@@ -118,21 +118,6 @@ scripts/                # seed-products, create-admin
 - [ ] 회원가입 → 마이페이지 → 결제 내역 확인됨
 - [ ] `pnpm create:admin <email>` 후 `/admin/orders` 진입 가능, 비어드민은 차단됨
 
-## 별도 repo 로 분리하기
-
-원본 강의 monorepo에서 이 폴더만 빼서 독립 repo로 만들고 싶다면:
-
-```bash
-# 옵션 A: subtree split (히스토리 보존)
-git subtree split --prefix=saju-boilerplate -b saju-only
-git push <new-remote> saju-only:main
-
-# 옵션 B: 빈 repo로 새로 시작
-cp -r saju-boilerplate ../saju-site && cd ../saju-site
-git init && git add . && git commit -m "init"
-git remote add origin <new-remote> && git push -u origin main
-```
-
 ## 트러블슈팅
 
 - **결제 위젯이 안 보여요** → `NEXT_PUBLIC_TOSS_CLIENT_KEY` 확인, 콘솔에서 도메인 등록 확인
