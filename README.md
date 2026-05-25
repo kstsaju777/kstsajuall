@@ -54,14 +54,15 @@
 │                                                                 │
 │  4. .env.local 채우기                                           │
 │     cp .env.example .env.local                                  │
-│     # 편집기로 열어서 값 입력                                    │
-│     필수: NEXT_PUBLIC_SUPABASE_URL/ANON_KEY,                    │
-│          SUPABASE_SERVICE_ROLE_KEY,                             │
-│          NEXT_PUBLIC_TOSS_CLIENT_KEY (테스트 기본값 OK),         │
-│          TOSS_SECRET_KEY (테스트 기본값 OK),                     │
-│          ANTHROPIC_API_KEY (또는 OPENAI / GEMINI 키 1개)         │
-│     권장: SAJU_API_KEY (luckyloveme 발급),                       │
-│          ADMIN_PASSWORD (본인 임의)                              │
+│     # 모든 키 필수 (발급 URL 은 아래 표 참고)                    │
+│     NEXT_PUBLIC_SUPABASE_URL                                    │
+│     NEXT_PUBLIC_SUPABASE_ANON_KEY                               │
+│     SUPABASE_SERVICE_ROLE_KEY                                   │
+│     NEXT_PUBLIC_TOSS_CLIENT_KEY  (테스트 기본값 그대로 OK)       │
+│     TOSS_SECRET_KEY              (테스트 기본값 그대로 OK)       │
+│     ANTHROPIC_API_KEY  ← OPENAI / GEMINI 중 택1 도 가능          │
+│     SAJU_API_KEY                                                │
+│     ADMIN_PASSWORD               (기본 0000, 운영 전 변경 권장)  │
 │                                                                 │
 │  5. Supabase 마이그레이션 + 시드                                │
 │     npx supabase link --project-ref <프로젝트 ref>              │
@@ -94,6 +95,20 @@
 │     ▶ Vercel 자동 재배포 (1~2분)                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+**환경변수 발급처**
+
+| 환경변수 | 어디서 받나 |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL`<br>`NEXT_PUBLIC_SUPABASE_ANON_KEY`<br>`SUPABASE_SERVICE_ROLE_KEY` | https://supabase.com → 프로젝트 생성 → **Settings → API** 의 `URL` / `anon` / `service_role` |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`<br>`TOSS_SECRET_KEY` | https://developers.tosspayments.com → **내 상점 → API 키** (테스트 키는 `.env.example` 기본값 그대로 사용 가능, 회원가입 없이 결제 테스트 OK) |
+| `ANTHROPIC_API_KEY` | https://console.anthropic.com/settings/keys |
+| `OPENAI_API_KEY` | https://platform.openai.com/api-keys |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | https://aistudio.google.com/app/apikey |
+| `SAJU_API_KEY` | https://luckyloveme.com/api-service (사주 명식 + 16종 풀 분석) |
+| `ADMIN_PASSWORD` | 본인이 임의로 설정 (기본 `0000`, 운영 전 강력한 값으로 반드시 변경) |
+
+> LLM 키는 Anthropic / OpenAI / Gemini **셋 중 하나만** 채우면 됩니다. `.env.local` 의 `LLM_PROVIDER` 로 어느 provider 를 쓸지 지정.
 
 **Fork vs Clone**
 
