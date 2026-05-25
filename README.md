@@ -56,8 +56,8 @@
 │     cp .env.example .env.local                                  │
 │     # 모든 키 필수 (발급 URL 은 아래 표 참고)                    │
 │     NEXT_PUBLIC_SUPABASE_URL                                    │
-│     NEXT_PUBLIC_SUPABASE_ANON_KEY                               │
-│     SUPABASE_SERVICE_ROLE_KEY                                   │
+│     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY  (sb_publishable_...)  │
+│     SUPABASE_SECRET_KEY                   (sb_secret_...)       │
 │     NEXT_PUBLIC_TOSS_CLIENT_KEY  (테스트 기본값 그대로 OK)       │
 │     TOSS_SECRET_KEY              (테스트 기본값 그대로 OK)       │
 │     ANTHROPIC_API_KEY  ← OPENAI / GEMINI 중 택1 도 가능          │
@@ -100,7 +100,7 @@
 
 | 환경변수 | 어디서 받나 |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL`<br>`NEXT_PUBLIC_SUPABASE_ANON_KEY`<br>`SUPABASE_SERVICE_ROLE_KEY` | https://supabase.com → 프로젝트 생성 → **Settings → API** 의 `URL` / `anon` / `service_role` |
+| `NEXT_PUBLIC_SUPABASE_URL`<br>`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`<br>`SUPABASE_SECRET_KEY` | https://supabase.com → 프로젝트 생성 → **Settings → API Keys**<br>• `publishable` (`sb_publishable_...`) ← 구 `anon` 대체<br>• `secret` (`sb_secret_...`) ← 구 `service_role` 대체<br>• 구 anon/service_role JWT 도 동작하나 2026 말 deprecated/삭제 예정 |
 | `NEXT_PUBLIC_TOSS_CLIENT_KEY`<br>`TOSS_SECRET_KEY` | https://developers.tosspayments.com → **내 상점 → API 키** (테스트 키는 `.env.example` 기본값 그대로 사용 가능, 회원가입 없이 결제 테스트 OK) |
 | `ANTHROPIC_API_KEY` | https://console.anthropic.com/settings/keys |
 | `OPENAI_API_KEY` | https://platform.openai.com/api-keys |
@@ -373,18 +373,18 @@ pnpm dev
 `.env.example` 참고. 핵심:
 
 ```bash
-NEXT_PUBLIC_SITE_URL=                 # 배포 도메인 (로컬은 http://localhost:3000)
+NEXT_PUBLIC_SITE_URL=                       # 배포 도메인 (로컬은 http://localhost:3000)
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=            # 절대 클라이언트에 노출 금지
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=       # sb_publishable_... (구 anon)
+SUPABASE_SECRET_KEY=                        # sb_secret_... (구 service_role) — 절대 클라이언트에 노출 금지
 NEXT_PUBLIC_TOSS_CLIENT_KEY=
 TOSS_SECRET_KEY=
-LLM_PROVIDER=anthropic                # openai | anthropic | gemini
+LLM_PROVIDER=anthropic                      # openai | anthropic | gemini
 LLM_MODEL=claude-sonnet-4-6
-ANTHROPIC_API_KEY=                    # 선택한 provider 키만 채우면 됨
+ANTHROPIC_API_KEY=                          # 선택한 provider 키만 채우면 됨
 SAJU_API_URL=https://luckyloveme.com/api/saju-full-analysis
-SAJU_API_KEY=                         # 운세위키 API 발급키 (https://luckyloveme.com/api-service)
-ADMIN_PASSWORD=                       # /admin 진입 비밀번호
+SAJU_API_KEY=                               # 운세위키 API 발급키 (https://luckyloveme.com/api-service)
+ADMIN_PASSWORD=0000                         # /admin 진입 비밀번호 (기본 0000, 운영 전 변경)
 ```
 
 ## 사주 명식표 API (luckyloveme)
