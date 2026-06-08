@@ -22,7 +22,7 @@ const BIRTH_TIMES = [
 // ─── 공통: 배경 이미지 + 하단 카드 래퍼 ─────────────────────────────────────
 function FormShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full min-h-screen overflow-hidden">
+    <div className="relative w-full overflow-hidden" style={{ height: "100dvh" }}>
       {/* 배경 이미지 */}
       <img
         src="/images/hero/hero-1.jpg"
@@ -238,7 +238,19 @@ function StepBirthDate({
     return nums.slice(0, 4) + "." + nums.slice(4, 6) + "." + nums.slice(6);
   };
 
-  const isValid = date.replace(/\./g, "").length >= 8;
+  // 날짜 유효성: 8자리 입력됐을 때만 검사
+  const nums = date.replace(/\./g, "");
+  const isFilled = nums.length >= 8;
+  const isValidDate = (() => {
+    if (!isFilled) return true; // 아직 입력 중이면 오류 안 보임
+    const y = parseInt(nums.slice(0, 4), 10);
+    const m = parseInt(nums.slice(4, 6), 10);
+    const d = parseInt(nums.slice(6, 8), 10);
+    if (m < 1 || m > 12 || d < 1) return false;
+    const last = new Date(y, m, 0).getDate(); // 해당 월의 마지막 날
+    return d <= last;
+  })();
+  const isValid = isFilled && isValidDate;
 
   return (
     <FormShell>
@@ -247,11 +259,18 @@ function StepBirthDate({
         <Title>생년월일을 알려주세요</Title>
         <div className="flex items-end gap-3">
           <div className="flex-1">
-            <UnderlineInput
+            <input
+              type="text"
+              inputMode="numeric"
               placeholder="1999.01.01"
               value={date}
-              onChange={(v) => setDate(formatDate(v))}
-              inputMode="numeric"
+              onChange={(e) => setDate(formatDate(e.target.value))}
+              className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
+              style={{
+                borderBottom: `1.5px solid ${!isValidDate && isFilled ? "#e03" : BORDER_CLR}`,
+                color: date ? "#1a1a1a" : PH_CLR,
+                caretColor: NAVY,
+              }}
             />
           </div>
           <div className="pb-1.5">
@@ -262,6 +281,12 @@ function StepBirthDate({
             />
           </div>
         </div>
+        {/* 날짜 오류 메시지 */}
+        {!isValidDate && isFilled && (
+          <p className="mt-2 text-[13px] font-medium" style={{ color: "#e03" }}>
+            생년월일을 다시 확인해주세요!
+          </p>
+        )}
       </div>
       <BottomNav
         onPrev={onPrev}
