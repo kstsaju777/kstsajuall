@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: { default: siteConfig.name, template: `%s | ${siteConfig.name}` },
   description: siteConfig.description,
   metadataBase: new URL(siteConfig.url),
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
