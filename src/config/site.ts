@@ -4,9 +4,9 @@
 // 운영 전 본인 정보로 반드시 교체하세요. 아래는 모두 더미 데이터입니다.
 
 export const siteConfig = {
-  name: "홍빈관",
+  name: "홍문당 | AI사주, 궁합, 운세 연구소",
   tagline: "정통 명리학의 깊이, 지금 당신의 사주",
-  description: "사주 팔자의 정통 해석과 AI 분석이 만납니다. 운현각에서 나의 운명을 읽어보세요.",
+  description: "사주 팔자의 정통 해석과 AI 분석이 만납니다. 홍문당에서 나의 운명을 읽어보세요.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   email: "support@example.com",
 };
