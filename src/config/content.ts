@@ -164,12 +164,12 @@ export const cardSections = {
     cards: [
       { image: "/images/cards/love-1.jpg", badge: "연애", tag: "NEW",  name: "자미두수", desc: "명반 속 12개 별자리로 읽는 100년 인생 흐름", href: "/products" },
       { image: "/images/cards/love-2.mp4", type: "video" as const, badge: "연애", tag: "인기", name: "자미두수 연애운",    desc: "동양의 별자리가 알려주는 나의 연애운과 솔로탈출 시기",         href: "/products" },
-      { image: "/images/cards/love-3.mp4", type: "video" as const, badge: "연애",              name: "연애운 풀이",    desc: "올해 나의 연애운 흐름 분석",                   href: "/products" },
+      { image: "/images/cards/love-3.mp4", type: "video" as const, badge: "자미두수", tag: "인기", name: "자미두수 궁합",    desc: "동양의 별자리로 보는 궁합과 상대의 마음 크기",                   href: "/products" },
       { image: "/images/cards/love-4.mp4", type: "video" as const, badge: "자미두수", tag: "NEW", name: "자미두수 임신운",      desc: "동양의 별자리가 알려주는 임신 시기와 아이 성별",                 href: "/products" },
-      { image: "/images/cards/love-5.jpg", badge: "연애",              name: "결혼운 분석",    desc: "결혼 적령기와 배우자 사주 분석",               href: "/products" },
-      { image: "/images/cards/love-6.jpg", badge: "자미두수", tag: "NEW",  name: "자미두수 재회운", desc: "동양의 별자리로 보는 궁합과 재회 가능성",      href: "/products" },
-      { image: "/images/cards/love-7.jpg", badge: "자미두수", tag: "인기", name: "자미두수 궁합",   desc: "상대방은 날 얼마나 좋아할까",                  href: "/products" },
-      { image: "/images/cards/love-8.jpg", badge: "자미두수",              name: "자미두수 결혼운", desc: "별자리 속 운명의 상대와 결혼운 시기",          href: "/products" },
+      { image: "/images/cards/love-5.jpg", badge: "자미두수", tag: "NEW", name: "자미두수 재회운",    desc: "동양의 별자리가 알려주는 너의 속마음과 재회가능성",               href: "/products" },
+      { image: "/images/cards/love-6.jpg", badge: "자미두수", tag: "NEW", name: "자미두수 결혼운", desc: "별자리 속 운명의 상대, 나의 배우자의 모습과 결혼운 시기",      href: "/products" },
+      { image: "/images/cards/love-7.jpg", badge: "자미두수", tag: "NEW", name: "자미두수 갈등 궁합",   desc: "사주가 답 못하는 질문, 부처궁이 풀어드려요",                  href: "/products" },
+      { image: "/images/cards/love-8.jpg", badge: "자미두수", tag: "NEW", name: "자미두수", desc: "인생 12궁과 14주성으로 향후 10년 기운 흐름을 분석합니다",          href: "/products" },
     ],
   },
 
