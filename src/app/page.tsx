@@ -59,6 +59,16 @@ export default function HomePage() {
       />
 
       <CategorySection
+        layout={s.marriage.layout}
+        badge={s.marriage.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.marriage.title}
+        moreHref={s.marriage.moreHref}
+        cards={s.marriage.cards}
+      />
+
+      <CategorySection
         layout={s.total.layout}
         badge={s.total.badge}
         badgeColor="text-orange-400"

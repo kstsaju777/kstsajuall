@@ -239,6 +239,20 @@ export const cardSections = {
     ],
   },
 
+  /** 결혼 섹션 — layout: "large" (2장씩 크게) */
+  marriage: {
+    badge: "결혼",
+    title: "내 운명의 상대는 어디에",
+    moreHref: "/products?category=결혼",
+    layout: "large" as const,
+    cards: [
+      { image: "/images/cards/marriage-1.jpg", badge: "결혼", tag: "추천", name: "배우자 사주",    desc: "내 운명의 상대 외모·성격·직업 분석",       href: "/products" },
+      { image: "/images/cards/marriage-2.jpg", badge: "결혼", tag: "NEW",  name: "결혼 시기",      desc: "결혼 적령기와 만남의 시기 분석",           href: "/products" },
+      { image: "/images/cards/marriage-3.jpg", badge: "결혼",              name: "결혼 궁합",      desc: "두 사람의 결혼 후 운세 흐름 분석",         href: "/products" },
+      { image: "/images/cards/marriage-4.jpg", badge: "결혼", tag: "인기", name: "혼인 택일",      desc: "결혼식 날짜를 사주로 정하는 혼인 택일",    href: "/products" },
+    ],
+  },
+
   /** 종합 섹션 — layout: "tall" (2장씩 가장 길게) */
   total: {
     badge: "종합",
