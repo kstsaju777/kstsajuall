@@ -267,4 +267,18 @@ export const cardSections = {
       { image: "/images/cards/total-5.jpg", badge: "종합",               name: "월간 운세",     desc: "이번 달 나의 운세 흐름 분석",                 href: "/products" },
     ],
   },
+
+  /** 건강 섹션 — layout: "large" (2장씩 크게) */
+  health: {
+    badge: "건강",
+    title: "내가 조심해야 할 것은",
+    moreHref: "/products?category=건강",
+    layout: "large" as const,
+    cards: [
+      { image: "/images/cards/health-1.jpg", badge: "건강", tag: "추천", name: "건강 사주",     desc: "타고난 체질과 건강 주의 시기 분석",         href: "/products" },
+      { image: "/images/cards/health-2.jpg", badge: "건강", tag: "NEW",  name: "체질 분석",     desc: "사주 오행으로 보는 나의 체질과 건강 관리",   href: "/products" },
+      { image: "/images/cards/health-3.jpg", badge: "건강",              name: "수명·건강운",   desc: "건강 주의 시기와 예방 포인트",               href: "/products" },
+      { image: "/images/cards/health-4.jpg", badge: "건강", tag: "인기", name: "오늘의 건강운", desc: "오늘 내 건강 기운은 어떤가요",               href: "/products" },
+    ],
+  },
 };

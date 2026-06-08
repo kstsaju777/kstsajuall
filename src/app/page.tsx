@@ -77,6 +77,16 @@ export default function HomePage() {
         moreHref={s.total.moreHref}
         cards={s.total.cards}
       />
+
+      <CategorySection
+        layout={s.health.layout}
+        badge={s.health.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.health.title}
+        moreHref={s.health.moreHref}
+        cards={s.health.cards}
+      />
     </div>
   );
 }
