@@ -239,12 +239,12 @@ export const cardSections = {
     ],
   },
 
-  /** 결혼 섹션 — layout: "large" (2장씩 크게) */
+  /** 결혼 섹션 — layout: "medium" (3장씩 촘촘히) */
   marriage: {
     badge: "결혼",
     title: "내 운명의 상대는 어디에",
     moreHref: "/products?category=결혼",
-    layout: "large" as const,
+    layout: "medium" as const,
     cards: [
       { image: "/images/cards/marriage-1.jpg", badge: "결혼", tag: "추천", name: "배우자 사주",    desc: "내 운명의 상대 외모·성격·직업 분석",       href: "/products" },
       { image: "/images/cards/marriage-2.jpg", badge: "결혼", tag: "NEW",  name: "결혼 시기",      desc: "결혼 적령기와 만남의 시기 분석",           href: "/products" },
@@ -268,12 +268,12 @@ export const cardSections = {
     ],
   },
 
-  /** 건강 섹션 — layout: "tall" (2장씩 더 길게) */
+  /** 건강 섹션 — layout: "medium" (3장씩 촘촘히) */
   wellbeing: {
     badge: "건강",
     title: "내가 조심해야 할 것은",
     moreHref: "/products?category=건강",
-    layout: "tall" as const,
+    layout: "medium" as const,
     cards: [
       { image: "/images/cards/health-1.jpg", badge: "건강", tag: "추천", name: "건강 사주",     desc: "타고난 체질과 건강 주의 시기 분석",         href: "/products" },
       { image: "/images/cards/health-2.jpg", badge: "건강", tag: "NEW",  name: "체질 분석",     desc: "사주 오행으로 보는 나의 체질과 건강 관리",   href: "/products" },
