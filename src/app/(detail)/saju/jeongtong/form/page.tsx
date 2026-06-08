@@ -48,7 +48,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
     // visualViewport 높이에 맞춰 동적으로 조정 → 키보드 올라와도 카드 보임
     <div
       className="relative w-full overflow-hidden"
-      style={{ height: vh ? `${vh}px` : "100%" }}
+      style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%" }}
     >
       {/* 배경 이미지 */}
       <img

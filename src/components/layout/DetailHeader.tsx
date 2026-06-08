@@ -20,7 +20,7 @@ export function DetailHeader() {
     <>
       {/* 헤더 바 */}
       <header
-        className="sticky top-0 z-40 flex items-center justify-between px-4 h-14"
+        className="flex-shrink-0 flex items-center justify-between px-4 h-14 z-40"
         style={{ backgroundColor: "#fdf8f4", borderBottom: "1px solid #ede8e2" }}
       >
         {/* 좌: 뒤로가기 */}
