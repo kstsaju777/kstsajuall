@@ -79,13 +79,13 @@ export default function HomePage() {
       />
 
       <CategorySection
-        layout={s.health.layout}
-        badge={s.health.badge}
+        layout={s.wellbeing.layout}
+        badge={s.wellbeing.badge}
         badgeColor="text-orange-400"
         badgeBg="bg-orange-400/10"
-        title={s.health.title}
-        moreHref={s.health.moreHref}
-        cards={s.health.cards}
+        title={s.wellbeing.title}
+        moreHref={s.wellbeing.moreHref}
+        cards={s.wellbeing.cards}
       />
     </div>
   );

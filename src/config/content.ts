@@ -269,7 +269,7 @@ export const cardSections = {
   },
 
   /** 건강 섹션 — layout: "tall" (2장씩 더 길게) */
-  health: {
+  wellbeing: {
     badge: "건강",
     title: "내가 조심해야 할 것은",
     moreHref: "/products?category=건강",
