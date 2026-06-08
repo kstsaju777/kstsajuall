@@ -3,39 +3,34 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// ─── 상수 ────────────────────────────────────────────────────────────────────
-const NAVY = "#2d3a8c";
-const PINK_LABEL = "#c47c85";
-const BG_CARD = "rgba(255,240,243,0.97)";
+// ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
+const NAVY       = "#2d3a8c";          // 주요 액션 버튼 색
+const CARD_BG    = "rgb(252,220,228)"; // 카드 배경 (연핑크)
+const LABEL_CLR  = "#c47c85";          // 소제목 색
+const BORDER_CLR = "#d4a8b4";          // 인풋 밑줄 색
+const PH_CLR     = "#d4a8b4";          // 플레이스홀더 색
 
 const BIRTH_TIMES = [
-  "자시 (23:00 ~ 01:00)",
-  "축시 (01:00 ~ 03:00)",
-  "인시 (03:00 ~ 05:00)",
-  "묘시 (05:00 ~ 07:00)",
-  "진시 (07:00 ~ 09:00)",
-  "사시 (09:00 ~ 11:00)",
-  "오시 (11:00 ~ 13:00)",
-  "미시 (13:00 ~ 15:00)",
-  "신시 (15:00 ~ 17:00)",
-  "유시 (17:00 ~ 19:00)",
-  "술시 (19:00 ~ 21:00)",
-  "해시 (21:00 ~ 23:00)",
+  "자시 (23:00 ~ 01:00)", "축시 (01:00 ~ 03:00)",
+  "인시 (03:00 ~ 05:00)", "묘시 (05:00 ~ 07:00)",
+  "진시 (07:00 ~ 09:00)", "사시 (09:00 ~ 11:00)",
+  "오시 (11:00 ~ 13:00)", "미시 (13:00 ~ 15:00)",
+  "신시 (15:00 ~ 17:00)", "유시 (17:00 ~ 19:00)",
+  "술시 (19:00 ~ 21:00)", "해시 (21:00 ~ 23:00)",
 ];
 
-// ─── 공통 레이아웃 래퍼 ───────────────────────────────────────────────────────
-// 배경 이미지는 항상 full-screen, 하단 카드가 위에 얹힘
+// ─── 공통: 배경 이미지 + 하단 카드 래퍼 ─────────────────────────────────────
 function FormShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative w-full min-h-screen overflow-hidden">
-      {/* 배경 이미지 — 항상 유지 */}
+      {/* 배경 이미지 */}
       <img
         src="/images/hero/hero-1.jpg"
         alt=""
         aria-hidden
         className="absolute inset-0 w-full h-full object-cover object-top"
       />
-      {/* 하단 그라데이션 페이드 — 이미지와 경계 없이 자연스럽게 */}
+      {/* 그라데이션 오버레이 */}
       <div
         className="absolute inset-0"
         style={{
@@ -43,14 +38,13 @@ function FormShell({ children }: { children: React.ReactNode }) {
             "linear-gradient(to bottom, transparent 20%, rgba(252,220,228,0.15) 45%, rgba(252,220,228,0.55) 60%, rgba(252,220,228,0.85) 72%, rgba(252,220,228,0.97) 82%)",
         }}
       />
-      {/* 콘텐츠 — 상단 패딩에 투명 그라데이션 이어붙임 */}
+      {/* 하단 카드 */}
       <div className="absolute bottom-0 left-0 right-0">
-        {/* 카드 상단 부드러운 전환 영역 */}
+        {/* 이미지→카드 경계 소프트 페이드 */}
         <div
           style={{
-            height: "56px",
-            background:
-              "linear-gradient(to bottom, transparent, rgba(252,220,228,0.97))",
+            height: 56,
+            background: `linear-gradient(to bottom, transparent, ${CARD_BG})`,
             pointerEvents: "none",
           }}
         />
@@ -60,7 +54,90 @@ function FormShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── 하단 버튼 영역 ───────────────────────────────────────────────────────────
+// ─── 공통: 소제목 ─────────────────────────────────────────────────────────────
+function Label({ text }: { text: string }) {
+  return (
+    <p className="text-[13px] font-medium mb-1" style={{ color: LABEL_CLR }}>
+      {text}
+    </p>
+  );
+}
+
+// ─── 공통: 메인 타이틀 ────────────────────────────────────────────────────────
+function Title({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-[24px] font-bold mb-6" style={{ color: "#1a1a1a" }}>
+      {children}
+    </h2>
+  );
+}
+
+// ─── 공통: 텍스트 인풋 (밑줄만) ──────────────────────────────────────────────
+function UnderlineInput({
+  placeholder,
+  value,
+  onChange,
+  inputMode = "text",
+  autoFocus = false,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  inputMode?: "text" | "numeric";
+  autoFocus?: boolean;
+}) {
+  return (
+    <input
+      type="text"
+      inputMode={inputMode}
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      autoFocus={autoFocus}
+      className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
+      style={{
+        borderBottom: `1.5px solid ${BORDER_CLR}`,
+        color: value ? "#1a1a1a" : PH_CLR,
+        caretColor: NAVY,
+      }}
+    />
+  );
+}
+
+// ─── 공통: Pill 토글 버튼 (양력/음력/윤달 등) ─────────────────────────────────
+function PillToggle<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: readonly T[];
+  value: T;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="flex gap-2">
+      {options.map((opt) => {
+        const active = value === opt;
+        return (
+          <button
+            key={opt}
+            onClick={() => onChange(opt)}
+            className="px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all"
+            style={{
+              backgroundColor: active ? NAVY : "transparent",
+              color: active ? "white" : "#aaa",
+              border: active ? `1.5px solid ${NAVY}` : "1.5px solid transparent",
+            }}
+          >
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── 공통: 하단 버튼 영역 ────────────────────────────────────────────────────
 function BottomNav({
   onPrev,
   onNext,
@@ -73,12 +150,19 @@ function BottomNav({
   nextDisabled?: boolean;
 }) {
   return (
-    <div className="flex gap-3 px-5 pb-8 pt-3" style={{ backgroundColor: "rgb(252,220,228)" }}>
+    <div
+      className="flex items-center gap-3 px-5 pb-8 pt-4"
+      style={{ backgroundColor: CARD_BG }}
+    >
       {onPrev && (
         <button
           onClick={onPrev}
-          className="flex-shrink-0 px-5 py-3.5 rounded-xl border text-[15px] font-semibold"
-          style={{ borderColor: "#ccc", color: "#666", backgroundColor: "white" }}
+          className="flex-shrink-0 px-5 py-3.5 rounded-2xl text-[15px] font-semibold"
+          style={{
+            backgroundColor: "rgba(255,255,255,0.55)",
+            color: "#888",
+            border: "1.5px solid rgba(200,180,185,0.5)",
+          }}
         >
           이전
         </button>
@@ -86,8 +170,11 @@ function BottomNav({
       <button
         onClick={onNext}
         disabled={nextDisabled}
-        className="flex-1 py-3.5 rounded-xl text-white text-[16px] font-bold transition-all"
-        style={{ backgroundColor: nextDisabled ? "#b0b8d4" : NAVY }}
+        className="flex-1 py-3.5 rounded-2xl text-white text-[16px] font-bold transition-all"
+        style={{
+          backgroundColor: nextDisabled ? "#c0b8d0" : NAVY,
+          letterSpacing: "-0.3px",
+        }}
       >
         {nextLabel}
       </button>
@@ -101,28 +188,27 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
-          꼼꼼히 사주 봐드릴게요!
-        </p>
-        <h2 className="text-[24px] font-bold mb-5" style={{ color: "#1a1a1a" }}>
-          성별이 어떻게 되세요?
-        </h2>
+      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        <Label text="꼼꼼히 사주 봐드릴게요!" />
+        <Title>성별이 어떻게 되세요?</Title>
         <div className="flex flex-col gap-3">
-          {(["여자", "남자"] as const).map((g) => (
-            <button
-              key={g}
-              onClick={() => setGender(g)}
-              className="w-full py-4 rounded-xl text-[16px] font-semibold border transition-all"
-              style={{
-                backgroundColor: gender === g ? "#e2e6f5" : "white",
-                borderColor: gender === g ? NAVY : "#e0d8dc",
-                color: gender === g ? NAVY : "#444",
-              }}
-            >
-              {g}
-            </button>
-          ))}
+          {(["여자", "남자"] as const).map((g) => {
+            const active = gender === g;
+            return (
+              <button
+                key={g}
+                onClick={() => setGender(g)}
+                className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
+                style={{
+                  backgroundColor: active ? "rgba(45,58,140,0.08)" : "rgba(255,255,255,0.7)",
+                  border: `1.5px solid ${active ? NAVY : "rgba(200,180,185,0.5)"}`,
+                  color: active ? NAVY : "#555",
+                }}
+              >
+                {g}
+              </button>
+            );
+          })}
         </div>
       </div>
       <BottomNav
@@ -156,43 +242,24 @@ function StepBirthDate({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
-          사주의 첫 단추예요
-        </p>
-        <h2 className="text-[24px] font-bold mb-7" style={{ color: "#1a1a1a" }}>
-          생년월일을 알려주세요
-        </h2>
-
+      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        <Label text="사주의 첫 단추예요" />
+        <Title>생년월일을 알려주세요</Title>
         <div className="flex items-end gap-3">
           <div className="flex-1">
-            <input
-              type="text"
-              inputMode="numeric"
+            <UnderlineInput
               placeholder="1999.01.01"
               value={date}
-              onChange={(e) => setDate(formatDate(e.target.value))}
-              className="w-full bg-transparent text-[17px] pb-2 outline-none"
-              style={{
-                borderBottom: "2px solid #c0a8b0",
-                color: date ? "#1a1a1a" : "#c0a8b0",
-              }}
+              onChange={(v) => setDate(formatDate(v))}
+              inputMode="numeric"
             />
           </div>
-          <div className="flex gap-1.5 pb-1">
-            {(["양력", "음력", "윤달"] as const).map((c) => (
-              <button
-                key={c}
-                onClick={() => setCalendar(c)}
-                className="px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-all"
-                style={{
-                  backgroundColor: calendar === c ? NAVY : "rgba(255,255,255,0.6)",
-                  color: calendar === c ? "white" : "#888",
-                }}
-              >
-                {c}
-              </button>
-            ))}
+          <div className="pb-1.5">
+            <PillToggle
+              options={["양력", "음력", "윤달"] as const}
+              value={calendar}
+              onChange={setCalendar}
+            />
           </div>
         </div>
       </div>
@@ -222,12 +289,11 @@ function StepBirthTime({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
-        <div className="flex items-start justify-between mb-7">
+      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        {/* 타이틀 + 시간모름 체크 */}
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
-              태어난 시간이 운명을 가른대요
-            </p>
+            <Label text="태어난 시간이 운명을 가른대요" />
             <h2 className="text-[24px] font-bold" style={{ color: "#1a1a1a" }}>
               나의 태어난 시간
             </h2>
@@ -237,68 +303,70 @@ function StepBirthTime({
             className="flex items-center gap-1.5 mt-2 flex-shrink-0"
           >
             <div
-              className="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+              className="w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-all"
               style={{
-                borderColor: unknown ? NAVY : "#bbb",
+                borderColor: unknown ? NAVY : "#c0a8b4",
                 backgroundColor: unknown ? NAVY : "transparent",
               }}
             >
               {unknown && (
-                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}
             </div>
-            <span className="text-[13px] font-medium" style={{ color: unknown ? NAVY : "#999" }}>
+            <span className="text-[13px] font-medium" style={{ color: unknown ? NAVY : "#b0909a" }}>
               시간 모름
             </span>
           </button>
         </div>
 
-        {/* 드롭다운 */}
+        {/* 드롭다운 트리거 */}
         <div className="relative">
           <button
             onClick={() => !unknown && setOpen((v) => !v)}
             disabled={unknown}
-            className="w-full flex items-center justify-between py-3.5 px-4 rounded-xl text-[15px]"
+            className="w-full flex items-center justify-between py-3 text-[16px]"
             style={{
-              backgroundColor: "white",
-              border: "1px solid #e0d0d4",
-              color: (time && !unknown) ? "#1a1a1a" : "#bbb",
-              opacity: unknown ? 0.45 : 1,
+              borderBottom: `1.5px solid ${unknown ? "rgba(200,168,180,0.4)" : BORDER_CLR}`,
+              color: (time && !unknown) ? "#1a1a1a" : PH_CLR,
+              opacity: unknown ? 0.5 : 1,
+              background: "transparent",
             }}
           >
             <span>{unknown ? "시간 모름" : (time || "태어난 시간")}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
 
+          {/* 드롭다운 목록 */}
           {open && !unknown && (
             <div
-              className="absolute top-full left-0 right-0 z-20 rounded-xl overflow-hidden shadow-xl mt-1"
-              style={{ border: "1px solid #e0d0d4", backgroundColor: "white" }}
+              className="absolute top-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mt-2"
+              style={{ border: "1px solid #eadde0", backgroundColor: "white" }}
             >
-              <div className="px-4 py-2.5 text-[13px] font-bold" style={{ backgroundColor: "#ede8e4", color: "#666" }}>
+              <div className="px-4 py-2.5 text-[12px] font-bold tracking-wide uppercase"
+                style={{ backgroundColor: "#f5eff0", color: "#b0909a" }}>
                 태어난 시간
               </div>
               <div
                 onClick={() => { setUnknown(true); setTime(""); setOpen(false); }}
-                className="px-4 py-3 text-[14px] cursor-pointer hover:bg-gray-50"
-                style={{ color: "#999", borderBottom: "1px solid #f5f0ee" }}
+                className="px-4 py-3 text-[14px] cursor-pointer"
+                style={{ color: "#b0909a", borderBottom: "1px solid #f5eff0" }}
               >
                 시간 모름
               </div>
-              <div className="max-h-48 overflow-y-auto">
+              <div className="max-h-52 overflow-y-auto">
                 {BIRTH_TIMES.map((t) => (
                   <div
                     key={t}
                     onClick={() => { setTime(t); setOpen(false); }}
                     className="px-4 py-3 text-[14px] cursor-pointer"
                     style={{
-                      backgroundColor: time === t ? "#eef0f9" : "white",
+                      backgroundColor: time === t ? "rgba(45,58,140,0.06)" : "white",
                       color: time === t ? NAVY : "#333",
-                      borderBottom: "1px solid #f8f5f4",
+                      borderBottom: "1px solid #faf5f6",
                     }}
                   >
                     {t}
@@ -331,23 +399,13 @@ function StepName({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
-          이제 거의 다 왔어요
-        </p>
-        <h2 className="text-[24px] font-bold mb-7" style={{ color: "#1a1a1a" }}>
-          이름이 어떻게 되세요?
-        </h2>
-        <input
-          type="text"
+      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        <Label text="이제 거의 다 왔어요" />
+        <Title>이름이 어떻게 되세요?</Title>
+        <UnderlineInput
           placeholder="김지은"
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full bg-transparent text-[17px] pb-2 outline-none"
-          style={{
-            borderBottom: "2px solid #c0a8b0",
-            color: name ? "#1a1a1a" : "#c0a8b0",
-          }}
+          onChange={setName}
           autoFocus
         />
       </div>
@@ -375,35 +433,33 @@ function StepConcern({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
-          자세히 적을수록 더 깊이 봐드려요
-        </p>
-        <h2 className="text-[24px] font-bold mb-1" style={{ color: "#1a1a1a" }}>
+      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        <Label text="자세히 적을수록 더 깊이 봐드려요" />
+        <h2 className="text-[24px] font-bold mb-0.5" style={{ color: "#1a1a1a" }}>
           어떤 고민이 있으세요?{" "}
-          <span className="text-[18px] font-normal" style={{ color: "#bbb" }}>
+          <span className="text-[17px] font-normal" style={{ color: "#c0a8b0" }}>
             (선택)
           </span>
         </h2>
-        <p className="text-[12px] mb-4" style={{ color: "#c0a0a8" }}>비워도 괜찮아요!</p>
+        <p className="text-[12px] mb-4" style={{ color: "#c0a8b0" }}>비워도 괜찮아요!</p>
 
-        <div className="relative">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value.slice(0, MAX))}
-            placeholder={`(예시) 남자친구랑 헤어지고 다음 연애 상대는 언제 생길지, 아님 재회할 수 있을지 궁금해요...\n직장은 마케팅 쪽으로 갈 수 있을지도 알려주세요!`}
-            rows={5}
-            className="w-full rounded-2xl p-4 text-[14px] outline-none resize-none leading-relaxed"
-            style={{
-              backgroundColor: "white",
-              border: "1px solid #e0d0d4",
-              color: "#333",
-            }}
-          />
-          <p className="text-right text-[12px] mt-1 pr-1" style={{ color: text.length >= MAX ? "#e55" : "#c0a8b0" }}>
-            {text.length}/{MAX}
-          </p>
-        </div>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value.slice(0, MAX))}
+          placeholder={`(예시) 남자친구랑 헤어지고 다음 연애 상대는 언제 생길지, 아님 재회할 수 있을지 궁금해요...\n직장은 마케팅 쪽으로 갈 수 있을지도 알려주세요!`}
+          rows={5}
+          className="w-full rounded-2xl p-4 text-[14px] outline-none resize-none leading-relaxed"
+          style={{
+            backgroundColor: "rgba(255,255,255,0.7)",
+            border: "1.5px solid rgba(200,168,180,0.4)",
+            color: "#333",
+            caretColor: NAVY,
+          }}
+        />
+        <p className="text-right text-[12px] mt-1.5 pr-0.5"
+          style={{ color: text.length >= MAX ? "#e55" : "#c0a8b0" }}>
+          {text.length}/{MAX}
+        </p>
       </div>
       <BottomNav
         onPrev={onPrev}
@@ -429,42 +485,39 @@ export default function SajuFormPage() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<Partial<FormData>>({});
 
-  const updateAndNext = (data: Partial<FormData>, nextStep: number) => {
+  const next = (data: Partial<FormData>, to: number) => {
     setForm((prev) => ({ ...prev, ...data }));
-    setStep(nextStep);
-  };
-
-  const handleSubmit = (concern: string) => {
-    const final = { ...form, concern };
-    console.log("최종 사주 데이터:", final);
-    router.push("/checkout");
+    setStep(to);
   };
 
   return (
     <>
-      {step === 1 && <StepGender onNext={(gender) => updateAndNext({ gender }, 2)} />}
+      {step === 1 && <StepGender onNext={(gender) => next({ gender }, 2)} />}
       {step === 2 && (
         <StepBirthDate
           onPrev={() => setStep(1)}
-          onNext={({ date, calendar }) => updateAndNext({ date, calendar }, 3)}
+          onNext={({ date, calendar }) => next({ date, calendar }, 3)}
         />
       )}
       {step === 3 && (
         <StepBirthTime
           onPrev={() => setStep(2)}
-          onNext={(time) => updateAndNext({ time }, 4)}
+          onNext={(time) => next({ time }, 4)}
         />
       )}
       {step === 4 && (
         <StepName
           onPrev={() => setStep(3)}
-          onNext={(name) => updateAndNext({ name }, 5)}
+          onNext={(name) => next({ name }, 5)}
         />
       )}
       {step === 5 && (
         <StepConcern
           onPrev={() => setStep(4)}
-          onSubmit={handleSubmit}
+          onSubmit={(concern) => {
+            console.log("사주 데이터:", { ...form, concern });
+            router.push("/checkout");
+          }}
         />
       )}
     </>
