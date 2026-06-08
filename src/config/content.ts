@@ -268,12 +268,12 @@ export const cardSections = {
     ],
   },
 
-  /** 건강 섹션 — layout: "large" (2장씩 크게) */
+  /** 건강 섹션 — layout: "tall" (2장씩 더 길게) */
   health: {
     badge: "건강",
     title: "내가 조심해야 할 것은",
     moreHref: "/products?category=건강",
-    layout: "large" as const,
+    layout: "tall" as const,
     cards: [
       { image: "/images/cards/health-1.jpg", badge: "건강", tag: "추천", name: "건강 사주",     desc: "타고난 체질과 건강 주의 시기 분석",         href: "/products" },
       { image: "/images/cards/health-2.jpg", badge: "건강", tag: "NEW",  name: "체질 분석",     desc: "사주 오행으로 보는 나의 체질과 건강 관리",   href: "/products" },
