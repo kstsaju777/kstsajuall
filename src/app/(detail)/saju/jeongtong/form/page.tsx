@@ -35,16 +35,27 @@ function FormShell({ children }: { children: React.ReactNode }) {
         aria-hidden
         className="absolute inset-0 w-full h-full object-cover object-top"
       />
-      {/* 하단 그라데이션 페이드 */}
+      {/* 하단 그라데이션 페이드 — 이미지와 경계 없이 자연스럽게 */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, transparent 30%, rgba(252,220,228,0.6) 65%, rgba(252,220,228,0.97) 80%)",
+            "linear-gradient(to bottom, transparent 20%, rgba(252,220,228,0.15) 45%, rgba(252,220,228,0.55) 60%, rgba(252,220,228,0.85) 72%, rgba(252,220,228,0.97) 82%)",
         }}
       />
-      {/* 콘텐츠 (하단 카드) */}
-      <div className="absolute bottom-0 left-0 right-0">{children}</div>
+      {/* 콘텐츠 — 상단 패딩에 투명 그라데이션 이어붙임 */}
+      <div className="absolute bottom-0 left-0 right-0">
+        {/* 카드 상단 부드러운 전환 영역 */}
+        <div
+          style={{
+            height: "56px",
+            background:
+              "linear-gradient(to bottom, transparent, rgba(252,220,228,0.97))",
+            pointerEvents: "none",
+          }}
+        />
+        {children}
+      </div>
     </div>
   );
 }
@@ -62,7 +73,7 @@ function BottomNav({
   nextDisabled?: boolean;
 }) {
   return (
-    <div className="flex gap-3 px-5 pb-8 pt-3" style={{ backgroundColor: "rgba(252,220,228,0.97)" }}>
+    <div className="flex gap-3 px-5 pb-8 pt-3" style={{ backgroundColor: "rgb(252,220,228)" }}>
       {onPrev && (
         <button
           onClick={onPrev}
@@ -90,7 +101,7 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgba(252,220,228,0.97)" }}>
+      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
           꼼꼼히 사주 봐드릴게요!
         </p>
@@ -145,7 +156,7 @@ function StepBirthDate({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgba(252,220,228,0.97)" }}>
+      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
           사주의 첫 단추예요
         </p>
@@ -211,7 +222,7 @@ function StepBirthTime({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgba(252,220,228,0.97)" }}>
+      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
         <div className="flex items-start justify-between mb-7">
           <div>
             <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
@@ -320,7 +331,7 @@ function StepName({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgba(252,220,228,0.97)" }}>
+      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
           이제 거의 다 왔어요
         </p>
@@ -364,7 +375,7 @@ function StepConcern({
 
   return (
     <FormShell>
-      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgba(252,220,228,0.97)" }}>
+      <div className="px-6 pt-8 pb-2" style={{ backgroundColor: "rgb(252,220,228)" }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: PINK_LABEL }}>
           자세히 적을수록 더 깊이 봐드려요
         </p>
