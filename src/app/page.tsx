@@ -1,15 +1,72 @@
-import { Hero } from "@/components/landing/Hero";
-import { ProductLineup } from "@/components/landing/ProductLineup";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { CTA } from "@/components/landing/CTA";
+import { HeroCarousel } from "@/components/landing/HeroCarousel";
+import { ShuffledCategorySection as CategorySection } from "@/components/landing/ShuffledCategorySection";
+import { cardSections } from "@/config/content";
 
 export default function HomePage() {
+  const s = cardSections;
   return (
-    <>
-      <Hero />
-      <ProductLineup />
-      <HowItWorks />
-      <CTA />
-    </>
+    <div className="pb-10">
+      <HeroCarousel />
+
+      <CategorySection
+        layout={s.love.layout}
+        badge={s.love.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.love.title}
+        moreHref={s.love.moreHref}
+        cards={s.love.cards}
+      />
+
+      <CategorySection
+        layout={s.money.layout}
+        badge={s.money.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.money.title}
+        moreHref={s.money.moreHref}
+        cards={s.money.cards}
+      />
+
+      <CategorySection
+        layout={s.compat.layout}
+        badge={s.compat.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.compat.title}
+        moreHref={s.compat.moreHref}
+        cards={s.compat.cards}
+      />
+
+      <CategorySection
+        layout={s.career.layout}
+        badge={s.career.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.career.title}
+        moreHref={s.career.moreHref}
+        cards={s.career.cards}
+      />
+
+      <CategorySection
+        layout={s.health.layout}
+        badge={s.health.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.health.title}
+        moreHref={s.health.moreHref}
+        cards={s.health.cards}
+      />
+
+      <CategorySection
+        layout={s.total.layout}
+        badge={s.total.badge}
+        badgeColor="text-orange-400"
+        badgeBg="bg-orange-400/10"
+        title={s.total.title}
+        moreHref={s.total.moreHref}
+        cards={s.total.cards}
+      />
+    </div>
   );
 }

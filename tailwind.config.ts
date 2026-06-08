@@ -40,16 +40,17 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Ollama palette aliases (see DESIGN.md)
-        ink: "#000000",
-        canvas: "#ffffff",
-        "surface-soft": "#fafafa",
-        "surface-dark": "#171717",
-        charcoal: "#525252",
-        body: "#737373",
-        mute: "#a3a3a3",
-        hairline: "#e5e5e5",
-        "hairline-strong": "#d4d4d4",
+        // 운현각 다크 팔레트
+        ink: "#f2f2f2",
+        canvas: "#711b20",
+        "surface-soft": "#1a1a1a",
+        "surface-dark": "#000000",
+        charcoal: "#a3a3a3",
+        body: "#8a8a8a",
+        mute: "#555555",
+        hairline: "#262626",
+        "hairline-strong": "#333333",
+        gold: "#c9a84c",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -58,7 +59,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "SF Pro Rounded",
+          "Pretendard",
           "-apple-system",
           "BlinkMacSystemFont",
           "ui-sans-serif",

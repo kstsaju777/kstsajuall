@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { siteConfig, businessInfo } from "@/config/site";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth";
+import { NavTabs } from "@/components/layout/NavTabs";
+import { GoldDust } from "@/components/layout/GoldDust";
+import { SideDrawer } from "@/components/layout/SideDrawer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,73 +28,106 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="ko">
-      <body suppressHydrationWarning>
-        <SiteHeader isLoggedIn={isLoggedIn} />
-        <main className="min-h-[calc(100vh-7rem)]">{children}</main>
-        <SiteFooter />
+      <body suppressHydrationWarning className="bg-[#0a0a0a]">
+        {/* 모바일 앱처럼 가운데 고정 너비 컨테이너 */}
+        <div className="mx-auto w-full max-w-[480px] min-h-screen shadow-2xl relative overflow-hidden" style={{ backgroundColor: "#711b20" }}>
+          <GoldDust />
+          <div className="relative z-10">
+            <SiteHeader isLoggedIn={isLoggedIn} />
+            <main className="min-h-[calc(100vh-7rem)]">{children}</main>
+            <SiteFooter />
+          </div>
+        </div>
         <Toaster position="top-center" />
       </body>
     </html>
   );
 }
 
-// Ollama: 56px utility nav, primary nav on canvas, no shadow.
+
 function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
-    <header className="border-b border-hairline bg-canvas">
+    <header className="border-b border-hairline sticky top-0 z-50" style={{ backgroundColor: "#ffffff" }}>
+      {/* 행1: 로고 + 아이콘 */}
       <div className="container flex h-14 items-center justify-between">
-        <Link href="/" className="font-semibold text-[15px] text-ink">
-          {siteConfig.name}
+        <Link href="/" className="flex items-center">
+          <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
         </Link>
-        <nav className="flex items-center gap-6 text-[13px] font-medium">
-          <Link href="/products" className="text-ink hover:text-body">상품</Link>
-          {isLoggedIn ? (
-            <>
-              <Link href="/mypage" className="text-ink hover:text-body">마이페이지</Link>
-              <form action="/api/auth/signout" method="post">
-                <button type="submit" className="text-ink hover:text-body">로그아웃</button>
-              </form>
-            </>
-          ) : (
-            <Link href="/login" className="text-ink hover:text-body">로그인</Link>
-          )}
-        </nav>
+        <div className="flex items-center gap-4">
+          {/* 검색 아이콘 */}
+          <button className="text-black hover:opacity-60 transition-opacity" aria-label="검색">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+          </button>
+          {/* 사이드 드로어 */}
+          <SideDrawer isLoggedIn={isLoggedIn} />
+        </div>
       </div>
+
+      {/* 행2: 카테고리 탭 */}
+      <Suspense fallback={null}>
+        <NavTabs />
+      </Suspense>
     </header>
   );
 }
 
-// Ollama: footer is a quiet caption-gray strip with hairline divider.
 function SiteFooter() {
-  // 사업자정보 한 줄 — 운세위키 푸터 포맷: "회사 | 사업자등록번호: ... | 통신판매업 신고번호: ... | 대표: ... | 주소: ..."
-  const businessLine = [
-    businessInfo.companyName,
-    `사업자등록번호: ${businessInfo.businessNumber}`,
-    `통신판매업 신고번호: ${businessInfo.mailOrderNumber}`,
-    `대표: ${businessInfo.representative}`,
-    `주소: ${businessInfo.address}`,
-  ].join(" | ");
-
-  const contactLine = [
-    `고객센터: ${businessInfo.email}`,
-    businessInfo.phone
-      ? `핸드폰${businessInfo.phoneNote ? `(${businessInfo.phoneNote})` : ""}: ${businessInfo.phone}`
-      : null,
-  ]
-    .filter(Boolean)
-    .join(" | ");
-
   return (
-    <footer className="border-t border-hairline mt-20">
-      <div className="container py-10 text-xs text-body space-y-4">
-        <div className="flex flex-wrap gap-x-5 gap-y-1.5">
-          <Link href="/legal/terms" className="hover:text-ink">이용약관</Link>
-          <Link href="/legal/privacy" className="hover:text-ink">개인정보처리방침</Link>
-          <Link href="/legal/refund-policy" className="hover:text-ink">환불정책</Link>
+    <footer className="border-t border-hairline mt-10" style={{ backgroundColor: "#ffffff" }}>
+      <div className="px-6 py-10 text-center space-y-5" style={{ color: "#333" }}>
+
+        {/* 로고 */}
+        <div className="flex justify-center">
+          <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
         </div>
-        <p className="text-mute leading-relaxed">{businessLine}</p>
-        <p className="text-mute leading-relaxed">{contactLine}</p>
-        <p className="text-mute">© {new Date().getFullYear()} {siteConfig.name}</p>
+
+        {/* 사업자 정보 */}
+        <div className="space-y-1.5 text-[11px] text-body font-myeongjo leading-relaxed">
+          <p>
+            <span className="text-mute">상호</span> {businessInfo.companyName}
+            {businessInfo.representative && (
+              <> &nbsp;|&nbsp; <span className="text-mute">대표이사</span> {businessInfo.representative}</>
+            )}
+          </p>
+          {businessInfo.address && (
+            <p>{businessInfo.address}</p>
+          )}
+          <div className="my-2 border-t border-hairline/50" />
+          {businessInfo.mailOrderNumber && (
+            <p><span className="text-mute">통신판매업 신고</span> {businessInfo.mailOrderNumber}</p>
+          )}
+          {businessInfo.businessNumber && (
+            <p><span className="text-mute">사업자등록번호</span> {businessInfo.businessNumber}</p>
+          )}
+          <div className="my-2 border-t border-hairline/50" />
+          <p>
+            <span className="text-mute">고객센터</span>{" "}
+            <a href={`mailto:${businessInfo.email}`} className="text-gold hover:underline">
+              {businessInfo.email}
+            </a>
+          </p>
+          {businessInfo.phone && (
+            <p>
+              <span className="text-mute">대표번호</span> {businessInfo.phone}
+              {businessInfo.phoneNote && (
+                <span className="block text-[10px] text-mute mt-0.5">({businessInfo.phoneNote})</span>
+              )}
+            </p>
+          )}
+        </div>
+
+        {/* 법적 링크 */}
+        <div className="flex justify-center gap-5 text-[11px] text-body font-myeongjo pt-1">
+          <Link href="/legal/terms" className="hover:text-ink transition-colors">이용약관</Link>
+          <Link href="/legal/privacy" className="hover:text-ink transition-colors">개인정보처리방침</Link>
+        </div>
+
+        {/* 카피라이트 */}
+        <p className="text-[10px] text-mute font-myeongjo">
+          Copyright © {new Date().getFullYear()} {siteConfig.name} · All rights reserved
+        </p>
       </div>
     </footer>
   );

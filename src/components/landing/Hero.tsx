@@ -17,13 +17,13 @@ export function Hero() {
 
       <div className="mt-8 flex items-center justify-center gap-3">
         <Link href="/products" className={cn(buttonVariants({ size: "lg" }))}>
-          상품 보기
+          운세 보러가기
         </Link>
         <Link
           href="#how-it-works"
           className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
         >
-          작동 방식
+          이용 안내
         </Link>
       </div>
     </section>

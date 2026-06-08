@@ -2,29 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 붓글씨 + 디스플레이 한국 폰트 */
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Brush+Script&family=Black+Han+Sans&display=swap');
+
+/* Pretendard — 현대적 한국어 폰트 */
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* 스크롤바 숨김 */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Ollama-inspired design system — see DESIGN.md
    Paper-white canvas, pure black primary, no shadows, hairline borders,
    full-rounded pill geometry on interactive elements. */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;          /* canvas #ffffff */
-    --foreground: 0 0% 0%;            /* ink #000000 */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --primary: 0 0% 0%;               /* pure black */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 98%;            /* surface-soft #fafafa */
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 98%;
-    --muted-foreground: 0 0% 45%;     /* body #737373 */
-    --accent: 0 0% 98%;
-    --accent-foreground: 0 0% 0%;
+    --background: 357 61% 27%;         /* canvas #711b20 */
+    --foreground: 0 0% 95%;           /* ink #f2f2f2 밝은 텍스트 */
+    --card: 0 0% 8%;                  /* #141414 */
+    --card-foreground: 0 0% 95%;
+    --primary: 43 74% 56%;            /* #c9a84c 골드 포인트 */
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 10%;            /* #1a1a1a */
+    --secondary-foreground: 0 0% 85%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;     /* 회색 보조 텍스트 */
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 95%;
     --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;               /* hairline #e5e5e5 */
-    --input: 0 0% 90%;
-    --ring: 217 91% 60%;              /* focus-ring blue */
+    --border: 0 0% 15%;               /* #262626 */
+    --input: 0 0% 15%;
+    --ring: 43 74% 56%;               /* 골드 포커스링 */
     --radius: 0.75rem;                /* lg used for cards */
   }
 }
@@ -40,17 +78,33 @@
   body {
     @apply bg-background text-foreground;
     font-family:
-      "SF Pro Rounded", -apple-system, BlinkMacSystemFont, ui-sans-serif,
-      system-ui, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      "Pretendard", -apple-system, BlinkMacSystemFont, ui-sans-serif,
+      system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   }
   code, pre, kbd, samp {
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco,
       Consolas, "Liberation Mono", monospace;
   }
-  /* Heading: SF Pro Rounded weight 500–600. Centered hero handled inline. */
+  /* 제목: 나눔명조 (정통 붓글씨 느낌) */
   h1, h2, h3 {
     @apply tracking-tight;
-    font-weight: 600;
+    font-family: 'Nanum Myeongjo', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
+    font-weight: 700;
+  }
+
+  /* 로고 전용 붓글씨 */
+  .font-brush {
+    font-family: 'Nanum Brush Script', cursive;
+  }
+
+  /* 명조체 전용 클래스 */
+  .font-myeongjo {
+    font-family: 'Nanum Myeongjo', serif;
+  }
+
+  /* 섹션 타이틀 전용 */
+  .font-blackhan {
+    font-family: 'Black Han Sans', 'Nanum Gothic', sans-serif;
   }
 }
 
