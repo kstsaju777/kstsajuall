@@ -19,13 +19,13 @@ export default function HomePage() {
       />
 
       <CategorySection
-        layout={s.money.layout}
-        badge={s.money.badge}
+        layout={s.baby.layout}
+        badge={s.baby.badge}
         badgeColor="text-orange-400"
         badgeBg="bg-orange-400/10"
-        title={s.money.title}
-        moreHref={s.money.moreHref}
-        cards={s.money.cards}
+        title={s.baby.title}
+        moreHref={s.baby.moreHref}
+        cards={s.baby.cards}
       />
 
       <CategorySection

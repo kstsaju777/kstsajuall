@@ -167,66 +167,75 @@ export const cardSections = {
       { image: "/images/cards/love-3.mp4", type: "video" as const, badge: "연애",              name: "연애운 풀이",    desc: "올해 나의 연애운 흐름 분석",                   href: "/products" },
       { image: "/images/cards/love-4.mp4", type: "video" as const, badge: "연애", tag: "추천", name: "인연 사주",      desc: "운명적 인연이 오는 시기 분석",                 href: "/products" },
       { image: "/images/cards/love-5.jpg", badge: "연애",              name: "결혼운 분석",    desc: "결혼 적령기와 배우자 사주 분석",               href: "/products" },
+      { image: "/images/cards/love-6.jpg", badge: "자미두수", tag: "NEW",  name: "자미두수 재회운", desc: "동양의 별자리로 보는 궁합과 재회 가능성",      href: "/products" },
+      { image: "/images/cards/love-7.jpg", badge: "자미두수", tag: "인기", name: "자미두수 궁합",   desc: "상대방은 날 얼마나 좋아할까",                  href: "/products" },
+      { image: "/images/cards/love-8.jpg", badge: "자미두수",              name: "자미두수 결혼운", desc: "별자리 속 운명의 상대와 결혼운 시기",          href: "/products" },
     ],
   },
 
-  /** 재물 섹션 — layout: "medium" (3장씩 촘촘히) */
-  money: {
-    badge: "재물",
-    title: "재물운이 터지는 날은?",
-    moreHref: "/products?category=재물",
+  /** 임신·육아 섹션 — layout: "medium" (3장씩 촘촘히) */
+  baby: {
+    badge: "임신·육아",
+    title: "우리 아이가 궁금할 때",
+    moreHref: "/products?category=가정",
     layout: "medium" as const,
     cards: [
-      { image: "/images/cards/money-1.jpg", badge: "재물", tag: "추천", name: "재물운 분석",    desc: "언제 돈이 들어오는지 사주로 확인하세요",   href: "/products" },
-      { image: "/images/cards/money-2.jpg", badge: "재물",              name: "종합 사주 감명", desc: "대운·세운·재물운 종합 풀이",               href: "/products" },
-      { image: "/images/cards/money-3.jpg", badge: "재물", tag: "NEW",  name: "사업운 분석",    desc: "사업 시작 적기와 재물 흐름 분석",           href: "/products" },
-      { image: "/images/cards/money-4.jpg", badge: "재물",              name: "투자운 풀이",    desc: "재테크·투자 운세 집중 분석",               href: "/products" },
-      { image: "/images/cards/money-5.jpg", badge: "재물", tag: "인기", name: "부동산운",       desc: "부동산 매매·이사 길한 시기 분석",           href: "/products" },
+      { image: "/images/cards/baby-1.jpg", badge: "가정", tag: "추천", name: "임신 사주",       desc: "임신 시기와 아이 성별을 사주로 분석합니다",   href: "/products" },
+      { image: "/images/cards/baby-2.jpg", badge: "가정",              name: "영재 사주",       desc: "우리 아이는 어떤 영재일까",                   href: "/products" },
+      { image: "/images/cards/baby-3.jpg", badge: "가정", tag: "NEW",  name: "자녀 사주",       desc: "타고난 재능과 맞춤 양육법 분석",              href: "/products" },
+      { image: "/images/cards/baby-4.jpg", badge: "가정",              name: "태명 작명",       desc: "사주에 맞는 좋은 태명과 이름 짓기",           href: "/products" },
+      { image: "/images/cards/baby-5.jpg", badge: "가정", tag: "인기", name: "부부 궁합",       desc: "결혼 후 부부 사이의 운세 흐름",               href: "/products" },
+      { image: "/images/cards/baby-6.jpg", badge: "가정", tag: "추천", name: "합궁 택일",       desc: "임신 길일과 합궁 택일 분석",                  href: "/products" },
     ],
   },
 
-  /** 궁합 섹션 — layout: "tall" (2장씩 더 길게) */
+  /** 연애 섹션2 — layout: "tall" (2장씩 더 길게) */
   compat: {
+    badge: "연애",
+    title: "두근두근 설레고 싶을때",
+    moreHref: "/products?category=연애",
+    layout: "tall" as const,
+    cards: [
+      { image: "/images/cards/love2-1.jpg", badge: "연애", tag: "인기", name: "연애 궁합 분석", desc: "사주로 보는 두 사람의 궁합 분석",         href: "/products" },
+      { image: "/images/cards/love2-2.jpg", badge: "연애", tag: "NEW",  name: "종합 궁합",      desc: "인연의 시기와 운명적 만남 분석",           href: "/products" },
+      { image: "/images/cards/love2-3.jpg", badge: "연애",              name: "띠 궁합",        desc: "띠로 보는 기본 궁합 풀이",                 href: "/products" },
+      { image: "/images/cards/love2-4.jpg", badge: "연애", tag: "추천", name: "부부 궁합",      desc: "결혼 후 부부 사이의 운세 흐름",             href: "/products" },
+      { image: "/images/cards/love2-5.jpg", badge: "연애",              name: "인연 사주",      desc: "운명적 인연이 오는 시기 분석",              href: "/products" },
+    ],
+  },
+
+  /** 재회 섹션 — layout: "medium" (3장씩 촘촘히) */
+  career: {
+    badge: "재회",
+    title: "다시 만날 수 있을까",
+    moreHref: "/products?category=재회",
+    layout: "medium" as const,
+    cards: [
+      { image: "/images/cards/reunion-1.jpg", badge: "재회", tag: "추천", name: "재회 사주",      desc: "헤어진 그 사람과 다시 만날 수 있을까",     href: "/products" },
+      { image: "/images/cards/reunion-2.jpg", badge: "재회",              name: "재회 가능성",    desc: "상대의 속마음과 재회 타이밍 분석",         href: "/products" },
+      { image: "/images/cards/reunion-3.jpg", badge: "재회", tag: "NEW",  name: "자미두수 재회",  desc: "동양 별자리로 보는 재회 가능성",           href: "/products" },
+      { image: "/images/cards/reunion-4.jpg", badge: "재회",              name: "베딕 재회",      desc: "인도 점성술로 보는 재회 시기와 확률",      href: "/products" },
+      { image: "/images/cards/reunion-5.jpg", badge: "재회", tag: "인기", name: "연락 사주",      desc: "그 사람이 먼저 연락할 시기 분석",          href: "/products" },
+      { image: "/images/cards/reunion-6.jpg", badge: "재회",              name: "이별 원인 분석", desc: "이별의 진짜 원인과 회복 가능성",           href: "/products" },
+      { image: "/images/cards/reunion-7.jpg", badge: "재회", tag: "추천", name: "재결합 타이밍",  desc: "다시 시작하기 좋은 시기와 방법",           href: "/products" },
+      { image: "/images/cards/reunion-8.jpg", badge: "재회",              name: "감정선 분석",    desc: "상대의 감정 흐름과 현재 마음 상태",        href: "/products" },
+    ],
+  },
+
+  /** 궁합 섹션2 — layout: "large" (2장씩 크게) */
+  health: {
     badge: "궁합",
     title: "우리 얼마나 잘 맞을까",
     moreHref: "/products?category=궁합",
-    layout: "tall" as const,
-    cards: [
-      { image: "/images/cards/compat-1.jpg", badge: "궁합", tag: "인기", name: "연애 궁합 분석", desc: "사주로 보는 두 사람의 궁합 분석",         href: "/products" },
-      { image: "/images/cards/compat-2.jpg", badge: "궁합", tag: "NEW",  name: "종합 궁합",      desc: "인연의 시기와 운명적 만남 분석",           href: "/products" },
-      { image: "/images/cards/compat-3.jpg", badge: "궁합",              name: "띠 궁합",        desc: "띠로 보는 기본 궁합 풀이",                 href: "/products" },
-      { image: "/images/cards/compat-4.jpg", badge: "궁합", tag: "추천", name: "부부 궁합",      desc: "결혼 후 부부 사이의 운세 흐름",             href: "/products" },
-      { image: "/images/cards/compat-5.jpg", badge: "궁합",              name: "비즈니스 궁합",  desc: "동업·사업 파트너 궁합 분석",               href: "/products" },
-    ],
-  },
-
-  /** 직업 섹션 — layout: "medium" (3장씩 촘촘히) */
-  career: {
-    badge: "직업",
-    title: "내 직업운과 적성은?",
-    moreHref: "/products?category=직업",
-    layout: "medium" as const,
-    cards: [
-      { image: "/images/cards/career-1.jpg", badge: "직업", tag: "추천", name: "사주 기본 감명", desc: "타고난 성향과 직업 적성 분석",           href: "/products" },
-      { image: "/images/cards/career-2.jpg", badge: "직업",              name: "종합 사주 감명", desc: "직업운·재물운 포함 종합 사주 풀이",       href: "/products" },
-      { image: "/images/cards/career-3.jpg", badge: "직업", tag: "NEW",  name: "취업·이직운",   desc: "올해 취업과 이직 운세 집중 분석",         href: "/products" },
-      { image: "/images/cards/career-4.jpg", badge: "직업",              name: "승진운 분석",   desc: "승진·인사 길한 시기와 흐름",             href: "/products" },
-      { image: "/images/cards/career-5.jpg", badge: "직업", tag: "인기", name: "적성 분석",     desc: "나에게 맞는 직업군과 적성 탐색",         href: "/products" },
-    ],
-  },
-
-  /** 건강 섹션 — layout: "large" (2장씩 크게) */
-  health: {
-    badge: "건강",
-    title: "건강하게 오래 살려면?",
-    moreHref: "/products?category=건강",
     layout: "large" as const,
     cards: [
-      { image: "/images/cards/health-1.jpg", badge: "건강", tag: "NEW",  name: "종합 사주 감명", desc: "건강운 포함 대운·세운 종합 풀이",         href: "/products" },
-      { image: "/images/cards/health-2.jpg", badge: "건강",              name: "사주 기본 감명", desc: "타고난 체질과 건강 흐름 분석",           href: "/products" },
-      { image: "/images/cards/health-3.jpg", badge: "건강", tag: "추천", name: "체질 분석",     desc: "사주로 보는 오행 체질과 건강 관리",       href: "/products" },
-      { image: "/images/cards/health-4.jpg", badge: "건강",              name: "수명·건강운",   desc: "건강 주의 시기와 예방 포인트",           href: "/products" },
-      { image: "/images/cards/health-5.jpg", badge: "건강", tag: "인기", name: "오늘의 건강운", desc: "오늘 내 건강 기운은 어떤가요",           href: "/products" },
+      { image: "/images/cards/compat2-1.jpg", badge: "궁합", tag: "NEW",  name: "연애 궁합 분석", desc: "사주로 보는 두 사람의 궁합 분석",         href: "/products" },
+      { image: "/images/cards/compat2-2.jpg", badge: "궁합",              name: "종합 궁합",      desc: "인연의 시기와 운명적 만남 분석",           href: "/products" },
+      { image: "/images/cards/compat2-3.jpg", badge: "궁합", tag: "추천", name: "띠 궁합",        desc: "띠로 보는 기본 궁합 풀이",                 href: "/products" },
+      { image: "/images/cards/compat2-4.jpg", badge: "궁합",              name: "부부 궁합",      desc: "결혼 후 부부 사이의 운세 흐름",             href: "/products" },
+      { image: "/images/cards/compat2-5.jpg", badge: "궁합", tag: "인기", name: "비즈니스 궁합",  desc: "동업·사업 파트너 궁합 분석",               href: "/products" },
+      { image: "/images/cards/compat2-6.jpg", badge: "궁합", tag: "NEW",  name: "자미두수 궁합",  desc: "동양 별자리로 보는 심층 궁합 분석",         href: "/products" },
+      { image: "/images/cards/compat2-7.jpg", badge: "궁합",              name: "합궁 사주",      desc: "두 사람의 에너지가 맞는 최적의 시기",       href: "/products" },
     ],
   },
 
