@@ -162,10 +162,10 @@ export const cardSections = {
     moreHref: "/products?category=연애",
     layout: "large" as const,
     cards: [
-      { image: "/images/cards/love-1.jpg", badge: "연애", tag: "NEW",  name: "연애·합궁 분석", desc: "내 연애 기운과 잘 맞는 사람의 사주 궁합 분석", href: "/products" },
-      { image: "/images/cards/love-2.mp4", type: "video" as const, badge: "연애", tag: "인기", name: "궁합 리포트",    desc: "두 사람의 사주로 보는 심층 궁합 분석",         href: "/products" },
+      { image: "/images/cards/love-1.jpg", badge: "연애", tag: "NEW",  name: "자미두수", desc: "명반 속 12개 별자리로 읽는 100년 인생 흐름", href: "/products" },
+      { image: "/images/cards/love-2.mp4", type: "video" as const, badge: "연애", tag: "인기", name: "자미두수 연애운",    desc: "동양의 별자리가 알려주는 나의 연애운과 솔로탈출 시기",         href: "/products" },
       { image: "/images/cards/love-3.mp4", type: "video" as const, badge: "연애",              name: "연애운 풀이",    desc: "올해 나의 연애운 흐름 분석",                   href: "/products" },
-      { image: "/images/cards/love-4.mp4", type: "video" as const, badge: "연애", tag: "추천", name: "인연 사주",      desc: "운명적 인연이 오는 시기 분석",                 href: "/products" },
+      { image: "/images/cards/love-4.mp4", type: "video" as const, badge: "자미두수", tag: "NEW", name: "자미두수 임신운",      desc: "동양의 별자리가 알려주는 임신 시기와 아이 성별",                 href: "/products" },
       { image: "/images/cards/love-5.jpg", badge: "연애",              name: "결혼운 분석",    desc: "결혼 적령기와 배우자 사주 분석",               href: "/products" },
       { image: "/images/cards/love-6.jpg", badge: "자미두수", tag: "NEW",  name: "자미두수 재회운", desc: "동양의 별자리로 보는 궁합과 재회 가능성",      href: "/products" },
       { image: "/images/cards/love-7.jpg", badge: "자미두수", tag: "인기", name: "자미두수 궁합",   desc: "상대방은 날 얼마나 좋아할까",                  href: "/products" },
