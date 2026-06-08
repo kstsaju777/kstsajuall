@@ -1,3 +1,8 @@
+# 동영상 파일 (용량 큼 — Vercel은 외부 스토리지 사용 권장)
+*.mp4
+*.webm
+*.mov
+
 node_modules
 .next
 out
