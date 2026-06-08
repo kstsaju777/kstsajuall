@@ -32,7 +32,7 @@ export const heroSlides: HeroSlide[] = [
     badge: "정통사주",
     title: "내 인생 전반을\n정통사주로",
     desc: "프리미엄 명리학 기반 내 인생 전반 알아보기",
-    href: "/products",
+    href: "/saju/jeongtong",
   },
   {
     image: "/images/hero/hero-2.jpg",
