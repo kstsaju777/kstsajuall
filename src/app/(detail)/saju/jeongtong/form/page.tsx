@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
-const NAVY       = "#2d3a8c";          // 주요 액션 버튼 색
-const CARD_BG    = "rgb(252,220,228)"; // 카드 배경 (연핑크)
-const LABEL_CLR  = "#c47c85";          // 소제목 색
-const BORDER_CLR = "#d4a8b4";          // 인풋 밑줄 색
-const PH_CLR     = "#d4a8b4";          // 플레이스홀더 색
+const NAVY       = "#2d3a8c";
+const CARD_BG    = "rgb(252,220,228)";
+const LABEL_CLR  = "#c47c85";
+const BORDER_CLR = "#d4a8b4";
+const PH_CLR     = "#d4a8b4";
 
 const BIRTH_TIMES = [
   "자시 (23:00 ~ 01:00)", "축시 (01:00 ~ 03:00)",
@@ -19,10 +19,37 @@ const BIRTH_TIMES = [
   "술시 (19:00 ~ 21:00)", "해시 (21:00 ~ 23:00)",
 ];
 
+// ─── 키보드 대응: visualViewport 기반 높이 훅 ─────────────────────────────────
+function useViewportHeight() {
+  const [vh, setVh] = useState<number | null>(null);
+
+  useEffect(() => {
+    const update = () => {
+      const vp = window.visualViewport;
+      if (vp) setVh(vp.height);
+    };
+    update();
+    window.visualViewport?.addEventListener("resize", update);
+    window.visualViewport?.addEventListener("scroll", update);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("scroll", update);
+    };
+  }, []);
+
+  return vh;
+}
+
 // ─── 공통: 배경 이미지 + 하단 카드 래퍼 ─────────────────────────────────────
 function FormShell({ children }: { children: React.ReactNode }) {
+  const vh = useViewportHeight();
+
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    // visualViewport 높이에 맞춰 동적으로 조정 → 키보드 올라와도 카드 보임
+    <div
+      className="relative w-full overflow-hidden"
+      style={{ height: vh ? `${vh}px` : "100%" }}
+    >
       {/* 배경 이미지 */}
       <img
         src="/images/hero/hero-1.jpg"
@@ -40,7 +67,6 @@ function FormShell({ children }: { children: React.ReactNode }) {
       />
       {/* 하단 카드 */}
       <div className="absolute bottom-0 left-0 right-0">
-        {/* 이미지→카드 경계 소프트 페이드 */}
         <div
           style={{
             height: 56,
@@ -72,39 +98,7 @@ function Title({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── 공통: 텍스트 인풋 (밑줄만) ──────────────────────────────────────────────
-function UnderlineInput({
-  placeholder,
-  value,
-  onChange,
-  inputMode = "text",
-  autoFocus = false,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-  inputMode?: "text" | "numeric";
-  autoFocus?: boolean;
-}) {
-  return (
-    <input
-      type="text"
-      inputMode={inputMode}
-      placeholder={placeholder}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      autoFocus={autoFocus}
-      className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
-      style={{
-        borderBottom: `1.5px solid ${BORDER_CLR}`,
-        color: value ? "#1a1a1a" : PH_CLR,
-        caretColor: NAVY,
-      }}
-    />
-  );
-}
-
-// ─── 공통: Pill 토글 버튼 (양력/음력/윤달 등) ─────────────────────────────────
+// ─── 공통: Pill 토글 버튼 ────────────────────────────────────────────────────
 function PillToggle<T extends string>({
   options,
   value,
@@ -137,7 +131,7 @@ function PillToggle<T extends string>({
   );
 }
 
-// ─── 공통: 하단 버튼 영역 ────────────────────────────────────────────────────
+// ─── 공통: 하단 버튼 영역 ─────────────────────────────────────────────────────
 function BottomNav({
   onPrev,
   onNext,
@@ -238,17 +232,15 @@ function StepBirthDate({
     return nums.slice(0, 4) + "." + nums.slice(4, 6) + "." + nums.slice(6);
   };
 
-  // 날짜 유효성: 8자리 입력됐을 때만 검사
   const nums = date.replace(/\./g, "");
   const isFilled = nums.length >= 8;
   const isValidDate = (() => {
-    if (!isFilled) return true; // 아직 입력 중이면 오류 안 보임
+    if (!isFilled) return true;
     const y = parseInt(nums.slice(0, 4), 10);
     const m = parseInt(nums.slice(4, 6), 10);
     const d = parseInt(nums.slice(6, 8), 10);
     if (m < 1 || m > 12 || d < 1) return false;
-    const last = new Date(y, m, 0).getDate(); // 해당 월의 마지막 날
-    return d <= last;
+    return d <= new Date(y, m, 0).getDate();
   })();
   const isValid = isFilled && isValidDate;
 
@@ -281,7 +273,6 @@ function StepBirthDate({
             />
           </div>
         </div>
-        {/* 날짜 오류 메시지 */}
         {!isValidDate && isFilled && (
           <p className="mt-2 text-[13px] font-medium" style={{ color: "#e03" }}>
             생년월일을 다시 확인해주세요!
@@ -315,7 +306,6 @@ function StepBirthTime({
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        {/* 타이틀 + 시간모름 체크 */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <Label text="태어난 시간이 운명을 가른대요" />
@@ -346,8 +336,48 @@ function StepBirthTime({
           </button>
         </div>
 
-        {/* 드롭다운 트리거 */}
+        {/* 드롭다운 — 위로 열림 */}
         <div className="relative">
+          {/* 목록: bottom-full 로 위로 펼침 */}
+          {open && !unknown && (
+            <div
+              className="absolute bottom-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
+              style={{ border: "1px solid #eadde0", backgroundColor: "white" }}
+            >
+              <div className="max-h-56 overflow-y-auto flex flex-col-reverse">
+                {/* 시간 목록 (역순으로 쌓아서 위에서 자시가 먼저 보이게) */}
+                <div>
+                  {BIRTH_TIMES.map((t) => (
+                    <div
+                      key={t}
+                      onClick={() => { setTime(t); setOpen(false); }}
+                      className="px-4 py-3 text-[14px] cursor-pointer"
+                      style={{
+                        backgroundColor: time === t ? "rgba(45,58,140,0.06)" : "white",
+                        color: time === t ? NAVY : "#333",
+                        borderBottom: "1px solid #faf5f6",
+                      }}
+                    >
+                      {t}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div
+                onClick={() => { setUnknown(true); setTime(""); setOpen(false); }}
+                className="px-4 py-3 text-[14px] cursor-pointer"
+                style={{ color: "#b0909a", borderTop: "1px solid #f5eff0", backgroundColor: "#fdf8f9" }}
+              >
+                시간 모름
+              </div>
+              <div className="px-4 py-2 text-[12px] font-bold tracking-wide"
+                style={{ backgroundColor: "#f5eff0", color: "#b0909a" }}>
+                태어난 시간 선택
+              </div>
+            </div>
+          )}
+
+          {/* 트리거 버튼 */}
           <button
             onClick={() => !unknown && setOpen((v) => !v)}
             disabled={unknown}
@@ -360,46 +390,14 @@ function StepBirthTime({
             }}
           >
             <span>{unknown ? "시간 모름" : (time || "태어난 시간")}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
+            >
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
-
-          {/* 드롭다운 목록 */}
-          {open && !unknown && (
-            <div
-              className="absolute top-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mt-2"
-              style={{ border: "1px solid #eadde0", backgroundColor: "white" }}
-            >
-              <div className="px-4 py-2.5 text-[12px] font-bold tracking-wide uppercase"
-                style={{ backgroundColor: "#f5eff0", color: "#b0909a" }}>
-                태어난 시간
-              </div>
-              <div
-                onClick={() => { setUnknown(true); setTime(""); setOpen(false); }}
-                className="px-4 py-3 text-[14px] cursor-pointer"
-                style={{ color: "#b0909a", borderBottom: "1px solid #f5eff0" }}
-              >
-                시간 모름
-              </div>
-              <div className="max-h-52 overflow-y-auto">
-                {BIRTH_TIMES.map((t) => (
-                  <div
-                    key={t}
-                    onClick={() => { setTime(t); setOpen(false); }}
-                    className="px-4 py-3 text-[14px] cursor-pointer"
-                    style={{
-                      backgroundColor: time === t ? "rgba(45,58,140,0.06)" : "white",
-                      color: time === t ? NAVY : "#333",
-                      borderBottom: "1px solid #faf5f6",
-                    }}
-                  >
-                    {t}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
       <BottomNav
@@ -427,11 +425,18 @@ function StepName({
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <Label text="이제 거의 다 왔어요" />
         <Title>이름이 어떻게 되세요?</Title>
-        <UnderlineInput
+        <input
+          type="text"
           placeholder="김지은"
           value={name}
-          onChange={setName}
+          onChange={(e) => setName(e.target.value)}
           autoFocus
+          className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
+          style={{
+            borderBottom: `1.5px solid ${BORDER_CLR}`,
+            color: name ? "#1a1a1a" : PH_CLR,
+            caretColor: NAVY,
+          }}
         />
       </div>
       <BottomNav
@@ -462,12 +467,9 @@ function StepConcern({
         <Label text="자세히 적을수록 더 깊이 봐드려요" />
         <h2 className="text-[24px] font-bold mb-0.5" style={{ color: "#1a1a1a" }}>
           어떤 고민이 있으세요?{" "}
-          <span className="text-[17px] font-normal" style={{ color: "#c0a8b0" }}>
-            (선택)
-          </span>
+          <span className="text-[17px] font-normal" style={{ color: "#c0a8b0" }}>(선택)</span>
         </h2>
         <p className="text-[12px] mb-4" style={{ color: "#c0a8b0" }}>비워도 괜찮아요!</p>
-
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX))}
