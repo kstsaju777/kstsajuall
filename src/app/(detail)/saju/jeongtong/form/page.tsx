@@ -22,7 +22,7 @@ const BIRTH_TIMES = [
 // ─── 공통: 배경 이미지 + 하단 카드 래퍼 ─────────────────────────────────────
 function FormShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: "100dvh" }}>
+    <div className="relative w-full h-full overflow-hidden">
       {/* 배경 이미지 */}
       <img
         src="/images/hero/hero-1.jpg"
