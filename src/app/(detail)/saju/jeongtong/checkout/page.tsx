@@ -568,82 +568,105 @@ function CheckoutContent() {
     router.push(`/saju/jeongtong/report?${params.toString()}`);
   };
 
+  // position:fixed로 전체 뷰포트 너비를 점유 → 스크롤바가 브라우저 맨 오른쪽에 표시
   return (
-    <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
-      {/* 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto pb-2">
+    <>
+      {/* 전체 뷰포트 스크롤 컨테이너 (스크롤바 = 브라우저 우측 끝) */}
+      <div
+        style={{
+          position: "fixed",
+          top: 56,        // DetailHeader 높이
+          left: 0,
+          right: 0,
+          bottom: 152,    // StickyPayCTA 높이
+          overflowY: "scroll",
+          zIndex: 10,
+          backgroundColor: "black",
+        }}
+      >
+        {/* 컨텐츠는 480px 중앙 정렬 */}
+        <div style={{ maxWidth: 480, margin: "0 auto" }}>
 
-        {/* ① 이미지 → 그라데이션 → 텍스트 → 그라데이션 → 이미지 */}
-        <ImageTextBlock
-          topImgSrc="/images/hero/hero-1.jpg"
-          bottomImgSrc="/images/hero/hero-1.jpg"
-          label="정통사주 · 정밀 리포트"
-          headline={`${name}님의 사주,\n지금 이 순간까지\n살살이 봤어요`}
-          accentWord="살살이"
-          bgColor={WHITE}
-        />
+          {/* ① 이미지 → 그라데이션 → 텍스트 → 그라데이션 → 이미지 */}
+          <ImageTextBlock
+            topImgSrc="/images/hero/hero-1.jpg"
+            bottomImgSrc="/images/hero/hero-1.jpg"
+            label="정통사주 · 정밀 리포트"
+            headline={`${name}님의 사주,\n지금 이 순간까지\n살살이 봤어요`}
+            accentWord="살살이"
+            bgColor={WHITE}
+          />
 
-        {/* ② 명식 그리드 */}
-        <div style={{ backgroundColor: WHITE }}>
-          <p className="text-center text-[12px] tracking-widest pb-1" style={{ color: RED }}>✦ 사주 명식 ✦</p>
-          <MyeongsikGrid saju={saju} />
+          {/* ② 명식 그리드 */}
+          <div style={{ backgroundColor: WHITE }}>
+            <p className="text-center text-[12px] tracking-widest pb-1" style={{ color: RED }}>✦ 사주 명식 ✦</p>
+            <MyeongsikGrid saju={saju} />
+          </div>
+
+          {/* ③ 오행 차트 */}
+          <div className="h-2" style={{ backgroundColor: CREAM }} />
+          <OhaengChart saju={saju} />
+
+          {/* ④ 이미지 → 텍스트 → 이미지 */}
+          <ImageTextBlock
+            topImgSrc="/images/hero/hero-1.jpg"
+            bottomImgSrc="/images/hero/hero-1.jpg"
+            label="AI 정밀 사주 분석 · 5가지 항목"
+            headline={`지금 당신의 운명,\n낱낱이\n분석했습니다`}
+            accentWord="낱낱이"
+            bgColor={CREAM}
+          />
+
+          {/* ⑤ 분석 섹션 1~3 */}
+          <div className="pb-5" style={{ backgroundColor: CREAM }}>
+            {SECTIONS.slice(0, 3).map((s, i) => (
+              <AnalysisSection key={i} s={s} index={i} />
+            ))}
+          </div>
+
+          {/* ⑥ 이미지 구분자 */}
+          <ImageDivider bgColor={CREAM} />
+
+          {/* ⑦ 나머지 분석 */}
+          <div className="py-5" style={{ backgroundColor: CREAM }}>
+            {SECTIONS.slice(3).map((s, i) => (
+              <AnalysisSection key={i} s={s} index={i + 3} />
+            ))}
+          </div>
+
+          {/* ⑧ 달력 */}
+          <div className="h-2" style={{ backgroundColor: CREAM }} />
+          <FortuneCalendar saju={saju} />
+
+          {/* ⑨ 이미지 → 텍스트 → 이미지 */}
+          <ImageTextBlock
+            topImgSrc="/images/hero/hero-1.jpg"
+            bottomImgSrc="/images/hero/hero-1.jpg"
+            label="실제 이용 후기"
+            headline={`이미 수천 명이\n확인한\n그 정확함`}
+            accentWord="그 정확함"
+            bgColor={WHITE}
+          />
+
+          {/* ⑩ 후기 */}
+          <ReviewSection />
+          <div className="h-4" />
         </div>
-
-        {/* ③ 오행 차트 */}
-        <div className="h-2" style={{ backgroundColor: CREAM }} />
-        <OhaengChart saju={saju} />
-
-        {/* ④ 이미지 → 텍스트 → 이미지 */}
-        <ImageTextBlock
-          topImgSrc="/images/hero/hero-1.jpg"
-          bottomImgSrc="/images/hero/hero-1.jpg"
-          label="AI 정밀 사주 분석 · 5가지 항목"
-          headline={`지금 당신의 운명,\n낱낱이\n분석했습니다`}
-          accentWord="낱낱이"
-          bgColor={CREAM}
-        />
-
-        {/* ⑤ 분석 섹션 1~3 */}
-        <div className="pb-5" style={{ backgroundColor: CREAM }}>
-          {SECTIONS.slice(0, 3).map((s, i) => (
-            <AnalysisSection key={i} s={s} index={i} />
-          ))}
-        </div>
-
-        {/* ⑥ 그라데이션 → 이미지 → 그라데이션 (구분자) */}
-        <ImageDivider bgColor={CREAM} />
-
-        {/* ⑦ 나머지 분석 */}
-        <div className="py-5" style={{ backgroundColor: CREAM }}>
-          {SECTIONS.slice(3).map((s, i) => (
-            <AnalysisSection key={i} s={s} index={i + 3} />
-          ))}
-        </div>
-
-        {/* ⑧ 달력 */}
-        <div className="h-2" style={{ backgroundColor: CREAM }} />
-        <FortuneCalendar saju={saju} />
-
-        {/* ⑨ 이미지 → 텍스트 → 이미지 (후기 앞) */}
-        <ImageTextBlock
-          topImgSrc="/images/hero/hero-1.jpg"
-          bottomImgSrc="/images/hero/hero-1.jpg"
-          label="실제 이용 후기"
-          headline={`이미 수천 명이\n확인한\n그 정확함`}
-          accentWord="그 정확함"
-          bgColor={WHITE}
-        />
-
-        {/* ⑩ 후기 */}
-        <ReviewSection />
-
-        {/* 하단 여백 (CTA 공간) */}
-        <div className="h-4" />
       </div>
 
-      {/* 고정 결제 CTA */}
-      <StickyPayCTA onPay={handlePayment} name={name} />
-    </div>
+      {/* 고정 결제 CTA — 480px 컨테이너 기준 */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: "max(0px, calc(50vw - 240px))",
+          width: "min(100%, 480px)",
+          zIndex: 30,
+        }}
+      >
+        <StickyPayCTA onPay={handlePayment} name={name} />
+      </div>
+    </>
   );
 }
 
