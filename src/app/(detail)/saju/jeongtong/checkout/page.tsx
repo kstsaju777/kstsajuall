@@ -571,12 +571,8 @@ function CheckoutContent() {
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
       {/* 스크롤 영역 — 얇은 스크롤바 */}
-      <div className="flex-1 min-h-0 overflow-y-scroll" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(0,0,0,0.25) transparent" }}>
-        <style>{`
-          .checkout-area::-webkit-scrollbar { width: 4px; }
-          .checkout-area::-webkit-scrollbar-track { background: transparent; }
-          .checkout-area::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 2px; }
-        `}</style>
+      <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+        <style>{`div::-webkit-scrollbar { display: none; }`}</style>
 
         {/* ① 이미지 → 그라데이션 → 텍스트 → 그라데이션 → 이미지 */}
         <ImageTextBlock
