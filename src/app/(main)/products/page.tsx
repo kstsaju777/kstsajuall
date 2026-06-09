@@ -6,14 +6,14 @@ import { Suspense, useRef, useState } from "react";
 import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 
 // ─── 카드 컴포넌트 ─────────────────────────────────────────────────────────────
-function Card({ card }: { card: CategoryCard }) {
+function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard; aspectRatio?: string; small?: boolean }) {
   const isVideo = card.type === "video";
   const videoRef = useRef<HTMLVideoElement>(null);
   const [imgErr, setImgErr] = useState(false);
 
   return (
     <Link href={card.href} className="block rounded-2xl overflow-hidden relative"
-      style={{ backgroundColor: "#1a1a1a", aspectRatio: "4/3" }}>
+      style={{ backgroundColor: "#1a1a1a", aspectRatio }}>
 
       {/* 미디어 */}
       {isVideo ? (
@@ -35,25 +35,33 @@ function Card({ card }: { card: CategoryCard }) {
       <div className="absolute inset-0"
         style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
 
-      {/* 뱃지 & 태그 */}
-      <div className="absolute top-3 left-3 flex gap-1.5">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: "#711b20", color: "#fff" }}>
-          {card.badge}
-        </span>
-        {card.tag && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
-            {card.tag}
+      {/* 텍스트 + 뱃지 (하단 통합) */}
+      <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
+        {/* 뱃지 & 태그 */}
+        <div className="flex gap-1.5 mb-1.5">
+          <span className="font-bold rounded-full"
+            style={{ fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", backgroundColor: "#711b20", color: "#fff" }}>
+            {card.badge}
           </span>
-        )}
-      </div>
-
-      {/* 텍스트 */}
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <p className="text-white font-bold text-[17px] leading-snug">{card.name}</p>
-        <p className="text-[12px] mt-1 leading-relaxed line-clamp-2"
-          style={{ color: "rgba(255,255,255,0.7)" }}>{card.desc}</p>
+          {card.tag && (
+            <span className="font-bold rounded-full"
+              style={{ fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
+              {card.tag}
+            </span>
+          )}
+        </div>
+        {/* 서브 태그라인 */}
+        <p className="font-medium mb-1" style={{ fontSize: small ? 8 : 12, color: "rgba(255,255,255,0.55)" }}>
+          {card.desc}
+        </p>
+        {/* 메인 타이틀 */}
+        <p className="text-white font-bold leading-tight mb-1" style={{ fontSize: small ? 20 : 33 }}>
+          {card.name}
+        </p>
+        {/* 부연 설명 */}
+        <p className="leading-relaxed" style={{ fontSize: small ? 10 : 16, color: "rgba(255,255,255,0.45)" }}>
+          {card.desc}
+        </p>
       </div>
     </Link>
   );
@@ -74,11 +82,38 @@ function ProductsContent() {
         {label} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
       </p>
 
-      {/* 카드 리스트 */}
+      {/* 카드 리스트 — 1개 / 2개 / 1개 / 2개 ... 패턴 */}
       <div className="flex flex-col gap-3">
-        {cards.map((card, i) => (
-          <Card key={i} card={card} />
-        ))}
+        {(() => {
+          const rows: React.ReactNode[] = [];
+          let i = 0;
+          let rowIdx = 0;
+          while (i < cards.length) {
+            if (rowIdx % 2 === 0) {
+              // 단독 1개 (가로 전체)
+              rows.push(
+                <Card key={i} card={cards[i]} aspectRatio="4/3" />
+              );
+              i++;
+            } else {
+              // 세로 길게 2개 나란히
+              const left  = cards[i];
+              const right = cards[i + 1];
+              rows.push(
+                <div key={i} className="flex gap-3">
+                  <div className="flex-1"><Card card={left}  aspectRatio="2/3" small /></div>
+                  {right
+                    ? <div className="flex-1"><Card card={right} aspectRatio="2/3" small /></div>
+                    : <div className="flex-1" />
+                  }
+                </div>
+              );
+              i += 2;
+            }
+            rowIdx++;
+          }
+          return rows;
+        })()}
       </div>
     </div>
   );
