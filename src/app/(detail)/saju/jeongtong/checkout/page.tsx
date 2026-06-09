@@ -551,64 +551,10 @@ function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
 }
 
 // ─── 외부 커스텀 스크롤바 (검은 영역에 표시) ─────────────────────────────────
-function OuterScrollbar({ scrollEl }: { scrollEl: HTMLDivElement | null }) {
-  const [thumb, setThumb] = useState({ top: 0, height: 0 });
-  const trackH = typeof window !== "undefined" ? window.innerHeight - 56 : 600; // 헤더 56px 제외
-
-  useEffect(() => {
-    if (!scrollEl) return;
-    const update = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollEl;
-      if (scrollHeight <= clientHeight) { setThumb({ top: 0, height: 0 }); return; }
-      const ratio     = clientHeight / scrollHeight;
-      const thumbH    = Math.max(40, trackH * ratio);
-      const thumbTop  = (scrollTop / (scrollHeight - clientHeight)) * (trackH - thumbH);
-      setThumb({ top: thumbTop, height: thumbH });
-    };
-    update();
-    scrollEl.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      scrollEl.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [scrollEl, trackH]);
-
-  if (thumb.height === 0) return null;
-
-  return (
-    <div
-      className="fixed pointer-events-none"
-      style={{
-        // 브라우저 창 맨 오른쪽 끝 (검은 영역)
-        right: 2,
-        top: 56, // 헤더 높이
-        bottom: 0,
-        width: 4,
-        zIndex: 50,
-      }}
-    >
-      {/* 트랙 */}
-      <div className="absolute inset-0 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.1)" }} />
-      {/* 썸 */}
-      <div
-        className="absolute left-0 right-0 rounded-full"
-        style={{
-          top: thumb.top,
-          height: thumb.height,
-          backgroundColor: "rgba(255,255,255,0.45)",
-          transition: "top 0.05s linear",
-        }}
-      />
-    </div>
-  );
-}
-
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
-  const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
 
   const name     = searchParams.get("name")     ?? "고객";
   const date     = searchParams.get("date")     ?? "";
@@ -624,15 +570,8 @@ function CheckoutContent() {
 
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
-      {/* 커스텀 스크롤바 (검은 영역) */}
-      <OuterScrollbar scrollEl={scrollEl} />
-
-      {/* 스크롤 영역 - 네이티브 스크롤바 숨김 */}
-      <div
-        ref={setScrollEl}
-        className="flex-1 overflow-y-auto pb-2"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
+      {/* 스크롤 영역 */}
+      <div className="flex-1 overflow-y-auto pb-2">
 
         {/* ① 이미지 → 그라데이션 → 텍스트 → 그라데이션 → 이미지 */}
         <ImageTextBlock
