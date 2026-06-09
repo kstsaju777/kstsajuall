@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
@@ -497,6 +497,237 @@ function StepConcern({
   );
 }
 
+// ─── 이메일 오타 감지 ─────────────────────────────────────────────────────────
+const DOMAIN_TYPOS: Record<string, string> = {
+  "gmial.com": "gmail.com", "gmil.com": "gmail.com", "gmal.com": "gmail.com",
+  "gmail.co": "gmail.com", "gamil.com": "gmail.com", "gmaill.com": "gmail.com",
+  "nvaer.com": "naver.com", "naevr.com": "naver.com", "naver.co": "naver.com",
+  "daum.ne": "daum.net",   "daumnet": "daum.net",
+  "hotmial.com": "hotmail.com", "hotmal.com": "hotmail.com",
+  "kakoa.com": "kakao.com", "kaka.com": "kakao.com",
+};
+
+function getEmailWarning(email: string): string | null {
+  if (!email.includes("@")) return null;
+  const domain = email.split("@")[1]?.toLowerCase();
+  if (!domain) return null;
+  const fix = DOMAIN_TYPOS[domain];
+  if (fix) return `혹시 ${fix} 인가요? 한 번 더 확인해주세요`;
+  return null;
+}
+
+// ─── Step 6: 이메일 ───────────────────────────────────────────────────────────
+function StepEmail({
+  onPrev,
+  onNext,
+}: {
+  onPrev: () => void;
+  onNext: (email: string) => void;
+}) {
+  const [email, setEmail] = useState("");
+  const warning = getEmailWarning(email);
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !warning;
+
+  return (
+    <FormShell>
+      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        <Label text="리포트를 보내드릴게요" />
+        <Title>이메일을 알려주세요</Title>
+        <input
+          type="email"
+          inputMode="email"
+          placeholder="id@naver.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
+          style={{
+            borderBottom: `1.5px solid ${warning ? "#e03" : BORDER_CLR}`,
+            color: email ? "#1a1a1a" : PH_CLR,
+            caretColor: NAVY,
+          }}
+          autoFocus
+        />
+        {warning && (
+          <p className="mt-2 text-[13px] font-medium" style={{ color: "#e03" }}>
+            {warning}
+          </p>
+        )}
+      </div>
+      <BottomNav
+        onPrev={onPrev}
+        onNext={() => isValid && onNext(email)}
+        nextLabel="분석해줘!"
+        nextDisabled={!isValid}
+      />
+    </FormShell>
+  );
+}
+
+// ─── 사주 명식 데이터 생성 (간단 데모용) ──────────────────────────────────────
+const CHEONGAN = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const JIJI     = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const CG_KR    = ["갑","을","병","정","무","기","경","신","임","계"];
+const JJ_KR    = ["자","축","인","묘","진","사","오","미","신","유","술","해"];
+const ELEMENT_COLOR: Record<string, { bg: string; text: string; label: string }> = {
+  "甲": { bg: "#c8e6c9", text: "#2e7d32", label: "나무" },
+  "乙": { bg: "#c8e6c9", text: "#2e7d32", label: "나무" },
+  "丙": { bg: "#ffcdd2", text: "#c62828", label: "불" },
+  "丁": { bg: "#ffcdd2", text: "#c62828", label: "불" },
+  "戊": { bg: "#fff9c4", text: "#f57f17", label: "흙" },
+  "己": { bg: "#fff9c4", text: "#f57f17", label: "흙" },
+  "庚": { bg: "#b2ebf2", text: "#00838f", label: "쇠" },
+  "辛": { bg: "#b2ebf2", text: "#00838f", label: "쇠" },
+  "壬": { bg: "#bbdefb", text: "#1565c0", label: "수" },
+  "癸": { bg: "#bbdefb", text: "#1565c0", label: "수" },
+};
+const JIJI_COLOR: Record<string, { bg: string; text: string }> = {
+  "子": { bg: "#bbdefb", text: "#1565c0" }, "丑": { bg: "#fff9c4", text: "#f57f17" },
+  "寅": { bg: "#c8e6c9", text: "#2e7d32" }, "卯": { bg: "#c8e6c9", text: "#2e7d32" },
+  "辰": { bg: "#fff9c4", text: "#f57f17" }, "巳": { bg: "#ffcdd2", text: "#c62828" },
+  "午": { bg: "#ffcdd2", text: "#c62828" }, "未": { bg: "#fff9c4", text: "#f57f17" },
+  "申": { bg: "#b2ebf2", text: "#00838f" }, "酉": { bg: "#b2ebf2", text: "#00838f" },
+  "戌": { bg: "#fff9c4", text: "#f57f17" }, "亥": { bg: "#bbdefb", text: "#1565c0" },
+};
+
+function makePillar(seed: number) {
+  const cg = CHEONGAN[seed % 10];
+  const jj = JIJI[seed % 12];
+  return { cg, jj, cgKr: CG_KR[seed % 10], jjKr: JJ_KR[seed % 12] };
+}
+
+// ─── Step 7: 로딩 화면 ────────────────────────────────────────────────────────
+const ANALYSIS_ITEMS = [
+  "사주 원국 분석 중",
+  "타고난 자산 크기 분석 완료",
+  "연애·결혼 흐름 분석 중",
+  "직업·재물 대운 분석 중",
+  "2024–2034 운세 흐름 분석 중",
+];
+
+function StepLoading({ name, date }: { name: string; date: string }) {
+  const [progress, setProgress] = useState(0);
+  const [doneCount, setDoneCount] = useState(0);
+  const router = useRouter();
+
+  // 생년월일에서 시드 생성
+  const nums = date.replace(/\D/g, "");
+  const seed = parseInt(nums || "19900101", 10);
+  const pillars = [
+    makePillar(seed % 10),
+    makePillar((seed >> 2) % 10),
+    makePillar((seed >> 4) % 10),
+    makePillar((seed >> 6) % 10),
+  ];
+  const labels = ["시주", "일주", "월주", "년주"];
+
+  useEffect(() => {
+    // 진행도 애니메이션
+    const interval = setInterval(() => {
+      setProgress((p) => {
+        const next = p + Math.random() * 3 + 1;
+        if (next >= 100) { clearInterval(interval); return 100; }
+        return next;
+      });
+    }, 120);
+
+    // 분석 항목 하나씩 완료
+    const itemTimers = ANALYSIS_ITEMS.map((_, i) =>
+      setTimeout(() => setDoneCount(i + 1), 800 + i * 1200)
+    );
+
+    // 완료 후 이동
+    const done = setTimeout(() => router.push("/checkout"), 800 + ANALYSIS_ITEMS.length * 1200 + 600);
+
+    return () => {
+      clearInterval(interval);
+      itemTimers.forEach(clearTimeout);
+      clearTimeout(done);
+    };
+  }, []);
+
+  const pct = Math.min(100, Math.round(progress));
+
+  return (
+    <div className="w-full h-full overflow-y-auto" style={{ backgroundColor: "#fdf4f6" }}>
+      <div className="px-5 py-8">
+        {/* 타이틀 */}
+        <h2 className="text-center text-[18px] font-bold mb-6" style={{ color: "#1a1a1a" }}>
+          {name}님의 사주 명식
+        </h2>
+
+        {/* 사주 명식 그리드 */}
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          {pillars.map((p, i) => {
+            const cgColor = ELEMENT_COLOR[p.cg] ?? { bg: "#eee", text: "#555", label: "" };
+            const jjColor = JIJI_COLOR[p.jj]  ?? { bg: "#eee", text: "#555" };
+            return (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <p className="text-[11px] font-medium mb-0.5" style={{ color: "#b0909a" }}>
+                  {labels[i]}
+                </p>
+                {/* 천간 */}
+                <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5"
+                  style={{ backgroundColor: cgColor.bg }}>
+                  <span className="text-[9px] font-medium" style={{ color: cgColor.text }}>{cgColor.label}</span>
+                  <span className="text-[28px] font-bold leading-none" style={{ color: cgColor.text }}>{p.cg}</span>
+                  <span className="text-[9px]" style={{ color: cgColor.text }}>{p.cgKr}</span>
+                </div>
+                {/* 지지 */}
+                <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5"
+                  style={{ backgroundColor: jjColor.bg }}>
+                  <span className="text-[28px] font-bold leading-none" style={{ color: jjColor.text }}>{p.jj}</span>
+                  <span className="text-[9px]" style={{ color: jjColor.text }}>{p.jjKr}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 진행도 */}
+        <div className="mb-5">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[13px]" style={{ color: "#888" }}>분석 진행도</span>
+            <span className="text-[13px] font-bold" style={{ color: NAVY }}>{pct}%</span>
+          </div>
+          <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#e8dde0" }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${pct}%`, backgroundColor: NAVY }}
+            />
+          </div>
+        </div>
+
+        {/* 분석 항목 리스트 */}
+        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "white", border: "1px solid #f0e8ea" }}>
+          {ANALYSIS_ITEMS.map((item, i) => {
+            const done = i < doneCount;
+            const active = i === doneCount;
+            return (
+              <div key={i} className="flex items-center gap-3 px-5 py-3.5"
+                style={{ borderBottom: i < ANALYSIS_ITEMS.length - 1 ? "1px solid #faf5f6" : "none" }}>
+                {done ? (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8l3.5 3.5L13 5" stroke="#4caf50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : active ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                    style={{ borderColor: NAVY, borderTopColor: "transparent" }} />
+                ) : (
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#ede0e3" }} />
+                )}
+                <span className="text-[14px]" style={{ color: done ? "#333" : active ? "#1a1a1a" : "#bbb",
+                  fontWeight: active ? 600 : 400 }}>
+                  {item}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── 메인: 스텝 관리 ──────────────────────────────────────────────────────────
 type FormData = {
   gender: string;
@@ -505,6 +736,7 @@ type FormData = {
   time: string;
   name: string;
   concern: string;
+  email: string;
 };
 
 export default function SajuFormPage() {
@@ -541,10 +773,19 @@ export default function SajuFormPage() {
       {step === 5 && (
         <StepConcern
           onPrev={() => setStep(4)}
-          onSubmit={(concern) => {
-            console.log("사주 데이터:", { ...form, concern });
-            router.push("/checkout");
-          }}
+          onSubmit={(concern) => next({ concern }, 6)}
+        />
+      )}
+      {step === 6 && (
+        <StepEmail
+          onPrev={() => setStep(5)}
+          onNext={(email) => next({ email }, 7)}
+        />
+      )}
+      {step === 7 && (
+        <StepLoading
+          name={form.name ?? ""}
+          date={form.date ?? ""}
         />
       )}
     </>
