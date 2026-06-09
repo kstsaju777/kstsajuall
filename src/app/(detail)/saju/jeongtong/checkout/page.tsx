@@ -491,6 +491,110 @@ function ReviewSection() {
   );
 }
 
+// ─── 상품 옵션 ───────────────────────────────────────────────────────────────
+const PRODUCTS = [
+  { id: "basic",   name: "정통사주",                  badge: null,  desc: null,
+    tags: [],                              original: 60000,  discount: 40, price: 35900 },
+  { id: "combo",   name: "정통사주 X 자미두수 총운",  badge: "인기", desc: "[7일 한정] 내 평생 운명의 큰 그림을 한 번에!",
+    tags: ["정통사주","자미두수"],          original: 119300, discount: 54, price: 54900 },
+  { id: "premium", name: "인생 책임 패키지",           badge: null,  desc: "자신 있습니다, 인생을 책임지는 프리미엄 운세 패키지",
+    tags: ["정통사주","자미두수","재물운"], original: 169000, discount: 60, price: 67900 },
+];
+
+// ─── 결제 바텀시트 ────────────────────────────────────────────────────────────
+function PayBottomSheet({ open, onClose, onConfirm }: {
+  open: boolean; onClose: () => void; onConfirm: (id: string) => void;
+}) {
+  const [selected, setSelected] = useState("basic");
+  const [couponOpen, setCouponOpen] = useState(false);
+  const [coupon, setCoupon] = useState("");
+
+  if (!open) return null;
+
+  return (
+    <>
+      {/* 딤 배경 */}
+      <div className="fixed inset-0 z-40" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={onClose} />
+
+      {/* 시트 */}
+      <div className="fixed bottom-0 z-50 rounded-t-3xl overflow-hidden"
+        style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", backgroundColor: WHITE, boxShadow: "0 -8px 40px rgba(0,0,0,0.2)" }}>
+        {/* 핸들 */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: GRAY4 }} />
+        </div>
+
+        <div className="px-4 pb-8">
+          {/* 상품 카드 */}
+          <div className="space-y-2 mb-4">
+            {PRODUCTS.map((p) => {
+              const isSel = selected === p.id;
+              return (
+                <button key={p.id} onClick={() => setSelected(p.id)}
+                  className="w-full text-left rounded-2xl px-4 py-3 transition-all"
+                  style={{ backgroundColor: isSel ? "#fff5f6" : WHITE, border: `1.5px solid ${isSel ? RED : GRAY4}` }}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[14px] font-bold" style={{ color: GRAY1 }}>{p.name}</span>
+                        {p.badge && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: RED, color: WHITE }}>{p.badge}</span>
+                        )}
+                      </div>
+                      {p.desc && <p className="text-[11px] mt-0.5" style={{ color: GRAY3 }}>{p.desc}</p>}
+                      {p.tags.length > 0 && (
+                        <div className="flex gap-1 mt-1.5 flex-wrap">
+                          {p.tags.map(tag => (
+                            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: RED_PALE, color: RED }}>{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-[11px] line-through" style={{ color: GRAY3 }}>{p.original.toLocaleString()}원</p>
+                      <p className="text-[15px] font-bold" style={{ color: GRAY1 }}>
+                        <span style={{ color: RED }}>-{p.discount}%</span>{" "}{p.price.toLocaleString()}원
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 쿠폰 */}
+          <div className="mb-4">
+            <button onClick={() => setCouponOpen(o => !o)} className="text-[13px] underline" style={{ color: GRAY3 }}>
+              쿠폰 · 추천 코드 입력
+            </button>
+            {couponOpen && (
+              <div className="mt-2 flex gap-2">
+                <input type="text" value={coupon} onChange={e => setCoupon(e.target.value)}
+                  placeholder="코드를 입력하세요"
+                  className="flex-1 px-3 py-2 rounded-xl text-[13px]"
+                  style={{ border: `1px solid ${GRAY4}`, outline: "none" }} />
+                <button className="px-4 py-2 rounded-xl text-[13px] font-bold text-white" style={{ backgroundColor: RED }}>적용</button>
+              </div>
+            )}
+          </div>
+
+          {/* 동의 */}
+          <p className="text-center text-[11px] mb-4" style={{ color: GRAY3 }}>
+            결제 정보를 확인했고 <span className="underline">개인정보 처리방침</span>과 <span className="underline">서비스 이용약관</span>에 동의합니다
+          </p>
+
+          {/* 구매 버튼 */}
+          <button onClick={() => onConfirm(selected)}
+            className="w-full py-4 rounded-2xl font-bold text-[17px] text-white active:scale-95 transition-transform"
+            style={{ backgroundColor: "#e05c8a" }}>
+            구매하기
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── 결제 CTA 고정 하단 ───────────────────────────────────────────────────────
 function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
   const [glow, setGlow] = useState(false);
@@ -502,47 +606,20 @@ function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
   return (
     <div className="flex-shrink-0 px-5 pb-7 pt-4"
       style={{ backgroundColor: WHITE, boxShadow: "0 -4px 20px rgba(0,0,0,0.08)" }}>
-      {/* 잠금 항목 카운트 */}
-      <div className="flex items-center justify-center gap-1.5 mb-3">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={RED} strokeWidth="2.5">
-          <rect x="3" y="11" width="18" height="11" rx="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span className="text-[12px]" style={{ color: GRAY2 }}>
-          <span className="font-bold" style={{ color: RED }}>4개 항목</span>이 잠겨 있습니다 — 지금 열람하세요
-        </span>
-      </div>
-
-      {/* 가격 */}
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩29,000</span>
+          <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩60,000</span>
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "#fff0f2", color: RED_SOFT, border: `1px solid ${ROSE}` }}>
-            특가 -48%
-          </span>
+            style={{ backgroundColor: "#fff0f2", color: RED_SOFT, border: `1px solid ${ROSE}` }}>특가 -40%</span>
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩14,900</span>
-        </div>
+        <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩35,900</span>
       </div>
-
-      {/* 버튼 */}
-      <button
-        onClick={onPay}
+      <button onClick={onPay}
         className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
-        style={{
-          backgroundColor: RED,
-          boxShadow: glow
-            ? `0 4px 24px ${RED}88, 0 2px 8px rgba(0,0,0,0.15)`
-            : `0 2px 12px ${RED}44`,
-          transition: "box-shadow 1s ease",
-        }}
-      >
+        style={{ backgroundColor: RED, boxShadow: glow ? `0 4px 24px ${RED}88` : `0 2px 12px ${RED}44`, transition: "box-shadow 1s ease" }}>
         <span>🔓</span>
         <span>{name}님의 풀 사주 지금 확인하기</span>
       </button>
-
       <p className="text-center text-[11px] mt-2" style={{ color: GRAY3 }}>
         🔒 토스페이먼츠 안전결제 · 결제 즉시 열람 · 환불 불가
       </p>
@@ -550,7 +627,6 @@ function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
   );
 }
 
-// ─── 외부 커스텀 스크롤바 (검은 영역에 표시) ─────────────────────────────────
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -563,7 +639,10 @@ function CheckoutContent() {
 
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
-  const handlePayment = () => {
+  const [showSheet, setShowSheet] = useState(false);
+
+  const handleConfirm = (_productId: string) => {
+    setShowSheet(false);
     const params = new URLSearchParams({ name, date, time, calendar });
     router.push(`/saju/jeongtong/report?${params.toString()}`);
   };
@@ -641,7 +720,10 @@ function CheckoutContent() {
       </div>
 
       {/* 고정 결제 CTA */}
-      <StickyPayCTA onPay={handlePayment} name={name} />
+      <StickyPayCTA onPay={() => setShowSheet(true)} name={name} />
+
+      {/* 결제 바텀시트 */}
+      <PayBottomSheet open={showSheet} onClose={() => setShowSheet(false)} onConfirm={handleConfirm} />
     </div>
   );
 }

@@ -4,15 +4,17 @@ import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 
 const TABS = [
-  { label: "전체", category: "" },
-  { label: "무료", category: "사주" },
-  { label: "연애", category: "자미두수" },
-  { label: "재회", category: "타로" },
-  { label: "결혼", category: "무료" },
-  { label: "가정", category: "기타" },
-  { label: "기타", category: "기타2" },
-  { label: "채팅", category: "채팅" },
+  { label: "전체",  category: "" },
+  { label: "무료",  category: "무료" },
+  { label: "재물",  category: "재물" },
+  { label: "연애",  category: "연애" },
+  { label: "재회",  category: "재회" },
+  { label: "결혼",  category: "결혼" },
+  { label: "자녀",  category: "자녀" },
+  { label: "기타",  category: "기타" },
 ];
+
+const RED = "#711b20";
 
 export function NavTabs() {
   const searchParams = useSearchParams();
@@ -20,31 +22,32 @@ export function NavTabs() {
   const currentCategory = searchParams.get("category") ?? "";
 
   return (
-    <div className="overflow-x-auto scrollbar-none border-t border-gray-200">
-      <div className="flex w-full">
+    <div className="overflow-x-auto scrollbar-none" style={{ backgroundColor: "transparent" }}>
+      <div className="flex w-full gap-[2px]">
         {TABS.map((tab) => {
           const isActive =
             pathname === "/" || pathname === "/products"
               ? currentCategory === tab.category
               : false;
-          // 홈에서는 전체를 기본 활성
           const active = pathname === "/" ? tab.category === "" : isActive;
 
           return (
             <Link
               key={tab.label}
               href={tab.category ? `/products?category=${tab.category}` : "/"}
-              className={`relative flex-1 text-center py-3 text-[14px] whitespace-nowrap transition-colors ${
-                active
-                  ? "font-bold text-[#111]"
-                  : "font-normal text-[#999] hover:text-[#555]"
-              }`}
+              className="relative flex-1 text-center whitespace-nowrap transition-all"
+              style={{
+                padding: "10px 0 8px",
+                fontSize: 13,
+                fontWeight: active ? 700 : 400,
+                color: active ? "#fff" : "#111",
+                backgroundColor: active ? RED : "#eeeeee",
+                borderRadius: "8px 8px 0 0",
+                boxShadow: "none",
+                zIndex: active ? 1 : 0,
+              }}
             >
               {tab.label}
-              {/* 활성 밑줄 */}
-              {active && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#111] rounded-full" />
-              )}
             </Link>
           );
         })}

@@ -1,55 +1,97 @@
+"use client";
+
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { formatKRW } from "@/lib/utils";
-import { isSupabaseConfigured } from "@/lib/env";
-import { productsSeed } from "@/config/products.seed";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useRef, useState } from "react";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 
-export const metadata = { title: "상품" };
-
-export default async function ProductsPage() {
-  let products: { slug: string; name: string; description: string; price: number }[] | null;
-  if (isSupabaseConfigured()) {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("products")
-      .select("slug, name, description, price")
-      .eq("is_active", true)
-      .order("display_order", { ascending: true });
-    products = data;
-  } else {
-    products = productsSeed
-      .filter((p) => p.is_active)
-      .sort((a, b) => a.display_order - b.display_order)
-      .map(({ slug, name, description, price }) => ({ slug, name, description, price }));
-  }
+// ─── 카드 컴포넌트 ─────────────────────────────────────────────────────────────
+function Card({ card }: { card: CategoryCard }) {
+  const isVideo = card.type === "video";
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [imgErr, setImgErr] = useState(false);
 
   return (
-    <div className="container py-12">
-      <header className="mb-10">
-        <p className="text-xs font-mono text-mute mb-2">PRODUCTS</p>
-        <h1 className="text-3xl font-semibold tracking-tight">상품</h1>
-        <p className="mt-2 text-sm text-body">가볍게 시작해서 깊이 있게 들어가세요.</p>
-      </header>
+    <Link href={card.href} className="block rounded-2xl overflow-hidden relative"
+      style={{ backgroundColor: "#1a1a1a", aspectRatio: "4/3" }}>
 
-      {!products || products.length === 0 ? (
-        <p className="text-sm text-body">상품이 없습니다.</p>
+      {/* 미디어 */}
+      {isVideo ? (
+        <video
+          ref={videoRef}
+          src={card.image}
+          className="w-full h-full object-cover"
+          autoPlay muted loop playsInline
+        />
+      ) : imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <Link
-              key={p.slug}
-              href={`/products/${p.slug}`}
-              className="group block rounded-lg border border-hairline bg-canvas p-6 transition-colors hover:border-ink"
-            >
-              <p className="text-base font-semibold text-ink">{p.name}</p>
-              <p className="mt-1.5 text-sm text-body leading-relaxed line-clamp-2">
-                {p.description}
-              </p>
-              <p className="mt-5 text-lg font-mono font-medium text-ink">{formatKRW(p.price)}</p>
-            </Link>
-          ))}
-        </div>
+        <img src={card.image} alt={card.name}
+          className="w-full h-full object-cover"
+          onError={() => setImgErr(true)} />
       )}
+
+      {/* 그라데이션 오버레이 */}
+      <div className="absolute inset-0"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+
+      {/* 뱃지 & 태그 */}
+      <div className="absolute top-3 left-3 flex gap-1.5">
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: "#711b20", color: "#fff" }}>
+          {card.badge}
+        </span>
+        {card.tag && (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
+            {card.tag}
+          </span>
+        )}
+      </div>
+
+      {/* 텍스트 */}
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <p className="text-white font-bold text-[17px] leading-snug">{card.name}</p>
+        <p className="text-[12px] mt-1 leading-relaxed line-clamp-2"
+          style={{ color: "rgba(255,255,255,0.7)" }}>{card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
+// ─── 메인 ─────────────────────────────────────────────────────────────────────
+function ProductsContent() {
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category") ?? "";
+  const label = category || "전체";
+
+  const cards = CATEGORY_CARDS[label] ?? CATEGORY_CARDS["전체"];
+
+  return (
+    <div className="px-3 pt-4 pb-20">
+      {/* 카테고리 타이틀 */}
+      <p className="text-[13px] font-bold mb-4 px-1" style={{ color: "rgba(255,255,255,0.5)" }}>
+        {label} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
+      </p>
+
+      {/* 카드 리스트 */}
+      <div className="flex flex-col gap-3">
+        {cards.map((card, i) => (
+          <Card key={i} card={card} />
+        ))}
+      </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 rounded-full border-2 border-white border-t-transparent animate-spin" />
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }

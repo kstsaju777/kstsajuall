@@ -24,7 +24,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
 function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
-    <header className="border-b border-hairline sticky top-0 z-50" style={{ backgroundColor: "#ffffff" }}>
+    <header className="sticky top-0 z-50" style={{ backgroundColor: "#ffffff" }}>
       <div className="container flex h-14 items-center justify-between">
         <Link href="/" className="flex items-center">
           <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
