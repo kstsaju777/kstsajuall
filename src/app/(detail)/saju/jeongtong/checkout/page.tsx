@@ -580,8 +580,8 @@ function OuterScrollbar({ scrollEl }: { scrollEl: HTMLDivElement | null }) {
     <div
       className="fixed pointer-events-none"
       style={{
-        // 흰 컨테이너 우측 바깥 검은 영역에 위치
-        right: "max(2px, calc((100vw - min(100vw, 480px)) / 2 - 6px))",
+        // 브라우저 창 맨 오른쪽 끝 (검은 영역)
+        right: 2,
         top: 56, // 헤더 높이
         bottom: 0,
         width: 4,
