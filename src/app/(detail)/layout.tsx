@@ -4,18 +4,16 @@ export default function DetailLayout({ children }: { children: React.ReactNode }
   return (
     <>
       {/*
-        position: fixed + inset-0 로 브라우저 UI바 상관없이
-        완전히 viewport에 고정 → 어떤 환경에서도 스크롤 불가
-        max-w-[480px] + left-1/2 transform으로 데스크탑에서는 가운데 정렬
+        transform을 쓰면 내부 fixed 요소가 viewport 기준이 아닌
+        컨테이너 기준으로 위치해서 드로어가 오작동함.
+        transform 없이 left 계산으로 중앙 정렬.
       */}
       <div
-        className="fixed inset-0 flex flex-col mx-auto shadow-2xl"
+        className="fixed top-0 bottom-0 flex flex-col shadow-2xl"
         style={{
           backgroundColor: "#fdf8f4",
-          maxWidth: "480px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
+          width: "min(100%, 480px)",
+          left: "max(0px, calc(50vw - 240px))",
         }}
       >
         <DetailHeader />
