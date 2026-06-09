@@ -87,9 +87,32 @@ function getShipseong(dsh: string, th: string): string {
 
 // ─── 폼 입력값 파싱 헬퍼 ─────────────────────────────────────────────────────
 
-// "자시 (23:00 ~ 01:00)" → "23:00" / "시간 모름" → "unknown"
+// 시진 이름 → 그 시진 한가운데 시각 (lunar-javascript가 어느 경계 기준이든 오분류 없이 맞아떨어짐)
+// 30분 오프셋 기준: 자시=23:30~01:30, 신시=15:30~17:30 등
+const SIJU_HOUR_MAP: Record<string, string> = {
+  '자시': '00:30',  // 23:30~01:30 중간
+  '축시': '02:30',
+  '인시': '04:30',
+  '묘시': '06:30',
+  '진시': '08:30',
+  '사시': '10:30',
+  '오시': '12:30',
+  '미시': '14:30',
+  '신시': '16:30',
+  '유시': '18:30',
+  '술시': '20:30',
+  '해시': '22:30',
+};
+
+// "신시 (15:30 ~ 17:30)" → "16:30" / "시간 모름" → "unknown"
 export function parseTimeVal(timeStr: string): string {
   if (!timeStr || timeStr === '시간 모름') return 'unknown';
+  // 시진 이름 추출 (첫 두 글자 + '시')
+  const nameMatch = timeStr.match(/^([가-힣]{2}시)/);
+  if (nameMatch && SIJU_HOUR_MAP[nameMatch[1]]) {
+    return SIJU_HOUR_MAP[nameMatch[1]];
+  }
+  // fallback: 기존 방식
   const match = timeStr.match(/\((\d{2}:\d{2})/);
   return match ? match[1] : 'unknown';
 }
