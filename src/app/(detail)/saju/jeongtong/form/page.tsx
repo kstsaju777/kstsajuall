@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { calcSaju, ELEMENT_COLORS, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
 const NAVY       = "#2d3a8c";
@@ -563,38 +564,6 @@ function StepEmail({
   );
 }
 
-// ─── 사주 명식 데이터 생성 (간단 데모용) ──────────────────────────────────────
-const CHEONGAN = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
-const JIJI     = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-const CG_KR    = ["갑","을","병","정","무","기","경","신","임","계"];
-const JJ_KR    = ["자","축","인","묘","진","사","오","미","신","유","술","해"];
-const ELEMENT_COLOR: Record<string, { bg: string; text: string; label: string }> = {
-  "甲": { bg: "#c8e6c9", text: "#2e7d32", label: "나무" },
-  "乙": { bg: "#c8e6c9", text: "#2e7d32", label: "나무" },
-  "丙": { bg: "#ffcdd2", text: "#c62828", label: "불" },
-  "丁": { bg: "#ffcdd2", text: "#c62828", label: "불" },
-  "戊": { bg: "#fff9c4", text: "#f57f17", label: "흙" },
-  "己": { bg: "#fff9c4", text: "#f57f17", label: "흙" },
-  "庚": { bg: "#b2ebf2", text: "#00838f", label: "쇠" },
-  "辛": { bg: "#b2ebf2", text: "#00838f", label: "쇠" },
-  "壬": { bg: "#bbdefb", text: "#1565c0", label: "수" },
-  "癸": { bg: "#bbdefb", text: "#1565c0", label: "수" },
-};
-const JIJI_COLOR: Record<string, { bg: string; text: string }> = {
-  "子": { bg: "#bbdefb", text: "#1565c0" }, "丑": { bg: "#fff9c4", text: "#f57f17" },
-  "寅": { bg: "#c8e6c9", text: "#2e7d32" }, "卯": { bg: "#c8e6c9", text: "#2e7d32" },
-  "辰": { bg: "#fff9c4", text: "#f57f17" }, "巳": { bg: "#ffcdd2", text: "#c62828" },
-  "午": { bg: "#ffcdd2", text: "#c62828" }, "未": { bg: "#fff9c4", text: "#f57f17" },
-  "申": { bg: "#b2ebf2", text: "#00838f" }, "酉": { bg: "#b2ebf2", text: "#00838f" },
-  "戌": { bg: "#fff9c4", text: "#f57f17" }, "亥": { bg: "#bbdefb", text: "#1565c0" },
-};
-
-function makePillar(seed: number) {
-  const cg = CHEONGAN[seed % 10];
-  const jj = JIJI[seed % 12];
-  return { cg, jj, cgKr: CG_KR[seed % 10], jjKr: JJ_KR[seed % 12] };
-}
-
 // ─── Step 7: 로딩 화면 ────────────────────────────────────────────────────────
 const ANALYSIS_ITEMS = [
   "사주 원국 분석 중",
@@ -604,21 +573,25 @@ const ANALYSIS_ITEMS = [
   "2024–2034 운세 흐름 분석 중",
 ];
 
-function StepLoading({ name, date }: { name: string; date: string }) {
+const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
+
+function StepLoading({
+  name, date, time, calendar,
+}: {
+  name: string; date: string; time: string; calendar: string;
+}) {
   const [progress, setProgress] = useState(0);
   const [doneCount, setDoneCount] = useState(0);
   const router = useRouter();
 
-  // 생년월일에서 시드 생성
-  const nums = date.replace(/\D/g, "");
-  const seed = parseInt(nums || "19900101", 10);
-  const pillars = [
-    makePillar(seed % 10),
-    makePillar((seed >> 2) % 10),
-    makePillar((seed >> 4) % 10),
-    makePillar((seed >> 6) % 10),
-  ];
-  const labels = ["시주", "일주", "월주", "년주"];
+  // 실제 만세력 계산 (lunar-javascript 기반)
+  const saju: LocalSajuResult | null = useMemo(
+    () => calcSaju(date, time, calendar),
+    [date, time, calendar],
+  );
+  const pillars = saju
+    ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year]
+    : null;
 
   useEffect(() => {
     // 진행도 애니메이션
@@ -657,30 +630,39 @@ function StepLoading({ name, date }: { name: string; date: string }) {
 
         {/* 사주 명식 그리드 */}
         <div className="grid grid-cols-4 gap-2 mb-6">
-          {pillars.map((p, i) => {
-            const cgColor = ELEMENT_COLOR[p.cg] ?? { bg: "#eee", text: "#555", label: "" };
-            const jjColor = JIJI_COLOR[p.jj]  ?? { bg: "#eee", text: "#555" };
+          {pillars ? pillars.map((p, i) => {
+            const cgC = ELEMENT_COLORS[p.stemClass]   ?? ELEMENT_COLORS.unknown;
+            const jjC = ELEMENT_COLORS[p.branchClass] ?? ELEMENT_COLORS.unknown;
             return (
               <div key={i} className="flex flex-col items-center gap-1">
                 <p className="text-[11px] font-medium mb-0.5" style={{ color: "#b0909a" }}>
-                  {labels[i]}
+                  {PILLAR_LABELS[i]}
                 </p>
                 {/* 천간 */}
                 <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5"
-                  style={{ backgroundColor: cgColor.bg }}>
-                  <span className="text-[9px] font-medium" style={{ color: cgColor.text }}>{cgColor.label}</span>
-                  <span className="text-[28px] font-bold leading-none" style={{ color: cgColor.text }}>{p.cg}</span>
-                  <span className="text-[9px]" style={{ color: cgColor.text }}>{p.cgKr}</span>
+                  style={{ backgroundColor: cgC.bg }}>
+                  <span className="text-[9px] font-medium" style={{ color: cgC.text }}>{p.stemSs || p.stemHg}</span>
+                  <span className="text-[28px] font-bold leading-none" style={{ color: cgC.text }}>{p.stem}</span>
+                  <span className="text-[9px]" style={{ color: cgC.text }}>{p.stemHg}</span>
                 </div>
                 {/* 지지 */}
                 <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5"
-                  style={{ backgroundColor: jjColor.bg }}>
-                  <span className="text-[28px] font-bold leading-none" style={{ color: jjColor.text }}>{p.jj}</span>
-                  <span className="text-[9px]" style={{ color: jjColor.text }}>{p.jjKr}</span>
+                  style={{ backgroundColor: jjC.bg }}>
+                  <span className="text-[28px] font-bold leading-none" style={{ color: jjC.text }}>{p.branch}</span>
+                  <span className="text-[9px]" style={{ color: jjC.text }}>{p.branchHg}</span>
                 </div>
               </div>
             );
-          })}
+          }) : (
+            // 계산 실패 시 스켈레톤
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <p className="text-[11px] font-medium mb-0.5" style={{ color: "#b0909a" }}>{PILLAR_LABELS[i]}</p>
+                <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "#ede0e3" }} />
+                <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "#ede0e3" }} />
+              </div>
+            ))
+          )}
         </div>
 
         {/* 진행도 */}
@@ -786,6 +768,8 @@ export default function SajuFormPage() {
         <StepLoading
           name={form.name ?? ""}
           date={form.date ?? ""}
+          time={form.time ?? "시간 모름"}
+          calendar={form.calendar ?? "양력"}
         />
       )}
     </>
