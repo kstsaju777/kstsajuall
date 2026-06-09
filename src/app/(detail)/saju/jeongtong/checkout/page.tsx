@@ -179,21 +179,89 @@ function MyeongsikGrid({ saju }: { saju: LocalSajuResult | null }) {
   );
 }
 
-// ─── 이미지 섹션 구분자 ───────────────────────────────────────────────────────
-function ImageDivider({ text }: { text: string }) {
+// ─── 이미지→그라데이션→텍스트→그라데이션→이미지 블록 ─────────────────────────
+// src: 이미지 경로, headline: 큰 제목 (배열로 줄 분리), accent: 강조할 단어, sub: 작은 라벨
+function ImageTextBlock({
+  imgSrc,
+  label,
+  headline,
+  accentWord,
+  bgColor = WHITE,
+}: {
+  imgSrc: string;
+  label: string;
+  headline: string; // "○○님의 사주,\n지난 5년을\n살살이 봤어요" 형태
+  accentWord: string; // headline 중 이 단어만 컬러 처리
+  bgColor?: string;
+}) {
+  // accentWord 기준으로 headline을 분리해서 색상 적용
+  const parts = headline.split(accentWord);
+
   return (
-    <div className="relative h-36 overflow-hidden">
-      <img
-        src="/images/hero/hero-1.jpg"
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="absolute inset-0" style={{
-        background: "linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6))",
-      }} />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <p className="text-[16px] font-bold tracking-widest text-white drop-shadow-lg">{text}</p>
+    <div style={{ backgroundColor: bgColor }}>
+      {/* 이미지 영역 (하단 그라데이션으로 배경색과 자연스럽게 연결) */}
+      <div className="relative overflow-hidden" style={{ height: 280 }}>
+        <img
+          src={imgSrc}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
+        {/* 하단 페이드 - 이미지 → bgColor */}
+        <div className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none" style={{
+          background: `linear-gradient(to bottom, transparent, ${bgColor})`,
+        }} />
       </div>
+
+      {/* 텍스트 영역 */}
+      <div className="px-6 pb-2 -mt-4 text-center">
+        <p className="text-[12px] mb-3" style={{ color: RED }}>
+          {label}
+        </p>
+        <h2 className="text-[28px] font-black leading-tight" style={{ color: GRAY1 }}>
+          {parts.map((part, i) => (
+            <span key={i}>
+              {part.split("\n").map((line, j) => (
+                <span key={j}>
+                  {line}
+                  {j < part.split("\n").length - 1 && <br />}
+                </span>
+              ))}
+              {i < parts.length - 1 && (
+                <span style={{ color: RED }}>{accentWord}</span>
+              )}
+            </span>
+          ))}
+        </h2>
+      </div>
+
+      {/* 상단 페이드 - bgColor → 투명 (다음 이미지 연결용) */}
+      <div className="h-8 pointer-events-none" style={{
+        background: `linear-gradient(to bottom, ${bgColor}, transparent)`,
+      }} />
+    </div>
+  );
+}
+
+// 단순 이미지 구분자 (텍스트 없는 버전, 중간 연결용)
+function ImageDivider({ src = "/images/hero/hero-1.jpg", bgColor = WHITE }: {
+  src?: string; bgColor?: string;
+}) {
+  return (
+    <div style={{ backgroundColor: bgColor }}>
+      {/* 상단: bgColor → 투명 */}
+      <div className="h-10 pointer-events-none" style={{
+        background: `linear-gradient(to bottom, ${bgColor}, transparent)`,
+      }} />
+      <div className="relative overflow-hidden" style={{ height: 200 }}>
+        <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.15) 100%)",
+        }} />
+      </div>
+      {/* 하단: 투명 → bgColor */}
+      <div className="h-10 pointer-events-none" style={{
+        background: `linear-gradient(to top, ${bgColor}, transparent)`,
+      }} />
     </div>
   );
 }
@@ -516,24 +584,18 @@ function CheckoutContent() {
       {/* 스크롤 영역 */}
       <div className="flex-1 overflow-y-auto pb-2">
 
-        {/* ① 히어로 */}
-        <div className="relative h-52 overflow-hidden">
-          <img src="/images/hero/hero-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{
-            background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 100%)"
-          }} />
-          <div className="absolute inset-0 flex flex-col items-center justify-end pb-6 px-5">
-            <p className="text-[12px] tracking-widest text-white/70 mb-1">✦ 정통사주 풀이 ✦</p>
-            <h1 className="text-[22px] font-bold text-white text-center leading-snug">
-              {name}님의 사주 분석이<br />완료되었습니다
-            </h1>
-            <p className="text-[12px] text-white/60 mt-1">{date} · {calendar} · {time}</p>
-          </div>
-        </div>
+        {/* ① 이미지 → 그라데이션 → 텍스트 (히어로) */}
+        <ImageTextBlock
+          imgSrc="/images/hero/hero-1.jpg"
+          label="정통사주 · 정밀 리포트"
+          headline={`${name}님의 사주,\n지금 이 순간까지\n살살이 봤어요`}
+          accentWord="살살이"
+          bgColor={WHITE}
+        />
 
         {/* ② 명식 그리드 */}
         <div style={{ backgroundColor: WHITE }}>
-          <p className="text-center text-[12px] tracking-widest pt-5 pb-1" style={{ color: RED }}>✦ 사주 명식 ✦</p>
+          <p className="text-center text-[12px] tracking-widest pb-1" style={{ color: RED }}>✦ 사주 명식 ✦</p>
           <MyeongsikGrid saju={saju} />
         </div>
 
@@ -541,23 +603,26 @@ function CheckoutContent() {
         <div className="h-2" style={{ backgroundColor: CREAM }} />
         <OhaengChart saju={saju} />
 
-        {/* ④ 이미지 구분자 */}
-        <ImageDivider text="✦ AI 정밀 사주 분석 결과 ✦" />
+        {/* ④ 그라데이션 → 이미지 → 그라데이션 → 텍스트 */}
+        <ImageTextBlock
+          imgSrc="/images/hero/hero-1.jpg"
+          label="AI 정밀 사주 분석 · 5가지 항목"
+          headline={`지금 당신의 운명,\n낱낱이\n분석했습니다`}
+          accentWord="낱낱이"
+          bgColor={CREAM}
+        />
 
-        {/* ⑤ 분석 섹션 */}
-        <div className="py-5" style={{ backgroundColor: CREAM }}>
-          <p className="text-center text-[12px] tracking-widest mb-4" style={{ color: RED }}>
-            ✦ 5가지 항목 분석 ✦
-          </p>
+        {/* ⑤ 분석 섹션 1~3 */}
+        <div className="pb-5" style={{ backgroundColor: CREAM }}>
           {SECTIONS.slice(0, 3).map((s, i) => (
             <AnalysisSection key={i} s={s} index={i} />
           ))}
         </div>
 
-        {/* ⑥ 이미지 구분자 */}
-        <ImageDivider text="✦ 운세 흐름 분석 ✦" />
+        {/* ⑥ 그라데이션 → 이미지 → 그라데이션 (구분자) */}
+        <ImageDivider bgColor={CREAM} />
 
-        {/* ⑦ 나머지 분석 + 달력 */}
+        {/* ⑦ 나머지 분석 */}
         <div className="py-5" style={{ backgroundColor: CREAM }}>
           {SECTIONS.slice(3).map((s, i) => (
             <AnalysisSection key={i} s={s} index={i + 3} />
@@ -568,8 +633,14 @@ function CheckoutContent() {
         <div className="h-2" style={{ backgroundColor: CREAM }} />
         <FortuneCalendar saju={saju} />
 
-        {/* ⑨ 이미지 구분자 */}
-        <ImageDivider text="✦ 실제 후기 ✦" />
+        {/* ⑨ 그라데이션 → 이미지 → 그라데이션 → 텍스트 (후기 앞) */}
+        <ImageTextBlock
+          imgSrc="/images/hero/hero-1.jpg"
+          label="실제 이용 후기"
+          headline={`이미 수천 명이\n확인한\n그 정확함`}
+          accentWord="그 정확함"
+          bgColor={WHITE}
+        />
 
         {/* ⑩ 후기 */}
         <ReviewSection />
