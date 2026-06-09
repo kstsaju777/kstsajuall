@@ -608,8 +608,16 @@ function StepLoading({
       setTimeout(() => setDoneCount(i + 1), 800 + i * 1200)
     );
 
-    // 완료 후 이동
-    const done = setTimeout(() => router.push("/checkout"), 800 + ANALYSIS_ITEMS.length * 1200 + 600);
+    // 완료 후 이동 (사주 데이터를 query로 전달)
+    const done = setTimeout(() => {
+      const params = new URLSearchParams({
+        name,
+        date,
+        time,
+        calendar,
+      });
+      router.push(`/saju/jeongtong/checkout?${params.toString()}`);
+    }, 800 + ANALYSIS_ITEMS.length * 1200 + 600);
 
     return () => {
       clearInterval(interval);
