@@ -570,7 +570,8 @@ function CheckoutContent() {
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
       {/* 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto pb-2">
+      <div className="flex-1 overflow-y-auto pb-2" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+        <style>{`::-webkit-scrollbar { display: none; }`}</style>
 
         {/* ① 이미지 → 그라데이션 → 텍스트 → 그라데이션 → 이미지 */}
         <ImageTextBlock
