@@ -10,42 +10,51 @@ export async function POST(req: NextRequest) {
     const { data, error } = await resend.emails.send({
       from: "홍연당 <support@villionhive.com>",
       to: [customerEmail],
-      subject: `[홍연당] ${customerName}님, 구매가 완료되었습니다 🎉`,
+      subject: `[홍연당] ${customerName}님, 구매가 완료되었습니다`,
       html: `
-        <div style="font-family: 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #fdf8f4;">
-          <div style="text-align: center; margin-bottom: 32px;">
-            <h1 style="color: #9b2335; font-size: 24px; margin: 0;">홍연당</h1>
-            <p style="color: #888; font-size: 13px; margin-top: 4px;">정통 사주 · 운세 리포트</p>
+        <div style="font-family: 'Apple SD Gothic Neo', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+
+          <!-- 상단 헤더 (빨간 배경 + 로고) -->
+          <div style="background: #9b2335; padding: 36px 20px; text-align: center;">
+            <img src="https://www.hongyeondang.com/logo.png" alt="홍연당" style="height: 60px; max-width: 200px; object-fit: contain;" />
           </div>
 
-          <div style="background: #fff; border-radius: 16px; padding: 28px; margin-bottom: 24px; border: 1px solid #eee;">
-            <h2 style="color: #1a1a1a; font-size: 18px; margin: 0 0 16px;">구매 완료 안내</h2>
-            <p style="color: #444; font-size: 15px; line-height: 1.6; margin: 0 0 20px;">
+          <!-- 본문 -->
+          <div style="padding: 36px 28px; background: #ffffff;">
+            <h2 style="color: #1a1a1a; font-size: 20px; margin: 0 0 16px; text-align: center;">구매가 완료되었습니다</h2>
+            <p style="color: #444; font-size: 15px; line-height: 1.8; margin: 0 0 28px; text-align: center;">
               안녕하세요, <strong>${customerName}</strong>님!<br/>
               홍연당을 이용해주셔서 감사합니다.
             </p>
 
-            <div style="background: #fdf0f0; border-radius: 12px; padding: 16px; border: 1px solid #f5c5c8;">
-              <p style="color: #9b2335; font-size: 13px; font-weight: bold; margin: 0 0 8px;">📋 구매 내역</p>
-              <p style="color: #1a1a1a; font-size: 15px; font-weight: bold; margin: 0 0 4px;">${productName}</p>
+            <!-- 구매 내역 -->
+            <div style="background: #fdf0f0; border-radius: 12px; padding: 20px; margin-bottom: 28px; border: 1px solid #f5c5c8;">
+              <p style="color: #9b2335; font-size: 13px; font-weight: bold; margin: 0 0 10px;">구매 내역</p>
+              <p style="color: #1a1a1a; font-size: 16px; font-weight: bold; margin: 0 0 4px;">${productName}</p>
               <p style="color: #444; font-size: 14px; margin: 0;">${price.toLocaleString()}원</p>
             </div>
-          </div>
 
-          <div style="background: #fff; border-radius: 16px; padding: 28px; margin-bottom: 24px; border: 1px solid #eee;">
-            <p style="color: #1a1a1a; font-size: 15px; font-weight: bold; margin: 0 0 12px;">📖 리포트 확인 방법</p>
-            <p style="color: #444; font-size: 14px; line-height: 1.6; margin: 0;">
-              결제 완료 후 화면에서 바로 리포트를 확인하실 수 있습니다.<br/>
-              언제든지 홍연당 사이트를 통해 재열람하실 수 있습니다.
+            <!-- 버튼 -->
+            <div style="text-align: center; margin-bottom: 28px;">
+              <a href="https://www.hongyeondang.com" style="display: inline-block; background: #9b2335; color: #ffffff; font-size: 16px; font-weight: bold; padding: 16px 40px; border-radius: 50px; text-decoration: none;">
+                리포트 확인하러 가기
+              </a>
+            </div>
+
+            <p style="color: #888; font-size: 13px; line-height: 1.6; text-align: center; margin: 0;">
+              버튼이 작동하지 않으면 아래 링크를 복사하여 브라우저에 붙여넣으세요.<br/>
+              <a href="https://www.hongyeondang.com" style="color: #9b2335;">https://www.hongyeondang.com</a>
             </p>
           </div>
 
-          <div style="text-align: center; padding: 20px;">
-            <p style="color: #888; font-size: 12px; margin: 0;">
+          <!-- 푸터 -->
+          <div style="background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+            <p style="color: #aaa; font-size: 12px; margin: 0;">
               문의사항은 <a href="mailto:support@villionhive.com" style="color: #9b2335;">support@villionhive.com</a>으로 연락주세요.<br/>
               © 2025 홍연당 · Villionhive
             </p>
           </div>
+
         </div>
       `,
     });
