@@ -641,8 +641,29 @@ function CheckoutContent() {
 
   const [showSheet, setShowSheet] = useState(false);
 
-  const handleConfirm = (_productId: string) => {
+  const handleConfirm = async (productId: string) => {
     setShowSheet(false);
+    const product = PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0];
+
+    // 이메일 발송 (이메일 주소가 있을 경우)
+    const email = searchParams.get("email");
+    if (email) {
+      try {
+        await fetch("/api/send-order-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerEmail: email,
+            customerName: name,
+            productName: product.name,
+            price: product.price,
+          }),
+        });
+      } catch (e) {
+        // 이메일 실패해도 리포트는 진행
+      }
+    }
+
     const params = new URLSearchParams({ name, date, time, calendar });
     router.push(`/saju/jeongtong/report?${params.toString()}`);
   };
