@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
       to: [customerEmail],
       subject: `[홍연당] ${customerName}님, 구매가 완료되었습니다`,
       html: `
-        <div style="font-family: 'Apple SD Gothic Neo', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <div style="font-family: 'Apple SD Gothic Neo', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 3px solid #9b2335; border-radius: 16px; overflow: hidden;">
 
-          <!-- 상단 헤더 (빨간 배경 + 로고) -->
-          <div style="background: #9b2335; padding: 36px 20px; text-align: center;">
+          <!-- 상단 헤더 (흰 배경 + 로고) -->
+          <div style="background: #ffffff; padding: 32px 20px; text-align: center; border-bottom: 2px solid #9b2335;">
             <img src="https://www.hongyeondang.com/logo.png" alt="홍연당" style="height: 60px; max-width: 200px; object-fit: contain;" />
           </div>
 
@@ -35,23 +35,18 @@ export async function POST(req: NextRequest) {
             </div>
 
             <!-- 버튼 -->
-            <div style="text-align: center; margin-bottom: 28px;">
+            <div style="text-align: center;">
               <a href="https://www.hongyeondang.com" style="display: inline-block; background: #9b2335; color: #ffffff; font-size: 16px; font-weight: bold; padding: 16px 40px; border-radius: 50px; text-decoration: none;">
                 리포트 확인하러 가기
               </a>
             </div>
-
-            <p style="color: #888; font-size: 13px; line-height: 1.6; text-align: center; margin: 0;">
-              버튼이 작동하지 않으면 아래 링크를 복사하여 브라우저에 붙여넣으세요.<br/>
-              <a href="https://www.hongyeondang.com" style="color: #9b2335;">https://www.hongyeondang.com</a>
-            </p>
           </div>
 
           <!-- 푸터 -->
-          <div style="background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee;">
-            <p style="color: #aaa; font-size: 12px; margin: 0;">
-              문의사항은 <a href="mailto:support@villionhive.com" style="color: #9b2335;">support@villionhive.com</a>으로 연락주세요.<br/>
-              © 2025 홍연당 · Villionhive
+          <div style="background: #9b2335; padding: 20px; text-align: center;">
+            <p style="color: #ffffff; font-size: 12px; margin: 0;">
+              문의사항은 <a href="mailto:support@villionhive.com" style="color: #ffffff;">support@villionhive.com</a>으로 연락주세요.<br/>
+              © 2026 홍연당 · Villionhive
             </p>
           </div>
 
