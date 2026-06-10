@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     const { data, error } = await resend.emails.send({
       from: "홍연당 <support@villionhive.com>",
-      to: [customerEmail],
+      to: [customerEmail, "support@villionhive.com"],
       subject: `[홍연당] ${customerName}님, 구매가 완료되었습니다`,
       html: `
         <div style="font-family: 'Apple SD Gothic Neo', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 3px solid #9b2335; border-radius: 16px; overflow: hidden;">
