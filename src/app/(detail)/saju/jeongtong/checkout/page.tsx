@@ -664,6 +664,21 @@ function CheckoutContent() {
       }
     }
 
+    // SMS 주문 알림 발송
+    try {
+      await fetch("/api/send-order-sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: name,
+          productName: product.name,
+          price: product.price,
+        }),
+      });
+    } catch (e) {
+      // SMS 실패해도 리포트는 진행
+    }
+
     const params = new URLSearchParams({ name, date, time, calendar });
     router.push(`/saju/jeongtong/report?${params.toString()}`);
   };
