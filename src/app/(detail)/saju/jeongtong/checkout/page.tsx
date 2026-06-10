@@ -645,8 +645,8 @@ function CheckoutContent() {
     setShowSheet(false);
     const product = PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0];
 
-    // 이메일 발송 (이메일 주소가 있을 경우)
-    const email = searchParams.get("email");
+    // 이메일 발송 (테스트: 임시 고정 주소 / 실제는 searchParams에서 받아옴)
+    const email = searchParams.get("email") ?? "kimguback@gmail.com";
     if (email) {
       try {
         await fetch("/api/send-order-email", {
