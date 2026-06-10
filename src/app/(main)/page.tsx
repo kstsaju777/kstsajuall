@@ -34,7 +34,7 @@ export default function HomePage() {
   return (
     <div className="pb-10 px-4 pt-4 flex flex-col gap-4">
       {CARDS.map((card) => (
-        <Link key={card.name} href={card.href} className="block w-full rounded-2xl overflow-hidden relative" style={{ aspectRatio: "16/9" }}>
+        <Link key={card.name} href={card.href} className="block w-full rounded-2xl overflow-hidden relative" style={{ aspectRatio: "4/3" }}>
           <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
           {/* 하단 그라데이션 오버레이 */}
           <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.7))" }} />
