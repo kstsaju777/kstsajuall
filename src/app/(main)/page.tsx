@@ -18,7 +18,7 @@ const CARDS = [
     tag: "인기",
     name: "정통사주 재물운",
     desc: "평생 재물운과 돈이 들어오는 시기를 분석합니다",
-    href: "/saju/jeongtong",
+    href: "/coming-soon",
   },
   {
     image: "/images/hero/hero-7.jpg",
@@ -26,7 +26,7 @@ const CARDS = [
     tag: "HOT",
     name: "유혹사주",
     desc: "쉿, 내게 숨겨진 색기와 이성을 홀리는 매력 알아보기",
-    href: "/saju/jeongtong",
+    href: "/coming-soon",
   },
 ];
 
