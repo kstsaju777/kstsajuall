@@ -38,9 +38,11 @@ function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           <SideDrawer isLoggedIn={isLoggedIn} />
         </div>
       </div>
+      {/* 심사용 임시 비활성화
       <Suspense fallback={null}>
         <NavTabs />
       </Suspense>
+      */}
     </header>
   );
 }
