@@ -322,14 +322,15 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
   );
 }
 
-export default function TotalPage() {
+// ─── 하단 고정 CTA (카운트다운 + 토스트) — 별도 컴포넌트로 분리해 스토리 리렌더 방지 ───
+function StickyCTA() {
   const router = useRouter();
 
   // 03:27:35:43 부터 카운트다운
   const [timeLeft, setTimeLeft] = useState("03:27:35:43");
   useEffect(() => {
     const pad = (n: number) => String(n).padStart(2, "0");
-    const DURATION = 3 * 3600000 + 27 * 60000 + 35 * 1000 + 43 * 10; // 3h27m35s43cs
+    const DURATION = 3 * 3600000 + 27 * 60000 + 35 * 1000 + 43 * 10;
     const endTime = Date.now() + DURATION;
     const tick = () => {
       let diff = Math.max(0, endTime - Date.now());
@@ -356,16 +357,61 @@ export default function TotalPage() {
       }, 3500));
     };
     const schedule = () => {
-      const delay = 2500 + Math.random() * 5500; // 2.5~8초 랜덤 간격
+      const delay = 2500 + Math.random() * 5500;
       timers.push(setTimeout(() => {
         addToast();
-        if (Math.random() < 0.3) timers.push(setTimeout(addToast, 500)); // 30% 확률로 0.5초 뒤 하나 더
+        if (Math.random() < 0.3) timers.push(setTimeout(addToast, 500));
         schedule();
       }, delay));
     };
     schedule();
     return () => timers.forEach(clearTimeout);
   }, []);
+
+  return (
+    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+      left: "max(0px, calc(50vw - 240px))",
+      width: "min(100%, 480px)",
+      background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
+    }}>
+      <style>{`@keyframes spFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <div className="flex flex-col items-end gap-1 mb-2" style={{ minHeight: "30px" }}>
+        {toasts.map((t) => (
+          <div key={t.id} style={{
+            animation: "spFadeIn 0.4s ease",
+            display: "flex", alignItems: "center", gap: "6px",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: "9999px", padding: "5px 12px",
+            fontSize: "12px", color: "#fff", whiteSpace: "nowrap",
+          }}>
+            <span style={{
+              backgroundColor: TIME_COLORS[t.time] ?? "#9b2335",
+              color: "#fff", fontSize: "10px", fontWeight: 700,
+              borderRadius: "9999px", padding: "2px 7px",
+            }}>{t.time}</span>
+            <span><b>{t.name}</b>님이 신청하였습니다.</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-center text-[13px] font-bold mb-1">
+        <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
+        <span style={{ color: "#ffc107" }}>{timeLeft}</span>
+      </p>
+      <button
+        onClick={() => router.push("/saju/jeongtong")}
+        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
+        style={{ backgroundColor: "#9b2335", fontSize: "22px" }}
+      >
+        홍연에게 사주보러 가기
+      </button>
+    </div>
+  );
+}
+
+export default function TotalPage() {
+  const router = useRouter();
 
   return (
     <div className="w-full flex flex-col relative" style={{ backgroundColor: BG }}>
@@ -427,54 +473,8 @@ export default function TotalPage() {
       {/* 하단 여백 (고정 버튼에 마지막 장면이 가려지지 않도록) */}
       <div style={{ height: "110px" }} />
 
-      {/* 하단 고정 CTA 버튼 */}
-      <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
-        left: "max(0px, calc(50vw - 240px))",
-        width: "min(100%, 480px)",
-        background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
-      }}>
-        {/* 소셜프루프 토스트 */}
-        <style>{`@keyframes spFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-        <div className="flex flex-col items-end gap-1 mb-2" style={{ minHeight: "30px" }}>
-          {toasts.map((t) => (
-            <div key={t.id} style={{
-              animation: "spFadeIn 0.4s ease",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              backgroundColor: "rgba(0,0,0,0.6)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: "9999px",
-              padding: "5px 12px",
-              fontSize: "12px",
-              color: "#fff",
-              whiteSpace: "nowrap",
-            }}>
-              <span style={{
-                backgroundColor: TIME_COLORS[t.time] ?? "#9b2335",
-                color: "#fff",
-                fontSize: "10px",
-                fontWeight: 700,
-                borderRadius: "9999px",
-                padding: "2px 7px",
-              }}>{t.time}</span>
-              <span><b>{t.name}</b>님이 신청하였습니다.</span>
-            </div>
-          ))}
-        </div>
-
-        <p className="text-center text-[13px] font-bold mb-1">
-          <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
-          <span style={{ color: "#ffc107" }}>{timeLeft}</span>
-        </p>
-        <button
-          onClick={() => router.push("/saju/jeongtong")}
-          className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-          style={{ backgroundColor: "#9b2335", fontSize: "22px" }}
-        >
-          홍연에게 사주보러 가기
-        </button>
-      </div>
+      {/* 하단 고정 CTA (별도 컴포넌트) */}
+      <StickyCTA />
     </div>
   );
 }
