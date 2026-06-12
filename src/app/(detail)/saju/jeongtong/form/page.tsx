@@ -538,6 +538,7 @@ function getEmailWarning(email: string): string | null {
 
 // ─── Step 6: 이메일 ───────────────────────────────────────────────────────────
 const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "hotmail.com", "직접입력"];
+const MONO_FONT = "'Roboto Mono', monospace";
 
 function StepEmail({
   onPrev,
@@ -581,6 +582,7 @@ function StepEmail({
             style={{
               flex: "1 1 0",
               minWidth: 0,
+              fontFamily: MONO_FONT,
               borderBottom: `1.5px solid ${BORDER_CLR}`,
               color: local ? TEXT_CLR : PH_CLR,
               caretColor: NAVY,
@@ -589,7 +591,7 @@ function StepEmail({
           />
 
           {/* @ 고정 */}
-          <span className="text-[17px] font-bold pb-2.5" style={{ color: "#ffffff" }}>@</span>
+          <span className="text-[17px] font-bold pb-2.5" style={{ color: "#ffffff", fontFamily: MONO_FONT }}>@</span>
 
           {/* 도메인 영역 */}
           <div className="relative" style={{ flex: "1.2 1 0", minWidth: 0 }}>
@@ -624,7 +626,7 @@ function StepEmail({
                   value={custom}
                   onChange={(e) => setCustom(e.target.value)}
                   className="bg-transparent text-[16px] pb-2.5 outline-none"
-                  style={{ flex: "1 1 0", minWidth: 0, color: custom ? TEXT_CLR : PH_CLR, caretColor: NAVY }}
+                  style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, color: custom ? TEXT_CLR : PH_CLR, caretColor: NAVY }}
                 />
                 <button onClick={() => setOpen((v) => !v)} className="pb-2.5 pl-1">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -637,7 +639,7 @@ function StepEmail({
               <button
                 onClick={() => setOpen((v) => !v)}
                 className="w-full flex items-center justify-between text-[16px] pb-2.5"
-                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent" }}
+                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent", fontFamily: MONO_FONT }}
               >
                 <span className="truncate">{domain}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
