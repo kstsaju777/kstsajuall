@@ -66,14 +66,14 @@ const CHAPTERS = [
       {
         top: "12%", left: "8%", width: "42%", height: "25%",
         panels: [
-          { top: "0%", left: "0%", width: "90%", height: "60%", text: "단 한번의\n사주 간명으로\n역모를 막아냈다던.." },
+          { top: "0%", left: "0%", width: "110%", height: "60%", text: "단 한번의\n사주 간명으로\n역모를 막아냈다던.." },
         ],
       },
       {
         top: "90%", left: "35%", width: "58%", height: "20%",
         panels: [
-          { top: "0%",  left: "0%",  width: "68%", height: "68%", text: "그를 마주하면\n말하지 않아도 알며" },
-          { top: "32%", left: "32%", width: "68%", height: "68%", text: "\n묻지 않아도\n꿰뚫는다고.." },
+          { top: "-5%",  left: "-20%",  width: "80%", height: "68%", text: "그를 마주하면\n말하지 않아도 알며" },
+          { top: "50%", left: "32%", width: "68%", height: "70%", text: "묻지 않아도\n꿰뚫는다고.." },
         ],
       },
     ],
@@ -86,7 +86,7 @@ const CHAPTERS = [
       {
         top: "15%", left: "6%", width: "44%", height: "30%",
         panels: [
-          { top: "-70%", left: "0%", width: "90%", height: "60%", text: "조선의 왕들도\n야심한 밤을 틈타\n몰래 찾아갔다던 자." },
+          { top: "-70%", left: "0%", width: "110%", height: "70%", text: "조선의 왕들도\n야심한 밤을 틈타\n몰래 찾아갔다던 자." },
         ],
       },
     ],
@@ -264,7 +264,7 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
             }}>
               <p className="whitespace-pre-line font-bold leading-snug" style={{
                 fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-                fontSize: "clamp(13px, 3.4vw, 18px)",
+                fontSize: "clamp(13px, 3.4vw, 24px)",
                 color: "#1a1a1a",
               }}>
                 {p.text}
@@ -407,7 +407,7 @@ export default function TotalPage() {
                   {gap.text && (
                     <p className="whitespace-pre-line text-center leading-snug" style={{
                       fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-                      fontSize: "clamp(20px, 5.5vw, 28px)",
+                      fontSize: "clamp(20px, 5.5vw, 38px)",
                       fontWeight: 700,
                       color: "#ffffff",
                       letterSpacing: "0.05em",
