@@ -247,7 +247,7 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
           {/* 배경 그룹 — 패널들 불투명으로 합친 뒤 그룹 전체에 한 번만 투명도/필터 */}
           <div className="absolute inset-0" style={{
             filter: "url(#rough-paper-edge)",
-            opacity: 0.5,
+            opacity: 1,
           }}>
             {b.panels.map((p: any, pi: number) => (
               <div key={pi} className="absolute" style={{
@@ -282,13 +282,16 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
             top: c.top, left: c.left,
             width: c.width, aspectRatio: c.ratio ?? "1/1",
             borderRadius: "50%",
-            backgroundColor: "rgba(255,255,255,0.5)",
+            backgroundColor: "#ffffff",
             boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+            padding: "0 14%",
+            boxSizing: "border-box",
           }}>
           <p className="font-bold whitespace-pre-line leading-snug" style={{
             fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
             fontSize: c.fontSize ?? "20px",
             color: "#1a1a1a",
+            wordBreak: "keep-all",
           }}>
             {c.text}
           </p>
