@@ -185,8 +185,8 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <Label text="꼼꼼히 사주 봐드릴게요!" />
-        <Title>성별이 어떻게 되세요?</Title>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>내 질문에 답을 해주시오</p>
+        <Title>그대의 성별은 무엇이오?</Title>
         <div className="flex flex-col gap-3">
           {(["여자", "남자"] as const).map((g) => {
             const active = gender === g;
@@ -199,6 +199,7 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
                   backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
                   border: `1.5px solid ${active ? NAVY : "rgba(255,255,255,0.18)"}`,
                   color: active ? "#ffffff" : "#dddddd",
+                  opacity: active ? 1 : 0.55,
                 }}
               >
                 {g}
