@@ -485,12 +485,11 @@ function StepConcern({
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <Label text="자세히 적을수록 더 깊이 봐드려요" />
-        <h2 className="text-[24px] font-bold mb-0.5" style={{ color: TEXT_CLR }}>
-          어떤 고민이 있으세요?{" "}
-          <span className="text-[17px] font-normal" style={{ color: "#c0a8b0" }}>(선택)</span>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
+        <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
+          고민을 상세히 적어주겠소?{" "}
+          <span className="text-[15px] font-normal" style={{ color: "#888" }}>(선택) 비워도 괜찮소</span>
         </h2>
-        <p className="text-[12px] mb-4" style={{ color: "#c0a8b0" }}>비워도 괜찮아요!</p>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX))}
@@ -498,9 +497,9 @@ function StepConcern({
           rows={5}
           className="w-full rounded-2xl p-4 text-[14px] outline-none resize-none leading-relaxed"
           style={{
-            backgroundColor: "rgba(255,255,255,0.7)",
-            border: "1.5px solid rgba(200,168,180,0.4)",
-            color: "#333",
+            backgroundColor: "rgba(255,255,255,0.05)",
+            border: "1.5px solid rgba(255,255,255,0.15)",
+            color: TEXT_CLR,
             caretColor: NAVY,
           }}
         />
