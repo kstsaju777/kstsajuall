@@ -160,7 +160,7 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
       {/* 오버레이 텍스트 */}
       {(chapter as any).overlayText && (
         <div className="absolute z-20 left-0 right-0 text-center"
-          style={{ top: (chapter as any).overlayText.position === "top" ? "8%" : undefined, bottom: (chapter as any).overlayText.position === "bottom" ? "8%" : undefined, transform: "translateY(-50%)" }}>
+          style={{ top: (chapter as any).overlayText.position === "top" ? "0%" : undefined, bottom: (chapter as any).overlayText.position === "bottom" ? "8%" : undefined, transform: (chapter as any).overlayText.position === "top" ? "translateY(-50%)" : undefined }}>
           <p style={{
             fontFamily: BRUSH_FONT,
             fontSize: "clamp(34px, 9vw, 46px)",
