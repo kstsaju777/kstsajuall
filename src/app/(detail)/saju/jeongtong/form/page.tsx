@@ -155,9 +155,9 @@ function BottomNav({
           onClick={onPrev}
           className="flex-shrink-0 px-5 py-3.5 rounded-2xl text-[15px] font-semibold"
           style={{
-            backgroundColor: "rgba(255,255,255,0.55)",
-            color: "#888",
-            border: "1.5px solid rgba(200,180,185,0.5)",
+            backgroundColor: CARD_BG,
+            color: "#999",
+            border: "1.5px solid #555",
           }}
         >
           이전
@@ -222,9 +222,11 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
 function StepBirthDate({
   onPrev,
   onNext,
+  gender,
 }: {
   onPrev: () => void;
   onNext: (v: { date: string; calendar: string }) => void;
+  gender?: string;
 }) {
   const [date, setDate] = useState("");
   const [calendar, setCalendar] = useState<"양력" | "음력" | "윤달">("양력");
@@ -248,11 +250,21 @@ function StepBirthDate({
   })();
   const isValid = isFilled && isValidDate;
 
+  // 생년월일 유효 입력 시 자동 진행
+  useEffect(() => {
+    if (isValid) {
+      const t = setTimeout(() => onNext({ date, calendar }), 600);
+      return () => clearTimeout(t);
+    }
+  }, [isValid, date, calendar]);
+
+  const greeting = gender === "남자" ? "멋진 도련님이 오셨군요" : "어여쁜 숙녀분이 오셨군요";
+
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <Label text="사주의 첫 단추예요" />
-        <Title>생년월일을 알려주세요</Title>
+        <Label text={greeting} />
+        <Title>언제 태어났는지 말해주게</Title>
         <div className="flex items-end gap-3">
           <div className="flex-1">
             <input
@@ -286,7 +298,7 @@ function StepBirthDate({
       <BottomNav
         onPrev={onPrev}
         onNext={() => isValid && onNext({ date, calendar })}
-        nextLabel="응, 입력했어!"
+        nextLabel="다음으로"
         nextDisabled={!isValid}
       />
     </FormShell>
@@ -747,6 +759,7 @@ export default function SajuFormPage() {
       {step === 1 && <StepGender onNext={(gender) => next({ gender }, 2)} />}
       {step === 2 && (
         <StepBirthDate
+          gender={form.gender}
           onPrev={() => setStep(1)}
           onNext={({ date, calendar }) => next({ date, calendar }, 3)}
         />
