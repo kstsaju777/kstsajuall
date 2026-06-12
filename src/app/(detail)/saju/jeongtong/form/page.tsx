@@ -681,13 +681,13 @@ const ANALYSIS_ITEMS = [
 const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
 
 // 로딩 화면 말풍선 (흰 반투명)
-function LoadBubble({ text, size }: { text: string; size?: string }) {
+function LoadBubble({ text, size, width }: { text: string; size?: string; width?: string }) {
   return (
     <div className="flex items-center justify-center text-center" style={{
       backgroundColor: "#ffffff",
       borderRadius: "50%",
       aspectRatio: "4/3",
-      width: "190px",
+      width: width ?? "190px",
       padding: "0 26px",
       boxSizing: "border-box",
       boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
@@ -719,8 +719,8 @@ function StepLoading({
   useEffect(() => {
     videoRef.current?.play().catch(() => {});
     const t1 = setTimeout(() => setB1(true), 1000);
-    const t2 = setTimeout(() => setB2(true), 2000);
-    const t3 = setTimeout(() => { setB3(true); setB1(false); setB2(false); }, 4000);
+    const t2 = setTimeout(() => setB2(true), 3500);
+    const t3 = setTimeout(() => { setB3(true); setB1(false); setB2(false); }, 6000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
@@ -754,18 +754,18 @@ function StepLoading({
 
       {/* 말풍선 — 좌상단 (1초 후, b3 등장 시 페이드아웃) */}
       <div className="absolute" style={{ top: "10%", left: "6%", opacity: b1 ? 1 : 0, transition: "opacity 0.5s ease" }}>
-        <LoadBubble text={`${name}${honor}\n사주를 보니`} />
+        <LoadBubble text={`${name}${honor}\n사주를 보니`} size="20px" width="200px" />
       </div>
 
       {/* 말풍선 — 중앙 (2초 후, b3 등장 시 페이드아웃) */}
-      <div className="absolute" style={{ top: "44%", left: "50%", transform: "translate(-50%, -50%)", opacity: b2 ? 1 : 0, transition: "opacity 0.5s ease" }}>
-        <LoadBubble text={"놀라운게\n보이는군.."} />
+      <div className="absolute" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: b2 ? 1 : 0, transition: "opacity 0.5s ease" }}>
+        <LoadBubble text={"놀라운게\n보이는군.."} size="25px" width="200px" />
       </div>
 
       {/* 말풍선 — 좌하단 (2초 후) */}
       {b3 && (
-        <div className="absolute" style={{ bottom: "24%", left: "6%", animation: "loadFade 0.5s ease" }}>
-          <LoadBubble text={"한번\n들어보겠소?"} />
+        <div className="absolute" style={{ bottom: "20%", left: "20%", animation: "loadFade 0.5s ease" }}>
+          <LoadBubble text={"한번\n들어보겠소?"} size="40px" width="300px" />
         </div>
       )}
 
