@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { calcSaju, ELEMENT_COLORS, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 
@@ -180,8 +180,8 @@ function BottomNav({
 }
 
 // ─── Step 1: 성별 ─────────────────────────────────────────────────────────────
-function StepGender({ onNext }: { onNext: (v: string) => void }) {
-  const [gender, setGender] = useState<"여자" | "남자" | null>(null);
+function StepGender({ onNext, initial }: { onNext: (v: string) => void; initial?: string }) {
+  const [gender, setGender] = useState<"여자" | "남자" | null>((initial as "여자" | "남자") ?? null);
 
   return (
     <FormShell>
@@ -223,13 +223,18 @@ function StepBirthDate({
   onPrev,
   onNext,
   gender,
+  initialDate,
+  initialCalendar,
 }: {
   onPrev: () => void;
   onNext: (v: { date: string; calendar: string }) => void;
   gender?: string;
+  initialDate?: string;
+  initialCalendar?: string;
 }) {
-  const [date, setDate] = useState("");
-  const [calendar, setCalendar] = useState<"양력" | "음력" | "윤달">("양력");
+  const [date, setDate] = useState(initialDate ?? "");
+  const [calendar, setCalendar] = useState<"양력" | "음력" | "윤달">((initialCalendar as "양력" | "음력" | "윤달") ?? "양력");
+  const interacted = useRef(false);
 
   const formatDate = (raw: string) => {
     const nums = raw.replace(/\D/g, "").slice(0, 8);
@@ -250,9 +255,9 @@ function StepBirthDate({
   })();
   const isValid = isFilled && isValidDate;
 
-  // 생년월일 유효 입력 시 자동 진행
+  // 생년월일 유효 입력 시 자동 진행 (사용자가 직접 입력했을 때만)
   useEffect(() => {
-    if (isValid) {
+    if (isValid && interacted.current) {
       const t = setTimeout(() => onNext({ date, calendar }), 600);
       return () => clearTimeout(t);
     }
@@ -273,7 +278,7 @@ function StepBirthDate({
               inputMode="numeric"
               placeholder="1999.01.01"
               value={date}
-              onChange={(e) => setDate(formatDate(e.target.value))}
+              onChange={(e) => { interacted.current = true; setDate(formatDate(e.target.value)); }}
               className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
               style={{
                 borderBottom: `1.5px solid ${!isValidDate && isFilled ? "#e03" : BORDER_CLR}`,
@@ -286,7 +291,7 @@ function StepBirthDate({
             <PillToggle
               options={["양력", "음력", "윤달"] as const}
               value={calendar}
-              onChange={setCalendar}
+              onChange={(c) => { interacted.current = true; setCalendar(c); }}
             />
           </div>
         </div>
@@ -310,19 +315,22 @@ function StepBirthDate({
 function StepBirthTime({
   onPrev,
   onNext,
+  initialTime,
 }: {
   onPrev: () => void;
   onNext: (v: string) => void;
+  initialTime?: string;
 }) {
-  const [unknown, setUnknown] = useState(false);
-  const [time, setTime] = useState("");
+  const [unknown, setUnknown] = useState(initialTime === "시간 모름");
+  const [time, setTime] = useState(initialTime && initialTime !== "시간 모름" ? initialTime : "");
   const [open, setOpen] = useState(false);
+  const interacted = useRef(false);
 
   const selected = unknown ? "시간 모름" : time;
 
-  // 시간 선택 / 시간모름 시 자동 진행
+  // 시간 선택 / 시간모름 시 자동 진행 (사용자가 직접 선택했을 때만)
   useEffect(() => {
-    if (selected) {
+    if (selected && interacted.current) {
       const t = setTimeout(() => onNext(selected), 450);
       return () => clearTimeout(t);
     }
@@ -343,14 +351,14 @@ function StepBirthTime({
             {open && !unknown && (
               <div
                 className="absolute bottom-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
-                style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.92)", backdropFilter: "blur(6px)" }}
+                style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.55)", backdropFilter: "blur(8px)" }}
               >
                 <div className="max-h-56 overflow-y-auto flex flex-col-reverse">
                   <div>
                     {BIRTH_TIMES.map((t) => (
                       <div
                         key={t}
-                        onClick={() => { setTime(t); setOpen(false); }}
+                        onClick={() => { interacted.current = true; setTime(t); setOpen(false); }}
                         className="px-4 py-3 text-[14px] cursor-pointer"
                         style={{
                           backgroundColor: time === t ? "rgba(155,35,53,0.25)" : "transparent",
@@ -395,7 +403,7 @@ function StepBirthTime({
 
           {/* 시간 모름 박스 (우측) */}
           <button
-            onClick={() => { setUnknown((v) => !v); setTime(""); setOpen(false); }}
+            onClick={() => { interacted.current = true; setUnknown((v) => !v); setTime(""); setOpen(false); }}
             className="flex-shrink-0 px-4 rounded-xl text-[13px] font-semibold transition-all"
             style={{
               backgroundColor: unknown ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
@@ -421,11 +429,13 @@ function StepBirthTime({
 function StepName({
   onPrev,
   onNext,
+  initial,
 }: {
   onPrev: () => void;
   onNext: (v: string) => void;
+  initial?: string;
 }) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(initial ?? "");
 
   return (
     <FormShell>
@@ -460,11 +470,13 @@ function StepName({
 function StepConcern({
   onPrev,
   onSubmit,
+  initial,
 }: {
   onPrev: () => void;
   onSubmit: (v: string) => void;
+  initial?: string;
 }) {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initial ?? "");
   const MAX = 200;
   const filled = text.trim().length > 0;
 
@@ -527,11 +539,13 @@ function getEmailWarning(email: string): string | null {
 function StepEmail({
   onPrev,
   onNext,
+  initial,
 }: {
   onPrev: () => void;
   onNext: (email: string) => void;
+  initial?: string;
 }) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initial ?? "");
   const warning = getEmailWarning(email);
   const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !warning;
 
@@ -747,34 +761,40 @@ export default function SajuFormPage() {
 
   return (
     <>
-      {step === 1 && <StepGender onNext={(gender) => next({ gender }, 2)} />}
+      {step === 1 && <StepGender initial={form.gender} onNext={(gender) => next({ gender }, 2)} />}
       {step === 2 && (
         <StepBirthDate
           gender={form.gender}
+          initialDate={form.date}
+          initialCalendar={form.calendar}
           onPrev={() => setStep(1)}
           onNext={({ date, calendar }) => next({ date, calendar }, 3)}
         />
       )}
       {step === 3 && (
         <StepBirthTime
+          initialTime={form.time}
           onPrev={() => setStep(2)}
           onNext={(time) => next({ time }, 4)}
         />
       )}
       {step === 4 && (
         <StepName
+          initial={form.name}
           onPrev={() => setStep(3)}
           onNext={(name) => next({ name }, 5)}
         />
       )}
       {step === 5 && (
         <StepConcern
+          initial={form.concern}
           onPrev={() => setStep(4)}
           onSubmit={(concern) => next({ concern }, 6)}
         />
       )}
       {step === 6 && (
         <StepEmail
+          initial={form.email}
           onPrev={() => setStep(5)}
           onNext={(email) => next({ email }, 7)}
         />
