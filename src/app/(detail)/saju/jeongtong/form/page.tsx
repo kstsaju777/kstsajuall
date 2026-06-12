@@ -553,8 +553,8 @@ function StepEmail({
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <Label text="리포트를 보내드릴게요" />
-        <Title>이메일을 알려주세요</Title>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>풀이를 받아볼 곳이오</p>
+        <Title>이메일 주소를 알려주시게</Title>
         <input
           type="email"
           inputMode="email"
@@ -578,7 +578,7 @@ function StepEmail({
       <BottomNav
         onPrev={onPrev}
         onNext={() => isValid && onNext(email)}
-        nextLabel="분석해줘!"
+        nextLabel="작성완료"
         nextDisabled={!isValid}
       />
     </FormShell>
