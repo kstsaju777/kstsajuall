@@ -264,7 +264,7 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
             }}>
               <p className="whitespace-pre-line font-bold leading-snug" style={{
                 fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-                fontSize: "clamp(13px, 3.4vw, 24px)",
+                fontSize: "18px",
                 color: "#1a1a1a",
               }}>
                 {p.text}
@@ -286,7 +286,7 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
           }}>
           <p className="font-bold whitespace-pre-line leading-snug" style={{
             fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-            fontSize: "clamp(18px, 5vw, 26px)",
+            fontSize: "20px",
             color: "#1a1a1a",
           }}>
             {c.text}
@@ -300,7 +300,7 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
           style={{ top: (chapter as any).overlayText.position === "top" ? "0%" : undefined, bottom: (chapter as any).overlayText.position === "bottom" ? "8%" : undefined, transform: (chapter as any).overlayText.position === "top" ? "translateY(-50%)" : undefined }}>
           <p style={{
             fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-            fontSize: "clamp(20px, 5.5vw, 28px)",
+            fontSize: "24px",
             fontWeight: 700,
             color: "#9b2335",
             letterSpacing: "0.05em",
@@ -407,7 +407,7 @@ export default function TotalPage() {
                   {gap.text && (
                     <p className="whitespace-pre-line text-center leading-snug" style={{
                       fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-                      fontSize: "clamp(20px, 5.5vw, 38px)",
+                      fontSize: "30px",
                       fontWeight: 700,
                       color: "#ffffff",
                       letterSpacing: "0.05em",
