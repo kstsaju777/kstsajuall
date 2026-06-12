@@ -259,11 +259,12 @@ function StepBirthDate({
   }, [isValid, date, calendar]);
 
   const greeting = gender === "남자" ? "멋진 도련님이 오셨군요" : "어여쁜 숙녀분이 오셨군요";
+  const greetColor = gender === "남자" ? "#7ec8e3" : "#ec407a";
 
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <Label text={greeting} />
+        <p className="text-[13px] font-medium mb-1" style={{ color: greetColor }}>{greeting}</p>
         <Title>언제 태어났는지 말해주게</Title>
         <div className="flex items-end gap-3">
           <div className="flex-1">
