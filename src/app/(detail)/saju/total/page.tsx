@@ -20,6 +20,7 @@ const CHAPTERS = [
     media: { type: "video", src: "/images/cards/total-vid-1.webm" },
     bubble: null,
     overlayText: { text: "붉은 도포를 입은 자", position: "top" },
+    cornerBubble: { text: "김방진\n도령의\n인생을" },
   },
   {
     chapter: "3장",
@@ -155,6 +156,26 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
       {/* 말풍선 */}
       {chapter.bubble && (
         <Bubble text={chapter.bubble.text} position={chapter.bubble.position as "top" | "bottom"} />
+      )}
+
+      {/* 좌측 상단 둥근 말풍선 */}
+      {(chapter as any).cornerBubble && (
+        <div className="absolute z-20 flex items-center justify-center text-center"
+          style={{
+            top: "6%", left: "6%",
+            width: "32%", aspectRatio: "1/1",
+            borderRadius: "50%",
+            backgroundColor: "rgba(255,255,255,0.92)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+          }}>
+          <p className="whitespace-pre-line font-bold leading-snug" style={{
+            fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+            fontSize: "clamp(13px, 3.6vw, 17px)",
+            color: "#1a1a1a",
+          }}>
+            {(chapter as any).cornerBubble.text}
+          </p>
+        </div>
       )}
 
       {/* 오버레이 텍스트 */}
