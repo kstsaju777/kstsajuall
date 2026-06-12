@@ -258,7 +258,7 @@ function StepBirthDate({
     }
   }, [isValid, date, calendar]);
 
-  const greeting = gender === "남자" ? "멋진 도련님이 오셨군요" : "어여쁜 숙녀분이 오셨군요";
+  const greeting = gender === "남자" ? "멋진 도련님, 잘 찾아오셨소" : "어여쁜 아가씨, 잘 찾아오셨소";
   const greetColor = gender === "남자" ? "#7ec8e3" : "#f8a5c2";
 
   return (
