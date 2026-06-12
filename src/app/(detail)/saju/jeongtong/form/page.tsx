@@ -683,15 +683,17 @@ const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
 // 로딩 화면 말풍선 (흰 반투명)
 function LoadBubble({ text }: { text: string }) {
   return (
-    <div style={{
-      backgroundColor: "rgba(255,255,255,0.94)",
-      borderRadius: "18px",
-      padding: "12px 16px",
-      boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
-      maxWidth: "220px",
+    <div className="flex items-center justify-center text-center" style={{
+      backgroundColor: "#ffffff",
+      borderRadius: "50%",
+      aspectRatio: "4/3",
+      width: "190px",
+      padding: "0 26px",
+      boxSizing: "border-box",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
     }}>
       <p className="font-bold leading-snug whitespace-pre-line" style={{
-        color: "#1a1a1a", fontSize: "15px",
+        color: "#1a1a1a", fontSize: "16px",
         fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
       }}>
         {text}
