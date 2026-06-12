@@ -37,9 +37,9 @@ const BRUSH_FONT = "'East Sea Dokdo', cursive";
 
 // ─── 장면 사이 간격 (각각 개별 조절) ────────────────────────────────────────
 // GAPS[i] = i번째 장면 위쪽 검은 간격. text를 넣으면 여백 중앙에 흰 글씨 표시.
-const GAPS: { height: string; text?: string; line?: boolean }[] = [
+const GAPS: { height: string; text?: string; line?: boolean; bg?: string }[] = [
   { height: "0px" },                            // 1장 위
-  { height: "60px" },                           // 2장 위 (그라데이션 연결)
+  { height: "60px", bg: "#131921" },            // 2장 위 (그라데이션 연결)
   { height: "300px" },                          // 3장 위
   { height: "300px", text: "그의 이름은," },      // 4장 위 ← 여백 중앙 텍스트
   { height: "400px", line: true },              // 5장 위 ← 세로 흰 선
@@ -56,11 +56,13 @@ const CHAPTERS = [
     chapter: "1장",
     media: { type: "image", src: "/images/cards/total-img-1.jpg" },
     bubble: null,
+    bottomGrad: { color: "#131921", height: "15%" },
   },
   {
     chapter: "2장",
     media: { type: "video", src: "/images/cards/total-vid-1.webm" },
     bubble: null,
+    topGrad: { color: "#131921", height: "15%" },
     cornerBubbles: [
       {
         top: "12%", left: "8%", width: "42%", height: "25%",
@@ -221,8 +223,8 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
       {/* 상단 그라데이션 */}
       {!isFirst && (
         <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none" style={{
-          height: "35%",
-          background: `linear-gradient(to bottom, ${BG}, transparent)`,
+          height: (chapter as any).topGrad?.height ?? "35%",
+          background: `linear-gradient(to bottom, ${(chapter as any).topGrad?.color ?? BG}, transparent)`,
         }} />
       )}
 
@@ -312,8 +314,8 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
       {/* 하단 그라데이션 */}
       {!isLast && (
         <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none" style={{
-          height: "35%",
-          background: `linear-gradient(to top, ${BG}, transparent)`,
+          height: (chapter as any).bottomGrad?.height ?? "35%",
+          background: `linear-gradient(to top, ${(chapter as any).bottomGrad?.color ?? BG}, transparent)`,
         }} />
       )}
     </div>
@@ -399,7 +401,7 @@ export default function TotalPage() {
           return (
             <div key={i} className="w-full">
               {gap.height !== "0px" && (
-                <div className="relative w-full flex items-center justify-center" style={{ height: gap.height }}>
+                <div className="relative w-full flex items-center justify-center" style={{ height: gap.height, backgroundColor: (gap as any).bg }}>
                   {gap.line && (
                     <div style={{ position: "absolute", top: "10%", left: "50%", width: "1px", height: "40%", backgroundColor: "#ffffff", opacity: 0.7 }} />
                   )}
