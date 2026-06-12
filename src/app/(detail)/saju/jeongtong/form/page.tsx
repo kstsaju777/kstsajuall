@@ -681,7 +681,7 @@ const ANALYSIS_ITEMS = [
 const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
 
 // 로딩 화면 말풍선 (흰 반투명)
-function LoadBubble({ text }: { text: string }) {
+function LoadBubble({ text, size }: { text: string; size?: string }) {
   return (
     <div className="flex items-center justify-center text-center" style={{
       backgroundColor: "#ffffff",
@@ -693,7 +693,7 @@ function LoadBubble({ text }: { text: string }) {
       boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
     }}>
       <p className="font-bold leading-snug whitespace-pre-line" style={{
-        color: "#1a1a1a", fontSize: "16px",
+        color: "#1a1a1a", fontSize: size ?? "16px",
         fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
       }}>
         {text}
