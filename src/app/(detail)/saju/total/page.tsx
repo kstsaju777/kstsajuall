@@ -39,7 +39,7 @@ const BRUSH_FONT = "'East Sea Dokdo', cursive";
 // GAPS[i] = i번째 장면 위쪽 검은 간격. text를 넣으면 여백 중앙에 흰 글씨 표시.
 const GAPS: { height: string; text?: string; line?: boolean }[] = [
   { height: "0px" },                            // 1장 위
-  { height: "0px" },                            // 2장 위 (1장과 붙음)
+  { height: "60px" },                           // 2장 위 (그라데이션 연결)
   { height: "300px" },                          // 3장 위
   { height: "300px", text: "그의 이름은," },      // 4장 위 ← 여백 중앙 텍스트
   { height: "400px", line: true },              // 5장 위 ← 세로 흰 선
@@ -61,12 +61,11 @@ const CHAPTERS = [
     chapter: "2장",
     media: { type: "video", src: "/images/cards/total-vid-1.webm" },
     bubble: null,
-    overlayText: { text: "붉은 도포를 입은 자", position: "top" },
     cornerBubbles: [
       {
         top: "12%", left: "8%", width: "42%", height: "25%",
         panels: [
-          { top: "0%", left: "0%", width: "110%", height: "60%", text: "단 한번의\n사주 간명으로\n역모를 막아냈다던.." },
+          { top: "0%", left: "0%", width: "120%", height: "60%", text: "단 한번의\n사주 간명으로\n역모를 막아냈다던.." },
         ],
       },
       {
