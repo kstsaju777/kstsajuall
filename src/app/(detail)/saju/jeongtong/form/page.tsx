@@ -672,143 +672,93 @@ const ANALYSIS_ITEMS = [
 
 const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
 
+// 로딩 화면 말풍선 (흰 반투명)
+function LoadBubble({ text }: { text: string }) {
+  return (
+    <div style={{
+      backgroundColor: "rgba(255,255,255,0.94)",
+      borderRadius: "18px",
+      padding: "12px 16px",
+      boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+      maxWidth: "220px",
+    }}>
+      <p className="font-bold leading-snug whitespace-pre-line" style={{
+        color: "#1a1a1a", fontSize: "15px",
+        fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+      }}>
+        {text}
+      </p>
+    </div>
+  );
+}
+
 function StepLoading({
   name, date, time, calendar,
 }: {
   name: string; date: string; time: string; calendar: string;
 }) {
   const [progress, setProgress] = useState(0);
-  const [doneCount, setDoneCount] = useState(0);
+  const [b1, setB1] = useState(false);
+  const [b2, setB2] = useState(false);
   const router = useRouter();
 
-  // 실제 만세력 계산 (lunar-javascript 기반)
-  const saju: LocalSajuResult | null = useMemo(
-    () => calcSaju(date, time, calendar),
-    [date, time, calendar],
-  );
-  const pillars = saju
-    ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year]
-    : null;
-
   useEffect(() => {
-    // 진행도 애니메이션
+    const t1 = setTimeout(() => setB1(true), 1000);
+    const t2 = setTimeout(() => setB2(true), 2000);
+
     const interval = setInterval(() => {
       setProgress((p) => {
-        const next = p + Math.random() * 3 + 1;
-        if (next >= 100) { clearInterval(interval); return 100; }
-        return next;
+        const next = p + Math.random() * 3 + 1.2;
+        return next >= 100 ? 100 : next;
       });
-    }, 120);
+    }, 130);
 
-    // 분석 항목 하나씩 완료
-    const itemTimers = ANALYSIS_ITEMS.map((_, i) =>
-      setTimeout(() => setDoneCount(i + 1), 800 + i * 1200)
-    );
-
-    // 완료 후 이동 (사주 데이터를 query로 전달)
     const done = setTimeout(() => {
-      const params = new URLSearchParams({
-        name,
-        date,
-        time,
-        calendar,
-      });
+      const params = new URLSearchParams({ name, date, time, calendar });
       router.push(`/saju/jeongtong/checkout?${params.toString()}`);
-    }, 800 + ANALYSIS_ITEMS.length * 1200 + 600);
+    }, 6500);
 
     return () => {
-      clearInterval(interval);
-      itemTimers.forEach(clearTimeout);
-      clearTimeout(done);
+      clearTimeout(t1); clearTimeout(t2);
+      clearInterval(interval); clearTimeout(done);
     };
   }, []);
 
   const pct = Math.min(100, Math.round(progress));
 
   return (
-    <div className="w-full h-full overflow-y-auto" style={{ backgroundColor: "#fdf4f6" }}>
-      <div className="px-5 py-8">
-        {/* 타이틀 */}
-        <h2 className="text-center text-[18px] font-bold mb-6" style={{ color: "#1a1a1a" }}>
-          {name}님의 사주 명식
-        </h2>
+    <div className="relative w-full h-full overflow-hidden" style={{ backgroundColor: "#0a0a0a" }}>
+      <style>{`@keyframes loadFade { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }`}</style>
 
-        {/* 사주 명식 그리드 */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
-          {pillars ? pillars.map((p, i) => {
-            const cgC = ELEMENT_COLORS[p.stemClass]   ?? ELEMENT_COLORS.unknown;
-            const jjC = ELEMENT_COLORS[p.branchClass] ?? ELEMENT_COLORS.unknown;
-            return (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <p className="text-[11px] font-medium mb-0.5" style={{ color: "#b0909a" }}>
-                  {PILLAR_LABELS[i]}
-                </p>
-                {/* 천간 */}
-                <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5"
-                  style={{ backgroundColor: cgC.bg }}>
-                  <span className="text-[9px] font-medium" style={{ color: cgC.text }}>{p.stemSs || p.stemHg}</span>
-                  <span className="text-[28px] font-bold leading-none" style={{ color: cgC.text }}>{p.stem}</span>
-                  <span className="text-[9px]" style={{ color: cgC.text }}>{p.stemHg}</span>
-                </div>
-                {/* 지지 */}
-                <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5"
-                  style={{ backgroundColor: jjC.bg }}>
-                  <span className="text-[28px] font-bold leading-none" style={{ color: jjC.text }}>{p.branch}</span>
-                  <span className="text-[9px]" style={{ color: jjC.text }}>{p.branchHg}</span>
-                </div>
-              </div>
-            );
-          }) : (
-            // 계산 실패 시 스켈레톤
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <p className="text-[11px] font-medium mb-0.5" style={{ color: "#b0909a" }}>{PILLAR_LABELS[i]}</p>
-                <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "#ede0e3" }} />
-                <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "#ede0e3" }} />
-              </div>
-            ))
-          )}
+      {/* 배경 영상 */}
+      <video
+        src="/images/cards/total-loading.webm"
+        autoPlay muted loop playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.25), rgba(10,10,10,0.55))" }} />
+
+      {/* 말풍선 — 좌상단 (1초 후) */}
+      {b1 && (
+        <div className="absolute" style={{ top: "10%", left: "6%", animation: "loadFade 0.5s ease" }}>
+          <LoadBubble text={`${name}님의 사주…\n허, 제법 흥미롭구려`} />
         </div>
+      )}
 
-        {/* 진행도 */}
-        <div className="mb-5">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-[13px]" style={{ color: "#888" }}>분석 진행도</span>
-            <span className="text-[13px] font-bold" style={{ color: NAVY }}>{pct}%</span>
-          </div>
-          <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#e8dde0" }}>
-            <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{ width: `${pct}%`, backgroundColor: NAVY }}
-            />
-          </div>
+      {/* 말풍선 — 우하단 (2초 후) */}
+      {b2 && (
+        <div className="absolute" style={{ bottom: "26%", right: "6%", animation: "loadFade 0.5s ease" }}>
+          <LoadBubble text={"곧 풀이가 끝나니\n잠시만 기다리시게"} />
         </div>
+      )}
 
-        {/* 분석 항목 리스트 */}
-        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "white", border: "1px solid #f0e8ea" }}>
-          {ANALYSIS_ITEMS.map((item, i) => {
-            const done = i < doneCount;
-            const active = i === doneCount;
-            return (
-              <div key={i} className="flex items-center gap-3 px-5 py-3.5"
-                style={{ borderBottom: i < ANALYSIS_ITEMS.length - 1 ? "1px solid #faf5f6" : "none" }}>
-                {done ? (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8l3.5 3.5L13 5" stroke="#4caf50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                ) : active ? (
-                  <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                    style={{ borderColor: NAVY, borderTopColor: "transparent" }} />
-                ) : (
-                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#ede0e3" }} />
-                )}
-                <span className="text-[14px]" style={{ color: done ? "#333" : active ? "#1a1a1a" : "#bbb",
-                  fontWeight: active ? 600 : 400 }}>
-                  {item}
-                </span>
-              </div>
-            );
-          })}
+      {/* 하단 로딩바 */}
+      <div className="absolute bottom-0 left-0 right-0 px-6 pb-12">
+        <p className="text-center text-[15px] font-bold mb-3" style={{ color: "#ffffff" }}>
+          사주팔자 정밀분석중... <span style={{ color: "#ffc107" }}>{pct}%</span>
+        </p>
+        <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
+          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#9b2335", transition: "width 0.2s" }} />
         </div>
       </div>
     </div>
