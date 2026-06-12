@@ -192,7 +192,7 @@ function StepGender({ onNext, initial }: { onNext: (v: string) => void; initial?
   const [gender, setGender] = useState<"여자" | "남자" | null>((initial as "여자" | "남자") ?? null);
 
   return (
-    <FormShell>
+    <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>내 질문에 답을 해주시오</p>
         <Title>그대의 성별은 무엇이오?</Title>
@@ -222,7 +222,7 @@ function StepGender({ onNext, initial }: { onNext: (v: string) => void; initial?
         nextLabel="다음으로"
         nextDisabled={!gender}
       />
-    </FormShell>
+    </>
   );
 }
 
@@ -275,7 +275,7 @@ function StepBirthDate({
   const greetColor = gender === "남자" ? "#7ec8e3" : "#f8a5c2";
 
   return (
-    <FormShell>
+    <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: greetColor }}>{greeting}</p>
         <Title>언제 태어났는지 말해주게</Title>
@@ -315,7 +315,7 @@ function StepBirthDate({
         nextLabel="다음으로"
         nextDisabled={!isValid}
       />
-    </FormShell>
+    </>
   );
 }
 
@@ -345,7 +345,7 @@ function StepBirthTime({
   }, [selected]);
 
   return (
-    <FormShell>
+    <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>몰라도 딱히 상관없소</p>
         <h2 className="text-[24px] font-bold mb-6" style={{ color: TEXT_CLR }}>
@@ -431,7 +431,7 @@ function StepBirthTime({
         nextLabel="다음으로"
         nextDisabled={!selected}
       />
-    </FormShell>
+    </>
   );
 }
 
@@ -448,7 +448,7 @@ function StepName({
   const [name, setName] = useState(initial ?? "");
 
   return (
-    <FormShell>
+    <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이제 거의 다왔소</p>
         <Title>이름이 어떻게 되시오?</Title>
@@ -472,7 +472,7 @@ function StepName({
         nextLabel="다음으로"
         nextDisabled={!name.trim()}
       />
-    </FormShell>
+    </>
   );
 }
 
@@ -491,7 +491,7 @@ function StepConcern({
   const filled = text.trim().length > 0;
 
   return (
-    <FormShell>
+    <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
         <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
@@ -521,7 +521,7 @@ function StepConcern({
         onNext={() => onSubmit(text)}
         nextLabel={filled ? "다음으로" : "고민은 딱히 없소"}
       />
-    </FormShell>
+    </>
   );
 }
 
@@ -573,7 +573,7 @@ function StepEmail({
   const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   return (
-    <FormShell>
+    <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>풀이를 받아볼 곳이오</p>
         <Title>이메일 주소를 알려주시게</Title>
@@ -665,7 +665,7 @@ function StepEmail({
         nextLabel="작성완료"
         nextDisabled={!isValid}
       />
-    </FormShell>
+    </>
   );
 }
 
@@ -796,43 +796,47 @@ export default function SajuFormPage() {
 
   return (
     <>
-      {step === 1 && <StepGender initial={form.gender} onNext={(gender) => next({ gender }, 2)} />}
-      {step === 2 && (
-        <StepBirthDate
-          gender={form.gender}
-          initialDate={form.date}
-          initialCalendar={form.calendar}
-          onPrev={() => setStep(1)}
-          onNext={({ date, calendar }) => next({ date, calendar }, 3)}
-        />
-      )}
-      {step === 3 && (
-        <StepBirthTime
-          initialTime={form.time}
-          onPrev={() => setStep(2)}
-          onNext={(time) => next({ time }, 4)}
-        />
-      )}
-      {step === 4 && (
-        <StepName
-          initial={form.name}
-          onPrev={() => setStep(3)}
-          onNext={(name) => next({ name }, 5)}
-        />
-      )}
-      {step === 5 && (
-        <StepConcern
-          initial={form.concern}
-          onPrev={() => setStep(4)}
-          onSubmit={(concern) => next({ concern }, 6)}
-        />
-      )}
-      {step === 6 && (
-        <StepEmail
-          initial={form.email}
-          onPrev={() => setStep(5)}
-          onNext={(email) => next({ email }, 7)}
-        />
+      {step <= 6 && (
+        <FormShell>
+          {step === 1 && <StepGender initial={form.gender} onNext={(gender) => next({ gender }, 2)} />}
+          {step === 2 && (
+            <StepBirthDate
+              gender={form.gender}
+              initialDate={form.date}
+              initialCalendar={form.calendar}
+              onPrev={() => setStep(1)}
+              onNext={({ date, calendar }) => next({ date, calendar }, 3)}
+            />
+          )}
+          {step === 3 && (
+            <StepBirthTime
+              initialTime={form.time}
+              onPrev={() => setStep(2)}
+              onNext={(time) => next({ time }, 4)}
+            />
+          )}
+          {step === 4 && (
+            <StepName
+              initial={form.name}
+              onPrev={() => setStep(3)}
+              onNext={(name) => next({ name }, 5)}
+            />
+          )}
+          {step === 5 && (
+            <StepConcern
+              initial={form.concern}
+              onPrev={() => setStep(4)}
+              onSubmit={(concern) => next({ concern }, 6)}
+            />
+          )}
+          {step === 6 && (
+            <StepEmail
+              initial={form.email}
+              onPrev={() => setStep(5)}
+              onNext={(email) => next({ email }, 7)}
+            />
+          )}
+        </FormShell>
       )}
       {step === 7 && (
         <StepLoading
