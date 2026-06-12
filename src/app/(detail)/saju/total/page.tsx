@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 
 const BG = "#0a0a0a";
 
+// 거친 붓글씨 폰트 (제목/카피용) — globals.css에서 로드
+const BRUSH_FONT = "'East Sea Dokdo', cursive";
+
 // ─── 7장 스토리 구성 ─────────────────────────────────────────────────────────
 // 미디어 파일을 public/images/cards/ 폴더에 넣으세요
 const CHAPTERS = [
@@ -159,11 +162,10 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
         <div className="absolute z-20 left-0 right-0 text-center"
           style={{ top: (chapter as any).overlayText.position === "top" ? "20px" : undefined, bottom: (chapter as any).overlayText.position === "bottom" ? "20px" : undefined }}>
           <p style={{
-            fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-            fontSize: "clamp(18px, 5vw, 24px)",
-            fontWeight: 700,
+            fontFamily: BRUSH_FONT,
+            fontSize: "clamp(34px, 9vw, 46px)",
             color: "#9b2335",
-            letterSpacing: "0.15em",
+            letterSpacing: "0.08em",
             textShadow: "0 0 20px rgba(155,35,53,0.5)",
           }}>
             {(chapter as any).overlayText.text}
@@ -205,7 +207,7 @@ export default function TotalPage() {
 
       {/* CTA */}
       <div className="px-5 py-10 text-center" style={{ backgroundColor: BG }}>
-        <p className="text-white text-[16px] font-bold mb-2">지금, 당신의 사주를 펼치시오.</p>
+        <p className="text-white mb-2" style={{ fontFamily: BRUSH_FONT, fontSize: "clamp(30px, 8vw, 40px)" }}>지금, 당신의 사주를 펼치시오.</p>
         <p className="text-white/50 text-[13px] mb-6">홍연이 직접 읽어드리겠소.</p>
         <button
           onClick={() => router.push("/saju/jeongtong")}

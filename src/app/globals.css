@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* 붓글씨 + 디스플레이 한국 폰트 */
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Brush+Script&family=Black+Han+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Brush+Script&family=Black+Han+Sans&family=East+Sea+Dokdo&family=Gugi&display=swap');
 
 /* Pretendard — 현대적 한국어 폰트 */
 @font-face {
