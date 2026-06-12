@@ -17,7 +17,8 @@ export default function DetailLayout({ children }: { children: React.ReactNode }
         }}
       >
         <DetailHeader />
-        <main className="flex-1 overflow-y-auto min-h-0">
+        <main className="flex-1 overflow-y-auto min-h-0" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          <style>{`main::-webkit-scrollbar { display: none; }`}</style>
           {children}
         </main>
       </div>
