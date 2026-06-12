@@ -196,9 +196,9 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
                 onClick={() => setGender(g)}
                 className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
                 style={{
-                  backgroundColor: active ? "rgba(45,58,140,0.08)" : "rgba(255,255,255,0.7)",
-                  border: `1.5px solid ${active ? NAVY : "rgba(200,180,185,0.5)"}`,
-                  color: active ? NAVY : "#555",
+                  backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
+                  border: `1.5px solid ${active ? NAVY : "rgba(255,255,255,0.18)"}`,
+                  color: active ? "#ffffff" : "#dddddd",
                 }}
               >
                 {g}
