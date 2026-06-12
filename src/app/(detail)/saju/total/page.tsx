@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const BG = "#0a0a0a";
 
@@ -180,6 +180,30 @@ function Bubble({ text, position }: { text: string; position: "top" | "bottom" }
   );
 }
 
+// 화면에 보일 때만 재생되는 영상 (스크롤 성능 최적화)
+function LazyVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.play().catch(() => {});
+        } else {
+          el.pause();
+        }
+      },
+      { rootMargin: "300px 0px" } // 화면 들어오기 300px 전에 미리 재생
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <video ref={ref} src={src} className="w-full h-auto block" muted loop playsInline preload="metadata" />
+  );
+}
+
 function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: number }) {
   const isFirst = index === 0;
   const isLast = index === CHAPTERS.length - 1;
@@ -230,9 +254,9 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
 
       {/* 미디어 — 원본 비율 유지 */}
       {chapter.media.type === "video" ? (
-        <video src={chapter.media.src} className="w-full h-auto block" autoPlay muted loop playsInline />
+        <LazyVideo src={chapter.media.src} />
       ) : (
-        <img src={chapter.media.src} alt="" className="w-full h-auto block" />
+        <img src={chapter.media.src} alt="" className="w-full h-auto block" loading="lazy" />
       )}
 
       {/* 말풍선 */}
