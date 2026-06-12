@@ -58,7 +58,6 @@ function FormShell({ children }: { children: React.ReactNode }) {
         aria-hidden
         autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-cover object-top"
-        style={{ transform: "scale(0.88)", transformOrigin: "top center" }}
       />
       {/* 그라데이션 오버레이 — 영상 → 어두운 카드 */}
       <div
