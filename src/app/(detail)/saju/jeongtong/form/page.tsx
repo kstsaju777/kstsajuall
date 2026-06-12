@@ -537,6 +537,8 @@ function getEmailWarning(email: string): string | null {
 }
 
 // ─── Step 6: 이메일 ───────────────────────────────────────────────────────────
+const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "hotmail.com", "직접입력"];
+
 function StepEmail({
   onPrev,
   onNext,
@@ -546,34 +548,106 @@ function StepEmail({
   onNext: (email: string) => void;
   initial?: string;
 }) {
-  const [email, setEmail] = useState(initial ?? "");
-  const warning = getEmailWarning(email);
-  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !warning;
+  // initial 파싱
+  const initLocal = initial?.split("@")[0] ?? "";
+  const initDom = initial?.split("@")[1] ?? "";
+  const initIsKnown = EMAIL_DOMAINS.includes(initDom);
+
+  const [local, setLocal] = useState(initLocal);
+  const [domain, setDomain] = useState(initDom ? (initIsKnown ? initDom : "직접입력") : "naver.com");
+  const [custom, setCustom] = useState(initDom && !initIsKnown ? initDom : "");
+  const [open, setOpen] = useState(false);
+
+  const isCustom = domain === "직접입력";
+  const fullDomain = isCustom ? custom.trim() : domain;
+  const email = local.trim() && fullDomain ? `${local.trim()}@${fullDomain}` : "";
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>풀이를 받아볼 곳이오</p>
         <Title>이메일 주소를 알려주시게</Title>
-        <input
-          type="email"
-          inputMode="email"
-          placeholder="id@naver.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
-          style={{
-            borderBottom: `1.5px solid ${warning ? "#e03" : BORDER_CLR}`,
-            color: email ? TEXT_CLR : PH_CLR,
-            caretColor: NAVY,
-          }}
-          autoFocus
-        />
-        {warning && (
-          <p className="mt-2 text-[13px] font-medium" style={{ color: "#e03" }}>
-            {warning}
-          </p>
-        )}
+
+        <div className="flex items-end gap-2">
+          {/* 아이디 */}
+          <input
+            type="text"
+            inputMode="email"
+            placeholder="아이디"
+            value={local}
+            onChange={(e) => setLocal(e.target.value)}
+            className="bg-transparent text-[17px] pb-2.5 outline-none"
+            style={{
+              flex: "1 1 0",
+              minWidth: 0,
+              borderBottom: `1.5px solid ${BORDER_CLR}`,
+              color: local ? TEXT_CLR : PH_CLR,
+              caretColor: NAVY,
+            }}
+            autoFocus
+          />
+
+          {/* @ 고정 */}
+          <span className="text-[17px] font-bold pb-2.5" style={{ color: "#ffffff" }}>@</span>
+
+          {/* 도메인 영역 */}
+          <div className="relative" style={{ flex: "1.2 1 0", minWidth: 0 }}>
+            {/* 드롭다운 메뉴 — 위로 */}
+            {open && (
+              <div
+                className="absolute bottom-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
+                style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.55)", backdropFilter: "blur(8px)" }}
+              >
+                {EMAIL_DOMAINS.map((d) => (
+                  <div
+                    key={d}
+                    onClick={() => { setDomain(d); setOpen(false); }}
+                    className="px-4 py-3 text-[14px] cursor-pointer"
+                    style={{
+                      backgroundColor: domain === d ? "rgba(155,35,53,0.25)" : "transparent",
+                      color: domain === d ? "#fff" : "#ddd",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    {d}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {isCustom ? (
+              <div className="flex items-center" style={{ borderBottom: `1.5px solid ${BORDER_CLR}` }}>
+                <input
+                  type="text"
+                  placeholder="직접입력"
+                  value={custom}
+                  onChange={(e) => setCustom(e.target.value)}
+                  className="bg-transparent text-[16px] pb-2.5 outline-none"
+                  style={{ flex: "1 1 0", minWidth: 0, color: custom ? TEXT_CLR : PH_CLR, caretColor: NAVY }}
+                />
+                <button onClick={() => setOpen((v) => !v)} className="pb-2.5 pl-1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setOpen((v) => !v)}
+                className="w-full flex items-center justify-between text-[16px] pb-2.5"
+                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent" }}
+              >
+                <span className="truncate">{domain}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
       <BottomNav
         onPrev={onPrev}
