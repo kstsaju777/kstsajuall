@@ -50,7 +50,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
     // visualViewport 높이에 맞춰 동적으로 조정 → 키보드 올라와도 카드 보임
     <div
       className="relative w-full overflow-hidden"
-      style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%" }}
+      style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%", backgroundColor: "#131921" }}
     >
       {/* 배경 영상 */}
       <video
@@ -58,6 +58,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
         aria-hidden
         autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-cover object-top"
+        style={{ transform: "scale(0.88)", transformOrigin: "top center" }}
       />
       {/* 그라데이션 오버레이 — 영상 → 어두운 카드 */}
       <div
