@@ -168,7 +168,8 @@ function BottomNav({
         disabled={nextDisabled}
         className="flex-1 py-3.5 rounded-2xl text-white text-[16px] font-bold transition-all"
         style={{
-          backgroundColor: nextDisabled ? "#c0b8d0" : NAVY,
+          backgroundColor: NAVY,
+          opacity: nextDisabled ? 0.35 : 1,
           letterSpacing: "-0.3px",
         }}
       >
@@ -193,7 +194,7 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
             return (
               <button
                 key={g}
-                onClick={() => setGender(g)}
+                onClick={() => { setGender(g); setTimeout(() => onNext(g), 350); }}
                 className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
                 style={{
                   backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
@@ -210,7 +211,7 @@ function StepGender({ onNext }: { onNext: (v: string) => void }) {
       </div>
       <BottomNav
         onNext={() => gender && onNext(gender)}
-        nextLabel="다음으로!"
+        nextLabel="다음으로"
         nextDisabled={!gender}
       />
     </FormShell>
