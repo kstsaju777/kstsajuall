@@ -9,7 +9,7 @@ const BG = "#0a0a0a";
 const CHAPTERS = [
   {
     chapter: "1장",
-    media: { type: "text", src: "" },
+    media: { type: "image", src: "/images/cards/total-img-1.jpg" },
     bubble: null,
   },
   {
