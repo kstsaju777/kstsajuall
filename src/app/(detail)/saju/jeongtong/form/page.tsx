@@ -511,7 +511,7 @@ function StepConcern({
       <BottomNav
         onPrev={onPrev}
         onNext={() => onSubmit(text)}
-        nextLabel={filled ? "다음으로" : "딱히 없어, 넘어가자!"}
+        nextLabel={filled ? "다음으로" : "고민은 딱히 없소"}
       />
     </FormShell>
   );
