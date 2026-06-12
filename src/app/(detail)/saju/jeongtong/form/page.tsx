@@ -320,107 +320,97 @@ function StepBirthTime({
 
   const selected = unknown ? "시간 모름" : time;
 
+  // 시간 선택 / 시간모름 시 자동 진행
+  useEffect(() => {
+    if (selected) {
+      const t = setTimeout(() => onNext(selected), 450);
+      return () => clearTimeout(t);
+    }
+  }, [selected]);
+
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <Label text="태어난 시간이 운명을 가른대요" />
-            <h2 className="text-[24px] font-bold" style={{ color: TEXT_CLR }}>
-              나의 태어난 시간
-            </h2>
-          </div>
-          <button
-            onClick={() => { setUnknown((v) => !v); setTime(""); setOpen(false); }}
-            className="flex items-center gap-1.5 mt-2 flex-shrink-0"
-          >
-            <div
-              className="w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-all"
-              style={{
-                borderColor: unknown ? NAVY : "#c0a8b4",
-                backgroundColor: unknown ? NAVY : "transparent",
-              }}
-            >
-              {unknown && (
-                <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </div>
-            <span className="text-[13px] font-medium" style={{ color: unknown ? NAVY : "#b0909a" }}>
-              시간 모름
-            </span>
-          </button>
-        </div>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>몰라도 딱히 상관없소</p>
+        <h2 className="text-[24px] font-bold mb-6" style={{ color: TEXT_CLR }}>
+          혹, 태어난 시간도 아시오?
+        </h2>
 
-        {/* 드롭다운 — 위로 열림 */}
-        <div className="relative">
-          {/* 목록: bottom-full 로 위로 펼침 */}
-          {open && !unknown && (
-            <div
-              className="absolute bottom-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
-              style={{ border: "1px solid #eadde0", backgroundColor: "white" }}
-            >
-              <div className="max-h-56 overflow-y-auto flex flex-col-reverse">
-                {/* 시간 목록 (역순으로 쌓아서 위에서 자시가 먼저 보이게) */}
-                <div>
-                  {BIRTH_TIMES.map((t) => (
-                    <div
-                      key={t}
-                      onClick={() => { setTime(t); setOpen(false); }}
-                      className="px-4 py-3 text-[14px] cursor-pointer"
-                      style={{
-                        backgroundColor: time === t ? "rgba(45,58,140,0.06)" : "white",
-                        color: time === t ? NAVY : "#333",
-                        borderBottom: "1px solid #faf5f6",
-                      }}
-                    >
-                      {t}
-                    </div>
-                  ))}
+        {/* 드롭다운(좌) + 시간모름(우) */}
+        <div className="flex gap-2 items-stretch">
+          {/* 드롭다운 — 위로 열림 */}
+          <div className="relative flex-1">
+            {open && !unknown && (
+              <div
+                className="absolute bottom-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
+                style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.92)", backdropFilter: "blur(6px)" }}
+              >
+                <div className="max-h-56 overflow-y-auto flex flex-col-reverse">
+                  <div>
+                    {BIRTH_TIMES.map((t) => (
+                      <div
+                        key={t}
+                        onClick={() => { setTime(t); setOpen(false); }}
+                        className="px-4 py-3 text-[14px] cursor-pointer"
+                        style={{
+                          backgroundColor: time === t ? "rgba(155,35,53,0.25)" : "transparent",
+                          color: time === t ? "#fff" : "#ddd",
+                          borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        }}
+                      >
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="px-4 py-2 text-[12px] font-bold tracking-wide"
+                  style={{ backgroundColor: "rgba(255,255,255,0.05)", color: "#999" }}>
+                  태어난 시간 선택
                 </div>
               </div>
-              <div
-                onClick={() => { setUnknown(true); setTime(""); setOpen(false); }}
-                className="px-4 py-3 text-[14px] cursor-pointer"
-                style={{ color: "#b0909a", borderTop: "1px solid #f5eff0", backgroundColor: "#fdf8f9" }}
-              >
-                시간 모름
-              </div>
-              <div className="px-4 py-2 text-[12px] font-bold tracking-wide"
-                style={{ backgroundColor: "#f5eff0", color: "#b0909a" }}>
-                태어난 시간 선택
-              </div>
-            </div>
-          )}
+            )}
 
-          {/* 트리거 버튼 */}
+            {/* 트리거 버튼 */}
+            <button
+              onClick={() => !unknown && setOpen((v) => !v)}
+              disabled={unknown}
+              className="w-full flex items-center justify-between py-3 text-[16px]"
+              style={{
+                borderBottom: `1.5px solid ${unknown ? "rgba(255,255,255,0.1)" : BORDER_CLR}`,
+                color: (time && !unknown) ? TEXT_CLR : PH_CLR,
+                opacity: unknown ? 0.4 : 1,
+                background: "transparent",
+              }}
+            >
+              <span>{unknown ? "시간 모름" : (time || "태어난 시간")}</span>
+              <svg
+                width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </div>
+
+          {/* 시간 모름 박스 (우측) */}
           <button
-            onClick={() => !unknown && setOpen((v) => !v)}
-            disabled={unknown}
-            className="w-full flex items-center justify-between py-3 text-[16px]"
+            onClick={() => { setUnknown((v) => !v); setTime(""); setOpen(false); }}
+            className="flex-shrink-0 px-4 rounded-xl text-[13px] font-semibold transition-all"
             style={{
-              borderBottom: `1.5px solid ${unknown ? "rgba(200,168,180,0.4)" : BORDER_CLR}`,
-              color: (time && !unknown) ? TEXT_CLR : PH_CLR,
-              opacity: unknown ? 0.5 : 1,
-              background: "transparent",
+              backgroundColor: unknown ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
+              border: `1.5px solid ${unknown ? NAVY : "rgba(255,255,255,0.18)"}`,
+              color: unknown ? "#fff" : "#bbb",
             }}
           >
-            <span>{unknown ? "시간 모름" : (time || "태어난 시간")}</span>
-            <svg
-              width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+            시간모름
           </button>
         </div>
       </div>
       <BottomNav
         onPrev={onPrev}
         onNext={() => selected && onNext(selected)}
-        nextLabel="응, 입력했어!"
+        nextLabel="다음으로"
         nextDisabled={!selected}
       />
     </FormShell>
