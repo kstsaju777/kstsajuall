@@ -488,7 +488,7 @@ function StepConcern({
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
         <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
           고민을 상세히 적어주겠소?{" "}
-          <span className="text-[15px] font-normal" style={{ color: "#888" }}>(선택) 비워도 괜찮소</span>
+          <span className="text-[15px] font-normal" style={{ color: "#888" }}>(선택)</span>
         </h2>
         <textarea
           value={text}
