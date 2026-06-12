@@ -461,7 +461,7 @@ function StepName({
       <BottomNav
         onPrev={onPrev}
         onNext={() => name.trim() && onNext(name.trim())}
-        nextLabel="내 이름이야!"
+        nextLabel="다음으로"
         nextDisabled={!name.trim()}
       />
     </FormShell>
