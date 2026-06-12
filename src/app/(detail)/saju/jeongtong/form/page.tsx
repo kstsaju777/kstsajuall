@@ -709,8 +709,10 @@ function StepLoading({
   const [b1, setB1] = useState(false);
   const [b2, setB2] = useState(false);
   const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    videoRef.current?.play().catch(() => {});
     const t1 = setTimeout(() => setB1(true), 1000);
     const t2 = setTimeout(() => setB2(true), 2000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
@@ -735,8 +737,9 @@ function StepLoading({
 
       {/* 배경 영상 — 끝나면 자동 이동 */}
       <video
+        ref={videoRef}
         src="/images/cards/total-vid-loading.webm"
-        autoPlay muted playsInline
+        autoPlay muted playsInline preload="auto"
         onTimeUpdate={handleTime}
         onEnded={goNext}
         className="absolute inset-0 w-full h-full object-cover"
