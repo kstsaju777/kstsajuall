@@ -52,12 +52,20 @@ function FormShell({ children }: { children: React.ReactNode }) {
       className="relative w-full overflow-hidden"
       style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%", backgroundColor: "#131921" }}
     >
-      {/* 배경 영상 */}
+      {/* 배경 영상 — 블러 채움 레이어 */}
       <video
         src="/images/cards/total-apply.webm"
         aria-hidden
         autoPlay muted loop playsInline
-        className="absolute inset-0 w-full h-full object-cover object-top"
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ filter: "blur(24px)", transform: "scale(1.15)" }}
+      />
+      {/* 배경 영상 — 전체가 보이는 메인 레이어 */}
+      <video
+        src="/images/cards/total-apply.webm"
+        aria-hidden
+        autoPlay muted loop playsInline
+        className="absolute inset-0 w-full h-full object-contain object-top"
       />
       {/* 그라데이션 오버레이 — 영상 → 어두운 카드 */}
       <div
