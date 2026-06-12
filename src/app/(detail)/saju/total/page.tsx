@@ -9,11 +9,8 @@ const BG = "#0a0a0a";
 const CHAPTERS = [
   {
     chapter: "1장",
-    media: { type: "image", src: "/images/cards/total-img-1.jpg" },
-    bubble: {
-      text: "조선에 소문이 있었다.\n사주 한 장으로 운명을 바꾸는 자,\n그의 이름은 홍연.",
-      position: "bottom",
-    },
+    media: { type: "text", src: "" },
+    bubble: null,
   },
   {
     chapter: "2장",
@@ -102,6 +99,38 @@ function Bubble({ text, position }: { text: string; position: "top" | "bottom" }
 function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: number }) {
   const isFirst = index === 0;
   const isLast = index === CHAPTERS.length - 1;
+
+  // 1장 — 텍스트 전용 섹션
+  if (chapter.media.type === "text") {
+    return (
+      <div className="relative w-full flex flex-col items-center justify-center" style={{ aspectRatio: "4/3", backgroundColor: BG }}>
+        {/* 배경 별빛 효과 */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: "radial-gradient(ellipse at 50% 60%, rgba(155,35,53,0.18) 0%, transparent 70%)",
+        }} />
+
+        {/* 텍스트 */}
+        <div className="relative z-10 text-center px-8">
+          <p className="text-[11px] tracking-[0.4em] mb-6" style={{ color: "#9b2335" }}>— 조선 비사 —</p>
+          <h1 className="font-black leading-tight mb-6" style={{
+            fontSize: "clamp(28px, 8vw, 38px)",
+            color: "#ffffff",
+            textShadow: "0 0 40px rgba(155,35,53,0.6)",
+            fontFamily: "serif",
+          }}>
+            조선에<br />묘한 소문이<br />있었다
+          </h1>
+          <div style={{ width: "40px", height: "2px", backgroundColor: "#9b2335", margin: "0 auto" }} />
+        </div>
+
+        {/* 하단 그라데이션 */}
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{
+          height: "35%",
+          background: `linear-gradient(to top, ${BG}, transparent)`,
+        }} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full" style={{ aspectRatio: "4/3" }}>
