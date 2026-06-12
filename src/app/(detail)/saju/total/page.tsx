@@ -424,7 +424,7 @@ function StickyCTA() {
         <span style={{ color: "#ffc107" }}>{timeLeft}</span>
       </p>
       <button
-        onClick={() => router.push("/saju/jeongtong")}
+        onClick={() => router.push("/saju/jeongtong/form")}
         className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
         style={{ backgroundColor: "#9b2335", fontSize: "22px" }}
       >
