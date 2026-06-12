@@ -720,7 +720,7 @@ function StepLoading({
     videoRef.current?.play().catch(() => {});
     const t1 = setTimeout(() => setB1(true), 1000);
     const t2 = setTimeout(() => setB2(true), 2000);
-    const t3 = setTimeout(() => setB3(true), 2000);
+    const t3 = setTimeout(() => { setB3(true); setB1(false); setB2(false); }, 4000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
@@ -752,19 +752,15 @@ function StepLoading({
       />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.25), rgba(10,10,10,0.55))" }} />
 
-      {/* 말풍선 — 좌상단 (1초 후) */}
-      {b1 && (
-        <div className="absolute" style={{ top: "10%", left: "6%", animation: "loadFade 0.5s ease" }}>
-          <LoadBubble text={`${name}${honor}\n사주를 보니`} />
-        </div>
-      )}
+      {/* 말풍선 — 좌상단 (1초 후, b3 등장 시 페이드아웃) */}
+      <div className="absolute" style={{ top: "10%", left: "6%", opacity: b1 ? 1 : 0, transition: "opacity 0.5s ease" }}>
+        <LoadBubble text={`${name}${honor}\n사주를 보니`} />
+      </div>
 
-      {/* 말풍선 — 중앙 (2초 후) */}
-      {b2 && (
-        <div className="absolute" style={{ top: "44%", left: "50%", transform: "translate(-50%, -50%)", animation: "loadFade 0.5s ease" }}>
-          <LoadBubble text={"놀라운게\n보이는군.."} />
-        </div>
-      )}
+      {/* 말풍선 — 중앙 (2초 후, b3 등장 시 페이드아웃) */}
+      <div className="absolute" style={{ top: "44%", left: "50%", transform: "translate(-50%, -50%)", opacity: b2 ? 1 : 0, transition: "opacity 0.5s ease" }}>
+        <LoadBubble text={"놀라운게\n보이는군.."} />
+      </div>
 
       {/* 말풍선 — 좌하단 (2초 후) */}
       {b3 && (
