@@ -11,6 +11,12 @@ export const metadata: Metadata = {
     icon: "/icon.png",
     apple: "/icon.png",
   },
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: "default",
+    startupImage: ["/splash.png"],
+  },
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
