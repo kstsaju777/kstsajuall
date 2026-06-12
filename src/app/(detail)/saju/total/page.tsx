@@ -9,7 +9,7 @@ const BG = "#0a0a0a";
 const CHAPTERS = [
   {
     chapter: "1장",
-    media: { type: "video", src: "/images/cards/total-vid-1.webm" },
+    media: { type: "image", src: "/images/cards/total-img-1.jpg" },
     bubble: {
       text: "조선에 소문이 있었다.\n사주 한 장으로 운명을 바꾸는 자,\n그의 이름은 홍연.",
       position: "bottom",
