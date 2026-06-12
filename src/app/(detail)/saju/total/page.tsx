@@ -46,7 +46,7 @@ const GAPS: { height: string; text?: string; line?: boolean }[] = [
   { height: "400px", text: "내 장담하겠소" },   // 6장 위 ← 여백 중앙 텍스트
   { height: "300px", text: "고귀한 그대의 \n 사주 여덟글자로" },     // 7장 위 ← 여백 중앙 텍스트
   { height: "150px" },                          // 8장 위
-  { height: "300px" },                          // 9장(CTA) 위
+  { height: "180px" },                          // 9장(CTA) 위
 ];
 
 // ─── 7장 스토리 구성 ─────────────────────────────────────────────────────────
@@ -235,8 +235,8 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
       )}
 
       {/* 말풍선 */}
-      {chapter.bubble && (
-        <Bubble text={chapter.bubble.text} position={chapter.bubble.position as "top" | "bottom"} />
+      {(chapter as any).bubble && (
+        <Bubble text={(chapter as any).bubble.text} position={(chapter as any).bubble.position as "top" | "bottom"} />
       )}
 
       {/* 거친 한지 질감 말풍선 (겹친 패널 = 경계 없이 합쳐짐) */}
