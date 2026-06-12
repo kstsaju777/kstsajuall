@@ -15,10 +15,8 @@ const CHAPTERS = [
   {
     chapter: "2장",
     media: { type: "video", src: "/images/cards/total-vid-1.webm" },
-    bubble: {
-      text: "그는 왕도 찾아오는 명리학자.\n하지만 그가 가장 궁금한 건\n지금, 이 글을 읽는 당신의 사주.",
-      position: "top",
-    },
+    bubble: null,
+    overlayText: { text: "붉은 도포를 입은 자", position: "top" },
   },
   {
     chapter: "3장",
@@ -154,6 +152,23 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
       {/* 말풍선 */}
       {chapter.bubble && (
         <Bubble text={chapter.bubble.text} position={chapter.bubble.position as "top" | "bottom"} />
+      )}
+
+      {/* 오버레이 텍스트 */}
+      {(chapter as any).overlayText && (
+        <div className="absolute z-20 left-0 right-0 text-center"
+          style={{ top: (chapter as any).overlayText.position === "top" ? "20px" : undefined, bottom: (chapter as any).overlayText.position === "bottom" ? "20px" : undefined }}>
+          <p style={{
+            fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+            fontSize: "clamp(18px, 5vw, 24px)",
+            fontWeight: 700,
+            color: "#9b2335",
+            letterSpacing: "0.15em",
+            textShadow: "0 0 20px rgba(155,35,53,0.5)",
+          }}>
+            {(chapter as any).overlayText.text}
+          </p>
+        </div>
       )}
 
       {/* 하단 그라데이션 */}
