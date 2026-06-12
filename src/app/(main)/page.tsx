@@ -5,7 +5,8 @@ import Link from "next/link";
 
 const CARDS = [
   {
-    image: "/images/cards/total-1.jpg",
+    image: "/images/cards/total-0.webm",
+    type: "video" as const,
     badge: "종합",
     tag: "베스트",
     name: "종합 사주 감명",
@@ -35,7 +36,11 @@ export default function HomePage() {
     <div className="pb-10 px-4 pt-4 flex flex-col gap-4">
       {CARDS.map((card) => (
         <Link key={card.name} href={card.href} className="block w-full rounded-2xl overflow-hidden relative" style={{ aspectRatio: "4/3" }}>
-          <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+          {card.type === "video" ? (
+            <video src={card.image} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+          ) : (
+            <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+          )}
           {/* 하단 그라데이션 오버레이 */}
           <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.7))" }} />
           {/* 뱃지 */}
