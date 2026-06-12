@@ -703,21 +703,25 @@ function LoadBubble({ text }: { text: string }) {
 }
 
 function StepLoading({
-  name, date, time, calendar,
+  name, date, time, calendar, gender,
 }: {
-  name: string; date: string; time: string; calendar: string;
+  name: string; date: string; time: string; calendar: string; gender?: string;
 }) {
   const [progress, setProgress] = useState(0);
   const [b1, setB1] = useState(false);
   const [b2, setB2] = useState(false);
+  const [b3, setB3] = useState(false);
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const honor = gender === "남자" ? "군" : "양";
 
   useEffect(() => {
     videoRef.current?.play().catch(() => {});
     const t1 = setTimeout(() => setB1(true), 1000);
     const t2 = setTimeout(() => setB2(true), 2000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t3 = setTimeout(() => setB3(true), 2000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
   const goNext = () => {
@@ -751,14 +755,21 @@ function StepLoading({
       {/* 말풍선 — 좌상단 (1초 후) */}
       {b1 && (
         <div className="absolute" style={{ top: "10%", left: "6%", animation: "loadFade 0.5s ease" }}>
-          <LoadBubble text={`${name}님의 사주…\n허, 제법 흥미롭구려`} />
+          <LoadBubble text={`${name}${honor}\n사주를 보니`} />
         </div>
       )}
 
-      {/* 말풍선 — 우하단 (2초 후) */}
+      {/* 말풍선 — 중앙 (2초 후) */}
       {b2 && (
-        <div className="absolute" style={{ bottom: "26%", right: "6%", animation: "loadFade 0.5s ease" }}>
-          <LoadBubble text={"곧 풀이가 끝나니\n잠시만 기다리시게"} />
+        <div className="absolute" style={{ top: "44%", left: "50%", transform: "translate(-50%, -50%)", animation: "loadFade 0.5s ease" }}>
+          <LoadBubble text={"놀라운게\n보이는군.."} />
+        </div>
+      )}
+
+      {/* 말풍선 — 좌하단 (2초 후) */}
+      {b3 && (
+        <div className="absolute" style={{ bottom: "24%", left: "6%", animation: "loadFade 0.5s ease" }}>
+          <LoadBubble text={"한번\n들어보겠소?"} />
         </div>
       )}
 
@@ -846,6 +857,7 @@ export default function SajuFormPage() {
           date={form.date ?? ""}
           time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"}
+          gender={form.gender}
         />
       )}
     </>
