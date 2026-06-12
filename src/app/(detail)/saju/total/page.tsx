@@ -133,7 +133,7 @@ const CHAPTERS = [
     bubble: null,
     circleBubbles: [
       { text: "자, \n 여기 앉으시오", top: "0%", left: "5%",  width: "40%", ratio: "4/3" },
-      { text: "내가 묻는말에 \n 답해주겠나?", top: "110%", left: "30%", width: "40%", ratio: "4/3" },
+      { text: "내가 묻는말에 \n 답해주겠나?", top: "100%", left: "15%", width: "70%", ratio: "4/3", fontSize: "40px" },
     ],
   },
   {
@@ -287,7 +287,7 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
           }}>
           <p className="font-bold whitespace-pre-line leading-snug" style={{
             fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
-            fontSize: "20px",
+            fontSize: c.fontSize ?? "20px",
             color: "#1a1a1a",
           }}>
             {c.text}
