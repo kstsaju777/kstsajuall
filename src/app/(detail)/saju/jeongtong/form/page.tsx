@@ -764,8 +764,8 @@ function StepLoading({
 
       {/* 말풍선 — 좌하단 (2초 후) */}
       {b3 && (
-        <div className="absolute" style={{ bottom: "20%", left: "20%", animation: "loadFade 0.5s ease" }}>
-          <LoadBubble text={"한번\n들어보겠소?"} size="40px" width="300px" />
+        <div className="absolute" style={{ bottom: "20%", left: "15%", animation: "loadFade 0.5s ease" }}>
+          <LoadBubble text={"한번\n들어보겠소?"} size="35px" width="300px" />
         </div>
       )}
 
