@@ -740,7 +740,7 @@ function StepLoading({
 
       {/* 배경 영상 */}
       <video
-        src="/images/cards/total-loading.webm"
+        src="/images/cards/total-vid-loading.webm"
         autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-cover"
       />
