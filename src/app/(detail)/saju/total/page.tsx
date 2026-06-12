@@ -4,51 +4,131 @@ import { useRouter } from "next/navigation";
 
 const BG = "#0a0a0a";
 
-// ─── 미디어 슬롯 ──────────────────────────────────────────────────────────────
-// 파일을 public/images/cards/ 폴더에 넣으세요:
-//   total-img-1.jpg  total-vid-1.webm
-//   total-img-2.jpg  total-vid-2.webm
-//   total-img-3.jpg  total-vid-3.webm
-//   total-img-4.jpg
-const MEDIA = [
-  { type: "image", src: "/images/cards/total-img-1.jpg" },
-  { type: "video", src: "/images/cards/total-vid-1.webm" },
-  { type: "image", src: "/images/cards/total-img-2.jpg" },
-  { type: "video", src: "/images/cards/total-vid-2.webm" },
-  { type: "image", src: "/images/cards/total-img-3.jpg" },
-  { type: "video", src: "/images/cards/total-vid-3.webm" },
-  { type: "image", src: "/images/cards/total-img-4.jpg" },
+// ─── 7장 스토리 구성 ─────────────────────────────────────────────────────────
+// 미디어 파일을 public/images/cards/ 폴더에 넣으세요
+const CHAPTERS = [
+  {
+    chapter: "1장",
+    media: { type: "video", src: "/images/cards/total-vid-1.webm" },
+    bubble: {
+      text: "조선에 소문이 있었다.\n사주 한 장으로 운명을 바꾸는 자,\n그의 이름은 홍연.",
+      position: "bottom",
+    },
+  },
+  {
+    chapter: "2장",
+    media: { type: "image", src: "/images/cards/total-img-2.jpg" },
+    bubble: {
+      text: "그는 왕도 찾아오는 명리학자.\n하지만 그가 가장 궁금한 건\n지금, 이 글을 읽는 당신의 사주.",
+      position: "top",
+    },
+  },
+  {
+    chapter: "3장",
+    media: { type: "video", src: "/images/cards/total-vid-3.webm" },
+    bubble: {
+      text: "사주는 운명의 지도.\n태어난 년·월·일·시,\n그 네 기둥 안에\n당신의 모든 이야기가 담겨 있소.",
+      position: "bottom",
+    },
+  },
+  {
+    chapter: "4장",
+    media: { type: "image", src: "/images/cards/total-img-4.jpg" },
+    bubble: {
+      text: "흔한 풀이는 하지 않소.\n당신의 용신·기신,\n올해의 운·사랑·재물·건강\n모두 낱낱이 읽어드리겠소.",
+      position: "top",
+    },
+  },
+  {
+    chapter: "5장",
+    media: { type: "video", src: "/images/cards/total-vid-5.webm" },
+    bubble: {
+      text: "이미 3,000명의 운명을\n홍연이 읽었소.",
+      position: "bottom",
+    },
+  },
+  {
+    chapter: "6장",
+    media: { type: "image", src: "/images/cards/total-img-6.jpg" },
+    bubble: {
+      text: "당신은 지금 어떤 계절을\n지나고 있소?\n봄이 오기 전, 가장 추운 법이니—\n두려워 마시오.",
+      position: "top",
+    },
+  },
+  {
+    chapter: "7장",
+    media: { type: "video", src: "/images/cards/total-vid-7.webm" },
+    bubble: null,
+    isCTA: true,
+  },
 ];
 
-function MediaBlock({ item, index }: { item: typeof MEDIA[0]; index: number }) {
+function Bubble({ text, position }: { text: string; position: "top" | "bottom" }) {
+  return (
+    <div
+      className="absolute z-20 mx-5"
+      style={{
+        ...(position === "top" ? { top: "16px" } : { bottom: "60px" }),
+        left: 0, right: 0,
+      }}
+    >
+      <div
+        className="inline-block px-4 py-3 rounded-2xl text-center max-w-[80%]"
+        style={{
+          backgroundColor: "rgba(255,255,255,0.92)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+          margin: "0 auto",
+          display: "block",
+        }}
+      >
+        <p className="text-[14px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#1a1a1a" }}>
+          {text}
+        </p>
+        {/* 말풍선 꼬리 */}
+        <div
+          style={{
+            position: "absolute",
+            ...(position === "top"
+              ? { bottom: "-10px", left: "50%", transform: "translateX(-50%)", borderTop: "10px solid rgba(255,255,255,0.92)", borderLeft: "8px solid transparent", borderRight: "8px solid transparent" }
+              : { top: "-10px", left: "50%", transform: "translateX(-50%)", borderBottom: "10px solid rgba(255,255,255,0.92)", borderLeft: "8px solid transparent", borderRight: "8px solid transparent" }
+            ),
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: number }) {
   const isFirst = index === 0;
-  const isLast = index === MEDIA.length - 1;
+  const isLast = index === CHAPTERS.length - 1;
 
   return (
     <div className="relative w-full" style={{ aspectRatio: "4/3" }}>
-      {/* 상단 그라데이션 (첫 번째 제외) */}
+      {/* 상단 그라데이션 */}
       {!isFirst && (
         <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none" style={{
-          height: "30%",
+          height: "35%",
           background: `linear-gradient(to bottom, ${BG}, transparent)`,
         }} />
       )}
 
       {/* 미디어 */}
-      {item.type === "video" ? (
-        <video
-          src={item.src}
-          className="w-full h-full object-cover"
-          autoPlay muted loop playsInline
-        />
+      {chapter.media.type === "video" ? (
+        <video src={chapter.media.src} className="w-full h-full object-cover" autoPlay muted loop playsInline />
       ) : (
-        <img src={item.src} alt="" className="w-full h-full object-cover" />
+        <img src={chapter.media.src} alt="" className="w-full h-full object-cover" />
       )}
 
-      {/* 하단 그라데이션 (마지막 제외) */}
+      {/* 말풍선 */}
+      {chapter.bubble && (
+        <Bubble text={chapter.bubble.text} position={chapter.bubble.position as "top" | "bottom"} />
+      )}
+
+      {/* 하단 그라데이션 */}
       {!isLast && (
         <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none" style={{
-          height: "30%",
+          height: "35%",
           background: `linear-gradient(to top, ${BG}, transparent)`,
         }} />
       )}
@@ -60,33 +140,33 @@ export default function TotalPage() {
   const router = useRouter();
 
   return (
-    <div className="w-full min-h-screen flex flex-col relative" style={{ backgroundColor: BG }}>
+    <div className="w-full flex flex-col relative" style={{ backgroundColor: BG }}>
       {/* 뒤로가기 */}
       <button
         onClick={() => router.back()}
-        className="fixed top-4 left-4 z-50 w-9 h-9 rounded-full flex items-center justify-center"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        className="fixed z-50 w-9 h-9 rounded-full flex items-center justify-center"
+        style={{ top: "16px", left: "max(16px, calc(50vw - 224px))", backgroundColor: "rgba(0,0,0,0.5)" }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
           <path d="M19 12H5M12 5l-7 7 7 7" />
         </svg>
       </button>
 
-      {/* 미디어 슬롯들 */}
-      <div className="flex flex-col">
-        {MEDIA.map((item, i) => (
-          <MediaBlock key={i} item={item} index={i} />
-        ))}
-      </div>
+      {/* 7장 */}
+      {CHAPTERS.map((chapter, i) => (
+        <ChapterBlock key={i} chapter={chapter} index={i} />
+      ))}
 
-      {/* 구매 버튼 */}
-      <div className="px-5 py-8">
+      {/* CTA */}
+      <div className="px-5 py-10 text-center" style={{ backgroundColor: BG }}>
+        <p className="text-white text-[16px] font-bold mb-2">지금, 당신의 사주를 펼치시오.</p>
+        <p className="text-white/50 text-[13px] mb-6">홍연이 직접 읽어드리겠소.</p>
         <button
           onClick={() => router.push("/saju/jeongtong")}
-          className="w-full py-4 rounded-2xl font-bold text-[17px] text-white"
+          className="w-full py-4 rounded-2xl font-bold text-[17px] text-white active:scale-95 transition-transform"
           style={{ backgroundColor: "#9b2335" }}
         >
-          지금 확인하기
+          사주 풀이 받기
         </button>
       </div>
     </div>
