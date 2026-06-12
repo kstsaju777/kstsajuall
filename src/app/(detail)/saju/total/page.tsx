@@ -14,7 +14,7 @@ const CHAPTERS = [
   },
   {
     chapter: "2장",
-    media: { type: "image", src: "/images/cards/total-img-2.jpg" },
+    media: { type: "video", src: "/images/cards/total-vid-1.webm" },
     bubble: {
       text: "그는 왕도 찾아오는 명리학자.\n하지만 그가 가장 궁금한 건\n지금, 이 글을 읽는 당신의 사주.",
       position: "top",
@@ -111,16 +111,18 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
 
         {/* 텍스트 */}
         <div className="relative z-10 text-center px-8">
-          <p className="text-[11px] tracking-[0.4em] mb-6" style={{ color: "#9b2335" }}>— 조선 비사 —</p>
-          <h1 className="font-black leading-tight mb-6" style={{
-            fontSize: "clamp(28px, 8vw, 38px)",
-            color: "#ffffff",
-            textShadow: "0 0 40px rgba(155,35,53,0.6)",
-            fontFamily: "serif",
+          <h1 className="font-black leading-tight" style={{
+            fontSize: "clamp(32px, 9vw, 44px)",
+            fontFamily: "'Noto Serif KR', 'Nanum Myeongjo', serif",
+            background: "linear-gradient(to bottom, #fff9c4 0%, #ffb347 40%, #ff4500 80%, #cc1100 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            textShadow: "none",
+            filter: "drop-shadow(0 0 12px rgba(255,80,0,0.7)) drop-shadow(0 0 30px rgba(255,40,0,0.4))",
           }}>
             조선에<br />묘한 소문이<br />있었다
           </h1>
-          <div style={{ width: "40px", height: "2px", backgroundColor: "#9b2335", margin: "0 auto" }} />
         </div>
 
         {/* 하단 그라데이션 */}
