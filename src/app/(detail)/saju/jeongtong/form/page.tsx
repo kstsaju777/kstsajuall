@@ -538,7 +538,7 @@ function getEmailWarning(email: string): string | null {
 
 // ─── Step 6: 이메일 ───────────────────────────────────────────────────────────
 const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "hotmail.com", "직접입력"];
-const MONO_FONT = "'Space Mono', monospace";
+const MONO_FONT = "'Roboto Mono', monospace";
 
 function StepEmail({
   onPrev,
