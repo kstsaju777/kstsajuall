@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { calcSaju, ELEMENT_COLORS, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
-const NAVY       = "#2d3a8c";
-const CARD_BG    = "rgb(252,220,228)";
-const LABEL_CLR  = "#c47c85";
-const BORDER_CLR = "#d4a8b4";
-const PH_CLR     = "#d4a8b4";
+const NAVY       = "#9b2335";          // 포인트(버튼/토글) — 시그니처 레드
+const CARD_BG    = "#131921";          // 하단 카드 — 어두운 톤
+const LABEL_CLR  = "#e0a8b0";          // 소제목 — 밝은 로즈
+const BORDER_CLR = "#4a5560";          // 입력 밑줄
+const PH_CLR     = "#7a8590";          // 플레이스홀더
+const TEXT_CLR   = "#f5f5f5";          // 본문 텍스트 (어두운 카드 위)
 
 const BIRTH_TIMES = [
   "자시 (23:30 ~ 01:30)", "축시 (01:30 ~ 03:30)",
@@ -51,19 +52,19 @@ function FormShell({ children }: { children: React.ReactNode }) {
       className="relative w-full overflow-hidden"
       style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%" }}
     >
-      {/* 배경 이미지 */}
-      <img
-        src="/images/hero/hero-1.jpg"
-        alt=""
+      {/* 배경 영상 */}
+      <video
+        src="/images/cards/total-apply.webm"
         aria-hidden
+        autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-cover object-top"
       />
-      {/* 그라데이션 오버레이 */}
+      {/* 그라데이션 오버레이 — 영상 → 어두운 카드 */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, transparent 20%, rgba(252,220,228,0.15) 45%, rgba(252,220,228,0.55) 60%, rgba(252,220,228,0.85) 72%, rgba(252,220,228,0.97) 82%)",
+            "linear-gradient(to bottom, transparent 20%, rgba(19,25,33,0.15) 45%, rgba(19,25,33,0.55) 60%, rgba(19,25,33,0.85) 72%, rgba(19,25,33,0.97) 82%)",
         }}
       />
       {/* 하단 카드 */}
@@ -93,7 +94,7 @@ function Label({ text }: { text: string }) {
 // ─── 공통: 메인 타이틀 ────────────────────────────────────────────────────────
 function Title({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[24px] font-bold mb-6" style={{ color: "#1a1a1a" }}>
+    <h2 className="text-[24px] font-bold mb-6" style={{ color: TEXT_CLR }}>
       {children}
     </h2>
   );
@@ -261,7 +262,7 @@ function StepBirthDate({
               className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
               style={{
                 borderBottom: `1.5px solid ${!isValidDate && isFilled ? "#e03" : BORDER_CLR}`,
-                color: date ? "#1a1a1a" : PH_CLR,
+                color: date ? TEXT_CLR : PH_CLR,
                 caretColor: NAVY,
               }}
             />
@@ -310,7 +311,7 @@ function StepBirthTime({
         <div className="flex items-start justify-between mb-6">
           <div>
             <Label text="태어난 시간이 운명을 가른대요" />
-            <h2 className="text-[24px] font-bold" style={{ color: "#1a1a1a" }}>
+            <h2 className="text-[24px] font-bold" style={{ color: TEXT_CLR }}>
               나의 태어난 시간
             </h2>
           </div>
@@ -385,7 +386,7 @@ function StepBirthTime({
             className="w-full flex items-center justify-between py-3 text-[16px]"
             style={{
               borderBottom: `1.5px solid ${unknown ? "rgba(200,168,180,0.4)" : BORDER_CLR}`,
-              color: (time && !unknown) ? "#1a1a1a" : PH_CLR,
+              color: (time && !unknown) ? TEXT_CLR : PH_CLR,
               opacity: unknown ? 0.5 : 1,
               background: "transparent",
             }}
@@ -435,7 +436,7 @@ function StepName({
           className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
           style={{
             borderBottom: `1.5px solid ${BORDER_CLR}`,
-            color: name ? "#1a1a1a" : PH_CLR,
+            color: name ? TEXT_CLR : PH_CLR,
             caretColor: NAVY,
           }}
         />
@@ -466,7 +467,7 @@ function StepConcern({
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <Label text="자세히 적을수록 더 깊이 봐드려요" />
-        <h2 className="text-[24px] font-bold mb-0.5" style={{ color: "#1a1a1a" }}>
+        <h2 className="text-[24px] font-bold mb-0.5" style={{ color: TEXT_CLR }}>
           어떤 고민이 있으세요?{" "}
           <span className="text-[17px] font-normal" style={{ color: "#c0a8b0" }}>(선택)</span>
         </h2>
@@ -543,7 +544,7 @@ function StepEmail({
           className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
           style={{
             borderBottom: `1.5px solid ${warning ? "#e03" : BORDER_CLR}`,
-            color: email ? "#1a1a1a" : PH_CLR,
+            color: email ? TEXT_CLR : PH_CLR,
             caretColor: NAVY,
           }}
           autoFocus
