@@ -114,8 +114,8 @@ const CHAPTERS = [
     media: { type: "video", src: "/images/cards/total-vid-3.webm" },
     bubble: null,
     circleBubbles: [
-      { text: "내 말 듣고나면", top: "0%", left: "8%",  width: "40%", ratio: "3/2", fontSize: "28px" },
-      { text: "앞으로의\n인생이 달라질거요", top: "80%", left: "45%", width: "50%", ratio: "3/2", fontSize: "28px" },
+      { text: "내 말 듣고나면", top: "0%", left: "8%",  width: "40%", ratio: "3/2" },
+      { text: "앞으로의\n인생이 달라질거요", top: "80%", left: "45%", width: "50%", ratio: "3/2" },
     ],
   },
   {
@@ -123,8 +123,8 @@ const CHAPTERS = [
     media: { type: "video", src: "/images/cards/total-vid-4.webm" },
     bubble: null,
     circleBubbles: [
-      { text: "아주 솔직하게", top: "0%", left: "8%",  width: "35%", ratio: "4/3", fontSize: "26px" },
-      { text: "이야기 \n 해주겠소", top: "80%", left: "50%", width: "45%", ratio: "4/3", fontSize: "30px" },
+      { text: "아주 솔직하게", top: "0%", left: "8%",  width: "35%", ratio: "4/3" },
+      { text: "이야기 \n 해주겠소", top: "80%", left: "50%", width: "45%", ratio: "4/3" },
     ],
   },
   {
@@ -132,8 +132,8 @@ const CHAPTERS = [
     media: { type: "video", src: "/images/cards/total-vid-5.webm" },
     bubble: null,
     circleBubbles: [
-      { text: "자, \n 여기 앉으시오", top: "0%", left: "5%",  width: "40%", ratio: "4/3", fontSize: "28px" },
-      { text: "내가 묻는말에 \n 답해주겠나?", top: "100%", left: "15%", width: "70%", ratio: "4/3" },
+      { text: "자, \n 여기 앉으시오", top: "0%", left: "5%",  width: "40%", ratio: "4/3" },
+      { text: "내가 묻는말에 \n 답해주겠나?", top: "110%", left: "30%", width: "40%", ratio: "4/3" },
     ],
   },
   {
