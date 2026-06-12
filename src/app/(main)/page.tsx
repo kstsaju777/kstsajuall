@@ -11,7 +11,7 @@ const CARDS = [
     tag: "베스트",
     name: "종합 사주 감명",
     desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",
-    href: "/saju/jeongtong",
+    href: "/saju/total",
   },
   {
     image: "/images/hero/hero-3.jpg",
