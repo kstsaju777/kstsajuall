@@ -380,8 +380,10 @@ function StepBirthTime({
 
             {/* 트리거 버튼 */}
             <button
-              onClick={() => !unknown && setOpen((v) => !v)}
-              disabled={unknown}
+              onClick={() => {
+                if (unknown) { setUnknown(false); setOpen(true); }
+                else setOpen((v) => !v);
+              }}
               className="w-full flex items-center justify-between py-3 text-[16px]"
               style={{
                 borderBottom: `1.5px solid ${unknown ? "rgba(255,255,255,0.1)" : BORDER_CLR}`,
