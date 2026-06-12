@@ -442,11 +442,11 @@ function StepName({
   return (
     <FormShell>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <Label text="이제 거의 다 왔어요" />
-        <Title>이름이 어떻게 되세요?</Title>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이제 거의 다왔소</p>
+        <Title>이름이 어떻게 되시오?</Title>
         <input
           type="text"
-          placeholder="김지은"
+          placeholder="홍연주"
           value={name}
           onChange={(e) => setName(e.target.value)}
           autoFocus
