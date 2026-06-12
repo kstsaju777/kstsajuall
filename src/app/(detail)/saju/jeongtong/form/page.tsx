@@ -713,24 +713,19 @@ function StepLoading({
   useEffect(() => {
     const t1 = setTimeout(() => setB1(true), 1000);
     const t2 = setTimeout(() => setB2(true), 2000);
-
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        const next = p + Math.random() * 3 + 1.2;
-        return next >= 100 ? 100 : next;
-      });
-    }, 130);
-
-    const done = setTimeout(() => {
-      const params = new URLSearchParams({ name, date, time, calendar });
-      router.push(`/saju/jeongtong/checkout?${params.toString()}`);
-    }, 6500);
-
-    return () => {
-      clearTimeout(t1); clearTimeout(t2);
-      clearInterval(interval); clearTimeout(done);
-    };
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
+
+  const goNext = () => {
+    const params = new URLSearchParams({ name, date, time, calendar });
+    router.push(`/saju/jeongtong/checkout?${params.toString()}`);
+  };
+
+  // 영상 진행률을 로딩바에 동기화
+  const handleTime = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const v = e.currentTarget;
+    if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+  };
 
   const pct = Math.min(100, Math.round(progress));
 
@@ -738,10 +733,12 @@ function StepLoading({
     <div className="relative w-full h-full overflow-hidden" style={{ backgroundColor: "#0a0a0a" }}>
       <style>{`@keyframes loadFade { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }`}</style>
 
-      {/* 배경 영상 */}
+      {/* 배경 영상 — 끝나면 자동 이동 */}
       <video
         src="/images/cards/total-vid-loading.webm"
-        autoPlay muted loop playsInline
+        autoPlay muted playsInline
+        onTimeUpdate={handleTime}
+        onEnded={goNext}
         className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.25), rgba(10,10,10,0.55))" }} />
