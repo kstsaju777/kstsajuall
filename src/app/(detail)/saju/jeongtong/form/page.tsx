@@ -555,7 +555,7 @@ function StepEmail({
   const initIsKnown = EMAIL_DOMAINS.includes(initDom);
 
   const [local, setLocal] = useState(initLocal);
-  const [domain, setDomain] = useState(initDom ? (initIsKnown ? initDom : "직접입력") : "naver.com");
+  const [domain, setDomain] = useState(initDom ? (initIsKnown ? initDom : "직접입력") : "");
   const [custom, setCustom] = useState(initDom && !initIsKnown ? initDom : "");
   const [open, setOpen] = useState(false);
 
@@ -639,9 +639,9 @@ function StepEmail({
               <button
                 onClick={() => setOpen((v) => !v)}
                 className="w-full flex items-center justify-between text-[16px] pb-2.5"
-                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent", fontFamily: MONO_FONT }}
+                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: domain ? TEXT_CLR : "#7a8590", background: "transparent", fontFamily: MONO_FONT }}
               >
-                <span className="truncate">{domain}</span>
+                <span className="truncate">{domain || "선택하기"}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                   style={{ flexShrink: 0, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
                   <polyline points="6 9 12 15 18 9" />
