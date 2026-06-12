@@ -493,7 +493,7 @@ function StepConcern({
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX))}
-          placeholder={`(예시) 남자친구랑 헤어지고 다음 연애 상대는 언제 생길지, 아님 재회할 수 있을지 궁금해요...\n직장은 마케팅 쪽으로 갈 수 있을지도 알려주세요!`}
+          placeholder={`(예시) 지금 미용실 근무하고있는지 1년정도 돼가는데 다른곳으로 옮겨야 할지 계속 다녀야 할지 고민이고, 지금 남자친구네 집에서 살고있는데 남자친구 집근처로 직장을 옮길지 여기 계속 다닐지 너무고민입니다. 그리고, 결혼은 언제 할 수 있을지도 궁금하고 언제하면 좋은지도 궁금해요ㅠㅠ`}
           rows={5}
           className="w-full rounded-2xl p-4 text-[14px] outline-none resize-none leading-relaxed"
           style={{
