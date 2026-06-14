@@ -486,6 +486,14 @@ function ReportPreviewInner() {
   const [msLoading, setMsLoading] = useState(false);
   const [msFetched, setMsFetched] = useState(false);
 
+  // 입력(생년월일·시간·성별)이 바뀌면 명식 상태 초기화.
+  // Next 는 같은 라우트의 쿼리만 바뀌면 리마운트하지 않으므로, 직접 리셋하지 않으면
+  // 이전 결제자의 명식이 그대로 남는다.
+  useEffect(() => {
+    setMsView(null);
+    setMsFetched(false);
+  }, [date, time, calendar, gender]);
+
   // 명식보기 열 때만 운세위키 API 호출.
   // sessionStorage 에 캐시해서 다른 챕터에서 다시 열어도 추가 호출(=과금) 없음.
   const openMyeongsik = () => {
