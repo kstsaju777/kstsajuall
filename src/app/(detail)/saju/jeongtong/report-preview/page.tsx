@@ -13,8 +13,9 @@
 //    기존 hero 이미지를 끼워둠 — 추후 전용 일러스트로 교체.
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
+import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
 import { MyeongsikModalView } from "@/components/saju/MyeongsikModal";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
@@ -32,8 +33,48 @@ const WARN = "#c9474f";
 const NAVY = "#2d3a8c";
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
-// ─── 샘플 데이터 (토막1 기준, 추후 LLM 출력으로 교체) ──────────────
+// ─── 샘플 데이터 (파라미터 없이 열었을 때 폴백) ──────────────────────
 const NAME = "선우";
+
+const SAMPLE_CONTENT: ReportContent = {
+  hardSeason: {
+    intro: "지난 시간 동안 걸어온 길을 돌아보면 유독 마음이 무겁고 답답했던 터널 같은 시기가 있었을 것으로 보여요.",
+    callout: "특히 20대 중반부터 30대 초반까지 이어졌던 계유(癸酉) 대운의 시기는 깊은 내면의 방황과 정체기를 안겨주었네요.",
+    paragraphs: [
+      "이 시기에는 열심히 노력해도 제자리걸음을 하는 듯한 기분이 들고, 현실적인 돌파구를 찾기가 쉽지 않았을 거예요.",
+      "남들은 앞으로 나아가는 것처럼 보이는데 나만 홀로 멈춰 서 있는 듯한 고립감에 마음고생이 많으셨을 것 같아요.",
+      "이 고단했던 시간들은 인생의 다음 단계를 준비하기 위해 내면의 힘을 기르는 혹독한 겨울이었던 셈이에요.",
+    ],
+  },
+  cause: {
+    intro: "그토록 힘든 시기를 보낼 수밖에 없었던 이유는 사주 원국과 대운의 기운이 서로 부딪쳤기 때문이에요.",
+    callout: "월지에 자리 잡은 자수(子) 편인의 기운이 대운에서 들어온 계유(癸酉)의 강한 물 기운과 만나 과해진 탓이에요.",
+    paragraphs: [
+      "을목(乙) 일간에게 적당한 물은 성장의 자양분이 되지만 너무 과한 물은 오히려 뿌리를 썩게 만들어요.",
+      "이로 인해 현실적인 실행력보다는 머릿속의 생각과 걱정만 비대해져 스스로를 고립시키는 결과를 낳게 되었어요.",
+    ],
+    flow: [
+      { label: "20대 중반", tone: "warn", text: "진로와 미래에 대한 깊은 고민과 방황" },
+      { label: "20대 후반", tone: "warn", text: "내면의 성찰과 내실 다지기" },
+      { label: "30대 초반", tone: "warn", text: "생각의 늪에서 벗어나기 위한 고군분투" },
+      { label: "30대 중반", tone: "good", text: "안정적인 기반을 마련하기 시작" },
+      { label: "현재", tone: "good", text: "사회적 인정과 내면의 단단함이 조화를 이루는 시기" },
+    ],
+  },
+  pattern: {
+    intro: "삶에서 반복되어 온 가장 뚜렷한 패턴은 완벽하게 준비하려다 오히려 시작을 미루게 되는 현상이에요.",
+    callout: "어떤 일을 시작하기 전에 머릿속으로 수많은 시나리오를 그리며 걱정을 사서 하다가 타이밍을 놓치곤 하셨네요.",
+    paragraphs: [
+      "잘하고 싶은 마음이 너무 강하다 보니 작은 실수도 용납하지 못해 스스로에게 가혹한 기준을 들이대곤 했어요.",
+      "이제는 이 반복되는 고리를 끊어내고 조금 더 가볍고 유연하게 세상과 마주할 준비를 하셔야 할 때가 되었어요.",
+    ],
+    summary: [
+      { title: "과도한 생각의 늪", desc: "준비가 완벽해질 때까지 실행을 미루며 스스로를 압박하던 흐름이에요." },
+      { title: "내면의 고립감", desc: "힘든 일이 있어도 주변에 나누지 않고 혼자 삭이려 했던 성향이 강해요." },
+      { title: "새로운 돌파구 마련", desc: "30대 중반에 접어들며 현실적인 성과와 안정을 향해 나아가기 시작했어요." },
+    ],
+  },
+};
 
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
 
@@ -356,21 +397,17 @@ function Term({ children }: { children: React.ReactNode }) {
 }
 
 // 지난 시간의 운 흐름 — 라인 차트 + 시기별 타임라인
-const RUN_FLOW = [
-  { label: "20대 중반", tone: "warn", v: 22, text: "편인운 작용: 진로와 미래에 대한 깊은 고민과 방황" },
-  { label: "20대 후반", tone: "warn", v: 33, text: "편인운 작용: 내면의 성찰과 자격증 취득 등 내실 다지기" },
-  { label: "30대 초반", tone: "warn", v: 48, text: "편인운 작용: 생각의 늪에서 벗어나기 위한 고군분투" },
-  { label: "30대 중반", tone: "good", v: 72, text: "정인운 작용: 정관과 정인이 함께 오며 안정적인 기반 마련" },
-  { label: "현재", tone: "good", v: 82, text: "정인운 작용: 사회적 인정과 내면의 단단함이 조화를 이루는 시기" },
-] as const;
-
-function RunFlowChart() {
+function RunFlowChart({ flow }: { flow: ReportFlowItem[] }) {
+  const src = flow.length ? flow : [{ label: "현재", tone: "good" as const, text: "" }];
+  // tone(주의/좋음) + 순서로 차트 y값 산출 (과거→현재 상승 흐름)
+  const data = src.map((f, i) => ({ ...f, v: (f.tone === "good" ? 58 : 26) + i * 6 }));
   const W = 300, H = 140, padX = 26, padTop = 16, padBot = 32, avg = 50;
   const innerW = W - padX * 2;
-  const x = (i: number) => padX + (innerW * i) / (RUN_FLOW.length - 1);
+  const n = data.length;
+  const x = (i: number) => padX + (innerW * i) / Math.max(1, n - 1);
   const y = (v: number) => padTop + (H - padTop - padBot) * (1 - v / 100);
-  const pts = RUN_FLOW.map((d, i) => `${x(i)},${y(d.v)}`).join(" ");
-  const area = `${padX},${y(0)} ${pts} ${x(RUN_FLOW.length - 1)},${y(0)}`;
+  const pts = data.map((d, i) => `${x(i)},${y(d.v)}`).join(" ");
+  const area = `${padX},${y(0)} ${pts} ${x(n - 1)},${y(0)}`;
   return (
     <div className="rounded-2xl p-5 mt-6" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
       {/* 헤더 */}
@@ -407,17 +444,17 @@ function RunFlowChart() {
         {/* 선 */}
         <polyline points={pts} fill="none" stroke="url(#flowLine)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         {/* 점 */}
-        {RUN_FLOW.map((d, i) => (
+        {data.map((d, i) => (
           <circle key={i} cx={x(i)} cy={y(d.v)} r="4" fill={WHITE} stroke={d.tone === "good" ? BLUE : WARN} strokeWidth="2.5" />
         ))}
         {/* x축 라벨 */}
-        {RUN_FLOW.map((d, i) => (
+        {data.map((d, i) => (
           <text key={i} x={x(i)} y={H - 14} fontSize="8.5" fill={INK_SOFT} textAnchor="middle">{d.label}</text>
         ))}
       </svg>
       {/* 시기별 타임라인 */}
       <div className="mt-4 space-y-2">
-        {RUN_FLOW.map((d) => {
+        {data.map((d) => {
           const c = d.tone === "good" ? BLUE : WARN;
           return (
             <div key={d.label} className="flex gap-2.5 items-start">
@@ -473,65 +510,52 @@ export default function ReportPreviewPage() {
 
 function ReportPreviewInner() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const id = searchParams.get("id") ?? "";
   const date = searchParams.get("date") ?? "";
   const time = searchParams.get("time") ?? "";
   const calendar = searchParams.get("calendar") ?? "양력";
   const gender = searchParams.get("gender") ?? "";
+  const nameParam = searchParams.get("name") ?? "";
+  const email = searchParams.get("email") ?? "";
 
   const rootRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [tocOpen, setTocOpen] = useState(false);
   const [msOpen, setMsOpen] = useState(false);
-  const [msView, setMsView] = useState<MyeongsikView | null>(null);
-  const [msLoading, setMsLoading] = useState(false);
-  const [msFetched, setMsFetched] = useState(false);
 
-  // 입력(생년월일·시간·성별)이 바뀌면 명식 상태 초기화.
-  // Next 는 같은 라우트의 쿼리만 바뀌면 리마운트하지 않으므로, 직접 리셋하지 않으면
-  // 이전 결제자의 명식이 그대로 남는다.
+  // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름)
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string } | null>(null);
+  const [loading, setLoading] = useState(!!(id || date));
+  const startedRef = useRef(false);
+
+  // id 있으면 저장된 결과 조회(재생성 X), 입력만 있으면 생성+저장 후 id 주소로 교체
   useEffect(() => {
-    setMsView(null);
-    setMsFetched(false);
-  }, [date, time, calendar, gender]);
-
-  // 명식보기 열 때만 운세위키 API 호출.
-  // sessionStorage 에 캐시해서 다른 챕터에서 다시 열어도 추가 호출(=과금) 없음.
-  const openMyeongsik = () => {
-    setMsOpen(true);
-    if (msView || msFetched || !date) return;
-
-    // v2: 대운 yearStart / currentYear·Month 추가로 캐시 스키마 변경 → 키 버전업
-    const cacheKey = `ms:v2:${date}|${time}|${calendar}|${gender}`;
-    try {
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        setMsView(JSON.parse(cached) as MyeongsikView);
-        setMsFetched(true);
-        return;
-      }
-    } catch {
-      /* sessionStorage 접근 불가 시 무시하고 호출 */
-    }
-
-    setMsFetched(true);
-    setMsLoading(true);
-    fetch("/api/myeongsik", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, time, calendar, gender }),
-    })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => {
-        setMsView(d.view);
-        try {
-          sessionStorage.setItem(cacheKey, JSON.stringify(d.view));
-        } catch {
-          /* 저장 실패 무시 */
-        }
+    if (startedRef.current) return;
+    startedRef.current = true;
+    if (id) {
+      fetch(`/api/jeongtong-report?id=${encodeURIComponent(id)}`)
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name }))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    } else if (date) {
+      fetch("/api/jeongtong-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nameParam, date, time, calendar, gender, email }),
       })
-      .catch(() => {})
-      .finally(() => setMsLoading(false));
-  };
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((d) => {
+          setReport({ view: d.view, content: d.content, name: d.name });
+          if (d.resultId) router.replace(`/saju/jeongtong/report-preview?id=${d.resultId}`);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const openMyeongsik = () => setMsOpen(true);
 
   // (detail) 레이아웃의 스크롤 컨테이너(<main>)를 찾아 진행률 계산
   useEffect(() => {
@@ -554,18 +578,34 @@ function ReportPreviewInner() {
     return () => target.removeEventListener("scroll", onScroll);
   }, []);
 
+  // 생성/조회 중 로딩 화면
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center px-6 text-center" style={{ backgroundColor: CREAM, minHeight: "100%", height: "100%" }}>
+        <div className="rounded-full animate-spin" style={{ width: 44, height: 44, border: `3px solid ${MAROON}22`, borderTopColor: MAROON }} />
+        <p className="mt-5 text-[15px] font-bold" style={{ color: INK }}>사주를 풀이하고 있어요</p>
+        <p className="mt-1 text-[13px]" style={{ color: MUTE }}>명식을 세우고 해석을 작성하는 중입니다…</p>
+      </div>
+    );
+  }
+
+  const name = report?.name?.trim() || "고객";
+  const c: ReportContent = report?.content ?? SAMPLE_CONTENT;
+  const ilganHanja = (report?.view?.ilgan ?? "乙")[0];
+  const ilganLabel = (report?.view?.ilgan ?? "乙 (을목)").match(/\(([^)]+)\)/)?.[1] ?? "을목";
+
   return (
     <div ref={rootRef} style={{ backgroundColor: CREAM, minHeight: "100%" }}>
       <TopBar progress={progress} onMenu={() => setTocOpen(true)} onMyeongsik={openMyeongsik} />
       <TocPanel open={tocOpen} onClose={() => setTocOpen(false)} />
-      <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={msView} loading={msLoading} />
+      <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={report?.view ?? null} loading={false} />
 
       {/* ── 표지 ── */}
       <Cover />
 
       {/* ── 도입 인용 ── */}
       <Quote>
-        {`"오늘의 ${NAME}님이 되기까지,\n${NAME}님은 어떤 선택들을\n거쳐 왔는지 살펴보겠습니다."`}
+        {`"오늘의 ${name}님이 되기까지,\n${name}님은 어떤 선택들을\n거쳐 왔는지 살펴보겠습니다."`}
       </Quote>
 
       {/* ── 한자 디바이더 ── */}
@@ -581,33 +621,12 @@ function ReportPreviewInner() {
 
       {/* ── 본문: 힘들었던 시기 ── */}
       <section className="px-6 pt-2 pb-12">
-        <Heading>{NAME}님 삶이 힘들 수밖에 없던 시기</Heading>
-        <P>
-          {NAME}님이 지난 시간 동안 걸어온 길을 돌아보면 유독 마음이 무겁고 답답했던 터널 같은 시기가 있었을 것으로
-          보여요.
-        </P>
-        <Callout>
-          특히 20대 중반부터 30대 초반까지 이어졌던 <Term>계유(癸酉) 대운</Term>의 시기는 {NAME}님에게 깊은 내면의
-          방황과 정체기를 안겨주었네요.
-        </Callout>
-        <P>
-          이 시기에는 열심히 노력해도 제자리걸음을 하는 듯한 기분이 들고, 현실적인 돌파구를 찾기가 쉽지 않았을
-          거예요.
-        </P>
-        <P>
-          남들은 앞으로 나아가는 것처럼 보이는데 나만 홀로 멈춰 서 있는 듯한 고립감에 마음고생이 많으셨을 것 같아요.
-        </P>
-        <P>
-          겉으로는 아무렇지 않은 척 웃어 보였지만 혼자 있을 때는 깊은 생각의 늪에 빠져 스스로를 다그치기도 했겠네요.
-        </P>
-        <P>
-          하고 싶은 일은 많았지만 현실적인 여건이 따라주지 않아 마음속으로만 계획을 세우고 지우기를 반복하셨을
-          거예요.
-        </P>
-        <P>
-          이 고단했던 시간들은 {NAME}님이 인생의 다음 단계를 준비하기 위해 내면의 힘을 기르는 혹독한 겨울이었던
-          셈이에요.
-        </P>
+        <Heading>{name}님 삶이 힘들 수밖에 없던 시기</Heading>
+        <P>{c.hardSeason.intro}</P>
+        <Callout>{c.hardSeason.callout}</Callout>
+        {c.hardSeason.paragraphs.map((p, i) => (
+          <P key={i}>{p}</P>
+        ))}
       </section>
 
       {/* ── 한자 디바이더: 연유 ── */}
@@ -618,7 +637,7 @@ function ReportPreviewInner() {
 
       {/* ── 인용 ── */}
       <Quote>
-        {`"왜 ${NAME}님께\n힘든 일이 일어난 건지\n사주 속에 답이 있어요."`}
+        {`"왜 ${name}님께\n힘든 일이 일어난 건지\n사주 속에 답이 있어요."`}
       </Quote>
 
       {/* ── 삽화 ── */}
@@ -627,43 +646,22 @@ function ReportPreviewInner() {
       {/* ── 인용 (천간 강조) ── */}
       <div className="px-8 py-12 text-center">
         <p className="text-[18px] leading-[2]" style={{ color: INK, fontFamily: SERIF }}>
-          &quot;그것은 {NAME}님의 일주가
+          &quot;그것은 {name}님의 일주가
           <br />
-          <Term>乙(을)</Term>이기 때문이에요.&quot;
+          <Term>{ilganHanja}({ilganLabel})</Term>이기 때문이에요.&quot;
         </p>
       </div>
 
       {/* ── 본문: 사주 속 원인 + 운 흐름 차트 ── */}
       <section className="px-6 pt-2 pb-4">
         <Heading>왜 힘들었던 걸까, 사주 속 숨어있는 이유</Heading>
-        <P>
-          {NAME}님이 그토록 힘든 시기를 보낼 수밖에 없었던 이유는 사주 원국과 대운의 기운이 서로 부딪쳤기 때문이에요.
-        </P>
-        <Callout>
-          {NAME}님의 사주에서 월지에 자리 잡은 <Term>자수(子) 편인</Term>의 기운이 대운에서 들어온{" "}
-          <Term>계유(癸酉)</Term>의 강한 물 기운과 만나 과해진 탓이에요.
-        </Callout>
-        <P>
-          <Term>을목(乙)</Term> 일간을 가진 {NAME}님에게 적당한 물은 성장의 자양분이 되지만 너무 과한 물은 오히려
-          뿌리를 썩게 만들어요.
-        </P>
-        <P>
-          물이 넘쳐나면서 흙이 쓸려 내려가고 나무가 둥둥 떠다니는 <Term>부목(浮木)</Term>의 형상이 되어 현실적인
-          안정을 찾기 어려웠던 것이지요.
-        </P>
-        <P>
-          이로 인해 현실적인 실행력보다는 머릿속의 생각과 걱정만 비대해져 스스로를 고립시키는 결과를 낳게 되었어요.
-        </P>
-        <P>
-          또한 일지와 시지의 <Term>묘신원진(卯-申)</Term> 작용이 활성화되면서 내면의 예민함과 완벽주의가 스스로를 더
-          힘들게 짓눌렀네요.
-        </P>
-        <P>
-          결국 기운의 불균형이 {NAME}님의 마음을 흔들고 현실적인 성과를 내는 데 제약을 걸었던 사주학적 원인이 있었던
-          거예요.
-        </P>
+        <P>{c.cause.intro}</P>
+        <Callout>{c.cause.callout}</Callout>
+        {c.cause.paragraphs.map((p, i) => (
+          <P key={i}>{p}</P>
+        ))}
 
-        <RunFlowChart />
+        <RunFlowChart flow={c.cause.flow} />
       </section>
 
       {/* ── 인용 ── */}
@@ -685,31 +683,13 @@ function ReportPreviewInner() {
       {/* ── 본문: 반복되어 온 삶의 패턴 ── */}
       <section className="px-6 pt-2 pb-4">
         <Heading>반복되어 온 삶의 패턴</Heading>
-        <P>
-          {NAME}님의 삶에서 반복되어 온 가장 뚜렷한 패턴은 완벽하게 준비하려다 오히려 시작을 미루게 되는 현상이에요.
-        </P>
-        <Callout>
-          어떤 일을 시작하기 전에 머릿속으로 수많은 시나리오를 그리며 걱정을 사서 하다가 타이밍을 놓치곤 하셨네요.
-        </Callout>
-        <P>
-          잘하고 싶은 마음이 너무 강하다 보니 작은 실수도 용납하지 못해 스스로에게 가혹한 기준을 들이대곤 했어요.
-        </P>
-        <P>
-          또한 대인관계에서도 상대방의 눈치를 보며 맞춰주다가도 한순간에 마음의 문을 닫아버리는 고립의 패턴이
-          있었네요.
-        </P>
-        <P>
-          힘든 감정이 찾아왔을 때 주변 사람들에게 털어놓지 않고 혼자 끙끙 앓으며 해결하려는 성향도 반복되었을
-          거예요.
-        </P>
-        <P>
-          이러한 패턴들은 {NAME}님의 강한 주체성과 예민한 직관력이 부정적으로 얽혔을 때 나타나는 대표적인 모습이에요.
-        </P>
-        <P>
-          이제는 이 반복되는 고리를 끊어내고 조금 더 가볍고 유연하게 세상과 마주할 준비를 하셔야 할 때가 되었어요.
-        </P>
+        <P>{c.pattern.intro}</P>
+        <Callout>{c.pattern.callout}</Callout>
+        {c.pattern.paragraphs.map((p, i) => (
+          <P key={i}>{p}</P>
+        ))}
 
-        <SummaryCard title="지난 흐름 요약" items={PATTERN_SUMMARY} />
+        <SummaryCard title="지난 흐름 요약" items={c.pattern.summary} />
       </section>
 
       {/* ── 삽화 ── */}
@@ -717,7 +697,7 @@ function ReportPreviewInner() {
 
       {/* ── 마무리 인용 ── */}
       <Quote>
-        {`"지나온 모든 발걸음이 ${NAME}님만의\n단단한 지혜가 되었음을\n믿어 드려요."`}
+        {`"지나온 모든 발걸음이 ${name}님만의\n단단한 지혜가 되었음을\n믿어 드려요."`}
       </Quote>
 
       {/* ── 마무리 인용 (천간 강조) ── */}
@@ -725,7 +705,7 @@ function ReportPreviewInner() {
         <p className="text-[18px] leading-[2]" style={{ color: INK, fontFamily: SERIF }}>
           &quot;차가운 겨울 물속에서 견뎌낸
           <br />
-          <Term>을목(乙)</Term>의 끈기가
+          <Term>{ilganLabel}</Term>의 끈기가
           <br />
           이제 따뜻한 봄볕을 만나 싹을
           <br />
