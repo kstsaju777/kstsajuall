@@ -51,6 +51,11 @@ export type ReportContent = {
   seun: ReportSection & { flow: { year: number; score: number }[] }; // 세운(해마다) + 10년 운세 라인
   openLuck: ReportSection & { peak: { title: string; when: string; todo: string } }; // 운이 풀리는 결정적 시점
   domains: { intro: string; paragraphs: string[]; bars: { label: string; value: number }[] }; // 영역별 운세 강도
+  // ── 7장: 재물·직업운 정밀풀이 ──
+  wealthTime: ReportSection & { bars: { year: number; amount: string; value: number }[] }; // 향후 5년 재물운(연도/금액/상대크기)
+  jobFit: ReportSection & { jobs: { title: string; desc: string }[] }; // 내게 맞는 직업 TOP 3
+  jobType: ReportSection & { split: { leftLabel: string; left: number; rightLabel: string; right: number; leftDesc: string; rightDesc: string } }; // 직장인 vs 사업가
+  invest: ReportSection; // 내게 잘 맞는 투자 방법
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -61,6 +66,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   4: ["rarity", "special"],
   5: ["balance", "answer"],
   6: ["daeFlow", "seun", "openLuck", "domains"],
+  7: ["wealthTime", "jobFit", "jobType", "invest"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -94,6 +100,7 @@ const CH_THEME: Record<number, string> = {
   4: "'내 사주는 얼마나 희귀한가' — 명식의 희소성/등급, 귀인·신살·합충이 만드는 특별함",
   5: "'세상을 대하는 나만의 방식' — 독립과 협력 사이의 균형, 삶의 갈등을 푸는 해답",
   6: "'앞으로 10년, 어떻게 흘러갈까' — 현재 진행 중인 대운으로 보는 10년의 큰 흐름",
+  7: "'재물·직업운 정밀풀이' — 큰돈이 들어오는 시점, 향후 5년 재물운",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -170,6 +177,38 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "사주 데이터를 바탕으로 앞으로 10년간의 주요 인생 영역별 운세 강도를 종합 비교하는 도입",
     "paragraphs": ["돈·일·연애·결혼·건강 다섯 영역의 위계와 무게중심을 짚는 문장","이 비교를 삶의 기획·에너지 분배 가이드로 삼으라는 조언"],
     "bars": [ {"label":"재물","value":85}, {"label":"직업","value":90}, {"label":"애정","value":75}, {"label":"결혼","value":80}, {"label":"건강","value":70} ]
+  }
+}`,
+  7: `{
+  "wealthTime": {
+    "intro": "재물운이 어느 나이대로 갈수록 단단해지고 풍요로워지는지 흐름을 짚는 도입",
+    "callout": "큰돈을 만질 최고의 시기(연도+간지 한자)와 용신/희신(쇠·흙 등) 작용을 짚는 문장",
+    "paragraphs": ["그 시기 자산 가치 상승/투자 수익","상관 등 과해질 때 주의할 해와 투기·지출 리스크","장기적·안정적 자산관리 원칙 조언"],
+    "bars": [
+      {"year":2026,"amount":"1억 5천","value":15}, {"year":2027,"amount":"2억 5천","value":25},
+      {"year":2028,"amount":"6억","value":60}, {"year":2029,"amount":"5억","value":50}, {"year":2030,"amount":"2억","value":20}
+    ]
+  },
+  "jobFit": {
+    "intro": "어떤 일에서 가장 큰 성과를 내는지(타고난 적성)를 짚는 도입",
+    "callout": "강점(틈새 포착·전문성 브랜드화 등)을 십성 근거로 짚는 문장",
+    "paragraphs": ["맞지 않는 환경(단순 반복/지시)에서의 한계","전문성을 갈고닦아 증명할 때 따르는 명예·성취"],
+    "jobs": [
+      {"title":"직업명 1","desc":"왜 잘 맞는지 한 줄"},
+      {"title":"직업명 2","desc":"왜 잘 맞는지 한 줄"},
+      {"title":"직업명 3","desc":"왜 잘 맞는지 한 줄"}
+    ]
+  },
+  "jobType": {
+    "intro": "직장인 길과 사업가 길 중 어디에 더 강한지 도입",
+    "callout": "비견/상관 등으로 독립·주도 성향을 짚는 문장",
+    "paragraphs": ["직장 생활을 할 때 필요한 환경(독자적 프로젝트 등)","장기적으로 권하는 독립/1인 기업 방향"],
+    "split": { "leftLabel":"직장인 팔자","left":40,"rightLabel":"사업가 팔자","right":60,"leftDesc":"안정적이지만 답답함을 느끼기 쉬워요","rightDesc":"주도적으로 판을 짤 때 성과가 극대화돼요" }
+  },
+  "invest": {
+    "intro": "어떤 재테크 방식이 가장 잘 맞는지(투기성 vs 실물 안정형) 짚는 도입",
+    "callout": "용신 오행(흙·쇠 등)을 근거로 부동산·장기채권·우량주 등 안전한 투자처를 짚는 문장",
+    "paragraphs": ["상관의 충동적 기운이 부르는 투자 리스크와 경계점","철저한 분석·이성적 기준으로 장기 포트폴리오를 굴릴 때의 결실"]
   }
 }`,
 };

@@ -286,6 +286,80 @@ function DomainBars({ bars }: { bars: { label: string; value: number }[] }) {
   );
 }
 
+// 향후 5년 재물운 막대 차트 (7장) — 금액 라벨 + 상대 높이
+function WealthBars({ title, sub, bars }: { title: string; sub: string; bars: { year: number; amount: string; value: number }[] }) {
+  const src = bars.length ? bars : [{ year: new Date().getFullYear(), amount: "-", value: 50 }];
+  const max = Math.max(...src.map((b) => b.value), 1);
+  return (
+    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <h3 className="text-[15px] font-black mb-1 flex items-center gap-1.5" style={{ color: INK }}>
+        <span style={{ color: GOLD }}>📊</span> {title}
+      </h3>
+      <p className="text-[12px] mb-4" style={{ color: MUTE }}>{sub}</p>
+      <div className="flex justify-between gap-2" style={{ height: 170 }}>
+        {src.map((b, i) => (
+          <div key={i} className="flex-1 flex flex-col justify-end items-center">
+            <span className="text-[11.5px] font-black mb-1" style={{ color: MAROON }}>{b.amount}</span>
+            <div className="w-full rounded-t-lg" style={{ height: `${(b.value / max) * 100}%`, background: `linear-gradient(to top, ${GOLD}, ${GOLD}44)`, minHeight: 6 }} />
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between gap-2 mt-2">
+        {src.map((b, i) => (
+          <div key={i} className="flex-1 text-center text-[11.5px] font-bold" style={{ color: INK_SOFT }}>{b.year}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 내게 맞는 직업 TOP 3 (7장)
+function JobTop3({ jobs }: { jobs: { title: string; desc: string }[] }) {
+  if (!jobs.length) return null;
+  return (
+    <div className="rounded-2xl p-5 mb-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <h3 className="text-[15px] font-black mb-4" style={{ color: INK }}>내게 맞는 직업 TOP 3</h3>
+      <div className="space-y-4">
+        {jobs.slice(0, 3).map((j, i) => (
+          <div key={i} className="flex gap-3 items-start">
+            <span className="flex-shrink-0 flex items-center justify-center text-[13px] font-black text-white rounded-full" style={{ width: 26, height: 26, background: NAVY, opacity: 1 - i * 0.18 }}>{i + 1}</span>
+            <div>
+              <p className="text-[14px] font-bold" style={{ color: INK }}>{j.title}</p>
+              <p className="text-[12.5px] leading-relaxed mt-0.5" style={{ color: MUTE }}>{j.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 직장인 vs 사업가 양분 게이지 (7장)
+function SplitGauge({ split }: { split: { leftLabel: string; left: number; rightLabel: string; right: number; leftDesc: string; rightDesc: string } }) {
+  return (
+    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="flex justify-between items-end mb-2.5">
+        <div>
+          <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>● {split.leftLabel}</p>
+          <p className="text-[22px] font-black leading-none" style={{ color: INK_SOFT }}>{split.left}%</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[11px] font-bold mb-0.5" style={{ color: NAVY }}>{split.rightLabel} ●</p>
+          <p className="text-[22px] font-black leading-none" style={{ color: NAVY }}>{split.right}%</p>
+        </div>
+      </div>
+      <div className="flex rounded-full overflow-hidden" style={{ height: 10 }}>
+        <div style={{ width: `${split.left}%`, background: `${INK}26` }} />
+        <div style={{ width: `${split.right}%`, background: NAVY }} />
+      </div>
+      <div className="flex justify-between gap-4 mt-2.5">
+        <p className="text-[11px] flex-1" style={{ color: MUTE }}>{split.leftDesc}</p>
+        <p className="text-[11px] flex-1 text-right" style={{ color: INK_SOFT }}>{split.rightDesc}</p>
+      </div>
+    </div>
+  );
+}
+
 // 십성 → 6축 역할 값 (명식 기반)
 function sipseongRadar(view: MyeongsikView | null): { label: string; value: number }[] {
   const cat: Record<string, number> = { 비겁: 0, 식상: 0, 재성: 0, 관성: 0, 인성: 0 };
@@ -416,6 +490,8 @@ const CHAPTER_TITLES: Record<string, string> = {
   "3": "제3장 · 나는 왜 이런 사람인 걸까",
   "4": "제4장 · 내 사주는 얼마나 희귀할까",
   "5": "제5장 · 세상을 대하는 나만의 방식",
+  "6": "제6장 · 앞으로 10년, 어떻게 흘러갈까",
+  "7": "제7장 · 재물·직업운 정밀풀이",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -781,6 +857,49 @@ const SAMPLE_CONTENT: ReportContent = {
     bars: [
       { label: "재물", value: 85 }, { label: "직업", value: 90 }, { label: "애정", value: 75 },
       { label: "결혼", value: 80 }, { label: "건강", value: 70 },
+    ],
+  },
+  wealthTime: {
+    intro: "선우님의 재물운은 30대 후반에서 40대 초반으로 갈수록 점차 단단해지고 풍요로워지는 흐름을 보여줍니다.",
+    callout: "특히 2028년(무신년)과 2029년(기유년)은 선우님의 용신과 희신인 쇠와 흙의 기운이 강력하게 들어와 큰돈을 만질 수 있는 최고의 기회예요.",
+    paragraphs: [
+      "이 시기에는 자산 가치가 크게 상승하거나 투자했던 곳에서 예상치 못한 큰 수익이 돌아오는 기쁨을 누릴 수 있어요.",
+      "다만 상관의 기운이 과해지는 해에는 충동적인 투기나 무리한 지출로 인해 재물이 새어나갈 수 있으니 주의해야 해요.",
+      "장기적이고 안정적인 자산 관리 원칙을 세우고 이를 묵묵히 실천해 나갈 때 선우님의 재물 그릇은 가득 채워질 것입니다.",
+    ],
+    bars: [
+      { year: 2026, amount: "1억 5천", value: 15 }, { year: 2027, amount: "2억 5천", value: 25 },
+      { year: 2028, amount: "6억", value: 60 }, { year: 2029, amount: "5억", value: 50 }, { year: 2030, amount: "2억", value: 20 },
+    ],
+  },
+  jobFit: {
+    intro: "선우님은 뛰어난 기획력과 독창적인 아이디어를 바탕으로 스스로 판을 짜고 조율하는 일에서 가장 큰 성과를 내는 적성을 가지고 있어요.",
+    callout: "남들이 생각하지 못한 틈새시장을 직관적으로 포착하고 이를 나만의 전문적인 지식과 기술로 브랜드화하는 능력이 매우 탁월하네요.",
+    paragraphs: [
+      "단순히 지시받은 업무를 반복하는 환경에서는 쉽게 지치고 갈증을 느끼니 주도적인 권한이 주어지는 분야에서 일하셔야 해요.",
+      "선우님만의 대체 불가능한 전문성을 끊임없이 갈고닦아 세상에 증명해 보일 때 직업적인 명예와 성취가 함께 따를 것입니다.",
+    ],
+    jobs: [
+      { title: "전문 기획 및 전략 컨설턴트", desc: "독창적인 아이디어와 분석력으로 프로젝트를 설계하고 조율하는 역할이 제격이에요." },
+      { title: "IT 및 크리에이티브 디렉터", desc: "상관의 표현력을 살려 트렌디한 콘텐츠나 기술을 기획하고 이끄는 분야에 강해요." },
+      { title: "전문 자격 기반의 독립 사업가", desc: "세무, 노무, 기술 등 자신만의 전문 라이선스를 활용한 독립적인 비즈니스가 잘 맞아요." },
+    ],
+  },
+  jobType: {
+    intro: "선우님은 조직 내에서 능력을 인정받는 직장인의 길도 좋지만, 궁극적으로는 혼자 결정권을 쥐고 주도하는 독립적인 사업이 성향에 훨씬 강해요.",
+    callout: "사주에 비견과 상관의 힘이 강하게 자리 잡고 있어 누군가의 통제를 받기보다 내 뜻대로 비즈니스를 이끌어갈 때 에너지가 살아납니다.",
+    paragraphs: [
+      "직장 생활을 하더라도 독자적인 프로젝트를 맡아 자유롭게 기획할 수 있는 환경이 주어져야 답답함을 느끼지 않고 롱런할 수 있어요.",
+      "장기적으로는 자신만의 전문 자격이나 기술을 바탕으로 한 1인 기업이나 독립적인 형태의 사업을 구상해 보시는 것을 적극 추천해 드려요.",
+    ],
+    split: { leftLabel: "직장인 팔자", left: 40, rightLabel: "사업가 팔자", right: 60, leftDesc: "안정적이지만 답답함을 느끼기 쉬워요", rightDesc: "주도적으로 판을 짤 때 성과가 극대화돼요" },
+  },
+  invest: {
+    intro: "선우님에게 가장 잘 맞는 재테크 방법은 단기적인 주식이나 가상화폐 같은 투기성 투자보다는 실물 자산에 기반한 안정적인 투자예요.",
+    callout: "흙(土)과 쇠(金)의 기운이 재물과 안정을 뜻하므로 부동산이나 장기 채권, 혹은 우량주 중심의 장기 묻어두기식 투자가 가장 안전해요.",
+    paragraphs: [
+      "상관의 충동적인 기운이 발동할 때 귀가 얇아져 남들의 말만 믿고 섣불리 큰돈을 움직였다가는 큰 손실을 보기 쉬우니 경계해야 합니다.",
+      "나만의 철저한 분석과 이성적인 기준을 바탕으로 포트폴리오를 구성하고 흔들림 없이 장기적으로 굴려 갈 때 큰 부를 이룰 수 있어요.",
     ],
   },
 };
@@ -1857,8 +1976,82 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제7장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && (
+      {/* ═══════════ 제7장 ═══════════ */}
+      {ch === "7" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-16.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “재물·직업운<br />정밀풀이”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"돈과 일 —\n${name}님의 재물과 직업운을\n깊이 들여다보겠습니다."`}</Quote>
+
+          {/* 재물운 시점 */}
+          <HanjaDivider hanja="財時" sub="재물운이 흐르는 시점" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>큰돈이 들어오는 때는 따로 있어요</Heading>
+            <P>{c.wealthTime.intro}</P>
+            <Callout>{c.wealthTime.callout}</Callout>
+            {c.wealthTime.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <WealthBars title="향후 5년 재물운" sub="해마다 최대로 모을 수 있는 금액을 표시했어요." bars={c.wealthTime.bars} />
+          </section>
+
+          {/* 적직 */}
+          <HanjaDivider hanja="適職" sub="타고난 적성과 잘 맞는 직업" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>기획하고 조율하는 일에 강해요</Heading>
+            <P>{c.jobFit.intro}</P>
+            <Callout>{c.jobFit.callout}</Callout>
+            {c.jobFit.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <JobTop3 jobs={c.jobFit.jobs} />
+          </section>
+
+          {/* 직장인 vs 사업가 */}
+          <HanjaDivider hanja="職業" sub="직장인 팔자 vs 사업가 팔자" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>혼자 결정권을 쥘 때 빛나요</Heading>
+            <P>{c.jobType.intro}</P>
+            <Callout>{c.jobType.callout}</Callout>
+            {c.jobType.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <SplitGauge split={c.jobType.split} />
+          </section>
+
+          {/* 투자 */}
+          <HanjaDivider hanja="投資" sub="내게 잘 맞는 투자 방법" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>내게 잘 맞는 투자 방법</Heading>
+            <P>{c.invest.intro}</P>
+            <Callout>{c.invest.callout}</Callout>
+            {c.invest.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-17.jpg" h={360} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"재물은 흙(土)의 대지 위에\n쇠(金)의 도구로 일굴 때 가장\n단단하게 쌓여요.\n조급함을 내려놓고 장기적인\n안목으로 자산을 굴려 가세요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("6")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("8")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>연애·결혼운 정밀풀이</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제8장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
