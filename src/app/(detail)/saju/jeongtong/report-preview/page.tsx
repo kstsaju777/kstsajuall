@@ -424,8 +424,8 @@ function HealthCareCard({ element, tips }: { element: string; tips: { label: str
   );
 }
 
-// 미래 배우자 카드 (8장)
-function SpouseCard({ card }: { card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] } }) {
+// 인물 카드 (배우자 8장 · 귀인 10장 공용)
+function PersonCard({ title, label, photo, card }: { title?: string; label: string; photo: string; card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] } }) {
   const spec = (label: string, val: string) => (
     <div>
       <p className="text-[11px] font-bold mb-0.5" style={{ color: MAROON }}>{label}</p>
@@ -436,12 +436,15 @@ function SpouseCard({ card }: { card: { gender: string; ageBand: string; desc: s
     <div className="rounded-2xl p-4 mb-4" style={{ background: PINK_PALE, border: `1px solid ${INK}10` }}>
       <div className="flex items-center gap-2 mb-3">
         <span className="flex items-center justify-center rounded-full text-[13px]" style={{ width: 26, height: 26, background: WHITE, color: MAROON }}>👤</span>
-        <p className="text-[12px]" style={{ color: MUTE }}>사주로 본 배우자의 분위기예요.</p>
+        <div>
+          {title && <p className="text-[13px] font-black leading-tight" style={{ color: INK }}>{title}</p>}
+          <p className="text-[12px]" style={{ color: MUTE }}>{label}</p>
+        </div>
       </div>
       <div className="rounded-xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}0e` }}>
         <div className="relative" style={{ height: 200 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/hero/hero-4.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={photo} alt="" className="absolute inset-0 w-full h-full object-cover" />
           <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-0.5 rounded-md text-white" style={{ background: MAROON }}>{card.gender}</span>
           <span className="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-md" style={{ background: WHITE, color: INK }}>{card.ageBand}</span>
         </div>
@@ -598,6 +601,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "7": "제7장 · 재물·직업운 정밀풀이",
   "8": "제8장 · 연애·결혼운 정밀풀이",
   "9": "제9장 · 건강운 정밀풀이",
+  "10": "제10장 · 나를 도와줄 귀인은 누구일까",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1090,6 +1094,54 @@ const SAMPLE_CONTENT: ReportContent = {
       { label: "음식", title: "도라지, 무, 배 등 흰색 음식", desc: "폐와 호흡기 기능을 강화하는 데 좋아요" },
       { label: "운동", title: "맨몸 스트레칭과 필라테스", desc: "관절의 유연성을 기르고 뼈를 보호해요" },
       { label: "습관", title: "바른 자세 유지와 척추 정렬", desc: "뼈와 관절에 무리가 가지 않도록 돕습니다" },
+    ],
+  },
+  helper: {
+    intro: "선우님의 인생 여정에서 결정적인 순간마다 나타나 도움을 줄 귀인은 어떤 성향을 가진 사람인지 알려드릴게요.",
+    callout: "귀인은 선우님에게 달콤한 위로보다는 뼈를 때리는 냉정하고 현실적인 조언을 아끼지 않는 이성적이고 공정한 멘토 같은 사람이에요.",
+    paragraphs: [
+      "공과 사가 확실하고 일 처리가 완벽한 선배나 상사의 모습으로 다가와 선우님이 감정에 치우쳐 흔들릴 때 중심을 잡아 줍니다.",
+      "이런 귀인을 만났을 때는 자존심을 내세우기보다 그의 조언에 귀를 기울일 때 더 큰 도약의 기회를 잡을 수 있어요.",
+    ],
+    card: {
+      gender: "남성",
+      ageBand: "40대 초반",
+      desc: "말투가 다소 차갑고 직설적일 수 있지만, 일 처리가 완벽하고 공과 사가 확실한 선배나 상사예요. 선우님이 감정에 치우칠 때 중심을 잡아 줍니다.",
+      mbti: "ENTJ",
+      height: "178cm 내외",
+      personality: "냉철하지만 의리가 있고 책임감이 강한 성격",
+      jobField: "기획, 재무, 법률, 전문 경영인",
+      tags: ["이성적인", "공정한", "피드백이 확실한", "추진력 있는", "금융/법조계", "든든한 멘토", "신중한", "의리 있는"],
+    },
+  },
+  helperTime: {
+    intro: "이 소중한 귀인의 인연이 선우님의 삶에 본격적으로 찾아오고 활성화되는 구체적인 시기를 짚어드릴게요.",
+    callout: "귀인은 현재 지나고 있는 임신(壬申) 대운의 정관(申) 기운이 강해지는 해나, 선우님이 중요한 커리어적 결정을 내려야 할 때 나타나요.",
+    paragraphs: [
+      "특히 2028년 무신(戊申)년에는 귀인의 강력한 조력과 추천을 통해 승진이나 좋은 조건의 이직을 성취할 가능성이 매우 높답니다.",
+    ],
+  },
+  helperUse: {
+    intro: "선우님에게 찾아올 소중한 천을귀인의 인연을 어떻게 알아보고 삶에 현명하게 활용할 그 비결을 전해드릴게요.",
+    callout: "귀인은 선우님에게 달콤한 칭찬을 늘어놓기보다 뼈를 때리는 냉정하고 현실적인 조언을 건네는 모습으로 나타나요.",
+    paragraphs: [
+      "처음에는 그의 직설적인 말투에 자존심이 상하거나 거부감이 들 수 있지만 그의 말속에는 늘 뼈가 있고 진심이 담겨 있어요.",
+      "선우님이 감정에 치우쳐 무리한 결정을 내리려 할 때 브레이크를 걸어주고 올바른 방향을 제시해 주는 고마운 존재지요.",
+      "이 귀인의 조언을 잔소리로 치부하지 말고 나를 더 단단하게 다듬어주는 보석 같은 피드백으로 받아들이셔야 해요.",
+      "귀인이 제시하는 합리적인 규칙과 시스템을 적극적으로 수용하여 선우님의 업무나 사업에 적용해 보세요.",
+      "혼자 끙끙 앓으며 고민하던 일들을 귀인에게 털어놓고 자문을 구하면 생각보다 너무나 쉽게 해결책을 찾을 수 있어요.",
+      "귀인과의 긍정적인 관계를 유지하기 위해서는 평소에 예의를 갖추고 공적인 신뢰를 쌓아두는 것이 무엇보다 중요해요.",
+      "사적인 감정보다는 일의 성과와 공정함을 바탕으로 소통할 때 귀인은 선우님을 더욱 신뢰하고 전폭적으로 지원해 줍니다.",
+      "귀인이 이끄는 네트워크나 모임에 적극적으로 참여하여 선우님의 사회적 지평을 넓히는 기회로 삼으셔도 아주 좋아요.",
+      "그의 철저한 자기관리와 이성적인 판단 방식을 곁에서 지켜보며 선우님만의 훌륭한 롤모델로 삼아 배워보세요.",
+      "묘신원진의 예민함이 발동해 귀인의 의도를 오해하거나 의심하려 할 때마다 \"이것은 나를 위한 약이다\"라고 마음을 다잡으세요.",
+      "귀인의 도움을 받아 커리어를 확장해 나갈 때 선우님의 신강한 사주는 비로소 사회적으로 큰 결실을 맺게 됩니다.",
+      "고마운 마음을 말로만 끝내지 말고 작은 선물이나 진심 어린 감사 편지로 표현하여 인연의 끈을 더욱 단단히 묶으세요.",
+      "귀인은 선우님이 어려움에 처했을 때 보이지 않는 곳에서 든든한 바람막이가 되어줄 진짜 내 사람임을 잊지 마세요.",
+      "혼자 서는 삶도 아름답지만 귀인과 손을 잡고 함께 걸어갈 때 선우님의 여정은 훨씬 더 빠르고 풍요로워질 거예요.",
+      "하늘이 내려준 천을귀인의 복을 낭비하지 말고 겸손하고 열린 마음으로 그 기운을 온전히 흡수하시기를 바랄게요.",
+      "귀인의 지혜와 선우님의 추진력이 결합할 때 그 시너지는 상상 이상으로 거대하며 인생의 큰 도약을 이끌어 낼 것입니다.",
+      "소중한 인연을 귀하게 여기고 가꾸어 나가는 지혜로운 태도야말로 선우님의 삶을 가장 눈부시게 만드는 비결이랍니다.",
     ],
   },
 };
@@ -2281,7 +2333,7 @@ function ReportPreviewInner() {
           {/* 이런 사람이 배우자로 와요 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>이런 사람이 배우자로 와요</Heading>
-            <SpouseCard card={c.spouse.card} />
+            <PersonCard label="사주로 본 배우자의 분위기예요." photo="/images/hero/hero-4.jpg" card={c.spouse.card} />
             <P>{c.spouse.intro}</P>
             <Callout>{c.spouse.callout}</Callout>
             {c.spouse.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
@@ -2377,8 +2429,71 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제10장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && (
+      {/* ═══════════ 제10장 ═══════════ */}
+      {ch === "10" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “나를 도와줄<br />귀인은 누구일까?”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"${name}님을 돕는 귀인이\n어떤 사람이고,\n언제 찾아오는지 살펴보겠습니다."`}</Quote>
+
+          {/* 귀인은 어떤 사람일까 */}
+          <HanjaDivider hanja="貴人" sub="귀인은 어떤 사람일까" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>귀인은 어떤 사람일까</Heading>
+            <PersonCard title="귀인 인물 카드" label="나를 돕는 사람의 분위기와 특징이에요." photo="/images/hero/hero-6.jpg" card={c.helper.card} />
+            <P>{c.helper.intro}</P>
+            <Callout>{c.helper.callout}</Callout>
+            {c.helper.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 귀인은 언제 올까 */}
+          <HanjaDivider hanja="時機" sub="귀인은 언제 올까" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>귀인은 언제 올까</Heading>
+            <P>{c.helperTime.intro}</P>
+            <Callout>{c.helperTime.callout}</Callout>
+            {c.helperTime.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 그 인연을 어떻게 활용할지 */}
+          <HanjaDivider hanja="因緣" sub="그 인연을 어떻게 활용할지" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>그 인연을 어떻게 활용할지</Heading>
+            <P>{c.helperUse.intro}</P>
+            <Callout>{c.helperUse.callout}</Callout>
+            {c.helperUse.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-14.jpg" h={400} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"나를 깎아내리는 칼날이 아니라\n나를 다듬어 주는 정교한\n정(金)처럼,\n귀인의 쓴소리를 성장의 발판으로\n삼아 보세요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("9")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("11")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>반드시 조심해야 할 시기는 언제일까?</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제11장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>

@@ -68,6 +68,13 @@ export type ReportContent = {
   bodyWeak: ReportSection & { bars: { label: string; value: number }[] }; // 타고난 약한 부위 + 부위별 주의 신호
   riskTime: ReportSection; // 조심해야 할 시기와 사고수
   healthCare: ReportSection & { element: string; tips: { label: string; title: string; desc: string }[] }; // 오행에 따른 건강관리
+  // ── 10장: 나를 도와줄 귀인은 누구일까 ──
+  helper: { // 귀인은 어떤 사람일까
+    intro: string; callout: string; paragraphs: string[];
+    card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] };
+  };
+  helperTime: ReportSection; // 귀인은 언제 올까
+  helperUse: ReportSection;  // 그 인연을 어떻게 활용할지
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -81,6 +88,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   7: ["wealthTime", "jobFit", "jobType", "invest"],
   8: ["loveStyle", "loveFlow", "spouse", "marriage"],
   9: ["bodyWeak", "riskTime", "healthCare"],
+  10: ["helper", "helperTime", "helperUse"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -117,6 +125,7 @@ const CH_THEME: Record<number, string> = {
   7: "'재물·직업운 정밀풀이' — 큰돈이 들어오는 시점, 향후 5년 재물운",
   8: "'연애·결혼운 정밀풀이' — 사랑하는 방식, 시기별 연애 흐름",
   9: "'건강운 정밀풀이' — 타고난 약한 부위, 부위별 주의 신호",
+  10: "'나를 도와줄 귀인은 누구일까' — 귀인의 성향·특징(인물 카드)",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -284,6 +293,33 @@ const CH_SCHEMA: Record<number, string> = {
       {"label":"운동","title":"맨몸 스트레칭과 필라테스","desc":"관절의 유연성을 기르고 뼈를 보호해요"},
       {"label":"습관","title":"바른 자세 유지와 척추 정렬","desc":"뼈와 관절에 무리가 가지 않도록 돕습니다"}
     ]
+  }
+}`,
+  10: `{
+  "helper": {
+    "intro": "인생의 결정적 순간마다 도움을 줄 귀인이 어떤 성향인지 짚는 도입",
+    "callout": "귀인이 어떤 식으로 돕는 존재인지(냉정·공정한 멘토 등)를 짚는 문장",
+    "paragraphs": ["귀인의 모습(선배·상사 등)과 중심을 잡아주는 역할","감정에 흔들릴 때 귀인이 주는 도움"],
+    "card": {
+      "gender": "남성 또는 여성",
+      "ageBand": "40대 초반 등 연령대",
+      "desc": "귀인의 분위기·특징 2~3문장",
+      "mbti": "ENTJ 등 추정 MBTI",
+      "height": "178cm 내외 등",
+      "personality": "성격 한 줄",
+      "jobField": "직업 계열",
+      "tags": ["키워드","키워드","키워드","키워드","키워드","키워드","키워드","키워드"]
+    }
+  },
+  "helperTime": {
+    "intro": "귀인의 인연이 본격적으로 찾아오고 활성화되는 시기를 짚는 도입",
+    "callout": "귀인이 들어오는 시기(대운/세운 간지·정관 등 십성)를 짚는 문장",
+    "paragraphs": ["특정 연도(연도+간지)의 조력과 승진·이직 등 결실"]
+  },
+  "helperUse": {
+    "intro": "귀인의 인연을 알아보고 현명하게 활용하는 비결 도입",
+    "callout": "귀인이 다가오는 방식(직설적 조언 등)을 짚는 문장",
+    "paragraphs": ["직설적 말투를 받아들이는 태도","무리한 결정을 막아주는 역할","조언을 보석 같은 피드백으로 수용","귀인의 규칙·시스템을 적용","고민을 털어놓고 자문 구하기","예의·공적 신뢰를 쌓는 관계 유지","성과·공정함 기반 소통","귀인의 네트워크에 참여해 지평 넓히기"]
   }
 }`,
 };
