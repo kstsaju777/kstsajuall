@@ -648,6 +648,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "10": "제10장 · 나를 도와줄 귀인은 누구일까",
   "11": "제11장 · 반드시 조심해야 할 시기는 언제일까",
   "12": "제12장 · 반드시 조심해야 할 악인은 누구일까",
+  "13": "제13장 · 핵심 정리",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1286,6 +1287,27 @@ const SAMPLE_CONTENT: ReportContent = {
       "잃고 나서 후회하기보다 미리 경계하고 예방하는 지혜를 발휘할 때 선우님의 삶은 비로소 안전지대에 놓이게 돼요.",
       "내 안의 단단한 자존심을 상처 입지 않도록 스스로를 보호하는 법을 배우는 것도 중요한 개운의 과정이에요.",
       "소중한 것들을 지켜내고 다가올 황금기를 온전히 누리기 위해 늘 깨어있는 이성으로 세상을 마주하시기를 바랄게요.",
+    ],
+  },
+  sumEssence: {
+    intro: "선우님은 을묘(乙卯) 일주가 가진 강인한 생명력과 주체성을 바탕으로, 스스로의 힘으로 삶을 개척해 나가는 단단한 영혼이에요.",
+    callout: "뛰어난 기획력과 표현력을 무기 삼아 나만의 전문적인 영역을 구축할 때 가장 큰 사회적 성취와 자아실현을 이룰 수 있답니다.",
+    paragraphs: [
+      "남에게 휘둘리지 않고 나만의 확고한 기준을 지키며 주도적으로 판을 짜 나가는 주체적인 삶이야말로 선우님의 본질이에요.",
+    ],
+  },
+  sumTime: {
+    intro: "현재 지나고 있는 임신(壬申) 대운은 선우님의 삶에 안정적인 사회적 지위와 명예를 가져다주는 아주 긍정적인 상승기의 흐름이에요.",
+    callout: "특히 만 38세가 되는 2028년 무신(戊申)년은 재물과 관직의 기운이 동시에 폭발하여 인생의 큰 도약을 이룰 결정적 타이밍이에요.",
+    paragraphs: [
+      "다가올 황금기를 위해 지금부터 차근차근 실력을 쌓고 내실을 다져두는 것이 가장 현명하고 가치 있는 준비임을 잊지 마세요.",
+    ],
+  },
+  sumRelation: {
+    intro: "사주에 있는 묘신원진의 예민함을 다스리기 위해 가까운 사람들과 소통할 때 감정을 빼고 이성적으로 대화하는 노력이 필요해요.",
+    callout: "인생의 고비마다 찾아와 든든한 버팀목이 되어줄 천을귀인의 현실적인 조언을 겸손하고 열린 마음으로 받아들이는 것이 성공의 비결이에요.",
+    paragraphs: [
+      "나만의 성벽을 너무 높이 쌓지 말고, 주변의 귀인들과 유연하게 협력할 때 더 큰 기회와 풍요로운 재물이 흘러들어옵니다.",
     ],
   },
 };
@@ -2756,8 +2778,67 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제13장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && (
+      {/* ═══════════ 제13장 · 핵심 정리 ═══════════ */}
+      {ch === "13" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-9.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제5부 · {name}님만의 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “핵심 정리”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"지금까지의 이야기를\n세 가지로\n정리해 보겠습니다."`}</Quote>
+
+          {/* 1. 본질 */}
+          <section className="px-6 pt-4 pb-2">
+            <Heading>본질, 타고난 본바탕</Heading>
+            <P>{c.sumEssence.intro}</P>
+            <Callout>{c.sumEssence.callout}</Callout>
+            {c.sumEssence.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 2. 시기 */}
+          <section className="px-6 pt-4 pb-2">
+            <Heading>시기, 지금 흐르는 운의 때</Heading>
+            <P>{c.sumTime.intro}</P>
+            <Callout>{c.sumTime.callout}</Callout>
+            {c.sumTime.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 3. 관계 */}
+          <section className="px-6 pt-4 pb-2">
+            <Heading>관계, 기운끼리의 충과 합</Heading>
+            <P>{c.sumRelation.intro}</P>
+            <Callout>{c.sumRelation.callout}</Callout>
+            {c.sumRelation.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-13.jpg" h={400} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"나의 굳건한 뿌리를 믿고,\n다가올 황금빛 계절을 향해\n한 걸음씩 당당하게 걸어가시기를\n응원해 드려요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("12")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("14")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>지금부터 해야 할 일들</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제14장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>

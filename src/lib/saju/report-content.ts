@@ -88,6 +88,10 @@ export type ReportContent = {
     card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] };
   };
   loss: ReportSection; // 그때 무엇을 잃을 수 있는지
+  // ── 13장: 핵심 정리 ──
+  sumEssence: ReportSection;  // 본질, 타고난 본바탕
+  sumTime: ReportSection;     // 시기, 지금 흐르는 운의 때
+  sumRelation: ReportSection; // 관계, 기운끼리의 충과 합
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -104,6 +108,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   10: ["helper", "helperTime", "helperUse"],
   11: ["samjae", "samjaeFocus"],
   12: ["villain", "loss"],
+  13: ["sumEssence", "sumTime", "sumRelation"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -143,6 +148,7 @@ const CH_THEME: Record<number, string> = {
   10: "'나를 도와줄 귀인은 누구일까' — 귀인의 성향·특징(인물 카드)",
   11: "'반드시 조심해야 할 시기는 언제일까' — 가장 거친 3년 삼재, 연차별 주의점",
   12: "'반드시 조심해야 할 악인은 누구일까' — 나를 흔드는 사람의 패턴(인물 카드)",
+  13: "'핵심 정리' — 전체 풀이를 본질·시기·관계 세 가지로 요약",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -386,6 +392,23 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "악인의 유혹에 넘어갔을 때 잃게 될 구체적 손실을 짚는 도입",
     "callout": "가장 먼저 타격받는 것(재물·자산의 누수, 십성 한자 포함)을 짚는 문장",
     "paragraphs": ["경제적 어려움","정신적 배신감·마음앓이","불신·자책으로의 확산","본업 집중력·커리어 손실","진짜 인연과의 관계 악화","건강·수면 손실","평판·신용 실추","정관/상관 관점의 근본 원인","회복의 어려움과 예방의 중요성","의심스러운 인연을 정리하는 결단","깨어있는 이성으로 황금기를 지키라는 마무리"]
+  }
+}`,
+  13: `{
+  "sumEssence": {
+    "intro": "타고난 본질을 한 문단으로 요약(일주 한자·생명력·주체성)",
+    "callout": "강점을 살려 가장 큰 성취를 이루는 길을 짚는 한 문장",
+    "paragraphs": ["주체적인 삶이 곧 본질이라는 마무리 한 문단"]
+  },
+  "sumTime": {
+    "intro": "현재 대운(간지 한자)이 주는 흐름을 한 문단으로 요약",
+    "callout": "결정적 도약의 해(만 나이+연도+간지)를 짚는 한 문장",
+    "paragraphs": ["지금의 준비가 황금기를 만든다는 마무리 한 문단"]
+  },
+  "sumRelation": {
+    "intro": "관계에서 다스릴 합/충(예민함)과 소통 태도를 한 문단으로 요약",
+    "callout": "귀인의 조언을 받아들이는 것이 성공의 비결이라는 한 문장",
+    "paragraphs": ["귀인과 협력할 때 기회·재물이 흐른다는 마무리 한 문단"]
   }
 }`,
 };
