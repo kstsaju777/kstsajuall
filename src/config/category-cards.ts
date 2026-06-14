@@ -64,7 +64,7 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   연애_전체: [
     { image: "/images/hero/hero-12.jpg", badge: "연애", tag: "인기", name: "날 얼마나 좋아할까?",    desc: "동양의 별자리로 보는 궁합과 상대의 마음 크기",           href: "/saju/jamisusu-compat" },
     { image: "/images/cards/love/love-2.mp4", type: "video", badge: "연애", tag: "인기", name: "자미두수 연애운", desc: "동양의 별자리가 알려주는 나의 연애운과 솔로탈출 시기", href: "/saju/jamisusu-love" },
-    { image: "/images/hero/hero-5.webm", type: "video", badge: "연애", tag: "인기", name: "솔로지옥 연애사주", desc: "사주로 보는 나의 연애 매력과 운명의 인연 타이밍",  href: "/saju/solo-hell" },
+    { image: "/images/hero/hero-5.mp4", type: "video", badge: "연애", tag: "인기", name: "솔로지옥 연애사주", desc: "사주로 보는 나의 연애 매력과 운명의 인연 타이밍",  href: "/saju/solo-hell" },
     { image: "/images/hero/hero-15.jpg", badge: "연애",              name: "솔로탈출 연애사주",     desc: "언제 어떤 사람과 만날까? 외모부터 성격까지 알려드립니다",href: "/saju/love" },
     { image: "/images/cards/love2/love2-1.jpg",badge: "연애", tag: "인기", name: "연애 궁합 분석",        desc: "사주로 보는 두 사람의 궁합 분석",                        href: "/saju/love-compat" },
     { image: "/images/cards/love2/love2-2.jpg",badge: "연애", tag: "NEW",  name: "종합 궁합",             desc: "인연의 시기와 운명적 만남 분석",                         href: "/saju/total-compat" },

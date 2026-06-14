@@ -56,7 +56,7 @@ export const heroSlides: HeroSlide[] = [
     href: "/saju/jamisusu",
   },
   {
-    image: "/images/hero/hero-5.webm",
+    image: "/images/hero/hero-5.mp4",
     type: "video",
     badge: "솔로지옥",
     title: "솔로지옥\n연애사주",
