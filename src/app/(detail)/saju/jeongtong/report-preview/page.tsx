@@ -398,6 +398,50 @@ function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) 
   );
 }
 
+// 조심할 시기의 함정 박스 (11장)
+function TrapBox({ trap }: { trap: { title: string; desc: string; items: { title: string; desc: string }[] } }) {
+  return (
+    <div className="rounded-2xl p-5 mb-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}33` }}>
+      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${WARN}16`, color: WARN }}>조심할 시기의 함정</span>
+      <p className="mt-3 text-[17px] font-black leading-snug" style={{ color: INK }}>{trap.title}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{trap.desc}</p>
+      <div className="mt-3">
+        {trap.items.map((it, i) => (
+          <div key={i} className="flex gap-2.5 items-start py-3" style={{ borderTop: `1px solid ${WARN}1c` }}>
+            <span className="flex-shrink-0 text-[12px]" style={{ color: WARN, marginTop: 1 }}>▲</span>
+            <div>
+              <p className="text-[13.5px] font-bold" style={{ color: INK }}>{it.title}</p>
+              <p className="text-[12.5px] leading-relaxed mt-0.5" style={{ color: MUTE }}>{it.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 삼재 연차별 주의점 (11장)
+function SamjaeYearly({ items }: { items: { year: string; phase: string; action: string }[] }) {
+  return (
+    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <h3 className="text-[15px] font-black flex items-center gap-1.5" style={{ color: INK }}>
+        <span style={{ color: WARN }}>⚠</span> 삼재 연차별 주의점
+      </h3>
+      <p className="text-[12px] mt-1 mb-3" style={{ color: MUTE }}>세 해를 한눈에 비교해, 해마다 가장 조심할 일을 정리했어요.</p>
+      {items.map((it, i) => (
+        <div key={i} className="flex items-center gap-3 py-3" style={{ borderTop: `1px solid ${INK}0c` }}>
+          <span className="flex-shrink-0 rounded-full" style={{ width: 8, height: 8, background: WARN }} />
+          <div className="flex-1">
+            <p className="text-[13.5px] font-bold" style={{ color: INK }}>{it.year} · {it.phase}</p>
+            <p className="text-[12.5px] mt-0.5" style={{ color: MUTE }}>{it.action}</p>
+          </div>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-md" style={{ background: `${WARN}14`, color: WARN }}>경고</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // 오행에 따른 건강관리 카드 (9장)
 function HealthCareCard({ element, tips }: { element: string; tips: { label: string; title: string; desc: string }[] }) {
   return (
@@ -602,6 +646,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "8": "제8장 · 연애·결혼운 정밀풀이",
   "9": "제9장 · 건강운 정밀풀이",
   "10": "제10장 · 나를 도와줄 귀인은 누구일까",
+  "11": "제11장 · 반드시 조심해야 할 시기는 언제일까",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1142,6 +1187,48 @@ const SAMPLE_CONTENT: ReportContent = {
       "하늘이 내려준 천을귀인의 복을 낭비하지 말고 겸손하고 열린 마음으로 그 기운을 온전히 흡수하시기를 바랄게요.",
       "귀인의 지혜와 선우님의 추진력이 결합할 때 그 시너지는 상상 이상으로 거대하며 인생의 큰 도약을 이끌어 낼 것입니다.",
       "소중한 인연을 귀하게 여기고 가꾸어 나가는 지혜로운 태도야말로 선우님의 삶을 가장 눈부시게 만드는 비결이랍니다.",
+    ],
+  },
+  samjae: {
+    intro: "선우님이 인생을 살아가며 미리 대비하고 조심해야 할 가장 거친 3년인 삼재의 구체적인 시기를 알려드릴게요.",
+    callout: "1989년 뱀띠인 선우님에게 삼재는 만 41세가 되는 2031년(신해년)부터 2033년(계축년)까지의 3년 동안이에요.",
+    paragraphs: [
+      "이 시기는 현재의 임신(壬) 대운이 끝나고 다음 대운으로 넘어가는 교체기와 맞물려 있어 삶의 변동성이 정점에 다를 거예요.",
+      "들삼재인 2031년에는 외부적인 환경 변화나 무리한 신규 투자, 또는 잦은 제안 등을 단호하게 거절하고 수성하는 태도가 필요해요.",
+      "눌삼재인 2032년에는 가까운 가족이나 연인과의 갈등이 깊어질 수 있어 묘신원진의 예민함을 다스리는 데 집중하셔야 해요.",
+      "날삼재인 2033년에는 건강상의 누수나 만성 피로가 찾아오기 쉬우니 정기적인 검진과 휴식을 통해 몸을 보살펴야 합니다.",
+      "삼재는 무조건적인 재앙이 아니라 속도를 줄이고 내실을 기하라는 하늘의 지혜로운 신호임을 기억하고 차분히 대비해야 해요.",
+    ],
+    trap: {
+      title: "대운 교체기와 맞물리는 삼재의 변동성",
+      desc: "대운이 바뀌는 시기와 삼재가 겹쳐 변동성이 가장 커지는 구간이니 평소보다 신중해야 해요.",
+      items: [
+        { title: "무리한 투자 및 확장 금지", desc: "삼재 기간에는 새로운 사업 확장이나 큰 액수의 투자는 위험해요." },
+        { title: "대인관계에서의 구설수 주의", desc: "사소한 말로 오해가 깊어져 인간관계에 금이 갈 수 있으니 조심하세요." },
+        { title: "면역력 저하 및 건강 관리", desc: "스트레스로 인한 호흡기나 정신 건강을 평소보다 더 신경 써야 해요." },
+      ],
+    },
+    yearly: [
+      { year: "2031년", phase: "들삼재", action: "신규 투자 및 동업 제안 거절" },
+      { year: "2032년", phase: "눌삼재", action: "가족 및 연인과의 갈등 조율" },
+      { year: "2033년", phase: "날삼재", action: "건강 검진 및 만성 피로 관리" },
+    ],
+    guide: [
+      "들삼재인 2031년에는 외부의 달콤한 제안이나 무리한 확장을 단호히 거절하고 현재의 자리를 굳건히 지키는 것이 좋아요.",
+      "눌삼재인 2032년에는 가까운 사람들과의 오해를 풀기 위해 감정을 빼고 이성적으로 소통하는 대화법을 실천하셔야 해요.",
+      "날삼재인 2033년에는 그동안 쌓인 피로가 몸의 약한 부위로 나타날 수 있으니 정기 검진과 충분한 휴식으로 몸을 보살펴야 해요.",
+      "이 거친 3년의 시간을 내실을 다지는 충전의 기회로 삼는다면 삼재가 끝난 뒤 훨씬 더 크게 도약하는 발판이 될 것입니다.",
+    ],
+  },
+  samjaeFocus: {
+    intro: "삼재 기간 동안 선우님이 구체적으로 어떤 영역에서 함정을 피하고 조심해야 하는지 세 가지 핵심 포인트를 짚어드릴게요.",
+    callout: "첫째는 무리한 재정적 변동을 피하는 것으로, 확실하지 않은 투기성 자산에 돈을 묻거나 남에게 돈을 빌려주는 행위는 절대 금물이에요.",
+    paragraphs: [
+      "둘째는 대인관계에서의 오해와 구설수로, 묘신원진의 작용이 삼재의 거친 기운과 만나면 사소한 말 한마디가 큰 싸움으로 번지기 쉬워요.",
+      "셋째는 뼈와 관절, 그리고 호흡기 계통의 건강 관리로, 스트레스가 몸의 약한 부위로 흘러들어 만성 질환을 유발할 수 있어요.",
+      "이 시기에는 새로운 일을 벌이기보다 기존에 하던 일을 안정적으로 유지하고 시스템을 정비하는 데 힘쓰는 것이 훨씬 유리해요.",
+      "계약서를 쓸 때는 문구 하나하나를 꼼꼼히 확인하고, 구두 약속보다는 반드시 서면으로 증거를 남기는 습관을 들이셔야 안전해요.",
+      "마음의 조급함을 내려놓고 나 자신을 돌아보는 성찰의 시간으로 삼는다면 삼재의 파도 역시 무사히 넘길 수 있답니다.",
     ],
   },
 };
@@ -2492,8 +2579,74 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제11장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && (
+      {/* ═══════════ 제11장 ═══════════ */}
+      {ch === "11" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-8.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(40,0,0,0.45) 0%, transparent 32%, transparent 60%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제4부 · 흔들리는 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+                “반드시 조심해야 할<br />시기는 언제일까?”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"가장 거친 3년,\n삼재가 언제\n찾아오는지 살펴보겠습니다."`}</Quote>
+
+          {/* 삼재는 언제 */}
+          <HanjaDivider hanja="三災" sub="가장 거친 3년, 삼재는 언제일까" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>가장 거친 3년, 삼재는 언제일까</Heading>
+            <P>{c.samjae.intro}</P>
+            <Callout>{c.samjae.callout}</Callout>
+            {c.samjae.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <TrapBox trap={c.samjae.trap} />
+          </section>
+
+          <Quote>{`"삼재가 흐르는 삼 년 동안\n연차별로 가장 조심할 일을\n알려드릴게요."`}</Quote>
+
+          {/* 삼재 3년, 해마다 이렇게 보내요 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>삼재 3년, 해마다 이렇게 보내요</Heading>
+            <SamjaeYearly items={c.samjae.yearly} />
+            {c.samjae.guide.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 그때 조심할 것 (텍스트 디바이더) */}
+          <div className="px-6 py-12 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <p className="text-[20px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>그때 조심할 것:<br />변동 · 관계 · 건강</p>
+            <div className="mx-auto mt-4" style={{ width: 30, height: 2, background: `${INK}33` }} />
+          </div>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>그때 조심할 것: 변동·관계·건강</Heading>
+            <P>{c.samjaeFocus.intro}</P>
+            <Callout>{c.samjaeFocus.callout}</Callout>
+            {c.samjaeFocus.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-13.jpg" h={400} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"삼재라는 겨울바람이 불 때는\n억지로 꽃을 피우려 하지 말고,\n뿌리를 더 깊이 내리는 시간으로\n삼으면 안전하답니다."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("10")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("12")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>반드시 조심해야 할 악인은 누구일까?</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제12장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
