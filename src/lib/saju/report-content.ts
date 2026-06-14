@@ -82,6 +82,12 @@ export type ReportContent = {
     guide: string[]; // 해마다 이렇게 보내요(문단)
   };
   samjaeFocus: ReportSection; // 그때 조심할 것: 변동·관계·건강
+  // ── 12장: 반드시 조심해야 할 악인은 누구일까 ──
+  villain: { // 나를 흔드는 사람은 이렇게 온다
+    intro: string; callout: string; paragraphs: string[];
+    card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] };
+  };
+  loss: ReportSection; // 그때 무엇을 잃을 수 있는지
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -97,6 +103,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   9: ["bodyWeak", "riskTime", "healthCare"],
   10: ["helper", "helperTime", "helperUse"],
   11: ["samjae", "samjaeFocus"],
+  12: ["villain", "loss"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -135,6 +142,7 @@ const CH_THEME: Record<number, string> = {
   9: "'건강운 정밀풀이' — 타고난 약한 부위, 부위별 주의 신호",
   10: "'나를 도와줄 귀인은 누구일까' — 귀인의 성향·특징(인물 카드)",
   11: "'반드시 조심해야 할 시기는 언제일까' — 가장 거친 3년 삼재, 연차별 주의점",
+  12: "'반드시 조심해야 할 악인은 누구일까' — 나를 흔드는 사람의 패턴(인물 카드)",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -356,6 +364,28 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "삼재 기간 동안 구체적으로 조심해야 할 세 가지 핵심 포인트(변동·관계·건강) 도입",
     "callout": "첫째 핵심: 무리한 재정적 변동/투기/돈거래 금지를 짚는 문장",
     "paragraphs": ["둘째 핵심: 대인관계 오해·구설수(합/충 작용)","셋째 핵심: 뼈·관절·호흡기 건강 관리","새 일보다 기존 일 안정·시스템 정비","계약·서면 증거 등 실무 주의","조급함을 내려놓고 성찰의 시간으로 삼으라는 위로"]
+  }
+}`,
+  12: `{
+  "villain": {
+    "intro": "선우님을 흔들고 힘들게 만드는 악인이 어떤 모습으로 다가오는지 패턴을 분석하는 도입",
+    "callout": "악인이 처음 접근하는 방식(과도한 칭찬·아군처럼 등)을 짚는 문장",
+    "paragraphs": ["선우님의 어떤 기질(상관 등)을 파고드는지","경계심을 무장해제 시키는 방식"],
+    "card": {
+      "gender": "남성 또는 여성",
+      "ageBand": "30대 후반 등 연령대",
+      "desc": "조심할 인물의 분위기·특징 2~3문장",
+      "mbti": "ESTP 등 추정 MBTI",
+      "height": "175cm 내외 등",
+      "personality": "성격 한 줄",
+      "jobField": "직업 계열(다단계·투기성 영업 등)",
+      "tags": ["키워드","키워드","키워드","키워드","키워드","키워드","키워드","키워드"]
+    }
+  },
+  "loss": {
+    "intro": "악인의 유혹에 넘어갔을 때 잃게 될 구체적 손실을 짚는 도입",
+    "callout": "가장 먼저 타격받는 것(재물·자산의 누수, 십성 한자 포함)을 짚는 문장",
+    "paragraphs": ["경제적 어려움","정신적 배신감·마음앓이","불신·자책으로의 확산","본업 집중력·커리어 손실","진짜 인연과의 관계 악화","건강·수면 손실","평판·신용 실추","정관/상관 관점의 근본 원인","회복의 어려움과 예방의 중요성","의심스러운 인연을 정리하는 결단","깨어있는 이성으로 황금기를 지키라는 마무리"]
   }
 }`,
 };
