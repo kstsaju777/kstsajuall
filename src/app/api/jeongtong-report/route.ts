@@ -22,6 +22,9 @@ import { buildReportContentPrompt, parseReportContent } from "@/lib/saju/report-
 import { generateInterpretation } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 
+// 명식 + LLM 생성이 길어(~40초) Vercel 기본 10초 제한에 걸리므로 최대 실행시간 연장
+export const maxDuration = 60;
+
 const PRODUCT_SLUG = "premium-saju"; // 정통사주 결과지를 묶을 상품 (주문 FK용)
 
 const bodySchema = z.object({
