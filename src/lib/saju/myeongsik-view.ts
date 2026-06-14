@@ -29,6 +29,7 @@ export type MyeongsikView = {
   weolun: MsFlowItem[];
   currentYear: number; // 현재 세운 연도 (기본 선택/강조)
   currentMonth: number; // 현재 월운 월 (1~12)
+  sinStrength?: { score: number; strength: string; level: number }; // 신강/신약 (0~100점, 라벨, 7단계)
 };
 
 // 지지(한글) → 지장간(한자, 본기 순)
@@ -113,5 +114,10 @@ export function buildMyeongsikView(a: any): MyeongsikView {
   const currentYear = Number(sEl.currentSeun?.year ?? now.getFullYear());
   const currentMonth = Number(wEl.currentWeolun?.month ?? now.getMonth() + 1);
 
-  return { ilgan, pillars, daeun, seun, weolun, currentYear, currentMonth };
+  const ss = a?.sinStrength;
+  const sinStrength = ss
+    ? { score: Number(ss.score ?? 50), strength: String(ss.strength ?? "중화"), level: Number(ss.level ?? 4) }
+    : undefined;
+
+  return { ilgan, pillars, daeun, seun, weolun, currentYear, currentMonth, sinStrength };
 }

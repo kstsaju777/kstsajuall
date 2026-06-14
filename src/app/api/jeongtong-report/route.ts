@@ -18,7 +18,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
-import { buildReportContentPrompt, parseReportContent } from "@/lib/saju/report-content";
+import { buildChapterPrompt, parseContentJson } from "@/lib/saju/report-content";
 import { generateInterpretation } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 
@@ -68,9 +68,25 @@ export async function POST(request: NextRequest) {
     const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
     const view = buildMyeongsikView(analysis);
     const manseryeokText = formatSajuToManseryeok(analysis, birthInfo);
-    const { system, user } = buildReportContentPrompt({ name, gender: g, manseryeokText });
-    const llm = await generateInterpretation({ system, user });
-    const content = parseReportContent(llm.text);
+    // 장별로 나눠 병렬 생성 (한 호출이 작아 빠르고, 타임아웃에 안전)
+    const promptInput = { name, gender: g, manseryeokText };
+    const [c1, c2, c3] = await Promise.all([
+      generateInterpretation(buildChapterPrompt(1, promptInput)),
+      generateInterpretation(buildChapterPrompt(2, promptInput)),
+      generateInterpretation(buildChapterPrompt(3, promptInput)),
+    ]);
+    const content = {
+      ...parseContentJson(c1.text),
+      ...parseContentJson(c2.text),
+      ...parseContentJson(c3.text),
+    };
+    const llm = c1; // provider/model 기록용
+    const birth = {
+      date: `${ymd.year}.${pad(ymd.month)}.${pad(ymd.day)}`,
+      calendar: cal === "solar" ? "양력" : cal === "leap" ? "윤달" : "음력",
+      time: hasTime ? `${pad(hh)}:${pad(mm)}` : "시간 모름",
+      gender: g,
+    };
 
     // 2) DB 저장 (order → saju_inputs → saju_results)
     const service = createServiceClient();
@@ -109,7 +125,7 @@ export async function POST(request: NextRequest) {
       .from("saju_results")
       .insert({
         order_id: order.id,
-        myeongsik: { view, name } as never, // 명식 뷰 + 이름 저장
+        myeongsik: { view, name, birth } as never, // 명식 뷰 + 이름 + 생년월일 저장
         interpretation_md: JSON.stringify(content), // 구조화 풀이 JSON
         llm_provider: llm.provider,
         llm_model: llm.model,
@@ -120,7 +136,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "결과 저장 실패", detail: resultErr?.message }, { status: 500 });
     }
 
-    return NextResponse.json({ resultId: result.id, view, content, name });
+    return NextResponse.json({ resultId: result.id, view, content, name, birth });
   } catch (err) {
     return NextResponse.json(
       { error: "결과지 생성 실패", detail: err instanceof Error ? err.message : String(err) },
@@ -150,5 +166,5 @@ export async function GET(request: NextRequest) {
   } catch {
     content = null;
   }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", content });
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, content });
 }
