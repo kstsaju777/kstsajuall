@@ -1014,9 +1014,10 @@ function ReportPreviewInner() {
   type BirthMeta = { date: string; calendar: string; time: string } | null;
   const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
-  const [chapterLoading, setChapterLoading] = useState(false);
+  const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
+  const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
   const startedRef = useRef(false);
-  const attemptedRef = useRef<Set<number>>(new Set()); // 장별 생성 1회만 시도(무한 루프 방지)
+  const generatedRef = useRef(false); // 일괄 생성 1회만
   const chNum = Number(ch);
 
   // id 있으면 저장된 결과 조회(재생성 X), 입력만 있으면 생성+저장 후 id 주소로 교체
@@ -1047,26 +1048,71 @@ function ReportPreviewInner() {
 
   const openMyeongsik = () => setMsOpen(true);
 
-  // 현재 장의 콘텐츠가 없으면 그 장만 온디맨드 생성 (한 호출이 짧아 타임아웃 안전)
-  useEffect(() => {
-    if (!report || !id || loading) return;
-    if (!CHAPTER_SECTIONS[chNum]) return; // 아직 디자인 안 된 장은 스킵
-    if (isChapterReady(report.content as Record<string, unknown>, chNum)) return;
-    if (attemptedRef.current.has(chNum)) return; // 이미 시도한 장은 재시도 안 함(루프 방지)
-    attemptedRef.current.add(chNum);
-    let cancelled = false;
-    setChapterLoading(true);
+  // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
+  const persist = (mergedContent: Record<string, unknown>) => {
     fetch("/api/jeongtong-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, chapter: chNum }),
+      body: JSON.stringify({ id, content: mergedContent }),
+    }).catch(() => {});
+  };
+
+  // 단일 장 재시도 (에러 화면 '다시 시도'). 실패하면 needGen 유지 → 에러 화면 그대로
+  const genChapter = (n: number) => {
+    if (!id) return;
+    setGenerating(true);
+    fetch("/api/jeongtong-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, chapter: n }),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => { if (!cancelled && d.content) setReport((p) => (p ? { ...p, content: d.content } : p)); })
+      .then((d) => {
+        const sec = d?.sections;
+        if (!sec || !isChapterReady(sec, n)) return;
+        setReport((p) => {
+          if (!p) return p;
+          const merged = { ...(p.content as Record<string, unknown>), ...sec };
+          persist(merged);
+          return { ...p, content: merged as ReportContent };
+        });
+      })
       .catch(() => {})
-      .finally(() => { if (!cancelled) setChapterLoading(false); });
-    return () => { cancelled = true; };
-  }, [chNum, report?.content, id, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+      .finally(() => setGenerating(false));
+  };
+
+  // 결제 직후/조회 후: 빠진 "모든" 장을 병렬 생성 → 합본 1회 저장 (이후 장 이동 즉시)
+  useEffect(() => {
+    if (!report || !id || loading || generatedRef.current) return;
+    const all = Object.keys(CHAPTER_SECTIONS).map(Number);
+    const missing = all.filter((n) => !isChapterReady(report.content as Record<string, unknown>, n));
+    if (missing.length === 0) return;
+    generatedRef.current = true;
+    setRevealed(false); // 다 만들어지면 '결과 보기' 버튼으로 공개
+    setGenerating(true);
+    Promise.all(
+      missing.map((n) =>
+        fetch("/api/jeongtong-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, chapter: n }),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+      ),
+    )
+      .then((results) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const patch = Object.assign({}, ...results.filter(Boolean).map((r: any) => r.sections || {}));
+        setReport((p) => {
+          if (!p) return p;
+          const merged = { ...(p.content as Record<string, unknown>), ...patch };
+          persist(merged);
+          return { ...p, content: merged as ReportContent };
+        });
+      })
+      .finally(() => setGenerating(false));
+  }, [report, id, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // (detail) 레이아웃의 스크롤 컨테이너(<main>)를 찾아 진행률 계산
   useEffect(() => {
@@ -1101,8 +1147,11 @@ function ReportPreviewInner() {
   }
 
   const name = report?.name?.trim() || "고객";
-  // 누락 섹션(옛 데이터)은 샘플로 폴백
+  // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
   const c: ReportContent = { ...SAMPLE_CONTENT, ...(report?.content ?? {}) };
+  // 실제 결제자(id 있음)인데 현재 장이 아직 생성 안 됨 → 샘플 대신 로딩/에러 표시
+  const needGen = !!id && !!CHAPTER_SECTIONS[chNum] && !isChapterReady(report?.content as Record<string, unknown>, chNum);
+  const showLoading = generating || (needGen && !generatedRef.current); // 일괄 생성 중/직전
   const ilganHanja = (report?.view?.ilgan ?? "乙")[0];
   const ilganLabel = (report?.view?.ilgan ?? "乙 (을목)").match(/\(([^)]+)\)/)?.[1] ?? "을목";
 
@@ -1119,11 +1168,23 @@ function ReportPreviewInner() {
       />
       <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={report?.view ?? null} loading={false} />
 
-      {chapterLoading ? (
+      {showLoading ? (
         <div className="flex flex-col items-center justify-center px-6 text-center" style={{ minHeight: "70vh" }}>
           <div className="rounded-full animate-spin" style={{ width: 44, height: 44, border: `3px solid ${MAROON}22`, borderTopColor: MAROON }} />
-          <p className="mt-5 text-[15px] font-bold" style={{ color: INK }}>이 장을 풀이하고 있어요</p>
-          <p className="mt-1 text-[13px]" style={{ color: MUTE }}>잠시만 기다려 주세요…</p>
+          <p className="mt-5 text-[15px] font-bold" style={{ color: INK }}>전체 풀이를 준비하고 있어요</p>
+          <p className="mt-1 text-[13px]" style={{ color: MUTE }}>명식을 세우고 모든 장을 작성하는 중입니다…</p>
+        </div>
+      ) : needGen ? (
+        <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
+          <p className="text-[15px] font-bold" style={{ color: INK }}>이 장 풀이 생성에 실패했어요</p>
+          <p className="mt-1 text-[13px] leading-relaxed" style={{ color: MUTE }}>일시적인 오류일 수 있어요.<br />다시 시도해 주세요.</p>
+          <button onClick={() => genChapter(chNum)} className="mt-6 px-6 py-3 rounded-xl text-[14px] font-bold text-white active:scale-95 transition-all" style={{ background: MAROON }}>다시 시도</button>
+        </div>
+      ) : !revealed ? (
+        <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
+          <p className="text-[15px] font-bold" style={{ color: INK }}>{name}님의 결과지가 준비됐어요</p>
+          <p className="mt-1 text-[13px] leading-relaxed" style={{ color: MUTE }}>모든 장의 풀이가 완성되었습니다.<br />아래 버튼을 눌러 확인해 보세요.</p>
+          <button onClick={() => setRevealed(true)} className="mt-6 px-8 py-3.5 rounded-xl text-[15px] font-bold text-white active:scale-95 transition-all" style={{ background: MAROON }}>결과 보기</button>
         </div>
       ) : (
       <>

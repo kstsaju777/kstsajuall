@@ -16,9 +16,10 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
-import { buildChapterPrompt, parseContentJson, isChapterReady } from "@/lib/saju/report-content";
+import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
 import { generateInterpretation } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
+import { serverEnv } from "@/lib/env";
 
 export const maxDuration = 60;
 
@@ -34,12 +35,65 @@ const createSchema = z.object({
 });
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(9) });
 
+// 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string }) {
+  const { system, user } = buildChapterPrompt(chapter, input);
+  let meta = { provider: "", model: "" };
+  for (let i = 0; i < 2; i++) {
+    try {
+      const llm = await generateInterpretation({ system, user, json: true });
+      meta = { provider: llm.provider, model: llm.model };
+      const obj = parseContentJson(llm.text);
+      if (isChapterReady(obj, chapter)) return { obj, ...meta };
+    } catch {
+      /* 재시도 */
+    }
+  }
+  throw new Error(`${chapter}장 생성 실패(LLM 응답 불량)`);
+}
+
+// 옛 결과(만세력 미저장)는 saju_inputs 로 birthInfo 복원 → 운세위키 재호출
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadManseryeokFromInputs(service: any, resultId: string): Promise<string | null> {
+  const { data: r } = await service.from("saju_results").select("order_id").eq("id", resultId).maybeSingle();
+  if (!r) return null;
+  const { data: si } = await service.from("saju_inputs").select("*").eq("order_id", r.order_id).maybeSingle();
+  if (!si?.birth_date) return null;
+  const [y, m, d] = String(si.birth_date).split("-");
+  const hasTime = !si.time_unknown && !!si.birth_time;
+  const [hh, mm] = hasTime ? String(si.birth_time).split(":") : ["", ""];
+  const birthInfo: BirthInfo = {
+    birthYear: y,
+    birthMonth: String(Number(m)),
+    birthDay: String(Number(d)),
+    ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
+    calendarType: si.calendar === "lunar" ? "음력" : "양력",
+    gender: si.gender === "female" ? "female" : "male",
+  };
+  const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
+  return formatSajuToManseryeok(analysis, birthInfo);
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
+  if (body && typeof body.id === "string" && body.content && typeof body.content === "object") {
+    return saveContent(body.id, body.content as Record<string, unknown>);
+  }
   if (body && typeof body.id === "string" && typeof body.chapter === "number") {
-    return generateChapter(body);
+    return generateChapter(body); // 그 장 생성해서 반환만(저장은 클라가 합본 1회)
   }
   return createReport(body);
+}
+
+// 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
+async function saveContent(id: string, content: Record<string, unknown>) {
+  const service = createServiceClient();
+  const { data } = await service.from("saju_results").select("interpretation_md").eq("id", id).maybeSingle();
+  let existing: Record<string, unknown> = {};
+  try { existing = JSON.parse(data?.interpretation_md || "{}") || {}; } catch { existing = {}; }
+  const merged = { ...existing, ...content };
+  await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
+  return NextResponse.json({ ok: true });
 }
 
 // ── 초기 생성: 명식 + 1장 풀이 ──
@@ -75,9 +129,10 @@ async function createReport(body: unknown) {
     const view = buildMyeongsikView(analysis);
     const manseryeokText = formatSajuToManseryeok(analysis, birthInfo);
 
-    // 1장만 생성 (나머지 장은 진입 시 온디맨드)
-    const llm = await generateInterpretation(buildChapterPrompt(1, { name, gender: g, manseryeokText }));
-    const content = parseContentJson(llm.text);
+    // 풀이는 여기서 생성하지 않음 → 빈 상태로 저장하고, 결제 직후 클라가 전 장을 병렬 생성
+    const content: Record<string, unknown> = {};
+    const env = serverEnv();
+    const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
 
     const birth = {
       date: `${ymd.year}.${pad(ymd.month)}.${pad(ymd.day)}`,
@@ -144,18 +199,27 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (isChapterReady(content, chapter)) return NextResponse.json({ content }); // 이미 생성됨
+  if (isChapterReady(content, chapter)) {
+    // 이미 저장돼 있으면 그 장 섹션만 반환
+    const sections: Record<string, unknown> = {};
+    for (const k of CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
+    return NextResponse.json({ sections });
+  }
 
-  const manseryeokText: string | undefined = stored?.manseryeokText;
-  if (!manseryeokText) return NextResponse.json({ content }); // 옛 결과(만세력 미저장) → 생성 불가, 기존 그대로
+  let manseryeokText: string | undefined = stored?.manseryeokText;
+  if (!manseryeokText) {
+    if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
+    manseryeokText = (await loadManseryeokFromInputs(service, id)) ?? undefined; // 옛 결과 복원
+  }
+  if (!manseryeokText) return NextResponse.json({ error: "명식 정보를 찾을 수 없습니다." }, { status: 500 });
 
   try {
-    const llm = await generateInterpretation(
-      buildChapterPrompt(chapter, { name: stored?.name ?? "", gender: stored?.gender === "female" ? "female" : "male", manseryeokText }),
-    );
-    const merged = { ...content, ...parseContentJson(llm.text) };
-    await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
-    return NextResponse.json({ content: merged });
+    const { obj } = await genChapterContent(chapter, {
+      name: stored?.name ?? "",
+      gender: stored?.gender === "female" ? "female" : "male",
+      manseryeokText,
+    });
+    return NextResponse.json({ sections: obj }); // 저장은 클라가 합본으로(레이스 방지)
   } catch (err) {
     return NextResponse.json({ error: "장 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }

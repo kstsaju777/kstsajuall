@@ -9,6 +9,7 @@ import { serverEnv } from "@/lib/env";
 export type LlmRequest = {
   system: string;
   user: string;
+  json?: boolean; // true 면 JSON 형식 강제 (OpenAI json_object 모드)
 };
 
 export type LlmResponse = {
@@ -40,6 +41,7 @@ async function callOpenAI(req: LlmRequest, model: string, key: string | undefine
       { role: "user", content: req.user },
     ],
     temperature: 0.7,
+    ...(req.json ? { response_format: { type: "json_object" as const } } : {}),
   });
   const text = completion.choices[0]?.message?.content ?? "";
   return { text, provider: "openai", model };
