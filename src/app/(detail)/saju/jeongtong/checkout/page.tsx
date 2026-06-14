@@ -636,6 +636,7 @@ function CheckoutContent() {
   const date     = searchParams.get("date")     ?? "";
   const time     = searchParams.get("time")     ?? "시간 모름";
   const calendar = searchParams.get("calendar") ?? "양력";
+  const gender   = searchParams.get("gender")   ?? "";
 
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
@@ -679,8 +680,8 @@ function CheckoutContent() {
       // SMS 실패해도 리포트는 진행
     }
 
-    const params = new URLSearchParams({ name, date, time, calendar });
-    router.push(`/saju/jeongtong/report?${params.toString()}`);
+    const params = new URLSearchParams({ name, date, time, calendar, gender });
+    router.push(`/saju/jeongtong/report-preview?${params.toString()}`);
   };
 
   return (

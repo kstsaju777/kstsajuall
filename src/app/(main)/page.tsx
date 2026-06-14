@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const CARDS = [
   {
-    image: "/images/cards/total-0.webm",
+    image: "/images/cards/total/total-0.webm",
     type: "video" as const,
     badge: "종합",
     tag: "베스트",
