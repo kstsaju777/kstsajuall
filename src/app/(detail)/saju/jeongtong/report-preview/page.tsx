@@ -208,11 +208,122 @@ function UnseongMini({ view }: { view: MyeongsikView | null }) {
   );
 }
 
+// 간단 명식 (천간/지지만)
+function GanjiMini({ view }: { view: MyeongsikView | null }) {
+  if (!view) return null;
+  const ps = view.pillars;
+  const GC = "repeat(4, 1fr)";
+  const img = (src: string, alt: string) => (
+    <div className="flex justify-center py-1">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} style={{ width: 42, height: 42, objectFit: "contain" }} />
+    </div>
+  );
+  return (
+    <div className="rounded-2xl p-3.5 mb-4" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
+      <p className="text-[11px] font-bold mb-2" style={{ color: MUTE }}>내 명식</p>
+      <div className="grid" style={{ gridTemplateColumns: GC }}>
+        {["시", "일", "월", "년"].map((h) => <div key={h} className="text-center text-[11px] font-bold" style={{ color: MUTE }}>{h}</div>)}
+      </div>
+      <div className="grid" style={{ gridTemplateColumns: GC }}>{ps.map((p, i) => <div key={i}>{img(ganCharImage(p.gan), p.gan)}</div>)}</div>
+      <div className="grid" style={{ gridTemplateColumns: GC }}>{ps.map((p, i) => <div key={i}>{img(jiCharImage(p.ji), p.ji)}</div>)}</div>
+    </div>
+  );
+}
+
+// 강조 문단 (끝에 하이라이트 문장)
+function HiP({ children, hi }: { children: React.ReactNode; hi: string }) {
+  return (
+    <p className="text-[14.5px] leading-[1.95] mb-4" style={{ color: INK_SOFT }}>
+      {children}{" "}
+      <span style={{ background: "#fdf3c9", color: INK, fontWeight: 600, padding: "1px 3px", borderRadius: 3, boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone" } as React.CSSProperties}>{hi}</span>
+    </p>
+  );
+}
+
+// 신살/합/충 태그 카드
+function SpecialTag({ label, sub, color }: { label: string; sub?: string; color: string }) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 mb-2" style={{ background: `${color}12`, borderLeft: `3px solid ${color}` }}>
+      <span className="text-[15px] font-black" style={{ color }}>{label}</span>
+      {sub && <span className="text-[12.5px]" style={{ color: INK_SOFT }}>{sub}</span>}
+    </div>
+  );
+}
+
 const CHAPTER_TITLES: Record<string, string> = {
   "1": "제1장 · 지나온 시간과 선택들",
   "2": "제2장 · 타고난 길",
   "3": "제3장 · 나는 왜 이런 사람인 걸까",
+  "4": "제4장 · 내 사주는 얼마나 희귀할까",
 };
+
+// 사주 희귀도 — 종형 분포 + 등급/백분율 마커
+function RarityChart({ grade, percentile, name }: { grade: string; percentile: number; name: string }) {
+  const W = 300, H = 120, n = 60, base = H - 12, top = 16;
+  const pts = Array.from({ length: n + 1 }, (_, i) => {
+    const x = i / n;
+    const g = Math.exp(-Math.pow((x - 0.5) * 5, 2) / 2);
+    return [x * W, base - g * (base - top)];
+  });
+  const line = "M " + pts.map((p) => p.join(",")).join(" L ");
+  const area = line + ` L ${W},${base} L 0,${base} Z`;
+  const mf = Math.min(0.97, Math.max(0.03, 1 - percentile / 100)); // 희귀할수록 오른쪽 꼬리
+  const mx = mf * W;
+  return (
+    <div className="mx-5 my-2 rounded-2xl p-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <h3 className="text-[16px] font-black flex items-center gap-1.5 mb-1" style={{ color: INK }}>
+        <span style={{ color: ROSE }}>△</span> 사주 희귀도
+      </h3>
+      <p className="text-[12px] mb-4" style={{ color: MUTE }}>같은 명식이 얼마나 드문지 분포 위에 표시했어요.</p>
+      <div className="text-center mb-2">
+        <span className="text-[12px] font-black px-3 py-1 rounded-full" style={{ background: MAROON, color: WHITE }}>{grade}</span>
+        <p className="text-[24px] font-black mt-2" style={{ color: INK }}>전국민 중 {percentile}%</p>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 130 }}>
+        <defs>
+          <linearGradient id="rar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={MAROON} stopOpacity="0.18" />
+            <stop offset="100%" stopColor={MAROON} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={area} fill="url(#rar)" />
+        <path d={line} fill="none" stroke="#e88aa0" strokeWidth="2" />
+        <line x1={mx} y1={top - 4} x2={mx} y2={base} stroke={INK} strokeWidth="1.5" strokeDasharray="2 2" />
+        <circle cx={mx} cy={base} r="3.5" fill={INK} />
+        <text x={mx} y={top - 8} textAnchor="middle" fontSize="9" fontWeight="700" fill={INK}>{name}님</text>
+      </svg>
+    </div>
+  );
+}
+
+// 사주등급 표
+function GradeTable({ myGrade }: { myGrade: string }) {
+  const rows = [
+    { g: "S등급", ratio: "상위 1% 이내", desc: "매우 드문 특수 격국이나 신살의 조합" },
+    { g: "A등급", ratio: "상위 1~5%", desc: "천을귀인 중첩과 건록 일주의 귀한 조화" },
+    { g: "B등급", ratio: "상위 5~25%", desc: "일반적인 오행의 균형 잡힌 구성" },
+    { g: "C등급", ratio: "상위 25%~", desc: "대중적이고 평범한 사주 구성" },
+  ];
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}12` }}>
+      <p className="px-4 py-2.5 text-[13px] font-black" style={{ color: INK, background: "#f4ece7" }}>사주등급</p>
+      <div className="grid text-[11px] font-bold" style={{ gridTemplateColumns: "52px 78px 1fr", color: MUTE, background: "#faf3ee" }}>
+        <div className="px-2 py-1.5">등급</div><div className="px-2 py-1.5">비율</div><div className="px-2 py-1.5">특징</div>
+      </div>
+      {rows.map((r) => {
+        const me = r.g === myGrade;
+        return (
+          <div key={r.g} className="grid items-center" style={{ gridTemplateColumns: "52px 78px 1fr", background: me ? `${MAROON}0d` : WHITE, borderTop: `1px solid ${INK}0a` }}>
+            <div className="px-2 py-2.5 text-[12px] font-black" style={{ color: me ? MAROON : INK }}>{r.g}</div>
+            <div className="px-2 py-2.5 text-[11px]" style={{ color: INK_SOFT }}>{r.ratio}</div>
+            <div className="px-2 py-2.5 text-[11px] leading-snug" style={{ color: INK_SOFT }}>{r.desc}{me && <span style={{ color: MAROON, fontWeight: 800 }}> · 나</span>}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // 한글 텍스트 디바이더 (한자 없이)
 function TextDivider({ title }: { title: string }) {
@@ -1187,8 +1298,103 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제4장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && (
+      {/* ═══════════ 제4장 ═══════════ */}
+      {ch === "4" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-11.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제2부 · 타고난 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “내 사주는<br />얼마나 희귀할까”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"${name}님의 사주가\n얼마나 드문지\n살펴보겠습니다."`}</Quote>
+
+          {/* 발현 확률 분석 + 희귀도 차트 + 등급표 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>내 사주의 발현 확률</Heading>
+            <P>
+              {name}님의 사주가 지닌 희소성과 특별함에 대해 명리학적인 근거를 들어 자세히 풀어드릴게요.
+            </P>
+            <Callout>
+              {name}님의 사주는 을묘(乙卯) 건록 일주라는 강력한 주체성의 기둥 위에, 하늘의 보살핌을 뜻하는
+              천을귀인(天乙貴人)이 중첩된 귀한 명식이에요.
+            </Callout>
+            <P>
+              일간 을목(乙)에게 가장 귀한 글자인 자수(子)와 신금(申)이 월지와 시지에 나란히 자리 잡은 구성은 매우
+              드물답니다.
+            </P>
+            <P>
+              이러한 특별한 글자들의 배치와 오행의 조화는 전체 사주 구성 중 상위 2.5%에 해당하는 아주 높은 희소성을
+              보여줘요.
+            </P>
+            <P>
+              천을귀인이 두 개나 자리 잡고 있다는 것은 인생의 큰 위기나 고비마다 나를 돕는 귀인이 반드시 나타남을
+              의미해요.
+            </P>
+            <P>
+              이 귀하고 단단한 사주의 그릇을 믿고 주체적으로 삶을 이끌어갈 때 {name}님만의 특별한 복록은 온전히 발현될
+              거예요.
+            </P>
+
+            <RarityChart grade="A등급" percentile={2.5} name={name} />
+            <GradeTable myGrade="A등급" />
+          </section>
+
+          {/* 인용 */}
+          <Quote>{`"${name}님 사주가 지닌\n특별한 귀인의 기운을\n지금부터 구체적으로\n풀어드릴게요."`}</Quote>
+
+          {/* 이 사주가 드문 이유 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>이 사주가 드문 이유</Heading>
+            <GanjiMini view={report?.view ?? null} />
+
+            <div className="mb-4">
+              <SpecialTag label="乙卯" sub="을묘일주 × 도화살" color={NAVY} />
+              <SpecialTag label="巳 ↔ 申" sub="사신육합" color="#b5891c" />
+              <SpecialTag label="태극귀인 × 역마살" color="#c9474f" />
+              <SpecialTag label="卯 ↔ 申" sub="묘신원진" color="#3f8a52" />
+            </div>
+
+            <HiP hi="어느 자리에서든 시선을 독차지하게 해줘요.">
+              화초 같은 을묘일주에 도화살(타고난 인기)까지 더해졌어요. 강한 기질이 한층 또렷하게 드러나는 사주예요.
+            </HiP>
+            <HiP hi="사람과 깊이 엮이며 든든한 인연을 만들어내게 해줘요.">
+              뱀(巳)과 원숭이(申)가 단단히 묶여, 인연과 결속이 깊어지는 자리예요.
+            </HiP>
+            <HiP hi="막다른 길에서도 결국 도와줄 사람과 길이 나타나게 해줘요.">
+              태극귀인(막힌 일을 푸는 복)에 역마살(끊임없는 이동)까지 더해졌어요. 한 사주에 같이 있기 쉽지 않은 구성이에요.
+            </HiP>
+            <HiP hi="예민한 촉으로 남들이 놓치는 신호를 먼저 알아채게 해줘요.">
+              토끼(卯)와 원숭이(申)가 서로 밀어내, 예민함과 애증이 함께 도는 자리예요.
+            </HiP>
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-7.jpg" h={360} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"하늘이 내린 귀한 별들이\n${name}님의 길을 비추고 있으니,\n어떤 어둠 속에서도\n길을 잃지 않을 거예요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("3")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("5")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>세상을 대하는 나만의 방식</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제5장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
