@@ -44,3 +44,25 @@ export function sipseongOfBranch(ilgan: string, branch: string): string {
   const main = BRANCH_MAIN[branch];
   return main ? sipseong(ilgan, main) : "";
 }
+
+// ── 십이운성(十二運星) ──
+// 일간 기준 어떤 지지가 어느 단계(장생~양)에 있는지. 양간 順行 / 음간 逆行.
+const UNSEONG_STAGES = ["장생", "목욕", "관대", "건록", "제왕", "쇠", "병", "사", "묘", "절", "태", "양"];
+const BRANCH_ORDER = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+// 일간 → [장생 지지 인덱스, 진행방향(양간 +1 / 음간 -1)]
+const JANGSAENG: Record<string, [number, 1 | -1]> = {
+  甲: [11, 1], 丙: [2, 1], 戊: [2, 1], 庚: [5, 1], 壬: [8, 1],
+  乙: [6, -1], 丁: [9, -1], 己: [9, -1], 辛: [0, -1], 癸: [3, -1],
+};
+
+/** 지지의 십이운성 (일간 기준) */
+export function unseongOf(ilgan: string, branch: string): string {
+  const j = JANGSAENG[ilgan];
+  const b = BRANCH_ORDER.indexOf(branch);
+  if (!j || b < 0) return "";
+  const [start, dir] = j;
+  for (let k = 0; k < 12; k++) {
+    if ((((start + dir * k) % 12) + 12) % 12 === b) return UNSEONG_STAGES[k];
+  }
+  return "";
+}

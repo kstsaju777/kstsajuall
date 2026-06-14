@@ -46,6 +46,11 @@ export type ReportContent = {
   // ── 5장: 세상을 대하는 나만의 방식 ──
   balance: ReportSection & { spectrum: { label: string; value: number } }; // 독립↔협력 균형(0=독립, 100=협력)
   answer: ReportSection;    // 삶의 해답이 어디에 있는지
+  // ── 6장: 앞으로 10년, 어떻게 흘러갈까 ──
+  daeFlow: ReportSection;   // 대운으로 보는 10년의 큰 흐름
+  seun: ReportSection & { flow: { year: number; score: number }[] }; // 세운(해마다) + 10년 운세 라인
+  openLuck: ReportSection & { peak: { title: string; when: string; todo: string } }; // 운이 풀리는 결정적 시점
+  domains: { intro: string; paragraphs: string[]; bars: { label: string; value: number }[] }; // 영역별 운세 강도
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -55,6 +60,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   3: ["strength", "gyeokguk", "yongsin", "hapchung", "essence"],
   4: ["rarity", "special"],
   5: ["balance", "answer"],
+  6: ["daeFlow", "seun", "openLuck", "domains"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -87,6 +93,7 @@ const CH_THEME: Record<number, string> = {
   3: "'왜 이런 사람인가(사주 속 필연구조)' — 신강/신약, 격국, 용신, 합·충, 핵심 갈망",
   4: "'내 사주는 얼마나 희귀한가' — 명식의 희소성/등급, 귀인·신살·합충이 만드는 특별함",
   5: "'세상을 대하는 나만의 방식' — 독립과 협력 사이의 균형, 삶의 갈등을 푸는 해답",
+  6: "'앞으로 10년, 어떻게 흘러갈까' — 현재 진행 중인 대운으로 보는 10년의 큰 흐름",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -135,6 +142,34 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "삶의 갈등과 문제를 마주칠 때 해답을 어디서 찾는지 도입",
     "callout": "강한 주체성을 지키되 타인의 조언·사회적 규칙(정관 등)을 유연하게 받아들이는 화합의 지혜를 짚는 문장",
     "paragraphs": ["혼자 결정하되 고립되지 않는 법","주변의 예법·규율을 내 것으로 소화하는 법","뿌리(독립)와 가지(소통)가 함께 자랄 때 모습"]
+  }
+}`,
+  6: `{
+  "daeFlow": {
+    "intro": "앞으로 10년간 삶을 지배할 거대한 대운의 흐름과 인생의 계절 변화를 분석하는 도입 1~2문장",
+    "callout": "현재 진행 중인 대운(간지 한자 포함)이 어떤 시기인지(상승/정비/도약 등)를 한 문장으로 짚기. 천간(십성)·지지(십성) 작용 언급",
+    "paragraphs": ["이번 대운에 들어온 천간/지지의 십성이 주는 긍정적 기운","지난 대운과 비교한 변화(용신/기신 관점)","이 시기에 유리한 현실적 목표(직장·이직·내 집·결혼 등)","흐름을 대하는 마음가짐/조언"]
+  },
+  "seun": {
+    "intro": "대운이라는 큰 프레임 안에서 해마다 찾아오는 세운의 구체적인 변화와 흐름을 짚는 도입",
+    "callout": "현재 지나고 있는 해(연도+간지 한자)의 십성 기운과 그 해의 핵심 분위기를 짚는 문장",
+    "paragraphs": ["다음 해의 간지/십성과 그 작용","대망의 정점이 되는 해(연도+간지)와 용신 조화로 운이 정점","그 시기에 돌아오는 결실(재물·명예 등)","이어지는 해의 흐름과 자산/커리어 조언","향후 수년간 기운을 대하는 마음가짐"],
+    "flow": [
+      {"year": 2026, "score": 62}, {"year": 2027, "score": 74}, {"year": 2028, "score": 92},
+      {"year": 2029, "score": 88}, {"year": 2030, "score": 70}, {"year": 2031, "score": 64},
+      {"year": 2032, "score": 58}, {"year": 2033, "score": 60}
+    ]
+  },
+  "openLuck": {
+    "intro": "막힌 운이 본격적으로 풀리고 인생의 황금기가 시작되는 결정적 타이밍을 짚는 도입",
+    "callout": "운이 가장 강력하게 열리는 시기(만 나이 + 연도 + 간지 한자)와 그때 폭발하는 기운(재물·관성 등)을 짚는 문장",
+    "paragraphs": ["그 해에 활성화되는 원국의 합/십성과 사회적 결실","머릿속 구상이 현실 성과로 이어짐","직장/이직/승진 등 구체적 기회","주체적으로 판을 주도하라는 조언","그 시점을 위한 지금의 준비"],
+    "peak": { "title": "2028년 무신(戊申)년의 강력한 재관(財官) 활성화", "when": "용신과 희신이 함께 들어오는 때", "todo": "망설이지 말고 주체적으로 도전하세요" }
+  },
+  "domains": {
+    "intro": "사주 데이터를 바탕으로 앞으로 10년간의 주요 인생 영역별 운세 강도를 종합 비교하는 도입",
+    "paragraphs": ["돈·일·연애·결혼·건강 다섯 영역의 위계와 무게중심을 짚는 문장","이 비교를 삶의 기획·에너지 분배 가이드로 삼으라는 조언"],
+    "bars": [ {"label":"재물","value":85}, {"label":"직업","value":90}, {"label":"애정","value":75}, {"label":"결혼","value":80}, {"label":"건강","value":70} ]
   }
 }`,
 };

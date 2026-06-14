@@ -19,6 +19,7 @@ import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/re
 import { isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
 import { MyeongsikModalView } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
+import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
 const CREAM = "#fdf8f4";
@@ -33,6 +34,7 @@ const CALLOUT_BG = "#f7e9ec";
 const BLUE = "#3f63c4";
 const WARN = "#c9474f";
 const NAVY = "#2d3a8c";
+const GOLD = "#c2a23c";
 const TAG_COLORS = ["#2d3a8c", "#b5891c", "#c9474f", "#3f8a52"];
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
@@ -125,6 +127,161 @@ function SipseongMini({ view }: { view: MyeongsikView | null }) {
       <div className="grid" style={rs}>{lbl("지지")}{ps.map((p, i) => <div key={i}>{img(jiCharImage(p.ji), p.ji)}</div>)}</div>
       <div className="grid" style={rs}>{lbl("천간 십성")}{ps.map((p, i) => <div key={i}>{txt(p.sipTop)}</div>)}</div>
       <div className="grid" style={rs}>{lbl("지지 십성")}{ps.map((p, i) => <div key={i}>{txt(p.sipBot)}</div>)}</div>
+    </div>
+  );
+}
+
+// 대운 흐름표 (6장) — 명식 view.daeun 기반, 십성/운성 로컬 계산, 가로 스크롤
+type FlowCol = { label: string; gz: string; active: boolean; yearStart?: number };
+function FlowGrid({ title, sub, items, ilgan, mode }: { title: string; sub: string; items: FlowCol[]; ilgan: string; mode: "daeun" | "seun" }) {
+  if (!items.length) return null;
+  const COLW = 60, LW = 40;
+  const gc = { gridTemplateColumns: `${LW}px repeat(${items.length}, ${COLW}px)` } as const;
+  const lbl = (t: string) => <div className="flex items-center justify-center text-[10px] font-bold" style={{ color: MUTE }}>{t}</div>;
+  const cellBg = (a: boolean) => (a ? `${MAROON}12` : "transparent");
+  const sipTxt = (t: string, a: boolean) => <div className="py-1 text-center text-[11px] font-bold" style={{ color: a ? MAROON : INK_SOFT, background: cellBg(a) }}>{t}</div>;
+  const img = (src: string, alt: string, a: boolean) => (
+    <div className="py-0.5 flex items-center justify-center" style={{ background: cellBg(a) }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} style={{ width: 30, height: 30, objectFit: "contain" }} />
+    </div>
+  );
+  return (
+    <div className="rounded-2xl mb-5 overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
+      <div className="px-4 pt-3.5 pb-2 flex items-baseline gap-2">
+        <p className="text-[13px] font-black" style={{ color: INK }}>{title}</p>
+        <p className="text-[11px]" style={{ color: MUTE }}>{sub}</p>
+      </div>
+      <div className="overflow-x-auto pb-2">
+        <div style={{ minWidth: LW + items.length * COLW }}>
+          {/* 헤더 (대운=연도+나이 / 세운=연도) */}
+          <div className="grid" style={gc}>
+            <div />
+            {items.map((d, i) => (
+              <div key={i} className="py-1.5 text-center" style={{ background: cellBg(d.active) }}>
+                {mode === "daeun" ? (
+                  <>
+                    <div className="text-[10px]" style={{ color: MUTE }}>{d.yearStart || ""}</div>
+                    <div className="text-[12px] font-black" style={{ color: d.active ? MAROON : INK }}>{d.label}세</div>
+                  </>
+                ) : (
+                  <div className="text-[12px] font-black py-1" style={{ color: d.active ? MAROON : INK }}>{d.label}</div>
+                )}
+              </div>
+            ))}
+          </div>
+          {[
+            { l: "십성", r: (d: FlowCol) => sipTxt(sipseongOfStem(ilgan, d.gz[0]), d.active) },
+            { l: "천간", r: (d: FlowCol) => img(ganCharImage(d.gz[0]), d.gz[0], d.active) },
+            { l: "지지", r: (d: FlowCol) => img(jiCharImage(d.gz[1]), d.gz[1], d.active) },
+            { l: "십성", r: (d: FlowCol) => sipTxt(sipseongOfBranch(ilgan, d.gz[1]), d.active) },
+            { l: "운성", r: (d: FlowCol) => sipTxt(unseongOf(ilgan, d.gz[1]), d.active) },
+          ].map((row, ri) => (
+            <div key={ri} className="grid" style={{ ...gc, borderTop: `1px solid ${INK}0c` }}>
+              {lbl(row.l)}
+              {items.map((d, i) => <div key={i}>{row.r(d)}</div>)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 대운 흐름표 (6장) — 명식 view.daeun 기반
+function DaeunTable({ view }: { view: MyeongsikView | null }) {
+  const daeun = view?.daeun ?? [];
+  if (!daeun.length) return null;
+  return <FlowGrid title="대운 흐름표" sub={`대운 역행 · ${daeun[0]?.label}세 시작`} items={daeun} ilgan={(view?.ilgan ?? "乙")[0]} mode="daeun" />;
+}
+
+// 세운 흐름표 (6장) — 현재 연도부터 표시
+function SeunTable({ view }: { view: MyeongsikView | null }) {
+  const all = view?.seun ?? [];
+  const ai = all.findIndex((s) => s.active);
+  const items = ai >= 0 ? all.slice(ai) : all;
+  if (!items.length) return null;
+  return <FlowGrid title="세운 흐름표" sub="해마다의 한 해 리듬" items={items} ilgan={(view?.ilgan ?? "乙")[0]} mode="seun" />;
+}
+
+// 앞으로 10년 운세 흐름 — 라인 차트 (세운 flow 기반)
+function TrendChart({ flow }: { flow: { year: number; score: number }[] }) {
+  const data = flow.length ? flow : [{ year: new Date().getFullYear(), score: 50 }];
+  const W = 320, H = 150, padX = 24, padTop = 18, padBot = 28;
+  const n = data.length;
+  const x = (i: number) => padX + ((W - padX * 2) * i) / Math.max(1, n - 1);
+  const y = (v: number) => padTop + (H - padTop - padBot) * (1 - Math.min(100, Math.max(0, v)) / 100);
+  const pts = data.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
+  const area = `${padX},${y(0)} ${pts} ${x(n - 1)},${y(0)}`;
+  const peakI = data.reduce((m, d, i) => (d.score > data[m].score ? i : m), 0);
+  return (
+    <div className="rounded-2xl p-5 mt-2 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <h3 className="text-[15px] font-black flex items-center gap-1.5 mb-1" style={{ color: INK }}>
+        <span style={{ color: GOLD }}>📈</span> 앞으로 10년 운세 흐름
+      </h3>
+      <p className="text-[12px] mb-3" style={{ color: MUTE }}>대운의 큰 방향과 해마다 체감되는 상승 구간을 함께 보여줍니다.</p>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
+        <defs>
+          <linearGradient id="trendArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GOLD} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={GOLD} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <polygon points={area} fill="url(#trendArea)" />
+        <polyline points={pts} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {data.map((d, i) => (
+          <circle key={i} cx={x(i)} cy={y(d.score)} r={i === peakI ? 5 : 3.5} fill={i === peakI ? GOLD : WHITE} stroke={GOLD} strokeWidth="2" />
+        ))}
+        {data.map((d, i) => (
+          <text key={i} x={x(i)} y={H - 12} fontSize="8.5" fill={INK_SOFT} textAnchor="middle">{d.year}</text>
+        ))}
+      </svg>
+      <p className="text-center text-[11px] mt-1" style={{ color: MUTE }}>점이 높은 해일수록 그 해의 기운이 강해요.</p>
+    </div>
+  );
+}
+
+// 운이 풀리는 결정적 시점 박스 (6장 開運)
+function PeakBox({ peak }: { peak: { title: string; when: string; todo: string } }) {
+  return (
+    <div className="rounded-2xl p-5 mb-4" style={{ background: `linear-gradient(135deg, ${MAROON}0e, ${GOLD}14)`, border: `1px solid ${MAROON}22` }}>
+      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${MAROON}16`, color: MAROON }}>중요한 전환 시점</span>
+      <p className="mt-3 text-[19px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{peak.title}</p>
+      <div className="mt-4 space-y-3">
+        <div>
+          <p className="text-[11px] font-bold mb-0.5" style={{ color: MAROON }}>핵심 시기</p>
+          <p className="text-[13.5px]" style={{ color: INK_SOFT }}>{peak.when}</p>
+        </div>
+        <div>
+          <p className="text-[11px] font-bold mb-0.5" style={{ color: MAROON }}>해야 할 일</p>
+          <p className="text-[13.5px]" style={{ color: INK_SOFT }}>{peak.todo}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 영역별 운세 강도 막대 차트 (6장)
+function DomainBars({ bars }: { bars: { label: string; value: number }[] }) {
+  const src = bars.length ? bars : [{ label: "재물", value: 50 }];
+  return (
+    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <h3 className="text-[15px] font-black mb-4 flex items-center gap-1.5" style={{ color: INK }}>
+        <span style={{ color: GOLD }}>📊</span> 영역별 운세 강도
+      </h3>
+      <div className="flex justify-between gap-2.5" style={{ height: 160 }}>
+        {src.map((b, i) => (
+          <div key={i} className="flex-1 flex flex-col justify-end items-center">
+            <span className="text-[12px] font-black mb-1" style={{ color: INK }}>{b.value}%</span>
+            <div className="w-full rounded-t-lg" style={{ height: `${Math.min(100, Math.max(0, b.value))}%`, background: `linear-gradient(to top, ${GOLD}, ${GOLD}55)`, minHeight: 6 }} />
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between gap-2.5 mt-2">
+        {src.map((b, i) => (
+          <div key={i} className="flex-1 text-center text-[11.5px] font-bold" style={{ color: INK_SOFT }}>{b.label}</div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -574,6 +731,56 @@ const SAMPLE_CONTENT: ReportContent = {
       "혼자보다는 패턴을 찾아가는 협력 안에서 본인의 주체성을 스스로 강화시키는 길이 더 단단하고 빠르게 열려요.",
       "대중 속의 예법과 규율을 내 것으로 소화해 받쳐 쌓을 때, 나를 가두는 굴레가 아닌 나를 지켜주는 단단한 울타리가 되어 줍니다.",
       "나를 지키는 단단한 뿌리 위에 타인과 소통하는 가지를 뻗을 때, 가장 크고 웅장하게 자리 잡는 삶을 이루게 되실 거예요.",
+    ],
+  },
+  daeFlow: {
+    intro: "앞으로 10년간 삶을 지배할 거대한 대운의 흐름과 인생의 계절 변화를 분석해 드릴게요.",
+    callout: "현재 34세부터 43세까지 이어지는 임신(壬申) 대운을 지나고 있으며, 이는 인생의 큰 기둥이 잡히는 안정적인 상승기예요.",
+    paragraphs: [
+      "대운에서 들어온 정인(壬)과 정관(申)은 사회적인 명예와 문서운, 그리고 안정적인 직장과 지위를 보장해 주는 아주 긍정적인 기운이에요.",
+      "지난 대운의 차갑고 불안정했던 물 기운(편인)과 달리, 이번 대운은 용신인 금(金) 기운이 든든한 뿌리가 되어 줍니다.",
+      "이 시기에는 직장에서의 승진이나 이직, 혹은 내 집 마련이나 결혼 등 인생의 굵직한 현실적 목표들을 성취하기에 아주 유리해요.",
+      "억지로 판을 흔들기보다 현재 주어진 역할에 책임을 다하며 내실을 다질 때 사회적 지위가 자연스럽게 격상되는 흐름이에요.",
+      "이 든든한 대운의 울타리를 믿고 조급함을 내려놓은 채 차근차근 나만의 성을 쌓아 올리시기를 권해 드려요.",
+    ],
+  },
+  seun: {
+    intro: "대운이라는 큰 프레임 안에서 해마다 찾아오는 세운의 구체적인 변화와 흐름을 짚어드릴게요.",
+    callout: "현재 지나고 있는 2026년 병오(丙午)년은 상관의 기운이 강해져 창의적인 아이디어가 샘솟고 변화를 꾀하고 싶은 욕구가 커지는 해예요.",
+    paragraphs: [
+      "2027년 정미(丁未)년에는 식신과 편재가 만나 재물적인 성취를 위한 구체적인 행동과 투자의 발판을 마련하게 될 것으로 보여요.",
+      "그리고 대망의 2028년 무신(戊申)년에는 희신인 토(土)와 용신인 금(金)이 완벽하게 조화를 이루며 들어와 운의 정점을 찍게 됩니다.",
+      "이 시기에는 그동안 준비해 온 일들이 큰 재물과 확실한 명예로 돌아오며 인생의 큰 도약을 이루는 최고의 기회를 맞이해요.",
+      "이어지는 2029년 기유(己酉)년까지도 강한 재물과 관성의 기운이 유지되므로 안정적인 자산 구축과 커리어 확장이 가능해요.",
+      "이처럼 향후 수년간은 매우 유리한 기운들이 차례로 들어오니 두려움 없이 기회를 포착할 준비를 하셔야 해요.",
+    ],
+    flow: [
+      { year: 2026, score: 62 }, { year: 2027, score: 74 }, { year: 2028, score: 92 },
+      { year: 2029, score: 88 }, { year: 2030, score: 70 }, { year: 2031, score: 64 },
+      { year: 2032, score: 58 }, { year: 2033, score: 60 },
+    ],
+  },
+  openLuck: {
+    intro: "막힌 운이 본격적으로 풀리고 인생의 황금기가 시작되는 결정적인 타이밍을 짚어드릴게요.",
+    callout: "운이 가장 강력하게 열리는 시기는 만 38세가 되는 2028년 무신(戊申)년으로, 재물과 관성의 기운이 동시에 폭발하는 때예요.",
+    paragraphs: [
+      "이때는 사주 원국의 사신합(巳-申)이 활성화되면서 사회적인 명예와 계약이 맺어져 성사되고 큰돈이 들어오는 통로가 열려요.",
+      "그동안 머릿속으로만 구상해 왔던 기획이나 사업 아이템이 있다면 이 시기에 세상에 내놓을 때 가장 큰 성공을 거둘 수 있어요.",
+      "또한 직장인이라면 파격적인 승진이나 좋은 조건의 이직 제안을 받게 되며 사회적 위상이 한 단계 격상되는 경험을 하게 돼요.",
+      "망설이거나 주저하지 말고 주체적으로 판을 주도해 나갈 때 이 강력한 운의 에너지를 온전히 내 것으로 만들 수 있답니다.",
+      "이 눈부신 전환점을 위해 지금부터 실력을 갈고닦으며 내실을 다져두는 것이 가장 현명한 준비임을 잊지 마세요.",
+    ],
+    peak: { title: "2028년 무신(戊申)년의 강력한 재관(財官) 활성화", when: "용신과 희신이 함께 들어오는 때", todo: "망설이지 말고 주체적으로 도전하세요" },
+  },
+  domains: {
+    intro: "사주 데이터를 바탕으로 앞으로 펼쳐질 10년 동안의 주요 인생 영역별 운세 강도를 종합적으로 비교해 드릴게요.",
+    paragraphs: [
+      "돈, 일, 연애, 결혼, 건강이라는 다섯 가지 영역이 서로 어떻게 위계적으로 얽혀 있으며 어디에 무게중심을 두어야 할지 한눈에 보여드립니다.",
+      "이 차트를 통해 앞으로의 삶을 기획하고 에너지를 분배하는 현명한 가이드라인으로 삼아 보시기를 권해 드려요.",
+    ],
+    bars: [
+      { label: "재물", value: 85 }, { label: "직업", value: 90 }, { label: "애정", value: 75 },
+      { label: "결혼", value: 80 }, { label: "건강", value: 70 },
     ],
   },
 };
@@ -1572,8 +1779,86 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제6장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && (
+      {/* ═══════════ 제6장 ═══════════ */}
+      {ch === "6" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-13.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “앞으로 10년,<br />어떻게 흘러갈까?”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"앞으로의 10년,\n운의 큰 물결이\n어떻게 흐르는지 살펴보겠습니다."`}</Quote>
+
+          {/* 대운 흐름 */}
+          <HanjaDivider hanja="大運" sub="대운으로 보는 10년의 큰 흐름" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>대운으로 보는 10년의 큰 흐름</Heading>
+            <DaeunTable view={report?.view ?? null} />
+            <P>{c.daeFlow.intro}</P>
+            <Callout>{c.daeFlow.callout}</Callout>
+            {c.daeFlow.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <TrendChart flow={c.seun.flow} />
+          </section>
+
+          <Quote>{`"2028년과 2029년은 인생의\n황금기 같은 재물과 명예의\n강력한 상승기예요."`}</Quote>
+
+          {/* 세운 흐름 */}
+          <HanjaDivider hanja="歲運" sub="세운으로 보는 해마다의 운" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>세운으로 보는 해마다의 운</Heading>
+            <SeunTable view={report?.view ?? null} />
+            <P>{c.seun.intro}</P>
+            <Callout>{c.seun.callout}</Callout>
+            {c.seun.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 개운 시점 */}
+          <HanjaDivider hanja="開運" sub="운이 언제 풀리는지" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>운이 언제 풀리는지</Heading>
+            <P>{c.openLuck.intro}</P>
+            <Callout>{c.openLuck.callout}</Callout>
+            {c.openLuck.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <PeakBox peak={c.openLuck.peak} />
+          </section>
+
+          <Quote>{`"다가올 눈부신 기회를 잡기 위해\n지금부터 차근차근 준비해 보아요."`}</Quote>
+
+          {/* 5가지 주요 운세 영역 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>5가지 주요 운세 영역</Heading>
+            <P>{c.domains.intro}</P>
+            {c.domains.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <DomainBars bars={c.domains.bars} />
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-15.jpg" h={360} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"인생의 가장 아름다운 계절이\n머지않았으니,\n조급해하지 말고 나만의 속도로\n걸어가 보아요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("5")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("7")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>재물·직업운 정밀풀이</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제7장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
