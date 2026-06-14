@@ -64,6 +64,10 @@ export type ReportContent = {
     card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] };
   };
   marriage: ReportSection; // 오래가는 궁합의 비결
+  // ── 9장: 건강운 정밀풀이 ──
+  bodyWeak: ReportSection & { bars: { label: string; value: number }[] }; // 타고난 약한 부위 + 부위별 주의 신호
+  riskTime: ReportSection; // 조심해야 할 시기와 사고수
+  healthCare: ReportSection & { element: string; tips: { label: string; title: string; desc: string }[] }; // 오행에 따른 건강관리
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -76,6 +80,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   6: ["daeFlow", "seun", "openLuck", "domains"],
   7: ["wealthTime", "jobFit", "jobType", "invest"],
   8: ["loveStyle", "loveFlow", "spouse", "marriage"],
+  9: ["bodyWeak", "riskTime", "healthCare"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -111,6 +116,7 @@ const CH_THEME: Record<number, string> = {
   6: "'앞으로 10년, 어떻게 흘러갈까' — 현재 진행 중인 대운으로 보는 10년의 큰 흐름",
   7: "'재물·직업운 정밀풀이' — 큰돈이 들어오는 시점, 향후 5년 재물운",
   8: "'연애·결혼운 정밀풀이' — 사랑하는 방식, 시기별 연애 흐름",
+  9: "'건강운 정밀풀이' — 타고난 약한 부위, 부위별 주의 신호",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -253,6 +259,31 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "배우자와 오래 행복하게 지내는 핵심(독립 공간 존중 등)을 짚는 도입",
     "callout": "주의할 합/충(묘신원진 등)과 그로 인한 갈등 포인트, 소통 태도를 짚는 문장",
     "paragraphs": ["객관적 사실 기반 소통 훈련 조언","결혼 결실의 시기(연도+간지)와 결혼이 주는 안정감"]
+  }
+}`,
+  9: `{
+  "bodyWeak": {
+    "intro": "건강 관리를 위해 가장 먼저 챙겨야 할 신체 부위를 짚는 도입",
+    "callout": "오행 불균형(특정 오행 과다 → 약해지는 장부/부위)을 근거로 약한 부위를 짚는 문장(오행 한자 포함)",
+    "paragraphs": ["일상에서 먼저 나타나는 증상/신호","스트레스·수면 등 누적 시 주의점","기본 바탕을 다지는 조언"],
+    "bars": [ {"label":"호흡기","value":80}, {"label":"피부","value":60}, {"label":"관절","value":85}, {"label":"수면","value":70} ]
+  },
+  "riskTime": {
+    "intro": "특별히 건강·사고수를 조심해야 할 구체적 시기와 상황을 짚는 도입",
+    "callout": "계절적으로 취약한 때(약해지는 오행·여름/환절기 등)를 짚는 문장",
+    "paragraphs": ["원국의 합/충 활성 시기의 정신적 증상","운동·생활에서의 주의점","삼재 등 특정 연도와 정기검진 권유"]
+  },
+  "healthCare": {
+    "intro": "약한 부위를 보완할 맞춤형 건강 관리법 도입",
+    "callout": "가장 필요한 오행(용신, 한자 포함)을 채워 몸을 보강한다는 문장",
+    "paragraphs": ["바른 자세·호흡 등 생활 실천","작은 습관 변화의 효과와 격려"],
+    "element": "쇠 (金)",
+    "tips": [
+      {"label":"수분","title":"미지근한 물 자주 마시기","desc":"기관지 점막을 촉촉하게 유지해 줍니다"},
+      {"label":"음식","title":"도라지, 무, 배 등 흰색 음식","desc":"폐와 호흡기 기능을 강화하는 데 좋아요"},
+      {"label":"운동","title":"맨몸 스트레칭과 필라테스","desc":"관절의 유연성을 기르고 뼈를 보호해요"},
+      {"label":"습관","title":"바른 자세 유지와 척추 정렬","desc":"뼈와 관절에 무리가 가지 않도록 돕습니다"}
+    ]
   }
 }`,
 };

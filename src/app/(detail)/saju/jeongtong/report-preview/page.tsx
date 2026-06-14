@@ -261,14 +261,15 @@ function PeakBox({ peak }: { peak: { title: string; when: string; todo: string }
   );
 }
 
-// 영역별 운세 강도 막대 차트 (6장)
-function DomainBars({ bars }: { bars: { label: string; value: number }[] }) {
+// 영역별/부위별 운세 강도 막대 차트 (6·9장 공용)
+function DomainBars({ bars, title = "영역별 운세 강도", sub }: { bars: { label: string; value: number }[]; title?: string; sub?: string }) {
   const src = bars.length ? bars : [{ label: "재물", value: 50 }];
   return (
     <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <h3 className="text-[15px] font-black mb-4 flex items-center gap-1.5" style={{ color: INK }}>
-        <span style={{ color: GOLD }}>📊</span> 영역별 운세 강도
+      <h3 className="text-[15px] font-black flex items-center gap-1.5" style={{ color: INK }}>
+        <span style={{ color: GOLD }}>📊</span> {title}
       </h3>
+      {sub ? <p className="text-[12px] mt-1 mb-4" style={{ color: MUTE }}>{sub}</p> : <div className="mb-4" />}
       <div className="flex justify-between gap-2.5" style={{ height: 160 }}>
         {src.map((b, i) => (
           <div key={i} className="flex-1 flex flex-col justify-end items-center">
@@ -393,6 +394,32 @@ function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) 
         ))}
       </svg>
       <p className="text-center text-[11px] mt-1" style={{ color: MUTE }}>점이 높은 달일수록 인연의 기운이 강해요.</p>
+    </div>
+  );
+}
+
+// 오행에 따른 건강관리 카드 (9장)
+function HealthCareCard({ element, tips }: { element: string; tips: { label: string; title: string; desc: string }[] }) {
+  return (
+    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="flex items-center gap-3 mb-4">
+        <span className="flex items-center justify-center rounded-full text-[16px]" style={{ width: 38, height: 38, background: `${GOLD}1c`, color: GOLD }}>✦</span>
+        <div>
+          <p className="text-[11px] font-bold" style={{ color: MUTE }}>보강하면 좋은 기운</p>
+          <p className="text-[18px] font-black" style={{ color: INK }}>{element}</p>
+        </div>
+      </div>
+      <div>
+        {tips.map((t, i) => (
+          <div key={i} className="flex gap-3 items-start py-3" style={{ borderTop: `1px solid ${INK}0c` }}>
+            <span className="flex-shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-md" style={{ background: `${MAROON}10`, color: MAROON, minWidth: 44, textAlign: "center" }}>{t.label}</span>
+            <div>
+              <p className="text-[13.5px] font-bold" style={{ color: INK }}>{t.title}</p>
+              <p className="text-[12.5px] leading-relaxed mt-0.5" style={{ color: MUTE }}>{t.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -570,6 +597,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "6": "제6장 · 앞으로 10년, 어떻게 흘러갈까",
   "7": "제7장 · 재물·직업운 정밀풀이",
   "8": "제8장 · 연애·결혼운 정밀풀이",
+  "9": "제9장 · 건강운 정밀풀이",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1026,6 +1054,42 @@ const SAMPLE_CONTENT: ReportContent = {
     paragraphs: [
       "감정적으로 욱해서 쏘아붙이기보다 \"내가 이런 부분에서 서운했어\"라고 객관적인 사실을 바탕으로 소통하는 훈련이 필요하답니다.",
       "결혼은 2028년(무신년)에 구체적인 결실을 맺을 가능성이 가장 높으며, 결혼을 통해 선우님의 인생 안정감이 비약적으로 상승할 거예요.",
+    ],
+  },
+  bodyWeak: {
+    intro: "선우님의 사주에서 건강 관리를 위해 가장 먼저 보살피고 신경 쓰셔야 할 부위는 바로 호흡기와 관절 계통이에요.",
+    callout: "사주에 나무의 기운이 너무 강해지면 상대적으로 쇠(金)의 기운이 억눌려 뼈, 관절, 그리고 폐와 기관지가 약해지기 쉽습니다.",
+    paragraphs: [
+      "평소에 조금만 피로해도 목과 어깨가 뻐근해지거나 환절기마다 비염이나 감기로 고생하는 경향이 있을 수 있어요.",
+      "또한 스트레스가 누적되면 수면의 질이 떨어지고 신경이 예민해져 만성 피로를 호소하기 쉬우니 주의해야 해요.",
+      "몸의 뼈대와 호흡기를 튼튼하게 다지는 것이 선우님의 넘치는 열정을 오랫동안 유지할 수 있는 가장 기본적인 바탕이에요.",
+    ],
+    bars: [
+      { label: "호흡기", value: 80 }, { label: "피부", value: 60 }, { label: "관절", value: 85 }, { label: "수면", value: 70 },
+    ],
+  },
+  riskTime: {
+    intro: "선우님이 특별히 건강에 주의하고 사고수를 조심하셔야 할 구체적인 시기와 상황들을 짚어드릴게요.",
+    callout: "계절적으로는 쇠의 기운이 가장 약해지는 뜨거운 여름철이나, 일교차가 심해 면역력이 떨어지는 환절기에 건강 누수를 조심해야 해요.",
+    paragraphs: [
+      "또한 사주 원국의 묘신원진이 활성화되는 시기에는 정신적인 스트레스로 인한 두통이나 불면증이 찾아오기 쉬우니 마음을 다스려야 합니다.",
+      "운동을 할 때는 무리하게 무거운 무게를 들기보다 관절에 무리가 가지 않는 선에서 가볍고 꾸준하게 진행하는 것이 안전해요.",
+      "특히 삼재가 시작되는 2031년에는 만성 피로와 면역력 저하가 찾아올 수 있으니 정기적인 건강 검진을 꼭 챙기시기를 권해 드려요.",
+    ],
+  },
+  healthCare: {
+    intro: "오행의 원리를 활용하여 선우님의 약한 부위를 보완하고 활력을 불어넣어 줄 맞춤형 건강 관리법을 알려드릴게요.",
+    callout: "선우님에게 가장 필요한 쇠(金)의 기운을 일상에서 채워줌으로써 뼈와 관절을 튼튼히 하고 호흡기 면역력을 높일 수 있어요.",
+    paragraphs: [
+      "평소에 바른 자세를 유지하여 척추와 골반의 정렬을 맞추고, 깊은 호흡을 통해 폐에 맑은 산소를 충분히 공급해 주는 것이 좋아요.",
+      "일상에서의 작은 습관 변화가 선우님의 몸과 마음에 거대한 긍정적 변화를 불러올 것이니 오늘부터 가볍게 실천해 보세요.",
+    ],
+    element: "쇠 (金)",
+    tips: [
+      { label: "수분", title: "미지근한 물 자주 마시기", desc: "기관지 점막을 촉촉하게 유지해 줍니다" },
+      { label: "음식", title: "도라지, 무, 배 등 흰색 음식", desc: "폐와 호흡기 기능을 강화하는 데 좋아요" },
+      { label: "운동", title: "맨몸 스트레칭과 필라테스", desc: "관절의 유연성을 기르고 뼈를 보호해요" },
+      { label: "습관", title: "바른 자세 유지와 척추 정렬", desc: "뼈와 관절에 무리가 가지 않도록 돕습니다" },
     ],
   },
 };
@@ -2249,8 +2313,72 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제9장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && (
+      {/* ═══════════ 제9장 ═══════════ */}
+      {ch === "9" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-10.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “건강운 정밀풀이”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"평생 건강하게 —\n${name}님의 몸이 보내는 신호를\n미리 살펴보겠습니다."`}</Quote>
+
+          {/* 약한 부위 */}
+          <HanjaDivider hanja="弱處" sub="타고난 약한 부위" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>호흡기와 관절을 먼저 챙기세요</Heading>
+            <P>{c.bodyWeak.intro}</P>
+            <Callout>{c.bodyWeak.callout}</Callout>
+            {c.bodyWeak.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <DomainBars title="부위별 주의 신호" sub="몸에서 먼저 신호가 올 수 있는 부위예요." bars={c.bodyWeak.bars} />
+          </section>
+
+          {/* 조심해야 할 시기 */}
+          <HanjaDivider hanja="厄運" sub="조심해야 할 시기와 사고수" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>조심해야 할 시기와 사고수</Heading>
+            <P>{c.riskTime.intro}</P>
+            <Callout>{c.riskTime.callout}</Callout>
+            {c.riskTime.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 오행에 따른 건강관리 */}
+          <HanjaDivider hanja="養生" sub="오행에 따른 건강관리" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>오행에 따른 건강관리</Heading>
+            <P>{c.healthCare.intro}</P>
+            <Callout>{c.healthCare.callout}</Callout>
+            {c.healthCare.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <HealthCareCard element={c.healthCare.element} tips={c.healthCare.tips} />
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-1.jpg" h={400} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"몸의 뼈대(金)가 곧게 서야\n두른 나무(木)가 곧게 자라듯,\n관절과 호흡기를 보살피는 것이\n활력의 시작이에요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("8")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("10")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>나를 도와줄 귀인은 누구일까?</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제10장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
