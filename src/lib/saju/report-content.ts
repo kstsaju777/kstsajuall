@@ -56,6 +56,14 @@ export type ReportContent = {
   jobFit: ReportSection & { jobs: { title: string; desc: string }[] }; // 내게 맞는 직업 TOP 3
   jobType: ReportSection & { split: { leftLabel: string; left: number; rightLabel: string; right: number; leftDesc: string; rightDesc: string } }; // 직장인 vs 사업가
   invest: ReportSection; // 내게 잘 맞는 투자 방법
+  // ── 8장: 연애·결혼운 정밀풀이 ──
+  loveStyle: ReportSection; // 내가 사랑하는 방식
+  loveFlow: ReportSection & { flow: { label: string; score: number }[]; peakCallout: string }; // 시기별 연애 흐름(월별)
+  spouse: { // 이런 사람이 배우자로 와요
+    intro: string; callout: string; paragraphs: string[];
+    card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] };
+  };
+  marriage: ReportSection; // 오래가는 궁합의 비결
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -67,6 +75,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   5: ["balance", "answer"],
   6: ["daeFlow", "seun", "openLuck", "domains"],
   7: ["wealthTime", "jobFit", "jobType", "invest"],
+  8: ["loveStyle", "loveFlow", "spouse", "marriage"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -101,6 +110,7 @@ const CH_THEME: Record<number, string> = {
   5: "'세상을 대하는 나만의 방식' — 독립과 협력 사이의 균형, 삶의 갈등을 푸는 해답",
   6: "'앞으로 10년, 어떻게 흘러갈까' — 현재 진행 중인 대운으로 보는 10년의 큰 흐름",
   7: "'재물·직업운 정밀풀이' — 큰돈이 들어오는 시점, 향후 5년 재물운",
+  8: "'연애·결혼운 정밀풀이' — 사랑하는 방식, 시기별 연애 흐름",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -209,6 +219,40 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "어떤 재테크 방식이 가장 잘 맞는지(투기성 vs 실물 안정형) 짚는 도입",
     "callout": "용신 오행(흙·쇠 등)을 근거로 부동산·장기채권·우량주 등 안전한 투자처를 짚는 문장",
     "paragraphs": ["상관의 충동적 기운이 부르는 투자 리스크와 경계점","철저한 분석·이성적 기준으로 장기 포트폴리오를 굴릴 때의 결실"]
+  }
+}`,
+  8: `{
+  "loveStyle": {
+    "intro": "연애할 때 상대를 대하는 태도(다정함·배려 등)를 짚는 도입",
+    "callout": "강점(상관의 표현력 등)으로 연인을 사로잡는 매력을 짚는 문장(십성 근거)",
+    "paragraphs": ["사생활·독립 영역을 침범받기 싫어하는 까다로운 면","겉과 속의 고집/선, 넘어서면 마음을 닫는 면","서로의 독립성을 존중하며 깊은 교감을 갈망하는 지향"]
+  },
+  "loveFlow": {
+    "intro": "앞으로 1년간 찾아올 연애·인연의 흐름(하반기로 갈수록 강해짐 등) 도입",
+    "callout": "특히 좋은 시기(연도+계절+간지/용신)와 인연을 만날 확률을 짚는 문장",
+    "flow": [ {"label":"6월","score":55}, {"label":"7월","score":60}, {"label":"8월","score":78}, {"label":"9월","score":88}, {"label":"10월","score":72}, {"label":"11월","score":62}, {"label":"12월","score":56}, {"label":"1월","score":60} ],
+    "peakCallout": "연애운이 정점에 달하는 달(연도+월+간지)과 운명의 상대가 나타날 가능성을 짚는 문장",
+    "paragraphs": ["그 달의 매력(도화살 등)과 관계 발전","어떤 장소·계기에서 인연을 만나게 되는지"]
+  },
+  "spouse": {
+    "intro": "사주에 예정된 미래 배우자의 전반적 분위기를 짚는 도입",
+    "callout": "배우자가 선우님에게 어떤 존재인지(중심을 잡아주는 멘토 등)를 짚는 문장",
+    "paragraphs": ["예의·상식과 겉/속의 심지","서로의 전문성을 존중하는 동반자 관계"],
+    "card": {
+      "gender": "여성 또는 남성(상대 성별)",
+      "ageBand": "30대 초반 등 연령대",
+      "desc": "배우자의 분위기·성격 2~3문장",
+      "mbti": "ISTJ 등 추정 MBTI",
+      "height": "163cm 내외 등",
+      "personality": "성격 한 줄",
+      "jobField": "직업 계열(금융·공공기관 등)",
+      "tags": ["키워드","키워드","키워드","키워드","키워드","키워드"]
+    }
+  },
+  "marriage": {
+    "intro": "배우자와 오래 행복하게 지내는 핵심(독립 공간 존중 등)을 짚는 도입",
+    "callout": "주의할 합/충(묘신원진 등)과 그로 인한 갈등 포인트, 소통 태도를 짚는 문장",
+    "paragraphs": ["객관적 사실 기반 소통 훈련 조언","결혼 결실의 시기(연도+간지)와 결혼이 주는 안정감"]
   }
 }`,
 };

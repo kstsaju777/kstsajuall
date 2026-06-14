@@ -360,6 +360,83 @@ function SplitGauge({ split }: { split: { leftLabel: string; left: number; right
   );
 }
 
+// 앞으로 1년 연애 흐름 — 월별 라인 차트 (8장)
+function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) {
+  const data = flow.length ? flow : [{ label: "-", score: 50 }];
+  const W = 320, H = 150, padX = 24, padTop = 18, padBot = 28;
+  const n = data.length;
+  const x = (i: number) => padX + ((W - padX * 2) * i) / Math.max(1, n - 1);
+  const y = (v: number) => padTop + (H - padTop - padBot) * (1 - Math.min(100, Math.max(0, v)) / 100);
+  const pts = data.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
+  const area = `${padX},${y(0)} ${pts} ${x(n - 1)},${y(0)}`;
+  const peakI = data.reduce((m, d, i) => (d.score > data[m].score ? i : m), 0);
+  return (
+    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <h3 className="text-[15px] font-black flex items-center gap-1.5 mb-1" style={{ color: INK }}>
+        <span style={{ color: GOLD }}>📈</span> 앞으로 1년 연애 흐름
+      </h3>
+      <p className="text-[12px] mb-3" style={{ color: MUTE }}>인연의 기운이 강해지는 달이에요.</p>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
+        <defs>
+          <linearGradient id="loveArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GOLD} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={GOLD} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <polygon points={area} fill="url(#loveArea)" />
+        <polyline points={pts} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {data.map((d, i) => (
+          <circle key={i} cx={x(i)} cy={y(d.score)} r={i === peakI ? 5 : 3.5} fill={i === peakI ? GOLD : WHITE} stroke={GOLD} strokeWidth="2" />
+        ))}
+        {data.map((d, i) => (
+          <text key={i} x={x(i)} y={H - 12} fontSize="8.5" fill={INK_SOFT} textAnchor="middle">{d.label}</text>
+        ))}
+      </svg>
+      <p className="text-center text-[11px] mt-1" style={{ color: MUTE }}>점이 높은 달일수록 인연의 기운이 강해요.</p>
+    </div>
+  );
+}
+
+// 미래 배우자 카드 (8장)
+function SpouseCard({ card }: { card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] } }) {
+  const spec = (label: string, val: string) => (
+    <div>
+      <p className="text-[11px] font-bold mb-0.5" style={{ color: MAROON }}>{label}</p>
+      <p className="text-[13px]" style={{ color: INK_SOFT }}>{val}</p>
+    </div>
+  );
+  return (
+    <div className="rounded-2xl p-4 mb-4" style={{ background: PINK_PALE, border: `1px solid ${INK}10` }}>
+      <div className="flex items-center gap-2 mb-3">
+        <span className="flex items-center justify-center rounded-full text-[13px]" style={{ width: 26, height: 26, background: WHITE, color: MAROON }}>👤</span>
+        <p className="text-[12px]" style={{ color: MUTE }}>사주로 본 배우자의 분위기예요.</p>
+      </div>
+      <div className="rounded-xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}0e` }}>
+        <div className="relative" style={{ height: 200 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/hero/hero-4.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <span className="absolute top-3 left-3 text-[11px] font-bold px-2 py-0.5 rounded-md text-white" style={{ background: MAROON }}>{card.gender}</span>
+          <span className="absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-md" style={{ background: WHITE, color: INK }}>{card.ageBand}</span>
+        </div>
+        <div className="p-4">
+          <p className="text-[13.5px] leading-relaxed mb-3" style={{ color: INK_SOFT }}>{card.desc}</p>
+          <div className="grid grid-cols-2 gap-3 pt-3" style={{ borderTop: `1px solid ${INK}0c` }}>
+            {spec("MBTI", card.mbti)}
+            {spec("키", card.height)}
+          </div>
+          <div className="mt-3">{spec("성격", card.personality)}</div>
+          <div className="mt-3">{spec("직업계열", card.jobField)}</div>
+          <div className="flex flex-wrap gap-1.5 mt-4">
+            {card.tags.map((t, i) => (
+              <span key={i} className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${MAROON}10`, color: MAROON }}>{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // 십성 → 6축 역할 값 (명식 기반)
 function sipseongRadar(view: MyeongsikView | null): { label: string; value: number }[] {
   const cat: Record<string, number> = { 비겁: 0, 식상: 0, 재성: 0, 관성: 0, 인성: 0 };
@@ -492,6 +569,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "5": "제5장 · 세상을 대하는 나만의 방식",
   "6": "제6장 · 앞으로 10년, 어떻게 흘러갈까",
   "7": "제7장 · 재물·직업운 정밀풀이",
+  "8": "제8장 · 연애·결혼운 정밀풀이",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -900,6 +978,54 @@ const SAMPLE_CONTENT: ReportContent = {
     paragraphs: [
       "상관의 충동적인 기운이 발동할 때 귀가 얇아져 남들의 말만 믿고 섣불리 큰돈을 움직였다가는 큰 손실을 보기 쉬우니 경계해야 합니다.",
       "나만의 철저한 분석과 이성적인 기준을 바탕으로 포트폴리오를 구성하고 흔들림 없이 장기적으로 굴려 갈 때 큰 부를 이룰 수 있어요.",
+    ],
+  },
+  loveStyle: {
+    intro: "선우님은 연애를 할 때 상대방에게 매우 다정하고 세심한 배려를 아끼지 않는 따뜻한 사랑꾼의 면모를 지니고 있어요.",
+    callout: "상관의 풍부한 표현력 덕분에 연인에게 감동을 주는 이벤트를 하거나 예쁜 말로 마음을 사로잡는 능력이 매우 뛰어나시네요.",
+    paragraphs: [
+      "하지만 동시에 나만의 사생활과 독립적인 영역을 침범받는 것을 극도로 싫어하여 은근히 까다로운 면도 가지고 있답니다.",
+      "겉으로는 다 맞춰주는 것처럼 보여도 내면에는 확고한 고집과 선이 있어 상대방이 이를 넘어서면 마음의 문을 닫아버리기도 해요.",
+      "서로의 독립성을 존중해 주면서도 정서적인 깊은 교감을 나눌 수 있는 성숙한 연애를 지향하고 갈망하는 스타일이에요.",
+    ],
+  },
+  loveFlow: {
+    intro: "앞으로 1년 동안 선우님에게 찾아올 연애와 인연의 흐름은 하반기로 갈수록 점차 긍정적이고 강하게 활성화되는 양상을 보여줍니다.",
+    callout: "특히 2026년 가을철에는 선우님의 매력을 돋보이게 하는 기운과 용신인 쇠의 기운이 함께 들어와 마음에 쏙 드는 인연을 만날 확률이 매우 높아요.",
+    flow: [
+      { label: "6월", score: 55 }, { label: "7월", score: 60 }, { label: "8월", score: 78 }, { label: "9월", score: 88 },
+      { label: "10월", score: 72 }, { label: "11월", score: 62 }, { label: "12월", score: 56 }, { label: "1월", score: 60 },
+    ],
+    peakCallout: "연애운의 흐름이 가장 정점에 달하는 달은 2026년 8월(병신월)과 9월(정유월)로, 이 시기에 운명의 상대가 나타날 가능성이 매우 큽니다.",
+    paragraphs: [
+      "이 달에는 선우님의 매력(도화살)이 극대화되고 이성을 끌어당기는 관성의 기운이 강해져 자연스럽게 연인 관계로 발전하기 쉬워요.",
+      "평소 가보고 싶었던 문화 공간이나 전문적인 배움이 있는 장소에서 자연스럽게 대화가 통하는 사람을 만나게 될 것으로 보여요.",
+    ],
+  },
+  spouse: {
+    intro: "선우님의 사주에 예정된 미래의 배우자는 매우 단정하고 이지적인 분위기를 풍기며 자기 일에 대한 책임감이 아주 강한 사람이에요.",
+    callout: "차분하고 현실적인 성격으로 선우님이 감정적으로 흔들릴 때 든든하게 중심을 잡아주고 올바른 방향을 제시해 주는 멘토 같은 존재네요.",
+    paragraphs: [
+      "예의 바르고 상식이 통하는 사람이며, 겉은 부드러워 보이지만 내면은 누구보다 단단하고 굳건한 심지를 가지고 있답니다.",
+      "서로의 전문성을 존중해 주며 동반자로서 함께 성장해 나갈 수 있는 가장 이상적이고 든든한 파트너가 되어줄 사람이에요.",
+    ],
+    card: {
+      gender: "여성",
+      ageBand: "30대 초반",
+      desc: "단정하고 이지적인 분위기를 풍기며, 자기 일에 대한 자부심과 책임감이 강한 여성이에요. 예의 바르고 차분한 성격이지만 내면은 매우 단단해요.",
+      mbti: "ISTJ",
+      height: "163cm 내외",
+      personality: "차분하고 현실적이며 신뢰감을 주는 성격",
+      jobField: "금융, 공공기관, 전문 사무직",
+      tags: ["이지적인", "책임감 있는", "단정한 외모", "차분한 성격", "공무원/대기업", "자기관리 철저"],
+    },
+  },
+  marriage: {
+    intro: "선우님과 미래 배우자와의 결혼 생활은 서로의 독립적인 공간과 시간을 존중해 줄 때 가장 오랫동안 행복하게 유지될 수 있어요.",
+    callout: "사주에 있는 묘신원진의 작용으로 인해 사소한 말 한마디에 오해나 서운함이 쌓이기 쉬우니 대화할 때는 늘 이성적이고 차분해야 해요.",
+    paragraphs: [
+      "감정적으로 욱해서 쏘아붙이기보다 \"내가 이런 부분에서 서운했어\"라고 객관적인 사실을 바탕으로 소통하는 훈련이 필요하답니다.",
+      "결혼은 2028년(무신년)에 구체적인 결실을 맺을 가능성이 가장 높으며, 결혼을 통해 선우님의 인생 안정감이 비약적으로 상승할 거예요.",
     ],
   },
 };
@@ -2050,8 +2176,81 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제8장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && (
+      {/* ═══════════ 제8장 ═══════════ */}
+      {ch === "8" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “연애·결혼운<br />정밀풀이”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"${name}님은 어떻게 사랑하고\n어떤 인연을 만날까요.\n연애와 결혼운을 풀어보겠습니다."`}</Quote>
+
+          {/* 사랑하는 방식 */}
+          <HanjaDivider hanja="戀愛" sub="내가 사랑하는 방식" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>내가 사랑하는 방식</Heading>
+            <P>{c.loveStyle.intro}</P>
+            <Callout>{c.loveStyle.callout}</Callout>
+            {c.loveStyle.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 시기별 연애 흐름 */}
+          <HanjaDivider hanja="戀運" sub="나의 시기별 연애 흐름" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>나의 시기별 연애 흐름</Heading>
+            <P>{c.loveFlow.intro}</P>
+            <Callout>{c.loveFlow.callout}</Callout>
+            <LoveTrendChart flow={c.loveFlow.flow} />
+            <Callout>{c.loveFlow.peakCallout}</Callout>
+            {c.loveFlow.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 이런 사람이 배우자로 와요 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>이런 사람이 배우자로 와요</Heading>
+            <SpouseCard card={c.spouse.card} />
+            <P>{c.spouse.intro}</P>
+            <Callout>{c.spouse.callout}</Callout>
+            {c.spouse.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 궁합 */}
+          <HanjaDivider hanja="宮合" sub="미래 배우자와의 궁합" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>오래가는 궁합의 비결</Heading>
+            <P>{c.marriage.intro}</P>
+            <Callout>{c.marriage.callout}</Callout>
+            {c.marriage.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-9.jpg" h={400} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"서로의 화원에 적당한 거리를 두고\n물을 줄 때,\n${ilganLabel}(${ilganHanja})의 사랑은 시들지 않고\n가장 아름답게 피어난답니다."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("7")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("9")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>건강운 정밀풀이</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제9장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
