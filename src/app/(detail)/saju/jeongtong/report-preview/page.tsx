@@ -16,6 +16,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
+import { isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
 import { MyeongsikModalView } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 
@@ -32,6 +33,7 @@ const CALLOUT_BG = "#f7e9ec";
 const BLUE = "#3f63c4";
 const WARN = "#c9474f";
 const NAVY = "#2d3a8c";
+const TAG_COLORS = ["#2d3a8c", "#b5891c", "#c9474f", "#3f8a52"];
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
 // 오행 색상
@@ -532,6 +534,28 @@ const SAMPLE_CONTENT: ReportContent = {
       "이미 그 길을 스스로 열어갈 수 있는 충분히 단단하고 귀한 힘을 품고 태어났음을 꼭 기억해 주셨으면 해요.",
     ],
   },
+  rarity: {
+    intro: "사주가 지닌 희소성과 특별함에 대해 명리학적인 근거를 들어 자세히 풀어드릴게요.",
+    callout: "건록 일주라는 강력한 주체성의 기둥 위에, 하늘의 보살핌을 뜻하는 천을귀인이 중첩된 귀한 명식이에요.",
+    paragraphs: [
+      "가장 귀한 글자들이 월지와 시지에 나란히 자리 잡은 구성은 매우 드물답니다.",
+      "이 귀하고 단단한 사주의 그릇을 믿고 주체적으로 삶을 이끌어갈 때 특별한 복록은 온전히 발현될 거예요.",
+    ],
+    grade: "A등급",
+    percentile: 2.5,
+  },
+  special: {
+    tags: [
+      { label: "乙卯", sub: "을묘일주 × 도화살" },
+      { label: "巳 ↔ 申", sub: "사신육합" },
+      { label: "卯 ↔ 申", sub: "묘신원진" },
+    ],
+    items: [
+      { text: "화초 같은 일주에 도화살(타고난 인기)까지 더해졌어요. 강한 기질이 또렷하게 드러나는 사주예요.", hi: "어느 자리에서든 시선을 독차지하게 해줘요." },
+      { text: "두 글자가 단단히 묶여, 인연과 결속이 깊어지는 자리예요.", hi: "사람과 깊이 엮이며 든든한 인연을 만들어내게 해줘요." },
+      { text: "서로 밀어내는 기운이 함께 돌아, 예민함과 애증이 공존하는 자리예요.", hi: "예민한 촉으로 남들이 놓치는 신호를 먼저 알아채게 해줘요." },
+    ],
+  },
 };
 
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
@@ -990,7 +1014,10 @@ function ReportPreviewInner() {
   type BirthMeta = { date: string; calendar: string; time: string } | null;
   const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
+  const [chapterLoading, setChapterLoading] = useState(false);
   const startedRef = useRef(false);
+  const attemptedRef = useRef<Set<number>>(new Set()); // 장별 생성 1회만 시도(무한 루프 방지)
+  const chNum = Number(ch);
 
   // id 있으면 저장된 결과 조회(재생성 X), 입력만 있으면 생성+저장 후 id 주소로 교체
   useEffect(() => {
@@ -1019,6 +1046,27 @@ function ReportPreviewInner() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openMyeongsik = () => setMsOpen(true);
+
+  // 현재 장의 콘텐츠가 없으면 그 장만 온디맨드 생성 (한 호출이 짧아 타임아웃 안전)
+  useEffect(() => {
+    if (!report || !id || loading) return;
+    if (!CHAPTER_SECTIONS[chNum]) return; // 아직 디자인 안 된 장은 스킵
+    if (isChapterReady(report.content as Record<string, unknown>, chNum)) return;
+    if (attemptedRef.current.has(chNum)) return; // 이미 시도한 장은 재시도 안 함(루프 방지)
+    attemptedRef.current.add(chNum);
+    let cancelled = false;
+    setChapterLoading(true);
+    fetch("/api/jeongtong-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, chapter: chNum }),
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => { if (!cancelled && d.content) setReport((p) => (p ? { ...p, content: d.content } : p)); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setChapterLoading(false); });
+    return () => { cancelled = true; };
+  }, [chNum, report?.content, id, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // (detail) 레이아웃의 스크롤 컨테이너(<main>)를 찾아 진행률 계산
   useEffect(() => {
@@ -1071,6 +1119,14 @@ function ReportPreviewInner() {
       />
       <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={report?.view ?? null} loading={false} />
 
+      {chapterLoading ? (
+        <div className="flex flex-col items-center justify-center px-6 text-center" style={{ minHeight: "70vh" }}>
+          <div className="rounded-full animate-spin" style={{ width: 44, height: 44, border: `3px solid ${MAROON}22`, borderTopColor: MAROON }} />
+          <p className="mt-5 text-[15px] font-bold" style={{ color: INK }}>이 장을 풀이하고 있어요</p>
+          <p className="mt-1 text-[13px]" style={{ color: MUTE }}>잠시만 기다려 주세요…</p>
+        </div>
+      ) : (
+      <>
       {/* ═══════════ 제2장 ═══════════ */}
       {ch === "2" && (
         <>
@@ -1319,32 +1375,12 @@ function ReportPreviewInner() {
           {/* 발현 확률 분석 + 희귀도 차트 + 등급표 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>내 사주의 발현 확률</Heading>
-            <P>
-              {name}님의 사주가 지닌 희소성과 특별함에 대해 명리학적인 근거를 들어 자세히 풀어드릴게요.
-            </P>
-            <Callout>
-              {name}님의 사주는 을묘(乙卯) 건록 일주라는 강력한 주체성의 기둥 위에, 하늘의 보살핌을 뜻하는
-              천을귀인(天乙貴人)이 중첩된 귀한 명식이에요.
-            </Callout>
-            <P>
-              일간 을목(乙)에게 가장 귀한 글자인 자수(子)와 신금(申)이 월지와 시지에 나란히 자리 잡은 구성은 매우
-              드물답니다.
-            </P>
-            <P>
-              이러한 특별한 글자들의 배치와 오행의 조화는 전체 사주 구성 중 상위 2.5%에 해당하는 아주 높은 희소성을
-              보여줘요.
-            </P>
-            <P>
-              천을귀인이 두 개나 자리 잡고 있다는 것은 인생의 큰 위기나 고비마다 나를 돕는 귀인이 반드시 나타남을
-              의미해요.
-            </P>
-            <P>
-              이 귀하고 단단한 사주의 그릇을 믿고 주체적으로 삶을 이끌어갈 때 {name}님만의 특별한 복록은 온전히 발현될
-              거예요.
-            </P>
+            <P>{c.rarity.intro}</P>
+            <Callout>{c.rarity.callout}</Callout>
+            {c.rarity.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
 
-            <RarityChart grade="A등급" percentile={2.5} name={name} />
-            <GradeTable myGrade="A등급" />
+            <RarityChart grade={c.rarity.grade} percentile={c.rarity.percentile} name={name} />
+            <GradeTable myGrade={c.rarity.grade} />
           </section>
 
           {/* 인용 */}
@@ -1356,24 +1392,14 @@ function ReportPreviewInner() {
             <GanjiMini view={report?.view ?? null} />
 
             <div className="mb-4">
-              <SpecialTag label="乙卯" sub="을묘일주 × 도화살" color={NAVY} />
-              <SpecialTag label="巳 ↔ 申" sub="사신육합" color="#b5891c" />
-              <SpecialTag label="태극귀인 × 역마살" color="#c9474f" />
-              <SpecialTag label="卯 ↔ 申" sub="묘신원진" color="#3f8a52" />
+              {c.special.tags.map((t, i) => (
+                <SpecialTag key={i} label={t.label} sub={t.sub} color={TAG_COLORS[i % TAG_COLORS.length]} />
+              ))}
             </div>
 
-            <HiP hi="어느 자리에서든 시선을 독차지하게 해줘요.">
-              화초 같은 을묘일주에 도화살(타고난 인기)까지 더해졌어요. 강한 기질이 한층 또렷하게 드러나는 사주예요.
-            </HiP>
-            <HiP hi="사람과 깊이 엮이며 든든한 인연을 만들어내게 해줘요.">
-              뱀(巳)과 원숭이(申)가 단단히 묶여, 인연과 결속이 깊어지는 자리예요.
-            </HiP>
-            <HiP hi="막다른 길에서도 결국 도와줄 사람과 길이 나타나게 해줘요.">
-              태극귀인(막힌 일을 푸는 복)에 역마살(끊임없는 이동)까지 더해졌어요. 한 사주에 같이 있기 쉽지 않은 구성이에요.
-            </HiP>
-            <HiP hi="예민한 촉으로 남들이 놓치는 신호를 먼저 알아채게 해줘요.">
-              토끼(卯)와 원숭이(申)가 서로 밀어내, 예민함과 애증이 함께 도는 자리예요.
-            </HiP>
+            {c.special.items.map((it, i) => (
+              <HiP key={i} hi={it.hi}>{it.text}</HiP>
+            ))}
           </section>
 
           {/* 삽화 */}
@@ -1529,6 +1555,8 @@ function ReportPreviewInner() {
           <span>→</span>
         </button>
       </div>
+      </>
+      )}
       </>
       )}
     </div>

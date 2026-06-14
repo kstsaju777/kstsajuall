@@ -20,6 +20,8 @@ export type ReportFlowItem = {
 };
 
 export type ReportSummaryItem = { title: string; desc: string };
+export type ReportRarity = ReportSection & { grade: string; percentile: number };
+export type ReportSpecial = { tags: { label: string; sub: string }[]; items: { text: string; hi: string }[] };
 
 export type ReportContent = {
   // ── 1장: 지나온 시간과 선택들 ──
@@ -38,7 +40,25 @@ export type ReportContent = {
   yongsin: ReportSection;   // 용신
   hapchung: ReportSection;  // 합·충
   essence: ReportSection;   // 그래서, 내가 진짜 원하는 것
+  // ── 4장: 내 사주는 얼마나 희귀할까 ──
+  rarity: ReportRarity;     // 발현 확률(등급/백분율 포함)
+  special: ReportSpecial;   // 이 사주가 드문 이유(태그 + 강조문단)
 };
+
+// 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
+export const CHAPTER_SECTIONS: Record<number, string[]> = {
+  1: ["hardSeason", "cause", "pattern"],
+  2: ["wonguk", "ohaeng", "sipseong", "unseong", "pyori"],
+  3: ["strength", "gyeokguk", "yongsin", "hapchung", "essence"],
+  4: ["rarity", "special"],
+};
+
+// 해당 장의 콘텐츠가 이미 생성됐는지
+export function isChapterReady(content: Record<string, unknown> | null | undefined, chapter: number): boolean {
+  if (!content) return false;
+  const first = CHAPTER_SECTIONS[chapter]?.[0];
+  return !!first && content[first] != null;
+}
 
 const SYSTEM = `당신은 30년 경력의 따뜻한 사주 명리학 상담가입니다.
 주어진 사주 명식을 근거로, 한 사람의 '지나온 삶'을 문학적이면서도 공감 가는 톤으로 풀어냅니다.
@@ -61,6 +81,7 @@ const CH_THEME: Record<number, string> = {
   1: "'지나온 시간' — 과거의 흐름, 유독 힘들었던 시기, 반복되어 온 패턴",
   2: "'타고난 본바탕' — 원국 종합, 오행 균형, 십성 역할, 십이운성, 겉과 속",
   3: "'왜 이런 사람인가(사주 속 필연구조)' — 신강/신약, 격국, 용신, 합·충, 핵심 갈망",
+  4: "'내 사주는 얼마나 희귀한가' — 명식의 희소성/등급, 귀인·신살·합충이 만드는 특별함",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -84,6 +105,19 @@ const CH_SCHEMA: Record<number, string> = {
   "yongsin": { "intro": "가장 필요한 기운(용신) 도입", "callout": "용신 오행과 그 의미", "paragraphs": ["용신이 주는 역할","희신 보완","일상 실천 조언"] },
   "hapchung": { "intro": "끌어당기고 뒤흔드는 합·충 도입", "callout": "주요 원진/합/충과 작용(사주 용어 포함)", "paragraphs": ["부정적 작용과 경계점","긍정적 작용(육합 등)","중심을 잡는 법"] },
   "essence": { "intro": "사주 종합 도입", "callout": "진짜 원하는 단 하나의 본질(따옴표로 인용)", "paragraphs": ["왜 그것을 갈망하는지","채워질 때의 모습","격려 마무리"] }
+}`,
+  4: `{
+  "rarity": {
+    "intro": "사주의 희소성/특별함 도입",
+    "callout": "귀인(천을귀인 등)·건록·격국 등 귀한 조합을 짚는 문장",
+    "paragraphs": ["어떤 글자 배치가 드문지","그 희소성이 의미하는 바","격려"],
+    "grade": "S/A/B/C 중 하나(귀한 정도)",
+    "percentile": 2.5
+  },
+  "special": {
+    "tags": [ {"label":"乙卯","sub":"을묘일주 × 도화살"}, {"label":"巳 ↔ 申","sub":"사신육합"}, {"label":"卯 ↔ 申","sub":"묘신원진"} ],
+    "items": [ {"text":"신살/합/충의 의미 설명 1~2문장","hi":"그 덕에 좋은 점 한 줄"} ]
+  }
 }`,
 };
 
