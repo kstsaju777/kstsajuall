@@ -43,6 +43,9 @@ export type ReportContent = {
   // ── 4장: 내 사주는 얼마나 희귀할까 ──
   rarity: ReportRarity;     // 발현 확률(등급/백분율 포함)
   special: ReportSpecial;   // 이 사주가 드문 이유(태그 + 강조문단)
+  // ── 5장: 세상을 대하는 나만의 방식 ──
+  balance: ReportSection & { spectrum: { label: string; value: number } }; // 독립↔협력 균형(0=독립, 100=협력)
+  answer: ReportSection;    // 삶의 해답이 어디에 있는지
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -51,6 +54,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   2: ["wonguk", "ohaeng", "sipseong", "unseong", "pyori"],
   3: ["strength", "gyeokguk", "yongsin", "hapchung", "essence"],
   4: ["rarity", "special"],
+  5: ["balance", "answer"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -82,6 +86,7 @@ const CH_THEME: Record<number, string> = {
   2: "'타고난 본바탕' — 원국 종합, 오행 균형, 십성 역할, 십이운성, 겉과 속",
   3: "'왜 이런 사람인가(사주 속 필연구조)' — 신강/신약, 격국, 용신, 합·충, 핵심 갈망",
   4: "'내 사주는 얼마나 희귀한가' — 명식의 희소성/등급, 귀인·신살·합충이 만드는 특별함",
+  5: "'세상을 대하는 나만의 방식' — 독립과 협력 사이의 균형, 삶의 갈등을 푸는 해답",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -117,6 +122,19 @@ const CH_SCHEMA: Record<number, string> = {
   "special": {
     "tags": [ {"label":"乙卯","sub":"을묘일주 × 도화살"}, {"label":"巳 ↔ 申","sub":"사신육합"}, {"label":"卯 ↔ 申","sub":"묘신원진"} ],
     "items": [ {"text":"신살/합/충의 의미 설명 1~2문장","hi":"그 덕에 좋은 점 한 줄"} ]
+  }
+}`,
+  5: `{
+  "balance": {
+    "intro": "세상을 살아갈 때 독립적 주체성과 타인과의 협력 사이에서 어떻게 균형을 잡는지 도입 1~2문장",
+    "callout": "비견/겁재(독립)와 정관/식상 등(협력) 중 어디에 더 무게가 실리는지 짚는 문장(사주 용어 포함)",
+    "paragraphs": ["두 성향이 어떻게 조화를 이루는지","독립 쪽 성향이 강할 때의 모습과 강점","협력을 받아들일 때 얻는 것"],
+    "spectrum": { "label": "혼자 힘으로 살아가는 나", "value": 30 }
+  },
+  "answer": {
+    "intro": "삶의 갈등과 문제를 마주칠 때 해답을 어디서 찾는지 도입",
+    "callout": "강한 주체성을 지키되 타인의 조언·사회적 규칙(정관 등)을 유연하게 받아들이는 화합의 지혜를 짚는 문장",
+    "paragraphs": ["혼자 결정하되 고립되지 않는 법","주변의 예법·규율을 내 것으로 소화하는 법","뿌리(독립)와 가지(소통)가 함께 자랄 때 모습"]
   }
 }`,
 };

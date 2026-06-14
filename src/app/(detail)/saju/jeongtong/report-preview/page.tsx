@@ -258,6 +258,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "2": "제2장 · 타고난 길",
   "3": "제3장 · 나는 왜 이런 사람인 걸까",
   "4": "제4장 · 내 사주는 얼마나 희귀할까",
+  "5": "제5장 · 세상을 대하는 나만의 방식",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -556,6 +557,25 @@ const SAMPLE_CONTENT: ReportContent = {
       { text: "서로 밀어내는 기운이 함께 돌아, 예민함과 애증이 공존하는 자리예요.", hi: "예민한 촉으로 남들이 놓치는 신호를 먼저 알아채게 해줘요." },
     ],
   },
+  balance: {
+    intro: "세상을 살아갈 때 나만의 독립적인 주체성을 지키는 힘과 타인과 함께 발맞추는 힘, 이 둘 사이에서 어떻게 균형을 잡고 계신지 살펴보겠습니다.",
+    callout: "기본적으로 스스로 결정하고 책임지는 독립적인 삶에 더 큰 가치를 두면서도, 사회적 관계 속에서 협력하는 법도 늘 알고 계시네요.",
+    paragraphs: [
+      "이 두 가지 성향이 어떻게 조화를 이루며 삶을 이끌어가는지, 아래 스펙트럼을 통해 구체적인 모습을 보여드릴게요.",
+      "비견·겁재의 단단한 주체성이 중심을 잡고 있어, 나만의 기준을 가지고 세상을 마주할 때 가장 편안함을 느끼시는 분이에요.",
+      "남에게 의지하기보다 스스로 판단하고 책임지는 주체성이 강하시며, 그 독립성 위에서 본인의 능력이 극대화되는 성장을 이루어 가시네요.",
+    ],
+    spectrum: { label: "혼자 힘으로 살아가는 나", value: 30 },
+  },
+  answer: {
+    intro: "삶의 비탈과 갈등을 마주칠 때, 그 해답을 어디에서 찾을 수 있는지 짚어드릴게요.",
+    callout: "삶의 해답은 스스로의 강한 주체성(비견)을 잃지 않으면서, 타인의 조언과 사회적 규칙(정관 등)을 유연하게 받아들이는 화합의 지혜에 있어요.",
+    paragraphs: [
+      "혼자보다는 패턴을 찾아가는 협력 안에서 본인의 주체성을 스스로 강화시키는 길이 더 단단하고 빠르게 열려요.",
+      "대중 속의 예법과 규율을 내 것으로 소화해 받쳐 쌓을 때, 나를 가두는 굴레가 아닌 나를 지켜주는 단단한 울타리가 되어 줍니다.",
+      "나를 지키는 단단한 뿌리 위에 타인과 소통하는 가지를 뻗을 때, 가장 크고 웅장하게 자리 잡는 삶을 이루게 되실 거예요.",
+    ],
+  },
 };
 
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
@@ -812,6 +832,25 @@ function Quote({ children }: { children: React.ReactNode }) {
       <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
         {children}
       </p>
+    </div>
+  );
+}
+
+// 독립 ↔ 협력 스펙트럼 (5장)
+function SpectrumBar({ label, value }: { label: string; value: number }) {
+  const v = Math.min(96, Math.max(4, value)); // 0=독립, 100=협력
+  return (
+    <div className="rounded-2xl px-5 py-5 mb-5" style={{ background: "#fff", border: `1px solid ${INK}14`, boxShadow: "0 4px 18px rgba(0,0,0,0.04)" }}>
+      <p className="text-center text-[12px] mb-1" style={{ color: MUTE }}>나의 삶의 방식</p>
+      <p className="text-center text-[15px] font-black mb-4" style={{ color: INK }}>{label}</p>
+      <div className="relative" style={{ height: 14 }}>
+        <div className="absolute inset-0 rounded-full" style={{ background: `linear-gradient(to right, ${MAROON}, ${ROSE} 50%, ${NAVY})` }} />
+        <div className="absolute top-1/2" style={{ left: `${v}%`, transform: "translate(-50%,-50%)", width: 20, height: 20, borderRadius: "50%", background: "#fff", border: `3px solid ${INK}`, boxShadow: "0 2px 6px rgba(0,0,0,0.25)" }} />
+      </div>
+      <div className="flex justify-between mt-2 text-[12px] font-bold" style={{ color: INK_SOFT }}>
+        <span>독립</span>
+        <span>협력</span>
+      </div>
     </div>
   );
 }
@@ -1480,8 +1519,61 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제5장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && (
+      {/* ═══════════ 제5장 ═══════════ */}
+      {ch === "5" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-12.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제2부 · 타고난 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “세상을 대하는<br />나만의 방식”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"${name}님이 세상을\n어떤 방식으로\n마주하는지 살펴보겠습니다."`}</Quote>
+
+          {/* 균형 */}
+          <HanjaDivider hanja="均衡" sub="홀로 여는 삶, 서로 기대는 삶" />
+          <section className="px-6 pt-6 pb-4">
+            <P>{c.balance.intro}</P>
+            <Callout>{c.balance.callout}</Callout>
+            <P>{c.balance.paragraphs[0]}</P>
+            <SpectrumBar label={c.balance.spectrum.label} value={c.balance.spectrum.value} />
+            {c.balance.paragraphs.slice(1).map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 해답 */}
+          <HanjaDivider hanja="解答" sub="답이 어디에 있는지" />
+          <section className="px-6 pt-6 pb-4">
+            <P>{c.answer.intro}</P>
+            <Callout>{c.answer.callout}</Callout>
+            {c.answer.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-14.jpg" h={360} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"나를 지키는 단단한 뿌리 위에\n타인과 소통하는 가지를 뻗을 때,\n${name}님의 삶은 가장 크고\n웅장하게 자리 잡을 거예요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("4")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("6")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>앞으로 10년, 어떻게 흘러갈까?</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제6장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
