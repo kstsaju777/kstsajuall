@@ -33,7 +33,7 @@ const createSchema = z.object({
   gender: z.string().optional().default(""),
   email: z.string().optional().default(""),
 });
-const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(9) });
+const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string }) {
