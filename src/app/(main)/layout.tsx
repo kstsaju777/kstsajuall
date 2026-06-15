@@ -62,36 +62,30 @@ function SiteFooter() {
             )}
           </p>
           {businessInfo.address && <p>{businessInfo.address}</p>}
-          <div className="my-2 border-t border-hairline/50" />
           {businessInfo.mailOrderNumber && (
             <p><span className="text-mute">통신판매업 신고</span> {businessInfo.mailOrderNumber}</p>
           )}
           {businessInfo.businessNumber && (
             <p><span className="text-mute">사업자등록번호</span> {businessInfo.businessNumber}</p>
           )}
-          <div className="my-2 border-t border-hairline/50" />
           <p>
-            <span className="text-mute">고객센터</span>{" "}
-            <a href={`mailto:${businessInfo.email}`} className="text-gold hover:underline">
-              {businessInfo.email}
+            <span className="text-mute">고객센터</span> :{" "}
+            <a href={businessInfo.kakaoChannel} target="_blank" rel="noreferrer" className="text-gold hover:underline">
+              카카오톡 홍연당 채널
             </a>
+            {" "}|{" "}<span className="text-mute">MAIL</span> {businessInfo.email}
           </p>
-          {businessInfo.phone && (
-            <p>
-              <span className="text-mute">대표번호</span> {businessInfo.phone}
-              {businessInfo.phoneNote && (
-                <span className="block text-[10px] text-mute mt-0.5">({businessInfo.phoneNote})</span>
-              )}
-            </p>
-          )}
         </div>
-        <div className="flex justify-center gap-5 text-[11px] text-body pt-1">
+        <div className="flex justify-center gap-5 text-[11px] text-body font-bold pt-1">
           <Link href="/legal/terms" className="hover:text-ink transition-colors">이용약관</Link>
           <Link href="/legal/privacy" className="hover:text-ink transition-colors">개인정보처리방침</Link>
         </div>
-        <p className="text-[10px] text-mute">
-          Copyright © {new Date().getFullYear()} {siteConfig.name} · All rights reserved
-        </p>
+        <div className="space-y-1 pt-1">
+          <p className="text-[12px] text-body font-bold">AI사주, 궁합, 운세 연구소</p>
+          <p className="text-[10px] text-mute">
+            Copyright © {new Date().getFullYear()} 홍연당 · All rights reserved
+          </p>
+        </div>
       </div>
     </footer>
   );
