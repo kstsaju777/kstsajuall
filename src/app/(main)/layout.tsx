@@ -70,7 +70,7 @@ function SiteFooter() {
           )}
           <p>
             <span className="text-mute">고객센터</span> :{" "}
-            <a href={businessInfo.kakaoChannel} target="_blank" rel="noreferrer" className="text-gold hover:underline">
+            <a href={businessInfo.kakaoChannel} target="_blank" rel="noreferrer" className="underline hover:opacity-70">
               카카오톡 홍연당 채널
             </a>
             {" "}|{" "}<span className="text-mute">MAIL</span> {businessInfo.email}
@@ -81,8 +81,8 @@ function SiteFooter() {
           <Link href="/legal/privacy" className="hover:text-ink transition-colors">개인정보처리방침</Link>
         </div>
         <div className="space-y-1 pt-1">
-          <p className="text-[12px] text-body font-bold">AI사주, 궁합, 운세 연구소</p>
-          <p className="text-[10px] text-mute">
+          <p className="text-[11px] text-body">AI사주, 궁합, 운세 연구소</p>
+          <p className="text-[11px] text-mute">
             Copyright © {new Date().getFullYear()} 홍연당 · All rights reserved
           </p>
         </div>
