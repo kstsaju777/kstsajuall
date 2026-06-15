@@ -31,13 +31,6 @@
   font-style: normal;
 }
 
-/* 법적 문서 목록용 가·나·다 마커 */
-@counter-style legal-hangul {
-  system: fixed;
-  symbols: "가" "나" "다" "라" "마" "바" "사" "아" "자" "차" "카" "타" "파" "하";
-  suffix: ". ";
-}
-
 /* 스크롤바 숨김 */
 .scrollbar-none {
   scrollbar-width: none;
