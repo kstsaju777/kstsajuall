@@ -5,8 +5,31 @@
 /* 붓글씨 + 디스플레이 한국 폰트 */
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Brush+Script&family=Black+Han+Sans&family=East+Sea+Dokdo&family=Gugi&family=Roboto+Mono:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
 
-/* Pretendard — 현대적 한국어 폰트 (전체 굵기 100~900) */
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+/* Pretendard — 현대적 한국어 폰트 */
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
 
 /* 스크롤바 숨김 */
 .scrollbar-none {
@@ -62,10 +85,10 @@
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco,
       Consolas, "Liberation Mono", monospace;
   }
-  /* 제목: Pretendard (현대적 산세리프) */
+  /* 제목: 나눔명조 (정통 붓글씨 느낌) */
   h1, h2, h3 {
     @apply tracking-tight;
-    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-family: 'Nanum Myeongjo', 'Apple SD Gothic Neo', 'Noto Sans KR', serif;
     font-weight: 700;
   }
 
