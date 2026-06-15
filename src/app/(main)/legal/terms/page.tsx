@@ -5,12 +5,13 @@ export const metadata = { title: "이용약관" };
 export default function TermsPage() {
   return (
     <div
-      className="bg-white container py-12 max-w-3xl
-        [&_h1]:text-[#111] [&_h1]:[font-family:'Pretendard',sans-serif]
-        [&_h2]:text-[#111] [&_h2]:font-bold [&_h2]:[font-family:'Pretendard',sans-serif] [&_h2]:text-[16px] [&_h2]:mt-7 [&_h2]:mb-2.5
-        [&_p]:text-[#666] [&_p]:font-normal [&_p]:text-[13.5px] [&_p]:leading-[1.75] [&_p]:my-1.5
-        [&_li]:text-[#666] [&_li]:font-normal [&_li]:text-[13.5px] [&_li]:leading-[1.75]
-        [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-2 [&_ol]:space-y-1"
+      className="bg-white container py-12 max-w-3xl [font-family:'Pretendard',sans-serif]
+        [&_h1]:text-[#111] [&_h1]:font-bold
+        [&_h2]:text-[#111] [&_h2]:font-bold [&_h2]:text-[15.5px] [&_h2]:mt-0 [&_h2]:mb-3 [&_h2]:pt-7
+        [&_h2]:border-t [&_h2]:border-[#ededed]
+        [&_p]:text-[#666] [&_p]:font-normal [&_p]:text-[13.5px] [&_p]:leading-[1.8] [&_p]:my-2
+        [&_li]:text-[#666] [&_li]:font-normal [&_li]:text-[13.5px] [&_li]:leading-[1.8] [&_li]:my-0.5
+        [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:my-2 [&_ol]:space-y-1 [&_ol]:marker:text-[#aaa]"
     >
       <h1 className="text-2xl font-bold mb-6">이용약관</h1>
 
