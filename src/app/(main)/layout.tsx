@@ -52,7 +52,9 @@ function SiteFooter() {
     <footer style={{ backgroundColor: "#e5e5e5" }}>
       <div className="px-6 py-10 text-center space-y-5" style={{ color: "#333" }}>
         <div className="flex justify-center">
-          <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
+          <Link href="/" aria-label="홈으로">
+            <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
+          </Link>
         </div>
         <div className="space-y-1.5 text-[11px] text-body leading-relaxed">
           <p>
