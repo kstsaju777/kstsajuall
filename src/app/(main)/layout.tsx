@@ -49,7 +49,7 @@ function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
 function SiteFooter() {
   return (
-    <footer className="border-t border-hairline mt-10" style={{ backgroundColor: "#e5e5e5" }}>
+    <footer className="border-t border-hairline" style={{ backgroundColor: "#e5e5e5" }}>
       <div className="px-6 py-10 text-center space-y-5" style={{ color: "#333" }}>
         <div className="flex justify-center">
           <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
