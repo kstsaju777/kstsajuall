@@ -4,7 +4,18 @@ export const metadata = { title: "개인정보처리방침" };
 
 export default function PrivacyPage() {
   return (
-    <div className="container py-12 max-w-3xl prose-saju">
+    <div
+      className="bg-white container py-12 max-w-3xl [font-family:'Pretendard',sans-serif]
+        [&_h1]:text-[#111] [&_h1]:font-bold
+        [&_h2]:text-[#111] [&_h2]:font-bold [&_h2]:text-[15.5px] [&_h2]:mt-0 [&_h2]:mb-3 [&_h2]:pt-7 [&_h2]:border-t [&_h2]:border-[#ededed]
+        [&_h3]:text-[#222] [&_h3]:font-semibold [&_h3]:text-[13.5px] [&_h3]:mt-4 [&_h3]:mb-1.5
+        [&_p]:text-[#666] [&_p]:font-normal [&_p]:text-[13.5px] [&_p]:leading-[1.55] [&_p]:my-1.5
+        [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-1.5 [&_ul]:space-y-0.5 [&_ul]:marker:text-[#aaa]
+        [&_li]:text-[#666] [&_li]:font-normal [&_li]:text-[13.5px] [&_li]:leading-[1.55] [&_li]:my-0.5
+        [&_strong]:font-semibold [&_strong]:text-[#333]
+        [&_table]:text-[12.5px] [&_th]:text-[#222] [&_th]:font-semibold [&_td]:text-[#666]
+        [&_tr]:border-[#e5e5e5] [&_thead_tr]:border-[#d5d5d5]"
+    >
       <h1 className="text-2xl font-bold mb-6">개인정보처리방침</h1>
       <p>
         {businessInfo.companyName}(이하 &quot;회사&quot;라 함)은 {siteConfig.name}{" "}
