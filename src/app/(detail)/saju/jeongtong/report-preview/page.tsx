@@ -398,6 +398,22 @@ function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) 
   );
 }
 
+// 일진/월별 흐름 스트립 (14장 주운·월운)
+function FlowStrip({ items }: { items: { top: string; label: string; status: string }[] }) {
+  const sc = (s: string) => (/좋|길/.test(s) ? "#3f8a52" : /나쁨|흉|주의/.test(s) ? WARN : MUTE);
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-2 mb-5">
+      {items.map((it, i) => (
+        <div key={i} className="flex-shrink-0 rounded-xl p-2.5 text-center" style={{ minWidth: 64, flex: "1 0 0", background: WHITE, border: `1px solid ${INK}12` }}>
+          <p className="text-[11px] font-bold" style={{ color: MUTE }}>{it.top}</p>
+          <p className="text-[12.5px] font-black my-1" style={{ color: INK }}>{it.label}</p>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: `${sc(it.status)}1a`, color: sc(it.status) }}>{it.status}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // 조심할 시기의 함정 박스 (11장)
 function TrapBox({ trap }: { trap: { title: string; desc: string; items: { title: string; desc: string }[] } }) {
   return (
@@ -649,6 +665,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "11": "제11장 · 반드시 조심해야 할 시기는 언제일까",
   "12": "제12장 · 반드시 조심해야 할 악인은 누구일까",
   "13": "제13장 · 핵심 정리",
+  "14": "제14장 · 지금부터 해야 할 일들",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1308,6 +1325,53 @@ const SAMPLE_CONTENT: ReportContent = {
     callout: "인생의 고비마다 찾아와 든든한 버팀목이 되어줄 천을귀인의 현실적인 조언을 겸손하고 열린 마음으로 받아들이는 것이 성공의 비결이에요.",
     paragraphs: [
       "나만의 성벽을 너무 높이 쌓지 말고, 주변의 귀인들과 유연하게 협력할 때 더 큰 기회와 풍요로운 재물이 흘러들어옵니다.",
+    ],
+  },
+  openMethod: {
+    intro: "선우님의 사주에서 다소 부족하고 조후를 조율해 줄 수 있는 물(水) 기운을 일상에서 채워주는 구체적인 생활 처방을 전해드릴게요.",
+    callout: "물의 기운은 선우님에게 깊은 사색과 배움, 그리고 마음의 평온을 뜻하는 인성(印星)에 해당하여 내면의 열을 식혀주는 약이 돼요.",
+    paragraphs: [
+      "일상에서 가볍게 실천할 수 있는 처방들을 통해 몸의 순환을 돕고 마음의 여유를 되찾아 운의 흐름을 긍정적으로 바꾸어 보아요.",
+    ],
+    element: "물 (水)",
+    tips: [
+      { label: "색", title: "검은색과 남색 계열", desc: "옷이나 소품에 활용하면 마음이 차분해져요" },
+      { label: "방향", title: "북쪽 방향의 공간", desc: "잠자리나 책상 위치를 북쪽으로 두면 좋습니다" },
+      { label: "음식", title: "해조류와 짠맛이 나는 음식", desc: "신장과 방광의 기운을 돕고 조후를 맞춰줘요" },
+      { label: "생활", title: "반신욕과 아침 물 한 잔", desc: "몸의 순환을 돕고 내면의 열을 내려줍니다" },
+    ],
+  },
+  tomorrow: {
+    intro: "내일인 2026년 6월 11일은 병진(丙辰)일로, 선우님에게 상관(丙)과 정재(辰)의 기운이 함께 들어오는 날이에요.",
+    paragraphs: [
+      "창의적인 아이디어가 머릿속에 머물지 않고 구체적인 현실적 성과나 재물로 연결되기 아주 좋은 흐름을 가지고 있어요.",
+      "평소 미뤄두었던 중요한 기획이나 일을 정리하거나, 새로운 비즈니스 아이디어를 문서로 정리해 보시기를 적극 권해요.",
+      "나의 재능을 세상에 당당하게 보여줄 때 생각보다 훨씬 더 좋은 피드백과 현실적인 결실을 얻을 수 있는 하루가 될 거예요.",
+    ],
+  },
+  weekFlow: {
+    intro: "이번 한 주 동안 선우님에게 오르는 일진의 변화와 요일별 기운을 구체적인 대처 방법과 함께 안내해 드립니다.",
+    callout: "주 초반인 을묘(乙卯)일에는 선우님의 주체성과 고집이 강해져 주변 사람들과 의견 충돌이 생길 수 있으니 유연한 대처가 필요해요.",
+    paragraphs: [
+      "주 중반인 무오(戊午)일과 기미(己未)일에는 재물운이 크게 상승하므로 중요한 비즈니스 미팅이나 계약을 진행하기에 최적의 타이밍이에요.",
+      "주말인 신유(辛酉)일에는 정관의 기운이 강해져 윗사람의 도움을 받거나 공적인 업무가 아주 매끄럽게 해결되는 기쁨이 따릅니다.",
+      "이처럼 요일별로 들어오는 기운의 흐름을 미리 알고 대처한다면 이번 한 주를 훨씬 더 효율적이고 평온하게 보낼 수 있답니다.",
+      "매일 아침 가벼운 스트레칭으로 하루를 시작하면 몸의 긴장을 풀어주는 것도 이번 주를 건강하게 보내는 좋은 방법이에요.",
+    ],
+    days: [
+      { top: "6/10", label: "을묘일", status: "나쁨" }, { top: "6/11", label: "병진일", status: "보통" },
+      { top: "6/12", label: "정사일", status: "좋음" }, { top: "6/13", label: "무오일", status: "좋음" }, { top: "6/14", label: "기미일", status: "좋음" },
+    ],
+  },
+  monthFlow: {
+    intro: "앞으로 3개월 동안 선우님에게 찾아올 월별 기운의 흐름과 마음가짐에 대해 자세히 짚어드릴게요.",
+    callout: "8월 병신(丙申)월에는 상관과 정관이 만나 이직이나 부서 이동 등 커리어의 큰 변화가 생길 수 있으니 신중하게 대처해야 해요.",
+    paragraphs: [
+      "7월 을미(乙未)월에는 식상운과 협력이 더 든든하고 현실적인 재물을 취할 수 있는 기회가 자연스럽게 찾아올 것으로 보여요.",
+      "8월 정유(丁酉)월에는 편관과 충돌의 강한 압박과 스트레스가 찾아올 수 있으니 자기 관리에 각별히 신경 써야 안전해요.",
+    ],
+    months: [
+      { top: "6월", label: "갑오월", status: "나쁨" }, { top: "7월", label: "을미월", status: "좋음" }, { top: "8월", label: "병신월", status: "좋음" },
     ],
   },
 };
@@ -2837,8 +2901,81 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제14장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && (
+      {/* ═══════════ 제14장 · 지금부터 해야 할 일들 ═══════════ */}
+      {ch === "14" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-15.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제5부 · {name}님만의 길</p>
+              <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                “지금부터<br />해야할 일들”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"이제, 오늘부터\n무엇을 하면 좋을지\n정리해 드리겠습니다."`}</Quote>
+
+          {/* 나만의 개운법 */}
+          <HanjaDivider hanja="開運" sub="나만의 개운법" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>물 기운을 채우는 생활 처방</Heading>
+            <P>{c.openMethod.intro}</P>
+            <Callout>{c.openMethod.callout}</Callout>
+            {c.openMethod.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <HealthCareCard element={c.openMethod.element} tips={c.openMethod.tips} />
+          </section>
+
+          {/* 내일의 할 일 */}
+          <HanjaDivider hanja="明日" sub="내일의 할 일" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>내일은 어떤 날일까</Heading>
+            <P>{c.tomorrow.intro}</P>
+            {c.tomorrow.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 이번 주 할 일 */}
+          <HanjaDivider hanja="週運" sub="이번 주 할 일" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>이번 주, 운의 흐름 한눈에</Heading>
+            <FlowStrip items={c.weekFlow.days} />
+            <P>{c.weekFlow.intro}</P>
+            <Callout>{c.weekFlow.callout}</Callout>
+            {c.weekFlow.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 향후 3개월 */}
+          <HanjaDivider hanja="月運" sub="향후 3개월 동안 할 일" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>달마다 달라지는 기운</Heading>
+            <FlowStrip items={c.monthFlow.months} />
+            <P>{c.monthFlow.intro}</P>
+            <Callout>{c.monthFlow.callout}</Callout>
+            {c.monthFlow.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-1.jpg" h={400} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"매일의 작은 습관이 모여\n거대한 운명의 물결을 바꾸듯,\n오늘 전해드린 처방을 가볍게\n시작해 보세요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("13")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("15")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>흔들리지 않는 법에 대하여</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제15장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>

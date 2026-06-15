@@ -92,6 +92,11 @@ export type ReportContent = {
   sumEssence: ReportSection;  // 본질, 타고난 본바탕
   sumTime: ReportSection;     // 시기, 지금 흐르는 운의 때
   sumRelation: ReportSection; // 관계, 기운끼리의 충과 합
+  // ── 14장: 지금부터 해야 할 일들 ──
+  openMethod: ReportSection & { element: string; tips: { label: string; title: string; desc: string }[] }; // 나만의 개운법
+  tomorrow: { intro: string; paragraphs: string[] }; // 내일의 할 일
+  weekFlow: ReportSection & { days: { top: string; label: string; status: string }[] }; // 이번 주 일진
+  monthFlow: ReportSection & { months: { top: string; label: string; status: string }[] }; // 향후 3개월
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -109,6 +114,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   11: ["samjae", "samjaeFocus"],
   12: ["villain", "loss"],
   13: ["sumEssence", "sumTime", "sumRelation"],
+  14: ["openMethod", "tomorrow", "weekFlow", "monthFlow"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -149,6 +155,7 @@ const CH_THEME: Record<number, string> = {
   11: "'반드시 조심해야 할 시기는 언제일까' — 가장 거친 3년 삼재, 연차별 주의점",
   12: "'반드시 조심해야 할 악인은 누구일까' — 나를 흔드는 사람의 패턴(인물 카드)",
   13: "'핵심 정리' — 전체 풀이를 본질·시기·관계 세 가지로 요약",
+  14: "'지금부터 해야 할 일들' — 부족한 기운을 채우는 나만의 개운법(생활 처방)",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -409,6 +416,41 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "관계에서 다스릴 합/충(예민함)과 소통 태도를 한 문단으로 요약",
     "callout": "귀인의 조언을 받아들이는 것이 성공의 비결이라는 한 문장",
     "paragraphs": ["귀인과 협력할 때 기회·재물이 흐른다는 마무리 한 문단"]
+  }
+}`,
+  14: `{
+  "openMethod": {
+    "intro": "부족하거나 조후를 조율해 줄 핵심 기운을 일상에서 채우는 생활 처방 도입",
+    "callout": "그 기운(용신/희신 오행 한자 포함)이 십성으로 무엇을 뜻하며 어떤 약이 되는지 짚는 문장",
+    "paragraphs": ["가벼운 실천으로 운의 흐름을 바꾸자는 한 문단"],
+    "element": "물 (水) 등 보강할 오행",
+    "tips": [
+      {"label":"색","title":"보강할 색 계열","desc":"옷·소품 활용 팁"},
+      {"label":"방향","title":"이로운 방향/공간","desc":"잠자리·책상 배치 팁"},
+      {"label":"음식","title":"이로운 음식","desc":"장부/조후를 돕는 이유"},
+      {"label":"생활","title":"이로운 생활 습관","desc":"순환·내면을 돕는 이유"}
+    ]
+  },
+  "tomorrow": {
+    "intro": "내일 날짜와 일진(간지 한자+십성)을 짚고 어떤 기운의 날인지 한 문장",
+    "paragraphs": ["그 기운을 살린 구체적 행동 제안","미뤄둔 일/기획을 정리하라는 제안","재능을 드러낼 때의 결실"]
+  },
+  "weekFlow": {
+    "intro": "이번 한 주 요일별 일진 변화와 대처법을 안내하는 도입",
+    "callout": "주 초반 특정 일진(간지+십성)의 주의점을 짚는 문장",
+    "paragraphs": ["주 중반 재물/계약에 좋은 일진","주말 공적 업무에 좋은 일진","요일 흐름을 알고 대처하라는 정리","아침 스트레칭 등 건강 팁"],
+    "days": [
+      {"top":"6/10","label":"을묘일","status":"나쁨"}, {"top":"6/11","label":"병진일","status":"보통"},
+      {"top":"6/12","label":"정사일","status":"좋음"}, {"top":"6/13","label":"무오일","status":"좋음"}, {"top":"6/14","label":"기미일","status":"좋음"}
+    ]
+  },
+  "monthFlow": {
+    "intro": "앞으로 3개월 월별 기운의 흐름과 마음가짐을 짚는 도입",
+    "callout": "변화가 큰 달(월+간지)의 주의점을 짚는 문장",
+    "paragraphs": ["재물/협력에 좋은 달","충돌·스트레스를 주의할 달과 자기관리"],
+    "months": [
+      {"top":"6월","label":"갑오월","status":"나쁨"}, {"top":"7월","label":"을미월","status":"좋음"}, {"top":"8월","label":"병신월","status":"좋음"}
+    ]
   }
 }`,
 };
