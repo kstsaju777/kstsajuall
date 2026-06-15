@@ -181,7 +181,7 @@ function Bubble({ text, position }: { text: string; position: "top" | "bottom" }
 }
 
 // 화면에 보일 때만 재생되는 영상 (스크롤 성능 최적화)
-function LazyVideo({ src }: { src: string }) {
+function LazyVideo({ src, onReady }: { src: string; onReady?: () => void }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const el = ref.current;
@@ -200,13 +200,19 @@ function LazyVideo({ src }: { src: string }) {
     return () => io.disconnect();
   }, []);
   return (
-    <video ref={ref} src={src} className="w-full h-auto block" muted loop playsInline preload="metadata" />
+    <video ref={ref} src={src} className="w-full h-auto block" muted loop playsInline preload="metadata" onLoadedMetadata={onReady} />
   );
 }
 
 function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: number }) {
   const isFirst = index === 0;
   const isLast = index === CHAPTERS.length - 1;
+
+  // 미디어(이미지/영상)가 로드되어 컨테이너 높이가 잡힌 뒤에 오버레이(말풍선 등) 노출
+  // → 로드 전 말풍선이 위쪽에 먼저 깜빡였다가 밀려나는 레이아웃 시프트 방지
+  const [mediaReady, setMediaReady] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  useEffect(() => { if (imgRef.current?.complete) setMediaReady(true); }, []);
 
   // 1장 — 텍스트 전용 섹션
   if (chapter.media.type === "text") {
@@ -254,10 +260,13 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
 
       {/* 미디어 — 원본 비율 유지 */}
       {chapter.media.type === "video" ? (
-        <LazyVideo src={chapter.media.src} />
+        <LazyVideo src={chapter.media.src} onReady={() => setMediaReady(true)} />
       ) : (
-        <img src={chapter.media.src} alt="" className="w-full h-auto block" loading="lazy" />
+        <img ref={imgRef} src={chapter.media.src} alt="" className="w-full h-auto block" loading={isFirst ? "eager" : "lazy"} onLoad={() => setMediaReady(true)} />
       )}
+
+      {/* 미디어 로드 후 오버레이 노출 (말풍선 먼저 깜빡임 방지) */}
+      <div style={{ opacity: mediaReady ? 1 : 0, transition: "opacity 0.3s ease" }}>
 
       {/* 말풍선 */}
       {(chapter as any).bubble && (
@@ -334,6 +343,8 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
           </p>
         </div>
       )}
+
+      </div>
 
       {/* 하단 그라데이션 */}
       {!isLast && (
