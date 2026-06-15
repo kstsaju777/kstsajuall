@@ -398,6 +398,74 @@ function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) 
   );
 }
 
+// 후기 이벤트 박스 (마무리)
+function EventBox() {
+  const steps: [string, string][] = [
+    ["1", "이미지를 포함해서 리뷰를 작성해주세요."],
+    ["2", "링크를 알려주세요."],
+    ["3", "쿠폰을 드립니다."],
+  ];
+  return (
+    <div className="mx-6 mb-8 rounded-2xl p-6 text-center" style={{ background: PINK_PALE, border: `1px solid ${INK}10` }}>
+      <p className="text-[12px] font-bold" style={{ color: MAROON }}>리포트 후기 이벤트</p>
+      <h3 className="text-[19px] font-black leading-snug mt-1" style={{ color: INK }}>네이버 카페, 다음 카페,<br />익명 커뮤니티에<br />후기를 남겨주세요!</h3>
+      <span className="inline-block mt-3 text-[13px] font-bold text-white px-4 py-2 rounded-xl" style={{ background: MAROON }}>전 제품 무료쿠폰 1장</span>
+      <div className="rounded-xl p-4 mt-4 text-left" style={{ background: WHITE, border: `1px solid ${MAROON}22` }}>
+        {steps.map(([n, t]) => (
+          <div key={n} className="flex items-center gap-2.5 py-1">
+            <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[11px] font-black" style={{ width: 20, height: 20, background: MAROON }}>{n}</span>
+            <span className="text-[13px]" style={{ color: INK_SOFT }}>{t}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center gap-4 mt-4 text-[12.5px] font-bold" style={{ color: MUTE }}>
+        <span>네이버 카페</span><span>다음 카페</span><span>익명 커뮤니티</span>
+      </div>
+      <button className="w-full mt-4 py-3.5 rounded-xl text-[14px] font-bold text-white" style={{ background: INK }}>후기 이벤트 참여하기</button>
+    </div>
+  );
+}
+
+// 추천 상품(크로스셀) 그리드 (마무리)
+const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
+  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
+    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" }, { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
+  ] },
+  { cat: "재물·직업 분야", heading: "재물운과 직장운이 더 궁금하다면?", cards: [
+    { badge: "사주", title: "황금열쇠 재물운 사주", img: "hero-16" }, { badge: "사주", title: "천명 직업운", img: "hero-7" },
+  ] },
+  { cat: "연애·썸 분야", heading: "나의 다음 연애 상대는 누구일까?", cards: [
+    { badge: "사주", title: "솔로탈출 연애 사주", img: "hero-4" }, { badge: "사주", title: "날 얼마나 좋아할까?", img: "hero-3" }, { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
+  ] },
+  { cat: "결혼 분야", heading: "언제 누구와 결혼하게 될까?", cards: [
+    { badge: "사주", title: "두근두근 결혼사주", img: "hero-9" }, { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
+  ] },
+];
+function RecoGrid() {
+  const bc = (b: string) => (b === "자미두수" ? "#7c5cc4" : "#d96a8a");
+  return (
+    <div className="px-6 pb-4">
+      {RECO_GROUPS.map((g, gi) => (
+        <div key={gi} className="mb-6">
+          <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>{g.cat}</p>
+          <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>{g.heading}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {g.cards.map((c, i) => (
+              <div key={i} className="relative rounded-2xl overflow-hidden active:scale-[0.98] transition-all" style={{ aspectRatio: "3 / 4" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/images/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, rgba(0,0,0,0.55) 100%)" }} />
+                <span className="absolute top-2.5 right-2.5 text-[10px] font-bold text-white px-2 py-0.5 rounded-md" style={{ background: bc(c.badge) }}>{c.badge}</span>
+                <p className="absolute bottom-3 left-0 right-0 text-center text-[15px] font-black text-white px-2" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{c.title}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // 단하 낙관(도장) — 붉은 사각 전각
 function SealStamp() {
   return (
@@ -3194,12 +3262,17 @@ function ReportPreviewInner() {
           {/* 만족도 리뷰 */}
           <ReviewBox />
 
+          {/* 후기 이벤트 */}
+          <EventBox />
+
+          {/* 추천 상품 (크로스셀) */}
+          <RecoGrid />
+
           {/* 네비 */}
           <div className="px-6 pb-12 flex gap-2 items-stretch">
             <button onClick={() => next("15")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("1")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>
-              <span>처음부터 다시 보기</span>
-              <span>↺</span>
+            <button onClick={() => next("1")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>처음으로</span>
             </button>
           </div>
         </>
