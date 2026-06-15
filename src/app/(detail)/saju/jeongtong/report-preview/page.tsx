@@ -471,26 +471,35 @@ function RecoGrid() {
 function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
   const [slide, setSlide] = useState(0);
   const [hide, setHide] = useState(false);
-  const steps: [string, string][] = [
-    ["1", "이미지를 포함해서 리뷰를 작성해주세요."],
-    ["2", "작성한 글의 링크를 알려주세요."],
-    ["3", "확인 후 무료쿠폰을 드립니다."],
+  const [link, setLink] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const sns = [
+    { label: "네이버 블로그", sub: "", color: "#03c75a", t: "b" },
+    { label: "네이버카페", sub: "(2만 이상)", color: "#2db400", t: "☕" },
+    { label: "다음카페", sub: "(2만 이상)", color: "#e8330f", t: "cafe" },
   ];
+  const conds = [
+    "리포트 풀이 결과 화면을 캡쳐해 사진으로 올려주세요. (최소 1장)",
+    "왜 용했는지, 소름 돋았던 부분을 솔직하게 적어주세요.",
+    "후기에 'AI', '용용사주', '사주' 키워드를 꼭 포함해주세요.",
+  ];
+  const numBadge = (n: string) => (
+    <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[12px] font-black" style={{ width: 22, height: 22, background: GREEN }}>{n}</span>
+  );
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-5" style={{ pointerEvents: "auto" }}>
       <div onClick={() => onClose(hide)} className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
       <div className="relative w-full overflow-hidden rounded-3xl" style={{ maxWidth: 360, background: "#1b1920", boxShadow: "0 16px 50px rgba(0,0,0,0.5)" }}>
-        <button onClick={() => onClose(hide)} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "rgba(255,255,255,0.18)", color: "#fff", fontSize: 15, lineHeight: 1 }} aria-label="닫기">✕</button>
-        {/* 표지 이미지 */}
-        <div className="relative" style={{ height: 170 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(27,25,32,0.1) 0%, rgba(27,25,32,0.6) 70%, #1b1920 100%)" }} />
-        </div>
-
-        <div className="px-6 pb-2 -mt-3 text-center">
-          {slide === 0 ? (
-            <>
+        {slide === 0 ? (
+          <>
+            <button onClick={() => onClose(hide)} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "rgba(255,255,255,0.18)", color: "#fff", fontSize: 15, lineHeight: 1 }} aria-label="닫기">✕</button>
+            {/* 표지 이미지 */}
+            <div className="relative" style={{ height: 170 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(27,25,32,0.1) 0%, rgba(27,25,32,0.6) 70%, #1b1920 100%)" }} />
+            </div>
+            <div className="px-6 pb-2 -mt-3 text-center">
               <h3 className="text-[20px] font-black" style={{ color: "#fff" }}>SNS 리뷰 이벤트</h3>
               <p className="text-[13px] mt-1.5" style={{ color: "rgba(255,255,255,0.7)" }}>후기 남기면 전 제품 무료쿠폰을 드려요!</p>
               <span className="inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full" style={{ background: `${GREEN}33`, color: "#7fd3bf" }}>이벤트 마감 일시: 2026. 06. 17.</span>
@@ -501,35 +510,61 @@ function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
               </div>
               <button onClick={() => setSlide(1)} className="w-full mt-4 py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: GREEN }}>참여하고 무료쿠폰 받기 ›</button>
               <p className="text-[11.5px] mt-2.5" style={{ color: "rgba(255,255,255,0.5)" }}>참여 방법은 다음 단계에서 안내드려요</p>
-            </>
-          ) : (
-            <>
-              <h3 className="text-[20px] font-black" style={{ color: "#fff" }}>참여 방법</h3>
-              <p className="text-[13px] mt-1.5 mb-2" style={{ color: "rgba(255,255,255,0.7)" }}>아래 순서대로 참여하면 끝!</p>
-              <div className="text-left">
-                {steps.map(([n, t]) => (
-                  <div key={n} className="flex items-center gap-3 py-2">
-                    <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[12px] font-black" style={{ width: 22, height: 22, background: GREEN }}>{n}</span>
-                    <span className="text-[13.5px]" style={{ color: "rgba(255,255,255,0.85)" }}>{t}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* 헤더바 */}
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <button onClick={() => setSlide(0)} className="text-[13px] font-bold flex items-center gap-1" style={{ color: "rgba(255,255,255,0.7)" }}>‹ 안내로</button>
+              <span className="text-[15px] font-black" style={{ color: "#fff" }}>참여 방법</span>
+              <button onClick={() => onClose(hide)} className="flex items-center justify-center rounded-full" style={{ width: 26, height: 26, background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 13, lineHeight: 1 }} aria-label="닫기">✕</button>
+            </div>
+            <div className="px-5 py-4">
+              {/* ① SNS 업로드 */}
+              <div className="rounded-2xl p-4" style={{ background: "#26242b" }}>
+                <div className="flex items-center gap-2 mb-3">{numBadge("1")}<span className="text-[14px] font-black" style={{ color: "#fff" }}>아래 SNS에 후기를 올려주세요!</span></div>
+                <div className="flex justify-around mb-4">
+                  {sns.map((s, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5" style={{ width: 84 }}>
+                      <span className="flex items-center justify-center rounded-full text-white font-black" style={{ width: 44, height: 44, background: s.color, fontSize: s.t.length > 1 ? 11 : 18 }}>{s.t}</span>
+                      <span className="text-[11.5px] font-bold text-center" style={{ color: "rgba(255,255,255,0.85)" }}>{s.label}</span>
+                      {s.sub && <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.45)" }}>{s.sub}</span>}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11.5px] font-bold mb-2" style={{ color: GREEN }}>참여 조건 <span style={{ color: "rgba(255,255,255,0.4)" }}>| 꼭 지켜주세요</span></p>
+                {conds.map((c, i) => (
+                  <div key={i} className="flex gap-2 items-start py-1">
+                    <span className="flex-shrink-0 flex items-center justify-center rounded-full text-[9px]" style={{ width: 15, height: 15, background: `${GREEN}33`, color: "#7fd3bf", marginTop: 2 }}>✓</span>
+                    <span className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{c}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex justify-center gap-3 mt-3 text-[12px] font-bold" style={{ color: "rgba(255,255,255,0.55)" }}>
-                <span>네이버 카페</span><span>다음 카페</span><span>익명 커뮤니티</span>
+              {/* ② 링크 제출 */}
+              <div className="rounded-2xl p-4 mt-3" style={{ background: "#26242b" }}>
+                <div className="flex items-center gap-2 mb-3">{numBadge("2")}<span className="text-[14px] font-black" style={{ color: "#fff" }}>작성하신 리뷰를 제출해주세요!</span></div>
+                {submitted ? (
+                  <p className="text-[13px] text-center py-3" style={{ color: "#7fd3bf" }}>제출 완료! 확인 후 쿠폰을 보내드릴게요 🎁</p>
+                ) : (
+                  <>
+                    <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="blog.naver.com/xxx" className="w-full rounded-xl px-3.5 py-3 text-[13px] outline-none mb-2.5" style={{ background: "#15141a", border: "1px solid rgba(255,255,255,0.14)", color: "#fff" }} />
+                    <button onClick={() => link.trim() && setSubmitted(true)} className="w-full py-3 rounded-xl text-[14px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: link.trim() ? GREEN : "rgba(255,255,255,0.12)" }}>링크 제출하기</button>
+                  </>
+                )}
               </div>
-              <button onClick={() => onClose(hide)} className="w-full mt-4 py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: GREEN }}>확인했어요</button>
-            </>
-          )}
-          {/* 슬라이드 도트 */}
-          <div className="flex justify-center gap-1.5 mt-4">
-            {[0, 1].map((i) => (
-              <button key={i} onClick={() => setSlide(i)} className="rounded-full transition-all" style={{ width: slide === i ? 18 : 7, height: 7, background: slide === i ? GREEN : "rgba(255,255,255,0.25)" }} />
-            ))}
-          </div>
+              <p className="text-[10.5px] leading-relaxed text-center mt-3" style={{ color: "rgba(255,255,255,0.4)" }}>AI 작성 후기는 혜택에서 제외될 수 있으며, 1인 1회 참여 가능합니다.<br />작성된 게시글은 서비스 운영 및 마케팅에 활용될 수 있습니다.</p>
+            </div>
+          </>
+        )}
+        {/* 슬라이드 도트 */}
+        <div className="flex justify-center gap-1.5 pb-1">
+          {[0, 1].map((i) => (
+            <button key={i} onClick={() => setSlide(i)} className="rounded-full transition-all" style={{ width: slide === i ? 18 : 7, height: 7, background: slide === i ? GREEN : "rgba(255,255,255,0.25)" }} />
+          ))}
         </div>
-
         {/* 다시 보지 않기 */}
-        <button onClick={() => setHide((v) => !v)} className="w-full flex items-center gap-2 px-6 py-3.5 mt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        <button onClick={() => setHide((v) => !v)} className="w-full flex items-center gap-2 px-6 py-3.5 mt-1" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
           <span className="flex items-center justify-center rounded" style={{ width: 17, height: 17, border: `1.5px solid ${hide ? GREEN : "rgba(255,255,255,0.4)"}`, background: hide ? GREEN : "transparent", color: "#fff", fontSize: 11, lineHeight: 1 }}>{hide ? "✓" : ""}</span>
           <span className="text-[12.5px]" style={{ color: "rgba(255,255,255,0.6)" }}>다시 보지 않기</span>
         </button>
