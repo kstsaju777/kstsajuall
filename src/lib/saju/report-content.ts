@@ -101,6 +101,8 @@ export type ReportContent = {
   simju: ReportSection & { heart: { label: string; gan: string; ji: string } }; // 흔들림 없는 마음의 기둥(심주)
   shake: ReportSection;  // 무엇이 나의 심주를 흔드는가
   forge: ReportSection;  // 심주를 단단히 세우는 법
+  // ── 마무리: 단하의 편지 ──
+  letter: { paragraphs: string[] }; // 상담가 '단하'가 쓰는 개인화 편지
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -120,6 +122,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   13: ["sumEssence", "sumTime", "sumRelation"],
   14: ["openMethod", "tomorrow", "weekFlow", "monthFlow"],
   15: ["simju", "shake", "forge"],
+  16: ["letter"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -162,6 +165,7 @@ const CH_THEME: Record<number, string> = {
   13: "'핵심 정리' — 전체 풀이를 본질·시기·관계 세 가지로 요약",
   14: "'지금부터 해야 할 일들' — 부족한 기운을 채우는 나만의 개운법(생활 처방)",
   15: "'흔들리지 않는 법에 대하여' — 마음의 기둥(심주), 그것을 흔드는 것과 세우는 법",
+  16: "'단하의 편지' — 상담가 단하가 결과지 전체를 따뜻한 손편지로 맺는 글",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -475,6 +479,20 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "심주를 단단히 세우는 구체적 방법 도입",
     "callout": "감정과 사실을 분리해 자문하는 습관 등 핵심 방법을 짚는 문장",
     "paragraphs": ["원칙 점검·기록 등 일상 훈련","중심을 세우면 흔들리지 않는다는 격려"]
+  }
+}`,
+  16: `{
+  "letter": {
+    "paragraphs": [
+      "이름을 부르며 시작하는 인사와, 어떤 고민(올해 운세·재물·결혼 등)을 안고 찾아왔는지 따뜻하게 회상하는 한 문단",
+      "지난 힘들었던 시기를 일간 비유로 공감하며 잘 견뎌줘서 고맙다는 한 문단",
+      "지금의 대운과 다가올 황금기(연도)의 결실을 희망으로 전하는 한 문단",
+      "결혼/인연에 대한 격려 한 문단",
+      "삼재·악인 등 거친 시기를 만나도 강인한 생명력과 귀인의 보살핌이 함께함을 일러주는 한 문단",
+      "조급함을 내려놓고 자신의 속도로 살라는 위로 한 문단",
+      "앞날을 축원하는 한 문단",
+      "'힘든 날도 날씨 같은 것'이라는 비유로 스스로를 믿고 당당히 걸어가라는 마무리 한 문단"
+    ]
   }
 }`,
 };

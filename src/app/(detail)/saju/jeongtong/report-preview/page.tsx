@@ -398,6 +398,56 @@ function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) 
   );
 }
 
+// 단하 낙관(도장) — 붉은 사각 전각
+function SealStamp() {
+  return (
+    <div className="flex items-center justify-center" style={{ width: 56, height: 56, borderRadius: 8, border: `2px solid ${MAROON}`, color: MAROON, background: `${MAROON}08` }}>
+      <div className="grid grid-cols-2 gap-0.5 text-[15px] font-black leading-none" style={{ fontFamily: SERIF }}>
+        <span>四</span><span>柱</span><span>丹</span><span>霞</span>
+      </div>
+    </div>
+  );
+}
+
+// 결과지 만족도 리뷰 위젯 (마무리) — 게스트 백엔드 연결 전이라 로컬 완료 처리
+function ReviewBox() {
+  const faces = [
+    { v: 1, e: "😞", l: "매우불만" }, { v: 2, e: "😕", l: "불만" }, { v: 3, e: "😐", l: "보통" }, { v: 4, e: "🙂", l: "만족" }, { v: 5, e: "😍", l: "매우만족" },
+  ];
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState("");
+  const [done, setDone] = useState(false);
+  if (done) {
+    return (
+      <div className="rounded-2xl p-6 mx-6 mb-8 text-center" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
+        <p className="text-[28px] mb-1">🙏</p>
+        <p className="text-[15px] font-black" style={{ color: INK }}>소중한 의견 고맙습니다</p>
+        <p className="text-[12.5px] mt-1" style={{ color: MUTE }}>남겨주신 마음, 더 좋은 풀이로 보답할게요.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <p className="text-center text-[11px] font-bold" style={{ color: MAROON }}>좋은 길잡이 단하</p>
+      <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>풀이는 마음에 드셨나요?</h3>
+      <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>리뷰 작성자 중 매월 10분을 추첨해 환급해 드려요.</p>
+      <div className="flex justify-between mb-4">
+        {faces.map((f) => {
+          const on = rating === f.v;
+          return (
+            <button key={f.v} onClick={() => setRating(f.v)} className="flex flex-col items-center gap-1 active:scale-95 transition-all" style={{ opacity: rating && !on ? 0.45 : 1 }}>
+              <span style={{ fontSize: 30, transform: on ? "scale(1.18)" : "none", transition: "transform .15s" }}>{f.e}</span>
+              <span className="text-[11px]" style={{ color: on ? MAROON : MUTE, fontWeight: on ? 800 : 600 }}>{f.l}</span>
+            </button>
+          );
+        })}
+      </div>
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="풀이에 대한 솔직한 의견을 남겨주세요. 남겨주신 의견은 서비스 개선에 꼭 참고할게요." className="w-full rounded-xl p-3 text-[13px] outline-none resize-none" style={{ background: "#faf6f2", border: `1px solid ${INK}14`, color: INK }} />
+      <button onClick={() => rating && setDone(true)} disabled={!rating} className="w-full mt-3 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all active:scale-[0.99]" style={{ background: rating ? MAROON : `${INK}33` }}>제출하기</button>
+    </div>
+  );
+}
+
 // 심주 명식표 (15장) — 심주(용신 기둥) + 원국 4기둥, 심주 강조
 function SimjuTable({ view, heart }: { view: MyeongsikView | null; heart: { label: string; gan: string; ji: string } }) {
   const pillars = view?.pillars?.length
@@ -700,6 +750,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "13": "제13장 · 핵심 정리",
   "14": "제14장 · 지금부터 해야 할 일들",
   "15": "제15장 · 흔들리지 않는 법에 대하여",
+  "16": "마무리 · 단하의 편지",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1431,6 +1482,18 @@ const SAMPLE_CONTENT: ReportContent = {
       "마음속에 단단한 무게 중심과 기둥을 세울 때, 어떤 감정의 폭풍이 불어와도 선우님은 흔들리지 않고 삶을 살아갈 수 있을 거예요.",
     ],
   },
+  letter: {
+    paragraphs: [
+      "선우님, 오늘 전해드린 사주 이야기가 선우님의 마음에 따뜻한 이정표가 되었기를 바라는 마음으로 펜을 들었습니다. 올해 내 운세와 재물운은 어떨지, 그리고 결혼은 해야 할지 말아야 할지 깊은 고민을 안고 저를 찾아와 주셨지요.",
+      "지난 20대 중반부터 30대 초반까지, 차가운 물속에서 방향을 잡지 못하고 홀로 외로이 버텨내야 했던 시간들이 선우님에게는 참 고단하고 아팠을 것 같아요. 을목이라는 여린 풀이 너무 많은 물에 휩쓸려 뿌리가 흔들리던 그 시절을 묵묵히 견뎌내 주셔서 참 고맙고 대견해요.",
+      "하지만 선우님, 삶이 늘 겨울의 차가운 눈보라 속에만 머물지는 않는답니다. 지금 선우님은 인생의 가장 든든하고 안정적인 임신 대운의 길목에 와 계시며, 다가올 2028년에는 그동안 뿌린 노력의 씨앗들이 거대한 재물과 명예라는 황금빛 결실로 돌아올 준비를 하고 있어요.",
+      "결혼에 대한 고민도 깊으셨지요. 선우님 사주에는 나를 따뜻하게 안아주고 현실의 중심을 잡아줄 단정하고 이지적인 배우자의 기운이 분명히 자리 잡고 있어요. 결혼은 선우님의 흔들리는 마음을 단단하게 고정해 줄 훌륭한 닻이 되어줄 것이니, 두려워하지 말고 다가올 인연을 기쁘게 맞이하셨으면 좋겠어요.",
+      "물론 인생의 여정에서 때로는 삼재라는 거친 바람을 만나기도 하고, 나를 흔들려는 사람들을 마주하기도 하겠지요. 하지만 선우님에게는 어떤 비바람에도 꺾이지 않고 다시 일어서는 을묘 건록의 강인한 생명력과, 위기마다 나를 지켜줄 두 개의 천을귀인이라는 하늘의 보살핌이 함께하고 있음을 잊지 마세요.",
+      "그러니 너무 조급해하거나 완벽해지려 스스로를 다그치지 마세요. 가끔은 힘든 짐을 내려놓고 주변의 따뜻한 손길을 잡는 법도 배우며, 선우님만의 속도로 이 아름다운 봄날을 마음껏 누리시기를 바랄게요.",
+      "선우님의 앞날에 늘 따스한 햇살과 기분 좋은 바람이 가득하기를, 제가 늘 마음 깊이 기도하고 응원해 드릴게요.",
+      "힘든 날도 그냥 날씨 같은 거예요. 바람 불다가도 또 햇살이 비추기도 하거든요. 그러니 늘 스스로를 믿고 당당하게 걸어가세요.",
+    ],
+  },
 };
 
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
@@ -1486,7 +1549,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 // ─── 목차 (플로팅 패널) ───────────────────────────────────────────
 type TocItem = { no: string; title: string; current?: boolean };
 type TocGroup =
-  | { type: "single"; label: string; title: string }
+  | { type: "single"; label: string; title: string; no?: string }
   | { type: "part"; part: string; sub: string; items: TocItem[] };
 
 const TOC_GROUPS: TocGroup[] = [
@@ -1534,7 +1597,7 @@ const TOC_GROUPS: TocGroup[] = [
       { no: "15", title: "흔들리지 않는 법에 대하여" },
     ],
   },
-  { type: "single", label: "마무리", title: "단하의 편지" },
+  { type: "single", label: "마무리", title: "단하의 편지", no: "16" },
 ];
 
 function Dot({ active }: { active?: boolean }) {
@@ -1604,15 +1667,21 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           <div className="space-y-4">
             {TOC_GROUPS.map((g, gi) =>
               g.type === "single" ? (
-                <div key={gi} className="flex items-center gap-3">
-                  <Dot />
-                  <span className="text-[14px] font-black" style={{ color: INK }}>
+                <button
+                  key={gi}
+                  onClick={() => g.no && onSelect(g.no)}
+                  disabled={!g.no}
+                  className="flex items-center gap-3 w-full text-left"
+                  style={{ cursor: g.no ? "pointer" : "default" }}
+                >
+                  <Dot active={!!g.no && g.no === currentNo} />
+                  <span className="text-[14px] font-black" style={{ color: g.no === currentNo ? MAROON : INK }}>
                     {g.label}
                   </span>
                   <span className="text-[12.5px]" style={{ color: MUTE }}>
                     · {g.title}
                   </span>
-                </div>
+                </button>
               ) : (
                 <div key={gi}>
                   <div className="flex items-center gap-3 mb-2.5">
@@ -3094,8 +3163,50 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제16장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && ch !== "15" && (
+      {/* ═══════════ 마무리 · 단하의 편지 ═══════════ */}
+      {ch === "16" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 460 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 30%, transparent 66%, rgba(253,248,244,0.96) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.9)" }}>맺음</p>
+              <h1 className="text-[27px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}>
+                소녀 단하의 편지
+              </h1>
+            </div>
+          </div>
+
+          {/* 편지 본문 */}
+          <section className="px-7 pt-8 pb-2">
+            {c.letter.paragraphs.map((p, i) => (
+              <p key={i} className="text-[14.5px] leading-[2.05] mb-5" style={{ color: INK_SOFT }}>{p}</p>
+            ))}
+            {/* 서명 + 낙관 */}
+            <div className="flex items-center justify-end gap-3 mt-8 mb-2">
+              <span className="text-[13.5px] font-bold" style={{ color: INK }}>소녀 단하 올림</span>
+              <SealStamp />
+            </div>
+          </section>
+
+          {/* 만족도 리뷰 */}
+          <ReviewBox />
+
+          {/* 네비 */}
+          <div className="px-6 pb-12 flex gap-2 items-stretch">
+            <button onClick={() => next("15")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("1")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>
+              <span>처음부터 다시 보기</span>
+              <span>↺</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제17장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && ch !== "15" && ch !== "16" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
