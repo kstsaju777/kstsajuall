@@ -54,7 +54,7 @@ function SiteFooter() {
         <div className="flex justify-center">
           <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
         </div>
-        <div className="space-y-1.5 text-[11px] text-body font-myeongjo leading-relaxed">
+        <div className="space-y-1.5 text-[11px] text-body leading-relaxed">
           <p>
             <span className="text-mute">상호</span> {businessInfo.companyName}
             {businessInfo.representative && (
@@ -85,11 +85,11 @@ function SiteFooter() {
             </p>
           )}
         </div>
-        <div className="flex justify-center gap-5 text-[11px] text-body font-myeongjo pt-1">
+        <div className="flex justify-center gap-5 text-[11px] text-body pt-1">
           <Link href="/legal/terms" className="hover:text-ink transition-colors">이용약관</Link>
           <Link href="/legal/privacy" className="hover:text-ink transition-colors">개인정보처리방침</Link>
         </div>
-        <p className="text-[10px] text-mute font-myeongjo">
+        <p className="text-[10px] text-mute">
           Copyright © {new Date().getFullYear()} {siteConfig.name} · All rights reserved
         </p>
       </div>
