@@ -398,6 +398,39 @@ function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) 
   );
 }
 
+// 심주 명식표 (15장) — 심주(용신 기둥) + 원국 4기둥, 심주 강조
+function SimjuTable({ view, heart }: { view: MyeongsikView | null; heart: { label: string; gan: string; ji: string } }) {
+  const pillars = view?.pillars?.length
+    ? view.pillars.map((p) => ({ gan: p.gan, ji: p.ji }))
+    : [{ gan: "甲", ji: "申" }, { gan: "乙", ji: "卯" }, { gan: "丙", ji: "子" }, { gan: "己", ji: "巳" }];
+  const cols = [{ gan: heart.gan, ji: heart.ji, hi: true }, ...pillars.map((p) => ({ ...p, hi: false }))];
+  const gcols = { gridTemplateColumns: `repeat(${cols.length}, 1fr)` } as const;
+  const img = (src: string, alt: string) => (
+    <div className="flex items-center justify-center py-0.5">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} style={{ width: 30, height: 30, objectFit: "contain" }} />
+    </div>
+  );
+  return (
+    <div className="rounded-2xl p-4 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
+      <p className="text-[12px] font-bold mb-3 text-center" style={{ color: MUTE }}>
+        나를 위한 명식: <span style={{ color: MAROON, fontWeight: 800 }}>{heart.label}</span>
+      </p>
+      <div className="grid" style={gcols}>
+        {cols.map((c, i) => (
+          <div key={i} className="text-center text-[10px] font-bold py-1" style={{ color: c.hi ? MAROON : "transparent", background: c.hi ? `${MAROON}10` : "transparent", borderTopLeftRadius: c.hi ? 8 : 0, borderTopRightRadius: c.hi ? 8 : 0 }}>심주</div>
+        ))}
+      </div>
+      <div className="grid" style={gcols}>
+        {cols.map((c, i) => <div key={i} style={{ background: c.hi ? `${MAROON}10` : "transparent" }}>{img(ganCharImage(c.gan), c.gan)}</div>)}
+      </div>
+      <div className="grid" style={gcols}>
+        {cols.map((c, i) => <div key={i} style={{ background: c.hi ? `${MAROON}10` : "transparent", borderBottomLeftRadius: c.hi ? 8 : 0, borderBottomRightRadius: c.hi ? 8 : 0 }}>{img(jiCharImage(c.ji), c.ji)}</div>)}
+      </div>
+    </div>
+  );
+}
+
 // 일진/월별 흐름 스트립 (14장 주운·월운)
 function FlowStrip({ items }: { items: { top: string; label: string; status: string }[] }) {
   const sc = (s: string) => (/좋|길/.test(s) ? "#3f8a52" : /나쁨|흉|주의/.test(s) ? WARN : MUTE);
@@ -666,6 +699,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "12": "제12장 · 반드시 조심해야 할 악인은 누구일까",
   "13": "제13장 · 핵심 정리",
   "14": "제14장 · 지금부터 해야 할 일들",
+  "15": "제15장 · 흔들리지 않는 법에 대하여",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1372,6 +1406,29 @@ const SAMPLE_CONTENT: ReportContent = {
     ],
     months: [
       { top: "6월", label: "갑오월", status: "나쁨" }, { top: "7월", label: "을미월", status: "좋음" }, { top: "8월", label: "병신월", status: "좋음" },
+    ],
+  },
+  simju: {
+    intro: "사주 명리에서 타고난 여덟 글자 외에 내 마음속에 스스로 세워 다섯 번째 기둥인 '심주(心柱)'라는 마음의 중심이 있어요.",
+    callout: "선우님을 흔들림 없이 받쳐줄 단단한 심주는 바로 경신(庚申)이며, 이는 차갑고 이성적인 무쇠와 단단한 바위와 같은 기운을 의미해요.",
+    paragraphs: [
+      "천간의 경금(庚)은 흔들리지 않는 이성적 판단을, 지지의 신금(申)은 한결같이 묵묵히 실천하는 단단한 실행력을 의미합니다.",
+    ],
+    heart: { label: "경신(庚申)", gan: "庚", ji: "申" },
+  },
+  shake: {
+    intro: "선우님의 강한 나무 기운이 과하게 그러모아 감정 과잉으로 흐를 때 단단한 경신(庚)의 심주가 흔들리게 돼요.",
+    callout: "남의 칭찬을 듣지 않고 독단적으로 결정을 내리거나, 묘신원진의 예민함이 발동해 주변 사람들을 의심하고 원망하는 순간에 심주가 흔들립니다.",
+    paragraphs: [
+      "내면의 불안감과 조급함이 커지면서 현실적인 실천을 하지 않은 채 머릿속으로만 걱정을 쌓는 것도 심주가 흔들리는 신호예요.",
+    ],
+  },
+  forge: {
+    intro: "경신(庚申)의 강한 나무 기운을 마음속에 단단히 세우기 위해서는 일상에서 감정과 사실을 분리하는 연습을 하셔야 해요.",
+    callout: "어떤 상황에서도 감정적으로 욱하기보다 '이것이 객관적인 사실인가, 아니면 내 생각인가'를 먼저 차분하게 자문해 보세요.",
+    paragraphs: [
+      "하루의 마무리에 나만의 원칙을 점검하고 내일의 계획을 이성적으로 정리하며 일기를 쓰는 습관도 심주를 세우는 데 큰 도움이 돼요.",
+      "마음속에 단단한 무게 중심과 기둥을 세울 때, 어떤 감정의 폭풍이 불어와도 선우님은 흔들리지 않고 삶을 살아갈 수 있을 거예요.",
     ],
   },
 };
@@ -2974,8 +3031,71 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제15장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && (
+      {/* ═══════════ 제15장 · 흔들리지 않는 법에 대하여 ═══════════ */}
+      {ch === "15" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 470 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/hero/hero-17.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 32%, transparent 64%, rgba(253,248,244,0.95) 100%)" }} />
+            <div className="absolute top-7 left-0 right-0 text-center px-6">
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제5부 · {name}님만의 길</p>
+              <h1 className="text-[27px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+                “흔들리지 않는<br />법에 대하여”
+              </h1>
+            </div>
+          </div>
+
+          <Quote>{`"어떤 순간에도\n흔들리지 않으려면\n어떻게 해야 하는지\n살펴보겠습니다."`}</Quote>
+
+          {/* 심주 */}
+          <HanjaDivider hanja="心柱" sub="흔들림 없는 마음의 기둥, 심주" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>흔들림 없는 마음의 기둥, 심주</Heading>
+            <SimjuTable view={report?.view ?? null} heart={c.simju.heart} />
+            <P>{c.simju.intro}</P>
+            <Callout>{c.simju.callout}</Callout>
+            {c.simju.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 무엇이 흔드는가 */}
+          <HanjaDivider hanja="動搖" sub="무엇이 나의 심주를 흔드는가" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>무엇이 나의 심주를 흔드는가</Heading>
+            <P>{c.shake.intro}</P>
+            <Callout>{c.shake.callout}</Callout>
+            {c.shake.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 단단히 세우는 법 */}
+          <HanjaDivider hanja="鍛鍊" sub="심주를 단단히 세우는 법" />
+          <section className="px-6 pt-6 pb-4">
+            <Heading>심주를 단단히 세우는 법</Heading>
+            <P>{c.forge.intro}</P>
+            <Callout>{c.forge.callout}</Callout>
+            {c.forge.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 삽화 */}
+          <Illust src="/images/hero/hero-9.jpg" h={400} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"마음속에 ${c.simju.heart.label}의 단단한\n뿌리와 기둥을 세울 때,\n어떤 감정의 폭풍이 와도\n${name}님은 흔들리지 않을 거예요."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <div className="px-6 pb-10 flex gap-2 items-stretch">
+            <button onClick={() => next("14")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+            <button onClick={() => next("16")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+              <span>마무리 · 단하의 편지</span>
+              <span>→</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ═══════════ 제16장 이후 — 준비 중 ═══════════ */}
+      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && ch !== "15" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>

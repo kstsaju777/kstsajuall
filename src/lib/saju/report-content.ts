@@ -97,6 +97,10 @@ export type ReportContent = {
   tomorrow: { intro: string; paragraphs: string[] }; // 내일의 할 일
   weekFlow: ReportSection & { days: { top: string; label: string; status: string }[] }; // 이번 주 일진
   monthFlow: ReportSection & { months: { top: string; label: string; status: string }[] }; // 향후 3개월
+  // ── 15장: 흔들리지 않는 법에 대하여 ──
+  simju: ReportSection & { heart: { label: string; gan: string; ji: string } }; // 흔들림 없는 마음의 기둥(심주)
+  shake: ReportSection;  // 무엇이 나의 심주를 흔드는가
+  forge: ReportSection;  // 심주를 단단히 세우는 법
 };
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
@@ -115,6 +119,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   12: ["villain", "loss"],
   13: ["sumEssence", "sumTime", "sumRelation"],
   14: ["openMethod", "tomorrow", "weekFlow", "monthFlow"],
+  15: ["simju", "shake", "forge"],
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -156,6 +161,7 @@ const CH_THEME: Record<number, string> = {
   12: "'반드시 조심해야 할 악인은 누구일까' — 나를 흔드는 사람의 패턴(인물 카드)",
   13: "'핵심 정리' — 전체 풀이를 본질·시기·관계 세 가지로 요약",
   14: "'지금부터 해야 할 일들' — 부족한 기운을 채우는 나만의 개운법(생활 처방)",
+  15: "'흔들리지 않는 법에 대하여' — 마음의 기둥(심주), 그것을 흔드는 것과 세우는 법",
 };
 
 const CH_SCHEMA: Record<number, string> = {
@@ -451,6 +457,24 @@ const CH_SCHEMA: Record<number, string> = {
     "months": [
       {"top":"6월","label":"갑오월","status":"나쁨"}, {"top":"7월","label":"을미월","status":"좋음"}, {"top":"8월","label":"병신월","status":"좋음"}
     ]
+  }
+}`,
+  15: `{
+  "simju": {
+    "intro": "마음이 흔들릴 때 중심을 잡아줄 '심주'(용신 기둥)를 짚는 도입",
+    "callout": "심주가 되는 기운(용신 간지 한자+십성)이 어떤 단단한 바탕을 의미하는지 짚는 문장",
+    "paragraphs": ["그 심주가 흔들리지 않는 이성·중심을 의미한다는 한 문단"],
+    "heart": { "label": "경신(庚申)", "gan": "庚", "ji": "申" }
+  },
+  "shake": {
+    "intro": "무엇이 그 심주(마음의 중심)를 흔드는지 짚는 도입",
+    "callout": "심주를 흔드는 기운(특정 십성/합충, 감정 과잉 등)을 짚는 문장",
+    "paragraphs": ["충동적 결정/오해 등 흔들리는 상황","불안·조급함이 커질 때의 신호"]
+  },
+  "forge": {
+    "intro": "심주를 단단히 세우는 구체적 방법 도입",
+    "callout": "감정과 사실을 분리해 자문하는 습관 등 핵심 방법을 짚는 문장",
+    "paragraphs": ["원칙 점검·기록 등 일상 훈련","중심을 세우면 흔들리지 않는다는 격려"]
   }
 }`,
 };
