@@ -746,8 +746,8 @@ function CheckoutContent() {
     setShowSheet(false);
     const product = PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0];
 
-    // 이메일 발송 (테스트: 임시 고정 주소 / 실제는 searchParams에서 받아옴)
-    const email = searchParams.get("email") ?? "kimguback@gmail.com";
+    // 이메일 발송 — 고객이 입력한 주소로
+    const email = searchParams.get("email") ?? "";
     if (email) {
       try {
         await fetch("/api/send-order-email", {
@@ -780,7 +780,7 @@ function CheckoutContent() {
       // SMS 실패해도 리포트는 진행
     }
 
-    const params = new URLSearchParams({ name, date, time, calendar, gender });
+    const params = new URLSearchParams({ name, date, time, calendar, gender, email });
     router.push(`/saju/jeongtong/report-preview?${params.toString()}`);
   };
 

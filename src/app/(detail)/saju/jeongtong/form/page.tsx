@@ -703,9 +703,9 @@ function LoadBubble({ text, size, width }: { text: string; size?: string; width?
 }
 
 function StepLoading({
-  name, date, time, calendar, gender,
+  name, date, time, calendar, gender, email,
 }: {
-  name: string; date: string; time: string; calendar: string; gender?: string;
+  name: string; date: string; time: string; calendar: string; gender?: string; email: string;
 }) {
   const [progress, setProgress] = useState(0);
   const [b1, setB1] = useState(false);
@@ -725,7 +725,7 @@ function StepLoading({
   }, []);
 
   const goNext = () => {
-    const params = new URLSearchParams({ name, date, time, calendar, gender: gender ?? "" });
+    const params = new URLSearchParams({ name, date, time, calendar, gender: gender ?? "", email: email ?? "" });
     router.push(`/saju/jeongtong/checkout?${params.toString()}`);
   };
 
@@ -854,6 +854,7 @@ export default function SajuFormPage() {
           time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"}
           gender={form.gender}
+          email={form.email ?? ""}
         />
       )}
     </>
