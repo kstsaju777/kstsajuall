@@ -20,7 +20,7 @@ export function DetailHeader() {
     <>
       {/* 헤더 바 */}
       <header
-        className="flex-shrink-0 flex items-center justify-between px-4 h-14 z-40"
+        className="relative flex-shrink-0 flex items-center justify-between px-4 h-14 z-40"
         style={{ backgroundColor: "#fdf8f4", borderBottom: "1px solid #ede8e2" }}
       >
         {/* 좌: 뒤로가기 */}
@@ -34,11 +34,11 @@ export function DetailHeader() {
           </svg>
         </button>
 
-        {/* 가운데: 로고 */}
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2">
+        {/* 가운데: 로고 (홈으로) */}
+        <Link href="/" aria-label="홈으로" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center px-3 py-2">
           <img
             src="/images/logo.png"
-            alt="홍문당"
+            alt="홍연당"
             className="h-9 w-auto object-contain"
           />
         </Link>
