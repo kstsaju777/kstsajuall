@@ -1725,11 +1725,10 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 // ─── 목차 (플로팅 패널) — 홍연당 A안 ───────────────────────────────
 // no = 이동 대상(현재 본문 장 번호). "" 면 아직 준비 중(클릭 불가).
 // disp = 표시용(도입/제N장/마무리), chip = 키워드 칩.
-type TocEntry = { disp: string; chip: string; title: string; no: string; action?: "myeongsik" };
+type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "도입부", chip: "시작", title: "천년의 명리를 그대에게", no: "2" },
-  { disp: "제01장", chip: "명식", title: "내 사주팔자는 어떻게 생겼나", no: "", action: "myeongsik" },
+  { disp: "도입부", chip: "시작", title: "천년의 명리를 그대에게", no: "2", entry: true },
   { disp: "제02장", chip: "환경", title: "나는 어떤 그릇으로 태어났나", no: "2" },
   { disp: "제03장", chip: "운명", title: "나는 왜 이렇게 살아왔을까", no: "3" },
   { disp: "제04장", chip: "관계", title: "나는 세상을 어떻게 대하는가", no: "5" },
@@ -1748,7 +1747,7 @@ const TOC_A: TocEntry[] = [
   { disp: "마무리", chip: "결론", title: "그대에게 남기는 홍연의 서신", no: "16" },
 ];
 
-function TocPanel({ open, onClose, currentNo, onSelect, onMyeongsik }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void; onMyeongsik: () => void }) {
+function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
   return (
     <div
       className="fixed inset-y-0 z-50 flex items-start justify-center"
@@ -1801,12 +1800,9 @@ function TocPanel({ open, onClose, currentNo, onSelect, onMyeongsik }: { open: b
           {/* 목록 */}
           <div className="mt-3 space-y-1.5">
             {TOC_A.map((it, i) => {
-              const active = !!it.no && it.no === currentNo && !it.action;
-              const ready = !!it.no || !!it.action;
-              const handle = () => {
-                if (it.action === "myeongsik") { onMyeongsik(); onClose(); }
-                else if (it.no) { onSelect(it.no); onClose(); }
-              };
+              const active = !!it.no && it.no === currentNo && !it.entry;
+              const ready = !!it.no;
+              const handle = () => { if (it.no) { onSelect(it.no); onClose(); } };
               return (
                 <button
                   key={i}
@@ -1851,12 +1847,12 @@ function Cover() {
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 30%, transparent 70%, rgba(253,248,244,0.95) 100%)" }} />
       <div className="absolute top-7 left-0 right-0 text-center px-6">
         <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
-          제1부 · 지나온 길
+          제11장 · 굴곡
         </p>
         <h1 className="text-[30px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.35)" }}>
-          “내가 지나온
+          “나는 왜 그 시간을
           <br />
-          시간과 선택들”
+          견뎌야 했나”
         </h1>
       </div>
     </div>
@@ -2250,7 +2246,6 @@ function ReportPreviewInner() {
         onClose={() => setTocOpen(false)}
         currentNo={ch}
         onSelect={(no) => next(no)}
-        onMyeongsik={openMyeongsik}
       />
       <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={report?.view ?? null} loading={false} />
 
@@ -2283,9 +2278,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-8.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 30%, transparent 70%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제2부 · 타고난 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제02장 · 환경</p>
               <h1 className="text-[30px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.35)" }}>
-                “나는 어떤 사람일까”
+                “나는 어떤 그릇으로<br />태어났나”
               </h1>
             </div>
           </div>
@@ -2389,9 +2384,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-7.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 35%, transparent 65%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제2부 · 타고난 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제03장 · 운명</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}>
-                “나는 왜 이런<br />사람인 걸까”
+                “나는 왜<br />이렇게 살아왔을까”
               </h1>
               <p className="text-[12px] mt-2" style={{ color: "rgba(255,255,255,0.8)" }}>(사주 속 필연구조)</p>
             </div>
@@ -2510,9 +2505,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-11.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제2부 · 타고난 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제05장 · 특징</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “내 사주는<br />얼마나 희귀할까”
+                “내 사주는<br />얼마나 귀한가”
               </h1>
             </div>
           </div>
@@ -2575,9 +2570,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-12.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제2부 · 타고난 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제04장 · 관계</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “세상을 대하는<br />나만의 방식”
+                “나는 세상을<br />어떻게 대하는가”
               </h1>
             </div>
           </div>
@@ -2628,9 +2623,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-13.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제12장 · 흐름</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “앞으로 10년,<br />어떻게 흘러갈까?”
+                “내 대운은<br />어디로 흐르나”
               </h1>
             </div>
           </div>
@@ -2706,9 +2701,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-16.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제06장 · 재물</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “재물·직업운<br />정밀풀이”
+                “내 재물과 천직은<br />어떠한가”
               </h1>
             </div>
           </div>
@@ -2780,9 +2775,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제07장 · 사랑</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “연애·결혼운<br />정밀풀이”
+                “내 인연과 혼인의<br />때는 언제인가”
               </h1>
             </div>
           </div>
@@ -2853,9 +2848,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-10.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제08장 · 건강</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “건강운 정밀풀이”
+                “내 건강과 약한 곳은<br />어디인가”
               </h1>
             </div>
           </div>
@@ -2917,9 +2912,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3부 · 열리는 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제09장 · 귀인</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “나를 도와줄<br />귀인은 누구일까?”
+                “나를 살릴 귀인은<br />누구인가”
               </h1>
             </div>
           </div>
@@ -2980,9 +2975,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-8.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(40,0,0,0.45) 0%, transparent 32%, transparent 60%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제4부 · 흔들리는 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제13장 · 주의</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
-                “반드시 조심해야 할<br />시기는 언제일까?”
+                “내가 조심해야 할<br />때는 언제인가”
               </h1>
             </div>
           </div>
@@ -3046,9 +3041,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-7.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(40,0,0,0.45) 0%, transparent 32%, transparent 60%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제4부 · 흔들리는 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제10장 · 악인</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
-                “반드시 조심해야 할<br />악인은 누구일까?”
+                “내가 피해야 할<br />사람은 누구인가”
               </h1>
             </div>
           </div>
@@ -3100,9 +3095,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-9.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제5부 · {name}님만의 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제14장 · 당부</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “핵심 정리”
+                “내가 꼭 기억할<br />세 가지는 무엇인가”
               </h1>
             </div>
           </div>
@@ -3159,9 +3154,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-15.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제5부 · {name}님만의 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제15장 · 개운</p>
               <h1 className="text-[28px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
-                “지금부터<br />해야할 일들”
+                “나는 어떻게<br />운을 바꿀 수 있나”
               </h1>
             </div>
           </div>
@@ -3232,9 +3227,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-17.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 32%, transparent 64%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제5부 · {name}님만의 길</p>
+              <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제16장 · 중심</p>
               <h1 className="text-[27px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
-                “흔들리지 않는<br />법에 대하여”
+                “나는 어떻게<br />흔들리지 않을 수 있나”
               </h1>
             </div>
           </div>
@@ -3296,9 +3291,9 @@ function ReportPreviewInner() {
             <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 30%, transparent 66%, rgba(253,248,244,0.96) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
-              <p className="text-[12px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.9)" }}>맺음</p>
+              <p className="text-[12px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.9)" }}>맺음 · 결론</p>
               <h1 className="text-[27px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 12px rgba(0,0,0,0.45)" }}>
-                소녀 단하의 편지
+                그대에게 남기는<br />홍연의 서신
               </h1>
             </div>
           </div>
