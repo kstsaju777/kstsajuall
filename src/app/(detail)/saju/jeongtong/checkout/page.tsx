@@ -524,14 +524,18 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   const saved = sel.original - sel.price;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ pointerEvents: "auto" }}>
+    <>
       {/* 딤 배경 */}
-      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.6)" }} onClick={onClose} />
+      <div className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)" }} onClick={onClose} />
 
-      {/* 모달 */}
-      <div className="relative w-full overflow-y-auto rounded-3xl"
-        style={{ maxWidth: 400, maxHeight: "88vh", backgroundColor: DBG, boxShadow: "0 20px 60px rgba(0,0,0,0.55)", scrollbarWidth: "none" }}>
-        <div className="px-5 pt-5 pb-6">
+      {/* 바텀시트 — 하단을 채우며 위로 */}
+      <div className="fixed bottom-0 z-50 overflow-y-auto rounded-t-3xl"
+        style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", maxHeight: "92vh", backgroundColor: DBG, boxShadow: "0 -12px 40px rgba(0,0,0,0.5)", scrollbarWidth: "none" }}>
+        {/* 핸들 */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div style={{ width: 40, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.2)" }} />
+        </div>
+        <div className="px-5 pt-2 pb-7">
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[18px] font-black" style={{ color: DTXT }}>{PRODUCTS[0].name} 결제 안내</h3>
@@ -627,7 +631,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
