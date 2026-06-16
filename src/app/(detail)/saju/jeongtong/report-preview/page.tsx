@@ -1725,11 +1725,11 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 // ─── 목차 (플로팅 패널) — 홍연당 A안 ───────────────────────────────
 // no = 이동 대상(현재 본문 장 번호). "" 면 아직 준비 중(클릭 불가).
 // disp = 표시용(도입/제N장/마무리), chip = 키워드 칩.
-type TocEntry = { disp: string; chip: string; title: string; no: string };
+type TocEntry = { disp: string; chip: string; title: string; no: string; action?: "myeongsik" };
 
 const TOC_A: TocEntry[] = [
-  { disp: "도입부", chip: "시작", title: "천년의 명리를 그대에게", no: "" },
-  { disp: "제01장", chip: "명식", title: "내 사주팔자는 어떻게 생겼나", no: "" },
+  { disp: "도입부", chip: "시작", title: "천년의 명리를 그대에게", no: "2" },
+  { disp: "제01장", chip: "명식", title: "내 사주팔자는 어떻게 생겼나", no: "", action: "myeongsik" },
   { disp: "제02장", chip: "환경", title: "나는 어떤 그릇으로 태어났나", no: "2" },
   { disp: "제03장", chip: "운명", title: "나는 왜 이렇게 살아왔을까", no: "3" },
   { disp: "제04장", chip: "관계", title: "나는 세상을 어떻게 대하는가", no: "5" },
@@ -1748,7 +1748,7 @@ const TOC_A: TocEntry[] = [
   { disp: "마무리", chip: "결론", title: "그대에게 남기는 홍연의 서신", no: "16" },
 ];
 
-function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
+function TocPanel({ open, onClose, currentNo, onSelect, onMyeongsik }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void; onMyeongsik: () => void }) {
   return (
     <div
       className="fixed inset-y-0 z-50 flex items-start justify-center"
@@ -1801,12 +1801,16 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           {/* 목록 */}
           <div className="mt-3 space-y-1.5">
             {TOC_A.map((it, i) => {
-              const active = !!it.no && it.no === currentNo;
-              const ready = !!it.no;
+              const active = !!it.no && it.no === currentNo && !it.action;
+              const ready = !!it.no || !!it.action;
+              const handle = () => {
+                if (it.action === "myeongsik") { onMyeongsik(); onClose(); }
+                else if (it.no) { onSelect(it.no); onClose(); }
+              };
               return (
                 <button
                   key={i}
-                  onClick={() => { if (ready) { onSelect(it.no); onClose(); } }}
+                  onClick={handle}
                   disabled={!ready}
                   className="flex items-center gap-2.5 w-full text-left rounded-xl px-3 py-2 transition-colors"
                   style={{
@@ -2246,6 +2250,7 @@ function ReportPreviewInner() {
         onClose={() => setTocOpen(false)}
         currentNo={ch}
         onSelect={(no) => next(no)}
+        onMyeongsik={openMyeongsik}
       />
       <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={report?.view ?? null} loading={false} />
 
