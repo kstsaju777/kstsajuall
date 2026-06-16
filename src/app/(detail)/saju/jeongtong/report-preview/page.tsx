@@ -909,23 +909,24 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
   );
 }
 
+// URL 장번호(기존 본문 번호) → 홍연당 A안 표시 제목
 const CHAPTER_TITLES: Record<string, string> = {
-  "1": "제1장 · 지나온 시간과 선택들",
-  "2": "제2장 · 타고난 길",
-  "3": "제3장 · 나는 왜 이런 사람인 걸까",
-  "4": "제4장 · 내 사주는 얼마나 희귀할까",
-  "5": "제5장 · 세상을 대하는 나만의 방식",
-  "6": "제6장 · 앞으로 10년, 어떻게 흘러갈까",
-  "7": "제7장 · 재물·직업운 정밀풀이",
-  "8": "제8장 · 연애·결혼운 정밀풀이",
-  "9": "제9장 · 건강운 정밀풀이",
-  "10": "제10장 · 나를 도와줄 귀인은 누구일까",
-  "11": "제11장 · 반드시 조심해야 할 시기는 언제일까",
-  "12": "제12장 · 반드시 조심해야 할 악인은 누구일까",
-  "13": "제13장 · 핵심 정리",
-  "14": "제14장 · 지금부터 해야 할 일들",
-  "15": "제15장 · 흔들리지 않는 법에 대하여",
-  "16": "마무리 · 단하의 편지",
+  "1": "제11장 · 나는 왜 그 시간을 견뎌야 했나",
+  "2": "제02장 · 나는 어떤 그릇으로 태어났나",
+  "3": "제03장 · 나는 왜 이렇게 살아왔을까",
+  "4": "제05장 · 내 사주는 얼마나 귀한가",
+  "5": "제04장 · 나는 세상을 어떻게 대하는가",
+  "6": "제12장 · 내 대운은 앞으로 어디로 흐르나",
+  "7": "제06장 · 내 재물과 천직은 어떠한가",
+  "8": "제07장 · 내 인연과 혼인의 때는 언제인가",
+  "9": "제08장 · 내 건강과 약한 곳은 어디인가",
+  "10": "제09장 · 나를 살릴 귀인은 누구인가",
+  "11": "제13장 · 내가 조심해야 할 때는 언제인가",
+  "12": "제10장 · 내가 피해야 할 사람은 누구인가",
+  "13": "제14장 · 내가 꼭 기억할 세 가지는 무엇인가",
+  "14": "제15장 · 나는 어떻게 운을 바꿀 수 있나",
+  "15": "제16장 · 나는 어떻게 흔들리지 않을 수 있나",
+  "16": "마무리 · 그대에게 남기는 홍연의 서신",
 };
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
@@ -1721,68 +1722,31 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
   );
 }
 
-// ─── 목차 (플로팅 패널) ───────────────────────────────────────────
-type TocItem = { no: string; title: string; current?: boolean };
-type TocGroup =
-  | { type: "single"; label: string; title: string; no?: string }
-  | { type: "part"; part: string; sub: string; items: TocItem[] };
+// ─── 목차 (플로팅 패널) — 홍연당 A안 ───────────────────────────────
+// no = 이동 대상(현재 본문 장 번호). "" 면 아직 준비 중(클릭 불가).
+// disp = 표시용(도입/제N장/마무리), chip = 키워드 칩.
+type TocEntry = { disp: string; chip: string; title: string; no: string };
 
-const TOC_GROUPS: TocGroup[] = [
-  { type: "single", label: "인트로", title: "들어가며" },
-  { type: "part", part: "제1부", sub: "지나온 길", items: [{ no: "01", title: "내가 지나온 시간과 선택들" }] },
-  {
-    type: "part",
-    part: "제2부",
-    sub: "타고난 길",
-    items: [
-      { no: "02", title: "나는 어떤 사람일까" },
-      { no: "03", title: "나는 왜 이런 사람인 걸까 (사주 속 필연구조)" },
-      { no: "04", title: "내 사주는 얼마나 희귀할까" },
-      { no: "05", title: "세상을 대하는 나만의 방식" },
-    ],
-  },
-  {
-    type: "part",
-    part: "제3부",
-    sub: "열리는 길",
-    items: [
-      { no: "06", title: "앞으로 10년, 어떻게 흘러갈까?" },
-      { no: "07", title: "재물·직업운 정밀풀이" },
-      { no: "08", title: "연애·결혼운 정밀풀이" },
-      { no: "09", title: "건강운 정밀풀이" },
-      { no: "10", title: "나를 도와줄 귀인은 누구일까?" },
-    ],
-  },
-  {
-    type: "part",
-    part: "제4부",
-    sub: "흔들리는 길",
-    items: [
-      { no: "11", title: "반드시 조심해야 할 시기는 언제일까?" },
-      { no: "12", title: "반드시 조심해야 할 악인은 누구일까?" },
-    ],
-  },
-  {
-    type: "part",
-    part: "제5부",
-    sub: "선우님만의 길",
-    items: [
-      { no: "13", title: "핵심 정리" },
-      { no: "14", title: "지금부터 해야할 일들" },
-      { no: "15", title: "흔들리지 않는 법에 대하여" },
-    ],
-  },
-  { type: "single", label: "마무리", title: "단하의 편지", no: "16" },
+const TOC_A: TocEntry[] = [
+  { disp: "도입부", chip: "시작", title: "천년의 명리를 그대에게", no: "" },
+  { disp: "제01장", chip: "명식", title: "내 사주팔자는 어떻게 생겼나", no: "" },
+  { disp: "제02장", chip: "환경", title: "나는 어떤 그릇으로 태어났나", no: "2" },
+  { disp: "제03장", chip: "운명", title: "나는 왜 이렇게 살아왔을까", no: "3" },
+  { disp: "제04장", chip: "관계", title: "나는 세상을 어떻게 대하는가", no: "5" },
+  { disp: "제05장", chip: "특징", title: "내 사주는 얼마나 귀한가", no: "4" },
+  { disp: "제06장", chip: "재물", title: "내 재물과 천직은 어떠한가", no: "7" },
+  { disp: "제07장", chip: "사랑", title: "내 인연과 혼인의 때는 언제인가", no: "8" },
+  { disp: "제08장", chip: "건강", title: "내 건강과 약한 곳은 어디인가", no: "9" },
+  { disp: "제09장", chip: "귀인", title: "나를 살릴 귀인은 누구인가", no: "10" },
+  { disp: "제10장", chip: "악인", title: "내가 피해야 할 사람은 누구인가", no: "12" },
+  { disp: "제11장", chip: "굴곡", title: "나는 왜 그 시간을 견뎌야 했나", no: "1" },
+  { disp: "제12장", chip: "흐름", title: "내 대운은 앞으로 어디로 흐르나", no: "6" },
+  { disp: "제13장", chip: "주의", title: "내가 조심해야 할 때는 언제인가", no: "11" },
+  { disp: "제14장", chip: "당부", title: "내가 꼭 기억할 세 가지는 무엇인가", no: "13" },
+  { disp: "제15장", chip: "개운", title: "나는 어떻게 운을 바꿀 수 있나", no: "14" },
+  { disp: "제16장", chip: "중심", title: "나는 어떻게 흔들리지 않을 수 있나", no: "15" },
+  { disp: "마무리", chip: "결론", title: "그대에게 남기는 홍연의 서신", no: "16" },
 ];
-
-function Dot({ active }: { active?: boolean }) {
-  return (
-    <span
-      className="flex-shrink-0 rounded-full"
-      style={{ width: 9, height: 9, background: active ? BLUE : "transparent", border: active ? "none" : `2px solid ${INK}30` }}
-    />
-  );
-}
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
   return (
@@ -1817,16 +1781,12 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           scrollbarWidth: "none",
         }}
       >
-        <div className="px-6 py-6">
+        <div className="px-5 py-6">
           {/* 헤더 */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
-              <h2 className="text-[22px] font-black" style={{ color: INK }}>
-                목차
-              </h2>
-              <span className="text-[12px]" style={{ color: MUTE }}>
-                총 15장
-              </span>
+              <h2 className="text-[21px] font-black" style={{ color: INK, fontFamily: SERIF }}>목차</h2>
+              <span className="text-[11.5px]" style={{ color: MUTE }}>홍연이 그대에게 들려줄 이야기</span>
             </div>
             <button
               onClick={onClose}
@@ -1839,63 +1799,40 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           </div>
 
           {/* 목록 */}
-          <div className="space-y-4">
-            {TOC_GROUPS.map((g, gi) =>
-              g.type === "single" ? (
+          <div className="mt-4">
+            {TOC_A.map((it, i) => {
+              const active = !!it.no && it.no === currentNo;
+              const ready = !!it.no;
+              const isEdge = it.disp === "도입부" || it.disp === "마무리";
+              return (
                 <button
-                  key={gi}
-                  onClick={() => g.no && onSelect(g.no)}
-                  disabled={!g.no}
-                  className="flex items-center gap-3 w-full text-left"
-                  style={{ cursor: g.no ? "pointer" : "default" }}
+                  key={i}
+                  onClick={() => { if (ready) { onSelect(it.no); onClose(); } }}
+                  disabled={!ready}
+                  className="flex items-center gap-3 w-full text-left rounded-xl px-2.5 py-2.5 transition-colors"
+                  style={{ background: active ? `${MAROON}0c` : "transparent", opacity: ready ? 1 : 0.45, cursor: ready ? "pointer" : "default" }}
                 >
-                  <Dot active={!!g.no && g.no === currentNo} />
-                  <span className="text-[14px] font-black" style={{ color: g.no === currentNo ? MAROON : INK }}>
-                    {g.label}
+                  {/* 키워드 칩 */}
+                  <span
+                    className="flex-shrink-0 text-[11px] font-bold rounded-md text-center"
+                    style={{
+                      width: 38, padding: "3px 0",
+                      background: active ? MAROON : `${INK}0a`,
+                      color: active ? "#fff" : (isEdge ? MAROON : INK_SOFT),
+                    }}
+                  >
+                    {it.chip}
                   </span>
-                  <span className="text-[12.5px]" style={{ color: MUTE }}>
-                    · {g.title}
-                  </span>
+                  {/* 표시번호 + 제목 */}
+                  <div className="min-w-0">
+                    <span className="text-[10.5px] tracking-wide" style={{ color: MUTE }}>{it.disp}</span>
+                    <p className="text-[13.5px] leading-snug truncate" style={{ color: active ? MAROON : INK, fontWeight: active ? 800 : 500, fontFamily: isEdge ? SERIF : undefined }}>
+                      {it.title}
+                    </p>
+                  </div>
                 </button>
-              ) : (
-                <div key={gi}>
-                  <div className="flex items-center gap-3 mb-2.5">
-                    <Dot active={g.items.some((i) => i.no === currentNo)} />
-                    <span className="text-[14px] font-black" style={{ color: INK }}>
-                      {g.part}
-                    </span>
-                    <span className="text-[11px]" style={{ color: MUTE }}>
-                      {g.sub}
-                    </span>
-                  </div>
-                  <div className="ml-[4px] pl-5 space-y-2.5" style={{ borderLeft: `1px solid ${INK}14` }}>
-                    {g.items.map((it) => {
-                      const active = it.no === currentNo;
-                      return (
-                      <button
-                        key={it.no}
-                        onClick={() => { onSelect(it.no); onClose(); }}
-                        className="flex gap-2.5 items-start text-left w-full"
-                      >
-                        <span
-                          className="text-[12px] font-bold flex-shrink-0"
-                          style={{ color: active ? BLUE : MUTE, minWidth: 18 }}
-                        >
-                          {it.no}
-                        </span>
-                        <span
-                          className="text-[13px] leading-snug"
-                          style={{ color: active ? BLUE : INK_SOFT, fontWeight: active ? 700 : 400 }}
-                        >
-                          {it.title}
-                        </span>
-                      </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ),
-            )}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -2309,8 +2246,8 @@ function ReportPreviewInner() {
       <TocPanel
         open={tocOpen}
         onClose={() => setTocOpen(false)}
-        currentNo={String(ch).padStart(2, "0")}
-        onSelect={(no) => next(String(Number(no)))}
+        currentNo={ch}
+        onSelect={(no) => next(no)}
       />
       <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={report?.view ?? null} loading={false} />
 
