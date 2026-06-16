@@ -2074,7 +2074,7 @@ function ReportPreviewInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get("id") ?? "";
-  const ch = searchParams.get("ch") ?? "1";
+  const ch = searchParams.get("ch") ?? "2"; // A안 첫 본문 장(제02장 = 옛 ch2)으로 시작
   const date = searchParams.get("date") ?? "";
   const time = searchParams.get("time") ?? "";
   const calendar = searchParams.get("calendar") ?? "양력";
