@@ -1799,7 +1799,7 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           </div>
 
           {/* 목록 */}
-          <div className="mt-3">
+          <div className="mt-3 space-y-1.5">
             {TOC_A.map((it, i) => {
               const active = !!it.no && it.no === currentNo;
               const ready = !!it.no;
@@ -1808,8 +1808,14 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
                   key={i}
                   onClick={() => { if (ready) { onSelect(it.no); onClose(); } }}
                   disabled={!ready}
-                  className="flex items-center gap-2.5 w-full text-left rounded-lg px-2 py-1.5 transition-colors"
-                  style={{ background: active ? `${MAROON}0c` : "transparent", opacity: ready ? 1 : 0.45, cursor: ready ? "pointer" : "default" }}
+                  className="flex items-center gap-2.5 w-full text-left rounded-xl px-3 py-2 transition-colors"
+                  style={{
+                    background: active ? `${MAROON}10` : WHITE,
+                    border: `1px solid ${active ? MAROON : INK + "12"}`,
+                    boxShadow: active ? `0 0 0 1px ${MAROON}` : "none",
+                    opacity: ready ? 1 : 0.5,
+                    cursor: ready ? "pointer" : "default",
+                  }}
                 >
                   {/* 앞: 장 표시 */}
                   <span className="flex-shrink-0 text-[11px] font-bold text-center" style={{ width: 44, color: active ? MAROON : MUTE }}>
