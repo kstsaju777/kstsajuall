@@ -1799,34 +1799,26 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           </div>
 
           {/* 목록 */}
-          <div className="mt-4">
+          <div className="mt-3">
             {TOC_A.map((it, i) => {
               const active = !!it.no && it.no === currentNo;
               const ready = !!it.no;
-              const isEdge = it.disp === "도입부" || it.disp === "마무리";
               return (
                 <button
                   key={i}
                   onClick={() => { if (ready) { onSelect(it.no); onClose(); } }}
                   disabled={!ready}
-                  className="flex items-center gap-3 w-full text-left rounded-xl px-2.5 py-2.5 transition-colors"
+                  className="flex items-center gap-2.5 w-full text-left rounded-lg px-2 py-1.5 transition-colors"
                   style={{ background: active ? `${MAROON}0c` : "transparent", opacity: ready ? 1 : 0.45, cursor: ready ? "pointer" : "default" }}
                 >
-                  {/* 키워드 칩 */}
-                  <span
-                    className="flex-shrink-0 text-[11px] font-bold rounded-md text-center"
-                    style={{
-                      width: 38, padding: "3px 0",
-                      background: active ? MAROON : `${INK}0a`,
-                      color: active ? "#fff" : (isEdge ? MAROON : INK_SOFT),
-                    }}
-                  >
-                    {it.chip}
+                  {/* 앞: 장 표시 */}
+                  <span className="flex-shrink-0 text-[11px] font-bold text-center" style={{ width: 44, color: active ? MAROON : MUTE }}>
+                    {it.disp}
                   </span>
-                  {/* 표시번호 + 제목 */}
+                  {/* 키워드(작게) + 소제목(명조) */}
                   <div className="min-w-0">
-                    <span className="text-[10.5px] tracking-wide" style={{ color: MUTE }}>{it.disp}</span>
-                    <p className="text-[13.5px] leading-snug truncate" style={{ color: active ? MAROON : INK, fontWeight: active ? 800 : 500, fontFamily: isEdge ? SERIF : undefined }}>
+                    <span className="text-[10px] tracking-wide" style={{ color: active ? MAROON : MUTE }}>{it.chip}</span>
+                    <p className="text-[14px] leading-tight truncate" style={{ color: active ? MAROON : INK, fontWeight: active ? 800 : 600, fontFamily: SERIF }}>
                       {it.title}
                     </p>
                   </div>
