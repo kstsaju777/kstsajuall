@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { Suspense, useMemo, useState, useEffect } from "react";
 import { calcSaju, ELEMENT_COLORS, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 
@@ -510,12 +511,10 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   const [coupon, setCoupon] = useState("");
   const [marketing, setMarketing] = useState(true);
   const [mounted, setMounted] = useState(false);   // 슬라이드 업 트리거
-  const [closing, setClosing] = useState(false);   // 슬라이드 다운(나가기)
-  const [confirmExit, setConfirmExit] = useState(false); // 이탈 확인 팝업
+  const [confirmExit, setConfirmExit] = useState(false); // 이탈 만류 팝업
 
   useEffect(() => {
     if (open) {
-      setClosing(false);
       const id = requestAnimationFrame(() => setMounted(true));
       return () => cancelAnimationFrame(id);
     }
@@ -535,10 +534,9 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
 
   const sel = PRODUCTS.find((p) => p.id === selected) ?? PRODUCTS[0];
   const saved = sel.original - sel.price;
-  const visible = mounted && !closing;
+  const visible = mounted;
 
-  const requestClose = () => setConfirmExit(true);          // 이탈/X → 확인 팝업
-  const doExit = () => { setConfirmExit(false); setClosing(true); setTimeout(onClose, 320); }; // 나가기 → 슬라이드 다운
+  const requestClose = () => setConfirmExit(true);          // 이탈/X → 만류 팝업(실제 닫지 않음)
 
   return (
     <>
@@ -635,7 +633,9 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
 
           {/* 동의 안내 */}
           <p className="text-center text-[11px] leading-relaxed mt-3.5" style={{ color: DMUTE }}>
-            결제 정보를 확인하며 <span className="underline">개인정보 처리방침 동의</span>, <span className="underline">결제 진행 필수 동의</span>에 동의합니다.
+            결제 시{" "}
+            <Link href="/legal/privacy" className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>개인정보 처리방침</Link>과{" "}
+            <Link href="/legal/terms" className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>이용약관</Link>에 동의합니다.
           </p>
 
           {/* 마케팅 수신 동의 */}
@@ -655,10 +655,13 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} onClick={() => setConfirmExit(false)} />
           <div className="relative w-full rounded-3xl px-6 py-7 text-center"
             style={{ maxWidth: 320, background: "#211d27", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "popIn 0.22s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            {/* 닫기 X */}
+            <button onClick={() => setConfirmExit(false)} aria-label="닫기"
+              className="absolute top-3.5 right-3.5 flex items-center justify-center rounded-full"
+              style={{ width: 26, height: 26, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.65)", fontSize: 14, lineHeight: 1 }}>✕</button>
             <p className="text-[16px] font-black" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
-            <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.<br />정말 나가시겠어요?</p>
-            <button onClick={doExit} className="w-full mt-5 py-3.5 rounded-2xl text-[14px] font-bold active:scale-[0.99] transition-transform" style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)" }}>나가기</button>
-            <button onClick={() => setConfirmExit(false)} className="w-full mt-2.5 py-3.5 rounded-2xl text-[15px] font-black text-white active:scale-[0.99] transition-transform" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)", boxShadow: "0 6px 20px rgba(224,70,90,0.4)" }}>혜택 받고 계속하기</button>
+            <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.<br />지금 바로 받아보세요!</p>
+            <button onClick={() => setConfirmExit(false)} className="w-full mt-5 py-3.5 rounded-2xl text-[15px] font-black text-white active:scale-[0.99] transition-transform" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)", boxShadow: "0 6px 20px rgba(224,70,90,0.4)" }}>혜택 받고 계속하기</button>
           </div>
           <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes popIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}`}</style>
         </div>
