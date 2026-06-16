@@ -573,12 +573,12 @@ function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
   );
 }
 
-// 단하 낙관(도장) — 붉은 사각 전각
+// 홍연 낙관(도장) — 붉은 사각 전각
 function SealStamp() {
   return (
     <div className="flex items-center justify-center" style={{ width: 56, height: 56, borderRadius: 8, border: `2px solid ${MAROON}`, color: MAROON, background: `${MAROON}08` }}>
       <div className="grid grid-cols-2 gap-0.5 text-[15px] font-black leading-none" style={{ fontFamily: SERIF }}>
-        <span>四</span><span>柱</span><span>丹</span><span>霞</span>
+        <span>四</span><span>柱</span><span>紅</span><span>緣</span>
       </div>
     </div>
   );
@@ -603,7 +603,7 @@ function ReviewBox() {
   }
   return (
     <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <p className="text-center text-[11px] font-bold" style={{ color: MAROON }}>좋은 길잡이 단하</p>
+      <p className="text-center text-[11px] font-bold" style={{ color: MAROON }}>좋은 길잡이 홍연</p>
       <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>풀이는 마음에 드셨나요?</h3>
       <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>리뷰 작성자 중 매월 10분을 추첨해 환급해 드려요.</p>
       <div className="flex justify-between mb-4">
@@ -928,6 +928,28 @@ const CHAPTER_TITLES: Record<string, string> = {
   "15": "제16장 · 나는 어떻게 흔들리지 않을 수 있나",
   "16": "마무리 · 그대에게 남기는 홍연의 서신",
 };
+
+// A안 읽기 순서 (옛 본문 장번호 기준). 인페이지 이전/다음 이동에 사용.
+const A_ORDER = ["2", "3", "5", "4", "7", "8", "9", "10", "12", "1", "6", "11", "13", "14", "15", "16"];
+
+// 장 하단 이전/다음 네비 (A안 순서)
+function ChapterNav({ cur, go }: { cur: string; go: (n: string) => void }) {
+  const idx = A_ORDER.indexOf(cur);
+  const prev = idx > 0 ? A_ORDER[idx - 1] : null;
+  const nxt = idx >= 0 && idx < A_ORDER.length - 1 ? A_ORDER[idx + 1] : null;
+  const titleOf = (n: string) => CHAPTER_TITLES[n]?.split("· ").slice(1).join("· ") ?? "";
+  return (
+    <div className="px-6 pb-10 flex gap-2 items-stretch">
+      {prev && (
+        <button onClick={() => go(prev)} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
+      )}
+      <button onClick={() => go(nxt ?? A_ORDER[0])} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
+        <span>{nxt ? titleOf(nxt) : "처음으로"}</span>
+        <span>{nxt ? "→" : "↺"}</span>
+      </button>
+    </div>
+  );
+}
 
 // 사주 희귀도 — 종형 분포 + 등급/백분율 마커
 function RarityChart({ grade, percentile, name }: { grade: string; percentile: number; name: string }) {
@@ -2365,13 +2387,7 @@ function ReportPreviewInner() {
           <Quote>{`"복잡한 사주 명식이지만,\n제가 ${name}님께 자세히\n설명해 드릴게요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("1")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("3")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>나는 왜 이런 사람인 걸까</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="2" go={next} />
         </>
       )}
 
@@ -2486,13 +2502,7 @@ function ReportPreviewInner() {
           <Quote>{`"나를 지키는 단단한 심지와\n세상을 향해 뻗어 나가는 표현력이\n${name}님의 삶을 가장 눈부시게\n빛춰줄 등불이 될 거예요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("2")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("4")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>내 사주는 얼마나 희귀할까</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="3" go={next} />
         </>
       )}
 
@@ -2551,13 +2561,7 @@ function ReportPreviewInner() {
           <Quote>{`"하늘이 내린 귀한 별들이\n${name}님의 길을 비추고 있으니,\n어떤 어둠 속에서도\n길을 잃지 않을 거예요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("3")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("5")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>세상을 대하는 나만의 방식</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="4" go={next} />
         </>
       )}
 
@@ -2604,13 +2608,7 @@ function ReportPreviewInner() {
           <Quote>{`"나를 지키는 단단한 뿌리 위에\n타인과 소통하는 가지를 뻗을 때,\n${name}님의 삶은 가장 크고\n웅장하게 자리 잡을 거예요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("4")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("6")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>앞으로 10년, 어떻게 흘러갈까?</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="5" go={next} />
         </>
       )}
 
@@ -2682,13 +2680,7 @@ function ReportPreviewInner() {
           <Quote>{`"인생의 가장 아름다운 계절이\n머지않았으니,\n조급해하지 말고 나만의 속도로\n걸어가 보아요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("5")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("7")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>재물·직업운 정밀풀이</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="6" go={next} />
         </>
       )}
 
@@ -2756,13 +2748,7 @@ function ReportPreviewInner() {
           <Quote>{`"재물은 흙(土)의 대지 위에\n쇠(金)의 도구로 일굴 때 가장\n단단하게 쌓여요.\n조급함을 내려놓고 장기적인\n안목으로 자산을 굴려 가세요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("6")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("8")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>연애·결혼운 정밀풀이</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="7" go={next} />
         </>
       )}
 
@@ -2829,13 +2815,7 @@ function ReportPreviewInner() {
           <Quote>{`"서로의 화원에 적당한 거리를 두고\n물을 줄 때,\n${ilganLabel}(${ilganHanja})의 사랑은 시들지 않고\n가장 아름답게 피어난답니다."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("7")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("9")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>건강운 정밀풀이</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="8" go={next} />
         </>
       )}
 
@@ -2893,13 +2873,7 @@ function ReportPreviewInner() {
           <Quote>{`"몸의 뼈대(金)가 곧게 서야\n두른 나무(木)가 곧게 자라듯,\n관절과 호흡기를 보살피는 것이\n활력의 시작이에요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("8")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("10")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>나를 도와줄 귀인은 누구일까?</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="9" go={next} />
         </>
       )}
 
@@ -2956,13 +2930,7 @@ function ReportPreviewInner() {
           <Quote>{`"나를 깎아내리는 칼날이 아니라\n나를 다듬어 주는 정교한\n정(金)처럼,\n귀인의 쓴소리를 성장의 발판으로\n삼아 보세요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("9")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("11")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>반드시 조심해야 할 시기는 언제일까?</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="10" go={next} />
         </>
       )}
 
@@ -3022,13 +2990,7 @@ function ReportPreviewInner() {
           <Quote>{`"삼재라는 겨울바람이 불 때는\n억지로 꽃을 피우려 하지 말고,\n뿌리를 더 깊이 내리는 시간으로\n삼으면 안전하답니다."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("10")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("12")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>반드시 조심해야 할 악인은 누구일까?</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="11" go={next} />
         </>
       )}
 
@@ -3076,13 +3038,7 @@ function ReportPreviewInner() {
           <Quote>{`"화려한 말솜씨에 마음을\n빼앗기지 말고,\n그 사람의 발자국이 얼마나\n정직하고 일관된지 먼저\n살펴보세요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("11")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("13")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>핵심 정리</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="12" go={next} />
         </>
       )}
 
@@ -3135,13 +3091,7 @@ function ReportPreviewInner() {
           <Quote>{`"나의 굳건한 뿌리를 믿고,\n다가올 황금빛 계절을 향해\n한 걸음씩 당당하게 걸어가시기를\n응원해 드려요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("12")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("14")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>지금부터 해야 할 일들</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="13" go={next} />
         </>
       )}
 
@@ -3208,13 +3158,7 @@ function ReportPreviewInner() {
           <Quote>{`"매일의 작은 습관이 모여\n거대한 운명의 물결을 바꾸듯,\n오늘 전해드린 처방을 가볍게\n시작해 보세요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("13")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("15")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>흔들리지 않는 법에 대하여</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="14" go={next} />
         </>
       )}
 
@@ -3271,13 +3215,7 @@ function ReportPreviewInner() {
           <Quote>{`"마음속에 ${c.simju.heart.label}의 단단한\n뿌리와 기둥을 세울 때,\n어떤 감정의 폭풍이 와도\n${name}님은 흔들리지 않을 거예요."`}</Quote>
 
           {/* 다음 장 네비 */}
-          <div className="px-6 pb-10 flex gap-2 items-stretch">
-            <button onClick={() => next("14")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("16")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>마무리 · 단하의 편지</span>
-              <span>→</span>
-            </button>
-          </div>
+          <ChapterNav cur="15" go={next} />
         </>
       )}
 
@@ -3305,7 +3243,7 @@ function ReportPreviewInner() {
             ))}
             {/* 서명 + 낙관 */}
             <div className="flex items-center justify-end gap-3 mt-8 mb-2">
-              <span className="text-[13.5px] font-bold" style={{ color: INK }}>소녀 단하 올림</span>
+              <span className="text-[13.5px] font-bold" style={{ color: INK }}>홍연 올림</span>
               <SealStamp />
             </div>
           </section>
@@ -3320,12 +3258,7 @@ function ReportPreviewInner() {
           <RecoGrid />
 
           {/* 네비 */}
-          <div className="px-6 pb-12 flex gap-2 items-stretch">
-            <button onClick={() => next("15")} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
-            <button onClick={() => next("1")} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-              <span>처음으로</span>
-            </button>
-          </div>
+          <ChapterNav cur="16" go={next} />
         </div>
         {eventOpen && (
           <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
@@ -3459,16 +3392,7 @@ function ReportPreviewInner() {
       </div>
 
       {/* ── 다음 장 네비게이션 ── */}
-      <div className="px-6 pb-10">
-        <button
-          onClick={() => router.push(`/saju/jeongtong/report-preview?${id ? `id=${id}&` : ""}ch=2`)}
-          className="w-full py-4 rounded-2xl font-bold text-[15px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
-          style={{ background: NAVY, boxShadow: `0 4px 16px ${NAVY}44` }}
-        >
-          <span>나는 어떤 사람일까</span>
-          <span>→</span>
-        </button>
-      </div>
+      <ChapterNav cur="1" go={next} />
       </>
       )}
       </>
