@@ -501,60 +501,73 @@ const PRODUCTS = [
     tags: ["정통사주","자미두수","재물운"], original: 169000, discount: 60, price: 67900 },
 ];
 
-// ─── 결제 바텀시트 ────────────────────────────────────────────────────────────
+// ─── 결제 모달 (다크 테마) ────────────────────────────────────────────────────
 function PayBottomSheet({ open, onClose, onConfirm }: {
   open: boolean; onClose: () => void; onConfirm: (id: string) => void;
 }) {
   const [selected, setSelected] = useState("basic");
   const [couponOpen, setCouponOpen] = useState(false);
   const [coupon, setCoupon] = useState("");
+  const [marketing, setMarketing] = useState(true);
 
   if (!open) return null;
 
+  // 다크 토큰
+  const DBG = "#1b1820";       // 모달 배경
+  const DCARD = "#262229";     // 카드 배경
+  const DTXT = "#ffffff";
+  const DMUTE = "rgba(255,255,255,0.5)";
+  const DSTRIKE = "rgba(255,255,255,0.38)";
+  const ACCENT = "#e0465a";    // 강조 레드
+
+  const sel = PRODUCTS.find((p) => p.id === selected) ?? PRODUCTS[0];
+  const saved = sel.original - sel.price;
+
   return (
-    <>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ pointerEvents: "auto" }}>
       {/* 딤 배경 */}
-      <div className="fixed inset-0 z-40" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={onClose} />
+      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.6)" }} onClick={onClose} />
 
-      {/* 시트 */}
-      <div className="fixed bottom-0 z-50 rounded-t-3xl overflow-hidden"
-        style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", backgroundColor: WHITE, boxShadow: "0 -8px 40px rgba(0,0,0,0.2)" }}>
-        {/* 핸들 */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: GRAY4 }} />
-        </div>
+      {/* 모달 */}
+      <div className="relative w-full overflow-y-auto rounded-3xl"
+        style={{ maxWidth: 400, maxHeight: "88vh", backgroundColor: DBG, boxShadow: "0 20px 60px rgba(0,0,0,0.55)", scrollbarWidth: "none" }}>
+        <div className="px-5 pt-5 pb-6">
+          {/* 헤더 */}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[18px] font-black" style={{ color: DTXT }}>{PRODUCTS[0].name} 결제 안내</h3>
+            <button onClick={onClose} aria-label="닫기" className="flex items-center justify-center" style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
+          </div>
 
-        <div className="px-4 pb-8">
-          {/* 상품 카드 */}
-          <div className="space-y-2 mb-4">
+          {/* 총 할인 배지 */}
+          <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
+            style={{ background: "rgba(224,70,90,0.16)", border: `1px solid ${ACCENT}55`, color: "#ff9aa6" }}>
+            총 <span style={{ color: "#ff6b7e" }}>{saved.toLocaleString()}원</span> 할인받았어요!
+          </div>
+
+          {/* 패키지 할인혜택 */}
+          <p className="text-[13px] font-bold mb-2.5" style={{ color: DTXT }}>패키지 할인혜택 🎁</p>
+          <div className="space-y-2.5 mb-5">
             {PRODUCTS.map((p) => {
               const isSel = selected === p.id;
+              const isPkg = p.tags.length > 0;
               return (
                 <button key={p.id} onClick={() => setSelected(p.id)}
-                  className="w-full text-left rounded-2xl px-4 py-3 transition-all"
-                  style={{ backgroundColor: isSel ? "#fff5f6" : WHITE, border: `1.5px solid ${isSel ? RED : GRAY4}` }}>
+                  className="w-full text-left rounded-2xl px-4 py-3.5 transition-all"
+                  style={{ backgroundColor: DCARD, border: `1.5px solid ${isSel ? ACCENT : "rgba(255,255,255,0.08)"}`, boxShadow: isSel ? `0 0 0 3px ${ACCENT}22` : "none" }}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[14px] font-bold" style={{ color: GRAY1 }}>{p.name}</span>
-                        {p.badge && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: RED, color: WHITE }}>{p.badge}</span>
-                        )}
+                        {isPkg && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.12)", color: "#ff9aa6" }}>추천</span>}
+                        <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>{p.name}</span>
                       </div>
-                      {p.desc && <p className="text-[11px] mt-0.5" style={{ color: GRAY3 }}>{p.desc}</p>}
-                      {p.tags.length > 0 && (
-                        <div className="flex gap-1 mt-1.5 flex-wrap">
-                          {p.tags.map(tag => (
-                            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: RED_PALE, color: RED }}>{tag}</span>
-                          ))}
-                        </div>
-                      )}
+                      {isPkg && <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>{p.tags.join(" + ")}</p>}
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-[11px] line-through" style={{ color: GRAY3 }}>{p.original.toLocaleString()}원</p>
-                      <p className="text-[15px] font-bold" style={{ color: GRAY1 }}>
-                        <span style={{ color: RED }}>-{p.discount}%</span>{" "}{p.price.toLocaleString()}원
+                      <p className="text-[11px]" style={{ color: DSTRIKE }}>
+                        <span style={{ color: ACCENT, fontWeight: 700 }}>{p.discount}%</span>{" "}
+                        <span className="line-through">{p.original.toLocaleString()}</span>
                       </p>
+                      <p className="text-[16px] font-black mt-0.5" style={{ color: DTXT }}>{p.price.toLocaleString()}원</p>
                     </div>
                   </div>
                 </button>
@@ -562,36 +575,59 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             })}
           </div>
 
-          {/* 쿠폰 */}
-          <div className="mb-4">
-            <button onClick={() => setCouponOpen(o => !o)} className="text-[13px] underline" style={{ color: GRAY3 }}>
-              쿠폰 · 추천 코드 입력
+          {/* 합계 */}
+          <div className="space-y-1.5 mb-4">
+            <div className="flex items-center justify-between text-[13px]">
+              <span style={{ color: DMUTE }}>상품 판매가</span>
+              <span style={{ color: "rgba(255,255,255,0.85)" }}>{sel.original.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between text-[13px]">
+              <span style={{ color: "#ff6b7e", fontWeight: 700 }}>지금 결제 시 할인</span>
+              <span style={{ color: "#ff6b7e", fontWeight: 700 }}>-{saved.toLocaleString()}</span>
+            </div>
+          </div>
+
+          {/* 쿠폰 적용 */}
+          <div className="mb-5">
+            <button onClick={() => setCouponOpen((o) => !o)}
+              className="text-[12.5px] font-bold px-3.5 py-2 rounded-lg"
+              style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)" }}>
+              쿠폰 적용
             </button>
             {couponOpen && (
-              <div className="mt-2 flex gap-2">
-                <input type="text" value={coupon} onChange={e => setCoupon(e.target.value)}
-                  placeholder="코드를 입력하세요"
-                  className="flex-1 px-3 py-2 rounded-xl text-[13px]"
-                  style={{ border: `1px solid ${GRAY4}`, outline: "none" }} />
-                <button className="px-4 py-2 rounded-xl text-[13px] font-bold text-white" style={{ backgroundColor: RED }}>적용</button>
+              <div className="mt-2.5 flex gap-2">
+                <input type="text" value={coupon} onChange={(e) => setCoupon(e.target.value)}
+                  placeholder="쿠폰 코드를 입력하세요"
+                  className="flex-1 px-3 py-2.5 rounded-xl text-[13px] outline-none"
+                  style={{ background: "#15131a", border: "1px solid rgba(255,255,255,0.14)", color: DTXT }} />
+                <button className="px-4 rounded-xl text-[13px] font-bold text-white" style={{ background: ACCENT }}>적용</button>
               </div>
             )}
           </div>
 
-          {/* 동의 */}
-          <p className="text-center text-[11px] mb-4" style={{ color: GRAY3 }}>
-            결제 정보를 확인했고 <span className="underline">개인정보 처리방침</span>과 <span className="underline">서비스 이용약관</span>에 동의합니다
+          {/* 결제 버튼 */}
+          <button onClick={() => onConfirm(selected)}
+            className="w-full py-4 rounded-2xl font-black text-[17px] text-white active:scale-[0.99] transition-transform"
+            style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)", boxShadow: "0 6px 20px rgba(224,70,90,0.4)" }}>
+            결제하기
+          </button>
+
+          {/* 동의 안내 */}
+          <p className="text-center text-[11px] leading-relaxed mt-3.5" style={{ color: DMUTE }}>
+            결제 정보를 확인하며 <span className="underline">개인정보 처리방침 동의</span>, <span className="underline">결제 진행 필수 동의</span>에 동의합니다.
           </p>
 
-          {/* 구매 버튼 */}
-          <button onClick={() => onConfirm(selected)}
-            className="w-full py-4 rounded-2xl font-bold text-[17px] text-white active:scale-95 transition-transform"
-            style={{ backgroundColor: "#e05c8a" }}>
-            구매하기
-          </button>
+          {/* 마케팅 수신 동의 */}
+          <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+            <button onClick={() => setMarketing((v) => !v)} className="flex items-center gap-2">
+              <span className="flex items-center justify-center rounded" style={{ width: 17, height: 17, border: `1.5px solid ${marketing ? ACCENT : "rgba(255,255,255,0.35)"}`, background: marketing ? ACCENT : "transparent", color: "#fff", fontSize: 11, lineHeight: 1 }}>{marketing ? "✓" : ""}</span>
+              <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.7)" }}>마케팅 수신 동의 (선택)</span>
+            </button>
+            <button className="text-[12px] underline" style={{ color: DMUTE }}>자세히보기</button>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
