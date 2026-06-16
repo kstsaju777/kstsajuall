@@ -16,7 +16,7 @@ export const businessInfo = {
   companyName: "빌리언하이브",
   representative: "김민겸",
   businessNumber: "404-24-02171",
-  mailOrderNumber: "발급중",
+  mailOrderNumber: "2026-서울강남-03327",
   address: "서울특별시 강남구 압구정로 306, 지하 1층 6-S38호",
   phone: "", // 비우면 푸터/법적 페이지에서 전화번호 미노출
   phoneNote: "",
