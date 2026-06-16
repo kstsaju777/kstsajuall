@@ -511,11 +511,13 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   const [coupon, setCoupon] = useState("");
   const [marketing, setMarketing] = useState(true);
   const [mounted, setMounted] = useState(false);   // 슬라이드 업 트리거
+  const [closing, setClosing] = useState(false);   // 슬라이드 다운(나가기)
   const [confirmExit, setConfirmExit] = useState(false); // 이탈 만류 팝업
   const [legalDoc, setLegalDoc] = useState<null | "terms" | "privacy">(null); // 약관/방침 플로팅
 
   useEffect(() => {
     if (open) {
+      setClosing(false);
       const id = requestAnimationFrame(() => setMounted(true));
       return () => cancelAnimationFrame(id);
     }
@@ -535,9 +537,10 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
 
   const sel = PRODUCTS.find((p) => p.id === selected) ?? PRODUCTS[0];
   const saved = sel.original - sel.price;
-  const visible = mounted;
+  const visible = mounted && !closing;
 
-  const requestClose = () => setConfirmExit(true);          // 이탈/X → 만류 팝업(실제 닫지 않음)
+  const requestClose = () => setConfirmExit(true);          // 이탈/X → 만류 팝업
+  const doExit = () => { setConfirmExit(false); setClosing(true); setTimeout(onClose, 320); }; // 나가기 → 슬라이드 다운 후 닫힘
 
   return (
     <>
@@ -663,6 +666,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
             <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.</p>
             <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white active:scale-[0.99] transition-transform" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)" }}>혜택 받고 계속하기</button>
+            <button onClick={doExit} className="w-full mt-2 py-2.5 rounded-xl text-[13px] font-bold active:scale-[0.99] transition-transform" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)" }}>나가기</button>
           </div>
           <style>{`@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}`}</style>
         </div>
@@ -673,18 +677,18 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
         <div className="fixed inset-0 z-[70]">
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setLegalDoc(null)} />
           <div className="fixed z-[71] flex flex-col rounded-2xl overflow-hidden"
-            style={{ left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: "min(80vw, 300px)", maxHeight: "70vh", background: "#fff", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", animation: "legalPop 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            style={{ left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: "min(80vw, 300px)", maxHeight: "56vh", background: "#fff", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", animation: "legalPop 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             {/* 헤더 */}
             <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5" style={{ borderBottom: "1px solid #eee" }}>
               <span className="text-[13px] font-bold" style={{ color: "#111" }}>{legalDoc === "terms" ? "이용약관" : "개인정보처리방침"}</span>
               <button onClick={() => setLegalDoc(null)} aria-label="닫기" className="flex items-center justify-center rounded-full" style={{ width: 24, height: 24, background: "#f1f1f1", color: "#666", fontSize: 13, lineHeight: 1 }}>✕</button>
             </div>
             {/* 본문 (스크롤, 글자 비율 축소) */}
-            <div className={`flex-1 overflow-y-auto px-4 pt-2 pb-6 ${LEGAL_DOC_CLASS} [&_h1]:hidden [&_h2:first-of-type]:border-t-0 [&_h2:first-of-type]:pt-0`} style={{ background: "#fff", zoom: 0.82 } as React.CSSProperties}>
+            <div className={`legal-scroll flex-1 overflow-y-auto px-4 pt-2 pb-6 ${LEGAL_DOC_CLASS} [&_h1]:hidden [&_h2:first-of-type]:border-t-0 [&_h2:first-of-type]:pt-0`} style={{ background: "#fff", zoom: 0.82, scrollbarWidth: "thin", scrollbarColor: "#cfcfcf transparent" } as React.CSSProperties}>
               {legalDoc === "terms" ? <TermsContent /> : <PrivacyContent />}
             </div>
           </div>
-          <style>{`@keyframes legalPop{from{opacity:0;transform:translate(-50%,-50%) scale(0.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}`}</style>
+          <style>{`@keyframes legalPop{from{opacity:0;transform:translate(-50%,-50%) scale(0.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}.legal-scroll::-webkit-scrollbar{width:5px}.legal-scroll::-webkit-scrollbar-thumb{background:#cfcfcf;border-radius:3px}.legal-scroll::-webkit-scrollbar-track{background:transparent}`}</style>
         </div>
       )}
     </>
