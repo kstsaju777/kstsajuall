@@ -509,6 +509,19 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   const [couponOpen, setCouponOpen] = useState(false);
   const [coupon, setCoupon] = useState("");
   const [marketing, setMarketing] = useState(true);
+  const [mounted, setMounted] = useState(false);   // 슬라이드 업 트리거
+  const [closing, setClosing] = useState(false);   // 슬라이드 다운(나가기)
+  const [confirmExit, setConfirmExit] = useState(false); // 이탈 확인 팝업
+
+  useEffect(() => {
+    if (open) {
+      setClosing(false);
+      const id = requestAnimationFrame(() => setMounted(true));
+      return () => cancelAnimationFrame(id);
+    }
+    setMounted(false);
+    setConfirmExit(false);
+  }, [open]);
 
   if (!open) return null;
 
@@ -522,15 +535,19 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
 
   const sel = PRODUCTS.find((p) => p.id === selected) ?? PRODUCTS[0];
   const saved = sel.original - sel.price;
+  const visible = mounted && !closing;
+
+  const requestClose = () => setConfirmExit(true);          // 이탈/X → 확인 팝업
+  const doExit = () => { setConfirmExit(false); setClosing(true); setTimeout(onClose, 320); }; // 나가기 → 슬라이드 다운
 
   return (
     <>
       {/* 딤 배경 */}
-      <div className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)" }} onClick={onClose} />
+      <div className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)", opacity: visible ? 1 : 0, transition: "opacity 0.3s ease" }} onClick={requestClose} />
 
       {/* 바텀시트 — 하단을 채우며 위로 */}
       <div className="fixed bottom-0 z-50 overflow-y-auto rounded-t-3xl"
-        style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", maxHeight: "92vh", backgroundColor: DBG, boxShadow: "0 -12px 40px rgba(0,0,0,0.5)", scrollbarWidth: "none" }}>
+        style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", maxHeight: "92vh", backgroundColor: DBG, boxShadow: "0 -12px 40px rgba(0,0,0,0.5)", scrollbarWidth: "none", transform: visible ? "translateY(0)" : "translateY(100%)", transition: "transform 0.34s cubic-bezier(0.32,0.72,0,1)" }}>
         {/* 핸들 */}
         <div className="flex justify-center pt-3 pb-1">
           <div style={{ width: 40, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.2)" }} />
@@ -539,7 +556,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[18px] font-black" style={{ color: DTXT }}>{PRODUCTS[0].name} 결제 안내</h3>
-            <button onClick={onClose} aria-label="닫기" className="flex items-center justify-center" style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
+            <button onClick={requestClose} aria-label="닫기" className="flex items-center justify-center" style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
 
           {/* 총 할인 배지 */}
@@ -631,6 +648,21 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           </div>
         </div>
       </div>
+
+      {/* 이탈 확인 팝업 (플로팅) */}
+      {confirmExit && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-8" style={{ animation: "fadeIn 0.18s ease" }}>
+          <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} onClick={() => setConfirmExit(false)} />
+          <div className="relative w-full rounded-3xl px-6 py-7 text-center"
+            style={{ maxWidth: 320, background: "#211d27", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "popIn 0.22s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            <p className="text-[16px] font-black" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
+            <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.<br />정말 나가시겠어요?</p>
+            <button onClick={doExit} className="w-full mt-5 py-3.5 rounded-2xl text-[14px] font-bold active:scale-[0.99] transition-transform" style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.8)" }}>나가기</button>
+            <button onClick={() => setConfirmExit(false)} className="w-full mt-2.5 py-3.5 rounded-2xl text-[15px] font-black text-white active:scale-[0.99] transition-transform" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)", boxShadow: "0 6px 20px rgba(224,70,90,0.4)" }}>혜택 받고 계속하기</button>
+          </div>
+          <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes popIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}`}</style>
+        </div>
+      )}
     </>
   );
 }
