@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { Suspense, useMemo, useState, useEffect } from "react";
 import { calcSaju, ELEMENT_COLORS, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
+import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM      = "#fdf8f4";
@@ -512,6 +512,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   const [marketing, setMarketing] = useState(true);
   const [mounted, setMounted] = useState(false);   // 슬라이드 업 트리거
   const [confirmExit, setConfirmExit] = useState(false); // 이탈 만류 팝업
+  const [legalDoc, setLegalDoc] = useState<null | "terms" | "privacy">(null); // 약관/방침 플로팅
 
   useEffect(() => {
     if (open) {
@@ -631,11 +632,11 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             결제하기
           </button>
 
-          {/* 동의 안내 */}
+          {/* 동의 안내 — 링크 클릭 시 플로팅 모달 */}
           <p className="text-center text-[11px] leading-relaxed mt-3.5" style={{ color: DMUTE }}>
             결제 시{" "}
-            <Link href="/legal/privacy" className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>개인정보 처리방침</Link>과{" "}
-            <Link href="/legal/terms" className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>이용약관</Link>에 동의합니다.
+            <button onClick={() => setLegalDoc("privacy")} className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>개인정보 처리방침</button>과{" "}
+            <button onClick={() => setLegalDoc("terms")} className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>이용약관</button>에 동의합니다.
           </p>
 
           {/* 마케팅 수신 동의 */}
@@ -664,6 +665,26 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white active:scale-[0.99] transition-transform" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)" }}>혜택 받고 계속하기</button>
           </div>
           <style>{`@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}`}</style>
+        </div>
+      )}
+
+      {/* 약관/방침 — 플로팅 모달 (페이지 이동 없음) */}
+      {legalDoc && (
+        <div className="fixed inset-0 z-[70]">
+          <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setLegalDoc(null)} />
+          <div className="fixed bottom-0 z-[71] flex flex-col rounded-t-3xl overflow-hidden"
+            style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", maxHeight: "85vh", background: "#fff", boxShadow: "0 -12px 40px rgba(0,0,0,0.3)", animation: "sheetUp 0.28s cubic-bezier(0.32,0.72,0,1)" }}>
+            {/* 헤더 */}
+            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid #eee" }}>
+              <span className="text-[15px] font-bold" style={{ color: "#111" }}>{legalDoc === "terms" ? "이용약관" : "개인정보처리방침"}</span>
+              <button onClick={() => setLegalDoc(null)} aria-label="닫기" className="flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "#f1f1f1", color: "#666", fontSize: 15, lineHeight: 1 }}>✕</button>
+            </div>
+            {/* 본문 (스크롤) */}
+            <div className={`flex-1 overflow-y-auto px-5 pt-3 pb-8 ${LEGAL_DOC_CLASS} [&_h1]:hidden [&_h2:first-of-type]:border-t-0 [&_h2:first-of-type]:pt-0`} style={{ background: "#fff" }}>
+              {legalDoc === "terms" ? <TermsContent /> : <PrivacyContent />}
+            </div>
+          </div>
+          <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
         </div>
       )}
     </>
