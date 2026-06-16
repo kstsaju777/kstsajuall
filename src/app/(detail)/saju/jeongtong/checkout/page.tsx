@@ -668,23 +668,23 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
         </div>
       )}
 
-      {/* 약관/방침 — 플로팅 모달 (페이지 이동 없음) */}
+      {/* 약관/방침 — 가운데 작은 플로팅 모달 (페이지 이동 없음) */}
       {legalDoc && (
         <div className="fixed inset-0 z-[70]">
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setLegalDoc(null)} />
-          <div className="fixed bottom-0 z-[71] flex flex-col rounded-t-3xl overflow-hidden"
-            style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", maxHeight: "85vh", background: "#fff", boxShadow: "0 -12px 40px rgba(0,0,0,0.3)", animation: "sheetUp 0.28s cubic-bezier(0.32,0.72,0,1)" }}>
+          <div className="fixed z-[71] flex flex-col rounded-2xl overflow-hidden"
+            style={{ left: "50%", top: "50%", transform: "translate(-50%,-50%)", width: "min(80vw, 300px)", maxHeight: "70vh", background: "#fff", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", animation: "legalPop 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             {/* 헤더 */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid #eee" }}>
-              <span className="text-[15px] font-bold" style={{ color: "#111" }}>{legalDoc === "terms" ? "이용약관" : "개인정보처리방침"}</span>
-              <button onClick={() => setLegalDoc(null)} aria-label="닫기" className="flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "#f1f1f1", color: "#666", fontSize: 15, lineHeight: 1 }}>✕</button>
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5" style={{ borderBottom: "1px solid #eee" }}>
+              <span className="text-[13px] font-bold" style={{ color: "#111" }}>{legalDoc === "terms" ? "이용약관" : "개인정보처리방침"}</span>
+              <button onClick={() => setLegalDoc(null)} aria-label="닫기" className="flex items-center justify-center rounded-full" style={{ width: 24, height: 24, background: "#f1f1f1", color: "#666", fontSize: 13, lineHeight: 1 }}>✕</button>
             </div>
-            {/* 본문 (스크롤) */}
-            <div className={`flex-1 overflow-y-auto px-5 pt-3 pb-8 ${LEGAL_DOC_CLASS} [&_h1]:hidden [&_h2:first-of-type]:border-t-0 [&_h2:first-of-type]:pt-0`} style={{ background: "#fff" }}>
+            {/* 본문 (스크롤, 글자 비율 축소) */}
+            <div className={`flex-1 overflow-y-auto px-4 pt-2 pb-6 ${LEGAL_DOC_CLASS} [&_h1]:hidden [&_h2:first-of-type]:border-t-0 [&_h2:first-of-type]:pt-0`} style={{ background: "#fff", zoom: 0.82 } as React.CSSProperties}>
               {legalDoc === "terms" ? <TermsContent /> : <PrivacyContent />}
             </div>
           </div>
-          <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+          <style>{`@keyframes legalPop{from{opacity:0;transform:translate(-50%,-50%) scale(0.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}`}</style>
         </div>
       )}
     </>
