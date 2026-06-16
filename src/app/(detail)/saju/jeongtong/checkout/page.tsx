@@ -649,21 +649,21 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
         </div>
       </div>
 
-      {/* 이탈 확인 팝업 (플로팅) */}
+      {/* 이탈 만류 — 작은 플로팅 카드 (딤 없음, X로 끔) */}
       {confirmExit && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center px-8" style={{ animation: "fadeIn 0.18s ease" }}>
-          <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} onClick={() => setConfirmExit(false)} />
-          <div className="relative w-full rounded-3xl px-6 py-7 text-center"
-            style={{ maxWidth: 320, background: "#211d27", boxShadow: "0 24px 60px rgba(0,0,0,0.6)", animation: "popIn 0.22s cubic-bezier(0.34,1.4,0.5,1)" }}>
+        <div className="fixed z-[60] px-6"
+          style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", top: "34%", pointerEvents: "none" }}>
+          <div className="relative mx-auto rounded-2xl px-5 py-4"
+            style={{ pointerEvents: "auto", maxWidth: 290, background: "#211d27", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             {/* 닫기 X */}
             <button onClick={() => setConfirmExit(false)} aria-label="닫기"
-              className="absolute top-3.5 right-3.5 flex items-center justify-center rounded-full"
-              style={{ width: 26, height: 26, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.65)", fontSize: 14, lineHeight: 1 }}>✕</button>
-            <p className="text-[16px] font-black" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
-            <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.<br />지금 바로 받아보세요!</p>
-            <button onClick={() => setConfirmExit(false)} className="w-full mt-5 py-3.5 rounded-2xl text-[15px] font-black text-white active:scale-[0.99] transition-transform" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)", boxShadow: "0 6px 20px rgba(224,70,90,0.4)" }}>혜택 받고 계속하기</button>
+              className="absolute top-2.5 right-2.5 flex items-center justify-center rounded-full"
+              style={{ width: 22, height: 22, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", fontSize: 12, lineHeight: 1 }}>✕</button>
+            <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
+            <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.</p>
+            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white active:scale-[0.99] transition-transform" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)" }}>혜택 받고 계속하기</button>
           </div>
-          <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes popIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}`}</style>
+          <style>{`@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}`}</style>
         </div>
       )}
     </>
