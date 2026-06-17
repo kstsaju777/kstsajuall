@@ -111,22 +111,22 @@ export type ReportContent = {
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
 export const CHAPTER_SECTIONS: Record<number, string[]> = {
-  1: ["hardSeason", "cause", "pattern"],
-  2: ["wonguk", "ohaeng", "sipseong", "unseong", "pyori"],
-  3: ["strength", "gyeokguk", "yongsin", "hapchung", "essence"],
-  4: ["rarity", "special"],
-  5: ["balance", "answer"],
-  6: ["daeFlow", "seun", "openLuck", "domains"],
-  7: ["wealthTime", "jobFit", "jobType", "invest"],
-  8: ["loveStyle", "loveFlow", "spouse", "marriage"],
-  9: ["bodyWeak", "riskTime", "healthCare"],
-  10: ["helper", "helperTime", "helperUse"],
-  11: ["samjae", "samjaeFocus"],
-  12: ["villain", "loss"],
-  13: ["sumEssence", "sumTime", "sumRelation"],
-  14: ["openMethod", "tomorrow", "weekFlow", "monthFlow"],
-  15: ["simju", "shake", "forge"],
-  16: ["letter"],
+  1: ["wonguk", "ohaeng", "sipseong", "unseong", "pyori"],     // 제1장 환경
+  2: ["strength", "gyeokguk", "yongsin", "hapchung", "essence"], // 제2장 운명
+  3: ["balance", "answer"],                                     // 제3장 관계
+  4: ["rarity", "special"],                                     // 제4장 특징
+  5: ["wealthTime", "jobFit", "jobType", "invest"],             // 제5장 재물
+  6: ["loveStyle", "loveFlow", "spouse", "marriage"],           // 제6장 사랑
+  7: ["bodyWeak", "riskTime", "healthCare"],                    // 제7장 건강
+  8: ["helper", "helperTime", "helperUse"],                     // 제8장 귀인
+  9: ["villain", "loss"],                                       // 제9장 악인
+  10: ["hardSeason", "cause", "pattern"],                       // 제10장 굴곡
+  11: ["daeFlow", "seun", "openLuck", "domains"],               // 제11장 흐름
+  12: ["samjae", "samjaeFocus"],                                // 제12장 주의
+  13: ["sumEssence", "sumTime", "sumRelation"],                 // 제13장 당부
+  14: ["openMethod", "tomorrow", "weekFlow", "monthFlow"],      // 제14장 개운
+  15: ["simju", "shake", "forge"],                              // 제15장 중심
+  16: ["letter"],                                               // 마무리
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지
@@ -144,21 +144,21 @@ export type ReportPromptInput = {
 
 // 장별 JSON 스키마 (출력 필드 구조 — 화면 렌더와 1:1). 톤/주제/지시는 report-prompts.ts 참고.
 const CH_SCHEMA: Record<number, string> = {
-  1: `{
+  10: `{
   "hardSeason": { "intro": "유독 힘들었던 시기 도입 1~2문장", "callout": "특정 대운/시기를 짚는 핵심 문장(사주 용어 포함)", "paragraphs": ["문단","문단","문단"] },
   "cause": { "intro": "왜 힘들었는지 도입", "callout": "월지/일간 등 원국 구조로 원인을 짚는 문장", "paragraphs": ["문단","문단","문단"],
     "flow": [ {"label":"20대 중반","tone":"warn","text":"그 시기 운 작용 한 줄"}, {"label":"현재","tone":"good","text":"한 줄"} ] },
   "pattern": { "intro": "반복 패턴 도입", "callout": "반복 패턴 핵심 문장", "paragraphs": ["문단","문단"],
     "summary": [ {"title":"핵심 키워드","desc":"한 줄 설명"} ] }
 }`,
-  2: `{
+  1: `{
   "wonguk": { "intro": "일주의 강점/생명력 도입", "callout": "일간의 본질을 짚는 문장", "paragraphs": ["각 기둥(월/년/시) 해석","원국 전체 조화","문단"] },
   "ohaeng": { "intro": "어떤 기운이 강한지 도입", "callout": "가장 강한 오행과 의미", "paragraphs": ["성격에 주는 영향","약한 오행 보완점","조언"] },
   "sipseong": { "intro": "십성으로 본 사회적 역할 도입", "callout": "가장 활성화된 십성과 의미", "paragraphs": ["그 십성의 강점","어떤 일에서 빛나는지","문단"] },
   "unseong": { "intro": "십이운성 도입", "callout": "일주 등 핵심 운성과 기운", "paragraphs": ["기운의 특징","주의점/조언"] },
   "pyori": { "intro": "겉과 속이 다를 수 있다는 도입", "callout": "겉모습 vs 속마음 핵심 대비", "paragraphs": ["밖에서 보는 모습","실제 내면의 모습"] }
 }`,
-  3: `{
+  2: `{
   "strength": { "intro": "본질적 힘의 강도(신강/신약) 도입", "callout": "통근/득령 등으로 힘의 강도를 짚는 문장(사주 용어 포함)", "paragraphs": ["신강(또는 신약)의 특징","장점","안으로 뭉칠 때의 주의점/조언"] },
   "gyeokguk": { "intro": "사회적 그릇(격국) 도입", "callout": "월지 중심 격국명과 특징", "paragraphs": ["그 격국이 원하는 자리","제대로 발현될 때 모습","채워지지 않을 때 주의점"] },
   "yongsin": { "intro": "가장 필요한 기운(용신) 도입", "callout": "용신 오행과 그 의미", "paragraphs": ["용신이 주는 역할","희신 보완","일상 실천 조언"] },
@@ -178,7 +178,7 @@ const CH_SCHEMA: Record<number, string> = {
     "items": [ {"text":"신살/합/충의 의미 설명 1~2문장","hi":"그 덕에 좋은 점 한 줄"} ]
   }
 }`,
-  5: `{
+  3: `{
   "balance": {
     "intro": "세상을 살아갈 때 독립적 주체성과 타인과의 협력 사이에서 어떻게 균형을 잡는지 도입 1~2문장",
     "callout": "비견/겁재(독립)와 정관/식상 등(협력) 중 어디에 더 무게가 실리는지 짚는 문장(사주 용어 포함)",
@@ -191,7 +191,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["혼자 결정하되 고립되지 않는 법","주변의 예법·규율을 내 것으로 소화하는 법","뿌리(독립)와 가지(소통)가 함께 자랄 때 모습"]
   }
 }`,
-  6: `{
+  11: `{
   "daeFlow": {
     "intro": "앞으로 10년간 삶을 지배할 거대한 대운의 흐름과 인생의 계절 변화를 분석하는 도입 1~2문장",
     "callout": "현재 진행 중인 대운(간지 한자 포함)이 어떤 시기인지(상승/정비/도약 등)를 한 문장으로 짚기. 천간(십성)·지지(십성) 작용 언급",
@@ -219,7 +219,7 @@ const CH_SCHEMA: Record<number, string> = {
     "bars": [ {"label":"재물","value":85}, {"label":"직업","value":90}, {"label":"애정","value":75}, {"label":"결혼","value":80}, {"label":"건강","value":70} ]
   }
 }`,
-  7: `{
+  5: `{
   "wealthTime": {
     "intro": "재물운이 어느 나이대로 갈수록 단단해지고 풍요로워지는지 흐름을 짚는 도입",
     "callout": "큰돈을 만질 최고의 시기(연도+간지 한자)와 용신/희신(쇠·흙 등) 작용을 짚는 문장",
@@ -251,7 +251,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["상관의 충동적 기운이 부르는 투자 리스크와 경계점","철저한 분석·이성적 기준으로 장기 포트폴리오를 굴릴 때의 결실"]
   }
 }`,
-  8: `{
+  6: `{
   "loveStyle": {
     "intro": "연애할 때 상대를 대하는 태도(다정함·배려 등)를 짚는 도입",
     "callout": "강점(상관의 표현력 등)으로 연인을 사로잡는 매력을 짚는 문장(십성 근거)",
@@ -285,7 +285,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["객관적 사실 기반 소통 훈련 조언","결혼 결실의 시기(연도+간지)와 결혼이 주는 안정감"]
   }
 }`,
-  9: `{
+  7: `{
   "bodyWeak": {
     "intro": "건강 관리를 위해 가장 먼저 챙겨야 할 신체 부위를 짚는 도입",
     "callout": "오행 불균형(특정 오행 과다 → 약해지는 장부/부위)을 근거로 약한 부위를 짚는 문장(오행 한자 포함)",
@@ -310,7 +310,7 @@ const CH_SCHEMA: Record<number, string> = {
     ]
   }
 }`,
-  10: `{
+  8: `{
   "helper": {
     "intro": "인생의 결정적 순간마다 도움을 줄 귀인이 어떤 성향인지 짚는 도입",
     "callout": "귀인이 어떤 식으로 돕는 존재인지(냉정·공정한 멘토 등)를 짚는 문장",
@@ -337,7 +337,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["직설적 말투를 받아들이는 태도","무리한 결정을 막아주는 역할","조언을 보석 같은 피드백으로 수용","귀인의 규칙·시스템을 적용","고민을 털어놓고 자문 구하기","예의·공적 신뢰를 쌓는 관계 유지","성과·공정함 기반 소통","귀인의 네트워크에 참여해 지평 넓히기"]
   }
 }`,
-  11: `{
+  12: `{
   "samjae": {
     "intro": "미리 대비하고 조심해야 할 가장 거친 3년(삼재)의 시기를 알려주는 도입",
     "callout": "띠(생년 지지)를 근거로 삼재 기간(시작~끝 연도+간지, 만 나이)을 정확히 짚는 문장",
@@ -364,7 +364,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["둘째 핵심: 대인관계 오해·구설수(합/충 작용)","셋째 핵심: 뼈·관절·호흡기 건강 관리","새 일보다 기존 일 안정·시스템 정비","계약·서면 증거 등 실무 주의","조급함을 내려놓고 성찰의 시간으로 삼으라는 위로"]
   }
 }`,
-  12: `{
+  9: `{
   "villain": {
     "intro": "선우님을 흔들고 힘들게 만드는 악인이 어떤 모습으로 다가오는지 패턴을 분석하는 도입",
     "callout": "악인이 처음 접근하는 방식(과도한 칭찬·아군처럼 등)을 짚는 문장",
