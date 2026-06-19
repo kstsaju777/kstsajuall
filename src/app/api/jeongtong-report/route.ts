@@ -286,7 +286,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const imagePrompt = buildSajuImagePrompt(pillars);
-    const imgBuffer = await generateSajuImage(imagePrompt, env.OPENAI_API_KEY);
+    const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
     const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
     const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
     if (uploadErr) throw uploadErr;
