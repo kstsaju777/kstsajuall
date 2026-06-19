@@ -149,7 +149,7 @@ async function createReport(body: unknown) {
       console.log("[이미지생성] DALL-E 프롬프트 빌드 시작");
       const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
       console.log("[이미지생성] gpt-image-1 호출 중...");
-      const imgBuffer = await generateSajuImage(imagePrompt, env.OPENAI_API_KEY);
+      const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
       console.log("[이미지생성] 이미지 생성 완료, 크기:", imgBuffer.byteLength);
       const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
       const { error: uploadErr } = await service.storage
