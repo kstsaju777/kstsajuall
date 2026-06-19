@@ -1389,7 +1389,7 @@ function ScrollMyeongsik({ view, name, birth }: { view: MyeongsikView | null; na
 // ─── 샘플 데이터 (파라미터 없이 열었을 때 폴백) ──────────────────────
 const NAME = "선우";
 
-const SAMPLE_CONTENT: ReportContent = {
+const SAMPLE_CONTENT = {
   hardSeason: {
     intro: "지난 시간 동안 걸어온 길을 돌아보면 유독 마음이 무겁고 답답했던 터널 같은 시기가 있었을 것으로 보여요.",
     callout: "특히 20대 중반부터 30대 초반까지 이어졌던 계유(癸酉) 대운의 시기는 깊은 내면의 방황과 정체기를 안겨주었네요.",
