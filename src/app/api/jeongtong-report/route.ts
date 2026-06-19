@@ -274,8 +274,7 @@ export async function PATCH(request: NextRequest) {
   const { id } = await request.json().catch(() => ({}));
   if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
 
-  const env = getEnv();
-  if (!env.OPENAI_API_KEY) return NextResponse.json({ error: "OpenAI 키 없음" }, { status: 503 });
+  if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: "OpenAI 키 없음" }, { status: 503 });
 
   const service = createServiceClient();
   const { data, error } = await service.from("saju_results").select("myeongsik").eq("id", id).maybeSingle();
