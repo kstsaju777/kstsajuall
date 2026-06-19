@@ -847,8 +847,8 @@ function AbilityRadar({ pillars }: { pillars: { sipTop: string; sipBot: string; 
             const next = (i + 1) % axes.length;
             const id = `rg${i}`;
             return (
-              <radialGradient key={id} id={id} cx="0%" cy="0%" r="100%" gradientUnits="userSpaceOnUse"
-                fx={cx} fy={cy} cx2={cx} cy2={cy}>
+              <radialGradient key={id} id={id} cx={cx} cy={cy} r="100%" gradientUnits="userSpaceOnUse"
+                fx={cx} fy={cy}>
                 <stop offset="0%" stopColor={RAINBOW[i]} stopOpacity="0" />
                 <stop offset="100%" stopColor={RAINBOW[i]} stopOpacity={0.25 + (((a.value + axes[next].value) / 2) / 100) * 0.45} />
               </radialGradient>
@@ -3142,10 +3142,12 @@ function ReportPreviewInner() {
             </div>
           </div>
 
-          <Quote>{`${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 사주를 펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 사주팔자요.\n\n풀이를 읽다 명식이 궁금할 때면\n상단 '명식보기' 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
+          <Quote>{`${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 사주를 펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 사주팔자요.`}</Quote>
 
           {/* 명식표 */}
           <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
+
+          <Quote>{`풀이를 읽다 명식이 궁금할 때면\n상단 '명식보기' 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
 
           {/* 원국 분석 */}
