@@ -85,7 +85,7 @@ export async function generateSajuImage(prompt: string, apiKey: string | undefin
     size: "1536x1024",
     quality: "medium",
   });
-  const b64 = res.data[0]?.b64_json;
+  const b64 = res.data?.[0]?.b64_json;
   if (!b64) throw new Error("이미지 데이터 없음");
   return Buffer.from(b64, "base64");
 }
