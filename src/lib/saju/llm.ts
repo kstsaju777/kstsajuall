@@ -72,3 +72,20 @@ async function callGemini(req: LlmRequest, model: string, key: string | undefine
   const text = result.response.text();
   return { text, provider: "gemini", model };
 }
+
+// gpt-image-1로 사주 원국 이미지 생성 → base64 Buffer 반환
+export async function generateSajuImage(prompt: string, apiKey: string | undefined): Promise<Buffer> {
+  if (!apiKey) throw new Error("OPENAI_API_KEY is required for image generation");
+  const { default: OpenAI } = await import("openai");
+  const client = new OpenAI({ apiKey });
+  const res = await client.images.generate({
+    model: "gpt-image-1",
+    prompt,
+    n: 1,
+    size: "1536x1024",
+    quality: "medium",
+  });
+  const b64 = res.data[0]?.b64_json;
+  if (!b64) throw new Error("이미지 데이터 없음");
+  return Buffer.from(b64, "base64");
+}

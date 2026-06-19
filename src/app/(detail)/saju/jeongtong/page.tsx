@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -132,7 +132,7 @@ export default function JeongtongSajuPage() {
       {/* ── 히어로 이미지 ── */}
       <div className="relative w-full" style={{ aspectRatio: "9/11", maxHeight: "70vh" }}>
         <img
-          src="/images/hero/hero-1.jpg"
+          src="/media/hero/hero-1.jpg"
           alt="정통사주"
           className="w-full h-full object-cover object-top"
         />

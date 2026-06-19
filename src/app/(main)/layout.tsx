@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Suspense } from "react";
 import { siteConfig, businessInfo } from "@/config/site";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -27,7 +27,7 @@ function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
     <header className="sticky top-0 z-50" style={{ backgroundColor: "#ffffff" }}>
       <div className="container flex h-14 items-center justify-between">
         <Link href="/" className="flex items-center">
-          <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
+          <img src="/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
         </Link>
         <div className="flex items-center gap-4">
           <button className="text-black hover:opacity-60 transition-opacity" aria-label="검색">
@@ -53,7 +53,7 @@ function SiteFooter() {
       <div className="px-6 py-10 text-center space-y-5" style={{ color: "#333" }}>
         <div className="flex justify-center">
           <Link href="/" aria-label="홈으로">
-            <img src="/images/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
+            <img src="/logo.png" alt={siteConfig.name} className="h-10 w-auto object-contain" />
           </Link>
         </div>
         <div className="space-y-1.5 text-[11px] text-body leading-relaxed">

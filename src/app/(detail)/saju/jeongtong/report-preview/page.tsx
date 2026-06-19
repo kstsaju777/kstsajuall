@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -15,9 +15,10 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
+import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
 import { isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
-import { MyeongsikModalView } from "@/components/saju/MyeongsikModal";
+import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
 
@@ -454,7 +455,7 @@ function RecoGrid() {
             {g.cards.map((c, i) => (
               <div key={i} className="relative rounded-2xl overflow-hidden active:scale-[0.98] transition-all" style={{ aspectRatio: "3 / 4" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/images/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, rgba(0,0,0,0.55) 100%)" }} />
                 <span className="absolute top-2.5 right-2.5 text-[10px] font-bold text-white px-2 py-0.5 rounded-md" style={{ background: bc(c.badge) }}>{c.badge}</span>
                 <p className="absolute bottom-3 left-0 right-0 text-center text-[15px] font-black text-white px-2" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{c.title}</p>
@@ -496,7 +497,7 @@ function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
             {/* 표지 이미지 */}
             <div className="relative" style={{ height: 170 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <img src="/media/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(27,25,32,0.1) 0%, rgba(27,25,32,0.6) 70%, #1b1920 100%)" }} />
             </div>
             <div className="px-6 pb-2 -mt-3 text-center">
@@ -805,6 +806,95 @@ function sipseongRadar(view: MyeongsikView | null): { label: string; value: numb
   ];
 }
 
+// 타고난 능력치 계산 (십성 + 오행 기반, 8축)
+function calcAbilityScores(pillars: { sipTop: string; sipBot: string; ganEl: string; jiEl: string }[]): { label: string; emoji: string; value: number }[] {
+  const sip: Record<string, number> = {};
+  const el: Record<string, number> = {};
+  for (const p of pillars) {
+    for (const s of [p.sipTop, p.sipBot]) if (s) sip[s] = (sip[s] ?? 0) + 1;
+    for (const e of [p.ganEl, p.jiEl]) if (e) el[e] = (el[e] ?? 0) + 1;
+  }
+  const g = (keys: string[]) => keys.reduce((a, k) => a + (sip[k] ?? 0), 0);
+  const e = (keys: string[]) => keys.reduce((a, k) => a + (el[k] ?? 0), 0);
+  const sc = (raw: number, base = 42, per = 13) => Math.min(98, Math.max(28, base + raw * per));
+  return [
+    { label: "추진력", emoji: "⚡", value: sc(g(["겁재","편관"]) + e(["목","금"]) * 0.5) },
+    { label: "리더십", emoji: "👑", value: sc(g(["편관","정관","겁재"]) + e(["금"]) * 0.6) },
+    { label: "창의력", emoji: "✨", value: sc(g(["상관","편인"]) + e(["화","수"]) * 0.5) },
+    { label: "재물운", emoji: "💎", value: sc(g(["편재","정재"]) + e(["토"]) * 0.6) },
+    { label: "지속력", emoji: "🌿", value: sc(g(["식신","정재","정관"]) + e(["토","목"]) * 0.4) },
+    { label: "사교력", emoji: "🌸", value: sc(g(["비견","식신","상관"]) + e(["화"]) * 0.6) },
+    { label: "감수성", emoji: "🌙", value: sc(g(["정인","편인"]) + e(["수"]) * 0.6) },
+    { label: "직관력", emoji: "🔮", value: sc(g(["편인","상관"]) + e(["수","화"]) * 0.5) },
+  ];
+}
+
+// 타고난 능력치 레이더 차트
+function AbilityRadar({ pillars }: { pillars: { sipTop: string; sipBot: string; ganEl: string; jiEl: string }[] }) {
+  const axes = calcAbilityScores(pillars);
+  const cx = 130, cy = 130, maxR = 82;
+  const ang = (i: number) => (-90 + i * 45) * (Math.PI / 180);
+  const pt = (i: number, r: number): [number, number] => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
+  const gridPoly = (frac: number) => axes.map((_, i) => pt(i, maxR * frac).join(",")).join(" ");
+  const valPoly = axes.map((a, i) => pt(i, maxR * (a.value / 100)).join(",")).join(" ");
+  const RAINBOW = ["#FF3B3B","#FF8C00","#FFD700","#34C759","#00C7C7","#3478F6","#9B59B6","#FF2D78"];
+  return (
+    <div className="mt-8 mb-2 rounded-2xl py-4" style={{ background: `#f0f0f0`, border: `1px solid #d8d8d8` }}>
+      {/* 레이더 SVG */}
+      <svg viewBox="0 0 260 260" className="w-full" style={{ maxHeight: 300 }}>
+        <defs>
+          {axes.map((a, i) => {
+            const next = (i + 1) % axes.length;
+            const id = `rg${i}`;
+            return (
+              <radialGradient key={id} id={id} cx="0%" cy="0%" r="100%" gradientUnits="userSpaceOnUse"
+                fx={cx} fy={cy} cx2={cx} cy2={cy}>
+                <stop offset="0%" stopColor={RAINBOW[i]} stopOpacity="0" />
+                <stop offset="100%" stopColor={RAINBOW[i]} stopOpacity={0.25 + (((a.value + axes[next].value) / 2) / 100) * 0.45} />
+              </radialGradient>
+            );
+          })}
+        </defs>
+        {/* 그리드 */}
+        {[0.25, 0.5, 0.75, 1].map((f, fi) => (
+          <polygon key={f} points={gridPoly(f)} fill="none" stroke={fi === 3 ? "#bbb" : "#d4d4d4"} strokeWidth={fi === 3 ? 1 : 0.8} />
+        ))}
+        {/* 축선 */}
+        {axes.map((_, i) => { const [x, y] = pt(i, maxR); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#ccc" strokeWidth="0.8" />; })}
+        {/* 색상 섹터 — 각 삼각형 무지개색 그라데이션 */}
+        {axes.map((a, i) => {
+          const next = (i + 1) % axes.length;
+          const [x1, y1] = pt(i, maxR * (a.value / 100));
+          const [x2, y2] = pt(next, maxR * (axes[next].value / 100));
+          return (
+            <polygon key={i}
+              points={`${cx},${cy} ${x1},${y1} ${x2},${y2}`}
+              fill={`url(#rg${i})`}
+              stroke="none"
+            />
+          );
+        })}
+        {/* 외곽선 */}
+        <polygon points={valPoly} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="1.2" />
+        {/* 꼭짓점 도트 — 무지개색 */}
+        {axes.map((a, i) => { const [x, y] = pt(i, maxR * (a.value / 100)); return <circle key={i} cx={x} cy={y} r="4" fill={RAINBOW[i]} stroke="#f0f0f0" strokeWidth="1.5" />; })}
+        {/* 라벨 — 컬러 뱃지 */}
+        {axes.map((a, i) => {
+          const dist = [0, 1, 4, 7].includes(i) ? maxR + 22 : maxR + 32;
+          const [x, y] = pt(i, dist);
+          const bw = 46, bh = 20;
+          return (
+            <g key={i}>
+              <rect x={x - bw / 2} y={y - bh / 2} width={bw} height={bh} rx="5" ry="5" fill={RAINBOW[i]} fillOpacity="0.35" />
+              <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize="11" fontWeight="800" fill="#111" fontFamily="sans-serif">{a.label}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 // 육각형 레이더 차트
 function RadarChart({ axes }: { axes: { label: string; value: number }[] }) {
   const cx = 100, cy = 100, maxR = 60;
@@ -834,6 +924,175 @@ function RadarChart({ axes }: { axes: { label: string; value: number }[] }) {
             </text>
           );
         })}
+      </svg>
+    </div>
+  );
+}
+
+// 신살 플로팅 그래픽
+function SinsalFloat({ view }: { view: MyeongsikView | null }) {
+  if (!view) return null;
+  const all = view.pillars.flatMap((p) => (p.sinsal ?? "").split(/\s+/).filter(Boolean));
+  const unique = [...new Set(all)];
+  if (unique.length === 0) return null;
+
+  const SAL_META: Record<string, { color: string; glow: string; hanja: string }> = {
+    "천을귀인": { color: "#f0c040", glow: "#f0c04066", hanja: "天乙" },
+    "문창귀인": { color: "#7eb8f7", glow: "#7eb8f766", hanja: "文昌" },
+    "천덕귀인": { color: "#f0c040", glow: "#f0c04066", hanja: "天德" },
+    "월덕귀인": { color: "#e8a020", glow: "#e8a02066", hanja: "月德" },
+    "암록":     { color: "#50d890", glow: "#50d89066", hanja: "暗祿" },
+    "금여록":   { color: "#50d890", glow: "#50d89066", hanja: "金輿" },
+    "문곡귀인": { color: "#7eb8f7", glow: "#7eb8f766", hanja: "文曲" },
+    "역마살":   { color: "#ff9040", glow: "#ff904066", hanja: "驛馬" },
+    "도화살":   { color: "#ff6eb0", glow: "#ff6eb066", hanja: "桃花" },
+    "화개살":   { color: "#b080f0", glow: "#b080f066", hanja: "華蓋" },
+    "양인살":   { color: "#ff5050", glow: "#ff505066", hanja: "羊刃" },
+    "현침살":   { color: "#a0c8ff", glow: "#a0c8ff66", hanja: "懸針" },
+    "겁살":     { color: "#ff5050", glow: "#ff505066", hanja: "劫殺" },
+    "공망":     { color: "#aaaaaa", glow: "#aaaaaa44", hanja: "空亡" },
+  };
+
+  // 위치 미리 계산 (랜덤처럼 보이되 겹치지 않게)
+  const positions = [
+    { x: 18, y: 22 }, { x: 55, y: 10 }, { x: 78, y: 28 },
+    { x: 8,  y: 52 }, { x: 38, y: 48 }, { x: 68, y: 55 },
+    { x: 20, y: 72 }, { x: 50, y: 75 }, { x: 80, y: 70 },
+    { x: 12, y: 88 }, { x: 45, y: 90 }, { x: 75, y: 88 },
+  ];
+
+  return (
+    <div className="relative my-6 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(160deg, #0a0618 0%, #120820 50%, #0a1020 100%)", minHeight: 220 }}>
+      <style>{`
+        @keyframes floatA { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-10px)} }
+        @keyframes floatB { 0%,100%{transform:translateY(-6px)} 50%{transform:translateY(6px)} }
+        @keyframes floatC { 0%,100%{transform:translateY(4px)} 50%{transform:translateY(-8px)} }
+        @keyframes pulseGlow { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:0.8} }
+      `}</style>
+
+      {/* 별 파티클 */}
+      {[...Array(28)].map((_, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: `${(i * 37 + 11) % 95}%`,
+          top: `${(i * 53 + 7) % 90}%`,
+          width: i % 3 === 0 ? 2 : 1,
+          height: i % 3 === 0 ? 2 : 1,
+          borderRadius: "50%",
+          background: "#fff",
+          animation: `twinkle ${2 + (i % 3)}s ease-in-out ${(i * 0.3) % 2}s infinite`,
+        }} />
+      ))}
+
+      {/* 신살 플로팅 아이템 */}
+      {unique.map((sal, i) => {
+        const meta = SAL_META[sal] ?? { color: "#aaa", glow: "#aaa44", hanja: sal.slice(0, 2) };
+        const pos = positions[i % positions.length];
+        const floatAnims = ["floatA", "floatB", "floatC"];
+        const anim = floatAnims[i % 3];
+        const dur = 3 + (i % 4) * 0.7;
+        const delay = (i * 0.5) % 2.5;
+        return (
+          <div key={sal} style={{
+            position: "absolute",
+            left: `${pos.x}%`,
+            top: `${pos.y}%`,
+            transform: "translate(-50%, -50%)",
+            animation: `${anim} ${dur}s ease-in-out ${delay}s infinite`,
+            textAlign: "center",
+            cursor: "default",
+          }}>
+            {/* 글로우 후광 */}
+            <div style={{
+              position: "absolute", inset: -8, borderRadius: "50%",
+              background: `radial-gradient(circle, ${meta.glow} 0%, transparent 70%)`,
+              animation: `pulseGlow ${dur * 0.8}s ease-in-out ${delay}s infinite`,
+            }} />
+            {/* 한자 */}
+            <div style={{ fontSize: 10, color: `${meta.color}99`, fontWeight: 700, letterSpacing: "0.05em", lineHeight: 1.2, position: "relative" }}>{meta.hanja}</div>
+            {/* 신살 이름 */}
+            <div style={{
+              position: "relative",
+              fontSize: 13, fontWeight: 900, color: meta.color,
+              textShadow: `0 0 12px ${meta.glow}, 0 0 24px ${meta.glow}`,
+              letterSpacing: "0.02em", whiteSpace: "nowrap",
+            }}>{sal}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// 신살 만다라 (원형 배치)
+function SinsalMandala({ view }: { view: MyeongsikView | null }) {
+  if (!view) return null;
+
+  // 각 기둥의 sinsal 수집 + 중복 제거
+  const all = view.pillars.flatMap((p) => (p.sinsal ?? "").split(/\s+/).filter(Boolean));
+  const unique = [...new Set(all)];
+  if (unique.length === 0) return null;
+
+  // 신살 종류별 색상/카테고리
+  const SAL_META: Record<string, { color: string; label: string }> = {
+    "천을귀인": { color: "#c49622", label: "天乙貴人" },
+    "문창귀인": { color: "#3478F6", label: "文昌貴人" },
+    "천덕귀인": { color: "#c49622", label: "天德貴人" },
+    "월덕귀인": { color: "#b5832a", label: "月德貴人" },
+    "암록":     { color: "#34C759", label: "暗祿" },
+    "금여록":   { color: "#34C759", label: "金輿祿" },
+    "문곡귀인": { color: "#3478F6", label: "文曲貴人" },
+    "역마살":   { color: "#FF8C00", label: "驛馬殺" },
+    "도화살":   { color: "#FF2D78", label: "桃花殺" },
+    "화개살":   { color: "#9B59B6", label: "華蓋殺" },
+    "양인살":   { color: "#FF3B3B", label: "羊刃殺" },
+    "겁살":     { color: "#FF3B3B", label: "劫殺" },
+    "재살":     { color: "#FF3B3B", label: "災殺" },
+    "공망":     { color: "#888",    label: "空亡" },
+  };
+
+  const cx = 160, cy = 160, outerR = 110, innerR = 36;
+  const count = unique.length;
+  const ang = (i: number) => (-90 + (360 / count) * i) * (Math.PI / 180);
+
+  return (
+    <div className="my-6 rounded-2xl overflow-hidden" style={{ background: "#0d0d0d" }}>
+      <svg viewBox="0 0 320 320" className="w-full" style={{ maxHeight: 340 }}>
+        {/* 외곽 장식 원 */}
+        <circle cx={cx} cy={cy} r={outerR + 24} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={outerR + 12} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.8" />
+        {/* 축선 */}
+        {unique.map((_, i) => {
+          const a = ang(i);
+          return (
+            <line key={i}
+              x1={cx + innerR * Math.cos(a)} y1={cy + innerR * Math.sin(a)}
+              x2={cx + outerR * Math.cos(a)} y2={cy + outerR * Math.sin(a)}
+              stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"
+            />
+          );
+        })}
+        {/* 신살 노드 */}
+        {unique.map((sal, i) => {
+          const a = ang(i);
+          const nx = cx + outerR * Math.cos(a);
+          const ny = cy + outerR * Math.sin(a);
+          const meta = SAL_META[sal] ?? { color: "#888", label: sal };
+          return (
+            <g key={sal}>
+              {/* 연결선 from center */}
+              <circle cx={nx} cy={ny} r="22" fill={`${meta.color}22`} stroke={meta.color} strokeWidth="1.2" />
+              <text x={nx} y={ny - 5} textAnchor="middle" dominantBaseline="central" fontSize="8" fill={meta.color} fontWeight="700">{meta.label}</text>
+              <text x={nx} y={ny + 8} textAnchor="middle" dominantBaseline="central" fontSize="9" fill="#fff" fontWeight="800">{sal}</text>
+            </g>
+          );
+        })}
+        {/* 중앙 일간 */}
+        <circle cx={cx} cy={cy} r={innerR} fill="#1a1a1a" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={innerR - 6} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
+        <text x={cx} y={cy - 6} textAnchor="middle" dominantBaseline="central" fontSize="18" fontWeight="900" fill="#fff">{view.ilgan?.[0] ?? "甲"}</text>
+        <text x={cx} y={cy + 10} textAnchor="middle" dominantBaseline="central" fontSize="9" fill="rgba(255,255,255,0.5)">일간</text>
       </svg>
     </div>
   );
@@ -911,6 +1170,7 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 
 // 장번호 → 표시 제목 (이제 장수와 키가 1:1로 일치)
 const CHAPTER_TITLES: Record<string, string> = {
+  "0": "인트로 · 사주팔자란 무엇인가",
   "1": "제1장 · 나는 어떤 그릇으로 태어났나",
   "2": "제2장 · 나는 왜 이렇게 살아왔을까",
   "3": "제3장 · 나는 세상을 어떻게 대하는가",
@@ -930,22 +1190,45 @@ const CHAPTER_TITLES: Record<string, string> = {
 };
 
 // A안 읽기 순서 (장수와 일치하므로 1~16 순차)
-const A_ORDER = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"];
+const A_ORDER = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"];
+
+// 개발용 장 재생성 플로팅 버튼 (배포 전 제거 예정)
+function RegenButton({ chapter, onRegen }: { chapter: number; onRegen: (n: number) => void }) {
+  return (
+    <div className="fixed top-20 right-4 z-50">
+      <button
+        onClick={() => onRegen(chapter)}
+        className="flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-[13px] shadow-xl"
+        style={{ background: MAROON, color: "#fff" }}
+      >
+        ↺ 제{chapter}장 재생성
+      </button>
+    </div>
+  );
+}
 
 // 장 하단 이전/다음 네비 (A안 순서)
 function ChapterNav({ cur, go }: { cur: string; go: (n: string) => void }) {
   const idx = A_ORDER.indexOf(cur);
   const prev = idx > 0 ? A_ORDER[idx - 1] : null;
   const nxt = idx >= 0 && idx < A_ORDER.length - 1 ? A_ORDER[idx + 1] : null;
+  const chapterLabel = (n: string) => CHAPTER_TITLES[n]?.split("· ")[0] ?? "";
   const titleOf = (n: string) => CHAPTER_TITLES[n]?.split("· ").slice(1).join("· ") ?? "";
   return (
     <div className="px-6 pb-10 flex gap-2 items-stretch">
       {prev && (
         <button onClick={() => go(prev)} className="px-4 py-4 rounded-2xl font-bold text-[14px]" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>←</button>
       )}
-      <button onClick={() => go(nxt ?? A_ORDER[0])} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: NAVY }}>
-        <span>{nxt ? titleOf(nxt) : "처음으로"}</span>
-        <span>{nxt ? "→" : "↺"}</span>
+      <button onClick={() => go(nxt ?? A_ORDER[0])} className="flex-1 py-4 rounded-2xl font-bold text-[14px] text-white flex items-center justify-center gap-2" style={{ background: MAROON }}>
+        {nxt ? (
+          <>
+            <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-md" style={{ background: "rgba(255,255,255,0.2)" }}>{chapterLabel(nxt)}</span>
+            <span>{titleOf(nxt)}</span>
+            <span>→</span>
+          </>
+        ) : (
+          <span>처음으로 ↺</span>
+        )}
       </button>
     </div>
   );
@@ -1060,7 +1343,7 @@ function SinStrengthGauge({ view }: { view: MyeongsikView | null }) {
 // 인라인 명식표 (제2장 두루마리)
 function ScrollMyeongsik({ view, name, birth }: { view: MyeongsikView | null; name: string; birth: { date: string; calendar: string; time: string } | null }) {
   if (!view) return null;
-  const ps = view.pillars;
+  const ps = applyLocalSinsal(view.pillars);
   const cols: [string, string][] = [["時", "시"], ["日", "일"], ["月", "월"], ["年", "년"]];
   const GC = "40px repeat(4, 1fr)";
   const rowStyle = { gridTemplateColumns: GC, borderTop: `1px solid ${INK}10` } as const;
@@ -1073,15 +1356,11 @@ function ScrollMyeongsik({ view, name, birth }: { view: MyeongsikView | null; na
   const img = (src: string, alt: string) => (
     <div className="py-1 flex items-center justify-center" style={{ background: "#fff" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} style={{ width: 40, height: 40, objectFit: "contain" }} />
+      <img src={src} alt={alt} style={{ width: 54, height: 54, objectFit: "contain" }} />
     </div>
   );
   return (
     <div className="mx-5 my-2 rounded-2xl p-4" style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", border: "1px solid #d8c4a0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" }}>
-      <div className="text-center mb-3">
-        <p className="text-[18px] font-black" style={{ color: INK, fontFamily: SERIF }}>{name}님</p>
-        {birth && <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>{birth.date} · {birth.calendar} · {birth.time}</p>}
-      </div>
       <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${INK}22` }}>
         <div className="grid" style={{ gridTemplateColumns: GC }}>
           <div style={{ background: "#efe6d6" }} />
@@ -1097,7 +1376,11 @@ function ScrollMyeongsik({ view, name, birth }: { view: MyeongsikView | null; na
         <div className="grid" style={rowStyle}>{lbl("지지")}{ps.map((p, i) => <div key={i}>{img(jiCharImage(p.ji), p.ji)}</div>)}</div>
         <div className="grid" style={rowStyle}>{lbl("십성")}{ps.map((p, i) => <div key={i}>{txt(p.sipBot)}</div>)}</div>
         <div className="grid" style={rowStyle}>{lbl("운성")}{ps.map((p, i) => <div key={i}>{txt(p.unseong)}</div>)}</div>
-        <div className="grid" style={rowStyle}>{lbl("신살")}{ps.map((p, i) => <div key={i}>{txt(p.sinsal || "—", MAROON)}</div>)}</div>
+        <div className="grid" style={rowStyle}>{lbl("신살")}{ps.map((p, i) => (
+          <div key={i} className="py-1.5 text-center text-[11px]" style={{ color: MAROON, background: "#fff" }}>
+            {p.sinsal ? p.sinsal.split(/[,\s·]+/).filter(Boolean).map((s, j) => <div key={j}>{s}</div>) : "—"}
+          </div>
+        ))}</div>
       </div>
     </div>
   );
@@ -1750,6 +2033,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
+  { disp: "인트로", chip: "서론", title: "사주팔자란 무엇인가", no: "0" },
   { disp: "제1장", chip: "환경", title: "나는 어떤 그릇으로 태어났나", no: "1" },
   { disp: "제2장", chip: "운명", title: "나는 왜 이렇게 살아왔을까", no: "2" },
   { disp: "제3장", chip: "관계", title: "나는 세상을 어떻게 대하는가", no: "3" },
@@ -1864,7 +2148,7 @@ function Cover() {
   return (
     <div className="relative overflow-hidden" style={{ height: 520 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/images/hero/hero-15.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <img src="/media/report/total/total-10/total-10-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 30%, transparent 70%, rgba(253,248,244,0.95) 100%)" }} />
       <div className="absolute top-7 left-0 right-0 text-center px-6">
         <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
@@ -1934,7 +2218,7 @@ function Illust({ src, h = 480 }: { src: string; h?: number }) {
     <div className="relative overflow-hidden" style={{ height: h, background: PINK_PALE }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute bottom-0 left-0 right-0 h-24" style={{ background: `linear-gradient(to bottom, transparent, ${CREAM})` }} />
+      <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 22%, transparent 78%, ${CREAM} 100%)` }} />
     </div>
   );
 }
@@ -1948,10 +2232,166 @@ function Heading({ children }: { children: React.ReactNode }) {
   );
 }
 
+// 일간 오행 + 월지 계절 기반 애니메이션 삽화
+function WongukIllustration({ ilgan, wolji }: { ilgan: string; wolji: string }) {
+  // 월지 → 계절
+  const SEASON: Record<string, "spring" | "summer" | "autumn" | "winter"> = {
+    寅: "spring", 卯: "spring", 辰: "spring",
+    巳: "summer", 午: "summer", 未: "summer",
+    申: "autumn", 酉: "autumn", 戌: "autumn",
+    亥: "winter", 子: "winter", 丑: "winter",
+  };
+  // 일간 → 오행
+  const OHAENG: Record<string, "목" | "화" | "토" | "금" | "수"> = {
+    甲: "목", 乙: "목", 丙: "화", 丁: "화", 戊: "토",
+    己: "토", 庚: "금", 辛: "금", 壬: "수", 癸: "수",
+  };
+  const season = SEASON[wolji] ?? "spring";
+  const ohaeng = OHAENG[ilgan] ?? "목";
+
+  // 계절 색상 팔레트
+  const palette = {
+    spring: { sky1: "#c8e6fa", sky2: "#e8f4e8", ground: "#7cb87c", ground2: "#5a9e5a", particle: "#f9c6d0", particleOp: 0.85 },
+    summer: { sky1: "#87ceeb", sky2: "#b5e8ff", ground: "#4a8f3f", ground2: "#3a7030", particle: "#fff7a0", particleOp: 0.7 },
+    autumn: { sky1: "#f4d9a0", sky2: "#e8b870", ground: "#8b6914", ground2: "#704f0a", particle: "#e8702a", particleOp: 0.8 },
+    winter: { sky1: "#c5d8f0", sky2: "#e8eef8", ground: "#7a9ab0", ground2: "#5a7a90", particle: "#ffffff", particleOp: 0.9 },
+  }[season];
+
+  const id = `wgi-${season}-${ohaeng}`;
+
+  // 오행별 주체 SVG (나무/불꽃/산/바위/물결)
+  const subject = {
+    목: (
+      <g>
+        {/* 나무 몸통 */}
+        <rect x="184" y="160" width="22" height="110" rx="4" fill="#6b3a1f" />
+        <rect x="182" y="200" width="26" height="80" rx="3" fill="#5a2e14" />
+        {/* 나무 잎 - 레이어 */}
+        <ellipse cx="195" cy="145" rx="52" ry="38" fill={season === "winter" ? "#2a5c2a" : "#2d7a2d"} style={{ animation: `${id}-sway 4s ease-in-out infinite` }} />
+        <ellipse cx="195" cy="122" rx="38" ry="30" fill={season === "winter" ? "#1e4a1e" : "#3a8c3a"} style={{ animation: `${id}-sway 4s ease-in-out infinite 0.3s` }} />
+        <ellipse cx="195" cy="104" rx="26" ry="22" fill={season === "winter" ? "#163816" : "#4a9e4a"} style={{ animation: `${id}-sway 4s ease-in-out infinite 0.6s` }} />
+        {/* 뿌리 */}
+        <path d="M184 268 Q170 280 155 285" stroke="#5a2e14" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <path d="M206 268 Q220 280 235 285" stroke="#5a2e14" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <path d="M195 268 Q195 282 195 290" stroke="#5a2e14" strokeWidth="4" fill="none" strokeLinecap="round" />
+      </g>
+    ),
+    화: (
+      <g>
+        {/* 불꽃 */}
+        <ellipse cx="195" cy="230" rx="18" ry="12" fill="#ff6b00" opacity="0.7" />
+        <path d="M195 230 Q180 200 195 160 Q210 200 195 230Z" fill="#ff4500" style={{ animation: `${id}-flicker 1.2s ease-in-out infinite` }} />
+        <path d="M195 220 Q175 195 188 155 Q205 190 195 220Z" fill="#ff8c00" opacity="0.8" style={{ animation: `${id}-flicker 1.5s ease-in-out infinite 0.2s` }} />
+        <path d="M195 220 Q215 195 202 155 Q185 190 195 220Z" fill="#ffa500" opacity="0.7" style={{ animation: `${id}-flicker 1.8s ease-in-out infinite 0.4s` }} />
+        <ellipse cx="195" cy="175" rx="10" ry="16" fill="#ffe066" opacity="0.6" style={{ animation: `${id}-flicker 1s ease-in-out infinite` }} />
+      </g>
+    ),
+    토: (
+      <g>
+        {/* 산 */}
+        <polygon points="100,270 195,130 290,270" fill="#8b7355" />
+        <polygon points="130,270 195,155 260,270" fill="#a08060" />
+        <polygon points="145,270 185,175 230,270" fill="#b89070" />
+        {/* 산 정상 설선 (겨울/가을) */}
+        {(season === "winter" || season === "autumn") && (
+          <polygon points="168,170 195,130 222,170" fill="#e8e0d0" opacity="0.8" />
+        )}
+      </g>
+    ),
+    금: (
+      <g>
+        {/* 바위/수정 */}
+        <polygon points="165,270 155,210 195,175 235,210 225,270" fill="#b0b8c8" />
+        <polygon points="165,270 155,210 195,175" fill="#c8d0e0" />
+        <polygon points="195,175 235,210 225,270 195,265" fill="#98a0b0" />
+        <polygon points="185,200 175,230 205,230 215,200 195,185" fill="#d8e0f0" opacity="0.6" />
+        {/* 반짝임 */}
+        <circle cx="175" cy="205" r="3" fill="white" opacity="0.8" style={{ animation: `${id}-sparkle 2s ease-in-out infinite` }} />
+        <circle cx="210" cy="215" r="2" fill="white" opacity="0.7" style={{ animation: `${id}-sparkle 2.5s ease-in-out infinite 0.5s` }} />
+      </g>
+    ),
+    수: (
+      <g>
+        {/* 물결 */}
+        <path d="M80 240 Q120 220 160 240 Q200 260 240 240 Q280 220 320 240" stroke="#4a90d9" strokeWidth="4" fill="none" strokeLinecap="round" style={{ animation: `${id}-wave 3s ease-in-out infinite` }} />
+        <path d="M80 255 Q120 235 160 255 Q200 275 240 255 Q280 235 320 255" stroke="#3a80c9" strokeWidth="4" fill="none" strokeLinecap="round" style={{ animation: `${id}-wave 3s ease-in-out infinite 0.5s` }} />
+        <path d="M80 270 Q120 250 160 270 Q200 290 240 270 Q280 250 320 270" stroke="#2a70b9" strokeWidth="4" fill="none" strokeLinecap="round" style={{ animation: `${id}-wave 3s ease-in-out infinite 1s` }} />
+        {/* 물방울 */}
+        <ellipse cx="195" cy="175" rx="20" ry="28" fill="#5aA0e0" opacity="0.7" style={{ animation: `${id}-drop 2s ease-in-out infinite` }} />
+        <ellipse cx="195" cy="168" rx="10" ry="8" fill="#8abcf0" opacity="0.5" />
+      </g>
+    ),
+  }[ohaeng];
+
+  // 파티클 (눈송이/꽃잎/낙엽/반짝임)
+  const particles = Array.from({ length: 18 }, (_, i) => ({
+    x: 20 + (i * 21) % 350,
+    delay: (i * 0.37) % 3,
+    dur: 2.5 + (i * 0.19) % 2,
+    size: 3 + (i * 0.7) % 5,
+  }));
+
+  return (
+    <div className="w-full overflow-hidden" style={{ background: `linear-gradient(to bottom, ${palette.sky1}, ${palette.sky2})`, borderRadius: 0 }}>
+      <style>{`
+        @keyframes ${id}-sway { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)} }
+        @keyframes ${id}-flicker { 0%,100%{transform:scaleY(1) scaleX(1)} 50%{transform:scaleY(1.08) scaleX(0.94)} }
+        @keyframes ${id}-wave { 0%,100%{d:path("M80 240 Q120 220 160 240 Q200 260 240 240 Q280 220 320 240")} 50%{d:path("M80 248 Q120 228 160 248 Q200 268 240 248 Q280 228 320 248")} }
+        @keyframes ${id}-sparkle { 0%,100%{opacity:0.3} 50%{opacity:1} }
+        @keyframes ${id}-drop { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes ${id}-fall { 0%{transform:translateY(-10px) rotate(0deg); opacity:0} 10%{opacity:${palette.particleOp}} 90%{opacity:${palette.particleOp}} 100%{transform:translateY(320px) rotate(360deg); opacity:0} }
+        @keyframes ${id}-glow { 0%,100%{opacity:0.15} 50%{opacity:0.32} }
+      `}</style>
+      <svg viewBox="0 0 390 320" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", width: "100%" }}>
+        {/* 배경 그라데이션 */}
+        <defs>
+          <radialGradient id={`${id}-grd`} cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="white" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="390" height="320" fill={`url(#${id}-grd)`} />
+
+        {/* 지평선 / 대지 */}
+        <ellipse cx="195" cy="320" rx="260" ry="60" fill={palette.ground2} />
+        <ellipse cx="195" cy="310" rx="240" ry="45" fill={palette.ground} />
+
+        {/* 주체 (오행별 이미지) */}
+        {subject}
+
+        {/* 파티클 */}
+        {particles.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x}
+            cy={0}
+            r={p.size / 2}
+            fill={palette.particle}
+            opacity={0}
+            style={{ animation: `${id}-fall ${p.dur}s ease-in ${p.delay}s infinite` }}
+          />
+        ))}
+
+        {/* 분위기 광원 */}
+        <ellipse cx="195" cy="80" rx="120" ry="80" fill="white" style={{ animation: `${id}-glow 5s ease-in-out infinite`, opacity: 0.15 }} />
+      </svg>
+    </div>
+  );
+}
+
+// 본문 소제목
+function SubHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[15px] font-black mt-6 mb-2" style={{ color: MAROON }}>
+      {children}
+    </h3>
+  );
+}
+
 // 본문 문단
 function P({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[14.5px] leading-[1.95] mb-4" style={{ color: INK_SOFT }}>
+    <p className="text-[14.5px] leading-[1.95] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>
       {children}
     </p>
   );
@@ -1961,7 +2401,7 @@ function P({ children }: { children: React.ReactNode }) {
 function Callout({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-xl px-4 py-3.5 mb-4" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-      <p className="text-[14px] leading-[1.85]" style={{ color: INK }}>
+      <p className="text-[14px] leading-[1.85]" style={{ color: INK, fontFamily: SERIF }}>
         {children}
       </p>
     </div>
@@ -1971,7 +2411,7 @@ function Callout({ children }: { children: React.ReactNode }) {
 // 사주 용어 강조 (인라인)
 function Term({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ color: MAROON, fontWeight: 800 }}>{children}</span>
+    <span style={{ color: INK, fontWeight: 800 }}>{children}</span>
   );
 }
 
@@ -2091,7 +2531,7 @@ function ReportPreviewInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const id = searchParams.get("id") ?? "";
-  const ch = searchParams.get("ch") ?? "1"; // 제1장으로 시작
+  const ch = searchParams.get("ch") ?? "0"; // 들어가며로 시작
   const date = searchParams.get("date") ?? "";
   const time = searchParams.get("time") ?? "";
   const calendar = searchParams.get("calendar") ?? "양력";
@@ -2105,8 +2545,8 @@ function ReportPreviewInner() {
   const [msOpen, setMsOpen] = useState(false);
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
-  type BirthMeta = { date: string; calendar: string; time: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta } | null>(null);
+  type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -2122,7 +2562,7 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/jeongtong-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null }))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -2133,7 +2573,7 @@ function ReportPreviewInner() {
       })
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => {
-          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null });
+          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null });
           if (d.resultId) router.replace(`/saju/jeongtong/report-preview?id=${d.resultId}`);
         })
         .catch(() => {})
@@ -2160,13 +2600,13 @@ function ReportPreviewInner() {
   };
 
   // 단일 장 재시도 (에러 화면 '다시 시도'). 실패하면 needGen 유지 → 에러 화면 그대로
-  const genChapter = (n: number) => {
+  const genChapter = (n: number, force = false) => {
     if (!id) return;
     setGenerating(true);
     fetch("/api/jeongtong-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, chapter: n }),
+      body: JSON.stringify({ id, chapter: n, force }),
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
@@ -2176,7 +2616,7 @@ function ReportPreviewInner() {
           if (!p) return p;
           const merged = { ...(p.content as Record<string, unknown>), ...sec };
           persist(merged);
-          return { ...p, content: merged as ReportContent };
+          return { ...p, content: merged as ReportContent, sajuImageUrl: d.sajuImageUrl ?? p.sajuImageUrl };
         });
       })
       .catch(() => {})
@@ -2268,7 +2708,16 @@ function ReportPreviewInner() {
         currentNo={ch}
         onSelect={(no) => next(no)}
       />
-      <MyeongsikModalView open={msOpen} onClose={() => setMsOpen(false)} view={report?.view ?? null} loading={false} />
+      <MyeongsikModalView
+        open={msOpen}
+        onClose={() => setMsOpen(false)}
+        view={report?.view ?? null}
+        loading={false}
+        meta={report && report.birth ? { name: report.name, gender: report.birth.gender || report.gender || gender, date: report.birth.date, calendar: report.birth.calendar, time: report.birth.time } : undefined}
+      />
+      {Number(ch) >= 1 && Number(ch) <= 16 && (
+        <RegenButton chapter={Number(ch)} onRegen={(n) => genChapter(n, true)} />
+      )}
 
       {showLoading ? (
         <div className="flex flex-col items-center justify-center px-6 text-center" style={{ minHeight: "70vh" }}>
@@ -2290,13 +2739,400 @@ function ReportPreviewInner() {
         </div>
       ) : (
       <>
+      {/* ═══════════ 인트로 ═══════════ */}
+      {ch === "0" && (
+        <>
+          {/* 표지 */}
+          <div className="relative overflow-hidden" style={{ height: 480 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/total/total-0/total-0-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 40%, transparent 65%, rgba(253,248,244,0.97) 100%)" }} />
+            <div className="absolute top-10 left-0 right-0 text-center px-8">
+              <p className="text-[11.5px] tracking-[0.28em] mb-4" style={{ color: "rgba(255,255,255,0.75)", fontFamily: SERIF }}>홍연이 그대에게 들려줄 이야기</p>
+              <h1 className="text-[32px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF, textShadow: "0 2px 16px rgba(0,0,0,0.4)" }}>
+                인트로
+              </h1>
+              <p className="mt-3 text-[16px] leading-relaxed" style={{ color: "rgba(255,255,255,0.88)", fontFamily: SERIF, textShadow: "0 1px 8px rgba(0,0,0,0.3)" }}>
+                사주팔자란 무엇인가
+              </p>
+            </div>
+          </div>
+
+          {/* 인사말 */}
+          <section className="px-6 pt-10 pb-6">
+            <P>안녕하시오, <Term>{name.slice(1)}{gender === "여자" || gender === "female" ? "양" : "군"}</Term>.</P>
+            <P>본격적으로 사주풀이에 들어가기 전에,<br />사주팔자가 무엇인지 먼저 짚고 넘어가겠소.</P>
+          </section>
+
+          {/* ─ 사주팔자란 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>사주팔자(四柱八字)란 무엇인가</Heading>
+            <P>
+              태어난 년·월·일·시,<br />
+              이 네 개의 기둥을 <Term>사주(四柱)</Term>라 하오.<br />
+              각 기둥에 천간과 지지, 글자 두 개씩 —<br />
+              도합 여덟 글자를 <Term>팔자(八字)</Term>라 하니,<br />
+              이를 합쳐 <Term>사주팔자(四柱八字)</Term>라 부르는 것이오.
+            </P>
+            <Callout>
+              사주명리학은 이 여덟 글자를 바탕으로<br />
+              타고난 기질·재능·인간관계·직업·건강·인생의 흐름을<br />
+              통합적으로 해석하는 동양의 전통 철학이오.
+            </Callout>
+          </section>
+
+          {/* ─ 사주의 네 기둥 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>사주의 네 기둥</Heading>
+            <P>사주에는 네 개의 기둥이 있다 하였소.<br />각 기둥이 무엇을 뜻하는지 살펴보겠소.</P>
+            <div className="grid grid-cols-4 gap-2 mb-5">
+              {[
+                { name: "시주", hanja: "時柱", time: "태어난 시", desc: "자녀·사고·말년", color: NAVY },
+                { name: "일주", hanja: "日柱", time: "태어난 날", desc: "나·배우자·중년", color: MAROON },
+                { name: "월주", hanja: "月柱", time: "태어난 달", desc: "부모·직업·청년", color: "#2c7a4b" },
+                { name: "년주", hanja: "年柱", time: "태어난 해", desc: "조상·어린시절", color: "#3a7d44" },
+              ].map((r) => (
+                <div key={r.name} className="rounded-2xl px-2 py-4 flex flex-col items-center gap-2 text-center" style={{ background: `${r.color}0c`, border: `1.5px solid ${r.color}30` }}>
+                  <p className="text-[15px] font-black" style={{ color: r.color }}>{r.name}</p>
+                  <p className="text-[11px]" style={{ color: MUTE }}>{r.hanja}</p>
+                  <p className="text-[11px]" style={{ color: INK_SOFT }}>{r.time}</p>
+                  <p className="text-[11px] font-bold leading-relaxed" style={{ color: INK }}>{r.desc}</p>
+                </div>
+              ))}
+            </div>
+            <P>
+              태어난 시간을 모른다면 시주 없이 보게 되니,<br />
+              이를 <Term>삼주육자(三柱六字)</Term>라 하오.
+            </P>
+            <P>
+              사주풀이에서는 년·월·일주를 가장 비중 있게 보며,<br />
+              시주는 경향을 읽는 참고 정도로 이해하면 되오.
+            </P>
+          </section>
+
+          {/* 삽화 */}
+          <div className="relative overflow-hidden" style={{ height: 300, background: PINK_PALE }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/total/total-0/total-0-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 22%, transparent 78%, ${CREAM} 100%)` }} />
+          </div>
+
+          {/* ─ 천간과 지지 ─ */}
+          <section className="px-6 pt-8 pb-4">
+            <Heading>천간(天干)과 지지(地支)</Heading>
+            <P>
+              <Term>천간(天干)</Term>은 하늘에 떠있는 글자로, 총 10개요.<br />
+              <Term>지지(地支)</Term>는 대지에 자리한 글자로, 총 12개요.
+            </P>
+          </section>
+
+          {/* ─ 10천간 표 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>10천간의 의미와 상징</Heading>
+            <div className="space-y-1.5">
+              {([
+                { hz: "甲", g: "갑목", oh: "목(木)", ohC: "#3a7d44", sym: "큰나무", key: "곧고 강하며, 타고난 리더의 기질을 지녔소" },
+                { hz: "乙", g: "을목", oh: "목(木)", ohC: "#3a7d44", sym: "풀·덩굴", key: "유연하고 생명력이 강하여 어디서나 잘 적응하오" },
+                { hz: "丙", g: "병화", oh: "화(火)", ohC: "#c0392b", sym: "태양", key: "외향적이고 존재감이 뚜렷하며 추진력이 강하오" },
+                { hz: "丁", g: "정화", oh: "화(火)", ohC: "#c0392b", sym: "촛불", key: "섬세하고 따뜻한 감성으로 주변을 밝히오" },
+                { hz: "戊", g: "무토", oh: "토(土)", ohC: "#b07d2a", sym: "산", key: "뚝심 있고 신뢰를 중시하며 완고한 면이 있소" },
+                { hz: "己", g: "기토", oh: "토(土)", ohC: "#b07d2a", sym: "논밭", key: "포근하고 배려심이 깊으며 현실 감각이 뛰어나오" },
+                { hz: "庚", g: "경금", oh: "금(金)", ohC: "#7a7a7a", sym: "바위", key: "원칙을 중시하고 묵직한 무게감이 있소" },
+                { hz: "辛", g: "신금", oh: "금(金)", ohC: "#7a7a7a", sym: "보석·금속", key: "날카롭고 세련되며 정제 능력이 탁월하오" },
+                { hz: "壬", g: "임수", oh: "수(水)", ohC: "#1a1a1a", sym: "바다", key: "깊고 넓은 사고로 유연하게 흐르는 기질이오" },
+                { hz: "癸", g: "계수", oh: "수(水)", ohC: "#1a1a1a", sym: "샘물·이슬", key: "예리한 직관력과 순수함을 갖추었소" },
+              ] as const).map((r) => (
+                <div key={r.hz} className="flex items-center gap-2.5 px-3 py-2 rounded-xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={ganCharImage(r.hz)} alt={r.g} style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }} />
+                  <span className="text-[14px] flex-shrink-0 px-1.5 py-0.5 rounded-md font-bold" style={{ background: `${r.ohC}18`, color: r.ohC, minWidth: 40, textAlign: "center" }}>{r.g}</span>
+                  <div className="min-w-0">
+                    <p className="text-[13px]" style={{ color: INK_SOFT }}>{r.sym} — <span style={{ color: INK }}>{r.key}</span></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ─ 12지지 표 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>12지지의 의미와 계절</Heading>
+            <P>지지는 자축인묘… 순이 아닌,<br />계절 순서로 보는 것이 이해에 쉽소.<br />중간의 진·미·술·축은 간절기를 뜻하오.</P>
+            {/* 12글자 한 줄 + 계절 구분선 */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+              {/* 계절 라벨 행 */}
+              <div className="grid grid-cols-12">
+                {[
+                  { label: "봄", span: 3, color: "#4a8c5c", bg: "#eef7f1", borderL: false },
+                  { label: "여름", span: 3, color: "#c0392b", bg: "#fdf0ee", borderL: true },
+                  { label: "가을", span: 3, color: "#b07d2a", bg: "#fdf6ee", borderL: true },
+                  { label: "겨울", span: 3, color: "#2c5282", bg: "#eef3fb", borderL: true },
+                ].map((s) => (
+                  <div key={s.label} className="col-span-3 text-center py-2 text-[13px] font-black" style={{ background: s.bg, color: s.color, borderLeft: s.borderL ? `1px solid ${INK}18` : "none" }}>
+                    {s.label}
+                  </div>
+                ))}
+              </div>
+              {/* 12글자 이미지 행 */}
+              <div className="grid grid-cols-12">
+                {([
+                  { hz: "寅", g: "인목", an: "🐯", nm: "호랑이", sc: "#4a8c5c", ec: "#3a7d44", bl: false },
+                  { hz: "卯", g: "묘목", an: "🐰", nm: "토끼", sc: "#4a8c5c", ec: "#3a7d44", bl: false },
+                  { hz: "辰", g: "진토", an: "🐲", nm: "용", sc: "#4a8c5c", ec: "#b07d2a", bl: false },
+                  { hz: "巳", g: "사화", an: "🐍", nm: "뱀", sc: "#c0392b", ec: "#c0392b", bl: true },
+                  { hz: "午", g: "오화", an: "🐴", nm: "말", sc: "#c0392b", ec: "#c0392b", bl: false },
+                  { hz: "未", g: "미토", an: "🐏", nm: "양", sc: "#c0392b", ec: "#b07d2a", bl: false },
+                  { hz: "申", g: "신금", an: "🐵", nm: "원숭이", sc: "#b07d2a", ec: "#7a7a7a", bl: true },
+                  { hz: "酉", g: "유금", an: "🐔", nm: "닭", sc: "#b07d2a", ec: "#7a7a7a", bl: false },
+                  { hz: "戌", g: "술토", an: "🐶", nm: "개", sc: "#b07d2a", ec: "#b07d2a", bl: false },
+                  { hz: "亥", g: "해수", an: "🐷", nm: "돼지", sc: "#2c5282", ec: "#1a1a1a", bl: true },
+                  { hz: "子", g: "자수", an: "🐭", nm: "쥐", sc: "#2c5282", ec: "#1a1a1a", bl: false },
+                  { hz: "丑", g: "축토", an: "🐮", nm: "소", sc: "#2c5282", ec: "#b07d2a", bl: false },
+                ] as const).map((r) => (
+                  <div key={r.hz} className="flex flex-col items-center gap-0.5 py-2" style={{ borderLeft: r.bl ? `1px solid ${INK}18` : "none" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={jiCharImage(r.hz)} alt={r.g} style={{ width: 30, height: 30, objectFit: "contain" }} />
+                    <span className="text-[14px] font-black" style={{ color: r.ec }}>{r.g}</span>
+                    <span className="text-[18px]">{r.an}</span>
+                    <span className="text-[10px] whitespace-nowrap" style={{ color: MUTE }}>{r.nm}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ─ 음양오행 ─ */}
+          <section className="px-6 pb-4">
+            <Heading>음양오행(陰陽五行)</Heading>
+            <P>음과 양은 고정된 것이 아니라 끊임없이 순환하오.<br />자연 모든 현상에 작용하는 조화와 균형의 원리이오.</P>
+
+            {/* 음양 시각화 */}
+            <div className="relative overflow-hidden rounded-2xl mb-5" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/total/total-0/total-0-2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            </div>
+
+            <P>
+              오행은 <Term>목·화·토·금·수</Term> 다섯 가지 기운이오.<br />
+              삶의 움직임을 읽는 도구라 이해하면 되오.
+            </P>
+            <P>
+              이 다섯 기운은 서로 돕기도 하고, 억누르기도 하오.<br />
+              돕는 관계를 <Term>생(生)</Term>이라 하고, 억누르는 관계를 <Term>극(剋)</Term>이라 하오.<br />
+              생과 극이 균형을 이룰 때 사주는 안정되고,<br />
+              한쪽으로 치우칠수록 삶의 굴곡이 깊어지오.
+            </P>
+          </section>
+
+          {/* ─ 오행 상생상극도 ─ */}
+          <section className="px-6 pb-2">
+            {(() => {
+              const cx = 170, cy = 170, r = 118;
+              const nodes = [
+                { label: "목", hanja: "木", color: "#2d7a3a", glow: "#4caf50", angle: -90 },
+                { label: "화", hanja: "火", color: "#c0392b", glow: "#ff6b6b", angle: -90 + 72 },
+                { label: "토", hanja: "土", color: "#9a6a1a", glow: "#f0b429", angle: -90 + 144 },
+                { label: "금", hanja: "金", color: "#5a6370", glow: "#b0bec5", angle: -90 + 216 },
+                { label: "수", hanja: "水", color: "#1a1a1a", glow: "#555555", angle: -90 + 288 },
+              ];
+              const pos = nodes.map(n => ({
+                ...n,
+                x: cx + r * Math.cos(n.angle * Math.PI / 180),
+                y: cy + r * Math.sin(n.angle * Math.PI / 180),
+              }));
+              const saeng = [[0,1],[1,2],[2,3],[3,4],[4,0]];
+              const geuk = [[0,2],[2,4],[4,1],[1,3],[3,0]];
+              const line = (a: typeof pos[0], b: typeof pos[0], color: string, glow: string, markerId: string, offset = 26) => {
+                const dx = b.x - a.x, dy = b.y - a.y;
+                const len = Math.sqrt(dx*dx+dy*dy);
+                const ux = dx/len, uy = dy/len;
+                const x1 = a.x + ux*offset, y1 = a.y + uy*offset;
+                const x2 = b.x - ux*(offset+6), y2 = b.y - uy*(offset+6);
+                return (
+                  <g key={`${a.label}-${b.label}`}>
+                    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={glow} strokeWidth="4" opacity="0.25" />
+                    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="1.6" markerEnd={`url(#${markerId})`} opacity="0.9" />
+                  </g>
+                );
+              };
+              return (
+                <svg viewBox="0 0 340 340" style={{ width: "100%", maxWidth: 340, display: "block", margin: "0 auto 4px" }}>
+                  <defs>
+                    {/* 배경 원형 그라데이션 */}
+                    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#f5ede4" />
+                      <stop offset="100%" stopColor="#fdf8f4" />
+                    </radialGradient>
+                    {/* 노드 그림자용 필터 */}
+                    <filter id="node-shadow" x="-40%" y="-40%" width="180%" height="180%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.18" />
+                    </filter>
+                    {/* 글로우 필터 */}
+                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    {/* 화살표 마커 — 생 */}
+                    <marker id="arr-s" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                      <path d="M0,0 L0,7 L7,3.5 z" fill="#3f63c4" />
+                    </marker>
+                    {/* 화살표 마커 — 극 */}
+                    <marker id="arr-g" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                      <path d="M0,0 L0,7 L7,3.5 z" fill="#c9474f" />
+                    </marker>
+                    {/* 각 노드별 방사형 그라데이션 */}
+                    {pos.map(n => (
+                      <radialGradient key={`grad-${n.label}`} id={`grad-${n.label}`} cx="35%" cy="30%" r="70%">
+                        <stop offset="0%" stopColor={n.glow} stopOpacity="0.9" />
+                        <stop offset="100%" stopColor={n.color} stopOpacity="1" />
+                      </radialGradient>
+                    ))}
+                  </defs>
+
+                  {/* 배경 원 */}
+                  <circle cx={cx} cy={cy} r={148} fill="url(#bg-grad)" stroke={`${INK}08`} strokeWidth="1" />
+                  {/* 희미한 오각형 */}
+                  <polygon
+                    points={pos.map(n => `${n.x},${n.y}`).join(" ")}
+                    fill="none" stroke={`${INK}10`} strokeWidth="1" strokeDasharray="4 4"
+                  />
+
+                  {/* 상극선 (뒤에 먼저) */}
+                  {geuk.map(([i,j]) => line(pos[i], pos[j], "#c9474f", "#ff6b6b", "arr-g"))}
+                  {/* 상생선 + "생" 라벨 */}
+                  {saeng.map(([i,j]) => {
+                    const a = pos[i], b = pos[j];
+                    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+                    const dx = b.x - a.x, dy = b.y - a.y;
+                    const len = Math.sqrt(dx*dx + dy*dy);
+                    // 수직 방향으로 14px 오프셋 (중심 방향으로)
+                    const px = -dy / len * 14, py = dx / len * 14;
+                    // 중심 쪽으로 당기기
+                    const towardCx = cx - mx, towardCy = cy - my;
+                    const dot = px * towardCx + py * towardCy;
+                    // 바깥쪽 = 중심 반대 방향
+                    const ox = dot > 0 ? -px : px, oy = dot > 0 ? -py : py;
+                    return (
+                      <g key={`s-${i}-${j}`}>
+                        {line(a, b, "#3f63c4", "#7ba7f0", "arr-s")}
+                        <text x={mx + ox} y={my + oy + 5} textAnchor="middle" fontSize="16" fontWeight="900" fill="#3f63c4" opacity="0.9" style={{ fontFamily: SERIF }}>생</text>
+                      </g>
+                    );
+                  })}
+
+                  {/* 노드 */}
+                  {pos.map((n) => (
+                    <g key={n.label} filter="url(#node-shadow)">
+                      <circle cx={n.x} cy={n.y} r={26} fill="none" stroke={n.glow} strokeWidth="3" opacity="0.3" />
+                      <circle cx={n.x} cy={n.y} r={22} fill={`url(#grad-${n.label})`} />
+                      <ellipse cx={n.x - 5} cy={n.y - 7} rx={8} ry={5} fill="white" opacity="0.25" />
+                      <text x={n.x} y={n.y - 3} textAnchor="middle" fontSize="14" fontWeight="900" fill="white" style={{ fontFamily: SERIF }}>{n.label}</text>
+                      <text x={n.x} y={n.y + 12} textAnchor="middle" fontSize="10" fill="white" opacity="0.8" style={{ fontFamily: SERIF }}>{n.hanja}</text>
+                    </g>
+                  ))}
+
+                  {/* 중앙 "극" */}
+                  <text x={cx} y={cy + 5} textAnchor="middle" fontSize="16" fontWeight="900" fill="#c9474f" opacity="0.75" style={{ fontFamily: SERIF }}>극</text>
+                </svg>
+              );
+            })()}
+          </section>
+
+          {/* ─ 생(生) ─ */}
+          <section className="px-6 pb-4">
+            <Heading>오행의 생(生) — 서로 돕는 관계</Heading>
+            <div className="space-y-2 mb-4">
+              {[
+                { rel: "목생화(木生火)", desc: "나무가 불의 땔감이 되어 연료가 되오" },
+                { rel: "화생토(火生土)", desc: "불이 꺼지면 재가 되어 흙이 되오" },
+                { rel: "토생금(土生金)", desc: "땅 속 깊은 곳에서 바위가 생성되오" },
+                { rel: "금생수(金生水)", desc: "바위 틈에서 샘물이 솟아나오" },
+                { rel: "수생목(水生木)", desc: "물이 나무를 길러내는 영양분이 되오" },
+              ].map((r) => (
+                <div key={r.rel} className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  <span className="text-[14px] font-black flex-shrink-0" style={{ color: BLUE, fontFamily: SERIF, width: 100 }}>{r.rel}</span>
+                  <span className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{r.desc}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ─ 극(剋) ─ */}
+          <section className="px-6 pb-6">
+            <Heading>오행의 극(剋) — 서로 억누르는 관계</Heading>
+            <div className="space-y-2 mb-4">
+              {[
+                { rel: "목극토(木剋土)", desc: "나무의 뿌리가 흙을 움직이지 못하게 잡소" },
+                { rel: "화극금(火剋金)", desc: "불이 금속에 열을 가해 그 성질을 잃게 하오" },
+                { rel: "토극수(土剋水)", desc: "흙이 물을 가둬 자유롭지 못하게 하오 (강줄기)" },
+                { rel: "금극목(金剋木)", desc: "금속이 나무를 잘라내거나 쪼개오 (톱·도끼)" },
+                { rel: "수극화(水剋火)", desc: "물이 불을 꺼버리오" },
+              ].map((r) => (
+                <div key={r.rel} className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  <span className="text-[14px] font-black flex-shrink-0" style={{ color: WARN, fontFamily: SERIF, width: 100 }}>{r.rel}</span>
+                  <span className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{r.desc}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ─ 십성 ─ */}
+          <section className="px-6 pb-4">
+            <Heading>십성(十星)이란 무엇인가</Heading>
+            <P>
+              우리가 흔히 이르는 비겁·식상·재성·관성·인성<br />이 다섯 범주가 곧 십성의 큰 틀이오.
+            </P>
+            <div className="space-y-2 mb-4">
+              {([
+                { name: "비겁", hanja: "比劫", color: "#3a7d44", icon: "⚔️", sub: "비견·겁재", desc: "일간과 같은 오행 — 자아·경쟁·형제" },
+                { name: "식상", hanja: "食傷", color: "#c0392b", icon: "🎨", sub: "식신·상관", desc: "일간이 생하는 오행 — 표현·창의·자식" },
+                { name: "재성", hanja: "財星", color: "#b07d2a", icon: "💰", sub: "편재·정재", desc: "일간이 극하는 오행 — 재물·여자·부친" },
+                { name: "관성", hanja: "官星", color: "#2c5282", icon: "🏛️", sub: "편관·정관", desc: "일간을 극하는 오행 — 권위·직업·남편" },
+                { name: "인성", hanja: "印星", color: "#7a3a8a", icon: "📚", sub: "편인·정인", desc: "일간을 생하는 오행 — 학문·모친·보호" },
+              ] as const).map((s) => (
+                <div key={s.name} className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: `${s.color}15` }}>
+                    {s.icon}
+                  </div>
+                  <div className="flex-shrink-0" style={{ width: 54 }}>
+                    <p className="text-[18px] font-black" style={{ color: INK, fontFamily: SERIF }}>{s.name}</p>
+                  </div>
+                  <div className="flex-1 min-w-0" style={{ borderLeft: `1px solid ${INK}10`, paddingLeft: 12 }}>
+                    <p className="text-[13px] font-bold mb-0.5" style={{ color: INK_SOFT }}>{s.sub}</p>
+                    <p className="text-[12px] leading-snug" style={{ color: INK_SOFT, fontFamily: SERIF }}>{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <P>이 열 가지 십성의 의미를 알면<br />풀이를 읽을 때 한결 수월할 것이오.<br />지금부터 풀이 속에서 자연스럽게 짚어드리겠소.</P>
+          </section>
+
+          {/* 맺음말 삽화 */}
+          <div className="relative overflow-hidden mx-0" style={{ background: CREAM }}>
+            <video src="/media/report/total/total-0/total-0-3.mp4" autoPlay muted loop playsInline className="w-full object-cover" />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 22%, transparent 78%, ${CREAM} 100%)` }} />
+          </div>
+
+          {/* 맺음말 */}
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+              {`"자, 이제 ${name}${gender === "여자" || gender === "female" ? "양" : "군"}의\n서사가 담긴 책을 펼쳐보겠소?"`}
+            </p>
+            <p className="mt-5 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연(紅緣)</p>
+          </div>
+
+          {/* 다음 장 네비 */}
+          <ChapterNav cur="0" go={next} />
+        </>
+      )}
+
       {/* ═══════════ 제2장 ═══════════ */}
       {ch === "1" && (
         <>
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 460 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-8.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-1/total-1-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 30%, transparent 70%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제1장 · 환경</p>
@@ -2306,84 +3142,407 @@ function ReportPreviewInner() {
             </div>
           </div>
 
-          <Quote>{`"자, 이제부터 ${name}님의 사주를\n한 장씩 펼쳐보겠습니다.\n가장 먼저, 타고난 본바탕부터\n들여다보겠습니다."`}</Quote>
+          <Quote>{`${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 사주를 펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name}${gender === "여자" || gender === "female" ? "양" : "군"}의 사주팔자요.\n\n풀이를 읽다 명식이 궁금할 때면\n상단 '명식보기' 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
-          {/* 삽화 + 명식표(두루마리) */}
-          <Illust src="/images/hero/hero-11.jpg" h={320} />
-          <ScrollMyeongsik view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
+          {/* 명식표 */}
+          <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
 
-          {/* 原局 디바이더 */}
-          <HanjaDivider hanja="原局" sub="사주 원국 한눈에 보기" />
 
           {/* 원국 분석 */}
-          <section className="px-6 pt-2 pb-12">
-            <Heading>사주 원국 한눈에 보기</Heading>
-            <P>{c.wonguk.intro}</P>
-            <Callout>{c.wonguk.callout}</Callout>
-            {c.wonguk.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+          <section className="pt-6 pb-12">
+            <div className="px-6">
+              <Heading>나란 사람의 본질과 성향</Heading>
+              <P>{c.wonguk.intro}</P>
+            </div>
+            {report?.sajuImageUrl ? (
+              <div className="relative overflow-hidden w-full" style={{ aspectRatio: "4/3" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={report.sajuImageUrl} alt="사주 원국 이미지" className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 15%, transparent 80%, ${CREAM} 100%)` }} />
+              </div>
+            ) : (
+              <div className="relative">
+                <WongukIllustration
+                  ilgan={report?.view?.pillars?.[1]?.gan ?? "甲"}
+                  wolji={report?.view?.pillars?.[2]?.ji ?? "子"}
+                />
+                {id && (
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                    <button
+                      onClick={() => {
+                        fetch("/api/jeongtong-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
+                          .then((r) => r.ok ? r.json() : Promise.reject())
+                          .then((d) => { if (d.sajuImageUrl) setReport((p) => p ? { ...p, sajuImageUrl: d.sajuImageUrl } : p); })
+                          .catch(() => {});
+                      }}
+                      className="text-xs px-3 py-1 rounded-full bg-white/70 border border-amber-300 text-amber-800"
+                    >
+                      이미지 재생성
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="px-6 pt-4">
+              {c.wonguk.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            </div>
           </section>
-
-          {/* 五行 디바이더 */}
-          <HanjaDivider hanja="五行" sub="오행으로 보는 다섯 기운의 균형" />
 
           {/* 오행 분석 + 도넛 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>오행으로 보는 다섯 기운의 균형</Heading>
-            <P>{c.ohaeng.intro}</P>
-            <Callout>{c.ohaeng.callout}</Callout>
-            {c.ohaeng.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <Heading>네 기둥이 품은 인생의 흐름</Heading>
 
-            <OhaengDonut view={report?.view ?? null} />
+            {/* 네 기둥 인생시기 시각화 */}
+            {(() => {
+              const ps = report?.view?.pillars ?? [];
+              // pillars 순서: [0]=시주, [1]=일주, [2]=월주, [3]=년주
+              const cols = [
+                { label: "시주", idx: 0, highlight: false, stage: "", age: "" },
+                { label: "일주", idx: 1, highlight: false, stage: "", age: "" },
+                { label: "월주", idx: 2, highlight: false, stage: "", age: "" },
+                { label: "년주", idx: 3, highlight: true, stage: "초년기", age: "0세~20세" },
+              ];
+              return (
+                <div className="mb-6 mt-2">
+                  <div className="flex gap-4 justify-center">
+                    {cols.map((col) => {
+                      const p = ps[col.idx];
+                      const blurred = !col.highlight;
+                      return (
+                        <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                          {/* 기둥 카드 */}
+                          <div
+                            style={{
+                              border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                              borderRadius: 12,
+                              background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                              padding: "8px 6px",
+                              filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                              opacity: blurred ? 0.45 : 1,
+                              transition: "all 0.2s",
+                              width: "100%",
+                            }}
+                          >
+                            <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                            {p ? (
+                              <>
+                                <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                              </>
+                            ) : (
+                              <div style={{ height: 120 }} />
+                            )}
+                          </div>
+                          {/* 화살표 + 시기 라벨 */}
+                          {col.highlight && (
+                            <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                              </svg>
+                              <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                <p className="text-[16px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 초년기 풀이 */}
+            {c.chonyeongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+
+            {/* 월주 비주얼 */}
+            {(() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: false, stage: "", age: "" },
+                { label: "일주", idx: 1, highlight: false, stage: "", age: "" },
+                { label: "월주", idx: 2, highlight: true, stage: "청년기", age: "20세~40세" },
+                { label: "년주", idx: 3, highlight: false, stage: "", age: "" },
+              ];
+              return (
+                <div className="mb-6 mt-6">
+                  <div className="flex gap-4 justify-center">
+                    {cols.map((col) => {
+                      const p = ps[col.idx];
+                      const blurred = !col.highlight;
+                      return (
+                        <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                          <div
+                            style={{
+                              border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                              borderRadius: 12,
+                              background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                              padding: "8px 6px",
+                              filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                              opacity: blurred ? 0.45 : 1,
+                              transition: "all 0.2s",
+                              width: "100%",
+                            }}
+                          >
+                            <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                            {p ? (
+                              <>
+                                <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                              </>
+                            ) : (
+                              <div style={{ height: 120 }} />
+                            )}
+                          </div>
+                          {col.highlight && (
+                            <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                              </svg>
+                              <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                <p className="text-[16px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 청년기 풀이 */}
+            {c.cheongneongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+
+            {/* 일주 비주얼 */}
+            {(() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: false, stage: "", age: "" },
+                { label: "일주", idx: 1, highlight: true, stage: "중년기", age: "40세~60세" },
+                { label: "월주", idx: 2, highlight: false, stage: "", age: "" },
+                { label: "년주", idx: 3, highlight: false, stage: "", age: "" },
+              ];
+              return (
+                <div className="mb-6 mt-6">
+                  <div className="flex gap-4 justify-center">
+                    {cols.map((col) => {
+                      const p = ps[col.idx];
+                      const blurred = !col.highlight;
+                      return (
+                        <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                          <div
+                            style={{
+                              border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                              borderRadius: 12,
+                              background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                              padding: "8px 6px",
+                              filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                              opacity: blurred ? 0.45 : 1,
+                              transition: "all 0.2s",
+                              width: "100%",
+                            }}
+                          >
+                            <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                            {p ? (
+                              <>
+                                <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                              </>
+                            ) : (
+                              <div style={{ height: 120 }} />
+                            )}
+                          </div>
+                          {col.highlight && (
+                            <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                              </svg>
+                              <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                <p className="text-[16px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 중년기 풀이 */}
+            {c.jungnyeongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+
+            {/* 시주 비주얼 + 노년기 풀이 — 시간 모름이면 미표시 */}
+            {report?.birth?.time !== "시간 모름" && (() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: true, stage: "노년기", age: "60세~" },
+                { label: "일주", idx: 1, highlight: false, stage: "", age: "" },
+                { label: "월주", idx: 2, highlight: false, stage: "", age: "" },
+                { label: "년주", idx: 3, highlight: false, stage: "", age: "" },
+              ];
+              return (
+                <>
+                  <div className="mb-6 mt-6">
+                    <div className="flex gap-4 justify-center">
+                      {cols.map((col) => {
+                        const p = ps[col.idx];
+                        const blurred = !col.highlight;
+                        return (
+                          <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                            <div
+                              style={{
+                                border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                                borderRadius: 12,
+                                background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                                padding: "8px 6px",
+                                filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                                opacity: blurred ? 0.45 : 1,
+                                transition: "all 0.2s",
+                                width: "100%",
+                              }}
+                            >
+                              <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                              {p ? (
+                                <>
+                                  <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                  <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                                </>
+                              ) : (
+                                <div style={{ height: 120 }} />
+                              )}
+                            </div>
+                            {col.highlight && (
+                              <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                                <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                  <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                  <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                                </svg>
+                                <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                  <p className="text-[16px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                  <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* 노년기 풀이 */}
+                  {c.nonyeongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+                </>
+              );
+            })()}
+
           </section>
-
-          {/* 인용 */}
-          <Quote>{`"나무와 불의 활기찬 에너지가\n${name}님의 삶을 이끄는 원동력이\n되어 주네요."`}</Quote>
-
-          {/* 十星 디바이더 */}
-          <HanjaDivider hanja="十星" sub="십성으로 보는 타고난 역할" />
 
           {/* 십성 분석 + 레이더 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>십성으로 보는 타고난 역할</Heading>
-            <SipseongMini view={report?.view ?? null} />
-            <P>{c.sipseong.intro}</P>
-            <Callout>{c.sipseong.callout}</Callout>
-            {c.sipseong.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
-
-            <RadarChart axes={sipseongRadar(report?.view ?? null)} />
+            <Heading>그대의 타고난 능력치</Heading>
+            {(report?.view?.pillars?.length ?? 0) > 0 && (
+              <AbilityRadar pillars={(report!.view.pillars as { sipTop: string; sipBot: string; ganEl: string; jiEl: string }[])} />
+            )}
+            {c.ability?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
           </section>
-
-          {/* 인용 */}
-          <Quote>{`"나를 표현하는 힘과 주체적인\n의지가 ${name}님 사주에서 가장\n돋보이네요."`}</Quote>
-
-          {/* 十二運星 디바이더 */}
-          <HanjaDivider hanja="十二運星" sub="십이운성으로 보는 기운의 세기" />
 
           {/* 십이운성 분석 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>십이운성으로 보는 기운의 세기</Heading>
-            <UnseongMini view={report?.view ?? null} />
-            <P>{c.unseong.intro}</P>
-            <Callout>{c.unseong.callout}</Callout>
-            {c.unseong.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            <Heading>그대에게 숨겨진 기운들</Heading>
+            {report?.view && (() => {
+              const SINSAL_EXCLUDE = new Set(["지살", "재살", "월살", "겁살", "천살", "공망"]);
+              const items = [...new Set(
+                applyLocalSinsal(report.view.pillars)
+                  .flatMap((p) => (p.sinsal ?? "").split(/[,\s·]+/).filter((s) => s && !SINSAL_EXCLUDE.has(s)))
+              )];
+              if (items.length === 0) return null;
+              const SIZES  = [34, 20, 28, 18, 32, 22, 26, 18, 30, 22, 24, 18, 28, 20, 28];
+              const COLORS = ["#39ff14","#ff6fff","#00f0ff","#ffe033","#ff4d4d","#b8ff57","#ff9500","#c77dff","#00ffb3","#ff2d78","#ffffff","#ffec3d","#44d9ff","#ff6b35","#a0ff6f"];
+              const ROTATES = [-2, 1.5, -1, 2.5, -1.5, 1, -2.5, 1.5, -1, 2, -1.5, 1, -2, 1.5, -1];
+              const ALIGNS = ["flex-start", "center", "flex-end", "center", "flex-start", "flex-end"];
+              // 3~4개씩 줄 나누기
+              const rows: string[][] = [];
+              let idx = 0;
+              const rowSizes = [2, 3, 2, 3, 2, 3];
+              for (const sz of rowSizes) {
+                if (idx >= items.length) break;
+                rows.push(items.slice(idx, idx + sz));
+                idx += sz;
+              }
+              if (idx < items.length) rows.push(items.slice(idx));
+              const DURS   = [3.2, 2.6, 3.8, 2.4, 3.5, 2.9, 4.1, 2.7, 3.3, 2.5, 3.9, 2.8, 3.6, 2.3, 4.0];
+              const DELAYS = [0, 0.6, 1.2, 0.3, 0.9, 1.5, 0.2, 0.8, 1.4, 0.5, 1.1, 0.4, 1.0, 0.7, 1.3];
+              const FLOATS = ["floatS0","floatS1","floatS2"];
+              return (
+                <>
+                  <style>{`
+                    @keyframes floatS0 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-4px)} }
+                    @keyframes floatS1 { 0%,100%{transform:translateY(-3px)} 50%{transform:translateY(3px)} }
+                    @keyframes floatS2 { 0%,100%{transform:translateY(2px)} 50%{transform:translateY(-4px)} }
+                  `}</style>
+                  <div className="my-4 mx-1 rounded-2xl" style={{ background: "#0f0f0f", aspectRatio: "16/9", display: "flex", flexDirection: "column", justifyContent: "space-evenly", padding: "20px 20px" }}>
+                    {rows.map((row, ri) => (
+                      <div key={ri} style={{ display: "flex", justifyContent: ALIGNS[ri % ALIGNS.length], alignItems: "center", gap: 14 }}>
+                        {row.map((sal) => {
+                          const i = items.indexOf(sal);
+                          const color = COLORS[i % COLORS.length];
+                          return (
+                            <span key={sal} style={{
+                              fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
+                              fontWeight: 900,
+                              fontSize: SIZES[i % SIZES.length],
+                              color,
+                              display: "inline-block",
+                              lineHeight: 1.1,
+                              letterSpacing: "-0.02em",
+                              whiteSpace: "nowrap",
+                              textShadow: `0 0 16px ${color}88`,
+                              animation: `${FLOATS[i % 3]} ${DURS[i % DURS.length]}s ease-in-out ${DELAYS[i % DELAYS.length]}s infinite`,
+                            }}>
+                              {sal}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+            {c.sinsalReading?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
           </section>
 
-          {/* 表裏 디바이더 */}
-          <HanjaDivider hanja="表裏" sub="밖에서 보는 나와 실제의 나" />
-
-          {/* 표리 분석 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>밖에서 보는 나와 실제의 나</Heading>
-            <P>{c.pyori.intro}</P>
-            <Callout>{c.pyori.callout}</Callout>
-            {c.pyori.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-12.jpg" h={360} />
+          <Illust src="/media/report/total/total-1/total-1-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"복잡한 사주 명식이지만,\n제가 ${name}님께 자세히\n설명해 드릴게요."`}</Quote>
+          <Quote>{`"${name}${report?.gender === "female" ? "양" : "군"}은 왜 이렇게 살아온 건지,\n그 필연의 구조를 알려드리겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
           <ChapterNav cur="1" go={next} />
@@ -2396,7 +3555,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 480 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-7.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-2/total-2-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.1) 35%, transparent 65%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제2장 · 운명</p>
@@ -2495,7 +3654,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-15.jpg" h={360} />
+          <Illust src="/media/report/total/total-2/total-2-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
           <Quote>{`"나를 지키는 단단한 심지와\n세상을 향해 뻗어 나가는 표현력이\n${name}님의 삶을 가장 눈부시게\n빛춰줄 등불이 될 거예요."`}</Quote>
@@ -2511,7 +3670,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-11.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-4/total-4-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제4장 · 특징</p>
@@ -2554,7 +3713,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-7.jpg" h={360} />
+          <Illust src="/media/report/total/total-4/total-4-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
           <Quote>{`"하늘이 내린 귀한 별들이\n${name}님의 길을 비추고 있으니,\n어떤 어둠 속에서도\n길을 잃지 않을 거예요."`}</Quote>
@@ -2570,7 +3729,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-12.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-3/total-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제3장 · 관계</p>
@@ -2601,7 +3760,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-14.jpg" h={360} />
+          <Illust src="/media/report/total/total-3/total-3-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
           <Quote>{`"나를 지키는 단단한 뿌리 위에\n타인과 소통하는 가지를 뻗을 때,\n${name}님의 삶은 가장 크고\n웅장하게 자리 잡을 거예요."`}</Quote>
@@ -2617,7 +3776,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-13.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-11/total-11-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제11장 · 흐름</p>
@@ -2673,7 +3832,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-15.jpg" h={360} />
+          <Illust src="/media/report/total/total-11/total-11-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
           <Quote>{`"인생의 가장 아름다운 계절이\n머지않았으니,\n조급해하지 말고 나만의 속도로\n걸어가 보아요."`}</Quote>
@@ -2689,7 +3848,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-16.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-5/total-5-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제5장 · 재물</p>
@@ -2741,7 +3900,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-17.jpg" h={360} />
+          <Illust src="/media/report/total/total-5/total-5-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
           <Quote>{`"재물은 흙(土)의 대지 위에\n쇠(金)의 도구로 일굴 때 가장\n단단하게 쌓여요.\n조급함을 내려놓고 장기적인\n안목으로 자산을 굴려 가세요."`}</Quote>
@@ -2757,7 +3916,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-6/total-6-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제6장 · 사랑</p>
@@ -2792,7 +3951,7 @@ function ReportPreviewInner() {
           {/* 이런 사람이 배우자로 와요 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>이런 사람이 배우자로 와요</Heading>
-            <PersonCard label="사주로 본 배우자의 분위기예요." photo="/images/hero/hero-4.jpg" card={c.spouse.card} />
+            {c.spouse?.card && <PersonCard label="사주로 본 배우자의 분위기예요." photo="/media/report/total/total-6/total-6-1.jpg" card={c.spouse.card} />}
             <P>{c.spouse.intro}</P>
             <Callout>{c.spouse.callout}</Callout>
             {c.spouse.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
@@ -2808,7 +3967,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-9.jpg" h={400} />
+          <Illust src="/media/report/total/total-6/total-6-2.jpg" h={400} />
 
           {/* 마무리 인용 */}
           <Quote>{`"서로의 화원에 적당한 거리를 두고\n물을 줄 때,\n${ilganLabel}(${ilganHanja})의 사랑은 시들지 않고\n가장 아름답게 피어난답니다."`}</Quote>
@@ -2824,7 +3983,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-10.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-7/total-7-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제7장 · 건강</p>
@@ -2866,7 +4025,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-1.jpg" h={400} />
+          <Illust src="/media/report/total/total-7/total-7-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
           <Quote>{`"몸의 뼈대(金)가 곧게 서야\n두른 나무(木)가 곧게 자라듯,\n관절과 호흡기를 보살피는 것이\n활력의 시작이에요."`}</Quote>
@@ -2882,7 +4041,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-8/total-8-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제8장 · 귀인</p>
@@ -2898,7 +4057,7 @@ function ReportPreviewInner() {
           <HanjaDivider hanja="貴人" sub="귀인은 어떤 사람일까" />
           <section className="px-6 pt-6 pb-4">
             <Heading>귀인은 어떤 사람일까</Heading>
-            <PersonCard title="귀인 인물 카드" label="나를 돕는 사람의 분위기와 특징이에요." photo="/images/hero/hero-6.jpg" card={c.helper.card} />
+            {c.helper?.card && <PersonCard title="귀인 인물 카드" label="나를 돕는 사람의 분위기와 특징이에요." photo="/media/report/total/total-8/total-8-1.jpg" card={c.helper.card} />}
             <P>{c.helper.intro}</P>
             <Callout>{c.helper.callout}</Callout>
             {c.helper.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
@@ -2923,7 +4082,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-14.jpg" h={400} />
+          <Illust src="/media/report/total/total-8/total-8-2.jpg" h={400} />
 
           {/* 마무리 인용 */}
           <Quote>{`"나를 깎아내리는 칼날이 아니라\n나를 다듬어 주는 정교한\n정(金)처럼,\n귀인의 쓴소리를 성장의 발판으로\n삼아 보세요."`}</Quote>
@@ -2939,7 +4098,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-8.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-12/total-12-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(40,0,0,0.45) 0%, transparent 32%, transparent 60%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제12장 · 주의</p>
@@ -2983,7 +4142,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-13.jpg" h={400} />
+          <Illust src="/media/report/total/total-12/total-12-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
           <Quote>{`"삼재라는 겨울바람이 불 때는\n억지로 꽃을 피우려 하지 말고,\n뿌리를 더 깊이 내리는 시간으로\n삼으면 안전하답니다."`}</Quote>
@@ -2999,7 +4158,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-7.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-9/total-9-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(40,0,0,0.45) 0%, transparent 32%, transparent 60%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제9장 · 악인</p>
@@ -3015,7 +4174,7 @@ function ReportPreviewInner() {
           <HanjaDivider hanja="小人" sub="나를 흔드는 사람은 이렇게 온다" />
           <section className="px-6 pt-6 pb-4">
             <Heading>나를 흔드는 사람은 이렇게 온다</Heading>
-            <PersonCard title="조심할 인물 카드" label="나를 흔들 수 있는 사람의 분위기와 특징이에요." photo="/images/hero/hero-12.jpg" card={c.villain.card} />
+            {c.villain?.card && <PersonCard title="조심할 인물 카드" label="나를 흔들 수 있는 사람의 분위기와 특징이에요." photo="/media/report/total/total-9/total-9-1.jpg" card={c.villain.card} />}
             <P>{c.villain.intro}</P>
             <Callout>{c.villain.callout}</Callout>
             {c.villain.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
@@ -3025,7 +4184,7 @@ function ReportPreviewInner() {
 
           {/* 무엇을 잃을 수 있는지 */}
           <HanjaDivider hanja="損失" sub="그때 무엇을 잃을 수 있는지" />
-          <Illust src="/images/hero/hero-16.jpg" h={400} />
+          <Illust src="/media/report/total/total-9/total-9-2.jpg" h={400} />
           <section className="px-6 pt-6 pb-4">
             <Heading>그때 무엇을 잃을 수 있는지</Heading>
             <P>{c.loss.intro}</P>
@@ -3047,7 +4206,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-9.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-13/total-13-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제13장 · 당부</p>
@@ -3084,7 +4243,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-13.jpg" h={400} />
+          <Illust src="/media/report/total/total-13/total-13-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
           <Quote>{`"나의 굳건한 뿌리를 믿고,\n다가올 황금빛 계절을 향해\n한 걸음씩 당당하게 걸어가시기를\n응원해 드려요."`}</Quote>
@@ -3100,7 +4259,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-15.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-14/total-14-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 32%, transparent 68%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제14장 · 개운</p>
@@ -3151,7 +4310,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-1.jpg" h={400} />
+          <Illust src="/media/report/total/total-14/total-14-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
           <Quote>{`"매일의 작은 습관이 모여\n거대한 운명의 물결을 바꾸듯,\n오늘 전해드린 처방을 가볍게\n시작해 보세요."`}</Quote>
@@ -3167,7 +4326,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 470 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-17.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-15/total-15-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 32%, transparent 64%, rgba(253,248,244,0.95) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.2em] mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>제15장 · 중심</p>
@@ -3208,7 +4367,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/images/hero/hero-9.jpg" h={400} />
+          <Illust src="/media/report/total/total-15/total-15-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
           <Quote>{`"마음속에 ${c.simju.heart.label}의 단단한\n뿌리와 기둥을 세울 때,\n어떤 감정의 폭풍이 와도\n${name}님은 흔들리지 않을 거예요."`}</Quote>
@@ -3225,7 +4384,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           <div className="relative overflow-hidden" style={{ height: 460 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/hero/hero-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src="/media/report/total/total-16/total-16-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, transparent 30%, transparent 66%, rgba(253,248,244,0.96) 100%)" }} />
             <div className="absolute top-7 left-0 right-0 text-center px-6">
               <p className="text-[12px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.9)" }}>맺음 · 결론</p>
@@ -3266,7 +4425,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제17장 이후 — 준비 중 ═══════════ */}
-      {ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && ch !== "15" && ch !== "16" && (
+      {ch !== "0" && ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && ch !== "15" && ch !== "16" && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
@@ -3289,7 +4448,7 @@ function ReportPreviewInner() {
       <HanjaDivider hanja="往事" sub="그해, 무슨 일이 있었을까" />
 
       {/* ── 삽화 ── */}
-      <Illust src="/images/hero/hero-8.jpg" />
+      <Illust src="/media/report/total/total-10/total-10-1.jpg" />
 
       {/* ── 인용 ── */}
       <Quote>
@@ -3310,7 +4469,7 @@ function ReportPreviewInner() {
       <HanjaDivider hanja="緣由" sub="왜 힘들었던 걸까, 사주 속 숨어있는 이유" />
 
       {/* ── 삽화 ── */}
-      <Illust src="/images/hero/hero-12.jpg" />
+      <Illust src="/media/report/total/total-10/total-10-2.jpg" />
 
       {/* ── 인용 ── */}
       <Quote>
@@ -3318,7 +4477,7 @@ function ReportPreviewInner() {
       </Quote>
 
       {/* ── 삽화 ── */}
-      <Illust src="/images/hero/hero-7.jpg" />
+      <Illust src="/media/report/total/total-10/total-10-3.jpg" />
 
       {/* ── 인용 (천간 강조) ── */}
       <div className="px-8 py-12 text-center">
@@ -3350,7 +4509,7 @@ function ReportPreviewInner() {
       <HanjaDivider hanja="宿命" sub="반복되어 온 삶의 패턴" />
 
       {/* ── 삽화 ── */}
-      <Illust src="/images/hero/hero-11.jpg" />
+      <Illust src="/media/report/total/total-10/total-10-4.jpg" />
 
       {/* ── 인용 ── */}
       <Quote>
@@ -3370,7 +4529,7 @@ function ReportPreviewInner() {
       </section>
 
       {/* ── 삽화 ── */}
-      <Illust src="/images/hero/hero-7.jpg" />
+      <Illust src="/media/report/total/total-10/total-10-5.jpg" />
 
       {/* ── 마무리 인용 ── */}
       <Quote>

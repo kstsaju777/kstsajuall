@@ -35,8 +35,14 @@ export type ReportContent = {
   // ── 2장: 나는 어떤 사람일까 (타고난 본바탕) ──
   wonguk: ReportSection;    // 사주 원국 한눈에 보기
   ohaeng: ReportSection;    // 오행 균형
+  chonyeongi: { paragraphs: string[] }; // 초년기(년주) 풀이
+  cheongneongi: { paragraphs: string[] }; // 청년기(월주) 풀이
+  jungnyeongi: { paragraphs: string[] };  // 중년기(일주) 풀이
+  nonyeongi: { paragraphs: string[] };    // 노년기(시주) 풀이 — 시간 모름이면 빈 배열
+  ability: { paragraphs: string[] };      // 타고난 능력치 풀이
   sipseong: ReportSection;  // 십성으로 보는 타고난 역할
   unseong: ReportSection;   // 십이운성으로 보는 기운의 세기
+  sinsalReading: { paragraphs: string[] }; // 신살 풀이
   pyori: ReportSection;     // 밖에서 보는 나와 실제의 나
   // ── 3장: 나는 왜 이런 사람인 걸까 (사주 속 필연구조) ──
   strength: ReportSection;  // 신강·신약
@@ -111,7 +117,7 @@ export type ReportContent = {
 
 // 장 ↔ 포함 섹션 (장별 온디맨드 생성/완료 판정용)
 export const CHAPTER_SECTIONS: Record<number, string[]> = {
-  1: ["wonguk", "ohaeng", "sipseong", "unseong", "pyori"],     // 제1장 환경
+  1: ["wonguk", "ohaeng", "chonyeongi", "cheongneongi", "jungnyeongi", "nonyeongi", "ability", "sipseong", "unseong", "sinsalReading", "pyori"],     // 제1장 환경
   2: ["strength", "gyeokguk", "yongsin", "hapchung", "essence"], // 제2장 운명
   3: ["balance", "answer"],                                     // 제3장 관계
   4: ["rarity", "special"],                                     // 제4장 특징
@@ -129,17 +135,27 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   16: ["letter"],                                               // 마무리
 };
 
-// 해당 장의 콘텐츠가 이미 생성됐는지
+// 해당 장의 콘텐츠가 이미 생성됐는지 (모든 섹션 키 확인, paragraphs 빈 배열도 미완성)
 export function isChapterReady(content: Record<string, unknown> | null | undefined, chapter: number): boolean {
   if (!content) return false;
-  const first = CHAPTER_SECTIONS[chapter]?.[0];
-  return !!first && content[first] != null;
+  const keys = CHAPTER_SECTIONS[chapter];
+  if (!keys?.length) return false;
+  return keys.every((k) => {
+    const v = content[k];
+    if (v == null) return false;
+    if (typeof v === "object" && v !== null && "paragraphs" in v) {
+      return ((v as { paragraphs: unknown[] }).paragraphs?.length ?? 0) > 0;
+    }
+    return true;
+  });
 }
 
 export type ReportPromptInput = {
   name: string;
   gender: "male" | "female";
   manseryeokText: string; // formatSajuToManseryeok 결과 (16종 풀 명식)
+  pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[];
+  birthYear?: number; // 생년 (나이 기반 시제 판단용)
 };
 
 // 장별 JSON 스키마 (출력 필드 구조 — 화면 렌더와 1:1). 톤/주제/지시는 report-prompts.ts 참고.
@@ -152,10 +168,68 @@ const CH_SCHEMA: Record<number, string> = {
     "summary": [ {"title":"핵심 키워드","desc":"한 줄 설명"} ] }
 }`,
   1: `{
-  "wonguk": { "intro": "일주의 강점/생명력 도입", "callout": "일간의 본질을 짚는 문장", "paragraphs": ["각 기둥(월/년/시) 해석","원국 전체 조화","문단"] },
+  "wonguk": {
+    "intro": "【필수 규칙】① 반드시 명식의 월지(月支)를 확인하여 실제 계절·한난조습을 먼저 결정하라. 子·亥=한겨울(寒水), 丑=겨울 끝 냉습, 寅·卯=이른 봄(온기 시작), 辰=봄 끝 습토, 巳·午=한여름(炎熱), 未=여름 끝 건토, 申·酉=초가을(서늘), 戌=가을 끝 건조, 이 계절 정보를 왜곡하지 말 것. ② 일간의 오행·일주·위에서 결정한 월지 계절을 하나의 자연물 이미지(나무·물·불·돌·바람 등)로 시각화하는 도입 2~3문장. 반드시 홍연 말투(~이오 / ~하오 / ~했소 / ~겠소)로 작성. 예시(子水월 甲木 일간의 경우): '그대는 추운 겨울의 끝자락에서 차가운 물 기운이 가득한 대지 위로 스스로의 힘을 다해 꼿꼿하게 일어선 푸른 숲의 나무와 같은 기운을 타고나셨소. 겉으로 보기에는 유연하고 부드러워 보이지만 땅속 깊이 박힌 뿌리가 매우 단단하여 웬만한 비바람에는 흔들리지 않는 강인한 생명력을 품고 있소. 얼어붙은 땅을 뚫고 나오는 봄의 새싹처럼 강한 추진력과 자생력을 갖추고 있어 어떤 역경이 와도 결국 스스로의 길을 찾아내는 분이오.' — 이 예시의 문체·온도를 유지하되 대상 명식의 실제 월지 계절에 맞게 완전히 새로 작성.",
+    "callout": "겉으로 드러나는 천간 인상과 지지에 숨겨진 내면 본성의 핵심 대비 한 문장. 홍연 말투(~이오/~하오/~했소)로 작성.",
+    "paragraphs": [
+      "신강/신약 판단 → 타고난 생명력·추진력·자생력을 위 intro와 이어지는 자연 이미지로 이어 묘사. 지배적 십성(비겁·식상 등)의 장점과 과할 때 그림자 → 용신·희신·기신 구체 언급 → 격국 이름과 특성. 반드시 홍연 말투(~이오/~하오/~했소/~겠소)로 4~5문장 작성.",
+      "천간 십성 기반 겉모습(표현·행동 방식) → 지지 십성 기반 내면(감추어진 욕구·경계심) → 두 얼굴의 온도 차이와 대인관계 패턴·주의점. 반드시 홍연 말투(~이오/~하오/~했소/~겠소)로 4~5문장 작성."
+    ]
+  },
   "ohaeng": { "intro": "어떤 기운이 강한지 도입", "callout": "가장 강한 오행과 의미", "paragraphs": ["성격에 주는 영향","약한 오행 보완점","조언"] },
+  "chonyeongi": {
+    "paragraphs": [
+      "【초년기 풀이 — 년주(年柱) 기반, 필수 규칙】⓪ 위에 제공된 [기둥별 십성 확인표]에서 년주 항목의 천간 십성과 지지 십성 값을 그대로 가져오오. 절대 추론하거나 임의로 변경하지 마오. 확인표에 없는 십성은 언급 자체를 금지하오. ① 십성을 언급할 때는 반드시 '년주 천간이 기토 편재이고, 년주 지지가 사화 상관이오.' 처럼 글자 이름과 십성을 함께 붙여서 말하오. ② 드러난 십성(년주 천간 십성·지지 십성)만을 해석하며, 명식에 없는 십성은 언급하지 마오. ③ 육친으로 보면 년주는 조부모를 나타내오. 아래 [십성별 의미 가이드]를 반드시 참고하여, 년주 천간 십성과 지지 십성 각각의 의미를 초년기 풀이에 녹여내오.
+
+[년주 천간 십성별 의미 가이드 — 조부(조상)의 인연·태어난 환경]
+비견=조상으로부터 독립적 성향 물려받음·경쟁 많은 초년·형제자매 친구 중요 / 겁재=경쟁적 상황 많음·나눔·희생 강요받았을 가능성·자립성 강해짐 / 식신=조화롭고 안정적 가정환경·성실하고 차분한 성격 형성·조상 인연 긍정적 / 상관=창의적·자유로운 환경·규칙보다 자유 추구·부모와 갈등 가능 / 편재=초년 변화 많거나 물질적 불안정·부모가 대담하고 외향적 / 정재=안정적 가정환경·책임감과 성실함을 부모로부터 배움 / 편관=부모가 강인하고 독립적·도전과 변화 많은 환경 / 정관=규칙·질서 중시 환경·전통적이고 책임감 있는 부모 / 편인=부모가 독특하고 창의적·다양한 시도 경험·고립감 가능 / 정인=부모 도움 많이 받음·학문적이고 안정된 환경·부모와 조화로운 관계
+
+[년주 지지 십성별 의미 가이드 — 조모(조상)의 인연·성장 환경]
+비견=형제자매·친구로부터 큰 영향·독립적으로 각자의 길 추구 / 겁재=또래와 갈등·경쟁 많음·그 과정에서 성장 / 식신=안정적이고 평화로운 가정·부모 도움으로 안정적 초년 / 상관=독특하고 창의적 성향·자유로운 사고·반항적 성향 가능 / 편재=어릴때부터 재물 경험·부모 지원 가능·변동성 강함 / 정재=조상으로부터 물질적 지원 가능·실속있고 안정적 환경 / 편관=독립적이고 변동성 강한 환경·부모와 갈등·긴장 가능 / 정관=안정적이고 체계적 교육·부모에 대한 존경심 형성 / 편인=독립적이고 창의적 환경·부모와의 관계 복잡하거나 특이함 / 정인=안정적이고 현실적인 부모·초년기에 보호받는 느낌 ④ 년주 천간 오행과 지지 오행 사이의 관계를 아래 표에서 정확히 확인하오. [상극표: 목극토 / 토극수 / 수극화 / 화극금 / 금극목] [상생표: 목생화 / 화생토 / 토생금 / 금생수 / 수생목] [비화: 같은 오행끼리] — 이 표에 없는 조합은 상극이 아니오. 상극이 맞는 경우에만 그 긴장이 초년기에 어떤 갈등이나 부침으로 작용했는지 첨언하오. 상생이면 그 기운이 서로 도왔다고 서술하오. 비화이면 기운이 강하게 모였다고 서술하오. ⑤ 위 [섹션별 시제 지시]에서 chonyeongi에 지정된 시제로만 모든 문장을 작성하오. 다른 시제를 섞지 마오. ⑥ 첫 문장은 반드시 '초년기에는'으로 시작하오. '이번 초년기에는', '그대의 초년기에는' 등 다른 표현은 절대 금지하오. ⑦ 좋은 면과 좋지 않은 면을 반드시 모두 담으오. 좋은 점만 나열하거나 좋지 않은 면을 희석하여 얼버무리지 마오. 반드시 홍연 말투로 300자(공백 포함) 내외로 작성하오."
+    ]
+  },
+  "cheongneongi": {
+    "paragraphs": [
+      "【청년기 풀이 — 월주(月柱) 기반, 필수 규칙】⓪ 위에 제공된 [기둥별 십성 확인표]에서 월주 항목의 천간 십성과 지지 십성 값을 그대로 가져오오. 절대 추론하거나 임의로 변경하지 마오. 확인표에 없는 십성은 언급 자체를 금지하오. ① 십성을 언급할 때는 반드시 '월주 천간이 갑목 비견이고, 월주 지지가 인목 정관이오.' 처럼 글자 이름과 십성을 함께 붙여서 말하오. ② 드러난 십성(월주 천간 십성·지지 십성)만을 해석하며, 명식에 없는 십성은 언급하지 마오. ③ 육친으로 보면 월주는 부모를 나타내오. 아래 [십성별 의미 가이드]를 반드시 참고하여, 월주 천간 십성과 지지 십성 각각의 의미를 청년기 풀이에 녹여내오.
+
+[월주 천간 십성별 의미 가이드 — 부친·사회활동·직업]
+비견=동등한 입장과 경쟁 많음·직업적 독립성 강함·자기주장 강한 부모 관계 / 겁재=재물 나눔·소모 경험·직업적 과감한 도전·부모와 자율적·독립적 관계 / 식신=직업에서 안정적이고 조화로운 성과·타인과 협력·부모와 원만한 관계 / 상관=창의적·독립적·틀을 깨는 아이디어·직업에서 새로운 방식 추구 / 편재=재물 흐름 크고 변동성 있음·직업적으로 활발하고 대담·부모와 자유로운 관계 / 정재=재물관리 능력 뛰어남·성실하고 안정적 직업 기반·책임감 있는 부모 관계 / 편관=직업 변동 많고 도전적·새로운 시도 즐김·자신의 방식 고수 / 정관=안정적이고 책임감 있는 직업 태도·전통·규범 중시·부모와 조화로운 관계 / 편인=창의적·독립적 성향·직업 변동 많음·부모와 독특한 관계 방식 / 정인=학문적·지적 직업 태도·사회적 신뢰·부모에게 존경받음
+
+[월주 지지 십성별 의미 가이드 — 모친·사회활동·직업]
+비견=사회 교류 활발·협력보다 경쟁 강함·동료와 끊임없는 경쟁 / 겁재=과도한 사회 경쟁·강한 추진력과 대담한 도전·재물 관리 주의 / 식신=사회적 안정 기반·직업에서 지속적 성과·주변과 조화롭고 평화로운 관계 / 상관=독창적이고 도전적·예술적·창의적 직업 적합·지나친 자유로움으로 갈등 가능 / 편재=재물운 큰 기회·변동성 강해 관리 필요·사교적이고 외향적 활동 적합 / 정재=안정적 재물운·직업에서 성실·가족을 위한 책임감 강조 / 편관=강한 추진력과 리더십·도전적·지나친 독단 주의 / 정관=안정적 직업으로 사회 신뢰·책임감·상사·부모와 조화·규범 준수 / 편인=독립적·창의적·지적 직업에서 두각·지나친 고립 주의 / 정인=학문적·지적 활동 강함·부모와 안정적·조화로운 관계·직업적 신뢰 높음 ④ 월주 천간 오행과 지지 오행 사이의 관계를 아래 표에서 정확히 확인하오. [상극표: 목극토 / 토극수 / 수극화 / 화극금 / 금극목] [상생표: 목생화 / 화생토 / 토생금 / 금생수 / 수생목] [비화: 같은 오행끼리] — 이 표에 없는 조합은 상극이 아니오. 상극이 맞는 경우에만 그 긴장이 청년기에 어떤 갈등이나 부침으로 작용했는지 첨언하오. 상생이면 그 기운이 서로 도왔다고 서술하오. 비화이면 기운이 강하게 모였다고 서술하오. ⑤ 위 [섹션별 시제 지시]에서 cheongneongi에 지정된 시제로만 모든 문장을 작성하오. 다른 시제를 섞지 마오. 두 십성이 함께 만들어내는 청년기 전체 분위기를 통합하여 서술하오. ⑥ 월주는 사회생활에서의 나의 모습을 나타내므로, 월주 십성과 오행을 근거로 직장인(조직 생활)이 어울리는 사주인지 사업·독립이 어울리는 사주인지 명확히 언급하오. ⑦ 좋은 면과 좋지 않은 면을 반드시 모두 담으오. 좋은 점만 나열하거나 좋지 않은 면을 희석하여 얼버무리지 마오. 반드시 홍연 말투(~이오/~하오/~했소/~겠소)로 300자(공백 포함) 내외로 작성하오."
+    ]
+  },
+  "jungnyeongi": {
+    "paragraphs": [
+      "【중년기 풀이 — 일주(日柱) 기반, 필수 규칙】⓪ 위에 제공된 [기둥별 십성 확인표]에서 일주 항목의 천간 십성과 지지 십성 값을 그대로 가져오오. 절대 추론하거나 임의로 변경하지 마오. 확인표에 없는 십성은 언급 자체를 금지하오. ① 십성을 언급할 때는 반드시 '일주 천간이 임수 일간이고, 일주 지지가 신금 정인이오.' 처럼 글자 이름과 십성을 함께 붙여서 말하오. ② 드러난 십성(일주 천간의 오행 본질·일지 십성)만을 해석하며, 명식에 없는 십성은 언급하지 마오. ③ 육친으로 보면 일주는 나 자신과 배우자를 나타내오. 일간의 오행·음양 본질이 나라는 사람의 중년기 삶의 방식을 결정하고, 아래 [십성별 의미 가이드]를 반드시 참고하여 일지 십성이 배우자와의 관계·결혼생활·내면 심리에 어떤 영향을 미치는지 구체적으로 풀이하오. 아울러 사회적 역할 완성, 직업 전성기 혹은 전환점, 내면의 성숙도 함께 서술하오.
+
+[일주 지지 십성별 의미 가이드 — 배우자궁·결혼생활·내면심리]
+비견=배우자와 대등하고 평등한 관계·서로 의견 존중·협력 기반·경쟁적 의견충돌 가능 / 겁재=경쟁적이고 도전적인 기운·배우자 활발하고 적극적·활기차고 역동적·지나친 갈등·간섭 가능 / 식신=안정적이고 평화로운 기운·배우자 온화하고 가정적·안정 중시하나 변화 두려워할 수 있음 / 상관=자유로운 분위기 선호·배우자 창의적이고 개성 강함·전통 결혼관 탈피·지나친 자유 추구 시 불안정 / 편재=활발하고 다채로운 관계·배우자 외향적이고 매력적·활기찬 결혼생활·지나친 외향성으로 갈등 가능 / 정재=안정적이고 현실적·배우자 성실하고 책임감 강함·신뢰 기반 결혼생활·낭만 부족할 수 있음 / 편관=강렬하고 도전적인 기운·배우자 강인하고 독립적·열정적이고 다이나믹·갈등·긴장 가능 / 정관=안정적이고 전통적 가치·배우자 신뢰할 수 있고 책임감·믿음직한 결혼생활·틀에 박힌 삶 가능 / 편인=독창적이고 독립적·배우자 창의적이고 독특·개성 넘치는 결혼생활·감정적 예민함·고립 가능 / 정인=안정적이고 배려심 강함·배우자 가정적이고 보호적·따뜻하고 조화로운 결혼생활·지나친 의존·희생 가능 ④ 일주 천간 오행과 지지 오행 사이의 관계를 아래 표에서 정확히 확인하오. [상극표: 목극토 / 토극수 / 수극화 / 화극금 / 금극목] [상생표: 목생화 / 화생토 / 토생금 / 금생수 / 수생목] [비화: 같은 오행끼리] — 이 표에 없는 조합은 상극이 아니오. 상극이 맞는 경우에만 그 긴장이 중년기에 어떤 갈등이나 삶의 전환으로 작용했는지 첨언하오. 상생이면 그 기운이 서로 도왔다고 서술하오. 비화이면 기운이 강하게 모였다고 서술하오. ⑤ 위 [섹션별 시제 지시]에서 jungnyeongi에 지정된 시제로만 모든 문장을 작성하오. 다른 시제를 섞지 마오. 두 기운이 함께 만들어내는 중년기 전체 분위기를 통합하여 서술하오. ⑥ 좋은 면과 좋지 않은 면을 반드시 모두 담으오. 좋은 점만 나열하거나 좋지 않은 면을 희석하여 얼버무리지 마오. 반드시 홍연 말투(~이오/~하오/~했소/~겠소)로 300자(공백 포함) 내외로 작성하오."
+    ]
+  },
+  "nonyeongi": {
+    "paragraphs": [
+      "【노년기 풀이 — 시주(時柱) 기반, 필수 규칙】⓪ 위에 제공된 [기둥별 십성 확인표]에서 시주 항목의 천간 십성과 지지 십성 값을 그대로 가져오오. 절대 추론하거나 임의로 변경하지 마오. 확인표에 없는 십성은 언급 자체를 금지하오. ① 십성을 언급할 때는 반드시 '시주 천간이 병화 편관이고, 시주 지지가 오화 정재이오.' 처럼 글자 이름과 십성을 함께 붙여서 말하오. ② 드러난 십성(시주 천간 십성·지지 십성)만을 해석하며, 명식에 없는 십성은 언급하지 마오. ③ 육친으로 보면 시주는 자녀를 나타내오. 아래 [십성별 의미 가이드]를 반드시 참고하여, 시주 천간 십성과 지지 십성 각각의 의미를 노년기 풀이에 녹여내오. 아울러 노후 재물·건강, 인생의 결실과 마무리도 함께 서술하오.
+
+[시주 천간 십성별 의미 가이드 — 말년·자녀(아들)]
+비견=자식 도움보다 자기의지로 삶 꾸림·말년에도 독립적·자신만의 방식 고수 / 겁재=말년에 재물 나눔·희생 발생·책임감 과중·자녀와 재물·책임 갈등 가능·소통 중요 / 식신=안정적이고 평화로운 말년·자식과 원만하고 조화로운 관계·자녀에게 풍요 제공 / 상관=도전적이고 창의적인 말년·틀을 깨는 일 많음·자녀 독립적이고 반항적 가능 / 편재=말년에 큰 재물 기회·외부 재물 활용·자녀에게 대담하고 관대한 태도 / 정재=말년에도 꾸준하고 안정적 재물·자녀에게 경제적 도움 가능한 위치 / 편관=말년에 변동 많고 도전적 삶·자녀와의 관계도 독립적이고 강렬 / 정관=안정적 사회적 지위 유지·자녀와 조화로운 관계·규칙적이고 책임감 있는 모습 / 편인=창의적이고 독특한 말년·직관적·독립적·다소 고독해질 가능성 / 정인=안정감 있고 조화로운 말년·자녀·후손에게 존경받는 위치·학문적이고 지혜로운 태도
+
+[시주 지지 십성별 의미 가이드 — 말년·자녀(딸)]
+비견=말년에 동료·형제자매·친구와 교류 활발·인간관계에서 도움받음·자녀에게서 협력과 도움 가능 / 겁재=자녀에게서 도움 받으나 감정적 갈등 가능·말년에 도전적 행동으로 인생 전환점 만들기도 함 / 식신=자식이 안정적이고 평화롭게 자리잡음·평화롭고 성실한 말년·자녀가 창의적 / 상관=자식 개성 강하고 독립적·말년에 갈등 상황 가능·조화를 신경써야 함 / 편재=자식 활발하고 사교적·재물 변동 많아 안정보다 변화 추구 성향 / 정재=자식 성실하고 안정적·재물관리 신중하게 해야 하는 경향 / 편관=자식 독립적이고 자기주장 강함·갈등·변동 유발 가능성 / 정관=자식 전통적이고 안정적 성향·너무 틀에 박히지 않도록 균형 필요 / 편인=자식 독창적이고 자유로운 성향·감정적 갈등 발생 여지 있음 / 정인=자식 안정적이고 현실적·부모에게 도움이 되는 역할 가능성 ④ 시주 천간 오행과 지지 오행 사이의 관계를 아래 표에서 정확히 확인하오. [상극표: 목극토 / 토극수 / 수극화 / 화극금 / 금극목] [상생표: 목생화 / 화생토 / 토생금 / 금생수 / 수생목] [비화: 같은 오행끼리] — 이 표에 없는 조합은 상극이 아니오. 상극이 맞는 경우에만 그 긴장이 노년기에 어떤 갈등이나 마무리의 과제로 작용하는지 첨언하오. 상생이면 그 기운이 서로 도왔다고 서술하오. 비화이면 기운이 강하게 모였다고 서술하오. ⑤ 위 [섹션별 시제 지시]에서 nonyeongi에 지정된 시제로만 모든 문장을 작성하오. 다른 시제를 섞지 마오. 두 기운이 함께 만들어내는 노년기 전체 분위기를 통합하여 서술하오. ⑥ 좋은 면과 좋지 않은 면을 반드시 모두 담으오. 좋은 점만 나열하거나 좋지 않은 면을 희석하여 얼버무리지 마오. 반드시 홍연 말투(~이오/~하오/~했소/~겠소)로 300자(공백 포함) 내외로 작성하오."
+    ]
+  },
+  "ability": {
+    "paragraphs": [
+      "【타고난 능력치 풀이 — 필수 규칙】위에 제공된 [타고난 능력치 점수]를 참고하여 풀이하오. ① 점수 수치는 절대 언급하지 마오. 높고 낮음을 글로만 표현하오. ② 80점 이상인 능력치는 두각되는 강점으로, 60점 미만인 능력치는 솔직하게 보완이 필요한 부분으로 서술하오. 좋은 점만 나열하거나 부족한 부분을 얼버무리지 마오. ③ 가장 높은 능력치 2~3개와 가장 낮은 능력치 1~2개를 구체적으로 언급하오. ④ 능력치 이름을 직접 언급(예: '추진력이 강하오')하여 명시적으로 서술하오. ⑤ 단순 나열이 아니라 이 조합이 실제 삶에서 어떤 방식으로 드러나는지 입체적으로 풀이하오. ⑥ 반드시 홍연 말투(~이오/~하오/~겠소)로 250자 내외로 작성하오."
+    ]
+  },
   "sipseong": { "intro": "십성으로 본 사회적 역할 도입", "callout": "가장 활성화된 십성과 의미", "paragraphs": ["그 십성의 강점","어떤 일에서 빛나는지","문단"] },
   "unseong": { "intro": "십이운성 도입", "callout": "일주 등 핵심 운성과 기운", "paragraphs": ["기운의 특징","주의점/조언"] },
+  "sinsalReading": {
+    "paragraphs": [
+      "【신살 풀이 — 필수 규칙】위 명식표에 기재된 신살들을 기반으로 이 사람의 사주를 풀이하오. 반드시 아래 다섯 가지 접근을 모두 담아 입체적으로 서술하오.\n① [실존 신살만] 명식표에 실제로 기재된 신살만 언급하오. 없는 신살을 지어내지 마오.\n② [삶의 서사] 각 신살이 이 사람의 삶에 어떤 이야기를 만들어내는지, 단순 정의가 아니라 실제 삶의 장면으로 풀어내오. 어떤 상황에서, 어떤 방식으로 그 기운이 드러나는지 구체적으로 서술하오.\n③ [귀인과 보호의 기운] 귀인살(천을귀인·문창귀인·천덕귀인·월덕귀인·금여록·암록 등)이 있다면, 어떤 형태의 귀인이 어떤 시기에 어떻게 찾아오는지 서술하오.\n④ [살의 이면] 역마살·도화살·화개살·현침살·망신살·홍염살 등 살의 기운이 있다면, 부정적 면만 나열하지 말고 그 살이 오히려 이 사람에게 개성과 추진력이 되는 면을 함께 서술하오. 일간·오행·십성과 연결하여 이 사람만의 방식으로 해석하오.\n⑤ [통합 기운] 신살들이 서로 어우러지며 만들어내는 이 사람만의 독특한 기운의 색채를 종합적으로 마무리하오. 이 사람이 신살의 기운을 어떻게 활용하면 좋은지 조언도 담아내오.\n반드시 홍연 말투(~이오/~하오/~했소/~겠소)로 560자 내외로 작성하오."
+    ]
+  },
   "pyori": { "intro": "겉과 속이 다를 수 있다는 도입", "callout": "겉모습 vs 속마음 핵심 대비", "paragraphs": ["밖에서 보는 모습","실제 내면의 모습"] }
 }`,
   2: `{
@@ -472,14 +546,212 @@ const CH_SCHEMA: Record<number, string> = {
 }`,
 };
 
+// 사주 원국 이미지 생성용 프롬프트 빌더
+export function buildSajuImagePrompt(pillars: { gan: string; ji: string }[]): string {
+  const [si, il, wol, nyeon] = pillars;
+
+  // 일간별 핵심 사물
+  const ILGAN_SUBJECT: Record<string, string> = {
+    甲: "a towering ancient tree — straight, mighty, a born leader of the forest",
+    乙: "lush vines and grass — flexible, vital, adapting gracefully to every environment",
+    丙: "the blazing sun — radiant, outward, powerful presence driving everything forward",
+    丁: "a candle flame — delicate, warm, gently illuminating the world around it",
+    戊: "a grand mountain — steadfast, trustworthy, immovable and enduring",
+    己: "fertile farmland — nurturing, caring, deeply rooted in practical reality",
+    庚: "a massive boulder — principled, weighty, unyielding and commanding",
+    辛: "shimmering gems and refined metal — sharp, elegant, refined to perfection",
+    壬: "a vast ocean — deep, expansive, flowing freely with broad perspective",
+    癸: "a spring or morning dew — pure, intuitive, quietly perceptive",
+  };
+
+  // 월지별 계절·분위기
+  const WOLJI_SEASON: Record<string, string> = {
+    寅: "early spring — first hints of warmth, pale green buds emerging from frozen earth",
+    卯: "full spring — soft pink blossoms, gentle breeze, fresh green everywhere",
+    辰: "late spring — lush greenery, warm humid air, mist over the hills",
+    巳: "early summer — rising heat, bright sky, vibrant life in full swing",
+    午: "midsummer — blazing sun overhead, intense light, deep saturated greens",
+    未: "late summer — golden haze, heat shimmer, earth beginning to dry",
+    申: "early autumn — crisp cool air, first leaves turning amber and red",
+    酉: "full autumn — golden amber landscape, falling leaves, serene melancholy",
+    戌: "late autumn — bare branches, dry earth, muted earth tones, cold wind",
+    亥: "early winter — first frost, barren ground, cold mist, darkness approaching",
+    子: "midwinter — deep cold, blue moonlight, snow blanketing the frozen ground",
+    丑: "late winter — lingering snow, pale dawn light, the earth waiting to thaw",
+  };
+
+  // 나머지 6글자 → 보조 사물 매핑 (일간·월지 제외)
+  const CHAR_ELEMENT: Record<string, string> = {
+    甲: "a tall straight tree in the background",
+    乙: "climbing vines or wildflowers nearby",
+    丙: "a bright sun or warm sunbeams breaking through",
+    丁: "a small flickering flame or lantern light",
+    戊: "a rugged mountain ridge in the distance",
+    己: "gentle rolling farmland or fertile soil",
+    庚: "large weathered boulders or rocky outcrops",
+    辛: "glinting crystal formations or refined metallic sheen",
+    壬: "a wide river or reflective ocean in the background",
+    癸: "morning dew on leaves or a quiet stream",
+    寅: "young saplings or fresh bamboo",
+    卯: "scattered blossoms or green meadow",
+    辰: "misty hills or mossy ground",
+    巳: "warm embers glowing in a crevice",
+    午: "sunlight streaming intensely through clouds",
+    未: "dry golden grass swaying in the breeze",
+    申: "sharp metallic rocks catching the light",
+    酉: "refined stone surfaces with cool sheen",
+    戌: "dark earth and scattered autumn leaves",
+    亥: "cold dark water or shadowed icy pool",
+    子: "deep still water reflecting moonlight",
+    丑: "frost-covered soil or patches of melting snow",
+  };
+
+  // 일간 오행 → 동물 색상
+  const ILGAN_COLOR: Record<string, string> = {
+    甲: "vibrant green", 乙: "soft green",
+    丙: "vivid red", 丁: "deep crimson",
+    戊: "golden yellow", 己: "warm amber",
+    庚: "pure white", 辛: "silver",
+    壬: "deep black", 癸: "dark blue",
+  };
+  // 일지(지지) → 동물
+  const ILJI_ANIMAL: Record<string, string> = {
+    子: "rat", 丑: "ox", 寅: "tiger", 卯: "rabbit",
+    辰: "dragon", 巳: "serpent", 午: "horse", 未: "goat",
+    申: "monkey", 酉: "rooster", 戌: "dog", 亥: "boar",
+  };
+
+  const ilgan = il?.gan ?? "";
+  const ilji = il?.ji ?? "";
+  const wolji = wol?.ji ?? "";
+  const subject = ILGAN_SUBJECT[ilgan] ?? "an ancient tree";
+  const season = WOLJI_SEASON[wolji] ?? "winter";
+  const animalColor = ILGAN_COLOR[ilgan] ?? "white";
+  const animal = ILJI_ANIMAL[ilji] ?? "";
+
+  // 일간·월지 제외한 나머지 6글자 추출
+  const others = [
+    nyeon?.gan, nyeon?.ji,
+    wol?.gan,            // 월간은 포함 (월지만 제외)
+    il?.ji,              // 일지 포함 (일간만 제외)
+    si?.gan, si?.ji,
+  ].filter(Boolean) as string[];
+
+  const secondaryElements = [...new Set(others)]
+    .map(ch => CHAR_ELEMENT[ch])
+    .filter(Boolean)
+    .join("; ");
+
+  const animalLine = animal
+    ? `ZODIAC ANIMAL: A ${animalColor} ${animal} appears naturally within the scene — placed in a fitting position (e.g. resting near the primary subject, perched on a rock, or partially hidden in the environment). The animal should feel like a natural part of the landscape, not forced. Its color is distinctly ${animalColor}.`
+    : "";
+
+  return `A breathtaking cinematic nature painting, Studio Ghibli / Makoto Shinkai style. No people, no text, no watermarks. Wide landscape composition.
+
+PRIMARY SUBJECT: ${subject}. This is the DOMINANT visual centerpiece of the painting.
+
+SEASON AND ATMOSPHERE: ${season}. All lighting, color palette, and weather must reflect this season precisely.
+
+${animalLine}
+
+SECONDARY ELEMENTS to blend naturally into the scene: ${secondaryElements || "none"}
+
+Composition: cinematic wide landscape, dramatic natural lighting, volumetric atmosphere, painterly and luminous, ultra-detailed, emotionally resonant.`;
+}
+
 // 한 장(chapter)의 콘텐츠만 생성하는 프롬프트 (장별 병렬 호출용)
+const GAN_KR: Record<string, string> = { 甲:"갑", 乙:"을", 丙:"병", 丁:"정", 戊:"무", 己:"기", 庚:"경", 辛:"신", 壬:"임", 癸:"계" };
+const JI_KR: Record<string, string> = { 子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
+
 export function buildChapterPrompt(chapter: number, input: ReportPromptInput): { system: string; user: string } {
   const honor = input.name?.trim() ? `${input.name}님` : "이분";
+
+  // 현재 나이 계산 및 섹션별 시제 직접 지정
+  let ageGuide = "";
+  const tenseOf = { chonyeongi: "현재형", cheongneongi: "현재형", jungnyeongi: "현재형", nonyeongi: "현재형" };
+  if (chapter === 1 && input.birthYear) {
+    const age = new Date().getFullYear() - input.birthYear;
+    if (age < 20) {
+      tenseOf.chonyeongi = "현재형(~이오/~하오)";
+      tenseOf.cheongneongi = "미래형(~겠소/~할 것이오)";
+      tenseOf.jungnyeongi = "미래형(~겠소/~할 것이오)";
+      tenseOf.nonyeongi   = "미래형(~겠소/~할 것이오)";
+    } else if (age < 40) {
+      tenseOf.chonyeongi  = "과거형(~했소/~이었소/~였소)";
+      tenseOf.cheongneongi = "현재형(~이오/~하오)";
+      tenseOf.jungnyeongi = "미래형(~겠소/~할 것이오)";
+      tenseOf.nonyeongi   = "미래형(~겠소/~할 것이오)";
+    } else if (age < 60) {
+      tenseOf.chonyeongi  = "과거형(~했소/~이었소/~였소)";
+      tenseOf.cheongneongi = "과거형(~했소/~이었소/~였소)";
+      tenseOf.jungnyeongi = "현재형(~이오/~하오)";
+      tenseOf.nonyeongi   = "미래형(~겠소/~할 것이오)";
+    } else {
+      tenseOf.chonyeongi  = "과거형(~했소/~이었소/~였소)";
+      tenseOf.cheongneongi = "과거형(~했소/~이었소/~였소)";
+      tenseOf.jungnyeongi = "과거형(~했소/~이었소/~였소)";
+      tenseOf.nonyeongi   = "현재형(~이오/~하오)";
+    }
+    ageGuide = `\n[섹션별 시제 지시 — 절대 준수, 예외 없음]
+chonyeongi(초년기) 풀이: 반드시 ${tenseOf.chonyeongi}으로만 작성
+cheongneongi(청년기) 풀이: 반드시 ${tenseOf.cheongneongi}으로만 작성
+jungnyeongi(중년기) 풀이: 반드시 ${tenseOf.jungnyeongi}으로만 작성
+nonyeongi(노년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
+  }
+
+  // 기둥별 십성 확인표 — chapter 1에서 인생시기 풀이의 십성 오류 방지
+  let pillarTable = "";
+  if (chapter === 1 && input.pillars && input.pillars.length > 0) {
+    // pillars 순서: [0]=시주, [1]=일주, [2]=월주, [3]=년주
+    const ORDER = ["년주", "월주", "일주", "시주"];
+    const byPos: Record<string, typeof input.pillars[0]> = {};
+    for (const p of input.pillars) byPos[p.pos] = p;
+    const rows = ORDER.map(pos => {
+      const p = byPos[pos];
+      if (!p) return null;
+      const ganKr = `${GAN_KR[p.gan] ?? p.gan}${p.ganEl}`;
+      const jiKr = `${JI_KR[p.ji] ?? p.ji}${p.jiEl}`;
+      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})`;
+    }).filter(Boolean);
+    pillarTable = `\n[기둥별 십성 확인표 — 반드시 이 값만 사용하고 임의 추론 금지]\n${rows.join("\n")}\n`;
+
+    // 능력치 점수 계산 (ability 섹션 풀이에 사용)
+    const sip: Record<string, number> = {};
+    const el: Record<string, number> = {};
+    for (const p of input.pillars) {
+      for (const s of [p.sipTop, p.sipBot]) if (s) sip[s] = (sip[s] ?? 0) + 1;
+      for (const e of [p.ganEl, p.jiEl]) if (e) el[e] = (el[e] ?? 0) + 1;
+    }
+    const g = (keys: string[]) => keys.reduce((a, k) => a + (sip[k] ?? 0), 0);
+    const e = (keys: string[]) => keys.reduce((a, k) => a + (el[k] ?? 0), 0);
+    const sc = (raw: number) => Math.min(98, Math.max(28, 42 + raw * 13));
+    const abilityScores = [
+      { label: "추진력", value: sc(g(["겁재","편관"]) + e(["목","금"]) * 0.5) },
+      { label: "리더십", value: sc(g(["편관","정관","겁재"]) + e(["금"]) * 0.6) },
+      { label: "창의력", value: sc(g(["상관","편인"]) + e(["화","수"]) * 0.5) },
+      { label: "재물운", value: sc(g(["편재","정재"]) + e(["토"]) * 0.6) },
+      { label: "지속력", value: sc(g(["식신","정재","정관"]) + e(["토","목"]) * 0.4) },
+      { label: "사교력", value: sc(g(["비견","식신","상관"]) + e(["화"]) * 0.6) },
+      { label: "감수성", value: sc(g(["정인","편인"]) + e(["수"]) * 0.6) },
+      { label: "직관력", value: sc(g(["편인","상관"]) + e(["수","화"]) * 0.5) },
+    ];
+    pillarTable += `\n[타고난 능력치 점수 — ability 풀이에서 이 수치를 기반으로 해석]\n${abilityScores.map(a => `${a.label}: ${Math.round(a.value)}점`).join(" / ")}\n※ 80점 이상=두각, 60~79점=양호, 60점 미만=보완 필요\n`;
+
+    // 신살 목록 주입 (sinsalReading 풀이용)
+    const SINSAL_EXCLUDE = new Set(["지살", "재살", "월살", "겁살", "천살", "공망"]);
+    const sinsalItems = [...new Set(
+      input.pillars.flatMap(p => (p.sinsal ?? "").split(/[,\s·]+/).filter(s => s && !SINSAL_EXCLUDE.has(s)))
+    )];
+    if (sinsalItems.length > 0) {
+      pillarTable += `\n[명식표 신살 목록 — sinsalReading 풀이에서 이 신살들만 사용]\n${sinsalItems.join(", ")}\n`;
+    }
+  }
+
   const user = `[대상] ${honor} (${input.gender === "male" ? "남성" : "여성"})
 
 [사주 명식]
 ${input.manseryeokText}
-
+${ageGuide}${pillarTable}
 위 명식을 근거로, ${honor}의 ${CH_THEME[chapter] ?? ""} 에 대한 결과지 콘텐츠를 작성하세요.
 ${CH_GUIDE[chapter]?.trim() ? `\n[이 장에서 특히 신경 쓸 것]\n${CH_GUIDE[chapter].trim()}\n` : ""}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):

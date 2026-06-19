@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const MENU_ITEMS = [
-  { label: "사주풀이", href: "/products?category=사주" },
-  { label: "자미두수", href: "/products?category=자미두수" },
-  { label: "타로", href: "/products?category=타로" },
-  { label: "작명", href: "/products?category=작명" },
-  { label: "기타 운세", href: "/products?category=기타" },
-];
+const MENU_ITEMS: { label: string; href: string }[] = [];
 
 interface Props {
   isLoggedIn: boolean;
@@ -63,7 +57,7 @@ export function SideDrawer({ isLoggedIn }: Props) {
 
         {/* 로그인 배너 */}
         <Link
-          href="/login"
+          href={isLoggedIn ? "/mypage" : "/login"}
           onClick={() => setOpen(false)}
           className="flex items-center justify-between px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
         >
@@ -100,7 +94,7 @@ export function SideDrawer({ isLoggedIn }: Props) {
         {/* 하단 카카오 문의 */}
         <div className="border-t border-gray-100 px-6 py-5 flex flex-col items-center gap-2">
           <a
-            href="https://pf.kakao.com"
+            href="http://pf.kakao.com/_bDxiXX"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full rounded-full py-3 text-[14px] font-bold text-black"

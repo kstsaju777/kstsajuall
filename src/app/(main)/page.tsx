@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 // import { HeroCarousel } from "@/components/landing/HeroCarousel"; // 심사용 비활성화
 import Link from "next/link";
 
 const CARDS = [
   {
-    image: "/images/cards/total/total-0.mp4",
+    image: "/media/cards/total/total-0.mp4",
     type: "video" as const,
     badge: "종합",
     tag: "베스트",
@@ -14,7 +14,7 @@ const CARDS = [
     href: "/saju/total",
   },
   {
-    image: "/images/hero/hero-3.jpg",
+    image: "/media/hero/hero-3.jpg",
     badge: "재물",
     tag: "인기",
     name: "정통사주 재물운",
@@ -22,7 +22,7 @@ const CARDS = [
     href: "/coming-soon",
   },
   {
-    image: "/images/hero/hero-7.jpg",
+    image: "/media/hero/hero-7.jpg",
     badge: "연애",
     tag: "HOT",
     name: "유혹사주",

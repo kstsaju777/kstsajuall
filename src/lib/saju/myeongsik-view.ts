@@ -32,6 +32,217 @@ export type MyeongsikView = {
   sinStrength?: { score: number; strength: string; level: number }; // 신강/신약 (0~100점, 라벨, 7단계)
 };
 
+// ── 로컬 신살 계산표 ──────────────────────────────────────────────────────────
+// 천을귀인: 일간 → 해당 지지 목록
+const TBL_CHEONUL: Record<string, string[]> = {
+  "甲": ["丑","未"], "戊": ["丑","未"], "庚": ["丑","未"],
+  "乙": ["子","申"], "己": ["子","申"],
+  "丙": ["亥","酉"], "丁": ["亥","酉"],
+  "辛": ["寅","午"],
+  "壬": ["卯","巳"], "癸": ["卯","巳"],
+};
+// 문창귀인: 일간 → 지지
+const TBL_MUNCHANG: Record<string, string> = {
+  "甲":"巳","乙":"午","丙":"申","丁":"酉",
+  "戊":"申","己":"酉","庚":"亥","辛":"子","壬":"寅","癸":"卯",
+};
+// 양인살: 일간 → 지지
+const TBL_YANGIN: Record<string, string> = {
+  "甲":"卯","乙":"寅","丙":"午","丁":"巳",
+  "戊":"午","己":"巳","庚":"酉","辛":"申","壬":"子","癸":"亥",
+};
+// 암록: 일간 → 지지
+const TBL_AMNOK: Record<string, string> = {
+  "甲":"亥","乙":"戌","丙":"申","丁":"未",
+  "戊":"申","己":"未","庚":"巳","辛":"辰","壬":"寅","癸":"丑",
+};
+// 금여록: 일간 → 지지
+const TBL_GEUMNYEO: Record<string, string> = {
+  "甲":"辰","乙":"巳","丙":"未","丁":"申",
+  "戊":"未","己":"申","庚":"戌","辛":"亥","壬":"丑","癸":"寅",
+};
+// 천덕귀인: 월지 → 천간 또는 지지 (사주 4기둥 어디든 해당 글자 있으면 적용)
+const TBL_CHEONDEOK: Record<string, string> = {
+  "寅":"丁","卯":"申","辰":"壬","巳":"辛",
+  "午":"亥","未":"甲","申":"癸","酉":"寅",
+  "戌":"丙","亥":"乙","子":"巳","丑":"庚",
+};
+// 월덕귀인: 월지 → 천간 (해당 천간이 있는 기둥에 적용)
+const TBL_WOLDEOK: Record<string, string> = {
+  "寅":"丙","午":"丙","戌":"丙",
+  "亥":"甲","卯":"甲","未":"甲",
+  "申":"壬","子":"壬","辰":"壬",
+  "巳":"庚","酉":"庚","丑":"庚",
+};
+// 문곡귀인: 일간 → 지지
+const TBL_MUNGOK: Record<string, string> = {
+  "甲":"亥","乙":"子","丙":"寅","丁":"卯",
+  "戊":"寅","己":"卯","庚":"巳","辛":"午","壬":"申","癸":"酉",
+};
+// 학당귀인: 일간 → 지지
+const TBL_HAKDANG: Record<string, string> = {
+  "甲":"寅","戊":"寅","乙":"午","丙":"寅",
+  "丁":"酉","己":"酉","庚":"巳","辛":"子","壬":"申","癸":"卯",
+};
+// 홍염살: 일간 → 지지 목록
+const TBL_HONGYEOM: Record<string, string[]> = {
+  "甲":["午","申"],"乙":["申"],"丙":["寅"],"丁":["未"],
+  "戊":["辰"],"己":["辰"],"庚":["戌","申"],"辛":["酉"],"壬":["子"],"癸":["申"],
+};
+// 백호살: 일주(천간+지지) 7가지 고정
+const SET_BAEHO = new Set(["甲辰","乙未","丙戌","丁丑","戊辰","壬戌","癸丑"]);
+// 괴강살: 일주(천간+지지) 4가지 고정
+const SET_GOEGANG = new Set(["庚辰","庚戌","壬辰","戊戌"]);
+// 태극귀인: 일간 → 지지 목록 (년지 또는 일지에 해당 지지가 있으면 성립)
+const TBL_TAEGUK: Record<string, string[]> = {
+  "甲": ["子","午"], "乙": ["子","午"],
+  "丙": ["卯","酉"], "丁": ["卯","酉"],
+  "戊": ["辰","戌","丑","未"], "己": ["辰","戌","丑","未"],
+  "庚": ["寅","亥"], "辛": ["寅","亥"],
+  "壬": ["巳","申"], "癸": ["巳","申"],
+};
+// 화개살: 년지/일지 삼합 그룹 → 묘고지 (해당 지지가 있는 기둥에 적용)
+const TBL_HWAGAE: Record<string, string> = {
+  "亥":"未","卯":"未","未":"未",
+  "寅":"戌","午":"戌","戌":"戌",
+  "巳":"丑","酉":"丑","丑":"丑",
+  "申":"辰","子":"辰","辰":"辰",
+};
+// 장성살: 일지 삼합 그룹 → 왕지 (해당 지지가 있는 기둥에 적용)
+const TBL_JANGSEONG: Record<string, string> = {
+  "申":"子","子":"子","辰":"子",
+  "寅":"午","午":"午","戌":"午",
+  "亥":"卯","卯":"卯","未":"卯",
+  "巳":"酉","酉":"酉","丑":"酉",
+};
+// 겁살: 년지 삼합 그룹 → 절지 (해당 지지가 있는 기둥에 적용)
+const TBL_GEOBSAL: Record<string, string> = {
+  "申":"巳","子":"巳","辰":"巳",
+  "寅":"亥","午":"亥","戌":"亥",
+  "亥":"申","卯":"申","未":"申",
+  "巳":"寅","酉":"寅","丑":"寅",
+};
+
+export function applyLocalSinsal(pillars: MsPillar[]): MsPillar[] {
+  const extra = calcLocalSinsal(pillars);
+  return pillars.map((p) => {
+    const existing = new Set(p.sinsal.split(/\s+/).filter(Boolean));
+    const toAdd = (extra[p.pos] ?? []).filter((s) => !existing.has(s));
+    if (toAdd.length === 0) return p;
+    return { ...p, sinsal: [p.sinsal, ...toAdd].filter(Boolean).join(" ") };
+  });
+}
+
+function calcLocalSinsal(pillars: MsPillar[]): Record<string, string[]> {
+  const extra: Record<string, string[]> = { "시주": [], "일주": [], "월주": [], "년주": [] };
+  const add = (pos: string, name: string) => { extra[pos]?.push(name); };
+
+  const ilgan = pillars[1]?.gan;  // 일간
+  const wolji = pillars[2]?.ji;   // 월지
+  const nyeonji = pillars[3]?.ji; // 년지
+  if (!ilgan) return extra;
+
+  // 천을귀인 — 일간 기준, 각 기둥 지지 체크
+  const cuJis = TBL_CHEONUL[ilgan] ?? [];
+  for (const p of pillars) if (cuJis.includes(p.ji)) add(p.pos, "천을귀인");
+
+  // 문창귀인 — 일간 기준
+  const mcJi = TBL_MUNCHANG[ilgan];
+  if (mcJi) for (const p of pillars) if (p.ji === mcJi) add(p.pos, "문창귀인");
+
+  // 양인살 — 일간 기준
+  const yiJi = TBL_YANGIN[ilgan];
+  if (yiJi) for (const p of pillars) if (p.ji === yiJi) add(p.pos, "양인살");
+
+  // 암록 — 일간 기준
+  const amJi = TBL_AMNOK[ilgan];
+  if (amJi) for (const p of pillars) if (p.ji === amJi) add(p.pos, "암록");
+
+  // 금여록 — 일간 기준
+  const gnJi = TBL_GEUMNYEO[ilgan];
+  if (gnJi) for (const p of pillars) if (p.ji === gnJi) add(p.pos, "금여록");
+
+  // 천덕귀인 — 월지 기준, 해당 천간/지지가 있는 기둥
+  if (wolji) {
+    const cdTarget = TBL_CHEONDEOK[wolji];
+    if (cdTarget) for (const p of pillars) if (p.gan === cdTarget || p.ji === cdTarget) add(p.pos, "천덕귀인");
+  }
+
+  // 월덕귀인 — 월지 기준, 해당 천간이 있는 기둥
+  if (wolji) {
+    const wdTarget = TBL_WOLDEOK[wolji];
+    if (wdTarget) for (const p of pillars) if (p.gan === wdTarget) add(p.pos, "월덕귀인");
+  }
+
+  // 백호살 — 일주(천간+지지) 기준
+  const ilju = pillars[1];
+  if (ilju && SET_BAEHO.has(ilju.gan + ilju.ji)) add("일주", "백호살");
+
+  // 괴강살 — 일주(천간+지지) 기준
+  if (ilju && SET_GOEGANG.has(ilju.gan + ilju.ji)) add("일주", "괴강살");
+
+  // 태극귀인 — 일간 기준, 4기둥 지지 전체 체크
+  const tgJis = TBL_TAEGUK[ilgan] ?? [];
+  for (const p of pillars) if (tgJis.includes(p.ji)) add(p.pos, "태극귀인");
+
+  // 현침살 — 천간 甲·辛 또는 지지 卯·午·未·申
+  const HYEONCHIM_GAN = new Set(["甲","辛"]);
+  const HYEONCHIM_JI = new Set(["卯","午","未","申"]);
+  for (const p of pillars) if (HYEONCHIM_GAN.has(p.gan) || HYEONCHIM_JI.has(p.ji)) add(p.pos, "현침살");
+
+  // 귀문관살 — 지지에 특정 두 글자가 동시에 있으면 해당 기둥 모두에 표기
+  const GWIMUN_PAIRS: [string, string][] = [
+    ["子","酉"],["丑","午"],["寅","未"],["卯","申"],["辰","亥"],["巳","戌"],
+  ];
+  const jiSet = pillars.map((p) => p.ji);
+  for (const [a, b] of GWIMUN_PAIRS) {
+    if (jiSet.includes(a) && jiSet.includes(b)) {
+      for (const p of pillars) if (p.ji === a || p.ji === b) add(p.pos, "귀문관살");
+    }
+  }
+
+  // 도화살 — 지지에 子·午·卯·酉
+  const DOHWA = new Set(["子","午","卯","酉"]);
+  for (const p of pillars) if (DOHWA.has(p.ji)) add(p.pos, "도화살");
+
+  // 역마살 — 지지에 寅·申·巳·亥
+  const YEOKMA = new Set(["寅","申","巳","亥"]);
+  for (const p of pillars) if (YEOKMA.has(p.ji)) add(p.pos, "역마살");
+
+  // 문곡귀인 — 일간 기준
+  const mgJi = TBL_MUNGOK[ilgan];
+  if (mgJi) for (const p of pillars) if (p.ji === mgJi) add(p.pos, "문곡귀인");
+
+  // 학당귀인 — 일간 기준
+  const hdJi = TBL_HAKDANG[ilgan];
+  if (hdJi) for (const p of pillars) if (p.ji === hdJi) add(p.pos, "학당귀인");
+
+  // 홍염살 — 일간 기준
+  const hyJis = TBL_HONGYEOM[ilgan] ?? [];
+  for (const p of pillars) if (hyJis.includes(p.ji)) add(p.pos, "홍염살");
+
+  // 화개살 — 년지/일지 기준
+  const hwagaeTargets = new Set<string>();
+  const ilji = pillars[1]?.ji;
+
+  // 장성살 — 일지 기준, 왕지가 있는 기둥에 적용
+  if (ilji) {
+    const jsTarget = TBL_JANGSEONG[ilji];
+    if (jsTarget) for (const p of pillars) if (p.ji === jsTarget) add(p.pos, "장성살");
+  }
+  if (nyeonji && TBL_HWAGAE[nyeonji]) hwagaeTargets.add(TBL_HWAGAE[nyeonji]);
+  if (ilji && TBL_HWAGAE[ilji]) hwagaeTargets.add(TBL_HWAGAE[ilji]);
+  for (const p of pillars) if (hwagaeTargets.has(p.ji)) add(p.pos, "화개살");
+
+  // 겁살 — 년지 기준
+  if (nyeonji) {
+    const gsJi = TBL_GEOBSAL[nyeonji];
+    if (gsJi) for (const p of pillars) if (p.ji === gsJi) add(p.pos, "겁살");
+  }
+
+  return extra;
+}
+
 // 지지(한글) → 지장간(한자, 본기 순)
 const JIJANG: Record<string, string> = {
   자: "壬·癸", 축: "癸·辛·己", 인: "戊·丙·甲", 묘: "甲·乙",
@@ -54,11 +265,27 @@ export function buildMyeongsikView(a: any): MyeongsikView {
 
   // 신살: 여러 배열을 (position, name) 으로 평탄화
   const sinsalEntries: { position?: string; name?: string }[] = [];
-  for (const s of a?.sibisinsals?.sibisinsals ?? []) sinsalEntries.push({ position: s.position, name: s.name });
+  const API_SINSAL_EXCLUDE = new Set(["낙정관살", "역마"]);
+  for (const s of a?.sibisinsals?.sibisinsals ?? []) if (!API_SINSAL_EXCLUDE.has(s.name)) sinsalEntries.push({ position: s.position, name: s.name });
   for (const s of a?.sibisinsals?.cheonui ?? []) sinsalEntries.push({ position: s.position, name: s.name });
-  for (const s of a?.sibisinsals?.nakjeonggwansal ?? []) sinsalEntries.push({ position: s.position, name: s.name });
-  const gg = a?.sibisinsals?.goegangsal;
-  if (gg?.exists) for (const p of gg.positions ?? []) sinsalEntries.push({ position: p, name: "괴강살" });
+  // 낙정관살 제외
+  // 괴강살은 로컬 계산으로 대체
+
+  // 도화살
+  const dohwaList = Array.isArray(a?.dohwa?.dohwas) ? a.dohwa.dohwas : Array.isArray(a?.dohwa) ? a.dohwa : [];
+  for (const s of dohwaList) if (s?.position) sinsalEntries.push({ position: s.position, name: s.name ?? "도화살" });
+
+  // 홍염살
+  const hongyeomList = Array.isArray(a?.hongyeom?.hongyeoms) ? a.hongyeom.hongyeoms : Array.isArray(a?.hongyeom) ? a.hongyeom : [];
+  for (const s of hongyeomList) if (s?.position) sinsalEntries.push({ position: s.position, name: s.name ?? "홍염살" });
+
+  // 화개살
+  const hwagaeList = Array.isArray(a?.hwagae?.hwagaes) ? a.hwagae.hwagaes : Array.isArray(a?.hwagae) ? a.hwagae : [];
+  for (const s of hwagaeList) if (s?.position) sinsalEntries.push({ position: s.position, name: s.name ?? "화개살" });
+
+  // 귀인 (16종 — position 있는 항목만)
+  const guiinList = Array.isArray(a?.guiin?.guiins) ? a.guiin.guiins : Array.isArray(a?.guiin) ? a.guiin : [];
+  for (const s of guiinList) if (s?.position) sinsalEntries.push({ position: s.position, name: s.name ?? s.type ?? "귀인" });
 
   const sipBy = (pos: string) => sipList.find((s) => s.position === pos)?.sipseong ?? "";
   const fortBy = (pos: string) => fortList.find((f) => f.position === pos)?.fortune ?? "";
@@ -72,7 +299,7 @@ export function buildMyeongsikView(a: any): MyeongsikView {
     }
     return {
       pos: o.pos,
-      sipTop: o.key === "day" ? "일원" : sipBy(o.ganPos),
+      sipTop: o.key === "day" ? "일간(나)" : sipBy(o.ganPos),
       gan: g.ganHanja ?? g.gan ?? "—",
       ganEl: g.ohaeng?.gan ?? "",
       ji: g.jiHanja ?? g.ji ?? "—",

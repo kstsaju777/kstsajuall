@@ -1,7 +1,7 @@
-// =====================================================
+﻿// =====================================================
 // 천간/지지 글자 이미지 매핑
 // =====================================================
-// public/images/saju/cheongan, jiji 에 업로드된 글자 이미지(파일명: 한글+오행 로마자)
+// public/media/saju/cheongan, jiji 에 업로드된 글자 이미지(파일명: 한글+오행 로마자)
 // 를 한자 글자 기준으로 찾아준다. 모르는 글자(시 미상 "—" 등)는 ques.png.
 
 const GAN_IMG: Record<string, string> = {
@@ -15,14 +15,14 @@ const JI_IMG: Record<string, string> = {
 };
 
 // 모르는 글자(시 미상 "—" 등)는 hipeun 으로 통일
-const HIPEUN = "/images/saju/cheongan/hipeun.png";
+const HIPEUN = "/media/saju/cheongan/hipeun.png";
 
 export function ganCharImage(hanja: string): string {
   const f = GAN_IMG[hanja];
-  return f ? `/images/saju/cheongan/${f}.png` : HIPEUN;
+  return f ? `/media/saju/cheongan/${f}.png` : HIPEUN;
 }
 
 export function jiCharImage(hanja: string): string {
   const f = JI_IMG[hanja];
-  return f ? `/images/saju/jiji/${f}.png` : HIPEUN;
+  return f ? `/media/saju/jiji/${f}.png` : HIPEUN;
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -50,17 +50,17 @@ const GAPS: { height: string; text?: string; line?: boolean; bg?: string }[] = [
 ];
 
 // ─── 7장 스토리 구성 ─────────────────────────────────────────────────────────
-// 미디어 파일을 public/images/cards/ 폴더에 넣으세요
+// 미디어 파일을 public/media/cards/ 폴더에 넣으세요
 const CHAPTERS = [
   {
     chapter: "1장",
-    media: { type: "image", src: "/images/cards/total/total-img-1.jpg" },
+    media: { type: "image", src: "/media/cards/total/total-img-1.jpg" },
     bubble: null,
     bottomGrad: { color: "#131921", height: "15%" },
   },
   {
     chapter: "2장",
-    media: { type: "video", src: "/images/cards/total/total-vid-1.mp4" },
+    media: { type: "video", src: "/media/cards/total/total-vid-1.mp4" },
     bubble: null,
     topGrad: { color: "#131921", height: "15%" },
     cornerBubbles: [
@@ -81,7 +81,7 @@ const CHAPTERS = [
   },
   {
     chapter: "3장",
-    media: { type: "image", src: "/images/cards/total/total-img-2.jpg" },
+    media: { type: "image", src: "/media/cards/total/total-img-2.jpg" },
     bubble: null,
     cornerBubbles: [
       {
@@ -94,7 +94,7 @@ const CHAPTERS = [
   },
   {
     chapter: "4장",
-    media: { type: "video", src: "/images/cards/total/total-vid-2.mp4" },
+    media: { type: "video", src: "/media/cards/total/total-vid-2.mp4" },
     bubble: null,
     circleBubbles: [
       { text: "'홍연(紅連)'", top: "62%", left: "55%", width: "40%", ratio: "5/3" },
@@ -102,7 +102,7 @@ const CHAPTERS = [
   },
   {
     chapter: "5장",
-    media: { type: "video", src: "/images/cards/total/total-0.mp4" },
+    media: { type: "video", src: "/media/cards/total/total-0.mp4" },
     bubble: null,
     circleBubbles: [
       { text: "그대 왔는가?", top: "-40%", left: "30%",  width: "40%", ratio: "3/2" },
@@ -111,7 +111,7 @@ const CHAPTERS = [
   },
   {
     chapter: "6장",
-    media: { type: "video", src: "/images/cards/total/total-vid-3.mp4" },
+    media: { type: "video", src: "/media/cards/total/total-vid-3.mp4" },
     bubble: null,
     circleBubbles: [
       { text: "내 말 듣고나면", top: "0%", left: "8%",  width: "40%", ratio: "3/2" },
@@ -120,7 +120,7 @@ const CHAPTERS = [
   },
   {
     chapter: "7장",
-    media: { type: "video", src: "/images/cards/total/total-vid-4.mp4" },
+    media: { type: "video", src: "/media/cards/total/total-vid-4.mp4" },
     bubble: null,
     circleBubbles: [
       { text: "아주 솔직하게", top: "0%", left: "8%",  width: "35%", ratio: "4/3" },
@@ -129,7 +129,7 @@ const CHAPTERS = [
   },
   {
     chapter: "8장",
-    media: { type: "video", src: "/images/cards/total/total-vid-5.mp4" },
+    media: { type: "video", src: "/media/cards/total/total-vid-5.mp4" },
     bubble: null,
     circleBubbles: [
       { text: "자, \n 여기 앉으시오", top: "0%", left: "5%",  width: "40%", ratio: "4/3" },
@@ -138,7 +138,7 @@ const CHAPTERS = [
   },
   {
     chapter: "9장",
-    media: { type: "video", src: "/images/cards/total/total-vid-7.mp4" },
+    media: { type: "video", src: "/media/cards/total/total-vid-7.mp4" },
     bubble: null,
     isCTA: true,
   },

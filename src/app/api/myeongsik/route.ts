@@ -23,7 +23,7 @@ const bodySchema = z.object({
   gender: z.string().optional().default(""), // "남자"/"여자"/"male"/"female"
 });
 
-const FIELDS: AnalysisField[] = ["ganji", "sipseong", "twelveFortune", "sibisinsals", "daeun", "seun", "weolun"];
+const FIELDS: AnalysisField[] = ["ganji", "sipseong", "twelveFortune", "sibisinsals", "guiin", "hongyeom", "dohwa", "hwagae", "daeun", "seun", "weolun", "sinStrength"];
 
 export async function POST(request: NextRequest) {
   if (!isSajuApiConfigured()) {

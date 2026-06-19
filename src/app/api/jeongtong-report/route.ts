@@ -15,9 +15,9 @@ import {
   formatSajuToManseryeok,
   type BirthInfo,
 } from "@/lib/saju/saju-api";
-import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
-import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
-import { generateInterpretation } from "@/lib/saju/llm";
+import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
+import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt } from "@/lib/saju/report-content";
+import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 
@@ -33,10 +33,10 @@ const createSchema = z.object({
   gender: z.string().optional().default(""),
   email: z.string().optional().default(""),
 });
-const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30) });
+const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: unknown[]; birthYear?: number }) {
   const { system, user } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 2; i++) {
@@ -142,6 +142,29 @@ async function createReport(body: unknown) {
     };
 
     const service = createServiceClient();
+
+    // 사주 원국 이미지 생성 (DALL-E 3, 1회만 과금) → Supabase Storage 영구 저장
+    let sajuImageUrl: string | null = null;
+    try {
+      console.log("[이미지생성] DALL-E 프롬프트 빌드 시작");
+      const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
+      console.log("[이미지생성] gpt-image-1 호출 중...");
+      const imgBuffer = await generateSajuImage(imagePrompt, env.OPENAI_API_KEY);
+      console.log("[이미지생성] 이미지 생성 완료, 크기:", imgBuffer.byteLength);
+      const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+      const { error: uploadErr } = await service.storage
+        .from("saju-images")
+        .upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+      if (uploadErr) {
+        console.error("[이미지생성] Storage 업로드 실패:", uploadErr);
+        throw uploadErr;
+      }
+      const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
+      sajuImageUrl = pubData.publicUrl;
+      console.log("[이미지생성] 완료! URL:", sajuImageUrl);
+    } catch (e) {
+      console.error("[이미지생성] 전체 실패:", e);
+    }
     const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
     if (!product) return NextResponse.json({ error: "상품을 찾을 수 없습니다." }, { status: 500 });
 
@@ -169,7 +192,7 @@ async function createReport(body: unknown) {
       .insert({
         order_id: order.id,
         // manseryeokText/gender 도 저장 → 이후 장 생성에 재사용(운세위키 재호출 불필요)
-        myeongsik: { view, name, birth, manseryeokText, gender: g } as never,
+        myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl } as never,
         interpretation_md: JSON.stringify(content),
         llm_provider: llm.provider,
         llm_model: llm.model,
@@ -178,7 +201,7 @@ async function createReport(body: unknown) {
       .single();
     if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패", detail: resultErr?.message }, { status: 500 });
 
-    return NextResponse.json({ resultId: result.id, view, content, name, birth });
+    return NextResponse.json({ resultId: result.id, view, content, name, birth, sajuImageUrl });
   } catch (err) {
     return NextResponse.json({ error: "결과지 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
@@ -188,7 +211,7 @@ async function createReport(body: unknown) {
 async function generateChapter(body: unknown) {
   const parsed = chapterSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { id, chapter } = parsed.data;
+  const { id, chapter, force } = parsed.data;
 
   const service = createServiceClient();
   const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md").eq("id", id).maybeSingle();
@@ -199,7 +222,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (isChapterReady(content, chapter)) {
+  if (!force && isChapterReady(content, chapter)) {
     // 이미 저장돼 있으면 그 장 섹션만 반환
     const sections: Record<string, unknown> = {};
     for (const k of CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
@@ -214,12 +237,17 @@ async function generateChapter(body: unknown) {
   if (!manseryeokText) return NextResponse.json({ error: "명식 정보를 찾을 수 없습니다." }, { status: 500 });
 
   try {
+    const birthDateStr: string = stored?.birth?.date ?? ""; // "yyyy.mm.dd"
+    const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
+      pillars: applyLocalSinsal(stored?.view?.pillars ?? []),
+      birthYear: birthYear || undefined,
     });
-    return NextResponse.json({ sections: obj }); // 저장은 클라가 합본으로(레이스 방지)
+
+    return NextResponse.json({ sections: obj });
   } catch (err) {
     return NextResponse.json({ error: "장 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
@@ -238,5 +266,36 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, content });
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, content });
+}
+
+// ── 이미지 재생성 ──
+export async function PATCH(request: NextRequest) {
+  const { id } = await request.json().catch(() => ({}));
+  if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
+
+  const env = getEnv();
+  if (!env.OPENAI_API_KEY) return NextResponse.json({ error: "OpenAI 키 없음" }, { status: 503 });
+
+  const service = createServiceClient();
+  const { data, error } = await service.from("saju_results").select("myeongsik").eq("id", id).maybeSingle();
+  if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stored = data.myeongsik as any;
+  const pillars = stored?.view?.pillars ?? [];
+
+  try {
+    const imagePrompt = buildSajuImagePrompt(pillars);
+    const imgBuffer = await generateSajuImage(imagePrompt, env.OPENAI_API_KEY);
+    const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+    const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+    if (uploadErr) throw uploadErr;
+    const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
+    const sajuImageUrl = pubData.publicUrl;
+    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
+    return NextResponse.json({ sajuImageUrl });
+  } catch (e) {
+    return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
+  }
 }

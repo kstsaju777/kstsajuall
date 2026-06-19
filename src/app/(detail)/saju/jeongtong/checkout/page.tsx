@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect } from "react";
@@ -239,7 +239,7 @@ function ImageTextBlock({
 }
 
 // 단순 이미지 구분자 (상하 그라데이션)
-function ImageDivider({ src = "/images/hero/hero-1.jpg", bgColor = WHITE }: {
+function ImageDivider({ src = "/media/hero/hero-1.jpg", bgColor = WHITE }: {
   src?: string; bgColor?: string;
 }) {
   return (
@@ -792,8 +792,8 @@ function CheckoutContent() {
 
         {/* ① 이미지 → 그라데이션 → 텍스트 → 그라데이션 → 이미지 */}
         <ImageTextBlock
-          topImgSrc="/images/hero/hero-1.jpg"
-          bottomImgSrc="/images/hero/hero-1.jpg"
+          topImgSrc="/media/hero/hero-1.jpg"
+          bottomImgSrc="/media/hero/hero-1.jpg"
           label="정통사주 · 정밀 리포트"
           headline={`${name}님의 사주,\n지금 이 순간까지\n살살이 봤어요`}
           accentWord="살살이"
@@ -812,8 +812,8 @@ function CheckoutContent() {
 
         {/* ④ 이미지 → 텍스트 → 이미지 */}
         <ImageTextBlock
-          topImgSrc="/images/hero/hero-1.jpg"
-          bottomImgSrc="/images/hero/hero-1.jpg"
+          topImgSrc="/media/hero/hero-1.jpg"
+          bottomImgSrc="/media/hero/hero-1.jpg"
           label="AI 정밀 사주 분석 · 5가지 항목"
           headline={`지금 당신의 운명,\n낱낱이\n분석했습니다`}
           accentWord="낱낱이"
@@ -843,8 +843,8 @@ function CheckoutContent() {
 
         {/* ⑨ 이미지 → 텍스트 → 이미지 */}
         <ImageTextBlock
-          topImgSrc="/images/hero/hero-1.jpg"
-          bottomImgSrc="/images/hero/hero-1.jpg"
+          topImgSrc="/media/hero/hero-1.jpg"
+          bottomImgSrc="/media/hero/hero-1.jpg"
           label="실제 이용 후기"
           headline={`이미 수천 명이\n확인한\n그 정확함`}
           accentWord="그 정확함"

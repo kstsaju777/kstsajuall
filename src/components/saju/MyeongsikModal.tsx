@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // =====================================================
 // 나의 명식 모달 (공용)
@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from "react";
 import type { MyeongsikView, MsFlowItem, MsPillar } from "@/lib/saju/myeongsik-view";
+import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { yearGanji, monthGanji } from "@/lib/saju/ganji-calc";
 import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
@@ -30,7 +31,7 @@ export const SAMPLE_VIEW: MyeongsikView = {
   ilgan: "乙 (을목)",
   pillars: [
     { pos: "시주", sipTop: "정관", gan: "庚", ganEl: "금", ji: "申", jiEl: "금", sipBot: "정관", jijang: "戊·壬·庚", unseong: "태", sinsal: "역마" },
-    { pos: "일주", sipTop: "일원", gan: "乙", ganEl: "목", ji: "卯", jiEl: "목", sipBot: "비견", jijang: "甲·乙", unseong: "건록", sinsal: "도화" },
+    { pos: "일주", sipTop: "일간(나)", gan: "乙", ganEl: "목", ji: "卯", jiEl: "목", sipBot: "비견", jijang: "甲·乙", unseong: "건록", sinsal: "도화" },
     { pos: "월주", sipTop: "편인", gan: "癸", ganEl: "수", ji: "子", jiEl: "수", sipBot: "편인", jijang: "壬·癸", unseong: "병", sinsal: "화개" },
     { pos: "년주", sipTop: "정재", gan: "戊", ganEl: "토", ji: "辰", jiEl: "토", sipBot: "정재", jijang: "乙·癸·戊", unseong: "관대", sinsal: "백호" },
   ],
@@ -51,7 +52,7 @@ export const SAMPLE_VIEW: MyeongsikView = {
 
 function MsRowLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-center text-[10.5px] font-bold" style={{ color: MUTE, background: "#f4ece7" }}>
+    <div className="flex items-center justify-center text-[12px] font-bold" style={{ color: MUTE, background: "#f4ece7" }}>
       {children}
     </div>
   );
@@ -68,7 +69,19 @@ function CharImgMini({ src, alt }: { src: string; alt: string }) {
 function FlowRow({ title, items, onSelect }: { title: string; items: MsFlowItem[]; onSelect?: (i: number) => void }) {
   return (
     <div className="mt-5">
-      <p className="text-[12.5px] font-black mb-2" style={{ color: INK }}>{title}</p>
+      <p className="text-[12.5px] mb-2">
+        {title.split(" · ").map((part, i) => {
+          if (i !== 0) return <span key={i} style={{ fontWeight: 400, color: MUTE }}> · {part}</span>;
+          // 첫 번째 파트: 괄호 안을 파란색으로
+          const m = part.match(/^(.*?)(\(.*\))(.*)$/);
+          if (!m) return <span key={i} className="font-black" style={{ color: INK }}>{part}</span>;
+          return (
+            <span key={i} className="font-black" style={{ color: INK }}>
+              {m[1]}<span style={{ color: "#1565c0" }}>{m[2]}</span>{m[3]}
+            </span>
+          );
+        })}
+      </p>
       <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
         {items.map((it, i) => (
           <button
@@ -109,10 +122,11 @@ function GridRow({ label, children }: { label: string; children: React.ReactNode
     </div>
   );
 }
-function CellText({ children, color = INK_SOFT, size = 11 }: { children: React.ReactNode; color?: string; size?: number }) {
+function CellText({ children, color = INK_SOFT, size = 13 }: { children: React.ReactNode; color?: string; size?: number }) {
+  const text = children === "일원" ? "일간(나)" : children;
   return (
-    <div className="py-1.5 text-center" style={{ background: WHITE }}>
-      <span style={{ color, fontSize: size }}>{children}</span>
+    <div className="py-0.5 text-center" style={{ background: WHITE }}>
+      <span style={{ color, fontSize: size }}>{text}</span>
     </div>
   );
 }
@@ -138,30 +152,56 @@ function SmallGan({ ch }: { ch: string }) {
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={ganCharImage(ch)} alt={ch} onError={() => setErr(true)} style={{ width: 23, height: 23, objectFit: "contain" }} />;
 }
-function CellJijang({ text }: { text: string }) {
+function CellJijang({ text, ilgan }: { text: string; ilgan: string }) {
   const chars = text.split("·").map((c) => c.trim()).filter(Boolean);
+  if (chars.length === 0) return (
+    <div className="py-1.5 flex items-center justify-center" style={{ background: WHITE }}>
+      <span style={{ fontSize: 10.5, color: INK_SOFT }}>—</span>
+    </div>
+  );
+  const rows: { ch: string | null; sip: string }[] = [];
+  chars.forEach((c, i) => {
+    rows.push({ ch: c, sip: sipseongOfStem(ilgan, c) });
+    if (chars.length === 2 && i === 0) rows.push({ ch: null, sip: "-" });
+  });
   return (
-    <div className="py-1.5 flex items-center justify-center flex-wrap gap-0.5" style={{ background: WHITE }}>
-      {chars.length === 0 ? (
-        <span style={{ fontSize: 10.5, color: INK_SOFT }}>—</span>
-      ) : chars.length === 2 ? (
-        // 지장간 2글자(여기·본기) → 가운데 hipeun 이미지로 3칸 정렬
-        <>
-          <SmallGan ch={chars[0]} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/saju/cheongan/hipeun.png" alt="" style={{ width: 23, height: 23, objectFit: "contain" }} />
-          <SmallGan ch={chars[1]} />
-        </>
-      ) : (
-        chars.map((c, i) => <SmallGan key={i} ch={c} />)
-      )}
+    <div className="py-1 flex flex-col items-center justify-center gap-1" style={{ background: WHITE }}>
+      {rows.map((r, i) => (
+        <div key={i} style={{ display: "inline-grid", gridTemplateColumns: "23px 32px", alignItems: "center", gap: 4 }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {r.ch === null ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="/media/saju/cheongan/hipeun.png" alt="-" style={{ width: 23, height: 23, objectFit: "contain" }} />
+            ) : (
+              <SmallGan ch={r.ch} />
+            )}
+          </div>
+          <span style={{ fontSize: 12, color: MUTE, whiteSpace: "nowrap" }}>{r.sip}</span>
+        </div>
+      ))}
     </div>
   );
 }
 
-export function MyeongsikModalView({ open, onClose, view, loading }: { open: boolean; onClose: () => void; view: MyeongsikView | null; loading: boolean }) {
+type MyeongsikMeta = { name: string; gender: string; date: string; calendar: string; time: string };
+
+// "HH:MM" → "자시", "신시" 등 (야자시 기준: 23:30 이후 = 자시)
+function timeToSi(hhmm: string): string {
+  const SI = ["자시","축시","인시","묘시","진시","사시","오시","미시","신시","유시","술시","해시"];
+  const [hStr, mStr] = hhmm.split(":");
+  const h = Number(hStr), m = Number(mStr || 0);
+  const total = h * 60 + m;
+  // 야자시 포함: 23:30 이상이면 자시(0), 이후 2시간 단위
+  const adj = total >= 23 * 60 + 30 ? total - 23 * 60 - 30 : total + 30;
+  return SI[Math.floor(adj / 120) % 12] ?? "";
+}
+
+const GAN_KR: Record<string, string> = { 甲:"갑", 乙:"을", 丙:"병", 丁:"정", 戊:"무", 己:"기", 庚:"경", 辛:"신", 壬:"임", 癸:"계" };
+const JI_KR: Record<string, string> = { 子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
+
+export function MyeongsikModalView({ open, onClose, view, loading, meta }: { open: boolean; onClose: () => void; view: MyeongsikView | null; loading: boolean; meta?: MyeongsikMeta }) {
   const v = view ?? SAMPLE_VIEW;
-  const ps: MsPillar[] = v.pillars;
+  const ps: MsPillar[] = applyLocalSinsal(v.pillars);
 
   // 대운 → 세운 → 월운 드릴다운
   const [selDaeun, setSelDaeun] = useState(() => Math.max(0, v.daeun.findIndex((d) => d.active)));
@@ -216,7 +256,7 @@ export function MyeongsikModalView({ open, onClose, view, loading }: { open: boo
         style={{ background: "rgba(0,0,0,0.4)", opacity: open ? 1 : 0, transition: "opacity 0.25s ease" }}
       />
       <div
-        className="relative w-full overflow-y-auto rounded-3xl"
+        className="relative w-full flex flex-col rounded-3xl"
         style={{
           maxHeight: "100%",
           background: CREAM,
@@ -224,33 +264,63 @@ export function MyeongsikModalView({ open, onClose, view, loading }: { open: boo
           opacity: open ? 1 : 0,
           transform: open ? "scale(1) translateY(0)" : "scale(0.96) translateY(8px)",
           transition: "opacity 0.22s ease, transform 0.22s ease",
-          scrollbarWidth: "none",
         }}
       >
-        <div className="px-5 py-6">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-baseline gap-2">
-              <h2 className="text-[20px] font-black" style={{ color: INK }}>나의 명식</h2>
-              <span className="text-[12px]" style={{ color: MUTE }}>일간 {v.ilgan}</span>
-            </div>
+        {/* 고정 헤더 */}
+        <div
+          className="px-5 pt-5 pb-3 rounded-t-3xl flex-shrink-0"
+          style={{ background: CREAM, borderBottom: `1px solid ${INK}10` }}
+        >
+          {/* 1행: 제목 + 닫기 */}
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-[18px] font-black" style={{ color: INK }}>나의 명식</h2>
             <button
               onClick={onClose}
               className="flex items-center justify-center rounded-full"
-              style={{ width: 28, height: 28, background: `${INK}0d`, color: INK_SOFT, fontSize: 15, lineHeight: 1 }}
+              style={{ width: 30, height: 30, background: `${INK}0d`, color: INK_SOFT, fontSize: 15, lineHeight: 1, flexShrink: 0 }}
               aria-label="닫기"
             >
               ✕
             </button>
           </div>
-          <p className="text-[11px] mb-4" style={{ color: MUTE }}>
-            {loading ? "명식을 불러오는 중…" : "사주팔자 원국 · 십성 · 지장간 · 십이운성 · 신살"}
-          </p>
+          {/* 2행: 정보 태그 */}
+          {meta && (() => {
+            const iljuP = v.pillars[1];
+            const iljuStr = iljuP ? `${GAN_KR[iljuP.gan] ?? iljuP.gan}${JI_KR[iljuP.ji] ?? iljuP.ji}일주` : "";
+            const genderLabel = meta.gender === "female" || meta.gender === "여자" ? "여성" : meta.gender === "male" || meta.gender === "남자" ? "남성" : meta.gender;
+            const siStr = meta.time && meta.time !== "시간 모름" ? timeToSi(meta.time) : "시간 모름";
+            const tags = [
+              `${meta.name} (${genderLabel})`,
+              `${meta.date} (${meta.calendar})`,
+              siStr,
+              iljuStr,
+            ].filter(Boolean);
+            return (
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map((t, i) => (
+                  <span
+                    key={i}
+                    className="text-[13px] px-2.5 py-1 rounded-full"
+                    style={{ background: `${INK}0d`, color: INK_SOFT }}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
 
+        {/* 스크롤 영역 */}
+        <div
+          className="overflow-y-auto px-5 pb-6 pt-3"
+          style={{ scrollbarWidth: "none" }}
+        >
           <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${INK}14` }}>
             <div className="grid" style={{ gridTemplateColumns: GRID_COLS }}>
               <MsRowLabel>구분</MsRowLabel>
               {ps.map((p) => (
-                <div key={p.pos} className="py-1.5 text-center text-[11px] font-bold" style={{ color: INK, background: "#efe3df" }}>
+                <div key={p.pos} className="py-1.5 text-center text-[13px] font-bold" style={{ color: INK, background: "#efe3df" }}>
                   {p.pos}
                 </div>
               ))}
@@ -259,14 +329,20 @@ export function MyeongsikModalView({ open, onClose, view, loading }: { open: boo
             <GridRow label="천간">{ps.map((p, i) => <CellImg key={i} src={ganCharImage(p.gan)} alt={p.gan} el={p.ganEl} />)}</GridRow>
             <GridRow label="지지">{ps.map((p, i) => <CellImg key={i} src={jiCharImage(p.ji)} alt={p.ji} el={p.jiEl} />)}</GridRow>
             <GridRow label="십성">{ps.map((p, i) => <CellText key={i}>{p.sipBot}</CellText>)}</GridRow>
-            <GridRow label="지장간">{ps.map((p, i) => <CellJijang key={i} text={p.jijang} />)}</GridRow>
+            <GridRow label="지장간">{ps.map((p, i) => <CellJijang key={i} text={p.jijang} ilgan={ilgan} />)}</GridRow>
             <GridRow label="운성">{ps.map((p, i) => <CellText key={i}>{p.unseong}</CellText>)}</GridRow>
-            <GridRow label="신살">{ps.map((p, i) => <CellText key={i} color={MAROON}>{p.sinsal || "—"}</CellText>)}</GridRow>
+            <GridRow label="신살">{ps.map((p, i) => (
+              <div key={i} className="py-1.5 text-center" style={{ background: WHITE }}>
+                {p.sinsal ? p.sinsal.split(/[,\s·]+/).filter(Boolean).map((s, j) => (
+                  <div key={j} style={{ color: MAROON, fontSize: 13 }}>{s}</div>
+                )) : <span style={{ color: MAROON, fontSize: 13 }}>—</span>}
+              </div>
+            ))}</GridRow>
           </div>
 
-          <FlowRow title="대운 (10년 주기) · 눌러서 세운 보기" items={daeunItems} onSelect={pickDaeun} />
-          <FlowRow title={`세운 (연운) · ${ys}~${ys + 9} · 눌러서 월운 보기`} items={seunItems} onSelect={(i) => setSelYear(ys + i)} />
-          <FlowRow title={`월운 (월별) · ${selYear}년`} items={weolunItems} />
+          <FlowRow title={`대운 (대운수 : ${v.daeun[0]?.label ?? "?"}) · 눌러서 세운 보기`} items={daeunItems} onSelect={pickDaeun} />
+          <FlowRow title={`세운 (${ys}~${ys + 9}) · 눌러서 월운 보기`} items={seunItems} onSelect={(i) => setSelYear(ys + i)} />
+          <FlowRow title={`월운 (${selYear}년)`} items={weolunItems} />
 
           {!view && (
             <p className="text-[10.5px] mt-5 text-center" style={{ color: MUTE }}>
@@ -274,6 +350,60 @@ export function MyeongsikModalView({ open, onClose, view, loading }: { open: boo
             </p>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// 한자 일주 → 일주 캐릭터 이미지 파일명
+const ILJU_IMG: Record<string, string> = {
+  "甲子":"01.갑자","乙丑":"02.을축","丙寅":"03.병인","丁卯":"04.정묘","戊辰":"05.무진",
+  "己巳":"06.기사","庚午":"07.경오","辛未":"08.신미","壬申":"09.임신","癸酉":"10.계유",
+  "甲戌":"11.갑술","乙亥":"12.을해","丙子":"13.병자","丁丑":"14.정축","戊寅":"15.무인",
+  "己卯":"16.기묘","庚辰":"17.경진","辛巳":"18.신사","壬午":"19.임오","癸未":"20.계미",
+  "甲申":"21.갑신","乙酉":"22.을유","丙戌":"23.병술","丁亥":"24.정해","戊子":"25.무자",
+  "己丑":"26.기축","庚寅":"27.경인","辛卯":"28.신묘","壬辰":"29.임진","癸巳":"30.계사",
+  "甲午":"31.갑오","乙未":"32.을미","丙申":"33.병신","丁酉":"34.정유","戊戌":"35.무술",
+  "己亥":"36.기해","庚子":"37.경자","辛丑":"38.신축","壬寅":"39.임인","癸卯":"40.계묘",
+  "甲辰":"41.갑진","乙巳":"42.을사","丙午":"43.병오","丁未":"44.정미","戊申":"45.무신",
+  "己酉":"46.기유","庚戌":"47.경술","辛亥":"48.신해","壬子":"49.임자","癸丑":"50.계축",
+  "甲寅":"51.갑인","乙卯":"52.을묘","丙辰":"53.병진","丁巳":"54.정사","戊午":"55.무오",
+  "己未":"56.기미","庚申":"57.경신","辛酉":"58.신유","壬戌":"59.임술","癸亥":"60.계해",
+};
+
+// 명식 테이블만 인라인 표시 (모달 없이 페이지에 직접 삽입용)
+export function MyeongsikTable({ view, name, birth }: {
+  view: MyeongsikView | null;
+  name: string;
+  birth: { date: string; calendar: string; time: string } | null;
+}) {
+  const v = view ?? SAMPLE_VIEW;
+  const ps = applyLocalSinsal(v.pillars);
+  const ilgan = v.pillars[1]?.gan ?? "";
+  return (
+    <div className="mx-5 my-2 rounded-2xl p-4" style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", border: "1px solid #d8c4a0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${INK}14` }}>
+        <div className="grid" style={{ gridTemplateColumns: GRID_COLS }}>
+          <MsRowLabel>구분</MsRowLabel>
+          {ps.map((p) => (
+            <div key={p.pos} className="py-1.5 text-center text-[13px] font-bold" style={{ color: INK, background: "#efe3df" }}>
+              {p.pos}
+            </div>
+          ))}
+        </div>
+        <GridRow label="십성">{ps.map((p, i) => <CellText key={i}>{p.sipTop}</CellText>)}</GridRow>
+        <GridRow label="천간">{ps.map((p, i) => <CellImg key={i} src={ganCharImage(p.gan)} alt={p.gan} el={p.ganEl} />)}</GridRow>
+        <GridRow label="지지">{ps.map((p, i) => <CellImg key={i} src={jiCharImage(p.ji)} alt={p.ji} el={p.jiEl} />)}</GridRow>
+        <GridRow label="십성">{ps.map((p, i) => <CellText key={i}>{p.sipBot}</CellText>)}</GridRow>
+        <GridRow label="지장간">{ps.map((p, i) => <CellJijang key={i} text={p.jijang} ilgan={ilgan} />)}</GridRow>
+        <GridRow label="운성">{ps.map((p, i) => <CellText key={i}>{p.unseong}</CellText>)}</GridRow>
+        <GridRow label="신살">{ps.map((p, i) => (
+          <div key={i} className="py-1.5 text-center" style={{ background: WHITE }}>
+            {p.sinsal ? p.sinsal.split(/[,\s·]+/).filter(Boolean).map((s, j) => (
+              <div key={j} style={{ color: MAROON, fontSize: 11 }}>{s}</div>
+            )) : <span style={{ color: MAROON, fontSize: 11 }}>—</span>}
+          </div>
+        ))}</GridRow>
       </div>
     </div>
   );
