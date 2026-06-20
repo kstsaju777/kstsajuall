@@ -4,6 +4,7 @@
 *.mov
 # 단, 카드/히어로 썸네일 영상은 사이트 표시에 필요하므로 추적
 !public/images/**/*.mp4
+!public/media/**/*.mp4
 !public/images/**/*.webm
 
 node_modules
