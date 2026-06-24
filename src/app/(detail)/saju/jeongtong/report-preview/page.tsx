@@ -313,86 +313,333 @@ function WealthBars({ title, sub, bars }: { title: string; sub: string; bars: { 
   );
 }
 
-// 내게 맞는 직업 TOP 3 (7장)
-function JobTop3({ jobs }: { jobs: { title: string; desc: string }[] }) {
-  if (!jobs.length) return null;
+// 세운 기반 재물운 꺾은선 차트
+function WealthLineChart({ view }: { view: MyeongsikView | null }) {
+  const TARGET_YEARS = [2024,2025,2026,2027,2028,2029,2030,2031,2032,2033];
+  // 십성 → 재물운 점수 매핑
+  const SIPSEONG_SCORE: Record<string, number> = {
+    재성:88, 편재:90, 정재:86, 식신:80, 상관:78,
+    인성:65, 편인:62, 정인:68, 비겁:55, 비견:56, 겁재:54,
+    관성:60, 편관:58, 정관:62,
+  };
+  // 오행→한글 (한자 매핑)
+  const STEM_EL: Record<string, string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+  const BRANCH_EL: Record<string, string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+  const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+  const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+  function toSipseong(ilEl: string, tEl: string): string {
+    if (ilEl === tEl) return "비겁";
+    if (GEN[ilEl] === tEl) return "식상";
+    if (CTL[ilEl] === tEl) return "재성";
+    if (CTL[tEl] === ilEl) return "관성";
+    if (GEN[tEl] === ilEl) return "인성";
+    return "비겁";
+  }
+  const ilEl = (() => {
+    const il = (view?.ilgan ?? "")[0];
+    return STEM_EL[il] ?? "목";
+  })();
+  // seun 에서 2024-2033 추출, 없으면 ganji로 추정
+  const seunMap: Record<number, string> = {};
+  (view?.seun ?? []).forEach((s) => { const y = Number(s.label); if (y >= 2024 && y <= 2033) seunMap[y] = s.gz; });
+  // 60갑자 순서로 없는 연도 보완
+  const GANJIS = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+  const BASE_YEAR = 2024; const BASE_GJ = "甲辰";
+  const baseIdx = GANJIS.indexOf(BASE_GJ);
+  TARGET_YEARS.forEach((y) => { if (!seunMap[y]) seunMap[y] = GANJIS[(baseIdx + (y - BASE_YEAR)) % 60]; });
+
+  const data = TARGET_YEARS.map((y) => {
+    const gz = seunMap[y] ?? "";
+    const stem = gz[0] ?? ""; const branch = gz[1] ?? "";
+    const sEl = STEM_EL[stem]; const bEl = BRANCH_EL[branch];
+    const sScore = sEl ? SIPSEONG_SCORE[toSipseong(ilEl, sEl)] ?? 65 : 65;
+    const bScore = bEl ? SIPSEONG_SCORE[toSipseong(ilEl, bEl)] ?? 65 : 65;
+    const raw = Math.round(sScore * 0.6 + bScore * 0.4);
+    return { year: y, gz, score: Math.min(95, Math.max(40, raw)) };
+  });
+
+  const W = 320, H = 160, padX = 20, padTop = 20, padBot = 30;
+  const n = data.length;
+  const minS = Math.min(...data.map(d => d.score));
+  const maxS = Math.max(...data.map(d => d.score));
+  const range = maxS - minS || 1;
+  const x = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
+  const y = (v: number) => padTop + (H - padTop - padBot) * (1 - (v - minS) / range);
+  const pts = data.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
+  const area = `${x(0)},${y(minS - range * 0.1)} ${pts} ${x(n-1)},${y(minS - range * 0.1)}`;
+  const peakI = data.reduce((m, d, i) => (d.score > data[m].score ? i : m), 0);
+
   return (
-    <div className="rounded-2xl p-5 mb-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <h3 className="text-[15px] font-black mb-4" style={{ color: INK }}>내게 맞는 직업 TOP 3</h3>
-      <div className="space-y-4">
-        {jobs.slice(0, 3).map((j, i) => (
-          <div key={i} className="flex gap-3 items-start">
-            <span className="flex-shrink-0 flex items-center justify-center text-[13px] font-black text-white rounded-full" style={{ width: 26, height: 26, background: NAVY, opacity: 1 - i * 0.18 }}>{i + 1}</span>
-            <div>
-              <p className="text-[14px] font-bold" style={{ color: INK }}>{j.title}</p>
-              <p className="text-[12.5px] leading-relaxed mt-0.5" style={{ color: MUTE }}>{j.desc}</p>
-            </div>
-          </div>
+    <div className="rounded-2xl p-4 mt-2 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
+        <defs>
+          <linearGradient id="wealthArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GOLD} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={GOLD} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        {[0,1,2,3].map(i => {
+          const yy = padTop + ((H - padTop - padBot) * i) / 3;
+          return <line key={i} x1={padX} x2={W - padX} y1={yy} y2={yy} stroke={`${INK}0d`} strokeWidth="1" />;
+        })}
+        <polygon points={area} fill="url(#wealthArea)" />
+        <polyline points={pts} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {data.map((d, i) => (
+          <g key={i}>
+            <circle cx={x(i)} cy={y(d.score)} r={3} fill={WHITE} stroke={GOLD} strokeWidth="2" />
+            <text x={x(i)} y={H - 12} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
+            <text x={x(i)} y={H - 3} fontSize="7" fill={MUTE} textAnchor="middle">{d.gz}</text>
+          </g>
         ))}
-      </div>
+      </svg>
+    </div>
+  );
+}
+
+// 직업 계열 클러스터 (5장)
+type JobCluster = { category: string; keywords: string[]; jobs: string[]; rankReason?: string; topJobReason?: string };
+function JobClusters({ clusters }: { clusters: JobCluster[] }) {
+  const [expanded, setExpanded] = useState<boolean[]>(() => clusters?.map(() => false) ?? []);
+  if (!clusters?.length) return null;
+  const RANK_LABEL = ["1순위", "2순위", "3순위"];
+  const RANK_STYLE = [
+    { accent: "#b8892a", bg: "#fffbf0", badgeBg: "#b8892a", badgeText: "#fff", tagBg: "#b8892a15", tagText: "#7a5c0a" },
+    { accent: "#5b7fa6", bg: "#f5f8fd", badgeBg: "#dde9f5", badgeText: "#2e527a", tagBg: "#5b7fa612", tagText: "#2e527a" },
+    { accent: "#7a6fa0", bg: "#f7f4ff", badgeBg: "#e4dff5", badgeText: "#4a3d7a", tagBg: "#7a6fa012", tagText: "#4a3d7a" },
+  ];
+  const toggle = (i: number) => setExpanded(prev => prev.map((v, idx) => idx === i ? !v : v));
+  return (
+    <div className="space-y-2.5 mb-4">
+      {clusters.map((cl, ci) => {
+        const s = RANK_STYLE[ci] ?? RANK_STYLE[2];
+        const top = cl.jobs?.[0];
+        const rest = cl.jobs?.slice(1) ?? [];
+        const isTop = ci === 0;
+        const isOpen = expanded[ci];
+        return (
+          <div key={ci} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${s.accent}${isTop ? "50" : "28"}`, boxShadow: isTop ? `0 4px 16px ${s.accent}18` : "none" }}>
+            {/* 접힌 상태 */}
+            <div style={{ background: `${s.accent}${isTop ? "12" : "07"}` }}>
+              {/* 계열 타이틀 */}
+              <div className="px-4 pt-2.5 pb-1.5 flex items-center gap-2" style={{ borderBottom: `1px solid ${s.accent}15` }}>
+                <span className="text-[11px] font-black px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: s.badgeBg, color: s.badgeText }}>{RANK_LABEL[ci]}</span>
+                <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{cl.category}</span>
+              </div>
+              {/* 대표 직업 + 자세히 버튼 */}
+              <div className="px-4 py-2.5 flex items-center justify-between gap-3">
+                <span className="text-[16px] font-black" style={{ color: s.accent, fontFamily: SERIF }}>{top}</span>
+                <button
+                  onClick={() => toggle(ci)}
+                  className="flex-shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-lg"
+                  style={{ background: s.accent, color: "#fff" }}
+                >
+                  {isOpen ? "접기" : "자세히"}
+                </button>
+              </div>
+            </div>
+            {/* 펼친 상태 */}
+            {isOpen && (
+              <div className="px-4 pt-3 pb-3.5" style={{ background: s.bg, borderTop: `1px solid ${s.accent}20` }}>
+                {/* 키워드 태그 */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {cl.keywords?.map((kw, ki) => (
+                    <span key={ki} className="text-[10.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: s.tagBg, color: s.tagText }}>#{kw}</span>
+                  ))}
+                </div>
+                {/* 계열 선정 이유 */}
+                {cl.rankReason && (
+                  <p className="text-[12.5px] leading-relaxed mb-3" style={{ color: INK_SOFT, fontFamily: SERIF }}>{cl.rankReason}</p>
+                )}
+                {/* 대표 직업 + 이유 */}
+                {top && (
+                  <div className="mb-3" style={{ borderLeft: `3px solid ${s.accent}`, paddingLeft: 10 }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-black px-1.5 py-0.5 rounded" style={{ background: s.accent, color: "#fff" }}>대표</span>
+                      <span className="text-[14px] font-black" style={{ color: s.accent, fontFamily: SERIF }}>{top}</span>
+                    </div>
+                    {cl.topJobReason && <p className="text-[11.5px] leading-relaxed" style={{ color: MUTE, fontFamily: SERIF }}>{cl.topJobReason}</p>}
+                  </div>
+                )}
+                {/* 나머지 직업 칩 */}
+                {rest.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {rest.map((job, ji) => (
+                      <span key={ji} className="text-[12px] font-bold px-3 py-1 rounded-lg" style={{ background: WHITE, border: `1px solid ${s.accent}25`, color: INK_SOFT, fontFamily: SERIF }}>{job}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 // 직장인 vs 사업가 양분 게이지 (7장)
-function SplitGauge({ split }: { split: { leftLabel: string; left: number; rightLabel: string; right: number; leftDesc: string; rightDesc: string } }) {
+// 투자 유형 궁합 바 차트 (5장)
+type InvestType = { category: string; icon: string; score: number; products: string[]; tip: string };
+function InvestTypeCards({ types }: { types: InvestType[] }) {
+  if (!types?.length) return null;
+  const BAR_MAX_H = 110;
+  const scoreColor = (s: number) => s >= 70 ? "#16a34a" : s >= 45 ? "#f59e0b" : "#e53935";
+  const scoreLabel = (s: number) => s >= 80 ? "최적" : s >= 65 ? "잘 맞음" : s >= 45 ? "보통" : s >= 25 ? "주의" : "비추천";
+  const scores = types.map(t => Math.min(100, Math.max(0, Number(t.score) || 0)));
+  const maxScore = Math.max(...scores, 1);
   return (
-    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <div className="flex justify-between items-end mb-2.5">
-        <div>
-          <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>● {split.leftLabel}</p>
-          <p className="text-[22px] font-black leading-none" style={{ color: INK_SOFT }}>{split.left}%</p>
-        </div>
-        <div className="text-right">
-          <p className="text-[11px] font-bold mb-0.5" style={{ color: NAVY }}>{split.rightLabel} ●</p>
-          <p className="text-[22px] font-black leading-none" style={{ color: NAVY }}>{split.right}%</p>
-        </div>
+    <div className="mb-4 rounded-2xl px-4 pt-5 pb-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+      {/* 바 차트 영역 */}
+      <div className="flex items-end justify-between gap-2" style={{ height: BAR_MAX_H + 20 }}>
+        {types.map((t, i) => {
+          const sc = scores[i];
+          const color = scoreColor(sc);
+          const barH = Math.round((sc / maxScore) * BAR_MAX_H);
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-0">
+              {/* 점수 */}
+              <span className="text-[11px] font-black mb-1" style={{ color }}>{sc}점</span>
+              {/* 막대 */}
+              <div className="w-full rounded-t-md" style={{
+                height: barH,
+                background: `linear-gradient(to top, ${color}, ${color}88)`,
+                minHeight: 4,
+              }} />
+            </div>
+          );
+        })}
       </div>
-      <div className="flex rounded-full overflow-hidden" style={{ height: 10 }}>
-        <div style={{ width: `${split.left}%`, background: `${INK}26` }} />
-        <div style={{ width: `${split.right}%`, background: NAVY }} />
+      {/* 구분선 */}
+      <div style={{ height: 1, background: `${INK}10`, marginBottom: 10 }} />
+      {/* X축: 아이콘 + 카테고리명 + 라벨 */}
+      <div className="flex justify-between gap-2">
+        {types.map((t, i) => {
+          const sc = scores[i];
+          const color = scoreColor(sc);
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+              <span className="text-[16px]">{t.icon}</span>
+              <span className="text-[9.5px] font-bold text-center" style={{ color: MUTE }}>{t.category}</span>
+              <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-full text-center" style={{ background: `${color}15`, color }}>{scoreLabel(sc)}</span>
+            </div>
+          );
+        })}
       </div>
-      <div className="flex justify-between gap-4 mt-2.5">
-        <p className="text-[11px] flex-1" style={{ color: MUTE }}>{split.leftDesc}</p>
-        <p className="text-[11px] flex-1 text-right" style={{ color: INK_SOFT }}>{split.rightDesc}</p>
+    </div>
+  );
+}
+
+function SplitGauge({ split }: { split: { leftLabel: string; left: number; rightLabel: string; right: number; leftDesc: string; rightDesc: string } }) {
+  if (!split) return null;
+  const rightWins = split.right >= split.left;
+  return (
+    <div className="mb-5">
+      <div className="flex gap-2.5">
+        {/* 직장인 카드 */}
+        <div className="flex-1 rounded-2xl px-4 py-4 flex flex-col items-center text-center relative" style={{
+          background: !rightWins ? INK : WHITE,
+          border: `2px solid ${!rightWins ? INK : `${INK}15`}`,
+          boxShadow: !rightWins ? `0 6px 20px ${INK}30` : "none",
+        }}>
+          {!rightWins && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-black px-2.5 py-0.5 rounded-full" style={{ background: GOLD, color: "#fff" }}>추천</span>}
+          <span className="text-[22px] mb-1">🏢</span>
+          <p className="text-[17px] font-black mb-2" style={{ color: !rightWins ? "#fff" : INK, fontFamily: SERIF }}>{split.leftLabel}</p>
+          <p className="text-[28px] font-black leading-none" style={{ color: !rightWins ? GOLD : MUTE }}>{split.left}<span className="text-[14px]">점</span></p>
+        </div>
+        {/* VS */}
+        <div className="flex items-center justify-center flex-shrink-0">
+          <span className="text-[11px] font-black" style={{ color: MUTE }}>VS</span>
+        </div>
+        {/* 사업가 카드 */}
+        <div className="flex-1 rounded-2xl px-4 py-4 flex flex-col items-center text-center relative" style={{
+          background: rightWins ? INK : WHITE,
+          border: `2px solid ${rightWins ? INK : `${INK}15`}`,
+          boxShadow: rightWins ? `0 6px 20px ${INK}30` : "none",
+        }}>
+          {rightWins && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-black px-2.5 py-0.5 rounded-full" style={{ background: GOLD, color: "#fff" }}>추천</span>}
+          <span className="text-[22px] mb-1">🚀</span>
+          <p className="text-[17px] font-black mb-2" style={{ color: rightWins ? "#fff" : INK, fontFamily: SERIF }}>{split.rightLabel}</p>
+          <p className="text-[28px] font-black leading-none" style={{ color: rightWins ? GOLD : MUTE }}>{split.right}<span className="text-[14px]">점</span></p>
+        </div>
       </div>
     </div>
   );
 }
 
 // 앞으로 1년 연애 흐름 — 월별 라인 차트 (8장)
-function LoveTrendChart({ flow }: { flow: { label: string; score: number }[] }) {
-  const data = flow.length ? flow : [{ label: "-", score: 50 }];
-  const W = 320, H = 150, padX = 24, padTop = 18, padBot = 28;
+function LoveLineChart({ view, gender }: { view: MyeongsikView | null; gender?: string }) {
+  const TARGET_YEARS = [2024,2025,2026,2027,2028,2029,2030,2031,2032,2033];
+  const STEM_EL: Record<string, string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+  const BRANCH_EL: Record<string, string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+  const GAN_KR2: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+  const JI_KR2: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+  const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+  const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+  function toSipseong(ilEl: string, tEl: string): string {
+    if (ilEl === tEl) return "비겁";
+    if (GEN[ilEl] === tEl) return "식상";
+    if (CTL[ilEl] === tEl) return "재성";
+    if (CTL[tEl] === ilEl) return "관성";
+    if (GEN[tEl] === ilEl) return "인성";
+    return "비겁";
+  }
+  // 연애운: 여성=관성 기운이 높을수록 Good, 남성=재성 기운이 높을수록 Good
+  const isFemale = gender === "female";
+  const LOVE_SCORE: Record<string, number> = isFemale
+    ? { 관성:90, 편관:88, 정관:92, 재성:70, 편재:68, 정재:72, 식상:75, 식신:76, 상관:74, 인성:60, 편인:58, 정인:62, 비겁:50, 비견:50, 겁재:48 }
+    : { 재성:90, 편재:88, 정재:92, 관성:70, 편관:68, 정관:72, 식상:75, 식신:76, 상관:74, 인성:60, 편인:58, 정인:62, 비겁:50, 비견:50, 겁재:48 };
+  const ilEl = (() => {
+    const il = (view?.ilgan ?? "")[0];
+    return STEM_EL[il] ?? "목";
+  })();
+  const seunMap: Record<number, string> = {};
+  (view?.seun ?? []).forEach((s) => { const y = Number(s.label); if (y >= 2024 && y <= 2033) seunMap[y] = s.gz; });
+  const GANJIS = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+  const BASE_YEAR = 2024; const BASE_GJ = "甲辰";
+  const baseIdx = GANJIS.indexOf(BASE_GJ);
+  TARGET_YEARS.forEach((y) => { if (!seunMap[y]) seunMap[y] = GANJIS[(baseIdx + (y - BASE_YEAR)) % 60]; });
+  const data = TARGET_YEARS.map((y) => {
+    const gz = seunMap[y] ?? "";
+    const stem = gz[0] ?? ""; const branch = gz[1] ?? "";
+    const sEl = STEM_EL[stem]; const bEl = BRANCH_EL[branch];
+    const sScore = sEl ? (LOVE_SCORE[toSipseong(ilEl, sEl)] ?? 60) : 60;
+    const bScore = bEl ? (LOVE_SCORE[toSipseong(ilEl, bEl)] ?? 60) : 60;
+    const raw = Math.round(sScore * 0.6 + bScore * 0.4);
+    const gzKr = `${GAN_KR2[stem] ?? ""}${JI_KR2[branch] ?? ""}`;
+    return { year: y, gz: gzKr, score: Math.min(95, Math.max(40, raw)) };
+  });
+  const W = 320, H = 160, padX = 20, padTop = 20, padBot = 30;
   const n = data.length;
-  const x = (i: number) => padX + ((W - padX * 2) * i) / Math.max(1, n - 1);
-  const y = (v: number) => padTop + (H - padTop - padBot) * (1 - Math.min(100, Math.max(0, v)) / 100);
+  const minS = Math.min(...data.map(d => d.score));
+  const maxS = Math.max(...data.map(d => d.score));
+  const range = maxS - minS || 1;
+  const x = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
+  const y = (v: number) => padTop + (H - padTop - padBot) * (1 - (v - minS) / range);
   const pts = data.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
-  const area = `${padX},${y(0)} ${pts} ${x(n - 1)},${y(0)}`;
-  const peakI = data.reduce((m, d, i) => (d.score > data[m].score ? i : m), 0);
+  const area = `${x(0)},${y(minS - range * 0.1)} ${pts} ${x(n-1)},${y(minS - range * 0.1)}`;
   return (
-    <div className="rounded-2xl p-5 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <h3 className="text-[15px] font-black flex items-center gap-1.5 mb-1" style={{ color: INK }}>
-        <span style={{ color: GOLD }}>📈</span> 앞으로 1년 연애 흐름
-      </h3>
-      <p className="text-[12px] mb-3" style={{ color: MUTE }}>인연의 기운이 강해지는 달이에요.</p>
+    <div className="rounded-2xl p-4 mt-2 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
         <defs>
           <linearGradient id="loveArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={GOLD} stopOpacity="0.22" />
-            <stop offset="100%" stopColor={GOLD} stopOpacity="0.02" />
+            <stop offset="0%" stopColor="#e8547a" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#e8547a" stopOpacity="0.02" />
           </linearGradient>
         </defs>
+        {[0,1,2,3].map(i => {
+          const yy = padTop + ((H - padTop - padBot) * i) / 3;
+          return <line key={i} x1={padX} x2={W - padX} y1={yy} y2={yy} stroke={`${INK}0d`} strokeWidth="1" />;
+        })}
         <polygon points={area} fill="url(#loveArea)" />
-        <polyline points={pts} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points={pts} fill="none" stroke="#e8547a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         {data.map((d, i) => (
-          <circle key={i} cx={x(i)} cy={y(d.score)} r={i === peakI ? 5 : 3.5} fill={i === peakI ? GOLD : WHITE} stroke={GOLD} strokeWidth="2" />
-        ))}
-        {data.map((d, i) => (
-          <text key={i} x={x(i)} y={H - 12} fontSize="8.5" fill={INK_SOFT} textAnchor="middle">{d.label}</text>
+          <g key={i}>
+            <circle cx={x(i)} cy={y(d.score)} r={3} fill={WHITE} stroke="#e8547a" strokeWidth="2" />
+            <text x={x(i)} y={H - 12} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
+            <text x={x(i)} y={H - 3} fontSize="7" fill={MUTE} textAnchor="middle">{d.gz}</text>
+          </g>
         ))}
       </svg>
-      <p className="text-center text-[11px] mt-1" style={{ color: MUTE }}>점이 높은 달일수록 인연의 기운이 강해요.</p>
     </div>
   );
 }
@@ -2485,23 +2732,41 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
           </div>
         </div>
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={onMyeongsik}
-            className="px-3 py-1.5"
-            style={{
-              color: "#5a2e14",
-              background: "linear-gradient(135deg, #f5e6c8 0%, #edd9a3 50%, #e8cfa0 100%)",
-              border: "1.5px solid #b8892a",
-              borderRadius: 4,
-              fontFamily: SERIF,
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "0.08em",
-              lineHeight: 1,
-              boxShadow: "inset 0 0 0 1px rgba(184,137,42,0.3), 0 1px 3px rgba(90,46,20,0.2)",
-            }}
-          >
-            📜 나의 명식
+          <button onClick={onMyeongsik} className="relative flex items-center" style={{ background: "none", border: "none", padding: 0 }}>
+            {/* 두루마리 양피지 */}
+            <div className="flex items-center" style={{ position: "relative" }}>
+              {/* 왼쪽 봉 — 위아래로 튀어나옴 */}
+              <div style={{
+                width: 8, height: 30, flexShrink: 0, zIndex: 2, position: "relative",
+                background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)",
+                borderRadius: 4,
+                boxShadow: "1px 0 3px rgba(0,0,0,0.4), inset -1px 0 2px rgba(255,200,80,0.4)",
+              }} />
+              {/* 양피지 본문 */}
+              <div style={{
+                padding: "5px 10px",
+                background: "linear-gradient(to bottom, #f9f0d8 0%, #edd9a3 40%, #e8d090 60%, #f0e0b0 100%)",
+                borderTop: "1.5px solid #b8892a",
+                borderBottom: "1.5px solid #b8892a",
+                boxShadow: "inset 0 1px 3px rgba(184,137,42,0.2), inset 0 -1px 3px rgba(184,137,42,0.2)",
+                color: "#5a2e14",
+                fontFamily: SERIF,
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: "0.1em",
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+              }}>
+                나의 명식
+              </div>
+              {/* 오른쪽 봉 */}
+              <div style={{
+                width: 8, height: 30, flexShrink: 0, zIndex: 2, position: "relative",
+                background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)",
+                borderRadius: 4,
+                boxShadow: "-1px 0 3px rgba(0,0,0,0.4), inset 1px 0 2px rgba(255,200,80,0.4)",
+              }} />
+            </div>
           </button>
           <button onClick={onMenu} className="flex flex-col items-center" style={{ color: INK_SOFT, lineHeight: 1 }}>
             <span className="text-[14px]">☰</span>
@@ -2885,10 +3150,20 @@ function SubHeading({ children }: { children: React.ReactNode }) {
 }
 
 // 본문 문단
+function boldYears(text: string): React.ReactNode[] {
+  const parts = text.split(/(\d{4}년\s*[가-힣]{2}년)/g);
+  return parts.map((part, i) =>
+    /^\d{4}년\s*[가-힣]{2}년$/.test(part)
+      ? <strong key={i} style={{ color: INK, fontWeight: 800 }}>{part}</strong>
+      : part
+  );
+}
+
 function P({ children }: { children: React.ReactNode }) {
+  const content = typeof children === "string" ? boldYears(children) : children;
   return (
     <p className="text-[14.5px] leading-[1.95] mb-4 whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>
-      {children}
+      {content}
     </p>
   );
 }
@@ -3667,25 +3942,11 @@ function ReportPreviewInner() {
           {/* 명식표 */}
           <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
 
-          <Quote>{`풀이를 읽다 명식이 궁금할 때면\n상단 `}<span style={{
-              display: "inline-block",
-              color: "#5a2e14",
-              background: "linear-gradient(135deg, #f5e6c8 0%, #edd9a3 50%, #e8cfa0 100%)",
-              border: "1.5px solid #b8892a",
-              borderRadius: 4,
-              fontFamily: SERIF,
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "0.08em",
-              lineHeight: 1,
-              boxShadow: "inset 0 0 0 1px rgba(184,137,42,0.3), 0 1px 3px rgba(90,46,20,0.2)",
-              padding: "6px 10px",
-              pointerEvents: "none",
-              userSelect: "none",
-              verticalAlign: "middle",
-              position: "relative",
-              top: -3,
-            }}>📜 나의 명식</span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
+          <Quote>{`풀이를 읽다 명식이 궁금할 때면\n상단 `}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", position: "relative", top: -2, pointerEvents: "none", userSelect: "none" }}>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "1px 0 3px rgba(0,0,0,0.4)" }} />
+              <span style={{ padding: "4px 8px", background: "linear-gradient(to bottom, #f9f0d8 0%, #edd9a3 40%, #e8d090 60%, #f0e0b0 100%)", borderTop: "1.5px solid #b8892a", borderBottom: "1.5px solid #b8892a", color: "#5a2e14", fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", lineHeight: 1, whiteSpace: "nowrap" }}>나의 명식</span>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "-1px 0 3px rgba(0,0,0,0.4)" }} />
+            </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
           {/* 원국 분석 */}
           <section className="pt-6 pb-12">
@@ -4594,40 +4855,40 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"돈과 일 —\n${name}님의 재물과 직업운을\n깊이 들여다보겠습니다."`}</Quote>
+          <Quote>{`"재물과 천직은\n타고난 그릇에 따라 흐르오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의 재물 그릇\n지금 바로 열어보겠소."`}</Quote>
 
           {/* 재물운 시점 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>큰돈이 들어오는 때는 따로 있어요</Heading>
-            <WealthBars title="향후 5년 재물운" sub="해마다 최대로 모을 수 있는 금액을 표시했어요." bars={c.wealthTime.bars} />
-            {c.wealthTime.intro && <P>{[c.wealthTime.intro, ...c.wealthTime.paragraphs].join("\n")}</P>}
+            <Heading>내 인생 재물운 그래프</Heading>
+            <WealthLineChart view={report?.view ?? null} />
+            {c.wealthTime.paragraphs?.[0] && <P>{c.wealthTime.paragraphs[0]}</P>}
           </section>
 
           {/* 적직 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>타고난 적성과 잘 맞는 직업</Heading>
-            <JobTop3 jobs={c.jobFit.jobs} />
-            {c.jobFit.intro && <P>{[c.jobFit.intro, ...c.jobFit.paragraphs].join("\n")}</P>}
+            <JobClusters clusters={c.jobFit.clusters} />
           </section>
 
           {/* 직장인 vs 사업가 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>직장인 팔자 vs 사업가 팔자</Heading>
+            <Heading>이 사주에게 더 잘 맞는 길은</Heading>
             <SplitGauge split={c.jobType.split} />
-            {c.jobType.intro && <P>{[c.jobType.intro, ...c.jobType.paragraphs].join("\n")}</P>}
+            {c.jobType.paragraphs?.length > 0 && <P>{c.jobType.paragraphs.join(" ")}</P>}
           </section>
 
           {/* 투자 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>내게 잘 맞는 투자 방법</Heading>
-            {c.invest.intro && <P>{[c.invest.intro, ...c.invest.paragraphs].join("\n")}</P>}
+            <Heading>내 사주에 맞는 투자 방법</Heading>
+            <InvestTypeCards types={c.invest.investTypes} />
+            {c.invest.paragraphs?.[0] && <P>{c.invest.paragraphs[0]}</P>}
           </section>
 
           {/* 삽화 */}
           <Illust src="/media/report/total/total-5/total-5-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"재물은 흙(土)의 대지 위에\n쇠(金)의 도구로 일굴 때 가장\n단단하게 쌓여요.\n조급함을 내려놓고 장기적인\n안목으로 자산을 굴려 가세요."`}</Quote>
+          <Quote>{`"재물의 그릇을 살폈으니,\n이제는 인연의 실을 따라가 보겠소.\n\n${name}${effectiveGender === "female" ? "양" : "군"}에게\n붉은 실이 닿는 때는 언제인가 —"`}</Quote>
 
           {/* 다음 장 네비 */}
           <ChapterNav cur="5" go={next} />
@@ -4652,19 +4913,19 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"${name}님은 어떻게 사랑하고\n어떤 인연을 만날까요.\n연애와 결혼운을 풀어보겠습니다."`}</Quote>
+          <Quote>{`"사람은 누구나\n제 운명의 실로 엮인 인연을 만나오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의 붉은 실,\n지금 풀어보겠소."`}</Quote>
 
           {/* 사랑하는 방식 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>내가 사랑하는 방식</Heading>
-            {c.loveStyle.intro && <P>{[c.loveStyle.intro, ...c.loveStyle.paragraphs].join("\n")}</P>}
+            <Heading>내 사주가 추구하는 연애관</Heading>
+            {c.loveStyle.paragraphs?.[0] && <P>{c.loveStyle.paragraphs[0]}</P>}
           </section>
 
           {/* 시기별 연애 흐름 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>나의 시기별 연애 흐름</Heading>
-            <LoveTrendChart flow={c.loveFlow.flow} />
-            {c.loveFlow.intro && <P>{[c.loveFlow.intro, ...c.loveFlow.paragraphs].join("\n")}</P>}
+            <LoveLineChart view={report?.view ?? null} gender={effectiveGender} />
+            {c.loveFlow.paragraphs?.[0] && <P>{c.loveFlow.paragraphs[0]}</P>}
           </section>
 
           {/* 이런 사람이 배우자로 와요 */}

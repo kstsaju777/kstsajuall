@@ -301,9 +301,12 @@ const CH_SCHEMA: Record<number, string> = {
 }`,
   5: `{
   "wealthTime": {
-    "intro": "재물운이 어느 나이대로 갈수록 단단해지고 풍요로워지는지 흐름을 짚는 도입",
-    "callout": "큰돈을 만질 최고의 시기(연도+간지 한자)와 용신/희신(쇠·흙 등) 작용을 짚는 문장",
-    "paragraphs": ["그 시기 자산 가치 상승/투자 수익","상관 등 과해질 때 주의할 해와 투기·지출 리스크","장기적·안정적 자산관리 원칙 조언"],
+    "intro": "절대 쓰지 마오 — 이 필드는 비워두시오",
+    "callout": "절대 쓰지 마오 — 이 필드는 비워두시오",
+    "paragraphs": [
+      "【하나의 흐름으로 작성】 2024~2033년 세운 전체를 하나의 연속된 풀이로 작성하오. 먼저 재물이 가장 강하게 열리는 시기(재성·식상 세운)를 연도와 간지를 명시하며 왜 그 해인지 십성 논리로 설명하오. 이어서 재물이 정체되거나 손실이 우려되는 시기(관성·인성·비겁 과다 세운)도 연도와 간지를 명시하며 이유를 서술하오. 각 시기에 어떻게 행동해야 하는지(투자·지출·자산관리)를 녹여 마무리하오. 단락 구분 없이 하나의 흐름으로, 홍연 말투(~이오/~하오/~겠소)로 8~10문장 이내로 작성하오.",
+      ""
+    ],
     "bars": [
       {"year":2026,"amount":"1억 5천","value":15}, {"year":2027,"amount":"2억 5천","value":25},
       {"year":2028,"amount":"6억","value":60}, {"year":2029,"amount":"5억","value":50}, {"year":2030,"amount":"2억","value":20}
@@ -313,36 +316,102 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "어떤 일에서 가장 큰 성과를 내는지(타고난 적성)를 짚는 도입",
     "callout": "강점(틈새 포착·전문성 브랜드화 등)을 십성 근거로 짚는 문장",
     "paragraphs": ["맞지 않는 환경(단순 반복/지시)에서의 한계","전문성을 갈고닦아 증명할 때 따르는 명예·성취"],
-    "jobs": [
-      {"title":"직업명 1","desc":"왜 잘 맞는지 한 줄"},
-      {"title":"직업명 2","desc":"왜 잘 맞는지 한 줄"},
-      {"title":"직업명 3","desc":"왜 잘 맞는지 한 줄"}
+    "clusters": [
+      {
+        "category": "계열명 — 명식 특성을 담은 이름으로",
+        "keywords": ["적성 키워드1", "키워드2", "키워드3"],
+        "jobs": ["직업1", "직업2", "직업3", "직업4", "직업5", "직업6", "직업7", "직업8"],
+        "rankReason": "이 계열이 1순위인 이유 — 명식 십성·오행 근거로 2~3문장. 왜 이 사람의 사주가 이 계열에 가장 잘 맞는지.",
+        "topJobReason": "대표 직업(jobs[0])을 첫 번째로 고른 이유 — 구체적 십성 작용으로 1~2문장."
+      },
+      {
+        "category": "계열명",
+        "keywords": ["키워드1", "키워드2", "키워드3"],
+        "jobs": ["직업1", "직업2", "직업3", "직업4", "직업5", "직업6", "직업7"],
+        "rankReason": "이 계열이 2순위인 이유 — 1순위보다는 약하지만 충분히 맞는 근거.",
+        "topJobReason": "대표 직업 선정 이유."
+      },
+      {
+        "category": "계열명",
+        "keywords": ["키워드1", "키워드2", "키워드3"],
+        "jobs": ["직업1", "직업2", "직업3", "직업4", "직업5", "직업6"],
+        "rankReason": "이 계열이 3순위인 이유 — 보완 기운으로 가능성은 있지만 가장 약한 근거.",
+        "topJobReason": "대표 직업 선정 이유."
+      }
     ]
   },
   "jobType": {
-    "intro": "직장인 길과 사업가 길 중 어디에 더 강한지 도입",
-    "callout": "비견/상관 등으로 독립·주도 성향을 짚는 문장",
-    "paragraphs": ["직장 생활을 할 때 필요한 환경(독자적 프로젝트 등)","장기적으로 권하는 독립/1인 기업 방향"],
-    "split": { "leftLabel":"직장인 팔자","left":40,"rightLabel":"사업가 팔자","right":60,"leftDesc":"안정적이지만 답답함을 느끼기 쉬워요","rightDesc":"주도적으로 판을 짤 때 성과가 극대화돼요" }
+    "intro": "절대 쓰지 마오 — 빈 문자열로",
+    "callout": "절대 쓰지 마오 — 빈 문자열로",
+    "paragraphs": [
+      "첫 문장: 직장인 X점, 사업가 Y점을 직접 언급하며 어느 길이 더 잘 맞는지 결론 제시.",
+      "두 번째 문장 이후: 일간 오행과 두드러진 십성(비겁·식상·재성·관성·인성 등)이 왜 그 길에 유리하게 작용하는지 명리학 근거로 2~3문장 서술.",
+      "이어서: 우세한 길에서 어떤 환경·역할·방식일 때 가장 크게 성과가 나는지 구체적으로 1~2문장 서술.",
+      "마지막: 열세한 길을 선택했을 때 어떤 어려움이나 답답함이 생기는지 1~2문장 경고. 전체 합산 500자(공백 포함) 내외. 홍연 말투(~이오/~하오/~겠소) 필수."
+    ],
+    "split": { "leftLabel":"직장인","left":40,"rightLabel":"사업가","right":60,"leftDesc":"안정적이지만 답답함을 느끼기 쉬워요","rightDesc":"주도적으로 판을 짤 때 성과가 극대화돼요" }
   },
   "invest": {
-    "intro": "어떤 재테크 방식이 가장 잘 맞는지(투기성 vs 실물 안정형) 짚는 도입",
-    "callout": "용신 오행(흙·쇠 등)을 근거로 부동산·장기채권·우량주 등 안전한 투자처를 짚는 문장",
-    "paragraphs": ["상관의 충동적 기운이 부르는 투자 리스크와 경계점","철저한 분석·이성적 기준으로 장기 포트폴리오를 굴릴 때의 결실"]
+    "intro": "절대 쓰지 마오 — 빈 문자열로",
+    "callout": "절대 쓰지 마오 — 빈 문자열로",
+    "paragraphs": [
+      "【필수 — 500자 내외 하나의 흐름으로】 investTypes의 점수 순서를 기반으로 어떤 투자가 잘 맞고, 어떤 투자가 위험한지 구체적으로 서술하오. 십성·오행 명칭은 사용하지 마오. 대신 이 사람의 기질·성향·삶의 태도(예: 안정을 중시하는 성향, 변동에 취약한 기질, 꼼꼼하게 따지는 성격 등)로 풀어서 설명하오. 잘 맞는 투자 유형은 구체적으로 어떤 방식으로 접근하면 좋은지(예: 매달 일정액 적립, 달러 분할 매수 등) 실용적 조언을 담으오. 위험한 투자 유형은 왜 이 사람에게 손실로 이어지기 쉬운지 구체적으로 경고하오. 하나의 자연스러운 단락으로, 홍연 말투(~이오/~하오/~겠소), 500자(공백 포함) 내외."
+    ],
+    "investTypes": [
+      {
+        "category": "저축",
+        "icon": "🏦",
+        "score": 85,
+        "products": ["CMA", "적금", "예금"],
+        "tip": "이 사주에 저축이 맞는 이유 한 줄"
+      },
+      {
+        "category": "주식",
+        "icon": "📈",
+        "score": 60,
+        "products": ["미장ETF", "국내성장주", "배당주"],
+        "tip": "주식 궁합 한 줄"
+      },
+      {
+        "category": "코인",
+        "icon": "🪙",
+        "score": 20,
+        "products": ["비트코인", "이더리움"],
+        "tip": "코인 궁합 한 줄"
+      },
+      {
+        "category": "현물",
+        "icon": "🥇",
+        "score": 75,
+        "products": ["금", "달러", "은"],
+        "tip": "현물 궁합 한 줄"
+      },
+      {
+        "category": "부동산",
+        "icon": "🏠",
+        "score": 55,
+        "products": ["아파트", "리츠", "경매"],
+        "tip": "부동산 궁합 한 줄"
+      }
+    ]
   }
 }`,
   6: `{
   "loveStyle": {
-    "intro": "연애할 때 상대를 대하는 태도(다정함·배려 등)를 짚는 도입",
-    "callout": "강점(상관의 표현력 등)으로 연인을 사로잡는 매력을 짚는 문장(십성 근거)",
-    "paragraphs": ["사생활·독립 영역을 침범받기 싫어하는 까다로운 면","겉과 속의 고집/선, 넘어서면 마음을 닫는 면","서로의 독립성을 존중하며 깊은 교감을 갈망하는 지향"]
+    "intro": "절대 쓰지 마오 — 빈 문자열로",
+    "callout": "절대 쓰지 마오 — 빈 문자열로",
+    "paragraphs": [
+      "【필수 — 하나의 풀이로】 일주 기반 연애 성향 → 재성/관성 위치 분석 → 일지 배우자궁+합충형 경고 순서로, 단락 구분 없이 하나의 자연스러운 흐름으로 서술하오. 사주 용어는 반드시 괄호로 풀이하오(예: 건록(자수성가와 독립의 기운)). 신강/신약, 일지 십이운성, 합·충·형 유무를 실제 명식에서 확인하여 근거로 사용하오. 여성 사주면 배우자를 상징하는 관성(정관·편관)이 어느 기둥에 있는지(없으면 무관 사주임을 명시), 남성 사주면 재성(정재·편재)이 어느 기둥에 있는지(없으면 무재 사주임을 명시) 반드시 분석하고 그 위치와 유무가 인연에 어떤 의미를 갖는지 풀이하오. 절대 두 개념 혼용 금지. 장점과 단점 모두 담되 따뜻한 시선으로. 홍연 말투(~이오/~하오/~겠소/~있소)로 통일하오. "~ㅂ니다", "~어요", "~습니다" 절대 금지. 700~900자(공백 포함)."
+    ]
   },
   "loveFlow": {
-    "intro": "앞으로 1년간 찾아올 연애·인연의 흐름(하반기로 갈수록 강해짐 등) 도입",
-    "callout": "특히 좋은 시기(연도+계절+간지/용신)와 인연을 만날 확률을 짚는 문장",
-    "flow": [ {"label":"6월","score":55}, {"label":"7월","score":60}, {"label":"8월","score":78}, {"label":"9월","score":88}, {"label":"10월","score":72}, {"label":"11월","score":62}, {"label":"12월","score":56}, {"label":"1월","score":60} ],
-    "peakCallout": "연애운이 정점에 달하는 달(연도+월+간지)과 운명의 상대가 나타날 가능성을 짚는 문장",
-    "paragraphs": ["그 달의 매력(도화살 등)과 관계 발전","어떤 장소·계기에서 인연을 만나게 되는지"]
+    "intro": "절대 쓰지 마오 — 빈 문자열로",
+    "callout": "절대 쓰지 마오 — 빈 문자열로",
+    "flow": [],
+    "peakCallout": "절대 쓰지 마오 — 빈 문자열로",
+    "paragraphs": [
+      "【필수 — 500자 내외】 위 연애운 점수표를 기반으로 2024~2033년 중 최소 5개 연도를 반드시 직접 언급하오. 점수 높은 해·낮은 해·전환점이 되는 해를 골고루 짚으오. 점수 숫자는 언급 금지. 연도는 반드시 '○○년 갑진년은' 형식으로 표기하오. '가장' 최상급은 1위 연도에만 사용하오. 각 연도마다 그 시기에 어떻게 행동하면 좋은지, 어떤 점을 조심해야 하는지 조언을 담으오. 【시제】 위에 주입된 리포트 생성 기준일을 확인하여 시제를 적용하오. 홍연 말투. '~ㅂ니다', '~어요' 절대 금지."
+    ]
   },
   "spouse": {
     "intro": "사주에 예정된 미래 배우자의 전반적 분위기를 짚는 도입",
@@ -819,11 +888,121 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     ohaengTable = `\n[오행 분포 — ohaengDesc 풀이에서 반드시 이 수치를 기반으로 서술]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n\n[MBTI 매칭 결과 — answer 풀이에서 반드시 이 유형에 대해서만 서술]\n사주 십성 분포로 도출된 MBTI 유형: ${computedMbti}\n이 유형의 특성·강점·약점을 사주 명식과 연결하여 홍연 말투로 풀이하오. mbtiType 필드값도 반드시 "${computedMbti}"로 설정하오.\n`;
   }
 
+  // chapter 6: 연애/결혼 — 기둥별 십성 확인표 주입 (인연성 위치 오류 방지)
+  if (chapter === 6 && input.pillars && input.pillars.length > 0) {
+    const ORDER6 = ["년주", "월주", "일주", "시주"];
+    const byPos6: Record<string, typeof input.pillars[0]> = {};
+    for (const p of input.pillars) byPos6[p.pos] = p;
+    const rows6 = ORDER6.map(pos => {
+      const p = byPos6[pos];
+      if (!p) return null;
+      const ganKr = `${GAN_KR[p.gan] ?? p.gan}${p.ganEl}`;
+      const jiKr = `${JI_KR[p.ji] ?? p.ji}${p.jiEl}`;
+      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})`;
+    }).filter(Boolean);
+    const isFemale = input.gender === "female";
+    const loveStars = isFemale
+      ? ["정관", "편관"]
+      : ["정재", "편재"];
+    const loveStarName = isFemale ? "관성(정관·편관)" : "재성(정재·편재)";
+    const found: string[] = [];
+    for (const p of input.pillars) {
+      if (loveStars.includes(p.sipTop)) found.push(`${p.pos} 천간`);
+      if (loveStars.includes(p.sipBot)) found.push(`${p.pos} 지지`);
+    }
+    const loveStarResult = found.length > 0
+      ? `${loveStarName} 위치: ${found.join(", ")}`
+      : `${loveStarName}: 명식에 없음 → ${isFemale ? "무관(無官) 사주" : "무재(無財) 사주"}`;
+    // 연애운 점수표 계산 (프론트 LoveLineChart 동일 알고리즘)
+    const STEM_EL6: Record<string, string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+    const BRANCH_EL6: Record<string, string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+    const GEN6: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+    const CTL6: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+    const GAN_KR6: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+    const JI_KR6: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+    const LOVE_SCORE6: Record<string, number> = isFemale
+      ? { 관성:90,편관:88,정관:92,재성:70,편재:68,정재:72,식상:75,식신:76,상관:74,인성:60,편인:58,정인:62,비겁:50,비견:50,겁재:48 }
+      : { 재성:90,편재:88,정재:92,관성:70,편관:68,정관:72,식상:75,식신:76,상관:74,인성:60,편인:58,정인:62,비겁:50,비견:50,겁재:48 };
+    function toSip6(ilEl: string, tEl: string): string {
+      if (ilEl === tEl) return "비겁";
+      if (GEN6[ilEl] === tEl) return "식상";
+      if (CTL6[ilEl] === tEl) return "재성";
+      if (CTL6[tEl] === ilEl) return "관성";
+      if (GEN6[tEl] === ilEl) return "인성";
+      return "비겁";
+    }
+    const ilEl6 = byPos6["일주"]?.ganEl ?? "목";
+    const GANJIS6 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+    const BASE_IDX6 = GANJIS6.indexOf("甲辰");
+    const loveRows: string[] = [];
+    for (let yi = 0; yi < 10; yi++) {
+      const year = 2024 + yi;
+      const gz = GANJIS6[(BASE_IDX6 + yi) % 60];
+      const stem = gz[0]; const branch = gz[1];
+      const sEl = STEM_EL6[stem]; const bEl = BRANCH_EL6[branch];
+      const sip_t = sEl ? toSip6(ilEl6, sEl) : "비겁";
+      const sip_b = bEl ? toSip6(ilEl6, bEl) : "비겁";
+      const score = Math.min(95, Math.max(40, Math.round((LOVE_SCORE6[sip_t] ?? 55) * 0.6 + (LOVE_SCORE6[sip_b] ?? 55) * 0.4)));
+      const gzKr = `${GAN_KR6[stem] ?? ""}${JI_KR6[branch] ?? ""}년`;
+      loveRows.push(`${year}년 ${gzKr}: 연애점수=${score}`);
+    }
+    const sortedLove = loveRows.map((r, i) => ({ i, score: Number(r.split("연애점수=")[1]) })).sort((a, b) => b.score - a.score);
+    const lovePeakYear = 2024 + sortedLove[0].i;
+    const lovePeakGz = loveRows[sortedLove[0].i].split(" ")[1];
+
+    const now = new Date();
+    const refYear = now.getFullYear();
+    const refMonth = now.getMonth() + 1;
+    pillarTable += `\n[리포트 생성 기준일 — 절대 규칙, 위반 시 탈락]\n오늘: ${refYear}년 ${refMonth}월\n\n【시제 적용 — 연도별 예시】\n- ${refYear - 2}년, ${refYear - 1}년 → 이미 지난 해 → 반드시 과거형: "~이었소", "~았소", "~높았소", "~찾아왔소"\n  예) "2024년 갑진년은 연애운이 높았소" (O) / "될 것이오" (X 절대 금지)\n- ${refYear}년 → 지금 이 해 → 반드시 현재형: "~이오", "~하오", "~있소"\n  예) "2026년 병오년은 연애운이 낮아지고 있소"\n- ${refYear + 1}년 이후 → 아직 오지 않은 해 → 반드시 미래형: "~될 것이오", "~찾아오겠소"\n  예) "2027년 정미년은 연애운이 회복될 것이오"\n\n\n[기둥별 십성 확인표 — 6장 연애 풀이에서 반드시 이 값만 사용, 임의 추론 금지]\n${rows6.join("\n")}\n\n[인연성 분석 결과 — 반드시 이 결과를 그대로 사용하오]\n${loveStarResult}\n\n[2024~2033 세운별 연애운 점수표 — loveFlow 풀이에서 반드시 이 수치 기반으로만 서술]\n${loveRows.join("\n")}\n연애운 1위(정점): ${lovePeakYear}년 ${lovePeakGz} (점수=${sortedLove[0].score})\n연애운 상위: ${sortedLove.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n연애운 하위: ${sortedLove.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n[연도 표기] '○○년 갑진년은' 형식. '가장' 최상급은 1위 연도(${lovePeakYear}년)에만 사용.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n`;
+  }
+
+  // chapter 5: 세운 재물운 점수 계산 후 주입 (프론트 WealthLineChart 동일 알고리즘)
+  let wealthTable = "";
+  if (chapter === 5 && input.pillars && input.pillars.length >= 2) {
+    const byPos5: Record<string, typeof input.pillars[0]> = {};
+    for (const p of input.pillars) byPos5[p.pos] = p;
+    const ilEl5 = byPos5["일주"]?.ganEl ?? "목";
+    const STEM_EL5: Record<string, string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+    const BRANCH_EL5: Record<string, string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+    const GEN5: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+    const CTL5: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+    const SIP_SCORE5: Record<string, number> = { 재성:88,편재:90,정재:86,식신:80,상관:78,인성:65,편인:62,정인:68,비겁:55,비견:56,겁재:54,관성:60,편관:58,정관:62 };
+    const SIP_NAME5: Record<string, string> = { 재성:"재성",편재:"편재",정재:"정재",식신:"식신",상관:"상관",인성:"인성",편인:"편인",정인:"정인",비겁:"비겁",비견:"비견",겁재:"겁재",관성:"관성",편관:"편관",정관:"정관" };
+    function toSip5(ilEl: string, tEl: string): string {
+      if (ilEl === tEl) return "비겁";
+      if (GEN5[ilEl] === tEl) return "식상";
+      if (CTL5[ilEl] === tEl) return "재성";
+      if (CTL5[tEl] === ilEl) return "관성";
+      if (GEN5[tEl] === ilEl) return "인성";
+      return "비겁";
+    }
+    const GANJIS5 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+    const BASE_IDX5 = GANJIS5.indexOf("甲辰"); // 2024년
+    const GAN_KR5: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+    const JI_KR5: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+    const rows5: string[] = [];
+    for (let yi = 0; yi < 10; yi++) {
+      const year = 2024 + yi;
+      const gz = GANJIS5[(BASE_IDX5 + yi) % 60];
+      const stem = gz[0]; const branch = gz[1];
+      const sEl = STEM_EL5[stem]; const bEl = BRANCH_EL5[branch];
+      const sip_t = sEl ? toSip5(ilEl5, sEl) : "비겁";
+      const sip_b = bEl ? toSip5(ilEl5, bEl) : "비겁";
+      const score = Math.round((SIP_SCORE5[sip_t] ?? 55) * 0.6 + (SIP_SCORE5[sip_b] ?? 55) * 0.4);
+      const gzKr = `${GAN_KR5[stem] ?? stem}${JI_KR5[branch] ?? branch}년`;
+      rows5.push(`${year}년 ${gzKr}: 천간=${SIP_NAME5[sip_t] ?? sip_t}, 지지=${SIP_NAME5[sip_b] ?? sip_b}, 재물점수=${score}`);
+    }
+    const sorted5 = [...rows5].map((r, i) => ({ r, i, score: Number(r.split("재물점수=")[1]) })).sort((a, b) => b.score - a.score);
+    const peakYear = 2024 + sorted5[0].i;
+    const peakGz = rows5[sorted5[0].i].split(" ")[1]; // "병오년" 형태
+    wealthTable = `\n[2024~2033 세운별 재물운 점수표 — wealthTime 풀이에서 반드시 이 수치 기반으로만 서술]\n${rows5.join("\n")}\n재물운 1위(유일한 정점): ${peakYear}년 ${peakGz} (점수=${sorted5[0].score})\n재물운 상위: ${sorted5.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n재물운 하위: ${sorted5.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n\n[연도 표기 규칙] 반드시 '○○년 병오년은' 형식으로 표기하오. '병화오화년' 같이 오행을 붙이거나 괄호로 묶는 표현은 절대 금지하오.\n[가장 표현 규칙] '가장 좋은', '가장 강한' 등 최상급 표현은 재물운 1위 연도(${peakYear}년)에만 단 한 번 사용하오. 2·3위 연도에는 '특히', '두드러지게' 등 다른 표현을 쓰오.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n`;
+  }
+
   const user = `[대상] ${honor} (${input.gender === "male" ? "남성" : "여성"}) — 풀이 전체에서 이름을 부를 때 반드시 '${honor}'로만 호칭하오. '님' 호칭은 절대 사용하지 마오.
 
 [사주 명식]
 ${input.manseryeokText}
-${ageGuide}${pillarTable}${deungTable}${ohaengTable}
+${ageGuide}${pillarTable}${deungTable}${ohaengTable}${wealthTable}
 위 명식을 근거로, ${honor}의 ${CH_THEME[chapter] ?? ""} 에 대한 결과지 콘텐츠를 작성하세요.
 ${CH_GUIDE[chapter]?.trim() ? `\n[이 장에서 특히 신경 쓸 것]\n${CH_GUIDE[chapter].trim()}\n` : ""}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
