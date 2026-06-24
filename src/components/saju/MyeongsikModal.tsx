@@ -134,12 +134,12 @@ function CellText({ children, color = INK_SOFT, size = 13 }: { children: React.R
 function CellImg({ src, alt, el }: { src: string; alt: string; el: string }) {
   const [err, setErr] = useState(false);
   return (
-    <div className="py-1.5 flex items-center justify-center" style={{ background: WHITE }}>
+    <div className="py-0.5 flex items-center justify-center" style={{ background: WHITE }}>
       {err ? (
-        <span className="font-black" style={{ color: EL_COLOR[el] ?? INK, fontSize: 20 }}>{alt}</span>
+        <span className="font-black" style={{ color: EL_COLOR[el] ?? INK, fontSize: 18 }}>{alt}</span>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={alt} onError={() => setErr(true)} style={{ width: 75, height: 75, objectFit: "contain" }} />
+        <img src={src} alt={alt} onError={() => setErr(true)} style={{ width: 54, height: 54, objectFit: "contain" }} />
       )}
     </div>
   );
@@ -150,7 +150,7 @@ function SmallGan({ ch }: { ch: string }) {
   const [err, setErr] = useState(false);
   if (err) return <span style={{ fontSize: 10.5, color: INK_SOFT }}>{ch}</span>;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={ganCharImage(ch)} alt={ch} onError={() => setErr(true)} style={{ width: 23, height: 23, objectFit: "contain" }} />;
+  return <img src={ganCharImage(ch)} alt={ch} onError={() => setErr(true)} style={{ width: 18, height: 18, objectFit: "contain" }} />;
 }
 function CellJijang({ text, ilgan }: { text: string; ilgan: string }) {
   const chars = text.split("·").map((c) => c.trim()).filter(Boolean);
@@ -167,11 +167,11 @@ function CellJijang({ text, ilgan }: { text: string; ilgan: string }) {
   return (
     <div className="py-1 flex flex-col items-center justify-center gap-1" style={{ background: WHITE }}>
       {rows.map((r, i) => (
-        <div key={i} style={{ display: "inline-grid", gridTemplateColumns: "23px 32px", alignItems: "center", gap: 4 }}>
+        <div key={i} style={{ display: "grid", gridTemplateColumns: "18px 32px", alignItems: "center", gap: 4, margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "center" }}>
             {r.ch === null ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src="/media/saju/cheongan/hipeun.png" alt="-" style={{ width: 23, height: 23, objectFit: "contain" }} />
+              <img src="/media/saju/cheongan/hipeun.png" alt="-" style={{ width: 18, height: 18, objectFit: "contain" }} />
             ) : (
               <SmallGan ch={r.ch} />
             )}
