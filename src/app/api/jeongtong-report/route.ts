@@ -223,7 +223,7 @@ async function generateChapter(body: unknown) {
   // myeongsik에 gender가 없으면 saju_inputs에서 fallback
   if (!stored?.gender && data.order_id && stored) {
     const { data: si } = await service.from("saju_inputs").select("gender").eq("order_id", data.order_id).maybeSingle();
-    if (si?.gender) stored.gender = si.gender === "female" || si.gender === "여자" ? "female" : "male";
+    if (si?.gender) stored.gender = (si.gender as string) === "female" || (si.gender as string) === "여자" ? "female" : "male";
   }
 
   let content: Record<string, unknown> = {};
