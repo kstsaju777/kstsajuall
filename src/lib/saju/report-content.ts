@@ -66,7 +66,7 @@ export type ReportContent = {
   wealthTime: ReportSection & { bars: { year: number; amount: string; value: number }[] }; // 향후 5년 재물운(연도/금액/상대크기)
   jobFit: ReportSection & { clusters: { category: string; keywords: string[]; jobs: string[]; rankReason?: string; topJobReason?: string }[] };
   jobType: ReportSection & { split: { leftLabel: string; left: number; rightLabel: string; right: number; leftDesc: string; rightDesc: string } }; // 직장인 vs 사업가
-  invest: ReportSection; // 내게 잘 맞는 투자 방법
+  invest: ReportSection & { investTypes: { category: string; icon: string; score: number; products: string[]; tip: string }[] };
   // ── 8장: 연애·결혼운 정밀풀이 ──
   loveStyle: ReportSection; // 내가 사랑하는 방식
   loveFlow: ReportSection & { flow: { label: string; score: number }[]; peakCallout: string }; // 시기별 연애 흐름(월별)
