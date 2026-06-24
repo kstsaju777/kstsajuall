@@ -428,34 +428,29 @@ function EventBox() {
 // 추천 상품(크로스셀) 그리드 (마무리)
 const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
   { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" }, { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-  ] },
-  { cat: "재물·직업 분야", heading: "재물운과 직장운이 더 궁금하다면?", cards: [
-    { badge: "사주", title: "황금열쇠 재물운 사주", img: "hero-16" }, { badge: "사주", title: "천명 직업운", img: "hero-7" },
-  ] },
-  { cat: "연애·썸 분야", heading: "나의 다음 연애 상대는 누구일까?", cards: [
-    { badge: "사주", title: "솔로탈출 연애 사주", img: "hero-4" }, { badge: "사주", title: "날 얼마나 좋아할까?", img: "hero-3" }, { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-  ] },
-  { cat: "결혼 분야", heading: "언제 누구와 결혼하게 될까?", cards: [
-    { badge: "사주", title: "두근두근 결혼사주", img: "hero-9" }, { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
+    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
+    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
+    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
+    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
   ] },
 ];
 function RecoGrid() {
-  const bc = (b: string) => (b === "자미두수" ? "#7c5cc4" : "#d96a8a");
   return (
-    <div className="px-6 pb-4">
+    <div className="pb-4">
       {RECO_GROUPS.map((g, gi) => (
         <div key={gi} className="mb-6">
-          <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>{g.cat}</p>
-          <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>{g.heading}</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="px-6">
+            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
+            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
             {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden active:scale-[0.98] transition-all" style={{ aspectRatio: "3 / 4" }}>
+              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, rgba(0,0,0,0.55) 100%)" }} />
-                <span className="absolute top-2.5 right-2.5 text-[10px] font-bold text-white px-2 py-0.5 rounded-md" style={{ background: bc(c.badge) }}>{c.badge}</span>
-                <p className="absolute bottom-3 left-0 right-0 text-center text-[15px] font-black text-white px-2" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{c.title}</p>
+                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
+                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
+                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
+                </div>
               </div>
             ))}
           </div>
