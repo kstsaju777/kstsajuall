@@ -3227,10 +3227,9 @@ function ReportPreviewInner() {
                 </svg>
               );
             })()}
-            <P style={{ marginTop: 16 }}>
-              생과 극이 균형을 이룰 때 사주는 안정되고,<br />
-              한쪽으로 치우칠수록 삶의 굴곡이 깊어지오.
-            </P>
+            <div style={{ marginTop: 16 }}>
+              <P>{"생과 극이 균형을 이룰 때 사주는 안정되고,\n한쪽으로 치우칠수록 삶의 굴곡이 깊어지오."}</P>
+            </div>
           </section>
 
           {/* ─ 생(生) ─ */}
