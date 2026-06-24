@@ -1122,25 +1122,351 @@ function UnseongMini({ view }: { view: MyeongsikView | null }) {
   );
 }
 
-// 간단 명식 (천간/지지만)
-function GanjiMini({ view }: { view: MyeongsikView | null }) {
-  if (!view) return null;
+// ── 합충형해파원진 계산 ──────────────────────────────
+const HANJA_TO_KOR: Record<string, string> = {
+  // 천간
+  "甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무","己":"기","庚":"경","辛":"신","壬":"임","癸":"계",
+  // 지지
+  "子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사","午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해",
+};
+const toKor = (hanja: string) => HANJA_TO_KOR[hanja] ?? hanja;
+// 받침 유무에 따라 조사 선택
+const josa = (word: string, withBatchim: string, withoutBatchim: string) => {
+  const code = word.charCodeAt(word.length - 1) - 0xAC00;
+  return code >= 0 && code % 28 !== 0 ? withBatchim : withoutBatchim;
+};
+type RelKind = "천간합" | "천간충" | "육합" | "삼합" | "충" | "형" | "파" | "해" | "원진";
+type Rel = { kind: RelKind; chars: string[]; label: string };
+
+const GAN_HAP: [string, string, string][] = [
+  ["갑","기","갑기합"],["을","경","을경합"],["병","신","병신합"],["정","임","정임합"],["무","계","무계합"],
+];
+// 천간합 → 합화 오행
+const GAN_HAP_RESULT: Record<string, string> = {
+  "갑기":"토","기갑":"토","을경":"금","경을":"금","병신":"수","신병":"수","정임":"목","임정":"목","무계":"화","계무":"화",
+};
+// 육합 → 합화 오행
+const YUK_HAP_RESULT: Record<string, string> = {
+  "자축":"토","축자":"토","인해":"목","해인":"목","묘술":"화","술묘":"화","진유":"금","유진":"금","사신":"수","신사":"수","오미":"화","미오":"화",
+};
+// 삼합 → 합화 오행
+const SAM_HAP_RESULT: Record<string, string> = {
+  "인오술":"화","신자진":"수","해묘미":"목","사유축":"금",
+};
+// 오행 생극 관계
+const EL_GENERATES: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+const EL_CONTROLS:  Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+// 일간 오행 기준 합화 오행 → 십성 카테고리
+function hapResultSipseong(ilganEl: string, resultEl: string): string {
+  if (ilganEl === resultEl) return "비겁";
+  if (EL_GENERATES[ilganEl] === resultEl) return "식상";
+  if (EL_CONTROLS[ilganEl]  === resultEl) return "재성";
+  if (EL_CONTROLS[resultEl] === ilganEl)  return "관성";
+  if (EL_GENERATES[resultEl]=== ilganEl)  return "인성";
+  return "";
+}
+const SIPSEONG_HAP_DESC: Record<string, string> = {
+  "비겁": "합화된 기운이 나 자신(비겁)의 힘을 강화하오. 자아·독립심·추진력이 더욱 강해지나, 지나치면 독단적으로 흐를 수 있소.",
+  "식상": "합화된 기운이 식상으로 작용하오. 표현력·창의성·활동성이 커지고, 재능이 밖으로 드러나는 힘이 강해지오.",
+  "재성": "합화된 기운이 재성으로 작용하오. 재물·현실적 성과·인간관계에서 실리를 추구하는 힘이 강해지오.",
+  "관성": "합화된 기운이 관성으로 작용하오. 명예·책임·규율의 기운이 강해지며, 사회적 역할과 지위와 깊이 연결되오.",
+  "인성": "합화된 기운이 인성으로 작용하오. 학문·직관·내면의 힘이 깊어지며, 정신적 안정과 지원의 기운이 커지오.",
+};
+const GAN_CHUNG: [string,string,string][] = [
+  ["갑","경","갑경충"],["을","신","을신충"],["병","임","병임충"],["정","계","정계충"],
+  ["무","임","무임충"],["갑","무","갑무충"],["경","병","경병충"],["기","을","기을충"],["계","기","계기충"],
+];
+const YUK_HAP: [string,string,string][] = [
+  ["자","축","자축합"],["인","해","인해합"],["묘","술","묘술합"],["진","유","진유합"],["사","신","사신합"],["오","미","오미합"],
+];
+const SAM_HAP: [string[],string][] = [
+  [["인","오","술"],"인오술 삼합(화국)"],[["신","자","진"],"신자진 삼합(수국)"],
+  [["해","묘","미"],"해묘미 삼합(목국)"],[["사","유","축"],"사유축 삼합(금국)"],
+];
+const JI_CHUNG: [string,string,string][] = [
+  ["자","오","자오충"],["축","미","축미충"],["인","신","인신충"],["묘","유","묘유충"],["진","술","진술충"],["사","해","사해충"],
+];
+const HYEONG: [string[],string][] = [
+  [["인","사","신"],"인사신 형"],[["축","술","미"],"축술미 형"],
+  [["진","진"],"진진 자형"],[["오","오"],"오오 자형"],[["유","유"],"유유 자형"],[["해","해"],"해해 자형"],
+  [["자","묘"],"자묘 상형"],
+];
+const PA: [string,string,string][] = [
+  ["자","유","자유파"],["오","묘","오묘파"],["인","해","인해파"],["사","신","사신파"],["축","진","축진파"],["술","미","술미파"],
+];
+const HAE: [string,string,string][] = [
+  ["자","미","자미해"],["축","오","축오해"],["인","사","인사해"],["묘","진","묘진해"],["신","해","신해해"],["유","술","유술해"],
+];
+const WONJIN: [string,string,string][] = [
+  ["자","미","자미원진"],["축","오","축오원진"],["인","유","인유원진"],["묘","신","묘신원진"],["진","해","진해원진"],["사","술","사술원진"],
+];
+
+// 기둥+천간지지 위치 → 삶의 영역
+const POS_MEANING: Record<string, string> = {
+  "시주천간": "말년·자녀 영역",
+  "시주지지": "말년·딸 영역",
+  "일주천간": "본인(나) 자체",
+  "일주지지": "배우자·내면 영역",
+  "월주천간": "직업·사회활동 영역",
+  "월주지지": "직업환경·모친 영역",
+  "년주천간": "초년·조부 영역",
+  "년주지지": "초년·조모 영역",
+};
+
+// 관계 종류별 핵심 의미 (위치 문장 뒤에 붙임)
+const KIND_MEANING: Record<RelKind, { verb: string; effect: string }> = {
+  "천간합": { verb: "서로 끌어당겨 합을 이루고 있소.", effect: "두 영역의 기운이 하나로 합쳐지며 새로운 에너지를 만들어내오. 협력·결합·인연의 힘이 강하게 흐르나, 합이 되는 과정에서 본래 기운이 변질될 수 있소." },
+  "천간충": { verb: "정면으로 충돌하고 있소.", effect: "두 영역이 서로를 약화시키며 긴장과 갈등을 만들어내오. 변동과 굴곡이 생기기 쉬우나, 이 충돌을 잘 다스리면 오히려 강한 추진력이 되기도 하오." },
+  "육합":   { verb: "음양으로 짝을 이뤄 합을 이루고 있소.", effect: "두 영역 사이에 깊은 조화와 결합의 기운이 흐르오. 인연·화합의 에너지로 해당 영역에서 좋은 관계가 맺어지기 쉽소." },
+  "삼합":   { verb: "기운이 모여 하나의 세력을 이루고 있소.", effect: "같은 방향으로 에너지가 강하게 결집되는 구조이오. 해당 오행의 기운이 명식 전체에 강하게 작용하오." },
+  "충":     { verb: "정반대로 부딪히고 있소.", effect: "두 영역 사이에 충돌과 변화의 기운이 강하오. 이동·변동·갈등이 나타나기 쉽지만, 막힌 기운을 뚫어주는 돌파구가 되기도 하오." },
+  "형":     { verb: "서로 형을 가하고 있소.", effect: "겉으로는 드러나지 않으나 내부에서 마찰과 긴장이 쌓이오. 관재·건강·인간관계에서 예상치 못한 갈등이 생길 수 있으니 주의하오." },
+  "파":     { verb: "서로 깨지는 관계에 있소.", effect: "시작은 있으나 끝이 흐지부지되는 기운이오. 해당 영역에서 인연이나 일이 도중에 어긋나거나 흩어지기 쉽소." },
+  "해":     { verb: "서로 해를 끼치는 관계에 있소.", effect: "보이지 않는 곳에서 방해·오해·배신이 생기오. 해당 영역에서 뜻밖의 손실이나 충돌이 나타날 수 있으니 각별히 살피오." },
+  "원진":   { verb: "서로 싫어하고 멀어지려는 관계에 있소.", effect: "겉으로는 멀쩡해 보여도 내면에 불편함과 갈등이 쌓이오. 해당 영역의 인연이 아쉬운 방식으로 끝맺어지는 경우가 많소." },
+};
+
+const PILLAR_ORDER: Record<string, number> = { "시주": 0, "일주": 1, "월주": 2, "년주": 3 };
+
+function buildRelDesc(r: Rel, view: MyeongsikView): string {
   const ps = view.pillars;
-  const GC = "repeat(4, 1fr)";
-  const img = (src: string, alt: string) => (
-    <div className="flex justify-center py-1">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} style={{ width: 42, height: 42, objectFit: "contain" }} />
+
+  const locate = (kor: string): { posKey: string; label: string; order: number } => {
+    for (const p of ps) {
+      if (toKor(p.gan) === kor) return { posKey: `${p.pos}천간`, label: POS_MEANING[`${p.pos}천간`] ?? p.pos, order: PILLAR_ORDER[p.pos] ?? 0 };
+      if (toKor(p.ji)  === kor) return { posKey: `${p.pos}지지`, label: POS_MEANING[`${p.pos}지지`] ?? p.pos, order: PILLAR_ORDER[p.pos] ?? 0 };
+    }
+    return { posKey: "", label: "", order: 0 };
+  };
+
+  const located = r.chars.map(c => ({ char: c, ...locate(c) }));
+  const parts = located.map(l => `'${l.char}'(${l.label})`);
+  const lastPart = parts[parts.length - 1];
+
+  // 거리 계산 (2글자 기준, 삼합은 최대 거리)
+  const orders = located.map(l => l.order);
+  const maxDist = orders.length >= 2
+    ? Math.max(...orders.flatMap((a, i) => orders.slice(i + 1).map(b => Math.abs(a - b))))
+    : 0;
+
+  const influence = maxDist === 0
+    ? { label: "영향력: 매우 강함", desc: "같은 기둥 안에서 작용하므로 영향력이 가장 강하오." }
+    : maxDist === 1
+    ? { label: "영향력: 강함", desc: "인접한 기둥 사이의 관계로 영향력이 강하오." }
+    : maxDist === 2
+    ? { label: "영향력: 보통", desc: "한 기둥을 사이에 두고 있어 영향력이 다소 약해지오." }
+    : { label: "영향력: 약함", desc: "시주와 년주처럼 가장 멀리 떨어진 관계로, 영향력이 상대적으로 약하오." };
+
+  const km = KIND_MEANING[r.kind];
+  // 마지막 글자에 맞는 주격 조사 붙이기
+  const subjectParticle = josa(lastPart, "이", "가");
+  let extra = "";
+  const ilju = view.pillars.find(p => p.pos === "일주");
+  const ilganEl = ilju?.ganEl ?? "";
+
+  const makeHapExtra = (resultEl: string) => {
+    const sip = hapResultSipseong(ilganEl, resultEl);
+    const sipDesc = SIPSEONG_HAP_DESC[sip] ?? "";
+    return `\n\n【합화 오행】 합쳐져 ${resultEl} 기운으로 변하오. 일간(${ilganEl}) 기준으로 ${resultEl}${josa(resultEl,"은","는")} ${sip}에 해당하오.\n${sipDesc}`;
+  };
+
+  if (r.kind === "천간합") {
+    const key = r.chars.join("");
+    const resultEl = GAN_HAP_RESULT[key] ?? GAN_HAP_RESULT[r.chars.slice().reverse().join("")];
+    if (resultEl) extra = makeHapExtra(resultEl);
+  } else if (r.kind === "육합") {
+    const key = r.chars.join("");
+    const resultEl = YUK_HAP_RESULT[key] ?? YUK_HAP_RESULT[r.chars.slice().reverse().join("")];
+    if (resultEl) extra = makeHapExtra(resultEl);
+  } else if (r.kind === "삼합") {
+    const sorted = [...r.chars].sort().join("");
+    const allKeys = Object.keys(SAM_HAP_RESULT);
+    const matchKey = allKeys.find(k => [...k.match(/.{1}/g)!].sort().join("") === sorted || k.split("").every(c => r.chars.includes(c)));
+    const resultEl = matchKey ? SAM_HAP_RESULT[matchKey] : undefined;
+    if (resultEl) extra = makeHapExtra(resultEl);
+  }
+  return `${parts.join("과 ")}${subjectParticle} ${km.verb.replace(/^이 /,"")}\n\n${km.effect}${extra}\n\n【${influence.label}】 ${influence.desc}`;
+}
+
+const KIND_META: Record<RelKind, { color: string; bg: string }> = {
+  "천간합": { color: "#2563eb", bg: "#eff6ff" },
+  "천간충": { color: "#dc2626", bg: "#fef2f2" },
+  "육합":   { color: "#0891b2", bg: "#ecfeff" },
+  "삼합":   { color: "#7c3aed", bg: "#f5f3ff" },
+  "충":     { color: "#ea580c", bg: "#fff7ed" },
+  "형":     { color: "#b45309", bg: "#fffbeb" },
+  "파":     { color: "#9333ea", bg: "#fdf4ff" },
+  "해":     { color: "#0f766e", bg: "#f0fdfa" },
+  "원진":   { color: "#be123c", bg: "#fff1f2" },
+};
+
+function calcRelations(view: MyeongsikView): Rel[] {
+  const ps = view.pillars;
+  const gans = ps.map(p => toKor(p.gan));
+  const jis  = ps.map(p => toKor(p.ji));
+  const rels: Rel[] = [];
+  const added = new Set<string>();
+  const add = (r: Rel) => { const k = r.kind+r.chars.join(""); if (!added.has(k)) { added.add(k); rels.push(r); } };
+
+  // 천간합
+  for (const [a,b,lbl] of GAN_HAP) {
+    if (gans.includes(a) && gans.includes(b)) add({ kind:"천간합", chars:[a,b], label:lbl });
+  }
+  // 천간충
+  for (const [a,b,lbl] of GAN_CHUNG) {
+    if (gans.includes(a) && gans.includes(b)) add({ kind:"천간충", chars:[a,b], label:lbl });
+  }
+  // 육합
+  for (const [a,b,lbl] of YUK_HAP) {
+    if (jis.includes(a) && jis.includes(b)) add({ kind:"육합", chars:[a,b], label:lbl });
+  }
+  // 삼합 (2개 이상 있으면 표시)
+  for (const [arr,lbl] of SAM_HAP) {
+    const found = arr.filter(c => jis.includes(c));
+    if (found.length >= 2) add({ kind:"삼합", chars:found, label:lbl });
+  }
+  // 지지충
+  for (const [a,b,lbl] of JI_CHUNG) {
+    if (jis.includes(a) && jis.includes(b)) add({ kind:"충", chars:[a,b], label:lbl });
+  }
+  // 형
+  for (const [arr,lbl] of HYEONG) {
+    const found = arr.filter(c => jis.includes(c));
+    if (arr.length === 2 && found.length === 2 && jis.filter(j=>j===arr[0]).length >= 2) add({ kind:"형", chars:found, label:lbl });
+    if (arr.length === 2 && found.length === 2 && arr[0] !== arr[1]) add({ kind:"형", chars:found, label:lbl });
+    if (arr.length === 3 && found.length >= 2) add({ kind:"형", chars:found, label:lbl });
+  }
+  // 파
+  for (const [a,b,lbl] of PA) {
+    if (jis.includes(a) && jis.includes(b)) add({ kind:"파", chars:[a,b], label:lbl });
+  }
+  // 해
+  for (const [a,b,lbl] of HAE) {
+    if (jis.includes(a) && jis.includes(b)) add({ kind:"해", chars:[a,b], label:lbl });
+  }
+  // 원진
+  for (const [a,b,lbl] of WONJIN) {
+    if (jis.includes(a) && jis.includes(b)) add({ kind:"원진", chars:[a,b], label:lbl });
+  }
+
+  return rels;
+}
+
+function RelationBadges({ view }: { view: MyeongsikView | null }) {
+  if (!view) return null;
+  const rels = calcRelations(view);
+  return (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {rels.map((r, i) => {
+        const m = KIND_META[r.kind];
+        return (
+          <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold" style={{ background: m.bg, color: m.color, border: `1px solid ${m.color}30` }}>
+            <span className="text-[11px] font-medium opacity-70">{r.kind}</span>
+            <span>{r.chars.join(["천간합","육합","삼합"].includes(r.kind) ? " + " : " ↔ ")}</span>
+          </div>
+        );
+      })}
     </div>
   );
-  return (
-    <div className="rounded-2xl p-3.5 mb-4" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
-      <p className="text-[11px] font-bold mb-2" style={{ color: MUTE }}>내 명식</p>
-      <div className="grid" style={{ gridTemplateColumns: GC }}>
-        {["시", "일", "월", "년"].map((h) => <div key={h} className="text-center text-[11px] font-bold" style={{ color: MUTE }}>{h}</div>)}
+}
+
+// 명식 + 합충 인터랙티브 컴포넌트
+function GanjiRelation({ view }: { view: MyeongsikView | null }) {
+  const [selected, setSelected] = useState<number | null>(null);
+  if (!view) return null;
+  const ps = view.pillars;
+  const rels = calcRelations(view);
+
+  const activeChars: Set<string> = new Set(
+    selected !== null ? rels[selected].chars.map(c => c) : []
+  );
+
+  const isActive = (kor: string) => selected === null || activeChars.has(kor);
+
+  const Cell = ({ src, alt, kor }: { src: string; alt: string; kor: string }) => {
+    const active = isActive(kor);
+    return (
+      <div className="flex justify-center py-1" style={{ transition: "filter 0.2s, opacity 0.2s", filter: active ? "none" : "blur(2px)", opacity: active ? 1 : 0.25 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={alt} style={{ width: 57, height: 57, objectFit: "contain" }} />
       </div>
-      <div className="grid" style={{ gridTemplateColumns: GC }}>{ps.map((p, i) => <div key={i}>{img(ganCharImage(p.gan), p.gan)}</div>)}</div>
-      <div className="grid" style={{ gridTemplateColumns: GC }}>{ps.map((p, i) => <div key={i}>{img(jiCharImage(p.ji), p.ji)}</div>)}</div>
+    );
+  };
+
+  return (
+    <div className="mb-4 rounded-2xl p-3.5" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
+      {/* 명식표 */}
+      <div className="mb-3">
+        <div className="grid mb-1" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+          {["시주","일주","월주","년주"].map((h) => (
+            <div key={h} className="text-center text-[11px] font-bold" style={{ color: MUTE }}>{h}</div>
+          ))}
+        </div>
+        <div className="grid mb-0.5" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+          {ps.map((p, i) => (
+            <div key={i} className="text-center text-[11px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.gan)) ? 1 : 0.25 }}>{p.sipTop || "—"}</div>
+          ))}
+        </div>
+        <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+          {ps.map((p, i) => <Cell key={i} src={ganCharImage(p.gan)} alt={p.gan} kor={toKor(p.gan)} />)}
+        </div>
+        <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+          {ps.map((p, i) => <Cell key={i} src={jiCharImage(p.ji)} alt={p.ji} kor={toKor(p.ji)} />)}
+        </div>
+        <div className="grid mt-0.5" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+          {ps.map((p, i) => (
+            <div key={i} className="text-center text-[11px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.ji)) ? 1 : 0.25 }}>{p.sipBot || "—"}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* 안내 박스 */}
+      <div className="rounded-xl px-4 py-3 mb-3 flex items-center gap-3" style={{ background: `${MAROON}08`, border: `1.5px dashed ${MAROON}60` }}>
+        <div className="text-[22px] animate-bounce">👇</div>
+        <div>
+          <p className="text-[12px] font-bold mb-0.5" style={{ color: MAROON }}>합·충·형·해·파·원진 해설</p>
+          <p className="text-[11px]" style={{ color: MUTE }}>아래 버튼을 눌러 상세 해설을 확인하오.</p>
+        </div>
+      </div>
+
+      {/* 관계 배지 */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        {rels.map((r, i) => {
+          const m = KIND_META[r.kind];
+          const isSelected = selected === i;
+          return (
+            <button
+              key={i}
+              onClick={() => setSelected(isSelected ? null : i)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold"
+              style={{
+                background: isSelected ? m.color : m.bg,
+                color: isSelected ? "#fff" : m.color,
+                border: `1px solid ${m.color}`,
+                transition: "all 0.15s",
+              }}
+            >
+              <span className="text-[11px] font-medium opacity-80">{r.kind}</span>
+              <span>{r.chars.join(["천간합","육합","삼합"].includes(r.kind) ? " + " : " ↔ ")}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 해설 */}
+      {selected !== null && (() => {
+        const r = rels[selected];
+        const m = KIND_META[r.kind];
+        const desc = buildRelDesc(r, view);
+        return (
+          <div className="rounded-xl px-4 py-3 mt-2" style={{ background: `${m.color}10`, borderLeft: `3px solid ${m.color}` }}>
+            <p className="text-[12px] font-bold mb-2" style={{ color: m.color }}>
+              {r.kind} · {r.chars.join(["천간합","육합","삼합"].includes(r.kind) ? " + " : " ↔ ")}
+            </p>
+            <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -1148,9 +1474,9 @@ function GanjiMini({ view }: { view: MyeongsikView | null }) {
 // 강조 문단 (끝에 하이라이트 문장)
 function HiP({ children, hi }: { children: React.ReactNode; hi: string }) {
   return (
-    <p className="text-[14.5px] leading-[1.95] mb-4" style={{ color: INK_SOFT }}>
+    <p className="text-[14.5px] leading-[1.95] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>
       {children}{" "}
-      <span style={{ background: "#fdf3c9", color: INK, fontWeight: 600, padding: "1px 3px", borderRadius: 3, boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone" } as React.CSSProperties}>{hi}</span>
+      <span style={{ color: INK_SOFT }}>{hi}</span>
     </p>
   );
 }
@@ -1171,7 +1497,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "1": "제1장 · 나는 어떤 그릇으로 태어났나",
   "2": "제2장 · 나의 진짜 모습은 무엇일까",
   "3": "제3장 · 나는 세상을 어떻게 대하는가",
-  "4": "제4장 · 내 사주는 얼마나 귀한가",
+  "4": "제4장 · 내 사주에 나타나는 특이점",
   "5": "제5장 · 내 재물과 천직은 어떠한가",
   "6": "제6장 · 내 인연과 혼인의 때는 언제인가",
   "7": "제7장 · 내 건강과 약한 곳은 어디인가",
@@ -2213,7 +2539,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제1장", chip: "환경", title: "나는 어떤 그릇으로 태어났나", no: "1" },
   { disp: "제2장", chip: "운명", title: "나의 진짜 모습은 무엇일까", no: "2" },
   { disp: "제3장", chip: "관계", title: "나는 세상을 어떻게 대하는가", no: "3" },
-  { disp: "제4장", chip: "특징", title: "내 사주는 얼마나 귀한가", no: "4" },
+  { disp: "제4장", chip: "특징", title: "내 사주에 나타나는 특이점", no: "4" },
   { disp: "제5장", chip: "재물", title: "내 재물과 천직은 어떠한가", no: "5" },
   { disp: "제6장", chip: "사랑", title: "내 인연과 혼인의 때는 언제인가", no: "6" },
   { disp: "제7장", chip: "건강", title: "내 건강과 약한 곳은 어디인가", no: "7" },
@@ -2390,10 +2716,10 @@ function HanjaDivider({ hanja, sub }: { hanja: string; sub: string }) {
 // 풀블리드 일러스트 (표제 없는 삽화)
 function Illust({ src, h = 480 }: { src: string; h?: number }) {
   return (
-    <div className="relative overflow-hidden" style={{ height: h, background: PINK_PALE }}>
+    <div className="relative w-full" style={{ background: PINK_PALE }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 22%, transparent 78%, ${CREAM} 100%)` }} />
+      <img src={src} alt="" className="w-full block" style={{ display: "block" }} />
+      <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, ${CREAM}bb 10%, ${CREAM}55 20%, transparent 35%, transparent 65%, ${CREAM}55 80%, ${CREAM}bb 90%, ${CREAM} 100%)` }} />
     </div>
   );
 }
@@ -3007,7 +3333,7 @@ function ReportPreviewInner() {
           <div className="relative overflow-hidden" style={{ height: 300, background: PINK_PALE }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-0/total-0-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 22%, transparent 78%, ${CREAM} 100%)` }} />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 35%, transparent 65%, ${CREAM} 100%)` }} />
           </div>
 
           {/* ─ 천간과 지지 ─ */}
@@ -3304,7 +3630,7 @@ function ReportPreviewInner() {
           {/* 맺음말 삽화 */}
           <div className="relative overflow-hidden mx-0" style={{ background: CREAM }}>
             <video src="/media/report/total/total-0/total-0-3.mp4" autoPlay muted loop playsInline className="w-full object-cover" />
-            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 22%, transparent 78%, ${CREAM} 100%)` }} />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 35%, transparent 65%, ${CREAM} 100%)` }} />
           </div>
 
           {/* 맺음말 */}
@@ -3803,11 +4129,11 @@ function ReportPreviewInner() {
             <Heading>필요한 기운과 피해야 할 기운</Heading>
             {(() => {
               const OHAENG_META: Record<string, { hanja: string; color: string; bg: string; desc: string }> = {
-                목: { hanja: "木", color: "#2d7a2d", bg: "#e8f5e9", desc: "성장·추진" },
-                화: { hanja: "火", color: "#c62828", bg: "#ffebee", desc: "열정·표현" },
-                토: { hanja: "土", color: "#795548", bg: "#efebe9", desc: "안정·신뢰" },
-                금: { hanja: "金", color: "#b8860b", bg: "#fffde7", desc: "절제·결단" },
-                수: { hanja: "水", color: "#1565c0", bg: "#e3f2fd", desc: "지혜·유연" },
+                목: { hanja: "木", color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
+                화: { hanja: "火", color: "#222", bg: "#ffebee", desc: "열정·표현" },
+                토: { hanja: "土", color: "#222", bg: "#efebe9", desc: "안정·신뢰" },
+                금: { hanja: "金", color: "#222", bg: "#fffde7", desc: "절제·결단" },
+                수: { hanja: "水", color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
               };
               const rows = [
                 { role: "용신", el: c.yongsin.yongsinEl, reason: c.yongsin.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
@@ -3835,7 +4161,7 @@ function ReportPreviewInner() {
                         <div className="flex flex-col gap-1">
                           <div className="text-[14px] font-black" style={{ color: m.color }}>{m.desc}</div>
                           {r.reason && (
-                            <div className="text-[11px] leading-snug" style={{ color: isGisin ? "#b71c1c" : "#555" }}>{r.reason}</div>
+                            <div className="text-[11px] leading-snug" style={{ color: "#555" }}>{r.reason}</div>
                           )}
                         </div>
                       </div>
@@ -3891,14 +4217,95 @@ function ReportPreviewInner() {
               </div>
             </div>
           )}
-          {c.hapchung.intro && <div className="px-6 pb-4"><P>{[c.hapchung.intro, ...c.hapchung.paragraphs].join("\n")}</P></div>}
+          {c.gyeokguk.intro && <div className="px-6 pb-4"><P>{[c.gyeokguk.intro, c.gyeokguk.callout, ...c.gyeokguk.paragraphs].filter(Boolean).join("\n")}</P></div>}
 
-          {/* 5. 핵심 갈망 */}
+          <section className="px-6 pt-2 pb-2">
+            <Heading>겉으로 드러나는 나와 내면의 나</Heading>
+          </section>
+          {c.essence.intro && <div className="px-6 pb-4"><P>{[c.essence.intro, ...c.essence.paragraphs].join("\n")}</P></div>}
+
+          {/* 삽화 */}
+          <Illust src="/media/report/total/total-2/total-2-1.jpg" h={360} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"다음으로는, ${name}${report?.gender === "female" ? "양" : "군"}이\n세상과 어떤 방식으로\n조우하게 되는지\n알려주겠소."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <ChapterNav cur="2" go={next} />
+        </>
+      )}
+
+      {/* ═══════════ 제4장 ═══════════ */}
+      {ch === "4" && (
+        <>
+          {/* 표지 */}
+          {/* 헤드라인 블록 */}
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 특징</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+              “내 사주에 나타나는 특이점”
+            </h1>
+          </div>
+          {/* 커버 이미지 */}
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/total/total-4/total-4-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+
+          <Quote>{`"${name}${report?.gender === "female" ? "양" : "군"}의 사주에서\n나타나는 특이점에 대해\n하나씩 짚어드리겠소."`}</Quote>
+
+
+          {/* 이 사주가 드문 이유 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>그대가 가진 오행들의 분포</Heading>
+            <Heading>사주에 존재하는 복잡한 글자관계</Heading>
+            <p className="text-[14.5px] leading-[2] mb-4 whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{`사주팔자 글자들 간에는\n아주 복잡한 관계가 있다는 사실 알고있소?\n크게 합·충·형·해·파·원진이 있소\n\n합이란\n말그대로 글자들이 합쳐져서\n서로 힘을 합치게 되는건데\n심지어는 오행이 변하기도 하오.\n\n충이란\n말그대로 글자들이 충돌해서\n서로 기운을 깎아버리는 것이오\n\n다만, 알아두어야 할게 있소.\n합이 있다고 해서 반드시 길하지도\n충이 있다고 해서 반드시 흉하지도\n않다는 것이오.\n\n그렇다면, ${name}${report?.gender === "female" ? "양" : "군"}의 사주팔자속 글자에는\n어떤 역학관계가 있는지 알려주겠소.`}</p>
           </section>
 
-          {/* 오행 분포 막대 */}
+          {/* 삽화 1 */}
+          <Illust src="/media/report/total/total-4/total-4-1.jpg" h={360} />
+
+          <section className="px-6 pt-8 pb-4">
+            <h2 className="text-[19px] font-black mb-3" style={{ color: INK }}>내 글자들에는 어떤 관계가 있을까</h2>
+            <GanjiRelation view={report?.view ?? null} />
+            <p className="text-[14.5px] leading-[2] mt-4 whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{`단순히 사주팔자 여덟글자만\n해석하면 되는줄 알았는데,\n이런 역학관계가 숨겨져 있다는것이\n놀랐을 수 있겠소.\n\n이런 합과 충은 대운과 세운이\n어떻게 흘러가냐에 따라서\n발현이 되기도, 무산이 되기도 하오.\n\n이따가, 이부분에 대해\n짚어보는 시간도 가져볼 것이오.`}</p>
+          </section>
+
+          {/* 삽화 2 */}
+          <Illust src="/media/report/total/total-4/total-4-2.jpg" h={360} />
+
+          {/* 마무리 인용 */}
+          <Quote>{`"지금까지의 분석결과들로\n${name}${report?.gender === "female" ? "양" : "군"}의 실제 인생에 대하여\n\n더 깊이 알아보는 시간을\n함께 가져보겠소."`}</Quote>
+
+          {/* 다음 장 네비 */}
+          <ChapterNav cur="4" go={next} />
+        </>
+      )}
+
+      {/* ═══════════ 제5장 ═══════════ */}
+      {ch === "3" && (
+        <>
+          {/* 표지 */}
+          {/* 헤드라인 블록 */}
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 관계</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+              “나는 세상을 어떻게 대하는가”
+            </h1>
+          </div>
+          {/* 커버 이미지 */}
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/total/total-3/total-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 55%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+
+          <Quote>{`"${name}${report?.gender === "female" ? "양" : "군"}이 세상을\n어떤 방식으로 마주하는지\n하나씩 살펴보겠소."`}</Quote>
+
+          {/* 오행 분포 */}
+          <section className="px-6 pt-2 pb-2">
+            <Heading>그대가 가진 오행들의 분포</Heading>
+          </section>
           {(() => {
             const ELS = [
               { key: "목", file: "mok",  color: "#43a047" },
@@ -3939,105 +4346,155 @@ function ReportPreviewInner() {
               </div>
             );
           })()}
-          {c.essence.intro && <div className="px-6 pb-4"><P>{[c.essence.intro, ...c.essence.paragraphs].join("\n")}</P></div>}
-
-          {/* 삽화 */}
-          <Illust src="/media/report/total/total-2/total-2-1.jpg" h={360} />
-
-          {/* 마무리 인용 */}
-          <Quote>{`"나를 지키는 단단한 심지와\n세상을 향해 뻗어 나가는 표현력이\n${name}님의 삶을 가장 눈부시게\n빛춰줄 등불이 될 거예요."`}</Quote>
-
-          {/* 다음 장 네비 */}
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제4장 ═══════════ */}
-      {ch === "4" && (
-        <>
-          {/* 표지 */}
-          {/* 헤드라인 블록 */}
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 특징</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              “내 사주는 얼마나 귀한가”
-            </h1>
-          </div>
-          {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-4/total-4-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"${name}님의 사주가\n얼마나 드문지\n살펴보겠습니다."`}</Quote>
-
-          {/* 발현 확률 분석 + 희귀도 차트 + 등급표 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>내 사주의 발현 확률</Heading>
-            <RarityChart grade={c.rarity.grade} percentile={c.rarity.percentile} name={name} />
-            <GradeTable myGrade={c.rarity.grade} />
-            {c.rarity.intro && <P>{[c.rarity.intro, ...c.rarity.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 인용 */}
-          <Quote>{`"${name}님 사주가 지닌\n특별한 귀인의 기운을\n지금부터 구체적으로\n풀어드릴게요."`}</Quote>
-
-          {/* 이 사주가 드문 이유 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>이 사주가 드문 이유</Heading>
-            <GanjiMini view={report?.view ?? null} />
-            <div className="mb-4">
-              {c.special.tags.map((t, i) => (
-                <SpecialTag key={i} label={t.label} sub={t.sub} color={TAG_COLORS[i % TAG_COLORS.length]} />
-              ))}
+          {c.ohaengDesc?.intro && (
+            <div className="px-6 pb-6">
+              <P>{[c.ohaengDesc.intro, ...c.ohaengDesc.paragraphs].join("\n")}</P>
             </div>
-            {c.special.items.map((it, i) => (
-              <HiP key={i} hi={it.hi}>{it.text}</HiP>
-            ))}
-          </section>
-
-          {/* 삽화 */}
-          <Illust src="/media/report/total/total-4/total-4-1.jpg" h={360} />
-
-          {/* 마무리 인용 */}
-          <Quote>{`"하늘이 내린 귀한 별들이\n${name}님의 길을 비추고 있으니,\n어떤 어둠 속에서도\n길을 잃지 않을 거예요."`}</Quote>
-
-          {/* 다음 장 네비 */}
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제5장 ═══════════ */}
-      {ch === "3" && (
-        <>
-          {/* 표지 */}
-          {/* 헤드라인 블록 */}
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 관계</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              “나는 세상을 어떻게 대하는가”
-            </h1>
-          </div>
-          {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-3/total-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 55%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"${name}님이 세상을\n어떤 방식으로\n마주하는지 살펴보겠습니다."`}</Quote>
+          )}
 
           {/* 균형 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>홀로 여는 삶, 서로 기대는 삶</Heading>
-            <SpectrumBar label={c.balance.spectrum.label} value={c.balance.spectrum.value} />
+            <Heading>월주, 사회적 영역을 말하다</Heading>
+            {/* 월주 강조 명식 도식 — 1장과 동일한 컴포넌트 */}
+            {(() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: false, stage: "", age: "" },
+                { label: "일주", idx: 1, highlight: false, stage: "", age: "" },
+                { label: "월주", idx: 2, highlight: true, stage: "청년기", age: "20~40세" },
+                { label: "년주", idx: 3, highlight: false, stage: "", age: "" },
+              ];
+              return (
+                <div className="mb-6 mt-2">
+                  <div className="flex gap-4 justify-center">
+                    {cols.map((col) => {
+                      const p = ps[col.idx];
+                      const blurred = !col.highlight;
+                      return (
+                        <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                          <div style={{ border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent", borderRadius: 12, background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)", padding: "8px 6px", filter: blurred ? "grayscale(1) blur(2.5px)" : "none", opacity: blurred ? 0.45 : 1, transition: "all 0.2s", width: "100%" }}>
+                            <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                            {p ? (
+                              <>
+                                <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                              </>
+                            ) : (
+                              <div style={{ height: 120 }} />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
             {c.balance.intro && <P>{[c.balance.intro, ...c.balance.paragraphs].join("\n")}</P>}
           </section>
 
           {/* 해답 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>답이 어디에 있는지</Heading>
+            <Heading>내 사주팔자를 MBTI로</Heading>
+            {/* MBTI 4×4 그리드 */}
+            {(() => {
+              const MBTI_GRID = [
+                ["INTJ","INTP","ENTJ","ENTP"],
+                ["INFJ","INFP","ENFJ","ENFP"],
+                ["ISTJ","ISTP","ESTJ","ESTP"],
+                ["ISFJ","ISFP","ESFJ","ESFP"],
+              ];
+              // 십성 카운트로 MBTI 자동 도출
+              const ps2 = report?.view?.pillars ?? [];
+              const sip: Record<string, number> = {};
+              for (const p of ps2) {
+                for (const s of [p.sipTop, p.sipBot]) {
+                  if (s && s !== "일간(나)" && s !== "—") sip[s] = (sip[s] ?? 0) + 1;
+                }
+              }
+              const g = (keys: string[]) => keys.reduce((a, k) => a + (sip[k] ?? 0), 0);
+              const bigeop   = g(["비견","겁재"]);
+              const siksang  = g(["식신","상관"]);
+              const jaeseong = g(["편재","정재"]);
+              const gwanseong= g(["편관","정관"]);
+              const inseong  = g(["편인","정인"]);
+              const E_score = bigeop + siksang;
+              const I_score = inseong + gwanseong;
+              const S_score = jaeseong + gwanseong;
+              const N_score = inseong + siksang;
+              const T_score = gwanseong + jaeseong;
+              const F_score = siksang + inseong;
+              const J_score = gwanseong;
+              const P_score = siksang + bigeop;
+              const mbti =
+                (E_score >= I_score ? "E" : "I") +
+                (N_score >= S_score ? "N" : "S") +
+                (F_score >= T_score ? "F" : "T") +
+                (P_score >= J_score ? "P" : "J");
+              const matched = mbti;
+              // 사분면별 기본 색상 (IN/EN/IS/ES)
+              // 열: 0,1=I계열 / 2,3=E계열
+              // 행: 0,1=N계열 / 2,3=S계열
+              const QUAD_COLORS: Record<string, { base: string; edge: string }> = {
+                IN: { base: "#7c3aed", edge: "#4c1d95" }, // 보라
+                EN: { base: "#ea580c", edge: "#7c2d12" }, // 주황
+                IS: { base: "#0284c7", edge: "#0c4a6e" }, // 파랑
+                ES: { base: "#16a34a", edge: "#14532d" }, // 초록
+              };
+              const getQuad = (ci: number, ri: number) => {
+                const ei = ci < 2 ? "I" : "E";
+                const ni = ri < 2 ? "N" : "S";
+                return ei + ni;
+              };
+              // 사분면 내 위치 (0,0)~(1,1) → 가장자리일수록 edge색에 가까움
+              const edgeWeight = (ci: number, ri: number) => {
+                const lci = ci < 2 ? ci : 3 - ci; // 0=가장자리, 1=내부
+                const lri = ri < 2 ? ri : 3 - ri;
+                return lci === 0 || lri === 0 ? 0.55 : 0.15; // 가장자리=edge색 강함
+              };
+              const blendHex = (a: string, b: string, t: number) => {
+                const h = (s: string) => [parseInt(s.slice(1,3),16), parseInt(s.slice(3,5),16), parseInt(s.slice(5,7),16)];
+                const [ar,ag,ab] = h(a); const [br,bg,bb] = h(b);
+                const r = Math.round(ar+(br-ar)*t); const gg = Math.round(ag+(bg-ag)*t); const bl2 = Math.round(ab+(bb-ab)*t);
+                return `rgb(${r},${gg},${bl2})`;
+              };
+              return (
+                <div className="mb-4 overflow-hidden" style={{ border: "1.5px solid #e8dfd0" }}>
+                  <div className="grid grid-cols-4">
+                    {MBTI_GRID.flat().map((type, idx) => {
+                      const ri = Math.floor(idx / 4);
+                      const ci = idx % 4;
+                      const isMatch = type === matched;
+                      const quad = getQuad(ci, ri);
+                      const { base, edge } = QUAD_COLORS[quad];
+                      const t = edgeWeight(ci, ri);
+                      const bg = blendHex(base, edge, t);
+                      const opacity = 0.18 + (1 - t) * 0.55;
+                      return (
+                        <div
+                          key={type}
+                          className="flex flex-col items-center justify-center"
+                          style={{
+                            background: bg,
+                            aspectRatio: "1",
+                            position: "relative",
+                            boxShadow: isMatch ? `inset 0 0 0 5px ${MAROON}` : "none",
+                            opacity: isMatch ? 1 : opacity,
+                          }}
+                        >
+                          <span className="text-[18px] font-black tracking-wide" style={{ color: "#fff", position: "relative", zIndex: 1 }}>{type}</span>
+                          {isMatch && <span className="text-[12px] font-bold" style={{ color: "#fff", position: "relative", zIndex: 1 }}>나의 유형</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
             {c.answer.intro && <P>{[c.answer.intro, ...c.answer.paragraphs].join("\n")}</P>}
           </section>
 
@@ -4045,7 +4502,10 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-3/total-3-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"나를 지키는 단단한 뿌리 위에\n타인과 소통하는 가지를 뻗을 때,\n${name}님의 삶은 가장 크고\n웅장하게 자리 잡을 거예요."`}</Quote>
+          <div className="px-8 py-12 text-center">
+            <p className="text-[26px] font-black mb-3" style={{ color: INK, fontFamily: SERIF }}>知彼知己 百戰百勝</p>
+            <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`지피지기 백전백승\n\n"내가 어떤 사람인지를\n정확히 알고있어야 이겨낼 수 있소.\n결코 잊어서는 안될 것이오."`}</p>
+          </div>
 
           {/* 다음 장 네비 */}
           <ChapterNav cur="3" go={next} />
