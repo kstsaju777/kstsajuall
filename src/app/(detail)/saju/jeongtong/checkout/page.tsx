@@ -495,11 +495,7 @@ function ReviewSection() {
 // ─── 상품 옵션 ───────────────────────────────────────────────────────────────
 const PRODUCTS = [
   { id: "basic",   name: "정통사주",                  badge: null,  desc: null,
-    tags: [],                              original: 60000,  discount: 40, price: 35900 },
-  { id: "combo",   name: "정통사주 X 자미두수 총운",  badge: "인기", desc: "[7일 한정] 내 평생 운명의 큰 그림을 한 번에!",
-    tags: ["정통사주","자미두수"],          original: 119300, discount: 54, price: 54900 },
-  { id: "premium", name: "인생 책임 패키지",           badge: null,  desc: "자신 있습니다, 인생을 책임지는 프리미엄 운세 패키지",
-    tags: ["정통사주","자미두수","재물운"], original: 169000, discount: 60, price: 67900 },
+    tags: [],                              original: 59800,  discount: 50, price: 29900 },
 ];
 
 // ─── 결제 모달 (다크 테마) ────────────────────────────────────────────────────
@@ -568,7 +564,6 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           </div>
 
           {/* 패키지 할인혜택 */}
-          <p className="text-[13px] font-bold mb-2.5" style={{ color: DTXT }}>패키지 할인혜택 🎁</p>
           <div className="space-y-2.5 mb-5">
             {PRODUCTS.map((p) => {
               const isSel = selected === p.id;
@@ -583,6 +578,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
                         {isPkg && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.12)", color: "#ff9aa6" }}>추천</span>}
                         <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>{p.name}</span>
                       </div>
+                      {!isPkg && <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 당신의 정통사주</p>}
                       {isPkg && <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>{p.tags.join(" + ")}</p>}
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -601,31 +597,13 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           {/* 합계 */}
           <div className="space-y-1.5 mb-4">
             <div className="flex items-center justify-between text-[13px]">
-              <span style={{ color: DMUTE }}>상품 판매가</span>
+              <span style={{ color: DMUTE }}>상품 판매가 (정가)</span>
               <span style={{ color: "rgba(255,255,255,0.85)" }}>{sel.original.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between text-[13px]">
-              <span style={{ color: "#ff6b7e", fontWeight: 700 }}>지금 결제 시 할인</span>
+              <span style={{ color: "#ff6b7e", fontWeight: 700 }}>지금 결제 시 할인 ({sel.discount}% 특가)</span>
               <span style={{ color: "#ff6b7e", fontWeight: 700 }}>-{saved.toLocaleString()}</span>
             </div>
-          </div>
-
-          {/* 쿠폰 적용 */}
-          <div className="mb-5">
-            <button onClick={() => setCouponOpen((o) => !o)}
-              className="text-[12.5px] font-bold px-3.5 py-2 rounded-lg"
-              style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)" }}>
-              쿠폰 적용
-            </button>
-            {couponOpen && (
-              <div className="mt-2.5 flex gap-2">
-                <input type="text" value={coupon} onChange={(e) => setCoupon(e.target.value)}
-                  placeholder="쿠폰 코드를 입력하세요"
-                  className="flex-1 px-3 py-2.5 rounded-xl text-[13px] outline-none"
-                  style={{ background: "#15131a", border: "1px solid rgba(255,255,255,0.14)", color: DTXT }} />
-                <button className="px-4 rounded-xl text-[13px] font-bold text-white" style={{ background: ACCENT }}>적용</button>
-              </div>
-            )}
           </div>
 
           {/* 결제 버튼 */}
@@ -635,21 +613,16 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             결제하기
           </button>
 
-          {/* 동의 안내 — 링크 클릭 시 플로팅 모달 */}
-          <p className="text-center text-[11px] leading-relaxed mt-3.5" style={{ color: DMUTE }}>
-            결제 시{" "}
-            <button onClick={() => setLegalDoc("privacy")} className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>개인정보 처리방침</button>과{" "}
-            <button onClick={() => setLegalDoc("terms")} className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>이용약관</button>에 동의합니다.
-          </p>
-
-          {/* 마케팅 수신 동의 */}
-          <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-            <button onClick={() => setMarketing((v) => !v)} className="flex items-center gap-2">
-              <span className="flex items-center justify-center rounded" style={{ width: 17, height: 17, border: `1.5px solid ${marketing ? ACCENT : "rgba(255,255,255,0.35)"}`, background: marketing ? ACCENT : "transparent", color: "#fff", fontSize: 11, lineHeight: 1 }}>{marketing ? "✓" : ""}</span>
-              <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.7)" }}>마케팅 수신 동의 (선택)</span>
-            </button>
-            <button className="text-[12px] underline" style={{ color: DMUTE }}>자세히보기</button>
+          {/* 동의 안내 — 자동 체크 + 링크 */}
+          <div className="flex items-center justify-center gap-2 mt-3.5">
+            <span className="flex-shrink-0 flex items-center justify-center rounded" style={{ width: 16, height: 16, background: ACCENT, color: "#fff", fontSize: 10 }}>✓</span>
+            <p className="text-[11px] leading-relaxed" style={{ color: DMUTE }}>
+              결제 시{" "}
+              <button onClick={() => setLegalDoc("privacy")} className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>개인정보 처리방침</button>과{" "}
+              <button onClick={() => setLegalDoc("terms")} className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>이용약관</button>에 동의합니다.
+            </p>
           </div>
+
         </div>
       </div>
 
@@ -708,21 +681,18 @@ function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
       style={{ backgroundColor: WHITE, boxShadow: "0 -4px 20px rgba(0,0,0,0.08)" }}>
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩60,000</span>
+          <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩59,800</span>
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "#fff0f2", color: RED_SOFT, border: `1px solid ${ROSE}` }}>특가 -40%</span>
+            style={{ backgroundColor: "#fff0f2", color: RED_SOFT, border: `1px solid ${ROSE}` }}>특가 -50%</span>
         </div>
-        <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩35,900</span>
+        <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩29,900</span>
       </div>
       <button onClick={onPay}
         className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
         style={{ backgroundColor: RED, boxShadow: glow ? `0 4px 24px ${RED}88` : `0 2px 12px ${RED}44`, transition: "box-shadow 1s ease" }}>
         <span>🔓</span>
-        <span>{name}님의 풀 사주 지금 확인하기</span>
+        <span>{name}님의 정통사주 지금바로 확인하기</span>
       </button>
-      <p className="text-center text-[11px] mt-2" style={{ color: GRAY3 }}>
-        🔒 토스페이먼츠 안전결제 · 결제 즉시 열람 · 환불 불가
-      </p>
     </div>
   );
 }

@@ -214,11 +214,18 @@ async function generateChapter(body: unknown) {
   const { id, chapter, force } = parsed.data;
 
   const service = createServiceClient();
-  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md").eq("id", id).maybeSingle();
+  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
   if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
+
+  // myeongsik에 gender가 없으면 saju_inputs에서 fallback
+  if (!stored?.gender && data.order_id && stored) {
+    const { data: si } = await service.from("saju_inputs").select("gender").eq("order_id", data.order_id).maybeSingle();
+    if (si?.gender) stored.gender = si.gender === "female" || si.gender === "여자" ? "female" : "male";
+  }
+
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 

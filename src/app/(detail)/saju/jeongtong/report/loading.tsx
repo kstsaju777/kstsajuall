@@ -17,10 +17,10 @@ export default function ReportLoading() {
         }}
       />
       <p className="mt-5 text-[15px] font-bold" style={{ color: "#1a1a1a" }}>
-        사주를 풀이하고 있어요
+        사주를 분석하고 있습니다
       </p>
       <p className="mt-1 text-[13px]" style={{ color: "#888888" }}>
-        명식을 세우고 해석을 작성하는 중입니다…
+        조금만 기다려주시면 완성됩니다…
       </p>
     </div>
   );
