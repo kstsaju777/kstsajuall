@@ -64,7 +64,7 @@ export type ReportContent = {
   domains: { intro: string; paragraphs: string[]; bars: { label: string; value: number }[] }; // 영역별 운세 강도
   // ── 7장: 재물·직업운 정밀풀이 ──
   wealthTime: ReportSection & { bars: { year: number; amount: string; value: number }[] }; // 향후 5년 재물운(연도/금액/상대크기)
-  jobFit: ReportSection & { jobs: { title: string; desc: string }[] }; // 내게 맞는 직업 TOP 3
+  jobFit: ReportSection & { clusters: { category: string; keywords: string[]; jobs: string[]; rankReason?: string; topJobReason?: string }[] };
   jobType: ReportSection & { split: { leftLabel: string; left: number; rightLabel: string; right: number; leftDesc: string; rightDesc: string } }; // 직장인 vs 사업가
   invest: ReportSection; // 내게 잘 맞는 투자 방법
   // ── 8장: 연애·결혼운 정밀풀이 ──
