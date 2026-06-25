@@ -70,7 +70,10 @@ export type ReportContent = {
   // ── 8장: 연애·결혼운 정밀풀이 ──
   loveStyle: ReportSection; // 내가 사랑하는 방식
   loveFlow: ReportSection & { flow: { label: string; score: number }[]; peakCallout: string }; // 시기별 연애 흐름(월별)
-  compatibleJuju: { juju: string; ganEl: string; jiEl: string; desc: string; avoidTti?: string }[]; // 이런 사주와 잘 맞아요
+  compatibleJuju: {
+    juju: string; ganEl: string; jiEl: string; desc: string; avoidTti?: string;
+    pillars?: { si: {gan:string;ji:string;ganEl:string;jiEl:string}; il: {gan:string;ji:string;ganEl:string;jiEl:string}; wol: {gan:string;ji:string;ganEl:string;jiEl:string}; nyeon: {gan:string;ji:string;ganEl:string;jiEl:string} };
+  }[]; // 이런 사주와 잘 맞아요
   marriage: ReportSection; // 오래가는 궁합의 비결
   // ── 9장: 건강운 정밀풀이 ──
   bodyWeak: ReportSection & { bars: { label: string; value: number }[] }; // 타고난 약한 부위 + 부위별 주의 신호
@@ -416,6 +419,7 @@ const CH_SCHEMA: Record<number, string> = {
       "ganEl": "일간 오행 (예: 목)",
       "jiEl": "일지 오행 (예: 수)",
       "avoidTti": "주입된 '피해야 할 띠' 문자열 그대로 (1번 항목에만 기재, 2·3번은 빈 문자열)",
+      "pillars": "【반드시 주입된 4기둥 JSON 배열의 [0]번째 객체 그대로 사용】",
       "desc": "【필수 — 홍연 말투, 120~180자】 이 일주가 왜 잘 맞는지 — 천간합·일지 육합·용신/희신 보유 등 주입된 근거를 쉬운 말로 풀이하오. ~ㅂ니다/~어요 절대 금지."
     },
     {
@@ -423,6 +427,7 @@ const CH_SCHEMA: Record<number, string> = {
       "ganEl": "일간 오행",
       "jiEl": "일지 오행",
       "avoidTti": "",
+      "pillars": "【주입된 4기둥 JSON 배열의 [1]번째 객체 그대로 사용】",
       "desc": "120~180자 풀이"
     },
     {
@@ -430,6 +435,7 @@ const CH_SCHEMA: Record<number, string> = {
       "ganEl": "일간 오행",
       "jiEl": "일지 오행",
       "avoidTti": "",
+      "pillars": "【주입된 4기둥 JSON 배열의 [2]번째 객체 그대로 사용】",
       "desc": "120~180자 풀이"
     }
   ],
@@ -1095,11 +1101,40 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
         .filter((x): x is NonNullable<typeof x> => x !== null)
         .sort((a,b) => b.score - a.score);
 
-      const top3 = compatScores.slice(0, 3);
+      // 년주/월주/시주 최적 60갑자 선정 (용신/희신 오행 기준, 년지 충·원진 제외)
+      function bestGanjiFor(avoidJiSt: Set<string>, preferEl1: string, preferEl2: string, excludeGz = ""): string {
+        return GANJIS_60.filter(gz => gz !== excludeGz && !avoidJiSt.has(gz[1])).map(gz => {
+          const el1 = STEM_EL_C[gz[0]] ?? ""; const el2 = BRANCH_EL_C[gz[1]] ?? "";
+          let s = 0;
+          if (el1 === preferEl1) s += 20; else if (el1 === preferEl2) s += 12;
+          if (el2 === preferEl1) s += 15; else if (el2 === preferEl2) s += 10;
+          return { gz, s };
+        }).sort((a,b) => b.s - a.s)[0]?.gz ?? GANJIS_60[0];
+      }
+      // 년주: 내 년지와 충·원진인 지지 피함, 용신/희신 우선
+      const emptySet = new Set<string>();
+      const bestNyeonGz = bestGanjiFor(avoidJiSet, yongsinEl, heesinEl);
+      // 월주·시주: 용신/희신 우선 (제약 없음)
+      const bestWolGz  = bestGanjiFor(emptySet, yongsinEl, heesinEl, bestNyeonGz);
+      const bestSiGz   = bestGanjiFor(emptySet, yongsinEl, heesinEl, bestNyeonGz);
+
+      const top3 = compatScores.slice(0, 3).map(t => ({
+        ...t,
+        pillars: {
+          si:    { gan: bestSiGz[0],    ji: bestSiGz[1],    ganEl: STEM_EL_C[bestSiGz[0]]   ??"", jiEl: BRANCH_EL_C[bestSiGz[1]]   ??"" },
+          il:    { gan: t.juju.replace("일주","")[0] ?? "", ji: t.juju.replace("일주","")[1] ?? "", ganEl: t.ganEl, jiEl: t.jiEl },
+          wol:   { gan: bestWolGz[0],   ji: bestWolGz[1],   ganEl: STEM_EL_C[bestWolGz[0]]  ??"", jiEl: BRANCH_EL_C[bestWolGz[1]]  ??"" },
+          nyeon: { gan: bestNyeonGz[0], ji: bestNyeonGz[1], ganEl: STEM_EL_C[bestNyeonGz[0]]??"", jiEl: BRANCH_EL_C[bestNyeonGz[1]]??"" },
+        }
+      }));
+
+      // 프롬프트 주입: 일주 정보만 (4기둥은 서버 계산값을 프론트에 직접 전달)
       const compatTable = top3.map((t,i) =>
         `${i+1}순위: ${t.juju} (일간 ${t.gan} / 일지 ${t.ji}) — ${t.reasons.join(", ")}`
       ).join("\n");
-      pillarTable += `\n[잘 맞는 일주 TOP 3 — compatibleJuju 필드에 반드시 이 일주들을 그대로 사용, 임의 변경 절대 금지]\n${compatTable}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n피해야 할 상대 띠(년지 충·원진): ${avoidTtiStr}\n`;
+      // 4기둥 전체를 JSON으로 pillarTable에 첨부 (프론트에서 사용)
+      const compatPillarsJson = JSON.stringify(top3.map(t => t.pillars));
+      pillarTable += `\n[잘 맞는 일주 TOP 3 — compatibleJuju 필드에 반드시 이 일주들을 그대로 사용, 임의 변경 절대 금지]\n${compatTable}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n피해야 할 상대 띠(년지 충·원진): ${avoidTtiStr}\n[4기둥 JSON — compatibleJuju[i].pillars 에 반드시 이 값 그대로 사용]\n${compatPillarsJson}\n`;
     }
 
     const now = new Date();

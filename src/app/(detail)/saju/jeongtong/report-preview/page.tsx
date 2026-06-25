@@ -982,40 +982,57 @@ function HealthCareCard({ element, tips }: { element: string; tips: { label: str
   );
 }
 
-// 잘 맞는 일주 카드 (6장)
-function CompatibleJujuCards({ items }: { items?: { juju: string; ganEl: string; jiEl: string; desc: string; avoidTti?: string }[] }) {
+// 잘 맞는 사주팔자 카드 (6장) — 명식표 스타일
+function CompatibleJujuCards({ items }: { items?: { juju: string; ganEl: string; jiEl: string; desc: string; avoidTti?: string; pillars?: { si:{gan:string;ji:string;ganEl:string;jiEl:string}; il:{gan:string;ji:string;ganEl:string;jiEl:string}; wol:{gan:string;ji:string;ganEl:string;jiEl:string}; nyeon:{gan:string;ji:string;ganEl:string;jiEl:string} } }[] }) {
   if (!items || items.length === 0) return null;
-  const EL_COLOR: Record<string, string> = { 목:"#2d8a4e",화:"#d94040",토:"#b8860b",금:"#7a7a8a",수:"#2255aa" };
-  const EL_BG: Record<string, string> = { 목:"#e8f5ec",화:"#fceaea",토:"#fdf6e3",금:"#f0f0f4",수:"#e8eef8" };
+  const EL_C: Record<string,string> = { 목:"#2e7d32",화:"#c62828",토:"#a9791c",금:"#6b7a82",수:"#1565c0" };
   const RANK_LABELS = ["1순위","2순위","3순위"];
   const avoidTti = items[0]?.avoidTti?.trim() ?? "";
   return (
-    <div className="flex flex-col gap-3 mt-2">
+    <div className="flex flex-col gap-4 mt-2">
       {items.map((item, i) => {
-        const ganColor = EL_COLOR[item.ganEl] ?? "#555";
-        const jiColor  = EL_COLOR[item.jiEl]  ?? "#555";
+        const p = item.pillars;
+        const cols = p
+          ? [
+              { pos:"시주", gan:p.si.gan, ji:p.si.ji, ganEl:p.si.ganEl, jiEl:p.si.jiEl },
+              { pos:"일주", gan:p.il.gan, ji:p.il.ji, ganEl:p.il.ganEl, jiEl:p.il.jiEl },
+              { pos:"월주", gan:p.wol.gan, ji:p.wol.ji, ganEl:p.wol.ganEl, jiEl:p.wol.jiEl },
+              { pos:"년주", gan:p.nyeon.gan, ji:p.nyeon.ji, ganEl:p.nyeon.ganEl, jiEl:p.nyeon.jiEl },
+            ]
+          : null;
         return (
-          <div key={i} style={{ background:"#fafafa", border:"1px solid #eee", borderRadius:12, padding:"14px 16px" }}>
-            {/* 순위 + 일주명 */}
-            <div className="flex items-center gap-2 mb-3">
-              <span style={{ fontSize:11, background: MAROON, color:"#fff", borderRadius:20, padding:"2px 9px", fontWeight:600 }}>{RANK_LABELS[i] ?? `${i+1}순위`}</span>
-              <span style={{ fontSize:20, fontWeight:700, color:"#1a1a1a", letterSpacing:"0.02em" }}>{item.juju}</span>
+          <div key={i} style={{ background:"linear-gradient(#faf3e4,#f1e3cc)", border:"1px solid #d8c4a0", borderRadius:14, overflow:"hidden", boxShadow:"0 4px 16px rgba(0,0,0,0.08)" }}>
+            {/* 순위 헤더 */}
+            <div style={{ background:"#efe3df", padding:"8px 14px", display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{ fontSize:11, background: MAROON, color:"#fff", borderRadius:20, padding:"2px 10px", fontWeight:700 }}>{RANK_LABELS[i] ?? `${i+1}순위`}</span>
+              <span style={{ fontSize:17, fontWeight:700, color:"#2a2320" }}>{item.juju}</span>
             </div>
-            {/* 사주팔자 스타일 일간·일지 표 */}
-            <div className="flex gap-2 mb-3">
-              <div style={{ flex:1, textAlign:"center", background: EL_BG[item.ganEl] ?? "#f5f5f5", borderRadius:8, padding:"8px 4px", border:`1.5px solid ${ganColor}22` }}>
-                <p style={{ fontSize:10, color:"#999", margin:"0 0 2px" }}>일간</p>
-                <p style={{ fontSize:20, fontWeight:700, color: ganColor, margin:0 }}>{item.juju.replace("일주","")[0]}</p>
-                <p style={{ fontSize:11, color: ganColor, margin:"2px 0 0", fontWeight:500 }}>{item.ganEl}</p>
+            {/* 명식표 */}
+            {cols && (
+              <div style={{ margin:"0 12px 12px", borderRadius:10, overflow:"hidden", border:"1px solid #c8b89044" }}>
+                {/* 기둥 라벨 */}
+                <div style={{ display:"grid", gridTemplateColumns:"36px repeat(4,1fr)", background:"#efe3df" }}>
+                  <div />
+                  {cols.map(c => <div key={c.pos} style={{ padding:"6px 0", textAlign:"center", fontSize:12, fontWeight:700, color:"#2a2320" }}>{c.pos}</div>)}
+                </div>
+                {/* 천간 행 */}
+                <div style={{ display:"grid", gridTemplateColumns:"36px repeat(4,1fr)", background:"#fff" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, color:"#9a8f88", fontWeight:600, background:"#f4ece7" }}>천간</div>
+                  {cols.map((c,ci) => (
+                    <GanJiCell key={ci} hanja={c.gan} el={c.ganEl} isGan type="gan" />
+                  ))}
+                </div>
+                {/* 지지 행 */}
+                <div style={{ display:"grid", gridTemplateColumns:"36px repeat(4,1fr)", background:"#fff" }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, color:"#9a8f88", fontWeight:600, background:"#f4ece7" }}>지지</div>
+                  {cols.map((c,ci) => (
+                    <GanJiCell key={ci} hanja={c.ji} el={c.jiEl} isGan={false} type="ji" />
+                  ))}
+                </div>
               </div>
-              <div style={{ flex:1, textAlign:"center", background: EL_BG[item.jiEl] ?? "#f5f5f5", borderRadius:8, padding:"8px 4px", border:`1.5px solid ${jiColor}22` }}>
-                <p style={{ fontSize:10, color:"#999", margin:"0 0 2px" }}>일지</p>
-                <p style={{ fontSize:20, fontWeight:700, color: jiColor, margin:0 }}>{item.juju.replace("일주","")[1]}</p>
-                <p style={{ fontSize:11, color: jiColor, margin:"2px 0 0", fontWeight:500 }}>{item.jiEl}</p>
-              </div>
-            </div>
+            )}
             {/* 설명 */}
-            <p style={{ fontSize:14, lineHeight:1.7, color:"#333", margin:0 }}>{item.desc}</p>
+            <p style={{ fontSize:14, lineHeight:1.75, color:"#3a3028", margin:"0 14px 14px", padding:"10px 12px", background:"rgba(255,255,255,0.5)", borderRadius:8 }}>{item.desc}</p>
           </div>
         );
       })}
@@ -1028,6 +1045,25 @@ function CompatibleJujuCards({ items }: { items?: { juju: string; ganEl: string;
             <p style={{ fontSize:13, color:"#7a4020", margin:0 }}>{avoidTti}</p>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+// 명식표 천간/지지 셀 (이미지 + 오행색 텍스트 폴백)
+function GanJiCell({ hanja, el, isGan, type }: { hanja: string; el: string; isGan: boolean; type: "gan"|"ji" }) {
+  const [err, setErr] = useState(false);
+  const EL_C: Record<string,string> = { 목:"#2e7d32",화:"#c62828",토:"#a9791c",금:"#6b7a82",수:"#1565c0" };
+  const src = isGan
+    ? `/media/saju/cheongan/${{"甲":"gapmok","乙":"eulmok","丙":"byeonghwa","丁":"jeonghwa","戊":"muto","己":"gito","庚":"gyeonggeum","辛":"singeum","壬":"imsu","癸":"gyesu"}[hanja]??""}.png`
+    : `/media/saju/jiji/${{"子":"jasu","丑":"chukto","寅":"inmok","卯":"myomok","辰":"jinto","巳":"sahwa","午":"ohwa","未":"mito","申":"singeum","酉":"yougeum","戌":"sulto","亥":"haesu"}[hanja]??""}.png`;
+  return (
+    <div style={{ padding:"4px 0", display:"flex", alignItems:"center", justifyContent:"center", background:"#fff" }}>
+      {!err && src.includes("/") && src.split("/").pop()?.replace(".png","") ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={hanja} onError={() => setErr(true)} style={{ width:48, height:48, objectFit:"contain" }} />
+      ) : (
+        <span style={{ fontSize:22, fontWeight:900, color: EL_C[el] ?? "#333" }}>{hanja}</span>
       )}
     </div>
   );
