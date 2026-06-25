@@ -343,56 +343,56 @@ const CH_SCHEMA: Record<number, string> = {
   "jobType": {
     "intro": "절대 쓰지 마오 — 빈 문자열로",
     "callout": "절대 쓰지 마오 — 빈 문자열로",
+    "split": { "leftLabel":"직장인","left":"【필수】이 사주에 맞는 직장인 적합도 점수(0~100 정수)","rightLabel":"사업가","right":"【필수】이 사주에 맞는 사업가 적합도 점수(0~100 정수, left+right=100)","leftDesc":"직장인 길의 특성 한 줄","rightDesc":"사업가 길의 특성 한 줄" },
     "paragraphs": [
-      "첫 문장: 직장인 X점, 사업가 Y점을 직접 언급하며 어느 길이 더 잘 맞는지 결론 제시.",
-      "두 번째 문장 이후: 일간 오행과 두드러진 십성(비겁·식상·재성·관성·인성 등)이 왜 그 길에 유리하게 작용하는지 명리학 근거로 2~3문장 서술.",
+      "첫 문장: 위 split 필드에 기입한 직장인 X점, 사업가 Y점을 그대로 언급하며 어느 길이 더 잘 맞는지 결론 제시.",
+      "두 번째 문장 이후: 일간 오행과 두드러진 십성이 왜 그 길에 유리하게 작용하는지 명리학 근거로 2~3문장 서술.",
       "이어서: 우세한 길에서 어떤 환경·역할·방식일 때 가장 크게 성과가 나는지 구체적으로 1~2문장 서술.",
       "마지막: 열세한 길을 선택했을 때 어떤 어려움이나 답답함이 생기는지 1~2문장 경고. 전체 합산 500자(공백 포함) 내외. 홍연 말투(~이오/~하오/~겠소) 필수."
-    ],
-    "split": { "leftLabel":"직장인","left":40,"rightLabel":"사업가","right":60,"leftDesc":"안정적이지만 답답함을 느끼기 쉬워요","rightDesc":"주도적으로 판을 짤 때 성과가 극대화돼요" }
+    ]
   },
   "invest": {
     "intro": "절대 쓰지 마오 — 빈 문자열로",
     "callout": "절대 쓰지 마오 — 빈 문자열로",
-    "paragraphs": [
-      "【필수 — 500자 내외 하나의 흐름으로】 investTypes의 점수 순서를 기반으로 어떤 투자가 잘 맞고, 어떤 투자가 위험한지 구체적으로 서술하오. 십성·오행 명칭은 사용하지 마오. 대신 이 사람의 기질·성향·삶의 태도(예: 안정을 중시하는 성향, 변동에 취약한 기질, 꼼꼼하게 따지는 성격 등)로 풀어서 설명하오. 잘 맞는 투자 유형은 구체적으로 어떤 방식으로 접근하면 좋은지(예: 매달 일정액 적립, 달러 분할 매수 등) 실용적 조언을 담으오. 위험한 투자 유형은 왜 이 사람에게 손실로 이어지기 쉬운지 구체적으로 경고하오. 하나의 자연스러운 단락으로, 홍연 말투(~이오/~하오/~겠소), 500자(공백 포함) 내외."
-    ],
     "investTypes": [
       {
         "category": "저축",
         "icon": "🏦",
-        "score": 85,
+        "score": "【필수】위 투자유형별 적합도 점수표의 저축 점수를 그대로 입력",
         "products": ["CMA", "적금", "예금"],
         "tip": "이 사주에 저축이 맞는 이유 한 줄"
       },
       {
         "category": "주식",
         "icon": "📈",
-        "score": 60,
+        "score": "【필수】위 점수표의 주식 점수를 그대로 입력",
         "products": ["미장ETF", "국내성장주", "배당주"],
         "tip": "주식 궁합 한 줄"
       },
       {
         "category": "코인",
         "icon": "🪙",
-        "score": 20,
+        "score": "【필수】위 점수표의 코인 점수를 그대로 입력",
         "products": ["비트코인", "이더리움"],
         "tip": "코인 궁합 한 줄"
       },
       {
         "category": "현물",
         "icon": "🥇",
-        "score": 75,
+        "score": "【필수】위 점수표의 현물 점수를 그대로 입력",
         "products": ["금", "달러", "은"],
         "tip": "현물 궁합 한 줄"
       },
       {
         "category": "부동산",
         "icon": "🏠",
-        "score": 55,
+        "score": "【필수】위 점수표의 부동산 점수를 그대로 입력",
         "products": ["아파트", "리츠", "경매"],
         "tip": "부동산 궁합 한 줄"
       }
+    ],
+    "paragraphs": [
+      "【필수 — 500자 내외 하나의 흐름으로】 위 investTypes의 score 순서를 기반으로 어떤 투자가 잘 맞고, 어떤 투자가 위험한지 구체적으로 서술하오. 십성·오행 명칭은 사용하지 마오. 이 사람의 기질·성향·삶의 태도로 풀어서 설명하오. 잘 맞는 투자 유형은 구체적 접근법(예: 매달 일정액 적립, 달러 분할 매수)을 담으오. 위험한 유형은 왜 손실로 이어지기 쉬운지 경고하오. 홍연 말투(~이오/~하오/~겠소), 500자 내외."
     ]
   }
 }`,
@@ -996,6 +996,30 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     const peakYear = 2024 + sorted5[0].i;
     const peakGz = rows5[sorted5[0].i].split(" ")[1]; // "병오년" 형태
     wealthTable = `\n[2024~2033 세운별 재물운 점수표 — wealthTime 풀이에서 반드시 이 수치 기반으로만 서술]\n${rows5.join("\n")}\n재물운 1위(유일한 정점): ${peakYear}년 ${peakGz} (점수=${sorted5[0].score})\n재물운 상위: ${sorted5.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n재물운 하위: ${sorted5.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n\n[연도 표기 규칙] 반드시 '○○년 병오년은' 형식으로 표기하오. '병화오화년' 같이 오행을 붙이거나 괄호로 묶는 표현은 절대 금지하오.\n[가장 표현 규칙] '가장 좋은', '가장 강한' 등 최상급 표현은 재물운 1위 연도(${peakYear}년)에만 단 한 번 사용하오. 2·3위 연도에는 '특히', '두드러지게' 등 다른 표현을 쓰오.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n`;
+
+    // 투자유형 점수 서버사이드 계산 (십성·오행 분포 기반)
+    const sipCount: Record<string, number> = {};
+    const elCount: Record<string, number> = { 목:0, 화:0, 토:0, 금:0, 수:0 };
+    for (const p of input.pillars) {
+      for (const s of [p.sipTop, p.sipBot]) {
+        if (s && s !== "일간(나)" && s !== "—") sipCount[s] = (sipCount[s] ?? 0) + 1;
+      }
+      if (p.ganEl && elCount[p.ganEl] !== undefined) elCount[p.ganEl]++;
+      if (p.jiEl  && elCount[p.jiEl]  !== undefined) elCount[p.jiEl]++;
+    }
+    const gc = (keys: string[]) => keys.reduce((a, k) => a + (sipCount[k] ?? 0), 0);
+    const bigeop = gc(["비견","겁재"]), siksang = gc(["식신","상관"]);
+    const jaeseong = gc(["편재","정재"]), gwanseong = gc(["편관","정관"]);
+    const inseong = gc(["편인","정인"]);
+    const clamp = (v: number, mn: number, mx: number) => Math.min(mx, Math.max(mn, Math.round(v)));
+    const investScores = {
+      저축: clamp(50 + inseong*10 + gwanseong*8 - gc(["겁재"])*8 - gc(["상관"])*8, 20, 95),
+      주식: clamp(50 + jaeseong*10 + gc(["식신"])*8 - inseong*8 + gc(["상관"])*4, 20, 90),
+      코인: clamp(30 + gc(["겁재"])*12 + gc(["상관"])*10 - inseong*10 - gwanseong*8, 5, 75),
+      현물: clamp(50 + elCount["금"]*8 + elCount["토"]*5 + inseong*6, 25, 90),
+      부동산: clamp(50 + elCount["토"]*10 + gc(["정재"])*8 + gwanseong*5 - bigeop*4, 20, 90),
+    };
+    wealthTable += `\n[투자유형별 적합도 점수 — invest.investTypes score 필드에 반드시 이 값을 그대로 사용하오. 임의 변경 절대 금지]\n저축: ${investScores["저축"]}점\n주식: ${investScores["주식"]}점\n코인: ${investScores["코인"]}점\n현물: ${investScores["현물"]}점\n부동산: ${investScores["부동산"]}점\n`;
   }
 
   const user = `[대상] ${honor} (${input.gender === "male" ? "남성" : "여성"}) — 풀이 전체에서 이름을 부를 때 반드시 '${honor}'로만 호칭하오. '님' 호칭은 절대 사용하지 마오.
