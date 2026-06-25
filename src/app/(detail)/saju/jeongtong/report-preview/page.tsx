@@ -983,29 +983,52 @@ function HealthCareCard({ element, tips }: { element: string; tips: { label: str
 }
 
 // 잘 맞는 일주 카드 (6장)
-function CompatibleJujuCards({ items }: { items?: { juju: string; ganEl: string; jiEl: string; desc: string }[] }) {
+function CompatibleJujuCards({ items }: { items?: { juju: string; ganEl: string; jiEl: string; desc: string; avoidTti?: string }[] }) {
   if (!items || items.length === 0) return null;
   const EL_COLOR: Record<string, string> = { 목:"#2d8a4e",화:"#d94040",토:"#b8860b",금:"#7a7a8a",수:"#2255aa" };
   const EL_BG: Record<string, string> = { 목:"#e8f5ec",화:"#fceaea",토:"#fdf6e3",금:"#f0f0f4",수:"#e8eef8" };
   const RANK_LABELS = ["1순위","2순위","3순위"];
+  const avoidTti = items[0]?.avoidTti?.trim() ?? "";
   return (
     <div className="flex flex-col gap-3 mt-2">
       {items.map((item, i) => {
         const ganColor = EL_COLOR[item.ganEl] ?? "#555";
         const jiColor  = EL_COLOR[item.jiEl]  ?? "#555";
-        const gBg      = EL_BG[item.ganEl]    ?? "#f5f5f5";
         return (
           <div key={i} style={{ background:"#fafafa", border:"1px solid #eee", borderRadius:12, padding:"14px 16px" }}>
-            <div className="flex items-center gap-2 mb-2">
+            {/* 순위 + 일주명 */}
+            <div className="flex items-center gap-2 mb-3">
               <span style={{ fontSize:11, background: MAROON, color:"#fff", borderRadius:20, padding:"2px 9px", fontWeight:600 }}>{RANK_LABELS[i] ?? `${i+1}순위`}</span>
-              <span style={{ fontSize:18, fontWeight:700, color:"#1a1a1a" }}>{item.juju}</span>
-              <span style={{ fontSize:12, background: gBg, color: ganColor, borderRadius:20, padding:"2px 8px", fontWeight:500 }}>일간 {item.ganEl}</span>
-              <span style={{ fontSize:12, background: EL_BG[item.jiEl] ?? "#f5f5f5", color: jiColor, borderRadius:20, padding:"2px 8px", fontWeight:500 }}>일지 {item.jiEl}</span>
+              <span style={{ fontSize:20, fontWeight:700, color:"#1a1a1a", letterSpacing:"0.02em" }}>{item.juju}</span>
             </div>
+            {/* 사주팔자 스타일 일간·일지 표 */}
+            <div className="flex gap-2 mb-3">
+              <div style={{ flex:1, textAlign:"center", background: EL_BG[item.ganEl] ?? "#f5f5f5", borderRadius:8, padding:"8px 4px", border:`1.5px solid ${ganColor}22` }}>
+                <p style={{ fontSize:10, color:"#999", margin:"0 0 2px" }}>일간</p>
+                <p style={{ fontSize:20, fontWeight:700, color: ganColor, margin:0 }}>{item.juju.replace("일주","")[0]}</p>
+                <p style={{ fontSize:11, color: ganColor, margin:"2px 0 0", fontWeight:500 }}>{item.ganEl}</p>
+              </div>
+              <div style={{ flex:1, textAlign:"center", background: EL_BG[item.jiEl] ?? "#f5f5f5", borderRadius:8, padding:"8px 4px", border:`1.5px solid ${jiColor}22` }}>
+                <p style={{ fontSize:10, color:"#999", margin:"0 0 2px" }}>일지</p>
+                <p style={{ fontSize:20, fontWeight:700, color: jiColor, margin:0 }}>{item.juju.replace("일주","")[1]}</p>
+                <p style={{ fontSize:11, color: jiColor, margin:"2px 0 0", fontWeight:500 }}>{item.jiEl}</p>
+              </div>
+            </div>
+            {/* 설명 */}
             <p style={{ fontSize:14, lineHeight:1.7, color:"#333", margin:0 }}>{item.desc}</p>
           </div>
         );
       })}
+      {/* 피해야 할 띠 */}
+      {avoidTti && (
+        <div style={{ background:"#fff8f0", border:"1px solid #f5cba0", borderRadius:10, padding:"10px 14px", display:"flex", alignItems:"flex-start", gap:8 }}>
+          <span style={{ fontSize:16 }}>⚠️</span>
+          <div>
+            <p style={{ fontSize:12, fontWeight:600, color:"#a0522d", margin:"0 0 2px" }}>피해야 할 상대 띠</p>
+            <p style={{ fontSize:13, color:"#7a4020", margin:0 }}>{avoidTti}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

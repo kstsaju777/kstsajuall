@@ -70,7 +70,7 @@ export type ReportContent = {
   // ── 8장: 연애·결혼운 정밀풀이 ──
   loveStyle: ReportSection; // 내가 사랑하는 방식
   loveFlow: ReportSection & { flow: { label: string; score: number }[]; peakCallout: string }; // 시기별 연애 흐름(월별)
-  compatibleJuju: { juju: string; ganEl: string; jiEl: string; desc: string }[]; // 이런 사주와 잘 맞아요
+  compatibleJuju: { juju: string; ganEl: string; jiEl: string; desc: string; avoidTti?: string }[]; // 이런 사주와 잘 맞아요
   marriage: ReportSection; // 오래가는 궁합의 비결
   // ── 9장: 건강운 정밀풀이 ──
   bodyWeak: ReportSection & { bars: { label: string; value: number }[] }; // 타고난 약한 부위 + 부위별 주의 신호
@@ -415,18 +415,21 @@ const CH_SCHEMA: Record<number, string> = {
       "juju": "위에서 주입된 1순위 일주 이름 그대로 사용 (예: 갑자일주)",
       "ganEl": "일간 오행 (예: 목)",
       "jiEl": "일지 오행 (예: 수)",
-      "desc": "【필수 — 홍연 말투, 120~180자】 이 일주가 왜 잘 맞는지 — 합 관계, 용신/희신 보유, 일간 상생 등 주입된 근거를 쉬운 말로 풀이하오. ~ㅂ니다/~어요 절대 금지."
+      "avoidTti": "주입된 '피해야 할 띠' 문자열 그대로 (1번 항목에만 기재, 2·3번은 빈 문자열)",
+      "desc": "【필수 — 홍연 말투, 120~180자】 이 일주가 왜 잘 맞는지 — 천간합·일지 육합·용신/희신 보유 등 주입된 근거를 쉬운 말로 풀이하오. ~ㅂ니다/~어요 절대 금지."
     },
     {
       "juju": "2순위 일주",
       "ganEl": "일간 오행",
       "jiEl": "일지 오행",
+      "avoidTti": "",
       "desc": "120~180자 풀이"
     },
     {
       "juju": "3순위 일주",
       "ganEl": "일간 오행",
       "jiEl": "일지 오행",
+      "avoidTti": "",
       "desc": "120~180자 풀이"
     }
   ],
@@ -1013,24 +1016,30 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
       hyeongResults.length ? `형: ${hyeongResults.join(", ")}` : "형: 없음",
     ].join("\n");
 
-    // 잘 맞는 일주 TOP 3 계산 (합충형파해원진 + 용신/희신 기반)
+    // 잘 맞는 일주 TOP 3 계산 (사용자 정의 궁합 규칙 기반)
     {
       const STEM_EL_C: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
       const BRANCH_EL_C: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
       const GAN_KR_C: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
       const JI_KR_C: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
-      const YUKAP_C: [string,string][] = [["子","丑"],["寅","亥"],["卯","戌"],["辰","酉"],["巳","申"],["午","未"]];
-      const CHUNG_C: [string,string][] = [["子","午"],["丑","未"],["寅","申"],["卯","酉"],["辰","戌"],["巳","亥"]];
-      const PA_C: [string,string][] = [["子","酉"],["午","卯"],["巳","申"],["寅","亥"],["辰","丑"],["戌","未"]];
-      const HAE_C: [string,string][] = [["子","未"],["丑","午"],["寅","巳"],["卯","辰"],["申","亥"],["酉","戌"]];
-      const WONJIN_C: [string,string][] = [["子","未"],["丑","午"],["寅","酉"],["卯","申"],["辰","亥"],["巳","戌"]];
-      const CHEONGAN_HAP_C: [string,string][] = [["甲","己"],["乙","庚"],["丙","辛"],["丁","壬"],["戊","癸"]];
+      const JI_띠: Record<string,string> = { 子:"자(쥐)띠",丑:"축(소)띠",寅:"인(호랑이)띠",卯:"묘(토끼)띠",辰:"진(용)띠",巳:"사(뱀)띠",午:"오(말)띠",未:"미(양)띠",申:"신(원숭이)띠",酉:"유(닭)띠",戌:"술(개)띠",亥:"해(돼지)띠" };
+      // 천간합 파트너 (1:1 매핑)
+      const CHEONGAN_HAP_PARTNER: Record<string,string> = { 甲:"己",己:"甲",乙:"庚",庚:"乙",丙:"辛",辛:"丙",丁:"壬",壬:"丁",戊:"癸",癸:"戊" };
+      // 지지 육합 파트너 (1:1 매핑)
+      const YUKAP_PARTNER: Record<string,string> = { 子:"丑",丑:"子",寅:"亥",亥:"寅",卯:"戌",戌:"卯",辰:"酉",酉:"辰",巳:"申",申:"巳",午:"未",未:"午" };
+      // 충 파트너
+      const CHUNG_PARTNER: Record<string,string> = { 子:"午",午:"子",丑:"未",未:"丑",寅:"申",申:"寅",卯:"酉",酉:"卯",辰:"戌",戌:"辰",巳:"亥",亥:"巳" };
+      // 원진 파트너
+      const WONJIN_PARTNER: Record<string,string> = { 子:"未",未:"子",丑:"午",午:"丑",寅:"酉",酉:"寅",卯:"申",申:"卯",辰:"亥",亥:"辰",巳:"戌",戌:"巳" };
       const GEN_C: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
       const CTL_C: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
-      const chkPair = (a: string, b: string, pairs: [string,string][]) => pairs.some(([x,y]) => (a===x&&b===y)||(a===y&&b===x));
-      const myJi6 = ["년주","월주","일주","시주"].map(pos => byPos6[pos]?.ji ?? "").filter(Boolean);
-      const myGan6 = ["년주","월주","일주","시주"].map(pos => byPos6[pos]?.gan ?? "").filter(Boolean);
-      const myIlEl6 = byPos6["일주"]?.ganEl ?? "목";
+
+      const myIlGan6 = byPos6["일주"]?.gan ?? "";
+      const myIlJi6  = byPos6["일주"]?.ji  ?? "";
+      const myNyeonJi6 = byPos6["년주"]?.ji ?? "";
+      const myIlEl6  = byPos6["일주"]?.ganEl ?? "목";
+
+      // 용신/희신: 사주 8자 오행 분포에서 가장 적은 오행
       const elCntC: Record<string,number> = { 목:0,화:0,토:0,금:0,수:0 };
       for (const p of input.pillars) {
         if (p.ganEl && elCntC[p.ganEl] !== undefined) elCntC[p.ganEl]++;
@@ -1038,37 +1047,59 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
       }
       const sortedElC = Object.entries(elCntC).sort((a,b) => a[1]-b[1]);
       const yongsinEl = sortedElC[0][0]; const heesinEl = sortedElC[1][0];
-      const myIlju6 = byPos6["일주"] ? `${byPos6["일주"].gan}${byPos6["일주"].ji}` : "";
+
+      // 천간합 파트너 일간 (내 일간과 합이 되는 상대 일간)
+      const hapGan6 = CHEONGAN_HAP_PARTNER[myIlGan6] ?? "";
+      // 육합 파트너 일지 (내 일지와 합이 되는 상대 일지)
+      const hapJi6  = YUKAP_PARTNER[myIlJi6] ?? "";
+      // 내 년지와 충·원진인 지지 → 상대 년지로 피해야 함 (표시용)
+      const avoidJiSet = new Set<string>();
+      if (CHUNG_PARTNER[myNyeonJi6])  avoidJiSet.add(CHUNG_PARTNER[myNyeonJi6]);
+      if (WONJIN_PARTNER[myNyeonJi6]) avoidJiSet.add(WONJIN_PARTNER[myNyeonJi6]);
+      const avoidTtiStr = [...avoidJiSet].map(j => JI_띠[j] ?? j).join(", ") || "없음";
+
+      const myIlju6 = `${myIlGan6}${myIlJi6}`;
       const GANJIS_60 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
-      const compatScores = GANJIS_60.filter(gz => gz !== myIlju6).map(gz => {
-        const gan = gz[0]; const ji = gz[1];
-        const ganEl = STEM_EL_C[gan] ?? "목"; const jiEl = BRANCH_EL_C[ji] ?? "목";
-        let score = 50; const reasons: string[] = [];
-        let hapCnt = 0;
-        for (const mj of myJi6) { if (chkPair(ji, mj, YUKAP_C)) { score += 15; hapCnt++; } }
-        if (hapCnt > 0) reasons.push(`지지육합 ${hapCnt}개`);
-        for (const mj of myJi6) { if (chkPair(ji, mj, CHUNG_C)) score -= 20; }
-        for (const mj of myJi6) { if (chkPair(ji, mj, PA_C))    score -= 10; }
-        for (const mj of myJi6) { if (chkPair(ji, mj, HAE_C))   score -= 10; }
-        for (const mj of myJi6) { if (chkPair(ji, mj, WONJIN_C)) score -= 12; }
-        let ganHapCnt = 0;
-        for (const mg of myGan6) { if (chkPair(gan, mg, CHEONGAN_HAP_C)) { score += 12; ganHapCnt++; } }
-        if (ganHapCnt > 0) reasons.push(`천간합 ${ganHapCnt}개`);
-        if (GEN_C[ganEl] === myIlEl6)      { score += 10; reasons.push("일간 상생"); }
-        else if (GEN_C[myIlEl6] === ganEl) { score += 8;  reasons.push("일간 상생"); }
-        else if (CTL_C[ganEl] === myIlEl6)  score -= 15;
-        else if (CTL_C[myIlEl6] === ganEl)  score -= 5;
-        if (ganEl === yongsinEl)       { score += 20; reasons.push(`용신(${yongsinEl}) 천간`); }
-        else if (ganEl === heesinEl)   { score += 12; reasons.push(`희신(${heesinEl}) 천간`); }
-        if (jiEl === yongsinEl)        { score += 15; reasons.push(`용신(${yongsinEl}) 지지`); }
-        else if (jiEl === heesinEl)    { score += 10; reasons.push(`희신(${heesinEl}) 지지`); }
-        return { juju: `${GAN_KR_C[gan]??''}${JI_KR_C[ji]??''}일주`, ganEl, jiEl, score, reasons };
-      }).sort((a,b) => b.score - a.score);
+
+      const compatScores = GANJIS_60
+        .filter(gz => gz !== myIlju6)
+        .map(gz => {
+          const gan = gz[0]; const ji = gz[1];
+          const ganEl = STEM_EL_C[gan] ?? "목"; const jiEl = BRANCH_EL_C[ji] ?? "목";
+
+          // [규칙1] 일간이 내 일간을 극하는 오행이면 제외 (단, 천간합 파트너는 예외 포함)
+          const isHapGan = gan === hapGan6;
+          if (!isHapGan && CTL_C[ganEl] === myIlEl6) return null;
+
+          let score = 50; const reasons: string[] = [];
+
+          // [규칙2] 천간합 일간 → 최우선 (+40)
+          if (isHapGan) { score += 40; reasons.push("천간합"); }
+          else if (GEN_C[ganEl] === myIlEl6) { score += 8; reasons.push("일간 상생"); }
+
+          // [규칙3] 일지 육합 → 2순위 (+30)
+          if (ji === hapJi6) { score += 30; reasons.push("일지 육합"); }
+
+          // [규칙4] 용신/희신 오행 보유 (합이나 생하는 관계인 오행)
+          if (ganEl === yongsinEl) { score += 20; reasons.push(`용신(${yongsinEl})`); }
+          else if (ganEl === heesinEl) { score += 12; reasons.push(`희신(${heesinEl})`); }
+          if (jiEl === yongsinEl) { score += 15; reasons.push(`용신지지(${yongsinEl})`); }
+          else if (jiEl === heesinEl) { score += 10; reasons.push(`희신지지(${heesinEl})`); }
+
+          return {
+            juju: `${GAN_KR_C[gan]??''}${JI_KR_C[ji]??''}일주`,
+            gan: `${GAN_KR_C[gan]??''}(${ganEl})`, ji: `${JI_KR_C[ji]??''}(${jiEl})`,
+            ganEl, jiEl, score, reasons
+          };
+        })
+        .filter((x): x is NonNullable<typeof x> => x !== null)
+        .sort((a,b) => b.score - a.score);
+
       const top3 = compatScores.slice(0, 3);
       const compatTable = top3.map((t,i) =>
-        `${i+1}순위: ${t.juju} (일간 ${t.ganEl} / 일지 ${t.jiEl}) — ${t.reasons.join(", ")} — 점수:${t.score}`
+        `${i+1}순위: ${t.juju} (일간 ${t.gan} / 일지 ${t.ji}) — ${t.reasons.join(", ")}`
       ).join("\n");
-      pillarTable += `\n[잘 맞는 일주 TOP 3 — compatibleJuju 필드에 반드시 이 일주들을 그대로 사용, 임의 변경 절대 금지]\n${compatTable}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n`;
+      pillarTable += `\n[잘 맞는 일주 TOP 3 — compatibleJuju 필드에 반드시 이 일주들을 그대로 사용, 임의 변경 절대 금지]\n${compatTable}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n피해야 할 상대 띠(년지 충·원진): ${avoidTtiStr}\n`;
     }
 
     const now = new Date();
