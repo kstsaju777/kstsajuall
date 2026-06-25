@@ -23,6 +23,19 @@ const MUTE = "#9a8f88";
 const MAROON = "#9b2335";
 const EL_COLOR: Record<string, string> = { 목: "#2e7d32", 화: "#c62828", 토: "#a9791c", 금: "#6b7a82", 수: "#1565c0" };
 const GRID_COLS = "44px repeat(4, 1fr)";
+const GUIIN_COLOR: Record<string, string> = {
+  천을귀인: "#9b2335",
+  문창귀인: "#1565c0",
+  천덕귀인: "#2e7d32",
+  월덕귀인: "#2e7d32",
+  태극귀인: "#a9791c",
+  문곡귀인: "#6b3fa0",
+  학당귀인: "#0288d1",
+};
+function guiinColor(s: string): string {
+  for (const [k, v] of Object.entries(GUIIN_COLOR)) if (s.includes(k)) return v;
+  return s.includes("귀인") ? MAROON : "#cccccc";
+}
 
 const flow = (rows: [string, string][], cur: number): MsFlowItem[] =>
   rows.map(([label, gz], i) => ({ label, gz, active: i === cur }));
@@ -134,12 +147,12 @@ function CellText({ children, color = INK_SOFT, size = 13 }: { children: React.R
 function CellImg({ src, alt, el }: { src: string; alt: string; el: string }) {
   const [err, setErr] = useState(false);
   return (
-    <div className="py-0.5 flex items-center justify-center" style={{ background: WHITE }}>
+    <div className="flex items-center justify-center" style={{ background: WHITE, padding: "0px 4px" }}>
       {err ? (
         <span className="font-black" style={{ color: EL_COLOR[el] ?? INK, fontSize: 18 }}>{alt}</span>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={alt} onError={() => setErr(true)} style={{ width: 54, height: 54, objectFit: "contain" }} />
+        <img src={src} alt={alt} onError={() => setErr(true)} style={{ width: 64, height: 64, objectFit: "contain" }} />
       )}
     </div>
   );
@@ -372,38 +385,42 @@ const ILJU_IMG: Record<string, string> = {
 };
 
 // 명식 테이블만 인라인 표시 (모달 없이 페이지에 직접 삽입용)
-export function MyeongsikTable({ view, name, birth }: {
+export function MyeongsikTable({ view, name, birth, rows, hideLabel }: {
   view: MyeongsikView | null;
   name: string;
   birth: { date: string; calendar: string; time: string } | null;
+  rows?: ("sipTop" | "gan" | "ji" | "sipBot" | "jijang" | "unseong" | "sinsal")[];
+  hideLabel?: boolean;
 }) {
   const v = view ?? SAMPLE_VIEW;
   const ps = applyLocalSinsal(v.pillars);
   const ilgan = v.pillars[1]?.gan ?? "";
+  const show = rows ? new Set(rows) : new Set(["sipTop","gan","ji","sipBot","jijang","unseong","sinsal"]);
+  const gc = hideLabel ? "repeat(4, 1fr)" : GRID_COLS;
   return (
-    <div className="mx-5 my-2 rounded-2xl p-4" style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", border: "1px solid #d8c4a0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" }}>
+    <div className="mx-5 my-2 rounded-2xl p-5" style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", border: "1px solid #d8c4a0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" }}>
       <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${INK}14` }}>
-        <div className="grid" style={{ gridTemplateColumns: GRID_COLS }}>
-          <MsRowLabel>구분</MsRowLabel>
+        <div className="grid" style={{ gridTemplateColumns: gc }}>
+          {!hideLabel && <MsRowLabel>구분</MsRowLabel>}
           {ps.map((p) => (
             <div key={p.pos} className="py-1.5 text-center text-[13px] font-bold" style={{ color: INK, background: "#efe3df" }}>
               {p.pos}
             </div>
           ))}
         </div>
-        <GridRow label="십성">{ps.map((p, i) => <CellText key={i}>{p.sipTop}</CellText>)}</GridRow>
-        <GridRow label="천간">{ps.map((p, i) => <CellImg key={i} src={ganCharImage(p.gan)} alt={p.gan} el={p.ganEl} />)}</GridRow>
-        <GridRow label="지지">{ps.map((p, i) => <CellImg key={i} src={jiCharImage(p.ji)} alt={p.ji} el={p.jiEl} />)}</GridRow>
-        <GridRow label="십성">{ps.map((p, i) => <CellText key={i}>{p.sipBot}</CellText>)}</GridRow>
-        <GridRow label="지장간">{ps.map((p, i) => <CellJijang key={i} text={p.jijang} ilgan={ilgan} />)}</GridRow>
-        <GridRow label="운성">{ps.map((p, i) => <CellText key={i}>{p.unseong}</CellText>)}</GridRow>
-        <GridRow label="신살">{ps.map((p, i) => (
+        {show.has("sipTop") && <div className="grid items-stretch" style={{ gridTemplateColumns: gc, borderTop: `1px solid ${INK}0d` }}>{!hideLabel && <MsRowLabel>십성</MsRowLabel>}{ps.map((p, i) => <CellText key={i}>{p.sipTop}</CellText>)}</div>}
+        {show.has("gan") && <div className="grid items-stretch" style={{ gridTemplateColumns: gc, borderTop: `1px solid ${INK}0d` }}>{!hideLabel && <MsRowLabel>천간</MsRowLabel>}{ps.map((p, i) => <CellImg key={i} src={ganCharImage(p.gan)} alt={p.gan} el={p.ganEl} />)}</div>}
+        {show.has("ji") && <div className="grid items-stretch" style={{ gridTemplateColumns: gc }}>{!hideLabel && <MsRowLabel>지지</MsRowLabel>}{ps.map((p, i) => <CellImg key={i} src={jiCharImage(p.ji)} alt={p.ji} el={p.jiEl} />)}</div>}
+        {show.has("sipBot") && <div className="grid items-stretch" style={{ gridTemplateColumns: gc, borderTop: `1px solid ${INK}0d` }}>{!hideLabel && <MsRowLabel>십성</MsRowLabel>}{ps.map((p, i) => <CellText key={i}>{p.sipBot}</CellText>)}</div>}
+        {show.has("jijang") && <div className="grid items-stretch" style={{ gridTemplateColumns: gc, borderTop: `1px solid ${INK}0d` }}>{!hideLabel && <MsRowLabel>지장간</MsRowLabel>}{ps.map((p, i) => <CellJijang key={i} text={p.jijang} ilgan={ilgan} />)}</div>}
+        {show.has("unseong") && <div className="grid items-stretch" style={{ gridTemplateColumns: gc, borderTop: `1px solid ${INK}0d` }}>{!hideLabel && <MsRowLabel>운성</MsRowLabel>}{ps.map((p, i) => <CellText key={i}>{p.unseong}</CellText>)}</div>}
+        {show.has("sinsal") && <div className="grid items-stretch" style={{ gridTemplateColumns: gc, borderTop: `1px solid ${INK}0d` }}>{!hideLabel && <MsRowLabel>신살</MsRowLabel>}{ps.map((p, i) => (
           <div key={i} className="py-1.5 text-center" style={{ background: WHITE }}>
             {p.sinsal ? p.sinsal.split(/[,\s·]+/).filter(Boolean).map((s, j) => (
-              <div key={j} style={{ color: MAROON, fontSize: 11 }}>{s}</div>
-            )) : <span style={{ color: MAROON, fontSize: 11 }}>—</span>}
+              <div key={j} style={{ color: guiinColor(s), fontSize: 13, fontWeight: s.includes("귀인") ? 700 : 400 }}>{s}</div>
+            )) : <span style={{ color: INK, fontSize: 13 }}>—</span>}
           </div>
-        ))}</GridRow>
+        ))}</div>}
       </div>
     </div>
   );

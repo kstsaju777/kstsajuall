@@ -16,7 +16,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
-import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt } from "@/lib/saju/report-content";
+import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData } from "@/lib/saju/report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -37,13 +37,35 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
-  const { system, user } = buildChapterPrompt(chapter, input);
+  const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 2; i++) {
     try {
       const llm = await generateInterpretation({ system, user, json: true });
       meta = { provider: llm.provider, model: llm.model };
       const obj = parseContentJson(llm.text);
+      // 6장: 서버 계산된 tags를 LLM 결과에 덮어씌우기
+      if (compatTags && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
+        const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
+        compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
+      }
+      // 6장: desc를 각 순위별 별도 호출로 생성 (정확도 보장)
+      if (chapter === 6 && ch6RankData && ch6RankData.length > 0 && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
+        const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
+        const personLabel = input.gender === "male" ? "이 여자는" : "이 남자는";
+        const honor = input.name;
+        await Promise.all(ch6RankData.map(async (rankData: DescRankData, idx: number) => {
+          if (!cj[idx]) return;
+          const { system: ds, user: du } = buildCompatDescPrompt(idx, honor, personLabel, rankData, system);
+          for (let r = 0; r < 2; r++) {
+            try {
+              const descLlm = await generateInterpretation({ system: ds, user: du, json: false });
+              cj[idx].desc = descLlm.text.trim();
+              break;
+            } catch { /* 재시도 */ }
+          }
+        }));
+      }
       if (isChapterReady(obj, chapter)) return { obj, ...meta };
     } catch {
       /* 재시도 */
