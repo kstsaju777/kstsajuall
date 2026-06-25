@@ -70,10 +70,7 @@ export type ReportContent = {
   // ── 8장: 연애·결혼운 정밀풀이 ──
   loveStyle: ReportSection; // 내가 사랑하는 방식
   loveFlow: ReportSection & { flow: { label: string; score: number }[]; peakCallout: string }; // 시기별 연애 흐름(월별)
-  spouse: { // 이런 사람이 배우자로 와요
-    intro: string; callout: string; paragraphs: string[];
-    card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] };
-  };
+  compatibleJuju: { juju: string; ganEl: string; jiEl: string; desc: string }[]; // 이런 사주와 잘 맞아요
   marriage: ReportSection; // 오래가는 궁합의 비결
   // ── 9장: 건강운 정밀풀이 ──
   bodyWeak: ReportSection & { bars: { label: string; value: number }[] }; // 타고난 약한 부위 + 부위별 주의 신호
@@ -123,7 +120,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   3: ["ohaengDesc", "balance", "answer"],                       // 제3장 관계
   4: ["rarity", "special"],                                     // 제4장 특징
   5: ["wealthTime", "jobFit", "jobType", "invest"],             // 제5장 재물
-  6: ["loveStyle", "loveFlow", "spouse", "marriage"],           // 제6장 사랑
+  6: ["loveStyle", "loveFlow", "compatibleJuju", "marriage"],    // 제6장 사랑
   7: ["bodyWeak", "riskTime", "healthCare"],                    // 제7장 건강
   8: ["helper", "helperTime", "helperUse"],                     // 제8장 귀인
   9: ["villain", "loss"],                                       // 제9장 악인
@@ -401,7 +398,7 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "절대 쓰지 마오 — 빈 문자열로",
     "callout": "절대 쓰지 마오 — 빈 문자열로",
     "paragraphs": [
-      "【필수 — 하나의 풀이로】 일주 기반 연애 성향 → 재성/관성 위치 분석 → 일지 배우자궁+합충형 경고 순서로, 단락 구분 없이 하나의 자연스러운 흐름으로 서술하오. 사주 용어는 반드시 괄호로 풀이하오(예: 건록(자수성가와 독립의 기운)). 신강/신약, 일지 십이운성, 합·충·형 유무를 실제 명식에서 확인하여 근거로 사용하오. 여성 사주면 배우자를 상징하는 관성(정관·편관)이 어느 기둥에 있는지(없으면 무관 사주임을 명시), 남성 사주면 재성(정재·편재)이 어느 기둥에 있는지(없으면 무재 사주임을 명시) 반드시 분석하고 그 위치와 유무가 인연에 어떤 의미를 갖는지 풀이하오. 절대 두 개념 혼용 금지. 장점과 단점 모두 담되 따뜻한 시선으로. 홍연 말투(~이오/~하오/~겠소/~있소)로 통일하오. "~ㅂ니다", "~어요", "~습니다" 절대 금지. 700~900자(공백 포함)."
+      "【필수 — 하나의 흐름으로 700~900자】 아래 세 가지를 순서대로, 누구나 쉽게 이해할 수 있는 말로 풀어 쓰오. 사주 용어를 쓸 때는 반드시 괄호 안에 쉬운 말로 풀이하오. 어렵거나 딱딱한 표현 금지. 홍연 말투(~이오/~하오/~겠소).\n1) 이 사람의 연애관: 을묘일주처럼 일주 전체 명칭을 쓰고, 연애에서 어떤 태도와 방식으로 사랑하는지 일상적 언어로 묘사하오. 어떤 연인이 되는지, 어떻게 감정을 표현하는지.\n2) 어떤 이성에게 끌리는지: 인연성(여성→관성, 남성→재성) 위치와 유무를 근거로, 어떤 분위기·성격·조건의 사람에게 끌리는지 구체적으로 묘사하오. 없으면 무관/무재 사주임을 쉬운 말로 설명하오.\n3) 주의할 점: 주입된 합충형 목록에 있는 것만 근거로, 실제 연애·결혼생활에서 어떤 갈등 패턴이 생기기 쉬운지, 어떻게 하면 좋은지 따뜻하게 조언하오. 합충형이 없으면 일지 기운에서 주의점을 찾으오."
     ]
   },
   "loveFlow": {
@@ -413,21 +410,26 @@ const CH_SCHEMA: Record<number, string> = {
       "【필수 — 500자 내외】 위 연애운 점수표를 기반으로 2024~2033년 중 최소 5개 연도를 반드시 직접 언급하오. 점수 높은 해·낮은 해·전환점이 되는 해를 골고루 짚으오. 점수 숫자는 언급 금지. 연도는 반드시 '○○년 갑진년은' 형식으로 표기하오. '가장' 최상급은 1위 연도에만 사용하오. 각 연도마다 그 시기에 어떻게 행동하면 좋은지, 어떤 점을 조심해야 하는지 조언을 담으오. 【시제】 위에 주입된 리포트 생성 기준일을 확인하여 시제를 적용하오. 홍연 말투. '~ㅂ니다', '~어요' 절대 금지."
     ]
   },
-  "spouse": {
-    "intro": "사주에 예정된 미래 배우자의 전반적 분위기를 짚는 도입",
-    "callout": "배우자가 선우님에게 어떤 존재인지(중심을 잡아주는 멘토 등)를 짚는 문장",
-    "paragraphs": ["예의·상식과 겉/속의 심지","서로의 전문성을 존중하는 동반자 관계"],
-    "card": {
-      "gender": "여성 또는 남성(상대 성별)",
-      "ageBand": "30대 초반 등 연령대",
-      "desc": "배우자의 분위기·성격 2~3문장",
-      "mbti": "ISTJ 등 추정 MBTI",
-      "height": "163cm 내외 등",
-      "personality": "성격 한 줄",
-      "jobField": "직업 계열(금융·공공기관 등)",
-      "tags": ["키워드","키워드","키워드","키워드","키워드","키워드"]
+  "compatibleJuju": [
+    {
+      "juju": "위에서 주입된 1순위 일주 이름 그대로 사용 (예: 갑자일주)",
+      "ganEl": "일간 오행 (예: 목)",
+      "jiEl": "일지 오행 (예: 수)",
+      "desc": "【필수 — 홍연 말투, 120~180자】 이 일주가 왜 잘 맞는지 — 합 관계, 용신/희신 보유, 일간 상생 등 주입된 근거를 쉬운 말로 풀이하오. ~ㅂ니다/~어요 절대 금지."
+    },
+    {
+      "juju": "2순위 일주",
+      "ganEl": "일간 오행",
+      "jiEl": "일지 오행",
+      "desc": "120~180자 풀이"
+    },
+    {
+      "juju": "3순위 일주",
+      "ganEl": "일간 오행",
+      "jiEl": "일지 오행",
+      "desc": "120~180자 풀이"
     }
-  },
+  ],
   "marriage": {
     "intro": "배우자와 오래 행복하게 지내는 핵심(독립 공간 존중 등)을 짚는 도입",
     "callout": "주의할 합/충(묘신원진 등)과 그로 인한 갈등 포인트, 소통 태도를 짚는 문장",
@@ -950,10 +952,129 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     const lovePeakYear = 2024 + sortedLove[0].i;
     const lovePeakGz = loveRows[sortedLove[0].i].split(" ")[1];
 
+    // 일주 명칭 계산
+    const ilP = byPos6["일주"];
+    const ilGanKr = ilP ? (GAN_KR6[ilP.gan] ?? "") : "";
+    const ilJiKr = ilP ? (JI_KR6[ilP.ji] ?? "") : "";
+    const ilJuName = `${ilGanKr}${ilJiKr}일주`;
+
+    // 지지 합충형 계산
+    const jiList: { pos: string; ji: string }[] = ["년주","월주","일주","시주"]
+      .map(pos => ({ pos, ji: byPos6[pos]?.ji ?? "" }))
+      .filter(x => x.ji);
+
+    // 지지육합
+    const YUKAP: [string,string,string][] = [
+      ["子","丑","토"],["寅","亥","목"],["卯","戌","화"],
+      ["辰","酉","금"],["巳","申","수"],["午","未","화"],
+    ];
+    // 충
+    const CHUNG: [string,string][] = [
+      ["子","午"],["丑","未"],["寅","申"],["卯","酉"],["辰","戌"],["巳","亥"]
+    ];
+    // 형 (무은지형·자형 위주)
+    const HYEONG: [string[],string][] = [
+      [["子","卯"],"무은지형(예의 없는 갈등)"],
+      [["寅","巳","申"],"지세지형(세력 다툼)"],
+      [["丑","戌","未"],"무례지형(고집 충돌)"],
+    ];
+
+    const JI_KR6_REV: Record<string,string> = {};
+    Object.entries(JI_KR6).forEach(([k,v]) => JI_KR6_REV[v] = k);
+    const jiRaw = jiList.map(x => x.ji); // 한자 지지
+
+    const hapResults: string[] = [];
+    const chungResults: string[] = [];
+    const hyeongResults: string[] = [];
+
+    for (let i = 0; i < jiList.length; i++) {
+      for (let j = i+1; j < jiList.length; j++) {
+        const a = jiList[i]; const b = jiList[j];
+        const aKr = JI_KR6[a.ji] ?? a.ji; const bKr = JI_KR6[b.ji] ?? b.ji;
+        for (const [x,y] of YUKAP) {
+          if ((a.ji===x && b.ji===y)||(a.ji===y && b.ji===x))
+            hapResults.push(`${a.pos}(${aKr}) ↔ ${b.pos}(${bKr}) 육합`);
+        }
+        for (const [x,y] of CHUNG) {
+          if ((a.ji===x && b.ji===y)||(a.ji===y && b.ji===x))
+            chungResults.push(`${a.pos}(${aKr}) ↔ ${b.pos}(${bKr}) 충`);
+        }
+      }
+    }
+    for (const [group, name] of HYEONG) {
+      const matched = jiList.filter(x => group.includes(x.ji));
+      if (matched.length === group.length)
+        hyeongResults.push(`${matched.map(x=>`${x.pos}(${JI_KR6[x.ji]??x.ji})`).join("·")} ${name}`);
+    }
+
+    const hapChungHyeong = [
+      hapResults.length ? `합: ${hapResults.join(", ")}` : "합: 없음",
+      chungResults.length ? `충: ${chungResults.join(", ")}` : "충: 없음",
+      hyeongResults.length ? `형: ${hyeongResults.join(", ")}` : "형: 없음",
+    ].join("\n");
+
+    // 잘 맞는 일주 TOP 3 계산 (합충형파해원진 + 용신/희신 기반)
+    {
+      const STEM_EL_C: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+      const BRANCH_EL_C: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+      const GAN_KR_C: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+      const JI_KR_C: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+      const YUKAP_C: [string,string][] = [["子","丑"],["寅","亥"],["卯","戌"],["辰","酉"],["巳","申"],["午","未"]];
+      const CHUNG_C: [string,string][] = [["子","午"],["丑","未"],["寅","申"],["卯","酉"],["辰","戌"],["巳","亥"]];
+      const PA_C: [string,string][] = [["子","酉"],["午","卯"],["巳","申"],["寅","亥"],["辰","丑"],["戌","未"]];
+      const HAE_C: [string,string][] = [["子","未"],["丑","午"],["寅","巳"],["卯","辰"],["申","亥"],["酉","戌"]];
+      const WONJIN_C: [string,string][] = [["子","未"],["丑","午"],["寅","酉"],["卯","申"],["辰","亥"],["巳","戌"]];
+      const CHEONGAN_HAP_C: [string,string][] = [["甲","己"],["乙","庚"],["丙","辛"],["丁","壬"],["戊","癸"]];
+      const GEN_C: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+      const CTL_C: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+      const chkPair = (a: string, b: string, pairs: [string,string][]) => pairs.some(([x,y]) => (a===x&&b===y)||(a===y&&b===x));
+      const myJi6 = ["년주","월주","일주","시주"].map(pos => byPos6[pos]?.ji ?? "").filter(Boolean);
+      const myGan6 = ["년주","월주","일주","시주"].map(pos => byPos6[pos]?.gan ?? "").filter(Boolean);
+      const myIlEl6 = byPos6["일주"]?.ganEl ?? "목";
+      const elCntC: Record<string,number> = { 목:0,화:0,토:0,금:0,수:0 };
+      for (const p of input.pillars) {
+        if (p.ganEl && elCntC[p.ganEl] !== undefined) elCntC[p.ganEl]++;
+        if (p.jiEl  && elCntC[p.jiEl]  !== undefined) elCntC[p.jiEl]++;
+      }
+      const sortedElC = Object.entries(elCntC).sort((a,b) => a[1]-b[1]);
+      const yongsinEl = sortedElC[0][0]; const heesinEl = sortedElC[1][0];
+      const myIlju6 = byPos6["일주"] ? `${byPos6["일주"].gan}${byPos6["일주"].ji}` : "";
+      const GANJIS_60 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+      const compatScores = GANJIS_60.filter(gz => gz !== myIlju6).map(gz => {
+        const gan = gz[0]; const ji = gz[1];
+        const ganEl = STEM_EL_C[gan] ?? "목"; const jiEl = BRANCH_EL_C[ji] ?? "목";
+        let score = 50; const reasons: string[] = [];
+        let hapCnt = 0;
+        for (const mj of myJi6) { if (chkPair(ji, mj, YUKAP_C)) { score += 15; hapCnt++; } }
+        if (hapCnt > 0) reasons.push(`지지육합 ${hapCnt}개`);
+        for (const mj of myJi6) { if (chkPair(ji, mj, CHUNG_C)) score -= 20; }
+        for (const mj of myJi6) { if (chkPair(ji, mj, PA_C))    score -= 10; }
+        for (const mj of myJi6) { if (chkPair(ji, mj, HAE_C))   score -= 10; }
+        for (const mj of myJi6) { if (chkPair(ji, mj, WONJIN_C)) score -= 12; }
+        let ganHapCnt = 0;
+        for (const mg of myGan6) { if (chkPair(gan, mg, CHEONGAN_HAP_C)) { score += 12; ganHapCnt++; } }
+        if (ganHapCnt > 0) reasons.push(`천간합 ${ganHapCnt}개`);
+        if (GEN_C[ganEl] === myIlEl6)      { score += 10; reasons.push("일간 상생"); }
+        else if (GEN_C[myIlEl6] === ganEl) { score += 8;  reasons.push("일간 상생"); }
+        else if (CTL_C[ganEl] === myIlEl6)  score -= 15;
+        else if (CTL_C[myIlEl6] === ganEl)  score -= 5;
+        if (ganEl === yongsinEl)       { score += 20; reasons.push(`용신(${yongsinEl}) 천간`); }
+        else if (ganEl === heesinEl)   { score += 12; reasons.push(`희신(${heesinEl}) 천간`); }
+        if (jiEl === yongsinEl)        { score += 15; reasons.push(`용신(${yongsinEl}) 지지`); }
+        else if (jiEl === heesinEl)    { score += 10; reasons.push(`희신(${heesinEl}) 지지`); }
+        return { juju: `${GAN_KR_C[gan]??''}${JI_KR_C[ji]??''}일주`, ganEl, jiEl, score, reasons };
+      }).sort((a,b) => b.score - a.score);
+      const top3 = compatScores.slice(0, 3);
+      const compatTable = top3.map((t,i) =>
+        `${i+1}순위: ${t.juju} (일간 ${t.ganEl} / 일지 ${t.jiEl}) — ${t.reasons.join(", ")} — 점수:${t.score}`
+      ).join("\n");
+      pillarTable += `\n[잘 맞는 일주 TOP 3 — compatibleJuju 필드에 반드시 이 일주들을 그대로 사용, 임의 변경 절대 금지]\n${compatTable}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n`;
+    }
+
     const now = new Date();
     const refYear = now.getFullYear();
     const refMonth = now.getMonth() + 1;
-    pillarTable += `\n[리포트 생성 기준일 — 절대 규칙, 위반 시 탈락]\n오늘: ${refYear}년 ${refMonth}월\n\n【시제 적용 — 연도별 예시】\n- ${refYear - 2}년, ${refYear - 1}년 → 이미 지난 해 → 반드시 과거형: "~이었소", "~았소", "~높았소", "~찾아왔소"\n  예) "2024년 갑진년은 연애운이 높았소" (O) / "될 것이오" (X 절대 금지)\n- ${refYear}년 → 지금 이 해 → 반드시 현재형: "~이오", "~하오", "~있소"\n  예) "2026년 병오년은 연애운이 낮아지고 있소"\n- ${refYear + 1}년 이후 → 아직 오지 않은 해 → 반드시 미래형: "~될 것이오", "~찾아오겠소"\n  예) "2027년 정미년은 연애운이 회복될 것이오"\n\n\n[기둥별 십성 확인표 — 6장 연애 풀이에서 반드시 이 값만 사용, 임의 추론 금지]\n${rows6.join("\n")}\n\n[인연성 분석 결과 — 반드시 이 결과를 그대로 사용하오]\n${loveStarResult}\n\n[2024~2033 세운별 연애운 점수표 — loveFlow 풀이에서 반드시 이 수치 기반으로만 서술]\n${loveRows.join("\n")}\n연애운 1위(정점): ${lovePeakYear}년 ${lovePeakGz} (점수=${sortedLove[0].score})\n연애운 상위: ${sortedLove.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n연애운 하위: ${sortedLove.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n[연도 표기] '○○년 갑진년은' 형식. '가장' 최상급은 1위 연도(${lovePeakYear}년)에만 사용.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n`;
+    pillarTable += `\n[일주 명칭 — 반드시 이 표현 그대로 사용]\n이 사주의 일주: ${ilJuName} (일간 ${ilGanKr}${ilP?.ganEl ?? ""} / 일지 ${ilJiKr}${ilP?.jiEl ?? ""})\n\n[지지 합·충·형 실제 목록 — 없는 합충형을 언급하면 절대 안 되오. 아래 목록에 있는 것만 언급하오]\n${hapChungHyeong}\n\n[리포트 생성 기준일 — 절대 규칙, 위반 시 탈락]\n오늘: ${refYear}년 ${refMonth}월\n\n【시제 적용 — 연도별 예시】\n- ${refYear - 2}년, ${refYear - 1}년 → 이미 지난 해 → 반드시 과거형: "~이었소", "~았소", "~높았소", "~찾아왔소"\n  예) "2024년 갑진년은 연애운이 높았소" (O) / "될 것이오" (X 절대 금지)\n- ${refYear}년 → 지금 이 해 → 반드시 현재형: "~이오", "~하오", "~있소"\n  예) "2026년 병오년은 연애운이 낮아지고 있소"\n- ${refYear + 1}년 이후 → 아직 오지 않은 해 → 반드시 미래형: "~될 것이오", "~찾아오겠소"\n  예) "2027년 정미년은 연애운이 회복될 것이오"\n\n\n[기둥별 십성 확인표 — 6장 연애 풀이에서 반드시 이 값만 사용, 임의 추론 금지]\n${rows6.join("\n")}\n\n[인연성 분석 결과 — 반드시 이 결과를 그대로 사용하오]\n${loveStarResult}\n\n[2024~2033 세운별 연애운 점수표 — loveFlow 풀이에서 반드시 이 수치 기반으로만 서술]\n${loveRows.join("\n")}\n연애운 1위(정점): ${lovePeakYear}년 ${lovePeakGz} (점수=${sortedLove[0].score})\n연애운 상위: ${sortedLove.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n연애운 하위: ${sortedLove.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n[연도 표기] '○○년 갑진년은' 형식. '가장' 최상급은 1위 연도(${lovePeakYear}년)에만 사용.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n`;
   }
 
   // chapter 5: 세운 재물운 점수 계산 후 주입 (프론트 WealthLineChart 동일 알고리즘)

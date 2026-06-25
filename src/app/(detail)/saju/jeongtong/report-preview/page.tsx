@@ -982,6 +982,34 @@ function HealthCareCard({ element, tips }: { element: string; tips: { label: str
   );
 }
 
+// 잘 맞는 일주 카드 (6장)
+function CompatibleJujuCards({ items }: { items?: { juju: string; ganEl: string; jiEl: string; desc: string }[] }) {
+  if (!items || items.length === 0) return null;
+  const EL_COLOR: Record<string, string> = { 목:"#2d8a4e",화:"#d94040",토:"#b8860b",금:"#7a7a8a",수:"#2255aa" };
+  const EL_BG: Record<string, string> = { 목:"#e8f5ec",화:"#fceaea",토:"#fdf6e3",금:"#f0f0f4",수:"#e8eef8" };
+  const RANK_LABELS = ["1순위","2순위","3순위"];
+  return (
+    <div className="flex flex-col gap-3 mt-2">
+      {items.map((item, i) => {
+        const ganColor = EL_COLOR[item.ganEl] ?? "#555";
+        const jiColor  = EL_COLOR[item.jiEl]  ?? "#555";
+        const gBg      = EL_BG[item.ganEl]    ?? "#f5f5f5";
+        return (
+          <div key={i} style={{ background:"#fafafa", border:"1px solid #eee", borderRadius:12, padding:"14px 16px" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ fontSize:11, background: MAROON, color:"#fff", borderRadius:20, padding:"2px 9px", fontWeight:600 }}>{RANK_LABELS[i] ?? `${i+1}순위`}</span>
+              <span style={{ fontSize:18, fontWeight:700, color:"#1a1a1a" }}>{item.juju}</span>
+              <span style={{ fontSize:12, background: gBg, color: ganColor, borderRadius:20, padding:"2px 8px", fontWeight:500 }}>일간 {item.ganEl}</span>
+              <span style={{ fontSize:12, background: EL_BG[item.jiEl] ?? "#f5f5f5", color: jiColor, borderRadius:20, padding:"2px 8px", fontWeight:500 }}>일지 {item.jiEl}</span>
+            </div>
+            <p style={{ fontSize:14, lineHeight:1.7, color:"#333", margin:0 }}>{item.desc}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // 인물 카드 (배우자 8장 · 귀인 10장 공용)
 function PersonCard({ title, label, photo, card }: { title?: string; label: string; photo: string; card: { gender: string; ageBand: string; desc: string; mbti: string; height: string; personality: string; jobField: string; tags: string[] } }) {
   const spec = (label: string, val: string) => (
@@ -2374,6 +2402,11 @@ const SAMPLE_CONTENT = {
   invest: {
     intro: "선우님에게 가장 잘 맞는 재테크 방법은 단기적인 주식이나 가상화폐 같은 투기성 투자보다는 실물 자산에 기반한 안정적인 투자예요.",
     callout: "흙(土)과 쇠(金)의 기운이 재물과 안정을 뜻하므로 부동산이나 장기 채권, 혹은 우량주 중심의 장기 묻어두기식 투자가 가장 안전해요.",
+    investTypes: [
+      { category:"부동산", icon:"🏠", score:82, products:["아파트","오피스텔"], tip:"장기 보유 전략이 유리합니다." },
+      { category:"저축", icon:"🏦", score:76, products:["적금","예금"], tip:"원금 보장 상품으로 안정 추구." },
+      { category:"주식", icon:"📈", score:65, products:["우량주","ETF"], tip:"장기 묻어두기 전략이 적합합니다." },
+    ],
     paragraphs: [
       "상관의 충동적인 기운이 발동할 때 귀가 얇아져 남들의 말만 믿고 섣불리 큰돈을 움직였다가는 큰 손실을 보기 쉬우니 경계해야 합니다.",
       "나만의 철저한 분석과 이성적인 기준을 바탕으로 포트폴리오를 구성하고 흔들림 없이 장기적으로 굴려 갈 때 큰 부를 이룰 수 있어요.",
@@ -2401,24 +2434,11 @@ const SAMPLE_CONTENT = {
       "평소 가보고 싶었던 문화 공간이나 전문적인 배움이 있는 장소에서 자연스럽게 대화가 통하는 사람을 만나게 될 것으로 보여요.",
     ],
   },
-  spouse: {
-    intro: "선우님의 사주에 예정된 미래의 배우자는 매우 단정하고 이지적인 분위기를 풍기며 자기 일에 대한 책임감이 아주 강한 사람이에요.",
-    callout: "차분하고 현실적인 성격으로 선우님이 감정적으로 흔들릴 때 든든하게 중심을 잡아주고 올바른 방향을 제시해 주는 멘토 같은 존재네요.",
-    paragraphs: [
-      "예의 바르고 상식이 통하는 사람이며, 겉은 부드러워 보이지만 내면은 누구보다 단단하고 굳건한 심지를 가지고 있답니다.",
-      "서로의 전문성을 존중해 주며 동반자로서 함께 성장해 나갈 수 있는 가장 이상적이고 든든한 파트너가 되어줄 사람이에요.",
-    ],
-    card: {
-      gender: "여성",
-      ageBand: "30대 초반",
-      desc: "단정하고 이지적인 분위기를 풍기며, 자기 일에 대한 자부심과 책임감이 강한 여성이에요. 예의 바르고 차분한 성격이지만 내면은 매우 단단해요.",
-      mbti: "ISTJ",
-      height: "163cm 내외",
-      personality: "차분하고 현실적이며 신뢰감을 주는 성격",
-      jobField: "금융, 공공기관, 전문 사무직",
-      tags: ["이지적인", "책임감 있는", "단정한 외모", "차분한 성격", "공무원/대기업", "자기관리 철저"],
-    },
-  },
+  compatibleJuju: [
+    { juju:"갑자일주", ganEl:"목", jiEl:"수", desc:"일간이 목(木)으로 선우님의 사주와 상생 관계를 이루며, 자수(子水) 지지가 선우님의 용신 오행을 채워주오. 서로 에너지가 자연스럽게 흐르는 좋은 조합이오." },
+    { juju:"임오일주", ganEl:"수", jiEl:"화", desc:"천간에서 합이 이루어지며, 오(午) 지지가 선우님과 육합을 이루오. 충·형·파 없이 안정된 관계가 형성되는 궁합이오." },
+    { juju:"경신일주", ganEl:"금", jiEl:"금", desc:"선우님의 희신 금(金) 오행을 일간·일지 모두 보유하고 있어 상대의 존재 자체가 도움이 되는 인연이오. 서로를 단단하게 만들어주는 조합이오." },
+  ],
   marriage: {
     intro: "선우님과 미래 배우자와의 결혼 생활은 서로의 독립적인 공간과 시간을 존중해 줄 때 가장 오랫동안 행복하게 유지될 수 있어요.",
     callout: "사주에 있는 묘신원진의 작용으로 인해 사소한 말 한마디에 오해나 서운함이 쌓이기 쉬우니 대화할 때는 늘 이성적이고 차분해야 해요.",
@@ -4928,11 +4948,10 @@ function ReportPreviewInner() {
             {c.loveFlow.paragraphs?.[0] && <P>{c.loveFlow.paragraphs[0]}</P>}
           </section>
 
-          {/* 이런 사람이 배우자로 와요 */}
+          {/* 이런 사주와 잘 맞아요 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>이런 사람이 배우자로 와요</Heading>
-            {c.spouse?.card && <PersonCard label="사주로 본 배우자의 분위기예요." photo="/media/report/total/total-6/total-6-1.jpg" card={c.spouse.card} />}
-            {c.spouse.intro && <P>{[c.spouse.intro, ...c.spouse.paragraphs].join("\n")}</P>}
+            <Heading>이런 사주와 잘 맞아요</Heading>
+            <CompatibleJujuCards items={c.compatibleJuju} />
           </section>
 
           {/* 궁합 */}
