@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 export type Product = {
   id: string;
@@ -502,10 +502,24 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   const CARD_W = 290;
   const STEP = CARD_W - 32;
 
+  const startAutoPlay = useCallback(() => {
+    if (slideTimer.current) clearInterval(slideTimer.current);
+    slideTimer.current = setInterval(() => {
+      setSlideIndex(prev => (prev + 1) % n);
+      setOffset(0);
+    }, 3000);
+  }, [n, setSlideIndex, slideTimer]);
+
+  useEffect(() => {
+    startAutoPlay();
+    return () => { if (slideTimer.current) clearInterval(slideTimer.current); };
+  }, [startAutoPlay]);
+
   const goTo = (i: number) => {
     if (slideTimer.current) clearInterval(slideTimer.current);
     setSlideIndex(((i % n) + n) % n);
     setOffset(0);
+    startAutoPlay();
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -522,7 +536,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   const onTouchEnd = () => {
     if (offset < -STEP / 3) goTo(idx + 1);
     else if (offset > STEP / 3) goTo(idx - 1);
-    else setOffset(0);
+    else { setOffset(0); startAutoPlay(); }
     touchStartX.current = null;
   };
 
