@@ -63,7 +63,10 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   const [catSlots, setCatSlots] = useState<Record<string, number>>(() =>
     Object.fromEntries(CATEGORIES.map(c => [c.tag, 0]))
   );
-  const [slideIndex, setSlideIndex] = useState(0);
+  const [slideIndex, setSlideIndex] = useState(() => {
+    const idx = initialProducts.findIndex(p => p.slug === "total");
+    return idx >= 0 ? idx : 0;
+  });
   const dragId = useRef<string | null>(null);
   const dragSource = useRef<"list" | "cat" | null>(null);
   const hasDragged = useRef(false); // 드래그 vs 클릭 구분
