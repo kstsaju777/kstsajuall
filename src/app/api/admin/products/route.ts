@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "name, slug, price는 필수입니다" }, { status: 400 });
   }
   const service = createServiceClient();
-  const { data, error } = await service.from("products").insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (service.from("products") as any).insert({
     name, slug, price: Number(price),
     description: description ?? "",
     image_url: image_url ?? "",
