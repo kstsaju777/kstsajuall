@@ -404,7 +404,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
               style={{
                 width: i === idx ? 20 : 6, height: 6, borderRadius: 3,
                 border: "none", padding: 0, cursor: "pointer", pointerEvents: "auto",
-                background: i === idx ? "#9b2335" : "rgba(255,255,255,0.45)",
+                background: i === idx ? "#f5c518" : "rgba(255,255,255,0.45)",
                 transition: "width 0.3s, background 0.3s",
               }}
             />
