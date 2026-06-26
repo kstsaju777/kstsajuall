@@ -47,15 +47,10 @@ export default function HomePage() {
     fetch("/api/admin/check").then(r => r.json()).then(d => { if (d.isAdmin) setIsAdmin(true); }).catch(() => {});
   }, []);
 
-  const [confirm, setConfirm] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState<{ id: string; toActive: boolean } | null>(null);
 
   const toggleCard = (id: string) => {
-    const current = activeMap[id];
-    if (!current) {
-      setConfirm(id); // 비공개→공개 시 확인창
-    } else {
-      setActiveMap(prev => ({ ...prev, [id]: false }));
-    }
+    setConfirm({ id, toActive: !activeMap[id] });
   };
 
   return (
@@ -128,9 +123,13 @@ export default function HomePage() {
             width: "100%", maxWidth: 300, textAlign: "center",
             boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
           }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: 8 }}>상품 공개</p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: 8 }}>
+              {confirm.toActive ? "상품 공개" : "상품 비공개"}
+            </p>
             <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, marginBottom: 24 }}>
-              실제 고객에게 상품이 노출됩니다.<br />오픈하시겠습니까?
+              {confirm.toActive
+                ? <>실제 고객에게 상품이 노출됩니다.<br />오픈하시겠습니까?</>
+                : <>상품이 고객에게 노출되지 않습니다.<br />비공개로 전환하시겠습니까?</>}
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               <button
@@ -141,10 +140,11 @@ export default function HomePage() {
                 }}
               >NO</button>
               <button
-                onClick={() => { setActiveMap(prev => ({ ...prev, [confirm]: true })); setConfirm(null); }}
+                onClick={() => { setActiveMap(prev => ({ ...prev, [confirm.id]: confirm.toActive })); setConfirm(null); }}
                 style={{
                   flex: 1, padding: "11px 0", borderRadius: 10, border: "none",
-                  background: "#9b2335", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                  background: confirm.toActive ? "#9b2335" : "#374151",
+                  color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
                 }}
               >YES</button>
             </div>
