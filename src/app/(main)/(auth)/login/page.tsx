@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 const ID_DOMAIN = "@hongyeondang.com";
 
@@ -24,6 +25,7 @@ function LoginInner() {
   const [pwInput, setPwInput] = useState("");
   const [idLoading, setIdLoading] = useState(false);
   const [idError, setIdError] = useState("");
+  const [legalDoc, setLegalDoc] = useState<"terms" | "privacy" | null>(null);
 
   async function handleKakaoLogin() {
     setKakaoLoading(true);
@@ -119,8 +121,29 @@ function LoginInner() {
       </form>
 
       <p className="mt-8 text-[11px] text-center" style={{ color: "#bbb" }}>
-        로그인 시 이용약관 및 개인정보처리방침에 동의하게 됩니다.
+        로그인 시{" "}
+        <button onClick={() => setLegalDoc("terms")} className="underline" style={{ color: "#9c8472" }}>이용약관</button>
+        {" "}및{" "}
+        <button onClick={() => setLegalDoc("privacy")} className="underline" style={{ color: "#9c8472" }}>개인정보처리방침</button>
+        에 동의하게 됩니다.
       </p>
+
+      {/* 약관 팝업 */}
+      {legalDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.45)" }} onClick={() => setLegalDoc(null)}>
+          <div className="flex flex-col rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}
+            style={{ left: "50%", top: "50%", width: "min(80vw, 300px)", maxHeight: "56vh", background: "#fff", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", animation: "legalPop 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5" style={{ borderBottom: "1px solid #eee" }}>
+              <span className="text-[13px] font-bold" style={{ color: "#111" }}>{legalDoc === "terms" ? "이용약관" : "개인정보처리방침"}</span>
+              <button onClick={() => setLegalDoc(null)} aria-label="닫기" className="flex items-center justify-center rounded-full" style={{ width: 24, height: 24, background: "#f1f1f1", color: "#666", fontSize: 13, lineHeight: 1 }}>✕</button>
+            </div>
+            <div className={`legal-scroll flex-1 overflow-y-auto px-4 pt-2 pb-6 ${LEGAL_DOC_CLASS} [&_h1]:hidden [&_h2:first-of-type]:border-t-0 [&_h2:first-of-type]:pt-0`} style={{ background: "#fff", zoom: 0.82, scrollbarWidth: "thin", scrollbarColor: "#cfcfcf transparent" } as React.CSSProperties}>
+              {legalDoc === "terms" ? <TermsContent /> : <PrivacyContent />}
+            </div>
+          </div>
+          <style>{`@keyframes legalPop{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}.legal-scroll::-webkit-scrollbar{width:5px}.legal-scroll::-webkit-scrollbar-thumb{background:#cfcfcf;border-radius:3px}.legal-scroll::-webkit-scrollbar-track{background:transparent}`}</style>
+        </div>
+      )}
     </div>
   );
 }
