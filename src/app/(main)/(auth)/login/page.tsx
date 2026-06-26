@@ -7,6 +7,53 @@ import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/lega
 
 const ID_DOMAIN = "@hongyeondang.com";
 
+function EmailDomainSelect({ value, onChange, domains }: { value: string; onChange: (v: string) => void; domains: string[] }) {
+  const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
+  return (
+    <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "12px 10px", borderRadius: 12, border: "1px solid #ddd0c4",
+          background: "#f0e8e0", color: value ? "#3a2820" : "#b0a090",
+          fontSize: 13, cursor: "pointer", outline: "none",
+        }}
+      >
+        <span>{value || "선택하세요"}</span>
+        <span style={{ fontSize: 9, color: "#9c8472", marginLeft: 4 }}>{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 50,
+          background: "#fff", borderRadius: 12, border: "1px solid #ddd0c4",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.12)", overflow: "hidden",
+        }}>
+          {domains.map(d => (
+            <button
+              key={d} type="button"
+              onMouseEnter={() => setHovered(d)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => { onChange(d); setOpen(false); setHovered(null); }}
+              style={{
+                width: "100%", textAlign: "left", padding: "11px 14px",
+                fontSize: 13, border: "none", cursor: "pointer",
+                background: hovered === d ? "#9b2335" : "#fff",
+                color: hovered === d ? "#fff" : "#3a2820",
+                transition: "background 0.1s, color 0.1s",
+              }}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function LoginPage() {
   return (
     <Suspense>
@@ -216,24 +263,11 @@ function LoginInner() {
                 style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
               />
               <span style={{ color: "#9c8472", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>@</span>
-              <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-                <select
-                  value={emailDomain}
-                  onChange={(e) => { setEmailDomain(e.target.value); setCustomDomain(""); }}
-                  className="w-full px-3 py-3 rounded-xl text-[13px] outline-none appearance-none"
-                  style={{
-                    background: "#f0e8e0", border: "1px solid #ddd0c4",
-                    color: emailDomain ? "#3a2820" : "#b0a090", paddingRight: 28,
-                  }}
-                >
-                  <option value="" disabled>도메인 ▼</option>
-                  {EMAIL_DOMAINS.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <span style={{
-                  position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-                  fontSize: 10, color: "#9c8472", pointerEvents: "none",
-                }}>▼</span>
-              </div>
+              <EmailDomainSelect
+                value={emailDomain}
+                onChange={(v) => { setEmailDomain(v); setCustomDomain(""); }}
+                domains={EMAIL_DOMAINS}
+              />
             </div>
             {emailDomain === "직접입력" && (
               <input
