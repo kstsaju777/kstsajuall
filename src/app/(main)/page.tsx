@@ -94,7 +94,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="pb-10 flex flex-col gap-4">
+    <div className="pb-10 flex flex-col gap-4 pt-4">
 
       {/* 상단 카드형 슬라이드 배너 - 어드민만 */}
       {isAdmin && products.length > 0 && (
