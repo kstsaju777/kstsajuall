@@ -114,7 +114,14 @@ export default function HomePage() {
         const comingSoon = !isAdmin && !active;
         const href = getHref(product.slug);
         const isVideo = product.is_video ?? false;
-        const imageUrl = product.image_url ?? "/media/hero/hero-3.jpg";
+        const imageUrl = product.image_url;
+        const isDummy = !imageUrl;
+        const DUMMY_GRADIENTS = [
+          "linear-gradient(135deg, #2d1b4e 0%, #6b2d6b 50%, #c0392b 100%)",
+          "linear-gradient(135deg, #1a2a4a 0%, #2d6b8a 50%, #1abc9c 100%)",
+          "linear-gradient(135deg, #3d1a00 0%, #8b4513 50%, #d4a017 100%)",
+          "linear-gradient(135deg, #1a3a1a 0%, #2d6b2d 50%, #a8d5a2 100%)",
+        ];
         const isDragTarget = dragOver === product.id;
 
         return (
@@ -154,18 +161,22 @@ export default function HomePage() {
               href={comingSoon ? "#" : href}
               onClick={e => {
                 if (comingSoon) { e.preventDefault(); return; }
-                if (dragId.current) { e.preventDefault(); } // 드래그 중엔 클릭 무시
+                if (dragId.current) { e.preventDefault(); }
               }}
               className="block w-full rounded-2xl overflow-hidden relative"
-              style={{ aspectRatio: "4/3", pointerEvents: comingSoon ? "none" : "auto" }}
+              style={{
+                aspectRatio: "4/3",
+                pointerEvents: comingSoon ? "none" : "auto",
+                background: isDummy ? DUMMY_GRADIENTS[products.indexOf(product) % DUMMY_GRADIENTS.length] : undefined,
+              }}
             >
-              {isVideo ? (
+              {!isDummy && (isVideo ? (
                 <video src={imageUrl} className="w-full h-full object-cover" autoPlay muted loop playsInline
                   style={comingSoon ? { filter: "blur(8px) brightness(0.15)", transform: "scale(1.05)" } : {}} />
               ) : (
                 <img src={imageUrl} alt={product.name} className="w-full h-full object-cover"
                   style={comingSoon ? { filter: "blur(8px) brightness(0.15)", transform: "scale(1.05)" } : {}} />
-              )}
+              ))}
               {comingSoon ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                   <p className="text-white font-black text-[18px]">서비스 준비중입니다</p>
@@ -345,10 +356,18 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
           const rotateY = d === 0 ? -tiltAngle : (d < 0 ? 8 : -8);
           const opacity = Math.abs(d) > 1 ? 0 : d === 0 ? 1 : 0.5;
           const zIndex = d === 0 ? 2 : 1;
-          const imageUrl = product.image_url ?? "/media/hero/hero-3.jpg";
+          const imageUrl = product.image_url;
+          const isDummy = !imageUrl;
           const isVideo = product.is_video ?? false;
           const href = getHref(product.slug);
           const isCurrent = d === 0;
+
+          const DUMMY_GRADIENTS = [
+            "linear-gradient(135deg, #2d1b4e 0%, #6b2d6b 50%, #c0392b 100%)",
+            "linear-gradient(135deg, #1a2a4a 0%, #2d6b8a 50%, #1abc9c 100%)",
+            "linear-gradient(135deg, #3d1a00 0%, #8b4513 50%, #d4a017 100%)",
+            "linear-gradient(135deg, #1a3a1a 0%, #2d6b2d 50%, #a8d5a2 100%)",
+          ];
 
           return (
             <div
@@ -369,12 +388,18 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 boxShadow: isCurrent ? "0 10px 28px rgba(0,0,0,0.55)" : "0 4px 12px rgba(0,0,0,0.3)",
                 filter: isCurrent ? "none" : "brightness(0.55)",
                 cursor: isCurrent ? "pointer" : "pointer",
+                background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
               }}
             >
-              {isVideo ? (
+              {!isDummy && (isVideo ? (
                 <video src={imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline />
               ) : (
                 <img src={imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ))}
+              {isDummy && (
+                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13, fontWeight: 700, letterSpacing: 1 }}>준비중</p>
+                </div>
               )}
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85))" }} />
               {/* 텍스트 — 카드 안에 자연스럽게 */}
