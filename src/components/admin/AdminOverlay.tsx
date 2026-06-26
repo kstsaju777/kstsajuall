@@ -128,11 +128,16 @@ export function AdminOverlay() {
                 {l.label} <span style={{ color: "#ccc" }}>{l.ext ? "↗" : "→"}</span>
               </a>
             ))}
-            <form action="/admin/logout" method="post" style={{ marginTop: 12 }}>
-              <button type="submit" style={{ width: "100%", padding: "8px", background: "#f5f5f5", border: "none", borderRadius: 8, fontSize: 13, color: "#888", cursor: "pointer" }}>
-                로그아웃
-              </button>
-            </form>
+            <button
+              onClick={async () => {
+                const { createClient } = await import("@/lib/supabase/client");
+                await createClient().auth.signOut();
+                window.location.href = "/";
+              }}
+              style={{ width: "100%", padding: "8px", background: "#f5f5f5", border: "none", borderRadius: 8, fontSize: 13, color: "#888", cursor: "pointer", marginTop: 12 }}
+            >
+              로그아웃
+            </button>
           </div>
         </div>
       )}

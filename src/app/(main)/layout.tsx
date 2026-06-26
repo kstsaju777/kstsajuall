@@ -6,12 +6,14 @@ import { getCurrentUser } from "@/lib/auth";
 import { NavTabs } from "@/components/layout/NavTabs";
 import { GoldDust } from "@/components/layout/GoldDust";
 import { SideDrawer } from "@/components/layout/SideDrawer";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
 
+const ADMIN_EMAIL = "admin@hongyeondang.com";
+
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
-  const isLoggedIn = isSupabaseConfigured() ? !!(await getCurrentUser()) : false;
-  const isAdmin = await isAdminAuthenticated();
+  const user = isSupabaseConfigured() ? await getCurrentUser() : null;
+  const isLoggedIn = !!user;
+  const isAdmin = !!user && user.email === ADMIN_EMAIL;
 
   return (
     <div className="mx-auto w-full max-w-[480px] min-h-screen shadow-2xl relative overflow-hidden" style={{ backgroundColor: "#711b20" }}>
