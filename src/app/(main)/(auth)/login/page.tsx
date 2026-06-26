@@ -112,11 +112,6 @@ function LoginInner() {
         router.push(redirectTo);
       }
     } else {
-      if (pwInput !== pwConfirm) {
-        setError("비밀번호가 일치하지 않습니다.");
-        setLoading(false);
-        return;
-      }
       if (pwInput.length < 6) {
         setError("비밀번호는 6자 이상이어야 합니다.");
         setLoading(false);
