@@ -94,7 +94,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="pb-10 flex flex-col gap-4 pt-4">
+    <div className="pb-10 flex flex-col gap-4 pt-8">
 
       {/* 상단 카드형 슬라이드 배너 - 어드민만 */}
       {isAdmin && products.length > 0 && (
@@ -327,7 +327,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   // 카드 크기 (원의 반지름 계산)
   const CARD_W = 220;
   const radius = Math.max(160, Math.round(CARD_W / (2 * Math.tan(Math.PI / n))));
-  const containerH = CARD_W + 40;
+  const containerH = CARD_W + 80;
 
   return (
     <div style={{ paddingBottom: 8, userSelect: "none" }}>
