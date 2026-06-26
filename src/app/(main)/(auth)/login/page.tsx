@@ -27,7 +27,7 @@ function LoginInner() {
   const [pwInput, setPwInput] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
   const [emailLocal, setEmailLocal] = useState("");
-  const [emailDomain, setEmailDomain] = useState("naver.com");
+  const [emailDomain, setEmailDomain] = useState("");
   const [customDomain, setCustomDomain] = useState("");
   const emailInput = emailLocal + "@" + (emailDomain === "직접입력" ? customDomain : emailDomain);
 
@@ -222,6 +222,7 @@ function LoginInner() {
                 className="flex-1 min-w-0 px-2 py-3 rounded-xl text-[13px] outline-none appearance-none"
                 style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
               >
+                <option value="" disabled>선택하세요</option>
                 {EMAIL_DOMAINS.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
