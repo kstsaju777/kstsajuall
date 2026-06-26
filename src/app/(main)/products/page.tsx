@@ -67,28 +67,26 @@ function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard
   );
 }
 
-// ─── 무료 탭 전용 카드 (이미지 위 + 하단 텍스트) ──────────────────────────────
+// ─── 무료 탭 전용 카드 (이미지 위에 텍스트 오버레이) ─────────────────────────
 function FreeCard({ card }: { card: CategoryCard }) {
   const [imgErr, setImgErr] = useState(false);
   return (
-    <Link href={card.href} className="block rounded-2xl overflow-hidden" style={{ background: "#1a1a1a" }}>
-      <div className="relative" style={{ aspectRatio: "4/3" }}>
-        {imgErr ? (
-          <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
-        ) : (
-          <img src={card.image} alt={card.name} className="w-full h-full object-cover" onError={() => setImgErr(true)} />
-        )}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)" }} />
-        {card.badge && (
-          <div className="absolute top-2 left-2 flex gap-1">
-            <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span>
-            {card.tag && <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(255,255,255,0.2)" }}>{card.tag}</span>}
-          </div>
-        )}
-      </div>
-      <div style={{ padding: "10px 12px 14px", background: "#1c1c1e" }}>
-        <p className="font-black text-white leading-tight" style={{ fontSize: 15, marginBottom: 4 }}>{card.name}</p>
-        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{card.desc}</p>
+    <Link href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ aspectRatio: "3/4", background: "#1a1a1a" }}>
+      {imgErr ? (
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        <img src={card.image} alt={card.name} className="absolute inset-0 w-full h-full object-cover" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)" }} />
+      {card.badge && (
+        <div className="absolute top-2.5 left-2.5 flex gap-1">
+          <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span>
+          {card.tag && <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)" }}>{card.tag}</span>}
+        </div>
+      )}
+      <div className="absolute bottom-0 left-0 right-0" style={{ padding: "0 12px 14px" }}>
+        <p className="font-black text-white leading-tight" style={{ fontSize: 14, marginBottom: 4 }}>{card.name}</p>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{card.desc}</p>
       </div>
     </Link>
   );
@@ -113,7 +111,7 @@ function FreeContent() {
 
       {/* 섹션들 */}
       {FREE_SECTIONS.map((section) => (
-        <div key={section.title} style={{ marginBottom: 32 }}>
+        <div key={section.title} style={{ marginBottom: 36 }}>
           <div style={{ padding: "0 16px 12px" }}>
             <p style={{ fontSize: 18, fontWeight: 900, color: "#fff", marginBottom: 4 }}>{section.title}</p>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{section.subtitle}</p>
@@ -123,6 +121,15 @@ function FreeContent() {
               <FreeCard key={i} card={card} />
             ))}
           </div>
+          {section.hasMore && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 14 }}>
+              <button style={{
+                padding: "9px 28px", borderRadius: 50,
+                border: "1px solid rgba(255,255,255,0.25)", background: "transparent",
+                color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 700, cursor: "pointer",
+              }}>더보기</button>
+            </div>
+          )}
         </div>
       ))}
     </div>
