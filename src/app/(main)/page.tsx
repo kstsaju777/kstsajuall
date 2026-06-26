@@ -422,7 +422,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
             >
               <div style={{
                 position: "absolute",
-                bottom: 80,
+                bottom: 94,
                 left: "50%",
                 transform: "translateX(-50%)",
                 width: CARD_W - 24,
