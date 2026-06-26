@@ -199,29 +199,19 @@ function LoginInner() {
           style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
         />
         {mode === "signup" && (
-          <>
-            <input
-              type="password"
-              value={pwConfirm}
-              onChange={(e) => setPwConfirm(e.target.value)}
-              placeholder="비밀번호 확인"
-              className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
-              style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
-            />
-            <input
-              type="email"
-              value={emailInput}
-              onChange={(e) => setEmailInput(e.target.value)}
-              placeholder="이메일 주소 (비밀번호 재설정용)"
-              className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
-              style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
-            />
-          </>
+          <input
+            type="email"
+            value={emailInput}
+            onChange={(e) => setEmailInput(e.target.value)}
+            placeholder="이메일 주소 (비밀번호 재설정용)"
+            className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
+            style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+          />
         )}
         {error && <p className="text-[12px] text-center" style={{ color: "#c0392b" }}>{error}</p>}
         <button
           type="submit"
-          disabled={loading || !idInput.trim() || !pwInput || (mode === "signup" && !pwConfirm)}
+          disabled={loading || !idInput.trim() || !pwInput}
           className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-opacity active:opacity-70"
           style={{ background: loading || !idInput.trim() || !pwInput ? "#c8b8a8" : "#9b2335" }}
         >
