@@ -55,14 +55,7 @@ const DUMMY_GRADIENTS = [
 
 
 export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Product[]; isAdmin: boolean }) {
-  const [products, setProducts] = useState<Product[]>(() => {
-    const idx = initialProducts.findIndex(p => p.slug === "total");
-    if (idx <= 0) return initialProducts;
-    const sorted = [...initialProducts];
-    const [total] = sorted.splice(idx, 1);
-    sorted.unshift(total);
-    return sorted;
-  });
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [confirm, setConfirm] = useState<{ id: string; toActive: boolean } | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const [catDragOver, setCatDragOver] = useState<string | null>(null); // 카테고리 섹션 drop 하이라이트
