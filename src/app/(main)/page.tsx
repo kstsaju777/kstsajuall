@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type MutableRefObject } from "react";
 
 type Product = {
   id: string;
@@ -265,88 +265,149 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   slideTimer: React.MutableRefObject<ReturnType<typeof setInterval> | null>;
   getHref: (slug: string) => string;
 }) {
+  const n = products.length;
+  const [rotation, setRotation] = useState(0); // 전체 누적 회전각
   const touchStartX = useRef<number | null>(null);
-  const idx = slideIndex % products.length;
+  const touchStartRot = useRef<number>(0);
+  const isDragging = useRef(false);
+  const anglePerCard = 360 / n;
+  const idx = ((Math.round(-rotation / anglePerCard) % n) + n) % n;
 
   const goTo = (i: number) => {
     if (slideTimer.current) clearInterval(slideTimer.current);
-    setSlideIndex((i + products.length) % products.length);
+    const current = ((Math.round(-rotation / anglePerCard) % n) + n) % n;
+    let diff = i - current;
+    if (diff > n / 2) diff -= n;
+    if (diff < -n / 2) diff += n;
+    setRotation(r => r - diff * anglePerCard);
+    setSlideIndex(i);
   };
 
-  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
-  const onTouchEnd = (e: React.TouchEvent) => {
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartRot.current = rotation;
+    isDragging.current = false;
+    if (slideTimer.current) clearInterval(slideTimer.current);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) goTo(diff > 0 ? idx + 1 : idx - 1);
+    const diff = e.touches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) > 5) isDragging.current = true;
+    setRotation(touchStartRot.current + diff * 0.5);
+  };
+
+  const onTouchEnd = () => {
+    // 가장 가까운 카드에 스냅
+    const snapped = Math.round(rotation / anglePerCard) * anglePerCard;
+    setRotation(snapped);
+    const newIdx = ((Math.round(-snapped / anglePerCard) % n) + n) % n;
+    setSlideIndex(newIdx);
     touchStartX.current = null;
   };
 
+  // 마우스 드래그 (PC)
+  const mouseStartX = useRef<number | null>(null);
+  const onMouseDown = (e: React.MouseEvent) => { mouseStartX.current = e.clientX; touchStartRot.current = rotation; isDragging.current = false; };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (mouseStartX.current === null) return;
+    const diff = e.clientX - mouseStartX.current;
+    if (Math.abs(diff) > 5) isDragging.current = true;
+    setRotation(touchStartRot.current + diff * 0.5);
+  };
+  const onMouseUp = () => {
+    if (mouseStartX.current === null) return;
+    const snapped = Math.round(rotation / anglePerCard) * anglePerCard;
+    setRotation(snapped);
+    const newIdx = ((Math.round(-snapped / anglePerCard) % n) + n) % n;
+    setSlideIndex(newIdx);
+    mouseStartX.current = null;
+  };
+
+  // 카드 크기 (원의 반지름 계산)
+  const CARD_W = 220;
+  const radius = Math.max(160, Math.round(CARD_W / (2 * Math.tan(Math.PI / n))));
+  const containerH = CARD_W + 40;
+
   return (
-    <div style={{ overflow: "hidden", paddingBottom: 8 }}>
-      {/* 카드 트랙 */}
+    <div style={{ paddingBottom: 8, userSelect: "none" }}>
+      {/* 3D 무대 */}
       <div
         onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
         style={{
-          display: "flex",
-          gap: 12,
-          paddingLeft: "8%",
-          transform: `translateX(calc(-${idx} * 84%))`,
-          transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
-          willChange: "transform",
+          perspective: 800,
+          height: containerH,
+          position: "relative",
+          cursor: "grab",
         }}
       >
-        {products.map((product, i) => {
-          const isVideo = product.is_video ?? false;
-          const imageUrl = product.image_url ?? "/media/hero/hero-3.jpg";
-          const href = getHref(product.slug);
-          const isCurrent = i === idx;
-          return (
-            <div
-              key={product.id}
-              onClick={() => { if (!isCurrent) { goTo(i); } }}
-              style={{
-                flexShrink: 0,
-                width: "80%",
-                borderRadius: 16,
-                overflow: "hidden",
-                position: "relative",
-                aspectRatio: "1/1",
-                cursor: isCurrent ? "pointer" : "pointer",
-                transform: isCurrent ? "scale(1)" : "scale(0.93)",
-                transition: "transform 0.35s",
-                boxShadow: isCurrent ? "0 8px 24px rgba(0,0,0,0.4)" : "0 2px 8px rgba(0,0,0,0.2)",
-              }}
-            >
-              {isVideo ? (
-                <video src={imageUrl} className="w-full h-full object-cover" autoPlay muted loop playsInline />
-              ) : (
-                <img src={imageUrl} alt={product.name} className="w-full h-full object-cover" />
-              )}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.8))" }} />
-              {product.badge && (
-                <span style={{
-                  position: "absolute", top: 12, left: 12,
-                  fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20,
-                  background: "#9b2335", color: "#fff",
-                }}>{product.badge}</span>
-              )}
-              {isCurrent && (
-                <Link href={href} style={{ position: "absolute", inset: 0 }} onClick={e => e.stopPropagation()} />
-              )}
-              <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
-                <p style={{ color: "#fff", fontWeight: 900, fontSize: 18, lineHeight: 1.3, margin: "0 0 4px", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>{product.name}</p>
-                {product.description && isCurrent && (
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: 0 }}>{product.description}</p>
+        <div style={{
+          width: CARD_W,
+          height: CARD_W,
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          transformStyle: "preserve-3d",
+          transform: `translateX(-50%) rotateY(${rotation}deg)`,
+          transition: touchStartX.current !== null || mouseStartX.current !== null ? "none" : "transform 0.5s cubic-bezier(.4,0,.2,1)",
+        }}>
+          {products.map((product, i) => {
+            const angle = i * anglePerCard;
+            const isCurrent = i === idx;
+            const imageUrl = product.image_url ?? "/media/hero/hero-3.jpg";
+            const isVideo = product.is_video ?? false;
+            const href = getHref(product.slug);
+            return (
+              <div
+                key={product.id}
+                style={{
+                  position: "absolute",
+                  width: CARD_W,
+                  height: CARD_W,
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  backfaceVisibility: "hidden",
+                  transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
+                  boxShadow: isCurrent ? "0 12px 32px rgba(0,0,0,0.6)" : "0 4px 12px rgba(0,0,0,0.3)",
+                  opacity: isCurrent ? 1 : 0.7,
+                  transition: "opacity 0.3s, box-shadow 0.3s",
+                }}
+                onClick={() => { if (!isDragging.current) { if (!isCurrent) goTo(i); } }}
+              >
+                {isVideo ? (
+                  <video src={imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline />
+                ) : (
+                  <img src={imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                )}
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.8))" }} />
+                {product.badge && (
+                  <span style={{ position: "absolute", top: 10, left: 10, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#9b2335", color: "#fff" }}>
+                    {product.badge}
+                  </span>
+                )}
+                <div style={{ position: "absolute", bottom: 14, left: 12, right: 12 }}>
+                  <p style={{ color: "#fff", fontWeight: 900, fontSize: 15, lineHeight: 1.3, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{product.name}</p>
+                  {isCurrent && product.description && (
+                    <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, margin: "3px 0 0" }}>{product.description}</p>
+                  )}
+                </div>
+                {isCurrent && !isDragging.current && (
+                  <Link href={href} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
                 )}
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* 인디케이터 */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 10 }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 4 }}>
         {products.map((_, i) => (
           <button
             key={i}
