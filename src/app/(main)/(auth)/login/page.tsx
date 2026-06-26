@@ -216,15 +216,24 @@ function LoginInner() {
                 style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
               />
               <span style={{ color: "#9c8472", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>@</span>
-              <select
-                value={emailDomain}
-                onChange={(e) => { setEmailDomain(e.target.value); setCustomDomain(""); }}
-                className="flex-1 min-w-0 px-2 py-3 rounded-xl text-[13px] outline-none appearance-none"
-                style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
-              >
-                <option value="" disabled>선택하세요</option>
-                {EMAIL_DOMAINS.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
+              <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+                <select
+                  value={emailDomain}
+                  onChange={(e) => { setEmailDomain(e.target.value); setCustomDomain(""); }}
+                  className="w-full px-3 py-3 rounded-xl text-[13px] outline-none appearance-none"
+                  style={{
+                    background: "#f0e8e0", border: "1px solid #ddd0c4",
+                    color: emailDomain ? "#3a2820" : "#b0a090", paddingRight: 28,
+                  }}
+                >
+                  <option value="" disabled>도메인 ▼</option>
+                  {EMAIL_DOMAINS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <span style={{
+                  position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                  fontSize: 10, color: "#9c8472", pointerEvents: "none",
+                }}>▼</span>
+              </div>
             </div>
             {emailDomain === "직접입력" && (
               <input
