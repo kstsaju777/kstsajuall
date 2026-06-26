@@ -20,11 +20,13 @@ function LoginInner() {
   const router = useRouter();
   const redirectTo = search.get("redirect") ?? "/mypage";
 
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [kakaoLoading, setKakaoLoading] = useState(false);
   const [idInput, setIdInput] = useState("");
   const [pwInput, setPwInput] = useState("");
-  const [idLoading, setIdLoading] = useState(false);
-  const [idError, setIdError] = useState("");
+  const [pwConfirm, setPwConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [legalDoc, setLegalDoc] = useState<"terms" | "privacy" | null>(null);
 
   async function handleKakaoLogin() {
@@ -39,20 +41,52 @@ function LoginInner() {
     });
   }
 
-  async function handleIdLogin(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!idInput.trim() || !pwInput) return;
-    setIdLoading(true);
-    setIdError("");
+    setLoading(true);
+    setError("");
     const supabase = createClient();
     const email = idInput.trim().toLowerCase() + ID_DOMAIN;
-    const { error } = await supabase.auth.signInWithPassword({ email, password: pwInput });
-    if (error) {
-      setIdError("아이디 또는 비밀번호가 올바르지 않습니다.");
-      setIdLoading(false);
+
+    if (mode === "login") {
+      const { error: err } = await supabase.auth.signInWithPassword({ email, password: pwInput });
+      if (err) {
+        setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+        setLoading(false);
+      } else {
+        router.push(redirectTo);
+      }
     } else {
-      router.push(redirectTo);
+      if (pwInput !== pwConfirm) {
+        setError("비밀번호가 일치하지 않습니다.");
+        setLoading(false);
+        return;
+      }
+      if (pwInput.length < 6) {
+        setError("비밀번호는 6자 이상이어야 합니다.");
+        setLoading(false);
+        return;
+      }
+      const { error: err } = await supabase.auth.signUp({
+        email,
+        password: pwInput,
+        options: { data: { display_name: idInput.trim() } },
+      });
+      if (err) {
+        setError(err.message.includes("already") ? "이미 사용 중인 아이디입니다." : "회원가입에 실패했습니다.");
+        setLoading(false);
+      } else {
+        router.push(redirectTo);
+      }
     }
+  }
+
+  function switchMode(next: "login" | "signup") {
+    setMode(next);
+    setError("");
+    setPwInput("");
+    setPwConfirm("");
   }
 
   return (
@@ -91,8 +125,18 @@ function LoginInner() {
         <div className="flex-1 h-px" style={{ background: "#e8ddd4" }} />
       </div>
 
-      {/* 아이디/비번 로그인 */}
-      <form onSubmit={handleIdLogin} className="w-full max-w-[320px] flex flex-col gap-2.5">
+      {/* 로그인/회원가입 탭 */}
+      <div className="w-full max-w-[320px] flex rounded-xl overflow-hidden mb-4" style={{ background: "#ede4d8" }}>
+        {(["login", "signup"] as const).map((m) => (
+          <button key={m} onClick={() => switchMode(m)} className="flex-1 py-2.5 text-[13.5px] font-bold transition-all"
+            style={{ background: mode === m ? "#9b2335" : "transparent", color: mode === m ? "#fff" : "#9c8472" }}>
+            {m === "login" ? "로그인" : "회원가입"}
+          </button>
+        ))}
+      </div>
+
+      {/* 폼 */}
+      <form onSubmit={handleSubmit} className="w-full max-w-[320px] flex flex-col gap-2.5">
         <input
           value={idInput}
           onChange={(e) => setIdInput(e.target.value)}
@@ -109,18 +153,28 @@ function LoginInner() {
           className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
           style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
         />
-        {idError && <p className="text-[12px] text-center" style={{ color: "#c0392b" }}>{idError}</p>}
+        {mode === "signup" && (
+          <input
+            type="password"
+            value={pwConfirm}
+            onChange={(e) => setPwConfirm(e.target.value)}
+            placeholder="비밀번호 확인"
+            className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
+            style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+          />
+        )}
+        {error && <p className="text-[12px] text-center" style={{ color: "#c0392b" }}>{error}</p>}
         <button
           type="submit"
-          disabled={idLoading || !idInput.trim() || !pwInput}
+          disabled={loading || !idInput.trim() || !pwInput || (mode === "signup" && !pwConfirm)}
           className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white transition-opacity active:opacity-70"
-          style={{ background: idLoading || !idInput.trim() || !pwInput ? "#c8b8a8" : "#9b2335" }}
+          style={{ background: loading || !idInput.trim() || !pwInput ? "#c8b8a8" : "#9b2335" }}
         >
-          {idLoading ? "로그인 중..." : "로그인"}
+          {loading ? (mode === "login" ? "로그인 중..." : "가입 중...") : (mode === "login" ? "로그인" : "회원가입")}
         </button>
       </form>
 
-      <p className="mt-8 text-[11px] text-center" style={{ color: "#bbb" }}>
+      <p className="mt-6 text-[11px] text-center" style={{ color: "#bbb" }}>
         로그인 시{" "}
         <button onClick={() => setLegalDoc("terms")} className="underline" style={{ color: "#9c8472" }}>이용약관</button>
         {" "}및{" "}
@@ -132,7 +186,7 @@ function LoginInner() {
       {legalDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.45)" }} onClick={() => setLegalDoc(null)}>
           <div className="flex flex-col rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}
-            style={{ left: "50%", top: "50%", width: "min(80vw, 300px)", maxHeight: "56vh", background: "#fff", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", animation: "legalPop 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            style={{ width: "min(80vw, 300px)", maxHeight: "56vh", background: "#fff", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", animation: "legalPop 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5" style={{ borderBottom: "1px solid #eee" }}>
               <span className="text-[13px] font-bold" style={{ color: "#111" }}>{legalDoc === "terms" ? "이용약관" : "개인정보처리방침"}</span>
               <button onClick={() => setLegalDoc(null)} aria-label="닫기" className="flex items-center justify-center rounded-full" style={{ width: 24, height: 24, background: "#f1f1f1", color: "#666", fontSize: 13, lineHeight: 1 }}>✕</button>
