@@ -20,7 +20,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <GoldDust />
       <div className="relative z-10">
         <SiteHeader isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
-        <main className="min-h-[calc(100vh-7rem)]">{children}</main>
+        <main>{children}</main>
         <SiteFooter />
       </div>
       {isAdmin && <AdminOverlay />}
