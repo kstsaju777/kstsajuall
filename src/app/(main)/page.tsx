@@ -96,50 +96,16 @@ export default function HomePage() {
   return (
     <div className="pb-10 flex flex-col gap-4">
 
-      {/* 상단 슬라이드 배너 - 어드민만 */}
-      {isAdmin && products.length > 0 && (() => {
-        const current = products[slideIndex % products.length];
-        const href = getHref(current.slug);
-        const isVideo = current.is_video ?? false;
-        const imageUrl = current.image_url ?? "/media/hero/hero-3.jpg";
-        return (
-          <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
-            <Link href={href} className="block w-full relative" style={{ aspectRatio: "16/9", display: "block" }}>
-              {isVideo ? (
-                <video key={current.id} src={imageUrl} className="w-full h-full object-cover" autoPlay muted loop playsInline />
-              ) : (
-                <img key={current.id} src={imageUrl} alt={current.name} className="w-full h-full object-cover" />
-              )}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.75))" }} />
-              {current.badge && (
-                <div style={{ position: "absolute", top: 14, left: 16 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "#9b2335", color: "#fff" }}>{current.badge}</span>
-                </div>
-              )}
-              <div style={{ position: "absolute", bottom: 36, left: 16, right: 16 }}>
-                <p style={{ color: "#fff", fontWeight: 900, fontSize: 22, lineHeight: 1.3, margin: "0 0 6px", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>{current.name}</p>
-                {current.description && (
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, margin: 0 }}>{current.description}</p>
-                )}
-              </div>
-              <div style={{ position: "absolute", bottom: 14, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5 }}>
-                {products.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={e => { e.preventDefault(); e.stopPropagation(); if (slideTimer.current) clearInterval(slideTimer.current); setSlideIndex(i); }}
-                    style={{
-                      width: i === slideIndex % products.length ? 20 : 6,
-                      height: 6, borderRadius: 3, border: "none", padding: 0,
-                      background: i === slideIndex % products.length ? "#fff" : "rgba(255,255,255,0.4)",
-                      transition: "width 0.3s, background 0.3s", cursor: "pointer",
-                    }}
-                  />
-                ))}
-              </div>
-            </Link>
-          </div>
-        );
-      })()}
+      {/* 상단 카드형 슬라이드 배너 - 어드민만 */}
+      {isAdmin && products.length > 0 && (
+        <AdminSlider
+          products={products}
+          slideIndex={slideIndex}
+          setSlideIndex={setSlideIndex}
+          slideTimer={slideTimer}
+          getHref={getHref}
+        />
+      )}
 
       <div className="px-4 pt-2 flex flex-col gap-4">
 
@@ -288,6 +254,112 @@ export default function HomePage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref }: {
+  products: Product[];
+  slideIndex: number;
+  setSlideIndex: (i: number) => void;
+  slideTimer: React.MutableRefObject<ReturnType<typeof setInterval> | null>;
+  getHref: (slug: string) => string;
+}) {
+  const touchStartX = useRef<number | null>(null);
+  const idx = slideIndex % products.length;
+
+  const goTo = (i: number) => {
+    if (slideTimer.current) clearInterval(slideTimer.current);
+    setSlideIndex((i + products.length) % products.length);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(diff > 0 ? idx + 1 : idx - 1);
+    touchStartX.current = null;
+  };
+
+  return (
+    <div style={{ overflow: "hidden", paddingBottom: 8 }}>
+      {/* 카드 트랙 */}
+      <div
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        style={{
+          display: "flex",
+          gap: 12,
+          paddingLeft: "8%",
+          transform: `translateX(calc(-${idx} * 84%))`,
+          transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
+          willChange: "transform",
+        }}
+      >
+        {products.map((product, i) => {
+          const isVideo = product.is_video ?? false;
+          const imageUrl = product.image_url ?? "/media/hero/hero-3.jpg";
+          const href = getHref(product.slug);
+          const isCurrent = i === idx;
+          return (
+            <div
+              key={product.id}
+              onClick={() => { if (!isCurrent) { goTo(i); } }}
+              style={{
+                flexShrink: 0,
+                width: "80%",
+                borderRadius: 16,
+                overflow: "hidden",
+                position: "relative",
+                aspectRatio: "3/4",
+                cursor: isCurrent ? "pointer" : "pointer",
+                transform: isCurrent ? "scale(1)" : "scale(0.93)",
+                transition: "transform 0.35s",
+                boxShadow: isCurrent ? "0 8px 24px rgba(0,0,0,0.4)" : "0 2px 8px rgba(0,0,0,0.2)",
+              }}
+            >
+              {isVideo ? (
+                <video src={imageUrl} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+              ) : (
+                <img src={imageUrl} alt={product.name} className="w-full h-full object-cover" />
+              )}
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.8))" }} />
+              {product.badge && (
+                <span style={{
+                  position: "absolute", top: 12, left: 12,
+                  fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20,
+                  background: "#9b2335", color: "#fff",
+                }}>{product.badge}</span>
+              )}
+              {isCurrent && (
+                <Link href={href} style={{ position: "absolute", inset: 0 }} onClick={e => e.stopPropagation()} />
+              )}
+              <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
+                <p style={{ color: "#fff", fontWeight: 900, fontSize: 18, lineHeight: 1.3, margin: "0 0 4px", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>{product.name}</p>
+                {product.description && isCurrent && (
+                  <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: 0 }}>{product.description}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 인디케이터 */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 10 }}>
+        {products.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            style={{
+              width: i === idx ? 20 : 6, height: 6, borderRadius: 3,
+              border: "none", padding: 0, cursor: "pointer",
+              background: i === idx ? "#fff" : "rgba(255,255,255,0.35)",
+              transition: "width 0.3s, background 0.3s",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
