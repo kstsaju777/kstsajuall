@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export type Product = {
   id: string;
@@ -61,6 +61,25 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   const [slideIndex, setSlideIndex] = useState(0);
   const dragId = useRef<string | null>(null);
   const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // 드래그 중 화면 가장자리에서 자동 스크롤
+  useEffect(() => {
+    let rafId: number;
+    const onDragOver = (e: DragEvent) => {
+      if (!dragId.current) return;
+      const zone = 100;
+      const maxSpeed = 18;
+      const y = e.clientY;
+      const h = window.innerHeight;
+      let speed = 0;
+      if (y < zone) speed = -maxSpeed * (1 - y / zone);
+      else if (y > h - zone) speed = maxSpeed * (1 - (h - y) / zone);
+      cancelAnimationFrame(rafId);
+      if (speed !== 0) rafId = requestAnimationFrame(() => window.scrollBy(0, speed));
+    };
+    window.addEventListener("dragover", onDragOver);
+    return () => { window.removeEventListener("dragover", onDragOver); cancelAnimationFrame(rafId); };
+  }, []);
 
   const getHref = (slug: string) => `/saju/${slug}`;
 
