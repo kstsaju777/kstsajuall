@@ -13,6 +13,23 @@ export type CategoryCard = {
   href: string;
 };
 
+export type FreeSection = {
+  title: string;
+  subtitle: string;
+  cards: CategoryCard[];
+};
+
+export const FREE_SECTIONS: FreeSection[] = [
+  {
+    title: "나를 알고 싶을 때",
+    subtitle: "내 타고난 기질과 운명을 무료로 먼저 확인해보세요 🔮",
+    cards: [
+      { image: "/media/hero/hero-1.jpg", badge: "무료", tag: "FREE", name: "정통사주 맛보기", desc: "내 사주 4기둥과 오행 균형을 무료로 확인해보세요", href: "/saju/jeongtong" },
+      { image: "/media/cards/saju_total/total-1.jpg", badge: "무료", tag: "FREE", name: "사주 기초 풀이", desc: "나는 어떤 사람일까? 기본 기질부터 확인해보세요", href: "/saju/jeongtong" },
+    ],
+  },
+];
+
 export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
 
   무료: [

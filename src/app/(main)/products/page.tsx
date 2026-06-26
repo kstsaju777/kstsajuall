@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useRef, useState } from "react";
-import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
+import { CATEGORY_CARDS, FREE_SECTIONS, type CategoryCard } from "@/config/category-cards";
 
 // ─── 카드 컴포넌트 ─────────────────────────────────────────────────────────────
 function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard; aspectRatio?: string; small?: boolean }) {
@@ -67,22 +67,83 @@ function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard
   );
 }
 
+// ─── 무료 탭 전용 카드 (이미지 위 + 하단 텍스트) ──────────────────────────────
+function FreeCard({ card }: { card: CategoryCard }) {
+  const [imgErr, setImgErr] = useState(false);
+  return (
+    <Link href={card.href} className="block rounded-2xl overflow-hidden" style={{ background: "#1a1a1a" }}>
+      <div className="relative" style={{ aspectRatio: "4/3" }}>
+        {imgErr ? (
+          <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+        ) : (
+          <img src={card.image} alt={card.name} className="w-full h-full object-cover" onError={() => setImgErr(true)} />
+        )}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)" }} />
+        {card.badge && (
+          <div className="absolute top-2 left-2 flex gap-1">
+            <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span>
+            {card.tag && <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(255,255,255,0.2)" }}>{card.tag}</span>}
+          </div>
+        )}
+      </div>
+      <div style={{ padding: "10px 12px 14px", background: "#1c1c1e" }}>
+        <p className="font-black text-white leading-tight" style={{ fontSize: 15, marginBottom: 4 }}>{card.name}</p>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.5 }}>{card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
+// ─── 무료 탭 레이아웃 ───────────────────────────────────────────────────────────
+function FreeContent() {
+  return (
+    <div className="pb-20">
+      {/* 이벤트 배너 */}
+      <div style={{ margin: "12px 12px 20px", background: "#fff", borderRadius: 16, padding: "16px 18px" }}>
+        <p style={{ fontSize: 16, fontWeight: 900, color: "#111", marginBottom: 8 }}>
+          기간 한정 무료 이벤트 🔔
+        </p>
+        <ul style={{ paddingLeft: 16, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+          <li style={{ fontSize: 13, color: "#333", lineHeight: 1.5 }}>아래 상품들은 곧 런칭될 아이템들이에요!</li>
+          <li style={{ fontSize: 13, color: "#c0392b", fontWeight: 700, lineHeight: 1.5 }}>
+            아이템을 쭉 둘러보고 신중히 골라주세요! (인당 3개 제한)
+          </li>
+        </ul>
+      </div>
+
+      {/* 섹션들 */}
+      {FREE_SECTIONS.map((section) => (
+        <div key={section.title} style={{ marginBottom: 32 }}>
+          <div style={{ padding: "0 16px 12px" }}>
+            <p style={{ fontSize: 18, fontWeight: 900, color: "#fff", marginBottom: 4 }}>{section.title}</p>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{section.subtitle}</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 12px" }}>
+            {section.cards.map((card, i) => (
+              <FreeCard key={i} card={card} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
 function ProductsContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category") ?? "";
   const label = category || "전체";
 
-  const cards = CATEGORY_CARDS[label] ?? CATEGORY_CARDS["전체"];
+  if (label === "무료") return <FreeContent />;
+
+  const cards = CATEGORY_CARDS[label] ?? CATEGORY_CARDS["전체"] ?? [];
 
   return (
     <div className="px-3 pt-4 pb-20">
-      {/* 카테고리 타이틀 */}
       <p className="text-[13px] font-bold mb-4 px-1" style={{ color: "rgba(255,255,255,0.5)" }}>
         {label} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
       </p>
-
-      {/* 카드 리스트 — 1개 / 2개 / 1개 / 2개 ... 패턴 */}
       <div className="flex flex-col gap-3">
         {(() => {
           const rows: React.ReactNode[] = [];
@@ -90,13 +151,9 @@ function ProductsContent() {
           let rowIdx = 0;
           while (i < cards.length) {
             if (rowIdx % 2 === 0) {
-              // 단독 1개 (가로 전체)
-              rows.push(
-                <Card key={i} card={cards[i]} aspectRatio="4/3" />
-              );
+              rows.push(<Card key={i} card={cards[i]} aspectRatio="4/3" />);
               i++;
             } else {
-              // 세로 길게 2개 나란히
               const left  = cards[i];
               const right = cards[i + 1];
               rows.push(
