@@ -7,6 +7,7 @@ import { NavTabs } from "@/components/layout/NavTabs";
 import { GoldDust } from "@/components/layout/GoldDust";
 import { SideDrawer } from "@/components/layout/SideDrawer";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
+import { FooterLegal } from "@/components/layout/FooterLegal";
 
 const ADMIN_EMAIL = "admin@hongyeondang.com";
 
@@ -84,10 +85,7 @@ function SiteFooter() {
             {" "}|{" "}<span className="text-mute">MAIL</span> {businessInfo.email}
           </p>
         </div>
-        <div className="flex justify-center gap-5 text-[11px] text-body font-bold pt-1">
-          <Link href="/legal/terms" className="hover:text-ink transition-colors">이용약관</Link>
-          <Link href="/legal/privacy" className="hover:text-ink transition-colors">개인정보처리방침</Link>
-        </div>
+        <FooterLegal />
         <div className="space-y-1 pt-1">
           <p className="text-[11px] text-body">AI사주, 궁합, 운세 연구소</p>
           <p className="text-[11px] text-mute">
