@@ -16,7 +16,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const isAdmin = !!user && user.email === ADMIN_EMAIL;
 
   return (
-    <div className="mx-auto w-full max-w-[480px] min-h-screen shadow-2xl relative overflow-hidden" style={{ backgroundColor: "#711b20" }}>
+    <div className="mx-auto w-full max-w-[480px] shadow-2xl relative overflow-hidden" style={{ backgroundColor: "#711b20" }}>
       <GoldDust />
       <div className="relative z-10">
         <SiteHeader isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
