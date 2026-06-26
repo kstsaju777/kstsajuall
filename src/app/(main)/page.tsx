@@ -387,7 +387,20 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 ) : (
                   <img src={imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 )}
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5))" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.8))" }} />
+                {/* 회전 중에만 보이는 3D 텍스트 */}
+                <div style={{
+                  position: "absolute", bottom: 14, left: 12, right: 12,
+                  opacity: dragging ? 1 : 0,
+                  transition: "opacity 0.15s",
+                }}>
+                  {product.badge && (
+                    <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 4 }}>
+                      {product.badge}
+                    </span>
+                  )}
+                  <p style={{ color: "#fff", fontWeight: 900, fontSize: 14, lineHeight: 1.3, margin: 0 }}>{product.name}</p>
+                </div>
                 {isCurrent && !isDragging.current && (
                   <Link href={href} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
                 )}
