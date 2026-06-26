@@ -20,7 +20,8 @@ function LoginInner() {
   const router = useRouter();
   const redirectTo = search.get("redirect") ?? "/mypage";
 
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
+  const [resetDone, setResetDone] = useState(false);
   const [kakaoLoading, setKakaoLoading] = useState(false);
   const [idInput, setIdInput] = useState("");
   const [pwInput, setPwInput] = useState("");
@@ -82,11 +83,27 @@ function LoginInner() {
     }
   }
 
-  function switchMode(next: "login" | "signup") {
+  function switchMode(next: "login" | "signup" | "reset") {
     setMode(next);
     setError("");
     setPwInput("");
     setPwConfirm("");
+    setResetDone(false);
+  }
+
+  async function handleReset(e: React.FormEvent) {
+    e.preventDefault();
+    if (!idInput.trim()) return;
+    setLoading(true);
+    setError("");
+    const supabase = createClient();
+    const email = idInput.trim().toLowerCase() + ID_DOMAIN;
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/mypage`,
+    });
+    setLoading(false);
+    if (err) setError("재설정 이메일 발송에 실패했습니다.");
+    else setResetDone(true);
   }
 
   return (
@@ -125,18 +142,36 @@ function LoginInner() {
         <div className="flex-1 h-px" style={{ background: "#e8ddd4" }} />
       </div>
 
-      {/* 로그인/회원가입 탭 */}
-      <div className="w-full max-w-[320px] flex rounded-xl overflow-hidden mb-4" style={{ background: "#ede4d8" }}>
-        {(["login", "signup"] as const).map((m) => (
-          <button key={m} onClick={() => switchMode(m)} className="flex-1 py-2.5 text-[13.5px] font-bold transition-all"
-            style={{ background: mode === m ? "#9b2335" : "transparent", color: mode === m ? "#fff" : "#9c8472" }}>
-            {m === "login" ? "로그인" : "회원가입"}
-          </button>
-        ))}
-      </div>
+      {/* 비밀번호 재설정 폼 */}
+      {mode === "reset" && (
+        <div className="w-full max-w-[320px]">
+          {resetDone ? (
+            <div className="text-center py-4">
+              <p className="text-[15px] font-bold mb-2" style={{ color: "#3a2820" }}>이메일을 확인해주세요</p>
+              <p className="text-[13px]" style={{ color: "#9c8472" }}>비밀번호 재설정 링크를 보내드렸습니다.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleReset} className="flex flex-col gap-2.5">
+              <input
+                value={idInput}
+                onChange={(e) => setIdInput(e.target.value)}
+                placeholder="아이디"
+                autoCapitalize="none"
+                className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
+                style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+              />
+              {error && <p className="text-[12px] text-center" style={{ color: "#c0392b" }}>{error}</p>}
+              <button type="submit" disabled={loading || !idInput.trim()} className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white"
+                style={{ background: !idInput.trim() ? "#c8b8a8" : "#9b2335" }}>
+                {loading ? "발송 중..." : "재설정 링크 보내기"}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
 
-      {/* 폼 */}
-      <form onSubmit={handleSubmit} className="w-full max-w-[320px] flex flex-col gap-2.5">
+      {/* 로그인 / 회원가입 폼 */}
+      {mode !== "reset" && <form onSubmit={handleSubmit} className="w-full max-w-[320px] flex flex-col gap-2.5">
         <input
           value={idInput}
           onChange={(e) => setIdInput(e.target.value)}
@@ -172,9 +207,31 @@ function LoginInner() {
         >
           {loading ? (mode === "login" ? "로그인 중..." : "가입 중...") : (mode === "login" ? "로그인" : "회원가입")}
         </button>
-      </form>
+      </form>}
 
-      <p className="mt-6 text-[11px] text-center" style={{ color: "#bbb" }}>
+      {/* 하단 링크 */}
+      <div className="w-full max-w-[320px] flex flex-col items-center gap-3 mt-5">
+        {mode === "login" ? (
+          <>
+            <button onClick={() => switchMode("signup")} className="text-[13px]" style={{ color: "#6b5344" }}>
+              아직 계정이 없으신가요? <span className="font-bold underline" style={{ color: "#9b2335" }}>회원가입하기</span>
+            </button>
+            <button onClick={() => switchMode("reset")} className="text-[12px]" style={{ color: "#b0a090" }}>
+              비밀번호를 잊어버리셨나요? <span className="underline">비밀번호 재설정</span>
+            </button>
+          </>
+        ) : mode === "signup" ? (
+          <button onClick={() => switchMode("login")} className="text-[13px]" style={{ color: "#6b5344" }}>
+            이미 계정이 있으신가요? <span className="font-bold underline" style={{ color: "#9b2335" }}>로그인하기</span>
+          </button>
+        ) : (
+          <button onClick={() => switchMode("login")} className="text-[13px]" style={{ color: "#6b5344" }}>
+            로그인으로 돌아가기
+          </button>
+        )}
+      </div>
+
+      <p className="mt-5 text-[11px] text-center" style={{ color: "#bbb" }}>
         로그인 시{" "}
         <button onClick={() => setLegalDoc("terms")} className="underline" style={{ color: "#9c8472" }}>이용약관</button>
         {" "}및{" "}
