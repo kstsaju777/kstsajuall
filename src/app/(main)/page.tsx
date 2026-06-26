@@ -324,9 +324,8 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
     mouseStartX.current = null;
   };
 
-  // 카드 크기 (원의 반지름 계산)
-  const CARD_W = 220;
-  const radius = Math.max(160, Math.round(CARD_W / (2 * Math.tan(Math.PI / n))));
+  const CARD_W = 200;
+  const radius = Math.max(130, Math.round(CARD_W / (2 * Math.tan(Math.PI / n)) * 0.75));
   const containerH = CARD_W + 80;
 
   return (
@@ -341,7 +340,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
         style={{
-          perspective: 800,
+          perspective: 600,
           height: containerH,
           position: "relative",
           cursor: "grab",
@@ -372,11 +371,12 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                   height: CARD_W,
                   borderRadius: 16,
                   overflow: "hidden",
-                  backfaceVisibility: "hidden",
+                  backfaceVisibility: "visible",
                   transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
                   boxShadow: isCurrent ? "0 12px 32px rgba(0,0,0,0.6)" : "0 4px 12px rgba(0,0,0,0.3)",
-                  opacity: isCurrent ? 1 : 0.7,
-                  transition: "opacity 0.3s, box-shadow 0.3s",
+                  opacity: isCurrent ? 1 : 0.45,
+                  filter: isCurrent ? "none" : "brightness(0.4) blur(1px)",
+                  transition: "opacity 0.3s, box-shadow 0.3s, filter 0.3s",
                 }}
                 onClick={() => { if (!isDragging.current) { if (!isCurrent) goTo(i); } }}
               >
