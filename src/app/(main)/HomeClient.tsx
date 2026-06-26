@@ -81,16 +81,6 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
         />
       )}
 
-      {/* 일반 유저 — 공개 상품만 캐러셀 */}
-      {!isAdmin && products.filter(p => p.is_active).length > 0 && (
-        <AdminSlider
-          products={products.filter(p => p.is_active)}
-          slideIndex={slideIndex}
-          setSlideIndex={setSlideIndex}
-          slideTimer={slideTimer}
-          getHref={getHref}
-        />
-      )}
 
       <div className="px-4 pt-8 flex flex-col gap-4">
         {products.map((product, index) => {
