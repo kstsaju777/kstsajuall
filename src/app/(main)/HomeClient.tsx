@@ -16,6 +16,34 @@ export type Product = {
   description?: string;
 };
 
+const CATEGORIES = [
+  {
+    tag: "궁합",
+    title: "우리, 잘 맞는 걸까?",
+    slugs: ["kunghap_yeonae", "kunghap_banryeo", "kunghap_janyeo", "kunghap_jaehwe", "kunghap_business"],
+  },
+  {
+    tag: "연애·결혼",
+    title: "사랑이 궁금할 때",
+    slugs: ["saju_yeonae", "saju_gyeolhon", "saju_ehon"],
+  },
+  {
+    tag: "임신·육아",
+    title: "우리 아이가 궁금할 때",
+    slugs: ["saju_imshin", "saju_adong"],
+  },
+  {
+    tag: "재물·건강",
+    title: "돈과 건강, 둘 다 챙기세요",
+    slugs: ["saju_jaemul", "saju_health"],
+  },
+  {
+    tag: "나를 알고 싶을 때",
+    title: "나는 어떤 사람일까?",
+    slugs: ["saju_youare", "saju_19geum", "saju_banryeo"],
+  },
+];
+
 const DUMMY_GRADIENTS = [
   "linear-gradient(135deg, #2d1b4e 0%, #6b2d6b 50%, #c0392b 100%)",
   "linear-gradient(135deg, #1a2a4a 0%, #2d6b8a 50%, #1abc9c 100%)",
@@ -199,6 +227,74 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           </button>
         )}
       </div>
+
+      {/* 카테고리 섹션 — admin 전용 */}
+      {isAdmin && (
+        <div className="flex flex-col gap-8 pb-10">
+          {CATEGORIES.map((cat) => {
+            const catProducts = products.filter(p => cat.slugs.includes(p.slug));
+            if (catProducts.length === 0) return null;
+            return (
+              <div key={cat.tag}>
+                <div className="px-4 flex items-center justify-between mb-3">
+                  <div>
+                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 700, marginBottom: 2, letterSpacing: 1 }}>{cat.tag}</p>
+                    <p style={{ fontSize: 18, color: "#fff", fontWeight: 900, lineHeight: 1.3 }}>{cat.title}</p>
+                  </div>
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
+                </div>
+                <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
+                  {catProducts.map((product, i) => {
+                    const imageUrl = product.image_url;
+                    const isDummy = !imageUrl;
+                    const isVideo = product.is_video ?? false;
+                    return (
+                      <Link
+                        key={product.id}
+                        href={`/saju/${product.slug}`}
+                        style={{
+                          flexShrink: 0,
+                          width: 140,
+                          height: 140,
+                          borderRadius: 14,
+                          overflow: "hidden",
+                          position: "relative",
+                          display: "block",
+                          background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
+                          opacity: product.is_active ? 1 : 0.6,
+                        }}
+                      >
+                        {!isDummy && (isVideo ? (
+                          <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline />
+                        ) : (
+                          <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ))}
+                        {isDummy && (
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, fontWeight: 700 }}>준비중</p>
+                          </div>
+                        )}
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8))" }} />
+                        <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
+                          {product.badge && (
+                            <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 3 }}>
+                              {product.badge}
+                            </span>
+                          )}
+                          <p style={{ color: "#fff", fontWeight: 800, fontSize: 12, lineHeight: 1.3, margin: 0 }}>{product.name}</p>
+                        </div>
+                        {!product.is_active && (
+                          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.5)", borderRadius: 8, padding: "2px 6px", fontSize: 9, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>비공개</div>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {confirm && (
         <div style={{
