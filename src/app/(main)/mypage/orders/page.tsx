@@ -27,15 +27,21 @@ export default async function MyOrdersPage() {
 
   const productIds = Array.from(new Set((orders ?? []).map((o) => o.product_id)));
   const { data: products } = productIds.length
-    ? await service.from("products").select("id, name").in("id", productIds)
+    ? await service.from("products").select("id, name, slug").in("id", productIds)
     : { data: [] };
-  const productMap = new Map((products ?? []).map((p) => [p.id, p.name]));
+  const productMap = new Map((products ?? []).map((p) => [p.id, { name: p.name, slug: p.slug }]));
 
   const orderIds = (orders ?? []).map((o) => o.id);
   const { data: results } = orderIds.length
     ? await service.from("saju_results").select("id, order_id").in("order_id", orderIds)
     : { data: [] };
   const resultMap = new Map((results ?? []).map((r) => [r.order_id, r.id]));
+
+  const { data: inputs } = orderIds.length
+    ? await service.from("saju_inputs").select("order_id, name, birth_date, birth_time, calendar, gender").in("order_id", orderIds)
+    : { data: [] };
+  const inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i]));
+
   const { data: reviews } = orderIds.length
     ? await service.from("reviews").select("order_id").in("order_id", orderIds)
     : { data: [] };
@@ -56,12 +62,32 @@ export default async function MyOrdersPage() {
         <ul className="divide-y divide-hairline border-y border-hairline">
           {orders.map((o) => {
             const resultId = resultMap.get(o.id);
+            const product = productMap.get(o.product_id);
+            const input = inputMap.get(o.id);
             const canReview = o.status === "paid" && o.user_id === user.id && !reviewedSet.has(o.id);
+
+            // 정통 리포트는 report-preview URL 재구성
+            let reportHref: string | null = null;
+            if (o.status === "paid" && input) {
+              if (product?.slug?.includes("jeongtong")) {
+                const p = new URLSearchParams({
+                  name: input.name ?? "",
+                  date: input.birth_date,
+                  time: input.birth_time ?? "",
+                  calendar: input.calendar,
+                  gender: input.gender,
+                });
+                reportHref = `/saju/jeongtong/report-preview?${p.toString()}`;
+              } else if (resultId) {
+                reportHref = `/results/${resultId}`;
+              }
+            }
+
             return (
               <li key={o.id} className="py-5 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-medium text-ink truncate">
-                    {productMap.get(o.product_id) ?? "-"}
+                    {product?.name ?? "-"}
                   </p>
                   <p className="text-xs text-body mt-1">
                     {formatDate(o.created_at)} · <span className="font-mono">{formatKRW(o.amount)}</span>
@@ -75,8 +101,8 @@ export default async function MyOrdersPage() {
                   >
                     {STATUS_LABEL[o.status] ?? o.status}
                   </Badge>
-                  {resultId && (
-                    <Link href={`/results/${resultId}`} className="text-sm font-medium underline underline-offset-4 text-ink">
+                  {reportHref && (
+                    <Link href={reportHref} className="text-sm font-medium underline underline-offset-4 text-ink">
                       결과 보기
                     </Link>
                   )}
