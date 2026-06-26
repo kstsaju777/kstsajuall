@@ -83,11 +83,6 @@ export default function HomePage() {
 
   return (
     <div className="pb-10 px-4 pt-4 flex flex-col gap-4">
-      {isAdmin && (
-        <p style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.5)", margin: "0 0 -8px" }}>
-          ☰ 카드를 길게 잡고 드래그해서 순서 변경
-        </p>
-      )}
 
       {products.map((product) => {
         const active = product.is_active;
