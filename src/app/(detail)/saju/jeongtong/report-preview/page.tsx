@@ -4075,7 +4075,7 @@ function ReportPreviewInner() {
                 { name: "시주", hanja: "時柱", time: "태어난 시", desc: "자녀·사고·말년", color: NAVY },
                 { name: "일주", hanja: "日柱", time: "태어난 날", desc: "나·배우자·중년", color: MAROON },
                 { name: "월주", hanja: "月柱", time: "태어난 달", desc: "부모·직업·청년", color: "#2c7a4b" },
-                { name: "년주", hanja: "年柱", time: "태어난 해", desc: "조상·배경·초년", color: "#3a7d44" },
+                { name: "년주", hanja: "年柱", time: "태어난 해", desc: "조상·배경·초년", color: "#a9791c" },
               ].map((r) => (
                 <div key={r.name} className="rounded-2xl px-2 py-4 flex flex-col items-center gap-2 text-center" style={{ background: `${r.color}0c`, border: `1.5px solid ${r.color}30` }}>
                   <p className="text-[15px] font-black" style={{ color: r.color }}>{r.name}</p>

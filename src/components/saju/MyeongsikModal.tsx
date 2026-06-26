@@ -180,8 +180,8 @@ function CellJijang({ text, ilgan }: { text: string; ilgan: string }) {
   return (
     <div className="py-1 flex flex-col items-center justify-center gap-1" style={{ background: WHITE }}>
       {rows.map((r, i) => (
-        <div key={i} style={{ display: "grid", gridTemplateColumns: "18px 32px", alignItems: "center", gap: 4, margin: "0 auto" }}>
-          <div style={{ display: "flex", justifyContent: "center" }}>
+        <div key={i} className="flex items-center justify-center" style={{ gap: 4, width: "100%" }}>
+          <div style={{ display: "flex", justifyContent: "center", flexShrink: 0 }}>
             {r.ch === null ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src="/media/saju/cheongan/hipeun.png" alt="-" style={{ width: 18, height: 18, objectFit: "contain" }} />
