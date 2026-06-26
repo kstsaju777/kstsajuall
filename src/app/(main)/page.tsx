@@ -395,31 +395,41 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
             );
           })}
         </div>
-      </div>
 
-      {/* 2D 텍스트 오버레이 — 드래그 중 사라지고 멈추면 페이드인 */}
-      {(() => {
-        const current = products[idx];
-        const href = getHref(current.slug);
-        return (
-          <Link href={href} style={{ textDecoration: "none", display: "block", textAlign: "center", padding: "0 24px 4px" }}>
-            <div style={{
-              opacity: dragging ? 0 : 1,
-              transition: dragging ? "opacity 0.1s" : "opacity 0.4s ease 0.15s",
-            }}>
-              {current.badge && (
-                <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 6 }}>
-                  {current.badge}
-                </span>
-              )}
-              <p style={{ color: "#fff", fontWeight: 900, fontSize: 18, lineHeight: 1.3, margin: "0 0 4px", textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{current.name}</p>
-              {current.description && (
-                <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, margin: 0 }}>{current.description}</p>
-              )}
-            </div>
-          </Link>
-        );
-      })()}
+        {/* 2D 텍스트 오버레이 — 카드 하단 위치에 absolute로 덮음 */}
+        {(() => {
+          const current = products[idx];
+          const href = getHref(current.slug);
+          return (
+            <Link
+              href={href}
+              style={{ textDecoration: "none", pointerEvents: dragging ? "none" : "auto" }}
+              onClick={e => { if (isDragging.current) e.preventDefault(); }}
+            >
+              <div style={{
+                position: "absolute",
+                bottom: 80,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: CARD_W - 24,
+                opacity: dragging ? 0 : 1,
+                transition: dragging ? "opacity 0.1s" : "opacity 0.35s ease 0.2s",
+                pointerEvents: "none",
+              }}>
+                {current.badge && (
+                  <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 5 }}>
+                    {current.badge}
+                  </span>
+                )}
+                <p style={{ color: "#fff", fontWeight: 900, fontSize: 16, lineHeight: 1.3, margin: "0 0 3px", textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}>{current.name}</p>
+                {current.description && (
+                  <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 11, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.9)" }}>{current.description}</p>
+                )}
+              </div>
+            </Link>
+          );
+        })()}
+      </div>
 
       {/* 인디케이터 */}
       <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 4 }}>
