@@ -54,7 +54,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
     >
       {/* 배경 영상 — 블러 채움 레이어 */}
       <video
-        src="/media/cards/total/total-apply.mp4"
+        src="/media/cards/saju_total/total-apply.mp4"
         aria-hidden
         autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-cover"
@@ -62,7 +62,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
       />
       {/* 배경 영상 — 전체가 보이는 메인 레이어 */}
       <video
-        src="/media/cards/total/total-apply.mp4"
+        src="/media/cards/saju_total/total-apply.mp4"
         aria-hidden
         autoPlay muted loop playsInline
         className="absolute inset-0 w-full h-full object-contain object-top"
@@ -744,7 +744,7 @@ function StepLoading({
       {/* 배경 영상 — 끝나면 자동 이동 */}
       <video
         ref={videoRef}
-        src="/media/cards/total/total-vid-loading.mp4"
+        src="/media/cards/saju_total/total-vid-loading.mp4"
         autoPlay muted playsInline preload="auto"
         onTimeUpdate={handleTime}
         onEnded={goNext}
@@ -860,3 +860,4 @@ export default function SajuFormPage() {
     </>
   );
 }
+

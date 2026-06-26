@@ -40,7 +40,7 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   ],
 
   기타: [
-    { image: "/media/cards/total/total-1.jpg",  badge: "종합", tag: "베스트", name: "종합 사주 감명",  desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",   href: "/saju/jeongtong" },
+    { image: "/media/cards/saju_total/total-1.jpg",  badge: "종합", tag: "베스트", name: "종합 사주 감명",  desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",   href: "/saju/jeongtong" },
   ],
 
   /*
@@ -56,8 +56,8 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
 
   재물_전체: [
     { image: "/media/hero/hero-4.jpg",  badge: "재물", tag: "NEW",  name: "자미두수 재물운",   desc: "동양 별자리로 보는 내 재물의 흐름과 재테크 타이밍",       href: "/saju/jamisusu" },
-    { image: "/media/cards/total/total-1.jpg",badge: "재물", tag: "베스트",name: "종합 사주 감명",   desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",           href: "/saju/total" },
-    { image: "/media/cards/total/total-3.jpg",badge: "재물",              name: "신년 사주",         desc: "새해 한 해 전체 운세 종합 분석",                          href: "/saju/new-year" },
+    { image: "/media/cards/saju_total/total-1.jpg",badge: "재물", tag: "베스트",name: "종합 사주 감명",   desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",           href: "/saju/total" },
+    { image: "/media/cards/saju_total/total-3.jpg",badge: "재물",              name: "신년 사주",         desc: "새해 한 해 전체 운세 종합 분석",                          href: "/saju/new-year" },
     { image: "/media/hero/hero-16.jpg", badge: "재물",              name: "자미두수 인생 흐름",desc: "12궁과 14주성으로 향후 10년의 기운 흐름을 분석합니다",    href: "/saju/jamisusu-life" },
   ],
 
@@ -107,8 +107,8 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
     { image: "/media/cards/health/health-2.jpg", badge: "건강", tag: "NEW",    name: "체질 분석",       desc: "사주 오행으로 보는 나의 체질과 건강 관리",         href: "/saju/constitution" },
     { image: "/media/cards/health/health-3.jpg", badge: "건강",                name: "수명·건강운",     desc: "건강 주의 시기와 예방 포인트",                    href: "/saju/longevity" },
     { image: "/media/hero/hero-10.jpg",   badge: "베딕",                name: "인도 베딕 점성술",desc: "다샤 주기와 7하우스 분석으로 재회의 시기와 가능성을 예측합니다", href: "/saju/vedic" },
-    { image: "/media/cards/total/total-3.jpg",  badge: "종합", tag: "NEW",    name: "신년 사주",       desc: "새해 한 해 전체 운세 종합 분석",                  href: "/saju/new-year" },
-    { image: "/media/cards/total/total-5.jpg",  badge: "종합",                name: "월간 운세",       desc: "이번 달 나의 운세 흐름 분석",                     href: "/saju/monthly" },
+    { image: "/media/cards/saju_total/total-3.jpg",  badge: "종합", tag: "NEW",    name: "신년 사주",       desc: "새해 한 해 전체 운세 종합 분석",                  href: "/saju/new-year" },
+    { image: "/media/cards/saju_total/total-5.jpg",  badge: "종합",                name: "월간 운세",       desc: "이번 달 나의 운세 흐름 분석",                     href: "/saju/monthly" },
   ],
   */
 };
@@ -121,3 +121,4 @@ CATEGORY_CARDS["전체"] = _all.filter((c) => {
   _seen.add(c.href + c.name);
   return true;
 });
+

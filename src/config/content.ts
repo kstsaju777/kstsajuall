@@ -260,11 +260,11 @@ export const cardSections = {
     moreHref: "/products?category=종합",
     layout: "tall" as const,
     cards: [
-      { image: "/media/cards/total/total-1.jpg", badge: "종합", tag: "베스트", name: "종합 사주 감명", desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이", href: "/saju/total" },
-      { image: "/media/cards/total/total-2.jpg", badge: "종합",               name: "오늘의 일진",   desc: "하루의 기운을 사주로 읽는 일진 풀이",         href: "/saju/daily" },
-      { image: "/media/cards/total/total-3.jpg", badge: "종합", tag: "NEW",   name: "신년 사주",     desc: "새해 한 해 전체 운세 종합 분석",               href: "/saju/new-year" },
-      { image: "/media/cards/total/total-4.jpg", badge: "종합", tag: "인기",  name: "사주 기본 감명", desc: "사주 4기둥으로 보는 타고난 성향",             href: "/saju/basic" },
-      { image: "/media/cards/total/total-5.jpg", badge: "종합",               name: "월간 운세",     desc: "이번 달 나의 운세 흐름 분석",                 href: "/saju/monthly" },
+      { image: "/media/cards/saju_total/total-1.jpg", badge: "종합", tag: "베스트", name: "종합 사주 감명", desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이", href: "/saju/total" },
+      { image: "/media/cards/saju_total/total-2.jpg", badge: "종합",               name: "오늘의 일진",   desc: "하루의 기운을 사주로 읽는 일진 풀이",         href: "/saju/daily" },
+      { image: "/media/cards/saju_total/total-3.jpg", badge: "종합", tag: "NEW",   name: "신년 사주",     desc: "새해 한 해 전체 운세 종합 분석",               href: "/saju/new-year" },
+      { image: "/media/cards/saju_total/total-4.jpg", badge: "종합", tag: "인기",  name: "사주 기본 감명", desc: "사주 4기둥으로 보는 타고난 성향",             href: "/saju/basic" },
+      { image: "/media/cards/saju_total/total-5.jpg", badge: "종합",               name: "월간 운세",     desc: "이번 달 나의 운세 흐름 분석",                 href: "/saju/monthly" },
     ],
   },
 
@@ -282,3 +282,4 @@ export const cardSections = {
     ],
   },
 };
+
