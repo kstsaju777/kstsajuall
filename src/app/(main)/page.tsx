@@ -266,7 +266,8 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   getHref: (slug: string) => string;
 }) {
   const n = products.length;
-  const [rotation, setRotation] = useState(0); // 전체 누적 회전각
+  const [rotation, setRotation] = useState(0);
+  const [dragging, setDragging] = useState(false); // 드래그 중 텍스트 숨김용
   const touchStartX = useRef<number | null>(null);
   const touchStartRot = useRef<number>(0);
   const isDragging = useRef(false);
@@ -287,6 +288,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
     touchStartX.current = e.touches[0].clientX;
     touchStartRot.current = rotation;
     isDragging.current = false;
+    setDragging(true);
     if (slideTimer.current) clearInterval(slideTimer.current);
   };
 
@@ -298,17 +300,16 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   };
 
   const onTouchEnd = () => {
-    // 가장 가까운 카드에 스냅
     const snapped = Math.round(rotation / anglePerCard) * anglePerCard;
     setRotation(snapped);
     const newIdx = ((Math.round(-snapped / anglePerCard) % n) + n) % n;
     setSlideIndex(newIdx);
     touchStartX.current = null;
+    setDragging(false);
   };
 
-  // 마우스 드래그 (PC)
   const mouseStartX = useRef<number | null>(null);
-  const onMouseDown = (e: React.MouseEvent) => { mouseStartX.current = e.clientX; touchStartRot.current = rotation; isDragging.current = false; };
+  const onMouseDown = (e: React.MouseEvent) => { mouseStartX.current = e.clientX; touchStartRot.current = rotation; isDragging.current = false; setDragging(true); };
   const onMouseMove = (e: React.MouseEvent) => {
     if (mouseStartX.current === null) return;
     const diff = e.clientX - mouseStartX.current;
@@ -322,6 +323,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
     const newIdx = ((Math.round(-snapped / anglePerCard) % n) + n) % n;
     setSlideIndex(newIdx);
     mouseStartX.current = null;
+    setDragging(false);
   };
 
   const CARD_W = 260;
@@ -385,18 +387,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 ) : (
                   <img src={imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 )}
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.8))" }} />
-                {product.badge && (
-                  <span style={{ position: "absolute", top: 10, left: 10, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#9b2335", color: "#fff" }}>
-                    {product.badge}
-                  </span>
-                )}
-                <div style={{ position: "absolute", bottom: 14, left: 12, right: 12, transform: "translateZ(2px)", WebkitFontSmoothing: "antialiased" } as React.CSSProperties}>
-                  <p style={{ color: "#fff", fontWeight: 900, fontSize: 15, lineHeight: 1.3, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{product.name}</p>
-                  {isCurrent && product.description && (
-                    <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, margin: "3px 0 0" }}>{product.description}</p>
-                  )}
-                </div>
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5))" }} />
                 {isCurrent && !isDragging.current && (
                   <Link href={href} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
                 )}
@@ -405,6 +396,30 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
           })}
         </div>
       </div>
+
+      {/* 2D 텍스트 오버레이 — 드래그 중 사라지고 멈추면 페이드인 */}
+      {(() => {
+        const current = products[idx];
+        const href = getHref(current.slug);
+        return (
+          <Link href={href} style={{ textDecoration: "none", display: "block", textAlign: "center", padding: "0 24px 4px" }}>
+            <div style={{
+              opacity: dragging ? 0 : 1,
+              transition: dragging ? "opacity 0.1s" : "opacity 0.4s ease 0.15s",
+            }}>
+              {current.badge && (
+                <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 6 }}>
+                  {current.badge}
+                </span>
+              )}
+              <p style={{ color: "#fff", fontWeight: 900, fontSize: 18, lineHeight: 1.3, margin: "0 0 4px", textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{current.name}</p>
+              {current.description && (
+                <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, margin: 0 }}>{current.description}</p>
+              )}
+            </div>
+          </Link>
+        );
+      })()}
 
       {/* 인디케이터 */}
       <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 4 }}>
