@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type Product = { id: string; name: string; slug: string | null; price: number; is_active: boolean; image_url?: string; badge?: string; tag?: string; is_video?: boolean };
 type Usage = { used: number; limit: number; bySource: { confirm: number; demo: number; manual: number } } | null;
@@ -16,6 +16,8 @@ export function AdminOverlay() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [confirmToggle, setConfirmToggle] = useState<{ id: string; current: boolean } | null>(null);
+  const dragId = useRef<string | null>(null);
+  const [dragOver, setDragOver] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/products").then(r => r.json()).then(d => setProducts(d.products ?? [])).catch(() => {});
@@ -177,13 +179,43 @@ export function AdminOverlay() {
               </div>
             )}
 
+            <p style={{ fontSize: 11, color: "#bbb", margin: "0 0 8px" }}>≡ 드래그로 순서 변경 가능</p>
             <div style={{ display: "grid", gap: 8 }}>
               {products.map(p => (
-                <div key={p.id} style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  padding: "10px 12px", background: p.is_active ? "#f0fdf4" : "#fafafa",
-                  borderRadius: 8, border: `1px solid ${p.is_active ? "#bbf7d0" : "#e8e8e8"}`,
-                }}>
+                <div
+                  key={p.id}
+                  draggable
+                  onDragStart={() => { dragId.current = p.id; }}
+                  onDragOver={e => { e.preventDefault(); setDragOver(p.id); }}
+                  onDragLeave={() => setDragOver(null)}
+                  onDrop={async () => {
+                    setDragOver(null);
+                    if (!dragId.current || dragId.current === p.id) return;
+                    const from = products.findIndex(x => x.id === dragId.current);
+                    const to = products.findIndex(x => x.id === p.id);
+                    const next = [...products];
+                    const [moved] = next.splice(from, 1);
+                    next.splice(to, 0, moved);
+                    const reordered = next.map((x, i) => ({ ...x, display_order: (i + 1) * 10 }));
+                    setProducts(reordered);
+                    dragId.current = null;
+                    await fetch("/api/admin/products", {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ orders: reordered.map(x => ({ id: x.id, display_order: x.display_order })) }),
+                    });
+                  }}
+                  onDragEnd={() => { dragId.current = null; setDragOver(null); }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "10px 12px",
+                    background: dragOver === p.id ? "#e0f2fe" : p.is_active ? "#f0fdf4" : "#fafafa",
+                    borderRadius: 8,
+                    border: `1px solid ${dragOver === p.id ? "#7dd3fc" : p.is_active ? "#bbf7d0" : "#e8e8e8"}`,
+                    cursor: "grab", transition: "background 0.15s",
+                  }}
+                >
+                  <span style={{ fontSize: 16, color: "#ccc", flexShrink: 0, cursor: "grab" }}>☰</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 13, fontWeight: 600, color: "#111", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</p>
                     <p style={{ fontSize: 11, color: "#aaa", margin: "2px 0 0" }}>{p.price.toLocaleString()}원</p>

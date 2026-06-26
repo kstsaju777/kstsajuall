@@ -30,6 +30,20 @@ export async function PATCH(request: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
+export async function PUT(request: NextRequest) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // 순서 일괄 업데이트: [{ id, display_order }]
+  const { orders } = await request.json();
+  if (!Array.isArray(orders)) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
+  const service = createServiceClient();
+  for (const { id, display_order } of orders) {
+    await service.from("products").update({ display_order }).eq("id", id);
+  }
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(request: NextRequest) {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
