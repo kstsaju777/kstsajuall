@@ -3813,9 +3813,14 @@ function ReportPreviewInner() {
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
   const [eventOpen, setEventOpen] = useState(false); // 마무리 장 진입 시 SNS 리뷰 이벤트 팝업
+  const [isAdmin, setIsAdmin] = useState(false);
   const startedRef = useRef(false);
   const generatedRef = useRef(false); // 일괄 생성 1회만
   const chNum = Number(ch);
+
+  useEffect(() => {
+    fetch("/api/admin/check").then(r => r.json()).then(d => setIsAdmin(d.isAdmin)).catch(() => {});
+  }, []);
 
   // id 있으면 저장된 결과 조회(재생성 X), 입력만 있으면 생성+저장 후 id 주소로 교체
   useEffect(() => {
@@ -3986,7 +3991,7 @@ function ReportPreviewInner() {
         loading={false}
         meta={report && report.birth ? { name: report.name, gender: report.birth.gender || report.gender || gender, date: report.birth.date, calendar: report.birth.calendar, time: report.birth.time } : undefined}
       />
-      {Number(ch) >= 1 && Number(ch) <= 16 && (
+      {isAdmin && Number(ch) >= 1 && Number(ch) <= 16 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
           {generating ? (
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-[13px] shadow-xl" style={{ background: "#555", color: "#fff" }}>
