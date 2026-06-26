@@ -26,6 +26,7 @@ function LoginInner() {
   const [idInput, setIdInput] = useState("");
   const [pwInput, setPwInput] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
+  const [emailInput, setEmailInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [legalDoc, setLegalDoc] = useState<"terms" | "privacy" | null>(null);
@@ -69,10 +70,15 @@ function LoginInner() {
         setLoading(false);
         return;
       }
+      if (!emailInput.trim() || !emailInput.includes("@")) {
+        setError("실제 이메일 주소를 입력해주세요.");
+        setLoading(false);
+        return;
+      }
       const { error: err } = await supabase.auth.signUp({
         email,
         password: pwInput,
-        options: { data: { display_name: idInput.trim() } },
+        options: { data: { display_name: idInput.trim(), real_email: emailInput.trim() } },
       });
       if (err) {
         setError(err.message.includes("already") ? "이미 사용 중인 아이디입니다." : "회원가입에 실패했습니다.");
@@ -91,18 +97,19 @@ function LoginInner() {
     setResetDone(false);
   }
 
+  const [resetEmail, setResetEmail] = useState("");
+
   async function handleReset(e: React.FormEvent) {
     e.preventDefault();
-    if (!idInput.trim()) return;
+    if (!resetEmail.trim()) return;
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const email = idInput.trim().toLowerCase() + ID_DOMAIN;
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error: err } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
       redirectTo: `${window.location.origin}/auth/callback?next=/mypage`,
     });
     setLoading(false);
-    if (err) setError("재설정 이메일 발송에 실패했습니다.");
+    if (err) setError("이메일 발송에 실패했습니다. 가입한 이메일 주소를 확인해주세요.");
     else setResetDone(true);
   }
 
@@ -152,17 +159,20 @@ function LoginInner() {
             </div>
           ) : (
             <form onSubmit={handleReset} className="flex flex-col gap-2.5">
+              <p className="text-[13px] text-center mb-1" style={{ color: "#9c8472" }}>
+                가입 시 입력한 이메일 주소로 재설정 링크를 보내드립니다.
+              </p>
               <input
-                value={idInput}
-                onChange={(e) => setIdInput(e.target.value)}
-                placeholder="아이디"
-                autoCapitalize="none"
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="이메일 주소"
                 className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
                 style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
               />
               {error && <p className="text-[12px] text-center" style={{ color: "#c0392b" }}>{error}</p>}
-              <button type="submit" disabled={loading || !idInput.trim()} className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white"
-                style={{ background: !idInput.trim() ? "#c8b8a8" : "#9b2335" }}>
+              <button type="submit" disabled={loading || !resetEmail.trim()} className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white"
+                style={{ background: !resetEmail.trim() ? "#c8b8a8" : "#9b2335" }}>
                 {loading ? "발송 중..." : "재설정 링크 보내기"}
               </button>
             </form>
@@ -189,14 +199,24 @@ function LoginInner() {
           style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
         />
         {mode === "signup" && (
-          <input
-            type="password"
-            value={pwConfirm}
-            onChange={(e) => setPwConfirm(e.target.value)}
-            placeholder="비밀번호 확인"
-            className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
-            style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
-          />
+          <>
+            <input
+              type="password"
+              value={pwConfirm}
+              onChange={(e) => setPwConfirm(e.target.value)}
+              placeholder="비밀번호 확인"
+              className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
+              style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+            />
+            <input
+              type="email"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              placeholder="이메일 주소 (비밀번호 재설정용)"
+              className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
+              style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+            />
+          </>
         )}
         {error && <p className="text-[12px] text-center" style={{ color: "#c0392b" }}>{error}</p>}
         <button
