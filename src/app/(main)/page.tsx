@@ -395,22 +395,21 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
             </div>
           );
         })}
-      </div>
-
-      {/* 인디케이터 */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 6 }}>
-        {products.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            style={{
-              width: i === idx ? 20 : 6, height: 6, borderRadius: 3,
-              border: "none", padding: 0, cursor: "pointer",
-              background: i === idx ? "#fff" : "rgba(255,255,255,0.35)",
-              transition: "width 0.3s, background 0.3s",
-            }}
-          />
-        ))}
+        {/* 인디케이터 — 컨테이너 하단 absolute */}
+        <div style={{ position: "absolute", bottom: 10, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5, pointerEvents: "none" }}>
+          {products.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              style={{
+                width: i === idx ? 20 : 6, height: 6, borderRadius: 3,
+                border: "none", padding: 0, cursor: "pointer", pointerEvents: "auto",
+                background: i === idx ? "#fff" : "rgba(255,255,255,0.45)",
+                transition: "width 0.3s, background 0.3s",
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
