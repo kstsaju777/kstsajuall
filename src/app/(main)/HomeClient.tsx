@@ -69,7 +69,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   };
 
   return (
-    <div className="pb-10 flex flex-col gap-4 pt-4">
+    <div className={`flex flex-col gap-4 pt-4 ${isAdmin ? "pb-10" : "pb-4"}`}>
       {/* 캐러셀 — 어드민만 */}
       {isAdmin && products.length > 0 && (
         <AdminSlider
@@ -82,7 +82,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       )}
 
 
-      <div className="px-4 pt-8 flex flex-col gap-4">
+      <div className={`px-4 flex flex-col gap-4 ${isAdmin ? "pt-8" : "pt-2"}`}>
         {products.map((product, index) => {
           const active = product.is_active;
           const comingSoon = !isAdmin && !active;
