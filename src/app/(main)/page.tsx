@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type Product = {
   id: string;
@@ -13,6 +13,7 @@ type Product = {
   badge: string | null;
   tag: string | null;
   is_video: boolean | null;
+  description?: string;
 };
 
 export default function HomePage() {
@@ -20,15 +21,15 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [confirm, setConfirm] = useState<{ id: string; toActive: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dragOver, setDragOver] = useState<string | null>(null);
+  const dragId = useRef<string | null>(null);
 
   useEffect(() => {
-    // 어드민 여부 확인
     fetch("/api/admin/check")
       .then(r => r.json())
       .then(d => { if (d.isAdmin) setIsAdmin(true); })
       .catch(() => {});
 
-    // 상품 목록 로드
     fetch("/api/products/public")
       .then(r => r.json())
       .then(d => { setProducts(d.products ?? []); setLoading(false); })
@@ -52,6 +53,24 @@ export default function HomePage() {
     setConfirm(null);
   };
 
+  const handleDrop = async (targetId: string) => {
+    setDragOver(null);
+    if (!dragId.current || dragId.current === targetId) return;
+    const from = products.findIndex(x => x.id === dragId.current);
+    const to = products.findIndex(x => x.id === targetId);
+    const next = [...products];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    const reordered = next.map((x, i) => ({ ...x, display_order: (i + 1) * 10 }));
+    setProducts(reordered);
+    dragId.current = null;
+    await fetch("/api/admin/products", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orders: reordered.map(x => ({ id: x.id, display_order: x.display_order })) }),
+    });
+  };
+
   const getHref = (slug: string) => {
     if (slug === "premium-saju") return "/saju/total";
     if (slug === "basic-saju") return "/saju/basic";
@@ -64,18 +83,59 @@ export default function HomePage() {
 
   return (
     <div className="pb-10 px-4 pt-4 flex flex-col gap-4">
+      {isAdmin && (
+        <p style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.5)", margin: "0 0 -8px" }}>
+          ☰ 카드를 길게 잡고 드래그해서 순서 변경
+        </p>
+      )}
+
       {products.map((product) => {
         const active = product.is_active;
         const comingSoon = !isAdmin && !active;
         const href = getHref(product.slug);
         const isVideo = product.is_video ?? false;
         const imageUrl = product.image_url ?? "/media/hero/hero-3.jpg";
+        const isDragTarget = dragOver === product.id;
 
         return (
-          <div key={product.id} className="relative">
+          <div
+            key={product.id}
+            className="relative"
+            draggable={isAdmin}
+            onDragStart={() => { dragId.current = product.id; }}
+            onDragOver={e => { if (isAdmin) { e.preventDefault(); setDragOver(product.id); } }}
+            onDragLeave={() => setDragOver(null)}
+            onDrop={() => handleDrop(product.id)}
+            onDragEnd={() => { dragId.current = null; setDragOver(null); }}
+            style={{
+              outline: isDragTarget ? "2px dashed rgba(255,255,255,0.6)" : "none",
+              borderRadius: 16,
+              transform: isDragTarget ? "scale(0.98)" : "scale(1)",
+              transition: "transform 0.15s, outline 0.15s",
+              cursor: isAdmin ? "grab" : "auto",
+            }}
+          >
+            {/* 어드민 드래그 힌트 */}
+            {isAdmin && (
+              <div style={{
+                position: "absolute", top: "50%", left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 5, pointerEvents: "none",
+                opacity: isDragTarget ? 1 : 0,
+                transition: "opacity 0.15s",
+                background: "rgba(0,0,0,0.6)", borderRadius: 10,
+                padding: "6px 14px", color: "#fff", fontSize: 13, fontWeight: 700,
+              }}>
+                여기에 놓기
+              </div>
+            )}
+
             <Link
               href={comingSoon ? "#" : href}
-              onClick={comingSoon ? (e) => e.preventDefault() : undefined}
+              onClick={e => {
+                if (comingSoon) { e.preventDefault(); return; }
+                if (dragId.current) { e.preventDefault(); } // 드래그 중엔 클릭 무시
+              }}
               className="block w-full rounded-2xl overflow-hidden relative"
               style={{ aspectRatio: "4/3", pointerEvents: comingSoon ? "none" : "auto" }}
             >
@@ -109,9 +169,10 @@ export default function HomePage() {
                 </>
               )}
             </Link>
+
             {isAdmin && (
               <button
-                onClick={() => toggleCard(product.id, active)}
+                onClick={e => { e.stopPropagation(); toggleCard(product.id, active); }}
                 style={{
                   position: "absolute", top: 8, right: 8, zIndex: 10,
                   padding: "4px 11px", borderRadius: 12, border: "none",
@@ -127,21 +188,18 @@ export default function HomePage() {
         );
       })}
 
-      {/* 어드민 상품 추가 버튼 */}
       {isAdmin && (
         <button
-          onClick={() => window.__adminAddProduct?.()}
           style={{
             width: "100%", padding: "16px", borderRadius: 16,
-            border: "2px dashed #9b2335", background: "transparent",
-            color: "#9b2335", fontSize: 14, fontWeight: 700, cursor: "pointer",
+            border: "2px dashed rgba(255,255,255,0.3)", background: "transparent",
+            color: "rgba(255,255,255,0.5)", fontSize: 14, fontWeight: 700, cursor: "pointer",
           }}
         >
-          + 새 상품 추가
+          + 새 상품 추가 (어드민 패널에서)
         </button>
       )}
 
-      {/* 공개/비공개 확인 모달 */}
       {confirm && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 9999,
@@ -163,21 +221,14 @@ export default function HomePage() {
                 : <>상품이 고객에게 노출되지 않습니다.<br />비공개로 전환하시겠습니까?</>}
             </p>
             <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={() => setConfirm(null)}
-                style={{
-                  flex: 1, padding: "11px 0", borderRadius: 10, border: "1px solid #ddd",
-                  background: "#f5f5f5", color: "#555", fontSize: 14, fontWeight: 700, cursor: "pointer",
-                }}
-              >NO</button>
-              <button
-                onClick={confirmToggle}
-                style={{
-                  flex: 1, padding: "11px 0", borderRadius: 10, border: "none",
-                  background: confirm.toActive ? "#9b2335" : "#374151",
-                  color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
-                }}
-              >YES</button>
+              <button onClick={() => setConfirm(null)}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: "1px solid #ddd", background: "#f5f5f5", color: "#555", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                NO
+              </button>
+              <button onClick={confirmToggle}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: "none", background: confirm.toActive ? "#9b2335" : "#374151", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                YES
+              </button>
             </div>
           </div>
         </div>
