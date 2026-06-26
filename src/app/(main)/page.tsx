@@ -107,7 +107,7 @@ export default function HomePage() {
         />
       )}
 
-      <div className="px-4 pt-2 flex flex-col gap-4">
+      <div className="px-4 pt-8 flex flex-col gap-4">
 
       {products.map((product) => {
         const active = product.is_active;
