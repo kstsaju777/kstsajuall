@@ -507,7 +507,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
     slideTimer.current = setInterval(() => {
       setSlideIndex(prev => (prev + 1) % n);
       setOffset(0);
-    }, 3000);
+    }, 5000);
   }, [n, setSlideIndex, slideTimer]);
 
   useEffect(() => {
