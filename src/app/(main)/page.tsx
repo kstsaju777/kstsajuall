@@ -366,7 +366,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 opacity,
                 transform: `translateX(calc(-50% + ${baseX}px)) scale(${scale}) rotateY(${rotateY}deg)`,
                 transition: isMoving ? "opacity 0.15s" : "transform 0.45s cubic-bezier(.4,0,.2,1), opacity 0.3s, box-shadow 0.3s",
-                boxShadow: isCurrent ? "0 16px 40px rgba(0,0,0,0.6)" : "0 4px 16px rgba(0,0,0,0.3)",
+                boxShadow: isCurrent ? "0 8px 20px rgba(0,0,0,0.5)" : "0 4px 10px rgba(0,0,0,0.3)",
                 filter: isCurrent ? "none" : "brightness(0.55)",
                 cursor: isCurrent ? "pointer" : "pointer",
               }}
