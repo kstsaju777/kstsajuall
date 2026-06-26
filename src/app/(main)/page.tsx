@@ -96,11 +96,9 @@ export default function HomePage() {
   return (
     <div className="pb-10 flex flex-col gap-4">
 
-      {/* 상단 슬라이드 배너 */}
-      {(() => {
-        const slideProducts = products.filter(p => isAdmin || p.is_active);
-        if (slideProducts.length === 0) return null;
-        const current = slideProducts[slideIndex % slideProducts.length];
+      {/* 상단 슬라이드 배너 - 어드민만 */}
+      {isAdmin && products.length > 0 && (() => {
+        const current = products[slideIndex % products.length];
         const href = getHref(current.slug);
         const isVideo = current.is_video ?? false;
         const imageUrl = current.image_url ?? "/media/hero/hero-3.jpg";
@@ -125,14 +123,14 @@ export default function HomePage() {
                 )}
               </div>
               <div style={{ position: "absolute", bottom: 14, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5 }}>
-                {slideProducts.map((_, i) => (
+                {products.map((_, i) => (
                   <button
                     key={i}
                     onClick={e => { e.preventDefault(); e.stopPropagation(); if (slideTimer.current) clearInterval(slideTimer.current); setSlideIndex(i); }}
                     style={{
-                      width: i === slideIndex % slideProducts.length ? 20 : 6,
+                      width: i === slideIndex % products.length ? 20 : 6,
                       height: 6, borderRadius: 3, border: "none", padding: 0,
-                      background: i === slideIndex % slideProducts.length ? "#fff" : "rgba(255,255,255,0.4)",
+                      background: i === slideIndex % products.length ? "#fff" : "rgba(255,255,255,0.4)",
                       transition: "width 0.3s, background 0.3s", cursor: "pointer",
                     }}
                   />
@@ -144,6 +142,7 @@ export default function HomePage() {
       })()}
 
       <div className="px-4 pt-2 flex flex-col gap-4">
+
       {products.map((product) => {
         const active = product.is_active;
         const comingSoon = !isAdmin && !active;
