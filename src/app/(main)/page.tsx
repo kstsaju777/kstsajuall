@@ -396,7 +396,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
           );
         })}
         {/* 인디케이터 — 컨테이너 하단 absolute */}
-        <div style={{ position: "absolute", bottom: 4, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5, pointerEvents: "none" }}>
+        <div style={{ position: "absolute", bottom: 22, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5, pointerEvents: "none" }}>
           {products.map((_, i) => (
             <button
               key={i}
