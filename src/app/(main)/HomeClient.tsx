@@ -23,6 +23,7 @@ const DUMMY_GRADIENTS = [
   "linear-gradient(135deg, #1a3a1a 0%, #2d6b2d 50%, #a8d5a2 100%)",
 ];
 
+
 export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Product[]; isAdmin: boolean }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [confirm, setConfirm] = useState<{ id: string; toActive: boolean } | null>(null);
