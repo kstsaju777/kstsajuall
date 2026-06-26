@@ -274,8 +274,10 @@ function LoginInner() {
                     className="w-full px-3 py-3 rounded-xl text-[13px] outline-none"
                     style={{ background: "#f0e8e0", border: "1px solid #9b2335", color: "#3a2820", paddingRight: 28 }}
                   />
-                  <button type="button" onClick={() => { setEmailDomain(""); setCustomDomain(""); }}
-                    style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "#b0a090", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
+                  {!customDomain && (
+                    <button type="button" onClick={() => { setEmailDomain(""); setCustomDomain(""); }}
+                      style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "#b0a090", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
+                  )}
                 </div>
               ) : (
                 <EmailDomainSelect
