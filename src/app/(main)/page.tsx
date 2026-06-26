@@ -83,11 +83,7 @@ export default function HomePage() {
     return () => { if (slideTimer.current) clearInterval(slideTimer.current); };
   }, [products, isAdmin]);
 
-  const getHref = (slug: string) => {
-    if (slug === "premium-saju") return "/saju/total";
-    if (slug === "basic-saju") return "/saju/basic";
-    return `/saju/${slug}`;
-  };
+  const getHref = (slug: string) => `/saju/${slug}`;
 
   if (loading) {
     return <div className="pb-10 px-4 pt-4 flex flex-col gap-4" />;
