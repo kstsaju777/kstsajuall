@@ -67,17 +67,28 @@ function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard
   );
 }
 
-// ─── 무료 탭 전용 카드 (이미지 위에 텍스트 오버레이) ─────────────────────────
-function FreeCard({ card }: { card: CategoryCard }) {
-  const [imgErr, setImgErr] = useState(false);
+const DUMMY_GRADIENTS = [
+  "linear-gradient(135deg, #1a0a2e 0%, #4a1060 50%, #8b1a3a 100%)",
+  "linear-gradient(135deg, #0a1a2e 0%, #103060 50%, #1a5080 100%)",
+  "linear-gradient(135deg, #1a1000 0%, #4a2800 50%, #8b5a00 100%)",
+  "linear-gradient(135deg, #0a1a0a 0%, #103010 50%, #204020 100%)",
+  "linear-gradient(135deg, #2a0a0a 0%, #600a0a 50%, #901a1a 100%)",
+  "linear-gradient(135deg, #1a0a1a 0%, #400a40 50%, #6a1a6a 100%)",
+];
+
+// ─── 무료 탭 전용 카드 (더미 그라디언트 + 텍스트 오버레이) ───────────────────
+function FreeCard({ card, idx }: { card: CategoryCard; idx: number }) {
+  const [imgOk, setImgOk] = useState(!!card.image);
+  const gradient = DUMMY_GRADIENTS[idx % DUMMY_GRADIENTS.length];
+
   return (
-    <Link href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ aspectRatio: "3/4", background: "#1a1a1a" }}>
-      {imgErr ? (
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
-      ) : (
-        <img src={card.image} alt={card.name} className="absolute inset-0 w-full h-full object-cover" onError={() => setImgErr(true)} />
+    <Link href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ aspectRatio: "3/4" }}>
+      {/* 배경: 이미지 있으면 이미지, 없으면 더미 그라디언트 */}
+      <div className="absolute inset-0" style={{ background: gradient }} />
+      {card.image && imgOk && (
+        <img src={card.image} alt={card.name} className="absolute inset-0 w-full h-full object-cover" onError={() => setImgOk(false)} />
       )}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)" }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)" }} />
       {card.badge && (
         <div className="absolute top-2.5 left-2.5 flex gap-1">
           <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span>
@@ -118,7 +129,7 @@ function FreeContent() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 12px" }}>
             {section.cards.map((card, i) => (
-              <FreeCard key={i} card={card} />
+              <FreeCard key={i} card={card} idx={i} />
             ))}
           </div>
           {section.hasMore && (
