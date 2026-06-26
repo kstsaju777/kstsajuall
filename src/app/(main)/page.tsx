@@ -315,7 +315,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
     mouseStartX.current = null;
   };
 
-  const containerH = CARD_W + 60;
+  const containerH = CARD_W + 8;
   const isMoving = offset !== 0;
 
   // 드래그 중 기울기 각도 (최대 ±12도)
