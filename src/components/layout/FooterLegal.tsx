@@ -24,7 +24,7 @@ export function FooterLegal() {
           }}
         >
           <div
-            className="flex flex-col rounded-2xl overflow-hidden"
+            className="flex flex-col rounded-2xl overflow-hidden text-left"
             onClick={e => e.stopPropagation()}
             style={{ width: "min(80vw, 300px)", maxHeight: "56vh", background: "#fff", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", animation: "legalPop 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}
           >
