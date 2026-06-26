@@ -429,7 +429,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 transform: "translateX(-50%)",
                 width: CARD_W - 24,
                 opacity: dragging ? 0 : 1,
-                transition: dragging ? "opacity 0.15s" : "opacity 0.3s ease 0.1s",
+                transition: dragging ? "opacity 0.15s" : "opacity 0.25s ease 0.5s",
                 pointerEvents: "none",
               }}>
                 {current.badge && (
