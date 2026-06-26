@@ -489,7 +489,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref }: {
   products: Product[];
   slideIndex: number;
-  setSlideIndex: (i: number) => void;
+  setSlideIndex: React.Dispatch<React.SetStateAction<number>>;
   slideTimer: React.MutableRefObject<ReturnType<typeof setInterval> | null>;
   getHref: (slug: string) => string;
 }) {
@@ -505,7 +505,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   const startAutoPlay = useCallback(() => {
     if (slideTimer.current) clearInterval(slideTimer.current);
     slideTimer.current = setInterval(() => {
-      setSlideIndex(prev => (prev + 1) % n);
+      setSlideIndex((prev: number) => (prev + 1) % n);
       setOffset(0);
     }, 5000);
   }, [n, setSlideIndex, slideTimer]);
