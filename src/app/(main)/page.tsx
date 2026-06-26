@@ -47,7 +47,16 @@ export default function HomePage() {
     fetch("/api/admin/check").then(r => r.json()).then(d => { if (d.isAdmin) setIsAdmin(true); }).catch(() => {});
   }, []);
 
-  const toggleCard = (id: string) => setActiveMap(prev => ({ ...prev, [id]: !prev[id] }));
+  const [confirm, setConfirm] = useState<string | null>(null);
+
+  const toggleCard = (id: string) => {
+    const current = activeMap[id];
+    if (!current) {
+      setConfirm(id); // 비공개→공개 시 확인창
+    } else {
+      setActiveMap(prev => ({ ...prev, [id]: false }));
+    }
+  };
 
   return (
     <div className="pb-10 px-4 pt-4 flex flex-col gap-4">
@@ -105,6 +114,43 @@ export default function HomePage() {
           </div>
         );
       })}
+
+      {/* 공개 전환 확인 모달 */}
+      {confirm && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "0 32px",
+        }}>
+          <div style={{
+            background: "#fff", borderRadius: 16, padding: "28px 24px",
+            width: "100%", maxWidth: 300, textAlign: "center",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+          }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: 8 }}>상품 공개</p>
+            <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6, marginBottom: 24 }}>
+              실제 고객에게 상품이 노출됩니다.<br />오픈하시겠습니까?
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setConfirm(null)}
+                style={{
+                  flex: 1, padding: "11px 0", borderRadius: 10, border: "1px solid #ddd",
+                  background: "#f5f5f5", color: "#555", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                }}
+              >NO</button>
+              <button
+                onClick={() => { setActiveMap(prev => ({ ...prev, [confirm]: true })); setConfirm(null); }}
+                style={{
+                  flex: 1, padding: "11px 0", borderRadius: 10, border: "none",
+                  background: "#9b2335", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                }}
+              >YES</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
