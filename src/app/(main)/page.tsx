@@ -12,7 +12,7 @@ export default async function HomePage() {
   const service = createServiceClient();
   let query = service
     .from("products")
-    .select("id, name, slug, price, description, is_active, image_url, badge, tag, is_video")
+    .select("id, name, slug, price, description, is_active, image_url, badge, tag, is_video, category")
     .order("display_order", { ascending: true });
 
   if (!isAdmin) {

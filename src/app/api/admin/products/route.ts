@@ -20,12 +20,21 @@ export async function PATCH(request: NextRequest) {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id, is_active } = await request.json();
-  if (!id || typeof is_active !== "boolean") {
-    return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
+  const body = await request.json();
+  const { id } = body;
+  if (!id) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updates: any = {};
+  if (typeof body.is_active === "boolean") updates.is_active = body.is_active;
+  if ("category" in body) updates.category = body.category ?? null;
+
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: "업데이트할 필드 없음" }, { status: 400 });
   }
+
   const service = createServiceClient();
-  const { error } = await service.from("products").update({ is_active }).eq("id", id);
+  const { error } = await service.from("products").update(updates).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

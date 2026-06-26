@@ -14,6 +14,7 @@ export type Product = {
   tag: string | null;
   is_video: boolean | null;
   description?: string;
+  category?: string | null;
 };
 
 const CATEGORIES = [
@@ -56,6 +57,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [confirm, setConfirm] = useState<{ id: string; toActive: boolean } | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
+  const [catDragOver, setCatDragOver] = useState<string | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
   const dragId = useRef<string | null>(null);
   const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -77,6 +79,19 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       setProducts(prev => prev.map(p => p.id === confirm.id ? { ...p, is_active: confirm.toActive } : p));
     }
     setConfirm(null);
+  };
+
+  const handleCategoryDrop = async (categoryTag: string | null) => {
+    setCatDragOver(null);
+    if (!dragId.current) return;
+    const id = dragId.current;
+    dragId.current = null;
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, category: categoryTag } : p));
+    await fetch("/api/admin/products", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, category: categoryTag }),
+    });
   };
 
   const handleDrop = async (targetId: string) => {
@@ -115,15 +130,20 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       {isAdmin && (
         <div className="flex flex-col gap-8 pt-4">
           {CATEGORIES.map((cat, catIdx) => {
-            const catProducts = products.filter(p => cat.slugs.includes(p.slug));
-            if (catProducts.length === 0) return null;
+            const catProducts = products.filter(p => p.category === cat.tag);
             const isBig = catIdx % 2 === 0;
             const cardW = isBig ? 180 : 120;
             const cardH = isBig ? 220 : 120;
             const fontSize = isBig ? 13 : 10;
             const badgeFontSize = isBig ? 10 : 8;
             return (
-              <div key={cat.tag}>
+              <div
+                key={cat.tag}
+                onDragOver={e => { e.preventDefault(); setCatDragOver(cat.tag); }}
+                onDragLeave={() => setCatDragOver(null)}
+                onDrop={() => handleCategoryDrop(cat.tag)}
+                style={{ borderRadius: 16, border: catDragOver === cat.tag ? "2px dashed rgba(255,255,255,0.5)" : "2px solid transparent", transition: "border 0.15s", padding: "0 0 4px" }}
+              >
                 <div className="px-4 flex items-center justify-between mb-3">
                   <div>
                     <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 700, marginBottom: 2, letterSpacing: 1 }}>{cat.tag}</p>
@@ -131,6 +151,11 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                   </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
                 </div>
+                {catProducts.length === 0 && (
+                  <div style={{ margin: "0 16px", height: 60, borderRadius: 12, border: "2px dashed rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>여기로 드래그해서 상품 추가</p>
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
                   {catProducts.map((product, i) => {
                     const imageUrl = product.image_url;
@@ -180,7 +205,21 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       )}
 
       {/* 전체 상품 카드 목록 — admin 전용 */}
-      <div className={`px-4 flex flex-col gap-4 ${isAdmin ? "pt-4" : "pt-2"}`}>
+      <div
+        className={`px-4 flex flex-col gap-4 ${isAdmin ? "pt-4" : "pt-2"}`}
+        onDragOver={e => { if (isAdmin) e.preventDefault(); setCatDragOver("__none__"); }}
+        onDragLeave={() => setCatDragOver(null)}
+        onDrop={() => handleCategoryDrop(null)}
+        style={catDragOver === "__none__" ? { outline: "2px dashed rgba(255,255,255,0.4)", borderRadius: 16 } : {}}
+      >
+        {isAdmin && (
+          <div className="px-0 flex items-center justify-between mb-1">
+            <div>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700, marginBottom: 2, letterSpacing: 1 }}>전체</p>
+              <p style={{ fontSize: 18, color: "#fff", fontWeight: 900, lineHeight: 1.3 }}>상품 전체보기</p>
+            </div>
+          </div>
+        )}
         {products.map((product, index) => {
           const active = product.is_active;
           const comingSoon = !isAdmin && !active;
