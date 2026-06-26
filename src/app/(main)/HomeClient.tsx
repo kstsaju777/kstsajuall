@@ -57,9 +57,14 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [confirm, setConfirm] = useState<{ id: string; toActive: boolean } | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
-  const [catDragOver, setCatDragOver] = useState<string | null>(null);
+  const [catDragOver, setCatDragOver] = useState<string | null>(null); // 카테고리 섹션 drop 하이라이트
+  const [cardDragOver, setCardDragOver] = useState<string | null>(null); // 카테고리 내 카드 drop 하이라이트
+  const [catSlots, setCatSlots] = useState<Record<string, number>>(() =>
+    Object.fromEntries(CATEGORIES.map(c => [c.tag, 0]))
+  );
   const [slideIndex, setSlideIndex] = useState(0);
   const dragId = useRef<string | null>(null);
+  const dragSource = useRef<"list" | "cat" | null>(null); // 드래그 출처
   const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 드래그 중 화면 가장자리에서 자동 스크롤
@@ -100,19 +105,61 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
     setConfirm(null);
   };
 
+  const patchCategory = async (id: string, category: string | null) => {
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, category } : p));
+    await fetch("/api/admin/products", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, category }),
+    });
+  };
+
+  // 카테고리 섹션 전체 영역에 드롭 (빈 공간)
   const handleCategoryDrop = async (categoryTag: string | null) => {
     setCatDragOver(null);
     if (!dragId.current) return;
     const id = dragId.current;
     dragId.current = null;
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, category: categoryTag } : p));
-    await fetch("/api/admin/products", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, category: categoryTag }),
-    });
+    dragSource.current = null;
+    await patchCategory(id, categoryTag);
   };
 
+  // 카테고리 내 카드에 드롭 → 순서 변경 or 카테고리 이동
+  const handleCardDropInCat = async (targetId: string, targetCat: string) => {
+    setCardDragOver(null);
+    if (!dragId.current || dragId.current === targetId) return;
+    const srcId = dragId.current;
+    dragId.current = null;
+    dragSource.current = null;
+
+    const src = products.find(p => p.id === srcId);
+    if (!src) return;
+
+    if (src.category === targetCat) {
+      // 같은 카테고리 내 순서 변경
+      const catList = products.filter(p => p.category === targetCat);
+      const fromIdx = catList.findIndex(p => p.id === srcId);
+      const toIdx = catList.findIndex(p => p.id === targetId);
+      const next = [...catList];
+      const [moved] = next.splice(fromIdx, 1);
+      next.splice(toIdx, 0, moved);
+      const reordered = products.map(p => {
+        const newIdx = next.findIndex(n => n.id === p.id);
+        return newIdx >= 0 ? { ...p, display_order: (newIdx + 1) * 10 } : p;
+      });
+      setProducts(reordered);
+      await fetch("/api/admin/products", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orders: next.map((x, i) => ({ id: x.id, display_order: (i + 1) * 10 })) }),
+      });
+    } else {
+      // 다른 카테고리로 이동
+      await patchCategory(srcId, targetCat);
+    }
+  };
+
+  // 하단 전체 목록 내 순서 변경
   const handleDrop = async (targetId: string) => {
     setDragOver(null);
     if (!dragId.current || dragId.current === targetId) return;
@@ -124,6 +171,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
     const reordered = next.map((x, i) => ({ ...x, display_order: (i + 1) * 10 }));
     setProducts(reordered);
     dragId.current = null;
+    dragSource.current = null;
     await fetch("/api/admin/products", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -155,13 +203,17 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             const cardH = isBig ? 220 : 120;
             const fontSize = isBig ? 13 : 10;
             const badgeFontSize = isBig ? 10 : 8;
+            const extraSlots = catSlots[cat.tag] ?? 0;
+            const totalSlots = Math.min(10, catProducts.length + extraSlots);
+            const emptySlots = Math.max(0, totalSlots - catProducts.length);
+            const canAddSlot = totalSlots < 10;
             return (
               <div
                 key={cat.tag}
                 onDragOver={e => { e.preventDefault(); setCatDragOver(cat.tag); }}
-                onDragLeave={() => setCatDragOver(null)}
+                onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setCatDragOver(null); }}
                 onDrop={() => handleCategoryDrop(cat.tag)}
-                style={{ borderRadius: 16, border: catDragOver === cat.tag ? "2px dashed rgba(255,255,255,0.5)" : "2px solid transparent", transition: "border 0.15s", padding: "0 0 4px" }}
+                style={{ borderRadius: 16, border: catDragOver === cat.tag ? "2px dashed rgba(255,255,255,0.4)" : "2px solid transparent", transition: "border 0.15s", padding: "0 0 4px" }}
               >
                 <div className="px-4 flex items-center justify-between mb-3">
                   <div>
@@ -170,25 +222,29 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                   </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
                 </div>
-                {catProducts.length === 0 && (
-                  <div style={{ margin: "0 16px", height: 60, borderRadius: 12, border: "2px dashed rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>여기로 드래그해서 상품 추가</p>
-                  </div>
-                )}
                 <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
                   {catProducts.map((product, i) => {
                     const imageUrl = product.image_url;
                     const isDummy = !imageUrl;
                     const isVideo = product.is_video ?? false;
+                    const isCardOver = cardDragOver === product.id;
                     return (
-                      <Link
+                      <div
                         key={product.id}
-                        href={`/saju/${product.slug}`}
+                        draggable
+                        onDragStart={e => { e.stopPropagation(); dragId.current = product.id; dragSource.current = "cat"; }}
+                        onDragOver={e => { e.preventDefault(); e.stopPropagation(); setCardDragOver(product.id); setCatDragOver(null); }}
+                        onDragLeave={() => setCardDragOver(null)}
+                        onDrop={e => { e.stopPropagation(); handleCardDropInCat(product.id, cat.tag); }}
+                        onDragEnd={() => { dragId.current = null; dragSource.current = null; setCardDragOver(null); }}
                         style={{
                           flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
-                          overflow: "hidden", position: "relative", display: "block",
+                          overflow: "hidden", position: "relative", cursor: "grab",
                           background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
                           opacity: product.is_active ? 1 : 0.6,
+                          outline: isCardOver ? "2px solid rgba(255,255,255,0.7)" : "none",
+                          transition: "outline 0.1s, transform 0.1s",
+                          transform: isCardOver ? "scale(0.96)" : "scale(1)",
                         }}
                       >
                         {!isDummy && (isVideo ? (
@@ -213,9 +269,42 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         {!product.is_active && (
                           <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.5)", borderRadius: 8, padding: "2px 5px", fontSize: 8, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>비공개</div>
                         )}
-                      </Link>
+                      </div>
                     );
                   })}
+
+                  {/* 빈 슬롯들 */}
+                  {Array.from({ length: emptySlots }).map((_, i) => (
+                    <div
+                      key={`empty-${i}`}
+                      onDragOver={e => { e.preventDefault(); e.stopPropagation(); setCatDragOver(`${cat.tag}-slot`); }}
+                      onDragLeave={() => setCatDragOver(null)}
+                      onDrop={e => { e.stopPropagation(); handleCategoryDrop(cat.tag); }}
+                      style={{
+                        flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
+                        border: catDragOver === `${cat.tag}-slot` ? "2px dashed rgba(255,255,255,0.7)" : "2px dashed rgba(255,255,255,0.25)",
+                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6,
+                        background: catDragOver === `${cat.tag}-slot` ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
+                        transition: "border 0.15s, background 0.15s",
+                      }}
+                    >
+                      <span style={{ fontSize: isBig ? 22 : 16, color: "rgba(255,255,255,0.2)", lineHeight: 1 }}>+</span>
+                      <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 9, fontWeight: 700, margin: 0 }}>드래그</p>
+                    </div>
+                  ))}
+
+                  {/* + 슬롯 추가 버튼 */}
+                  {canAddSlot && (
+                    <button
+                      onClick={() => setCatSlots(prev => ({ ...prev, [cat.tag]: (prev[cat.tag] ?? 0) + 1 }))}
+                      style={{
+                        flexShrink: 0, width: isBig ? 44 : 36, height: cardH, borderRadius: isBig ? 16 : 12,
+                        border: "2px dashed rgba(255,255,255,0.15)", background: "transparent",
+                        color: "rgba(255,255,255,0.2)", fontSize: isBig ? 20 : 16, cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}
+                    >+</button>
+                  )}
                 </div>
               </div>
             );
