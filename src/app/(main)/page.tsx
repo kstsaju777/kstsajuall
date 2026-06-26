@@ -398,7 +398,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
       </div>
 
       {/* 인디케이터 */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: -8 }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: -24 }}>
         {products.map((_, i) => (
           <button
             key={i}
