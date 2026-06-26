@@ -23,6 +23,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [dragOver, setDragOver] = useState<string | null>(null);
   const dragId = useRef<string | null>(null);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/check")
@@ -71,6 +73,16 @@ export default function HomePage() {
     });
   };
 
+  // 슬라이드 자동 재생
+  useEffect(() => {
+    const visibleProducts = products.filter(p => isAdmin || p.is_active);
+    if (visibleProducts.length <= 1) return;
+    slideTimer.current = setInterval(() => {
+      setSlideIndex(prev => (prev + 1) % visibleProducts.length);
+    }, 3000);
+    return () => { if (slideTimer.current) clearInterval(slideTimer.current); };
+  }, [products, isAdmin]);
+
   const getHref = (slug: string) => {
     if (slug === "premium-saju") return "/saju/total";
     if (slug === "basic-saju") return "/saju/basic";
@@ -82,8 +94,56 @@ export default function HomePage() {
   }
 
   return (
-    <div className="pb-10 px-4 pt-4 flex flex-col gap-4">
+    <div className="pb-10 flex flex-col gap-4">
 
+      {/* 상단 슬라이드 배너 */}
+      {(() => {
+        const slideProducts = products.filter(p => isAdmin || p.is_active);
+        if (slideProducts.length === 0) return null;
+        const current = slideProducts[slideIndex % slideProducts.length];
+        const href = getHref(current.slug);
+        const isVideo = current.is_video ?? false;
+        const imageUrl = current.image_url ?? "/media/hero/hero-3.jpg";
+        return (
+          <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+            <Link href={href} className="block w-full relative" style={{ aspectRatio: "16/9", display: "block" }}>
+              {isVideo ? (
+                <video key={current.id} src={imageUrl} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+              ) : (
+                <img key={current.id} src={imageUrl} alt={current.name} className="w-full h-full object-cover" />
+              )}
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.75))" }} />
+              {current.badge && (
+                <div style={{ position: "absolute", top: 14, left: 16 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: "#9b2335", color: "#fff" }}>{current.badge}</span>
+                </div>
+              )}
+              <div style={{ position: "absolute", bottom: 36, left: 16, right: 16 }}>
+                <p style={{ color: "#fff", fontWeight: 900, fontSize: 22, lineHeight: 1.3, margin: "0 0 6px", textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>{current.name}</p>
+                {current.description && (
+                  <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, margin: 0 }}>{current.description}</p>
+                )}
+              </div>
+              <div style={{ position: "absolute", bottom: 14, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 5 }}>
+                {slideProducts.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); if (slideTimer.current) clearInterval(slideTimer.current); setSlideIndex(i); }}
+                    style={{
+                      width: i === slideIndex % slideProducts.length ? 20 : 6,
+                      height: 6, borderRadius: 3, border: "none", padding: 0,
+                      background: i === slideIndex % slideProducts.length ? "#fff" : "rgba(255,255,255,0.4)",
+                      transition: "width 0.3s, background 0.3s", cursor: "pointer",
+                    }}
+                  />
+                ))}
+              </div>
+            </Link>
+          </div>
+        );
+      })()}
+
+      <div className="px-4 pt-2 flex flex-col gap-4">
       {products.map((product) => {
         const active = product.is_active;
         const comingSoon = !isAdmin && !active;
@@ -194,6 +254,7 @@ export default function HomePage() {
           + 새 상품 추가 (어드민 패널에서)
         </button>
       )}
+      </div>
 
       {confirm && (
         <div style={{
