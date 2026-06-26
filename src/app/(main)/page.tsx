@@ -388,18 +388,21 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                   <img src={imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 )}
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.8))" }} />
-                {/* 회전 중에만 보이는 3D 텍스트 */}
+                {/* 드래그 중 카드와 함께 돌아가는 3D 텍스트 */}
                 <div style={{
                   position: "absolute", bottom: 14, left: 12, right: 12,
                   opacity: dragging ? 1 : 0,
-                  transition: "opacity 0.15s",
+                  transition: "opacity 0.2s",
                 }}>
                   {product.badge && (
                     <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 4 }}>
                       {product.badge}
                     </span>
                   )}
-                  <p style={{ color: "#fff", fontWeight: 900, fontSize: 14, lineHeight: 1.3, margin: 0 }}>{product.name}</p>
+                  <p style={{ color: "#fff", fontWeight: 900, fontSize: 14, lineHeight: 1.3, margin: "0 0 2px" }}>{product.name}</p>
+                  {product.description && (
+                    <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, margin: 0 }}>{product.description}</p>
+                  )}
                 </div>
                 {isCurrent && !isDragging.current && (
                   <Link href={href} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
@@ -426,7 +429,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 transform: "translateX(-50%)",
                 width: CARD_W - 24,
                 opacity: dragging ? 0 : 1,
-                transition: dragging ? "opacity 0.1s" : "opacity 0.35s ease 0.2s",
+                transition: dragging ? "opacity 0.15s" : "opacity 0.3s ease 0.1s",
                 pointerEvents: "none",
               }}>
                 {current.badge && (
