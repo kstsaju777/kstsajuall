@@ -263,22 +263,28 @@ function LoginInner() {
                 style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
               />
               <span style={{ color: "#9c8472", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>@</span>
-              <EmailDomainSelect
-                value={emailDomain}
-                onChange={(v) => { setEmailDomain(v); setCustomDomain(""); }}
-                domains={EMAIL_DOMAINS}
-              />
+              {emailDomain === "직접입력" ? (
+                <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 4 }}>
+                  <input
+                    value={customDomain}
+                    onChange={(e) => setCustomDomain(e.target.value)}
+                    placeholder="직접 입력"
+                    autoCapitalize="none"
+                    autoFocus
+                    className="flex-1 min-w-0 px-3 py-3 rounded-xl text-[13px] outline-none"
+                    style={{ background: "#f0e8e0", border: "1px solid #9b2335", color: "#3a2820" }}
+                  />
+                  <button type="button" onClick={() => { setEmailDomain(""); setCustomDomain(""); }}
+                    style={{ flexShrink: 0, fontSize: 16, color: "#b0a090", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
+                </div>
+              ) : (
+                <EmailDomainSelect
+                  value={emailDomain}
+                  onChange={(v) => { setEmailDomain(v); setCustomDomain(""); }}
+                  domains={EMAIL_DOMAINS}
+                />
+              )}
             </div>
-            {emailDomain === "직접입력" && (
-              <input
-                value={customDomain}
-                onChange={(e) => setCustomDomain(e.target.value)}
-                placeholder="도메인 직접 입력 (예: company.com)"
-                autoCapitalize="none"
-                className="w-full px-3 py-3 rounded-xl text-[14px] outline-none"
-                style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
-              />
-            )}
             <p className="text-[11px] pl-1" style={{ color: "#b0a090" }}>비밀번호 재설정 시 사용됩니다</p>
           </div>
         )}
