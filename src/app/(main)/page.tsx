@@ -53,7 +53,7 @@ export default function HomePage() {
   };
 
   const getHref = (slug: string) => {
-    if (slug === "premium-saju") return "/saju/jeongtong";
+    if (slug === "premium-saju") return "/saju/total";
     if (slug === "basic-saju") return "/saju/basic";
     return `/saju/${slug}`;
   };
@@ -104,7 +104,7 @@ export default function HomePage() {
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <p className="text-white font-bold text-[18px] leading-tight">{product.name}</p>
-                    <p className="text-white/80 text-[12px] mt-1">{product.price.toLocaleString()}원</p>
+                    {product.description && <p className="text-white/80 text-[12px] mt-1">{product.description}</p>}
                   </div>
                 </>
               )}
