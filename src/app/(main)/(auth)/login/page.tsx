@@ -26,7 +26,12 @@ function LoginInner() {
   const [idInput, setIdInput] = useState("");
   const [pwInput, setPwInput] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
-  const [emailInput, setEmailInput] = useState("");
+  const [emailLocal, setEmailLocal] = useState("");
+  const [emailDomain, setEmailDomain] = useState("naver.com");
+  const [customDomain, setCustomDomain] = useState("");
+  const emailInput = emailLocal + "@" + (emailDomain === "직접입력" ? customDomain : emailDomain);
+
+  const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "nate.com", "직접입력"];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [legalDoc, setLegalDoc] = useState<"terms" | "privacy" | null>(null);
@@ -70,8 +75,9 @@ function LoginInner() {
         setLoading(false);
         return;
       }
-      if (!emailInput.trim() || !emailInput.includes("@")) {
-        setError("실제 이메일 주소를 입력해주세요.");
+      const finalDomain = emailDomain === "직접입력" ? customDomain.trim() : emailDomain;
+      if (!emailLocal.trim() || !finalDomain) {
+        setError("이메일 주소를 입력해주세요.");
         setLoading(false);
         return;
       }
@@ -199,14 +205,38 @@ function LoginInner() {
           style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
         />
         {mode === "signup" && (
-          <input
-            type="email"
-            value={emailInput}
-            onChange={(e) => setEmailInput(e.target.value)}
-            placeholder="이메일 주소 (비밀번호 재설정용)"
-            className="w-full px-4 py-3 rounded-xl text-[14px] outline-none"
-            style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
-          />
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <input
+                value={emailLocal}
+                onChange={(e) => setEmailLocal(e.target.value)}
+                placeholder="이메일 아이디"
+                autoCapitalize="none"
+                className="flex-1 min-w-0 px-3 py-3 rounded-xl text-[14px] outline-none"
+                style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+              />
+              <span style={{ color: "#9c8472", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>@</span>
+              <select
+                value={emailDomain}
+                onChange={(e) => { setEmailDomain(e.target.value); setCustomDomain(""); }}
+                className="flex-1 min-w-0 px-2 py-3 rounded-xl text-[13px] outline-none appearance-none"
+                style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+              >
+                {EMAIL_DOMAINS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            {emailDomain === "직접입력" && (
+              <input
+                value={customDomain}
+                onChange={(e) => setCustomDomain(e.target.value)}
+                placeholder="도메인 직접 입력 (예: company.com)"
+                autoCapitalize="none"
+                className="w-full px-3 py-3 rounded-xl text-[14px] outline-none"
+                style={{ background: "#f0e8e0", border: "1px solid #ddd0c4", color: "#3a2820" }}
+              />
+            )}
+            <p className="text-[11px] pl-1" style={{ color: "#b0a090" }}>비밀번호 재설정 시 사용됩니다</p>
+          </div>
         )}
         {error && <p className="text-[12px] text-center" style={{ color: "#c0392b" }}>{error}</p>}
         <button
