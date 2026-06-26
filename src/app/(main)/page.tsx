@@ -271,9 +271,9 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
   const isDragging = useRef(false);
   const idx = slideIndex;
 
-  const CARD_W = 260;
-  const CARD_GAP = 16;
-  const STEP = CARD_W + CARD_GAP;
+  const CARD_W = 240;
+  const CARD_GAP = 12;
+  const STEP = CARD_W - 28; // 양옆 카드 겹치게 해서 스와이프 유도
 
   const goTo = (i: number) => {
     if (slideTimer.current) clearInterval(slideTimer.current);
