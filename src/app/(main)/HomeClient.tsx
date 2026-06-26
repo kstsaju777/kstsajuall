@@ -111,12 +111,17 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       )}
 
 
-      {/* 카테고리 섹션 — admin 전용 */}
+      {/* 카테고리 섹션 — admin 전용 (짝수=큰카드, 홀수=작은카드 지그재그) */}
       {isAdmin && (
         <div className="flex flex-col gap-8 pt-4">
-          {CATEGORIES.map((cat) => {
+          {CATEGORIES.map((cat, catIdx) => {
             const catProducts = products.filter(p => cat.slugs.includes(p.slug));
             if (catProducts.length === 0) return null;
+            const isBig = catIdx % 2 === 0;
+            const cardW = isBig ? 180 : 120;
+            const cardH = isBig ? 220 : 120;
+            const fontSize = isBig ? 13 : 10;
+            const badgeFontSize = isBig ? 10 : 8;
             return (
               <div key={cat.tag}>
                 <div className="px-4 flex items-center justify-between mb-3">
@@ -126,7 +131,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                   </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
                 </div>
-                <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
+                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
                   {catProducts.map((product, i) => {
                     const imageUrl = product.image_url;
                     const isDummy = !imageUrl;
@@ -136,7 +141,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         key={product.id}
                         href={`/saju/${product.slug}`}
                         style={{
-                          flexShrink: 0, width: 140, height: 140, borderRadius: 14,
+                          flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
                           overflow: "hidden", position: "relative", display: "block",
                           background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
                           opacity: product.is_active ? 1 : 0.6,
@@ -149,20 +154,20 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         ))}
                         {isDummy && (
                           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, fontWeight: 700 }}>준비중</p>
+                            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 10, fontWeight: 700 }}>준비중</p>
                           </div>
                         )}
-                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8))" }} />
-                        <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85))" }} />
+                        <div style={{ position: "absolute", bottom: isBig ? 12 : 8, left: isBig ? 12 : 8, right: isBig ? 12 : 8 }}>
                           {product.badge && (
-                            <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 3 }}>
+                            <span style={{ display: "inline-block", fontSize: badgeFontSize, fontWeight: 700, padding: "1px 5px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 3 }}>
                               {product.badge}
                             </span>
                           )}
-                          <p style={{ color: "#fff", fontWeight: 800, fontSize: 12, lineHeight: 1.3, margin: 0 }}>{product.name}</p>
+                          <p style={{ color: "#fff", fontWeight: 800, fontSize, lineHeight: 1.3, margin: 0 }}>{product.name}</p>
                         </div>
                         {!product.is_active && (
-                          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.5)", borderRadius: 8, padding: "2px 6px", fontSize: 9, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>비공개</div>
+                          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.5)", borderRadius: 8, padding: "2px 5px", fontSize: 8, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>비공개</div>
                         )}
                       </Link>
                     );
