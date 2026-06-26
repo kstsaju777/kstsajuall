@@ -264,18 +264,18 @@ function LoginInner() {
               />
               <span style={{ color: "#9c8472", fontSize: 16, fontWeight: 700, flexShrink: 0 }}>@</span>
               {emailDomain === "직접입력" ? (
-                <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 4 }}>
+                <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
                   <input
                     value={customDomain}
                     onChange={(e) => setCustomDomain(e.target.value)}
                     placeholder="직접 입력"
                     autoCapitalize="none"
                     autoFocus
-                    className="flex-1 min-w-0 px-3 py-3 rounded-xl text-[13px] outline-none"
-                    style={{ background: "#f0e8e0", border: "1px solid #9b2335", color: "#3a2820" }}
+                    className="w-full px-3 py-3 rounded-xl text-[13px] outline-none"
+                    style={{ background: "#f0e8e0", border: "1px solid #9b2335", color: "#3a2820", paddingRight: 28 }}
                   />
                   <button type="button" onClick={() => { setEmailDomain(""); setCustomDomain(""); }}
-                    style={{ flexShrink: 0, fontSize: 16, color: "#b0a090", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
+                    style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "#b0a090", background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
                 </div>
               ) : (
                 <EmailDomainSelect
