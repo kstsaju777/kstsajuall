@@ -388,11 +388,9 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                   <img src={imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 )}
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.8))" }} />
-                {/* 드래그 중 카드와 함께 돌아가는 3D 텍스트 */}
+                {/* 항상 보이는 3D 텍스트 — 카드와 함께 돌아감 */}
                 <div style={{
                   position: "absolute", bottom: 14, left: 12, right: 12,
-                  opacity: dragging ? 1 : 0,
-                  transition: "opacity 0.2s",
                 }}>
                   {product.badge && (
                     <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 4 }}>
@@ -429,7 +427,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 transform: "translateX(-50%)",
                 width: CARD_W - 24,
                 opacity: dragging ? 0 : 1,
-                transition: dragging ? "opacity 0.15s" : "opacity 0.25s ease 0.5s",
+                transition: dragging ? "opacity 0.15s" : "opacity 0.25s ease 0.55s",
                 pointerEvents: "none",
               }}>
                 {current.badge && (
