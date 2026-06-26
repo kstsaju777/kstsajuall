@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
 export type Product = {
@@ -64,8 +65,10 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   );
   const [slideIndex, setSlideIndex] = useState(0);
   const dragId = useRef<string | null>(null);
-  const dragSource = useRef<"list" | "cat" | null>(null); // 드래그 출처
+  const dragSource = useRef<"list" | "cat" | null>(null);
+  const hasDragged = useRef(false); // 드래그 vs 클릭 구분
   const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const router = useRouter();
 
   // 드래그 중 화면 가장자리에서 자동 스크롤
   useEffect(() => {
@@ -232,11 +235,12 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                       <div
                         key={product.id}
                         draggable
-                        onDragStart={e => { e.stopPropagation(); dragId.current = product.id; dragSource.current = "cat"; }}
+                        onDragStart={e => { e.stopPropagation(); dragId.current = product.id; dragSource.current = "cat"; hasDragged.current = true; }}
                         onDragOver={e => { e.preventDefault(); e.stopPropagation(); setCardDragOver(product.id); setCatDragOver(null); }}
                         onDragLeave={() => setCardDragOver(null)}
                         onDrop={e => { e.stopPropagation(); handleCardDropInCat(product.id, cat.tag); }}
-                        onDragEnd={() => { dragId.current = null; dragSource.current = null; setCardDragOver(null); }}
+                        onDragEnd={() => { dragId.current = null; dragSource.current = null; setCardDragOver(null); setTimeout(() => { hasDragged.current = false; }, 0); }}
+                        onClick={() => { if (hasDragged.current) return; router.push(`/saju/${product.slug}`); }}
                         style={{
                           flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
                           overflow: "hidden", position: "relative", cursor: "grab",
