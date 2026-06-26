@@ -340,7 +340,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseUp}
         style={{
-          perspective: 600,
+          perspective: 1200,
           height: containerH,
           position: "relative",
           cursor: "grab",
@@ -391,7 +391,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                     {product.badge}
                   </span>
                 )}
-                <div style={{ position: "absolute", bottom: 14, left: 12, right: 12 }}>
+                <div style={{ position: "absolute", bottom: 14, left: 12, right: 12, transform: "translateZ(2px)", WebkitFontSmoothing: "antialiased" } as React.CSSProperties}>
                   <p style={{ color: "#fff", fontWeight: 900, fontSize: 15, lineHeight: 1.3, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>{product.name}</p>
                   {isCurrent && product.description && (
                     <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, margin: "3px 0 0" }}>{product.description}</p>
