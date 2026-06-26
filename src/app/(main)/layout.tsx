@@ -6,23 +6,27 @@ import { getCurrentUser } from "@/lib/auth";
 import { NavTabs } from "@/components/layout/NavTabs";
 import { GoldDust } from "@/components/layout/GoldDust";
 import { SideDrawer } from "@/components/layout/SideDrawer";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { AdminOverlay } from "@/components/admin/AdminOverlay";
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const isLoggedIn = isSupabaseConfigured() ? !!(await getCurrentUser()) : false;
+  const isAdmin = await isAdminAuthenticated();
 
   return (
     <div className="mx-auto w-full max-w-[480px] min-h-screen shadow-2xl relative overflow-hidden" style={{ backgroundColor: "#711b20" }}>
       <GoldDust />
       <div className="relative z-10">
-        <SiteHeader isLoggedIn={isLoggedIn} />
+        <SiteHeader isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
         <main className="min-h-[calc(100vh-7rem)]">{children}</main>
         <SiteFooter />
       </div>
+      {isAdmin && <AdminOverlay />}
     </div>
   );
 }
 
-function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
+function SiteHeader({ isLoggedIn, isAdmin }: { isLoggedIn: boolean; isAdmin: boolean }) {
   return (
     <header className="sticky top-0 z-50" style={{ backgroundColor: "#ffffff" }}>
       <div className="container flex h-14 items-center justify-between">
@@ -38,11 +42,11 @@ function SiteHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           <SideDrawer isLoggedIn={isLoggedIn} />
         </div>
       </div>
-      {/* 심사용 임시 비활성화
-      <Suspense fallback={null}>
-        <NavTabs />
-      </Suspense>
-      */}
+      {isAdmin && (
+        <Suspense fallback={null}>
+          <NavTabs />
+        </Suspense>
+      )}
     </header>
   );
 }

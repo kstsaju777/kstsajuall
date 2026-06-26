@@ -9,7 +9,7 @@ type SearchParams = Promise<{ from?: string; error?: string; unconfigured?: stri
 
 export default async function AdminLoginPage({ searchParams }: { searchParams: SearchParams }) {
   const { from, error, unconfigured } = await searchParams;
-  const dest = from && from.startsWith("/admin") ? from : "/admin";
+  const dest = from && from.startsWith("/") ? from : "/";
 
   // 이미 인증돼 있으면 바로 통과
   if (await isAdminAuthenticated()) redirect(dest);
@@ -18,7 +18,7 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: S
     "use server";
     const password = String(formData.get("password") ?? "");
     const fromField = String(formData.get("from") ?? "/admin");
-    const target = fromField.startsWith("/admin") ? fromField : "/admin";
+    const target = fromField.startsWith("/") ? fromField : "/";
     const ok = await setAdminCookie(password);
     if (!ok) {
       redirect(`/admin/login?from=${encodeURIComponent(target)}&error=1`);
