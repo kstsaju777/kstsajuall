@@ -4,14 +4,13 @@ import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
 
 const TABS = [
-  { label: "전체",  category: "" },
-  { label: "무료",  category: "무료" },
-  { label: "재물",  category: "재물" },
-  { label: "연애",  category: "연애" },
-  { label: "재회",  category: "재회" },
-  { label: "결혼",  category: "결혼" },
-  { label: "자녀",  category: "자녀" },
-  { label: "기타",  category: "기타" },
+  { label: "전체", category: "" },
+  { label: "종합", category: "종합" },
+  { label: "재물", category: "재물" },
+  { label: "사랑", category: "사랑" },
+  { label: "가족", category: "가족" },
+  { label: "기타", category: "기타" },
+  { label: "무료", category: "무료" },
 ];
 
 const RED = "#711b20";
