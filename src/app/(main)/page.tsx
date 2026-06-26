@@ -311,7 +311,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 borderRadius: 16,
                 overflow: "hidden",
                 position: "relative",
-                aspectRatio: "3/4",
+                aspectRatio: "1/1",
                 cursor: isCurrent ? "pointer" : "pointer",
                 transform: isCurrent ? "scale(1)" : "scale(0.93)",
                 transition: "transform 0.35s",
