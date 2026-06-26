@@ -315,7 +315,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
     mouseStartX.current = null;
   };
 
-  const containerH = CARD_W + 60;
+  const containerH = CARD_W + 16;
   const isMoving = offset !== 0;
 
   // 드래그 중 기울기 각도 (최대 ±12도)
@@ -398,7 +398,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
       </div>
 
       {/* 인디케이터 */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: -44 }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 6 }}>
         {products.map((_, i) => (
           <button
             key={i}
