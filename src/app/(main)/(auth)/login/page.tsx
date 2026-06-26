@@ -124,13 +124,27 @@ function LoginInner() {
         setLoading(false);
         return;
       }
-      const { error: err } = await supabase.auth.signUp({
+      // 중복 아이디 확인 — 먼저 로그인 시도해서 이미 존재하는지 체크
+      const { error: checkErr } = await supabase.auth.signInWithPassword({ email, password: "##check##" });
+      if (!checkErr || checkErr.message.includes("Invalid login credentials") === false) {
+        // 에러가 "Invalid login credentials"가 아니면 유저가 존재하는 것
+        if (!checkErr || checkErr.message.includes("Email not confirmed") || checkErr.message.includes("already registered")) {
+          setError("이미 사용 중인 아이디입니다.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const { data: signUpData, error: err } = await supabase.auth.signUp({
         email,
         password: pwInput,
         options: { data: { display_name: idInput.trim(), real_email: emailInput.trim() } },
       });
       if (err) {
         setError(err.message.includes("already") ? "이미 사용 중인 아이디입니다." : "회원가입에 실패했습니다.");
+        setLoading(false);
+      } else if (signUpData.user && signUpData.user.identities?.length === 0) {
+        setError("이미 사용 중인 아이디입니다.");
         setLoading(false);
       } else {
         router.push(redirectTo);
