@@ -324,8 +324,8 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
     mouseStartX.current = null;
   };
 
-  const CARD_W = 200;
-  const radius = Math.max(130, Math.round(CARD_W / (2 * Math.tan(Math.PI / n)) * 0.75));
+  const CARD_W = 260;
+  const radius = Math.max(150, Math.round(CARD_W / (2 * Math.tan(Math.PI / n)) * 0.72));
   const containerH = CARD_W + 80;
 
   return (
