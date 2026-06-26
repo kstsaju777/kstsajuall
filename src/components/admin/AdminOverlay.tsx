@@ -65,7 +65,7 @@ export function AdminOverlay() {
       <button
         onClick={() => setOpen(v => !v)}
         style={{
-          position: "fixed", top: 12, right: 12, zIndex: 9999,
+          position: "fixed", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 9999,
           background: open ? "#111" : "#9b2335",
           color: "#fff", border: "none", borderRadius: 20,
           padding: "6px 14px", fontSize: 12, fontWeight: 700,
