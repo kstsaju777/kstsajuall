@@ -720,6 +720,8 @@ function CheckoutContent() {
     const email = searchParams.get("email") ?? "";
     if (email) {
       try {
+        const reportParams = new URLSearchParams({ name, date, time, calendar, gender, email });
+        const reportUrl = `https://www.hongyeondang.com/saju/jeongtong/report-preview?${reportParams.toString()}`;
         await fetch("/api/send-order-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -728,6 +730,7 @@ function CheckoutContent() {
             customerName: name,
             productName: product.name,
             price: product.price,
+            reportUrl,
           }),
         });
       } catch (e) {

@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
-    const { customerEmail, customerName, productName, price } = await req.json();
+    const { customerEmail, customerName, productName, price, reportUrl } = await req.json();
 
     const { data, error } = await resend.emails.send({
       from: "홍연당 <support@villionhive.com>",
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
             <!-- 버튼 -->
             <div style="text-align: center;">
-              <a href="https://www.hongyeondang.com" style="display: inline-block; background: #9b2335; color: #ffffff; font-size: 16px; font-weight: bold; padding: 16px 40px; border-radius: 50px; text-decoration: none;">
+              <a href="${reportUrl ?? "https://www.hongyeondang.com"}" style="display: inline-block; background: #9b2335; color: #ffffff; font-size: 16px; font-weight: bold; padding: 16px 40px; border-radius: 50px; text-decoration: none;">
                 리포트 확인하러 가기
               </a>
             </div>
