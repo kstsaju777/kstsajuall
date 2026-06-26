@@ -110,6 +110,7 @@ function LoginInner() {
         setLoading(false);
       } else {
         router.push(redirectTo);
+        router.refresh();
       }
     } else {
       if (pwInput.length < 6) {
@@ -133,6 +134,7 @@ function LoginInner() {
         setLoading(false);
       } else {
         router.push(redirectTo);
+        router.refresh();
       }
     }
   }
