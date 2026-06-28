@@ -375,6 +375,47 @@ function StepIntro({ onNext }: { onNext: () => void }) {
   );
 }
 
+// ─── Step 10: 중간 타이핑 모션 ───────────────────────────────────────────────
+function StepIntro2({ onNext }: { onNext: () => void }) {
+  const SCENES = ["과거를 회상하느라\n고생많았소...", "이제 마지막\n단계만 남았소!"];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) {
+            setScene((s) => s + 1);
+          } else {
+            setTimeout(onNext, 700);
+          }
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]);
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#ff6b9d", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Step 5: 성별 + 태어난 시간 ───────────────────────────────────────────────
 function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void; onNext: (gender: string, date: string, time: string, calendar: string, name: string) => void; initial?: string; isPartner?: boolean }) {
   const prefix = isPartner ? "상대방의" : "나의";
@@ -929,7 +970,7 @@ export default function JaehweFormPage() {
   return (
     <>
       {step === 4 && <StepIntro onNext={() => setStep(5)} />}
-      {(step <= 3 || (step >= 5 && step <= 10)) && (
+      {(step <= 3 || (step >= 5 && step <= 9) || step === 11) && (
         <FormShell>
           {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
@@ -957,12 +998,13 @@ export default function JaehweFormPage() {
               myDate={form.date} myTime={form.time} myCalendar={form.calendar} myName={form.name}
               partnerDate={form.partnerDate} partnerTime={form.partnerTime} partnerCalendar={form.partnerCalendar} partnerName={form.partnerName} />
           )}
-          {step === 10 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(9)} onNext={(email) => next({ email }, 11)} />
+          {step === 11 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(10)} onNext={(email) => next({ email }, 12)} />
           )}
         </FormShell>
       )}
-      {step === 11 && (
+      {step === 10 && <StepIntro2 onNext={() => setStep(11)} />}
+      {step === 12 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""}
