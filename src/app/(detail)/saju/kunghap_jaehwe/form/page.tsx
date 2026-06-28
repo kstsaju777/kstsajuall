@@ -64,10 +64,12 @@ function FormShell({ children }: { children: React.ReactNode }) {
             "linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(19,25,33,0.3) 50%, rgba(19,25,33,0.75) 65%, rgba(19,25,33,1) 80%)",
         }}
       />
-      {/* 하단 카드 */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <div style={{ height: 56, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
-        {children}
+      {/* 하단 카드 — 높이 60%로 고정, 내용 넘치면 스크롤 */}
+      <div className="absolute bottom-0 left-0 right-0" style={{ maxHeight: "60%", display: "flex", flexDirection: "column" }}>
+        <div style={{ height: 56, flexShrink: 0, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
+        <div style={{ overflowY: "auto", flex: 1 }}>
+          {children}
+        </div>
       </div>
     </div>
   );
