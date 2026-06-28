@@ -376,7 +376,8 @@ function StepIntro({ onNext }: { onNext: () => void }) {
 }
 
 // ─── Step 5: 성별 + 태어난 시간 ───────────────────────────────────────────────
-function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, date: string, time: string, calendar: string, name: string) => void; initial?: string }) {
+function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void; onNext: (gender: string, date: string, time: string, calendar: string, name: string) => void; initial?: string; isPartner?: boolean }) {
+  const prefix = isPartner ? "상대방의" : "나의";
   const [gender, setGender] = useState(initial ?? "");
   const [showDate, setShowDate] = useState(!!initial);
   const [year, setYear]   = useState("");
@@ -412,9 +413,9 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
       <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <div className="px-6 pt-4 pb-3" style={{ backgroundColor: CARD_BG }}>
         {/* 성별 */}
-        <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 성별</p>
+        <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{prefix} 성별</p>
         <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대의 </span>
+          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{isPartner ? "상대방의 " : "그대의 "}</span>
           <span className="font-bold">성별은 무엇이오?</span>
         </h2>
         <div className="flex gap-3 mb-4">
@@ -435,7 +436,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
         {showDate && (
           <div style={{ animation: "slideUp 0.35s ease" }}>
             <div className="w-full mb-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
-            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 태어난 날짜</p>
+            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{prefix} 태어난 날짜</p>
             <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
               <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
               <span className="font-bold">태어난 날짜는?</span>
@@ -493,7 +494,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
             {dateEntered && (
               <div style={{ animation: "slideUp 0.35s ease" }}>
                 <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
-                <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 태어난 시간</p>
+                <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{prefix} 태어난 시간</p>
                 <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
                   <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
                   <span className="font-bold">태어난 시간은?</span>
@@ -569,7 +570,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                     <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
                     <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>이름</p>
                     <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-                      <span className="font-bold">그대의 이름을 알려주시오.</span>
+                      <span className="font-bold">{isPartner ? "상대방의 " : "그대의 "}이름을 알려주시오.</span>
                     </h2>
                     <input
                       type="text" placeholder="홍길동" autoComplete="off"
@@ -616,9 +617,9 @@ function StepName({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v:
 // ─── Step 5: 고민 ─────────────────────────────────────────────────────────────
 const PILLAR_LABELS_JW = ["시주", "일주", "월주", "년주"] as const;
 
-function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }: {
+function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, isPartner }: {
   onPrev: () => void; onSubmit: (v: string) => void; initial?: string;
-  date?: string; btime?: string; calendar?: string; name?: string;
+  date?: string; btime?: string; calendar?: string; name?: string; isPartner?: boolean;
 }) {
 
   const saju = useMemo(() => {
@@ -636,7 +637,7 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }:
         {/* 명식 그리드 */}
         {name && (
           <div className="mb-2">
-            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 사주팔자</p>
+            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{isPartner ? "상대방의" : "나의"} 사주팔자</p>
             <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
               <span className="font-bold" style={{ color: TEXT_CLR }}>{name}님의 </span>
               <span className="font-bold">사주팔자이오</span>
@@ -841,7 +842,7 @@ function StepLoading({ name, date, time, calendar, gender, email }: {
 }
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
-type FormData = { breakupReason: string; whoEnded: string; breakupDate: string; gender: string; date: string; calendar: string; time: string; name: string; concern: string; email: string; };
+type FormData = { breakupReason: string; whoEnded: string; breakupDate: string; gender: string; date: string; calendar: string; time: string; name: string; concern: string; partnerGender: string; partnerDate: string; partnerCalendar: string; partnerTime: string; partnerName: string; email: string; };
 
 export default function JaehweFormPage() {
   const router = useRouter();
@@ -856,7 +857,7 @@ export default function JaehweFormPage() {
   return (
     <>
       {step === 4 && <StepIntro onNext={() => setStep(5)} />}
-      {(step <= 3 || (step >= 5 && step <= 7)) && (
+      {(step <= 3 || (step >= 5 && step <= 9)) && (
         <FormShell>
           {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
@@ -873,12 +874,18 @@ export default function JaehweFormPage() {
               date={form.date} btime={form.time} calendar={form.calendar} name={form.name} />
           )}
           {step === 7 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(6)} onNext={(email) => next({ email }, 8)} />
-
+            <StepGender isPartner initial={form.partnerGender} onPrev={() => setStep(6)} onNext={(gender, date, time, calendar, name) => next({ partnerGender: gender, partnerDate: date, partnerTime: time, partnerCalendar: calendar, partnerName: name }, 8)} />
+          )}
+          {step === 8 && (
+            <StepConcern isPartner initial="" onPrev={() => setStep(7)} onSubmit={() => next({}, 9)}
+              date={form.partnerDate} btime={form.partnerTime} calendar={form.partnerCalendar} name={form.partnerName} />
+          )}
+          {step === 9 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(8)} onNext={(email) => next({ email }, 10)} />
           )}
         </FormShell>
       )}
-      {step === 8 && (
+      {step === 10 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""}
