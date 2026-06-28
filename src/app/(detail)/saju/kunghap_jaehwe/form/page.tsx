@@ -636,7 +636,11 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }:
         {/* 명식 그리드 */}
         {name && (
           <div className="mb-2">
-            <p className="text-[12px] font-medium mb-3" style={{ color: "#8a8a8a" }}>{name}님의 사주팔자</p>
+            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 사주팔자</p>
+            <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
+              <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{name}님의 </span>
+              <span className="font-bold">사주팔자이오</span>
+            </h2>
             <div className="grid grid-cols-4 gap-2">
               {(pillars ?? Array(4).fill(null)).map((p, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
