@@ -115,7 +115,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                   </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
                 </div>
-                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none" }}>
+                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
                   {catProducts.map((product, i) => {
                     const imageUrl = product.image_url;
                     const isDummy = !imageUrl;
@@ -127,6 +127,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         style={{
                           flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
                           overflow: "hidden", position: "relative", cursor: "pointer",
+                          scrollSnapAlign: "start",
                           background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
                           opacity: product.is_active ? 1 : 0.6,
                         }}
