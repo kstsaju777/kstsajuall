@@ -332,7 +332,48 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
   );
 }
 
-// ─── Step 4: 이름 ─────────────────────────────────────────────────────────────
+// ─── Step 4: 타이핑 안내 ──────────────────────────────────────────────────────
+function StepIntro({ onNext }: { onNext: () => void }) {
+  const SCENES = ["적느라 수고 많았소.", "이제 그대들의 정보를 부탁하오."];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) {
+            setScene((s) => s + 1);
+          } else {
+            setTimeout(onNext, 700);
+          }
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]);
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#ff6b9d", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Step 5: 이름 ─────────────────────────────────────────────────────────────
 function StepName({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
   const [name, setName] = useState(initial ?? "");
   return (
@@ -578,7 +619,8 @@ export default function JaehweFormPage() {
 
   return (
     <>
-      {step <= 6 && (
+      {step === 4 && <StepIntro onNext={() => setStep(5)} />}
+      {(step <= 3 || (step >= 5 && step <= 7)) && (
         <FormShell>
           {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
@@ -587,18 +629,18 @@ export default function JaehweFormPage() {
           {step === 3 && (
             <StepBreakupDate initial={form.breakupDate} onPrev={() => setStep(2)} onNext={(breakupDate) => next({ breakupDate }, 4)} />
           )}
-          {step === 4 && (
-            <StepName initial={form.name} onPrev={() => setStep(3)} onNext={(name) => next({ name }, 5)} />
-          )}
           {step === 5 && (
-            <StepConcern initial={form.concern} onPrev={() => setStep(4)} onSubmit={(concern) => next({ concern }, 6)} />
+            <StepName initial={form.name} onPrev={() => setStep(4)} onNext={(name) => next({ name }, 6)} />
           )}
           {step === 6 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(5)} onNext={(email) => next({ email }, 7)} />
+            <StepConcern initial={form.concern} onPrev={() => setStep(5)} onSubmit={(concern) => next({ concern }, 7)} />
+          )}
+          {step === 7 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(6)} onNext={(email) => next({ email }, 8)} />
           )}
         </FormShell>
       )}
-      {step === 7 && (
+      {step === 8 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""}
