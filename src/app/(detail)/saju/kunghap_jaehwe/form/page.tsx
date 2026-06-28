@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { calcSaju, ELEMENT_COLORS } from "@/lib/saju/local-manseryeok";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
 const NAVY       = "#ff6b9d";
@@ -612,13 +613,60 @@ function StepName({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v:
 }
 
 // ─── Step 5: 고민 ─────────────────────────────────────────────────────────────
-function StepConcern({ onPrev, onSubmit, initial }: { onPrev: () => void; onSubmit: (v: string) => void; initial?: string }) {
+const PILLAR_LABELS_JW = ["시주", "일주", "월주", "년주"] as const;
+
+function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }: {
+  onPrev: () => void; onSubmit: (v: string) => void; initial?: string;
+  date?: string; btime?: string; calendar?: string; name?: string;
+}) {
   const [text, setText] = useState(initial ?? "");
   const MAX = 200;
   const filled = text.trim().length > 0;
+
+  const saju = useMemo(() => {
+    if (!date) return null;
+    try {
+      return calcSaju(date, btime ?? "모름", calendar ?? "양력");
+    } catch { return null; }
+  }, [date, btime, calendar]);
+
+  const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
+
   return (
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        {/* 명식 그리드 */}
+        {name && (
+          <div className="mb-5">
+            <p className="text-[12px] font-medium mb-2" style={{ color: "#8a8a8a" }}>{name}님의 사주팔자</p>
+            <div className="grid grid-cols-4 gap-2">
+              {pillars ? pillars.map((p, i) => {
+                const cgC = ELEMENT_COLORS[p.stemClass]   ?? ELEMENT_COLORS.unknown;
+                const jjC = ELEMENT_COLORS[p.branchClass] ?? ELEMENT_COLORS.unknown;
+                return (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <p className="text-[10px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
+                    <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5" style={{ backgroundColor: cgC.bg }}>
+                      <span className="text-[9px] font-medium" style={{ color: cgC.text }}>{p.stemSs || ""}</span>
+                      <span className="text-[24px] font-bold leading-none" style={{ color: cgC.text }}>{p.stem}</span>
+                      <span className="text-[9px]" style={{ color: cgC.text }}>{p.stemHg}</span>
+                    </div>
+                    <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5" style={{ backgroundColor: jjC.bg }}>
+                      <span className="text-[24px] font-bold leading-none" style={{ color: jjC.text }}>{p.branch}</span>
+                      <span className="text-[9px]" style={{ color: jjC.text }}>{p.branchHg}</span>
+                    </div>
+                  </div>
+                );
+              }) : Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <p className="text-[10px] mb-0.5" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
+                  <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.1)" }} />
+                  <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.1)" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
         <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
           고민을 상세히 적어주겠소?{" "}
@@ -850,7 +898,8 @@ export default function JaehweFormPage() {
             <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, date, name) => next({ gender, date, name }, 6)} />
           )}
           {step === 6 && (
-            <StepConcern initial={form.concern} onPrev={() => setStep(5)} onSubmit={(concern) => next({ concern }, 7)} />
+            <StepConcern initial={form.concern} onPrev={() => setStep(5)} onSubmit={(concern) => next({ concern }, 7)}
+              date={form.date} btime={form.time} calendar={form.calendar} name={form.name} />
           )}
           {step === 7 && (
             <StepEmail initial={form.email} onPrev={() => setStep(6)} onNext={(email) => next({ email }, 8)} />
