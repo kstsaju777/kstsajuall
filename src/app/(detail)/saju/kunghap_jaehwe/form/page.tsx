@@ -284,7 +284,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
             이별한 날을 알면{" "}
             <span style={{ color: TEXT_CLR, fontWeight: 700 }}>그때 그대들의 사주가 어떻게 엇갈렸는지</span>,{" "}
-            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>왜 그리 될 수밖에 없었는지</span> 소인이 살펴볼 수 있소이다.
+            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>왜 그리 될 수밖에 없었는지</span> 소인이 살펴볼 수 있소.
           </p>
         </div>
       </div>
