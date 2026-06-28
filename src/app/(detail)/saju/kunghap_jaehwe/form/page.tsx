@@ -674,18 +674,18 @@ function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: s
   const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
   return (
     <div className="flex-1">
-      <p className="text-[13px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}님 사주팔자</p>
-      <div className="grid grid-cols-4 gap-1 rounded-2xl p-2" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+      <p className="text-[14px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}님 사주팔자</p>
+      <div className="grid grid-cols-4 gap-1.5 rounded-2xl p-3" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
-            <span style={{ fontSize: 9, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || " "}</span>
+            <span style={{ fontSize: 10, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || " "}</span>
             <div className="w-full rounded-xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1" }}>
               {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "90%", height: "90%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
             <div className="w-full rounded-xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1" }}>
               {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "90%", height: "90%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
-            <span style={{ fontSize: 9, color: LABEL_CLR, lineHeight: 1 }}>{p?.branchSs || " "}</span>
+            <span style={{ fontSize: 10, color: LABEL_CLR, lineHeight: 1 }}>{p?.branchSs || " "}</span>
           </div>
         ))}
       </div>
@@ -706,7 +706,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         {/* 나 / 상대방 명식 나란히 */}
-        <div className="flex gap-3 mb-5">
+        <div className="flex gap-4 mb-5">
           <MiniMyeongsik date={myDate} time={myTime} calendar={myCalendar} name={myName} />
           <div style={{ width: 1, backgroundColor: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
           <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
