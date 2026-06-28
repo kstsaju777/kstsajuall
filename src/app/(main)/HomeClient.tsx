@@ -164,6 +164,13 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
         </div>
       )}
 
+      {/* 로고 구분선 */}
+      {isAdmin && (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 0" }}>
+          <img src="/logo.png" alt="홍연당" style={{ width: 64, height: 64, objectFit: "contain", opacity: 0.7 }} />
+        </div>
+      )}
+
       {/* 전체 상품 카드 목록 — admin 전용 */}
       <div className={`px-4 flex flex-col gap-4 ${isAdmin ? "pt-4" : "pt-2"}`}>
         {isAdmin && (
