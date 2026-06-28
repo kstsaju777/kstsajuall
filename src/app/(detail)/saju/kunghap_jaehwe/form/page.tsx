@@ -677,7 +677,7 @@ function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: s
       <p className="text-[14px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}님 사주팔자</p>
       <div className="grid grid-cols-4 gap-1.5 rounded-2xl p-3" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
-          <div key={i} className="flex flex-col items-center gap-0.5">
+          <div key={i} className="flex flex-col items-center gap-1.5">
             <span style={{ fontSize: 12, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || " "}</span>
             <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
               {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
