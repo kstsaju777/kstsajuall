@@ -641,7 +641,7 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }:
               <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{name}님의 </span>
               <span className="font-bold">사주팔자이오</span>
             </h2>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2 rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
               {(pillars ?? Array(4).fill(null)).map((p, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <p className="text-[11px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
