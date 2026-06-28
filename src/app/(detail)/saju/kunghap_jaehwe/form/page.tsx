@@ -373,20 +373,46 @@ function StepIntro({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ─── Step 5: 성별 ─────────────────────────────────────────────────────────────
-function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
+// ─── Step 5: 성별 + 태어난 시간 ───────────────────────────────────────────────
+const TIME_SLOTS = [
+  { label: "자시", desc: "23:00 – 01:00" },
+  { label: "축시", desc: "01:00 – 03:00" },
+  { label: "인시", desc: "03:00 – 05:00" },
+  { label: "묘시", desc: "05:00 – 07:00" },
+  { label: "진시", desc: "07:00 – 09:00" },
+  { label: "사시", desc: "09:00 – 11:00" },
+  { label: "오시", desc: "11:00 – 13:00" },
+  { label: "미시", desc: "13:00 – 15:00" },
+  { label: "신시", desc: "15:00 – 17:00" },
+  { label: "유시", desc: "17:00 – 19:00" },
+  { label: "술시", desc: "19:00 – 21:00" },
+  { label: "해시", desc: "21:00 – 23:00" },
+  { label: "모름", desc: "" },
+];
+
+function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, time: string) => void; initial?: string }) {
   const [gender, setGender] = useState(initial ?? "");
+  const [time, setTime] = useState("");
+  const [showTime, setShowTime] = useState(!!initial);
+
+  const handleGender = (g: string) => {
+    setGender(g);
+    setShowTime(true);
+  };
+
   return (
     <>
+      <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <div className="px-6 pt-6 pb-4" style={{ backgroundColor: CARD_BG }}>
+        {/* 성별 */}
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>내담자 1</p>
-        <h2 className="text-[24px] mb-8" style={{ color: TEXT_CLR }}>
+        <h2 className="text-[24px] mb-5" style={{ color: TEXT_CLR }}>
           <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대의 </span>
           <span className="font-bold">성별은 무엇이오?</span>
         </h2>
-        <div className="flex gap-3">
+        <div className="flex gap-3 mb-6">
           {["남성", "여성"].map((label) => (
-            <button key={label} onClick={() => setGender(label)}
+            <button key={label} onClick={() => handleGender(label)}
               className="flex-1 py-3 rounded-2xl text-[18px] font-bold transition-all"
               style={{
                 backgroundColor: gender === label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
@@ -397,8 +423,33 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
             </button>
           ))}
         </div>
+
+        {/* 태어난 시간 — 성별 선택 시 슬라이드업 */}
+        {showTime && (
+          <div style={{ animation: "slideUp 0.35s ease" }}>
+            <div className="w-full mb-4" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+            <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>태어난 시간</p>
+            <h2 className="text-[24px] mb-4" style={{ color: TEXT_CLR }}>
+              <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
+              <span className="font-bold">태어난 시간은?</span>
+            </h2>
+            <div className="grid grid-cols-3 gap-2">
+              {TIME_SLOTS.map((t) => (
+                <button key={t.label} onClick={() => setTime(t.label)}
+                  className="rounded-xl py-2.5 flex flex-col items-center transition-all"
+                  style={{
+                    backgroundColor: time === t.label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                    border: `1.5px solid ${time === t.label ? NAVY : "rgba(255,255,255,0.1)"}`,
+                  }}>
+                  <span className="text-[14px] font-bold" style={{ color: time === t.label ? "#fff" : "rgba(255,255,255,0.7)" }}>{t.label}</span>
+                  {t.desc && <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{t.desc}</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => gender && onNext(gender)} nextLabel="다음으로" nextDisabled={!gender} />
+      <BottomNav onPrev={onPrev} onNext={() => gender && time && onNext(gender, time)} nextLabel="다음으로" nextDisabled={!gender || !time} />
     </>
   );
 }
@@ -660,7 +711,7 @@ export default function JaehweFormPage() {
             <StepBreakupDate initial={form.breakupDate} onPrev={() => setStep(2)} onNext={(breakupDate) => next({ breakupDate }, 4)} />
           )}
           {step === 5 && (
-            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender) => next({ gender }, 6)} />
+            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, time) => next({ gender, time }, 6)} />
           )}
           {step === 6 && (
             <StepName initial={form.name} onPrev={() => setStep(5)} onNext={(name) => next({ name }, 7)} />
