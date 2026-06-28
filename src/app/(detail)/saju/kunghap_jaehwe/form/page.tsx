@@ -334,7 +334,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
 
 // ─── Step 4: 타이핑 안내 ──────────────────────────────────────────────────────
 function StepIntro({ onNext }: { onNext: () => void }) {
-  const SCENES = ["적느라 수고 많았소.", "이제 그대들의 정보를 부탁하오."];
+  const SCENES = ["적느라 수고 많았소.", "이제 그대들의\n정보를 부탁하오."];
   const [scene, setScene] = useState(0);
   const [displayed, setDisplayed] = useState("");
 
@@ -364,7 +364,7 @@ function StepIntro({ onNext }: { onNext: () => void }) {
       <img src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
       <div className="relative z-10 px-8 text-center">
-        <p className="text-[26px] font-bold leading-relaxed" style={{ color: "#fff", minHeight: "2.2em" }}>
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
           {displayed}
           <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#ff6b9d", verticalAlign: "middle" }} />
         </p>
