@@ -74,7 +74,8 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   ],
 
   재물: [
-    { image: "/media/hero/hero-3.jpg",  badge: "재물", tag: "인기", name: "정통사주 재물운",   desc: "평생 재물운과 돈이 들어오는 시기를 분석합니다",           href: "/saju/jeongtong" },
+    { image: "/media/cards/saju_jaemul/jaemul-0.jpg", badge: "재물", tag: "인기", name: "재물사주", desc: "평생 재물운과 돈이 들어오는 시기를 분석합니다", href: "/saju/saju_jaemul" },
+    { image: "/media/cards/kunghap_business/business-0.jpg", badge: "궁합", tag: "비즈니스", name: "비즈니스 궁합", desc: "사업 파트너와의 궁합 분석", href: "/saju/kunghap_business" },
   ],
 
   연애: [
