@@ -32,7 +32,7 @@ const CATEGORIES = [
   {
     tag: "임신·육아",
     title: "우리 아이가 궁금할 때",
-    slugs: ["saju_imshin", "saju_adong"],
+    slugs: ["saju_imshin", "saju_janyeo"],
   },
   {
     tag: "재물·건강",
