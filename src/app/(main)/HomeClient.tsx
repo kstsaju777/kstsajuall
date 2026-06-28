@@ -95,7 +95,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 
       {/* 카테고리 섹션 */}
       {isAdmin && (
-        <div className="flex flex-col gap-8 pt-4">
+        <div className="flex flex-col gap-8 pt-1">
           {CATEGORIES.map((cat, catIdx) => {
             const catProducts = cat.slugs
               .map(slug => products.find(p => p.slug === slug))
