@@ -163,32 +163,9 @@ function ProductsContent() {
         {label} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
       </p>
       <div className="flex flex-col gap-3">
-        {(() => {
-          const rows: React.ReactNode[] = [];
-          let i = 0;
-          let rowIdx = 0;
-          while (i < cards.length) {
-            if (rowIdx % 2 === 0) {
-              rows.push(<Card key={i} card={cards[i]} aspectRatio="4/3" />);
-              i++;
-            } else {
-              const left  = cards[i];
-              const right = cards[i + 1];
-              rows.push(
-                <div key={i} className="flex gap-3">
-                  <div className="flex-1"><Card card={left}  aspectRatio="2/3" small /></div>
-                  {right
-                    ? <div className="flex-1"><Card card={right} aspectRatio="2/3" small /></div>
-                    : <div className="flex-1" />
-                  }
-                </div>
-              );
-              i += 2;
-            }
-            rowIdx++;
-          }
-          return rows;
-        })()}
+        {cards.map((card, i) => (
+          <Card key={i} card={card} aspectRatio="4/3" />
+        ))}
       </div>
     </div>
   );
