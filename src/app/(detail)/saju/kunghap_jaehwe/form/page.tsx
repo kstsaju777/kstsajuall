@@ -644,15 +644,15 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }:
             <div className="grid grid-cols-4 gap-2 rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
               {(pillars ?? Array(4).fill(null)).map((p, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
-                  <p className="text-[13px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
-                  <span className="text-[13px]" style={{ color: LABEL_CLR }}>{p?.stemSs || ""}</span>
+                  <p className="text-[15px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
+                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.stemSs || ""}</span>
                   <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
                     {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                   </div>
                   <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
                     {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                   </div>
-                  <span className="text-[13px]" style={{ color: LABEL_CLR }}>{p?.branchSs || ""}</span>
+                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.branchSs || ""}</span>
                 </div>
               ))}
             </div>
