@@ -373,7 +373,38 @@ function StepIntro({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ─── Step 5: 이름 ─────────────────────────────────────────────────────────────
+// ─── Step 5: 성별 ─────────────────────────────────────────────────────────────
+function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
+  const [gender, setGender] = useState(initial ?? "");
+  const options = [{ label: "남성", icon: "♂" }, { label: "여성", icon: "♀" }];
+  return (
+    <>
+      <div className="px-6 pt-6 pb-4" style={{ backgroundColor: CARD_BG }}>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>내담자 1</p>
+        <h2 className="text-[24px] mb-8" style={{ color: TEXT_CLR }}>
+          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대의 </span>
+          <span className="font-bold">성별은 무엇이오?</span>
+        </h2>
+        <div className="flex gap-3">
+          {options.map((o) => (
+            <button key={o.label} onClick={() => setGender(o.label)}
+              className="flex-1 py-5 rounded-2xl flex flex-col items-center gap-2 transition-all"
+              style={{
+                backgroundColor: gender === o.label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                border: `2px solid ${gender === o.label ? NAVY : "rgba(255,255,255,0.1)"}`,
+              }}>
+              <span className="text-[28px]" style={{ color: gender === o.label ? NAVY : "rgba(255,255,255,0.5)" }}>{o.icon}</span>
+              <span className="text-[16px] font-bold" style={{ color: gender === o.label ? "#fff" : "rgba(255,255,255,0.6)" }}>{o.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <BottomNav onPrev={onPrev} onNext={() => gender && onNext(gender)} nextLabel="다음으로" nextDisabled={!gender} />
+    </>
+  );
+}
+
+// ─── Step 6: 이름 ─────────────────────────────────────────────────────────────
 function StepName({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
   const [name, setName] = useState(initial ?? "");
   return (
@@ -620,7 +651,7 @@ export default function JaehweFormPage() {
   return (
     <>
       {step === 4 && <StepIntro onNext={() => setStep(5)} />}
-      {(step <= 3 || (step >= 5 && step <= 7)) && (
+      {(step <= 3 || (step >= 5 && step <= 8)) && (
         <FormShell>
           {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
@@ -630,17 +661,20 @@ export default function JaehweFormPage() {
             <StepBreakupDate initial={form.breakupDate} onPrev={() => setStep(2)} onNext={(breakupDate) => next({ breakupDate }, 4)} />
           )}
           {step === 5 && (
-            <StepName initial={form.name} onPrev={() => setStep(4)} onNext={(name) => next({ name }, 6)} />
+            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender) => next({ gender }, 6)} />
           )}
           {step === 6 && (
-            <StepConcern initial={form.concern} onPrev={() => setStep(5)} onSubmit={(concern) => next({ concern }, 7)} />
+            <StepName initial={form.name} onPrev={() => setStep(5)} onNext={(name) => next({ name }, 7)} />
           )}
           {step === 7 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(6)} onNext={(email) => next({ email }, 8)} />
+            <StepConcern initial={form.concern} onPrev={() => setStep(6)} onSubmit={(concern) => next({ concern }, 8)} />
+          )}
+          {step === 8 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(7)} onNext={(email) => next({ email }, 9)} />
           )}
         </FormShell>
       )}
-      {step === 8 && (
+      {step === 9 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""}
