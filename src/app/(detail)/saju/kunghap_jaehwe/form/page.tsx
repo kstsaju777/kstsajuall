@@ -58,7 +58,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(to bottom, transparent 20%, rgba(19,25,33,0.15) 45%, rgba(19,25,33,0.6) 62%, rgba(19,25,33,0.92) 75%, rgba(19,25,33,1) 85%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.2) 30%, rgba(19,25,33,0.5) 55%, rgba(19,25,33,0.9) 72%, rgba(19,25,33,1) 82%)",
         }}
       />
       {/* 하단 카드 */}
