@@ -166,7 +166,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 
       {/* 로고 구분선 */}
       {isAdmin && (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "24px 0" }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 0" }}>
           <img src="/logo_128.jpg" alt="홍연당" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ width: 64, height: 64, objectFit: "cover", borderRadius: "50%", cursor: "pointer" }} />
         </div>
       )}
