@@ -106,9 +106,9 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   ],
 
   기타: [
-    { image: "/media/cards/saju_total/total-0.mp4", type: "video", badge: "종합", tag: "베스트", name: "종합 사주 감명", desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이", href: "/saju/total" },
-    { image: "/media/cards/saju_health/health-0.jpg", badge: "건강", tag: "", name: "건강운 사주", desc: "타고난 체질과 건강 주의 시기를 분석합니다", href: "/saju/saju_health" },
     { image: "/media/cards/kunghap_banryeo/banryeo-0.jpg", badge: "궁합", tag: "반려", name: "반려 궁합", desc: "나와 반려동물의 궁합을 분석합니다", href: "/saju/kunghap_banryeo" },
+    { image: "/media/cards/saju_health/health-0.jpg", badge: "건강", tag: "", name: "건강운 사주", desc: "타고난 체질과 건강 주의 시기를 분석합니다", href: "/saju/saju_health" },
+    { image: "/media/cards/saju_total/total-0.mp4", type: "video", badge: "종합", tag: "베스트", name: "종합 사주 감명", desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이", href: "/saju/total" },
   ],
 
   /*
