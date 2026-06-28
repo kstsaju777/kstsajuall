@@ -71,10 +71,10 @@ function ChapterBlock({ chapter, index }: { chapter: typeof CHAPTERS[0]; index: 
 function StickyCTA() {
   const router = useRouter();
 
-  const [timeLeft, setTimeLeft] = useState("03:27:35:43");
+  const [timeLeft, setTimeLeft] = useState("07:35:24:15");
   useEffect(() => {
     const pad = (n: number) => String(n).padStart(2, "0");
-    const DURATION = 3 * 3600000 + 27 * 60000 + 35 * 1000 + 43 * 10;
+    const DURATION = 7 * 3600000 + 35 * 60000 + 24 * 1000 + 15 * 10;
     const endTime = Date.now() + DURATION;
     const tick = () => {
       let diff = Math.max(0, endTime - Date.now());
@@ -140,7 +140,7 @@ function StickyCTA() {
 
       <p className="text-center text-[13px] font-bold mb-1">
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
-        <span style={{ color: "#ffc107" }}>{timeLeft}</span>
+        <span style={{ color: "#ff69b4" }}>{timeLeft}</span>
       </p>
       <button
         onClick={() => router.push("/saju/jeongtong/form")}
