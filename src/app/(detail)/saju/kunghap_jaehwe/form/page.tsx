@@ -157,7 +157,10 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별한 이유</p>
-        <Title>그대들이 이별한 이유는 무엇이오?</Title>
+        <h2 className="text-[24px] mb-6" style={{ color: TEXT_CLR }}>
+          <span className="font-normal">그대들이 </span>
+          <span className="font-bold">이별한 이유는?</span>
+        </h2>
         <div className="flex flex-col gap-3">
           {BREAKUP_REASONS.map((reason) => {
             const active = selected === reason;
