@@ -228,6 +228,9 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
   const [month, setMonth]   = useState(initial ? initial.split(".")[1] ?? "" : "");
   const [day, setDay]       = useState(initial ? initial.split(".")[2] ?? "" : "");
   const [dayUnknown, setDayUnknown] = useState(false);
+  const [yearErr, setYearErr]   = useState(false);
+  const [monthErr, setMonthErr] = useState(false);
+  const [dayErr, setDayErr]     = useState(false);
   const monthRef = useRef<HTMLInputElement>(null);
   const dayRef   = useRef<HTMLInputElement>(null);
 
@@ -235,12 +238,13 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
   const mNum = parseInt(month, 10);
   const dNum = parseInt(day, 10);
   const yNum = parseInt(year, 10);
-  const dayValid = dayUnknown || (dNum >= 1 && dNum <= new Date(yNum, mNum, 0).getDate());
-  const isValid = year.length === 4 && mNum >= 1 && mNum <= 12 && dayValid;
+  const dayValid = dayUnknown || (dNum >= 1 && dNum <= 31);
+  const isValid = year.length === 4 && yNum >= 1950 && yNum <= 2050 && mNum >= 1 && mNum <= 12 && dayValid && !yearErr && !monthErr && !dayErr;
   const dateStr = `${year}.${month.padStart(2,"0")}.${dayUnknown ? "01" : day.padStart(2,"0")}`;
 
   const activeBorder = `2px solid ${NAVY}`;
   const normalBorder = `2px solid ${BORDER_CLR}`;
+  const errorBorder  = `2px solid #ff4444`;
 
   return (
     <>
@@ -254,38 +258,53 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
         {/* 년/월/일 입력 */}
         <div className="flex items-end gap-3 mb-2">
           <style>{`input::placeholder { color: rgba(255,255,255,0.25); }`}</style>
-          <div className="flex items-end gap-1">
-            <input
-              type="text" inputMode="numeric" placeholder="2026" autoComplete="off"
-              value={year}
-              onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) monthRef.current?.focus(); }}
-              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 80, borderBottom: dayUnknown ? activeBorder : year ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
-            />
-            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>년</span>
+          {/* 년 */}
+          <div className="flex flex-col items-center gap-0">
+            <div className="flex items-end gap-1">
+              <input
+                type="text" inputMode="numeric" placeholder="2026" autoComplete="off"
+                value={year}
+                onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); setYearErr(false); if (v.length === 4) monthRef.current?.focus(); }}
+                onBlur={() => { if (year.length === 4) { const y = parseInt(year, 10); setYearErr(y < 1950 || y > 2050); } }}
+                className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+                style={{ width: 80, borderBottom: yearErr ? errorBorder : year ? activeBorder : normalBorder, color: yearErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }}
+              />
+              <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>년</span>
+            </div>
+            {yearErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
           </div>
-          <div className="flex items-end gap-1">
-            <input
-              ref={monthRef}
-              type="text" inputMode="numeric" placeholder="06" autoComplete="off"
-              value={month}
-              onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); if (v.length === 2) dayRef.current?.focus(); }}
-              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 48, borderBottom: dayUnknown ? activeBorder : month ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
-            />
-            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>월</span>
+          {/* 월 */}
+          <div className="flex flex-col items-center gap-0">
+            <div className="flex items-end gap-1">
+              <input
+                ref={monthRef}
+                type="text" inputMode="numeric" placeholder="06" autoComplete="off"
+                value={month}
+                onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); setMonthErr(false); if (v.length === 2) dayRef.current?.focus(); }}
+                onBlur={() => { if (month) { const m = parseInt(month, 10); setMonthErr(m < 1 || m > 12); } }}
+                className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+                style={{ width: 48, borderBottom: monthErr ? errorBorder : month ? activeBorder : normalBorder, color: monthErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }}
+              />
+              <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>월</span>
+            </div>
+            {monthErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
           </div>
-          <div className="flex items-end gap-1">
-            <input
-              ref={dayRef}
-              type="text" inputMode="numeric" placeholder="10" autoComplete="off"
-              value={dayUnknown ? "-" : day}
-              disabled={dayUnknown}
-              onChange={(e) => setDay(pad(e.target.value, 2))}
-              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 48, borderBottom: day && !dayUnknown ? activeBorder : normalBorder, color: dayUnknown ? "rgba(255,255,255,0.35)" : TEXT_CLR, caretColor: NAVY }}
-            />
-            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>일</span>
+          {/* 일 */}
+          <div className="flex flex-col items-center gap-0">
+            <div className="flex items-end gap-1">
+              <input
+                ref={dayRef}
+                type="text" inputMode="numeric" placeholder="10" autoComplete="off"
+                value={dayUnknown ? "-" : day}
+                disabled={dayUnknown}
+                onChange={(e) => { setDay(pad(e.target.value, 2)); setDayErr(false); }}
+                onBlur={() => { if (day && !dayUnknown) { const d = parseInt(day, 10); setDayErr(d < 1 || d > 31); } }}
+                className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+                style={{ width: 48, borderBottom: dayErr ? errorBorder : day && !dayUnknown ? activeBorder : normalBorder, color: dayUnknown ? "rgba(255,255,255,0.35)" : dayErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }}
+              />
+              <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>일</span>
+            </div>
+            {dayErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
           </div>
         </div>
 
