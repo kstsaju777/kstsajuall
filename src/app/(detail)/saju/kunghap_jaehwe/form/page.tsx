@@ -258,7 +258,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               value={year}
               onChange={(e) => setYear(pad(e.target.value, 4))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 80, borderBottom: dayUnknown ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
+              style={{ width: 80, borderBottom: dayUnknown ? activeBorder : year ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
             <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>년</span>
           </div>
@@ -268,7 +268,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               value={month}
               onChange={(e) => setMonth(pad(e.target.value, 2))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 48, borderBottom: dayUnknown ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
+              style={{ width: 48, borderBottom: dayUnknown ? activeBorder : month ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
             <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>월</span>
           </div>
@@ -279,7 +279,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               disabled={dayUnknown}
               onChange={(e) => setDay(pad(e.target.value, 2))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 48, borderBottom: normalBorder, color: dayUnknown ? "rgba(255,255,255,0.2)" : TEXT_CLR, caretColor: NAVY }}
+              style={{ width: 48, borderBottom: day && !dayUnknown ? activeBorder : normalBorder, color: dayUnknown ? "rgba(255,255,255,0.2)" : TEXT_CLR, caretColor: NAVY }}
             />
             <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>일</span>
           </div>
