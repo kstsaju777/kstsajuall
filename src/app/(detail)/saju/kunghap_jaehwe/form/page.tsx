@@ -728,7 +728,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
             color: TEXT_CLR, caretColor: NAVY,
           }}
         />
-        <p className="text-right text-[12px] mt-1.5 pr-0.5" style={{ color: text.length >= MAX ? "#e55" : "#c0a8b0" }}>
+        <p className="text-right text-[12px] mt-0.5 pr-0.5" style={{ color: text.length >= MAX ? "#e55" : "#c0a8b0" }}>
           {text.length}/{MAX}
         </p>
       </div>
