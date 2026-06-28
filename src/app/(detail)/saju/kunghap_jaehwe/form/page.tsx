@@ -395,7 +395,8 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const dNum = parseInt(day, 10);
   const dateEntered = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr && !!calendar;
   const timeSelected = dateEntered && !!btime;
-  const dateValid = timeSelected && !!name.trim();
+  const nameValid = !!name.trim() && /^[가-힣\s]+$/.test(name.trim());
+  const dateValid = timeSelected && nameValid;
   const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")} (${calendar}) ${btime}`;
 
   const activeBorder = `2px solid ${NAVY}`;
@@ -572,8 +573,11 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                       type="text" placeholder="홍길동" autoComplete="off"
                       value={name} onChange={(e) => setName(e.target.value)}
                       className="w-full bg-transparent text-[22px] font-bold pb-1 outline-none"
-                      style={{ borderBottom: name ? `2px solid ${NAVY}` : `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
+                      style={{ borderBottom: (name && /[^가-힣\s]/.test(name)) ? "2px solid #ff4444" : name ? `2px solid ${NAVY}` : `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
                     />
+                    {name && /[^가-힣\s]/.test(name) && (
+                      <p className="text-[11px] mt-1" style={{ color: "#ff4444" }}>한글로만 입력하시오</p>
+                    )}
                   </div>
                 )}
               </div>
