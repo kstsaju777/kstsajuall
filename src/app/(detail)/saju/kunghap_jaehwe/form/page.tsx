@@ -376,7 +376,6 @@ function StepIntro({ onNext }: { onNext: () => void }) {
 // ─── Step 5: 성별 ─────────────────────────────────────────────────────────────
 function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
   const [gender, setGender] = useState(initial ?? "");
-  const options = [{ label: "남성", icon: "♂" }, { label: "여성", icon: "♀" }];
   return (
     <>
       <div className="px-6 pt-6 pb-4" style={{ backgroundColor: CARD_BG }}>
@@ -386,15 +385,15 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
           <span className="font-bold">성별은 무엇이오?</span>
         </h2>
         <div className="flex gap-3">
-          {options.map((o) => (
-            <button key={o.label} onClick={() => setGender(o.label)}
-              className="flex-1 py-5 rounded-2xl flex flex-col items-center gap-2 transition-all"
+          {["남성", "여성"].map((label) => (
+            <button key={label} onClick={() => setGender(label)}
+              className="flex-1 py-5 rounded-2xl text-[18px] font-bold transition-all"
               style={{
-                backgroundColor: gender === o.label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
-                border: `2px solid ${gender === o.label ? NAVY : "rgba(255,255,255,0.1)"}`,
+                backgroundColor: gender === label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                border: `2px solid ${gender === label ? NAVY : "rgba(255,255,255,0.1)"}`,
+                color: gender === label ? "#fff" : "rgba(255,255,255,0.6)",
               }}>
-              <span className="text-[28px]" style={{ color: gender === o.label ? NAVY : "rgba(255,255,255,0.5)" }}>{o.icon}</span>
-              <span className="text-[16px] font-bold" style={{ color: gender === o.label ? "#fff" : "rgba(255,255,255,0.6)" }}>{o.label}</span>
+              {label}
             </button>
           ))}
         </div>
