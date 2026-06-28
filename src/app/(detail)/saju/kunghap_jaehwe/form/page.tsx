@@ -383,14 +383,16 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const [yearErr, setYearErr]   = useState(false);
   const [monthErr, setMonthErr] = useState(false);
   const [dayErr, setDayErr]     = useState(false);
+  const [calendar, setCalendar] = useState("");
   const monthRef2 = useRef<HTMLInputElement>(null);
   const dayRef2   = useRef<HTMLInputElement>(null);
 
   const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
   const mNum = parseInt(month, 10);
   const dNum = parseInt(day, 10);
-  const dateValid = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr;
-  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")}`;
+  const showCalendar = day.length === 2 && dNum >= 1 && dNum <= 31 && !dayErr;
+  const dateValid = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr && !!calendar;
+  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")} (${calendar})`;
 
   const activeBorder = `2px solid ${NAVY}`;
   const normalBorder = `2px solid ${BORDER_CLR}`;
@@ -464,6 +466,23 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                 {dayErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
               </div>
             </div>
+
+            {/* 양력/음력/윤달 — 일 입력 후 슬라이드업 */}
+            {showCalendar && (
+              <div className="flex gap-2 mt-5" style={{ animation: "slideUp 0.3s ease" }}>
+                {["양력", "음력", "윤달"].map((c) => (
+                  <button key={c} onClick={() => setCalendar(c)}
+                    className="flex-1 py-2.5 rounded-xl text-[15px] font-bold transition-all"
+                    style={{
+                      backgroundColor: calendar === c ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                      border: `1.5px solid ${calendar === c ? NAVY : "rgba(255,255,255,0.1)"}`,
+                      color: calendar === c ? "#fff" : "rgba(255,255,255,0.6)",
+                    }}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
