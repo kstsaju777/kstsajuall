@@ -238,8 +238,11 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
   return (
     <>
       <div className="px-6 pt-6 pb-4" style={{ backgroundColor: CARD_BG }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별의 시기</p>
-        <h2 className="text-[24px] font-bold mb-6" style={{ color: TEXT_CLR }}>언제 이별을 하셨나요?</h2>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>기억이 나시오?</p>
+        <h2 className="text-[24px] mb-6" style={{ color: TEXT_CLR }}>
+          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대들이 </span>
+          <span className="font-bold">이별한 날짜는?</span>
+        </h2>
 
         {/* 년/월/일 입력 */}
         <div className="flex items-end gap-2 mb-5">
