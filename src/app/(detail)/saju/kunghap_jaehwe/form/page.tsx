@@ -679,10 +679,10 @@ function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: s
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
             <span style={{ fontSize: 12, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || " "}</span>
-            <div className="w-full rounded-xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1" }}>
+            <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
               {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
-            <div className="w-full rounded-xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1" }}>
+            <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
               {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
             <span style={{ fontSize: 12, color: LABEL_CLR, lineHeight: 1 }}>{p?.branchSs || " "}</span>
