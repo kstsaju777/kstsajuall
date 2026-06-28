@@ -100,7 +100,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             const catProducts = cat.slugs
               .map(slug => products.find(p => p.slug === slug))
               .filter(Boolean) as Product[];
-            const isBig = catIdx % 2 === 0;
+            const isBig = catIdx % 2 === 1;
             const cardW = isBig ? "42vw" : "28vw";
             const cardH = isBig ? "52vw" : "28vw";
             const fontSize = isBig ? 13 : 10;
