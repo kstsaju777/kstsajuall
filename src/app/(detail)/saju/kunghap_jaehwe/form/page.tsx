@@ -405,17 +405,17 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   return (
     <>
       <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }`}</style>
-      <div className="px-6 pt-6 pb-4" style={{ backgroundColor: CARD_BG }}>
+      <div className="px-6 pt-4 pb-3" style={{ backgroundColor: CARD_BG }}>
         {/* 성별 */}
-        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>내담자 1</p>
-        <h2 className="text-[24px] mb-5" style={{ color: TEXT_CLR }}>
+        <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>내담자 1</p>
+        <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
           <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대의 </span>
           <span className="font-bold">성별은 무엇이오?</span>
         </h2>
-        <div className="flex gap-3 mb-6">
+        <div className="flex gap-3 mb-4">
           {["남성", "여성"].map((label) => (
             <button key={label} onClick={() => handleGender(label)}
-              className="flex-1 py-3 rounded-2xl text-[18px] font-bold transition-all"
+              className="flex-1 py-2 rounded-2xl text-[16px] font-bold transition-all"
               style={{
                 backgroundColor: gender === label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
                 border: `2px solid ${gender === label ? NAVY : "rgba(255,255,255,0.1)"}`,
@@ -429,17 +429,17 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
         {/* 태어난 날짜 — 성별 선택 시 슬라이드업 */}
         {showDate && (
           <div style={{ animation: "slideUp 0.35s ease" }}>
-            <div className="w-full mb-4" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
-            <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>태어난 날짜</p>
-            <h2 className="text-[24px] mb-5" style={{ color: TEXT_CLR }}>
+            <div className="w-full mb-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>태어난 날짜</p>
+            <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
               <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
               <span className="font-bold">태어난 날짜는?</span>
             </h2>
             {/* 양력/음력/윤달 — 항상 노출 */}
-            <div className="flex gap-2 mb-5">
+            <div className="flex gap-2 mb-3">
               {["양력", "음력", "윤달"].map((c) => (
                 <button key={c} onClick={() => setCalendar(c)}
-                  className="flex-1 py-2.5 rounded-xl text-[15px] font-bold transition-all"
+                  className="flex-1 py-2 rounded-xl text-[13px] font-bold transition-all"
                   style={{
                     backgroundColor: calendar === c ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
                     border: `1.5px solid ${calendar === c ? NAVY : "rgba(255,255,255,0.1)"}`,
@@ -456,9 +456,9 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                 <div className="flex items-end gap-1">
                   <input type="text" inputMode="numeric" placeholder="2000" autoComplete="off" value={year}
                     onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) { const y = parseInt(v,10); const err = y<1950||y>2050; setYearErr(err); if (!err) monthRef2.current?.focus(); } else setYearErr(false); }}
-                    className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-                    style={{ width: 80, borderBottom: yearErr ? errorBorder : year ? activeBorder : normalBorder, color: yearErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
-                  <span className="pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>년</span>
+                    className="bg-transparent text-[22px] font-bold pb-1 outline-none text-center"
+                    style={{ width: 70, borderBottom: yearErr ? errorBorder : year ? activeBorder : normalBorder, color: yearErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
+                  <span className="pb-1" style={{ color: "rgba(255,255,255,0.5)", fontSize: 18 }}>년</span>
                 </div>
                 {yearErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
               </div>
@@ -466,9 +466,9 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                 <div className="flex items-end gap-1">
                   <input ref={monthRef2} type="text" inputMode="numeric" placeholder="01" autoComplete="off" value={month}
                     onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); if (v.length === 2) { const m = parseInt(v,10); const err = m<1||m>12; setMonthErr(err); if (!err) dayRef2.current?.focus(); } else setMonthErr(false); }}
-                    className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-                    style={{ width: 48, borderBottom: monthErr ? errorBorder : month ? activeBorder : normalBorder, color: monthErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
-                  <span className="pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>월</span>
+                    className="bg-transparent text-[22px] font-bold pb-1 outline-none text-center"
+                    style={{ width: 42, borderBottom: monthErr ? errorBorder : month ? activeBorder : normalBorder, color: monthErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
+                  <span className="pb-1" style={{ color: "rgba(255,255,255,0.5)", fontSize: 18 }}>월</span>
                 </div>
                 {monthErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
               </div>
@@ -476,9 +476,9 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                 <div className="flex items-end gap-1">
                   <input ref={dayRef2} type="text" inputMode="numeric" placeholder="01" autoComplete="off" value={day}
                     onChange={(e) => { const v = pad(e.target.value, 2); setDay(v); if (v.length === 2) { const d = parseInt(v,10); setDayErr(d<1||d>31); } else setDayErr(false); }}
-                    className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-                    style={{ width: 48, borderBottom: dayErr ? errorBorder : day ? activeBorder : normalBorder, color: dayErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
-                  <span className="pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>일</span>
+                    className="bg-transparent text-[22px] font-bold pb-1 outline-none text-center"
+                    style={{ width: 42, borderBottom: dayErr ? errorBorder : day ? activeBorder : normalBorder, color: dayErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
+                  <span className="pb-1" style={{ color: "rgba(255,255,255,0.5)", fontSize: 18 }}>일</span>
                 </div>
                 {dayErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
               </div>
@@ -487,9 +487,9 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
             {/* 태어난 시간 — 날짜 완성 시 슬라이드업 */}
             {dateEntered && (
               <div style={{ animation: "slideUp 0.35s ease" }}>
-                <div className="w-full my-4" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
-                <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>태어난 시간</p>
-                <h2 className="text-[24px] mb-4" style={{ color: TEXT_CLR }}>
+                <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+                <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>태어난 시간</p>
+                <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
                   <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
                   <span className="font-bold">태어난 시간은?</span>
                 </h2>
