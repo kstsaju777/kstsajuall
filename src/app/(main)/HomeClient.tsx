@@ -25,9 +25,9 @@ const CATEGORIES = [
     slugs: ["saju_yeonae", "kunghap_yeonae", "kunghap_jaehwe", "saju_gyeolhon", "saju_ehon"],
   },
   {
-    tag: "사주",
-    title: "내 사주의 모든것",
-    slugs: ["kunghap_yeonae", "kunghap_banryeo", "kunghap_janyeo", "kunghap_jaehwe", "kunghap_business"],
+    tag: "재물",
+    title: "돈과 건강, 둘 다 챙기세요",
+    slugs: ["saju_jaemul", "kunghap_business"],
   },
   {
     tag: "임신·육아",
