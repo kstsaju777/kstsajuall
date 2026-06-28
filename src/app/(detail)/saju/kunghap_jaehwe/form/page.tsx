@@ -264,8 +264,8 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               <input
                 type="text" inputMode="numeric" placeholder="2026" autoComplete="off"
                 value={year}
-                onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); setYearErr(false); if (v.length === 4) monthRef.current?.focus(); }}
-                onBlur={() => { if (year.length === 4) { const y = parseInt(year, 10); setYearErr(y < 1950 || y > 2050); } }}
+                onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) { const y = parseInt(v, 10); const err = y < 1950 || y > 2050; setYearErr(err); if (!err) monthRef.current?.focus(); } else { setYearErr(false); } }}
+                onBlur={() => { if (year.length > 0 && year.length < 4) setYearErr(true); }}
                 className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
                 style={{ width: 80, borderBottom: yearErr ? errorBorder : year ? activeBorder : normalBorder, color: yearErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }}
               />
@@ -280,7 +280,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
                 ref={monthRef}
                 type="text" inputMode="numeric" placeholder="06" autoComplete="off"
                 value={month}
-                onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); setMonthErr(false); if (v.length === 2) dayRef.current?.focus(); }}
+                onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); if (v.length === 2) { const m = parseInt(v, 10); const err = m < 1 || m > 12; setMonthErr(err); if (!err) dayRef.current?.focus(); } else { setMonthErr(false); } }}
                 onBlur={() => { if (month) { const m = parseInt(month, 10); setMonthErr(m < 1 || m > 12); } }}
                 className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
                 style={{ width: 48, borderBottom: monthErr ? errorBorder : month ? activeBorder : normalBorder, color: monthErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }}
@@ -297,7 +297,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
                 type="text" inputMode="numeric" placeholder="10" autoComplete="off"
                 value={dayUnknown ? "-" : day}
                 disabled={dayUnknown}
-                onChange={(e) => { setDay(pad(e.target.value, 2)); setDayErr(false); }}
+                onChange={(e) => { const v = pad(e.target.value, 2); setDay(v); if (v.length === 2) { const d = parseInt(v, 10); setDayErr(d < 1 || d > 31); } else { setDayErr(false); } }}
                 onBlur={() => { if (day && !dayUnknown) { const d = parseInt(day, 10); setDayErr(d < 1 || d > 31); } }}
                 className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
                 style={{ width: 48, borderBottom: dayErr ? errorBorder : day && !dayUnknown ? activeBorder : normalBorder, color: dayUnknown ? "rgba(255,255,255,0.35)" : dayErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }}
