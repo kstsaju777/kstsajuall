@@ -78,8 +78,12 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
     { image: "/media/cards/kunghap_business/business-0.jpg", badge: "궁합", tag: "비즈니스", name: "비즈니스 궁합", desc: "사업 파트너와의 궁합 분석", href: "/saju/kunghap_business" },
   ],
 
-  연애: [
-    { image: "/media/hero/hero-7.jpg",  badge: "연애", tag: "HOT",  name: "유혹사주",              desc: "쉿, 내게 숨겨진 색기와 이성을 홀리는 매력 알아보기",     href: "/saju/jeongtong" },
+  사랑: [
+    { image: "/media/cards/saju_yeonae/saju_yeonae-0.jpg", badge: "연애", tag: "인기", name: "연애운 사주", desc: "내 연애운과 이성운을 사주로 분석합니다", href: "/saju/saju_yeonae" },
+    { image: "/media/cards/kunghap_yeonae/yeonae-0.jpg", badge: "궁합", tag: "인기", name: "연애 궁합", desc: "우리 둘의 연애 궁합을 분석합니다", href: "/saju/kunghap_yeonae" },
+    { image: "/media/cards/kunghap_jaehwe/jaehwe-0.jpg", badge: "궁합", tag: "재회", name: "재회 궁합", desc: "헤어진 그 사람과 다시 만날 수 있을까", href: "/saju/kunghap_jaehwe" },
+    { image: "/media/cards/saju_gyeolhon/gyeolhon-0.jpg", badge: "결혼", tag: "추천", name: "결혼 사주", desc: "내 결혼운과 배우자 인연을 분석합니다", href: "/saju/saju_gyeolhon" },
+    { image: "/media/cards/saju_ehon/ehon-0.jpg", badge: "이혼", tag: "", name: "이혼 사주", desc: "이혼 위기, 사주로 먼저 알아보세요", href: "/saju/saju_ehon" },
   ],
 
   재회: [
