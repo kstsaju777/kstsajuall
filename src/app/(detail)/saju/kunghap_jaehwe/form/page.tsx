@@ -390,7 +390,6 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
   const mNum = parseInt(month, 10);
   const dNum = parseInt(day, 10);
-  const showCalendar = day.length === 2 && dNum >= 1 && dNum <= 31 && !dayErr;
   const dateValid = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr && !!calendar;
   const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")} (${calendar})`;
 
@@ -433,6 +432,21 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
               <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
               <span className="font-bold">태어난 날짜는?</span>
             </h2>
+            {/* 양력/음력/윤달 — 항상 노출 */}
+            <div className="flex gap-2 mb-5">
+              {["양력", "음력", "윤달"].map((c) => (
+                <button key={c} onClick={() => setCalendar(c)}
+                  className="flex-1 py-2.5 rounded-xl text-[15px] font-bold transition-all"
+                  style={{
+                    backgroundColor: calendar === c ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                    border: `1.5px solid ${calendar === c ? NAVY : "rgba(255,255,255,0.1)"}`,
+                    color: calendar === c ? "#fff" : "rgba(255,255,255,0.6)",
+                  }}>
+                  {c}
+                </button>
+              ))}
+            </div>
+
             <style>{`input::placeholder { color: rgba(255,255,255,0.25); }`}</style>
             <div className="flex items-end gap-3">
               <div className="flex flex-col items-center">
@@ -467,22 +481,6 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
               </div>
             </div>
 
-            {/* 양력/음력/윤달 — 일 입력 후 슬라이드업 */}
-            {showCalendar && (
-              <div className="flex gap-2 mt-5" style={{ animation: "slideUp 0.3s ease" }}>
-                {["양력", "음력", "윤달"].map((c) => (
-                  <button key={c} onClick={() => setCalendar(c)}
-                    className="flex-1 py-2.5 rounded-xl text-[15px] font-bold transition-all"
-                    style={{
-                      backgroundColor: calendar === c ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
-                      border: `1.5px solid ${calendar === c ? NAVY : "rgba(255,255,255,0.1)"}`,
-                      color: calendar === c ? "#fff" : "rgba(255,255,255,0.6)",
-                    }}>
-                    {c}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         )}
       </div>
