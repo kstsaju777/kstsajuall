@@ -54,7 +54,7 @@ const CHAPTERS = [
 
 function LazyImage({ src, alt, isFirst, onReady }: { src: string; alt?: string; isFirst?: boolean; onReady?: () => void }) {
   return (
-    <img src={src} alt={alt ?? ""} className="w-full h-auto block"
+    <img src={src} alt={alt ?? ""} style={{ display: "block", width: "100%", height: "auto", margin: 0, padding: 0, verticalAlign: "bottom" }}
       loading={isFirst ? "eager" : "lazy"} onLoad={onReady} />
   );
 }
@@ -168,7 +168,7 @@ export default function JaehwePage() {
         </svg>
       </button>
 
-      <div className="flex flex-col">
+      <div style={{ display: "flex", flexDirection: "column", fontSize: 0, lineHeight: 0 }}>
         {CHAPTERS.map((chapter, i) => {
           const gap = GAPS[i] ?? { height: "300px" };
           return (
