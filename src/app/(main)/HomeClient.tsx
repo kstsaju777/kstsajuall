@@ -25,9 +25,9 @@ const CATEGORIES = [
     slugs: ["saju_yeonae", "kunghap_yeonae", "kunghap_jaehwe", "saju_gyeolhon", "saju_ehon"],
   },
   {
-    tag: "가족",
-    title: "우리 아이가 궁금할 때",
-    slugs: ["saju_janyeo", "kunghap_janyeo", "saju_imshin", "saju_youare"],
+    tag: "재물",
+    title: "돈과 건강, 둘 다 챙기세요",
+    slugs: ["saju_jaemul", "kunghap_business"],
   },
   {
     tag: "임신·육아",
