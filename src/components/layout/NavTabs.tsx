@@ -5,7 +5,6 @@ import { useSearchParams, usePathname } from "next/navigation";
 
 const TABS = [
   { label: "전체", category: "" },
-  { label: "종합", category: "종합" },
   { label: "재물", category: "재물" },
   { label: "사랑", category: "사랑" },
   { label: "가족", category: "가족" },
