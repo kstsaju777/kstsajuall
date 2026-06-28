@@ -35,9 +35,9 @@ const CATEGORIES = [
     slugs: ["saju_janyeo", "kunghap_janyeo", "saju_imshin", "saju_youare"],
   },
   {
-    tag: "재물·건강",
-    title: "돈과 건강, 둘 다 챙기세요",
-    slugs: ["saju_jaemul", "saju_health"],
+    tag: "기타",
+    title: "이것도 궁금해요",
+    slugs: ["total", "kunghap_banryeo"],
   },
   {
     tag: "나를 알고 싶을 때",
