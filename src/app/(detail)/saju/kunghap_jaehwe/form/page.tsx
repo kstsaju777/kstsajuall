@@ -224,18 +224,13 @@ function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext:
 
 // ─── Step 3: 이별 날짜 ────────────────────────────────────────────────────────
 function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
-  const [year, setYear]     = useState(initial ? initial.split(".")[0] : "");
-  const [month, setMonth]   = useState(initial ? initial.split(".")[1] ?? "" : "");
-  const [day, setDay]       = useState(initial ? initial.split(".")[2] ?? "" : "");
-  const [dayUnknown, setDayUnknown] = useState(false);
+  const [year, setYear]   = useState(initial ? initial.split(".")[0] : "");
+  const [month, setMonth] = useState(initial ? initial.split(".")[1] ?? "" : "");
 
   const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
-  const yNum = parseInt(year, 10);
   const mNum = parseInt(month, 10);
-  const dNum = parseInt(day, 10);
-  const dayValid = dayUnknown || (dNum >= 1 && dNum <= new Date(yNum, mNum, 0).getDate());
-  const isValid = year.length === 4 && mNum >= 1 && mNum <= 12 && dayValid;
-  const dateStr = `${year}.${month.padStart(2,"0")}.${dayUnknown ? "00" : day.padStart(2,"0")}`;
+  const isValid = year.length === 4 && mNum >= 1 && mNum <= 12;
+  const dateStr = `${year}.${month.padStart(2,"0")}`;
 
   return (
     <>
@@ -269,29 +264,6 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
             />
             <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>월</span>
           </div>
-          <div className="flex items-end gap-1">
-            <input
-              type="text" inputMode="numeric" placeholder="10"
-              value={dayUnknown ? "" : day}
-              onChange={(e) => { setDayUnknown(false); setDay(pad(e.target.value, 2)); }}
-              disabled={dayUnknown}
-              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 52, borderBottom: `2px solid ${dayUnknown ? "rgba(255,255,255,0.2)" : BORDER_CLR}`, color: dayUnknown ? "rgba(255,255,255,0.25)" : TEXT_CLR, caretColor: NAVY }}
-            />
-            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>일</span>
-          </div>
-          <button
-            onClick={() => { setDayUnknown((v) => !v); setDay(""); }}
-            className="flex-shrink-0 px-3 rounded-xl text-[13px] font-semibold transition-all"
-            style={{
-              height: 40,
-              backgroundColor: dayUnknown ? "rgba(255,107,157,0.18)" : "rgba(255,255,255,0.05)",
-              border: `1.5px solid ${dayUnknown ? NAVY : "rgba(255,255,255,0.18)"}`,
-              color: dayUnknown ? "#fff" : "#aaa",
-            }}
-          >
-            모름
-          </button>
         </div>
 
         {/* 안내 텍스트 */}
