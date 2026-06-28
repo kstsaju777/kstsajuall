@@ -47,26 +47,23 @@ function FormShell({ children }: { children: React.ReactNode }) {
       className="relative w-full overflow-hidden"
       style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%", backgroundColor: "#131921" }}
     >
-      {/* 이미지 영역 — 화면 상단 40% */}
-      <div className="absolute top-0 left-0 right-0" style={{ height: "40%" }}>
-        <img
-          src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg"
-          aria-hidden
-          className="w-full h-full object-cover" style={{ objectPosition: "center -50px" }}
-        />
-      </div>
-      {/* 그라데이션 오버레이 — 이미지 위에 z-index 높여서 경계 덮기 */}
+      {/* 배경 이미지 — 전체 화면 */}
+      <img
+        src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg"
+        aria-hidden
+        className="absolute inset-0 w-full h-full object-cover object-top"
+      />
+      {/* 그라데이션 오버레이 — 하단으로 자연스럽게 페이드 */}
       <div
-        className="absolute left-0 right-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          top: "20%",
-          height: "30%",
-          zIndex: 1,
-          background: "linear-gradient(to bottom, transparent 0%, rgba(19,25,33,0.6) 50%, rgba(19,25,33,1) 100%)",
+          background:
+            "linear-gradient(to bottom, transparent 20%, rgba(19,25,33,0.15) 45%, rgba(19,25,33,0.6) 62%, rgba(19,25,33,0.92) 75%, rgba(19,25,33,1) 85%)",
         }}
       />
       {/* 하단 카드 */}
-      <div className="absolute bottom-0 left-0 right-0" style={{ zIndex: 2 }}>
+      <div className="absolute bottom-0 left-0 right-0">
+        <div style={{ height: 56, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
         {children}
       </div>
     </div>
