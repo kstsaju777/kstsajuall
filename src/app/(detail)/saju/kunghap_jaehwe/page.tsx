@@ -28,13 +28,25 @@ const TIME_COLORS: Record<string, string> = {
 
 const GAPS: { height: string; text?: string; line?: boolean; bg?: string }[] = [
   { height: "0px" },
+  { height: "0px" },
+  { height: "0px" },
   { height: "180px" },
 ];
 
 const CHAPTERS = [
   {
     chapter: "1장",
-    media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-1.png" },
+    media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-1.jpg" },
+    bubble: null,
+  },
+  {
+    chapter: "2장",
+    media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-2.jpg" },
+    bubble: null,
+  },
+  {
+    chapter: "3장",
+    media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-3.jpg" },
     bubble: null,
     isCTA: true,
   },
