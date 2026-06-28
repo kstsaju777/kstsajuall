@@ -637,47 +637,20 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }:
         {name && (
           <div className="mb-2">
             <p className="text-[12px] font-medium mb-3" style={{ color: "#8a8a8a" }}>{name}님의 사주팔자</p>
-            <div>
-              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(42,35,32,0.08)" }}>
-                {/* 기둥 헤더 */}
-                <div className="grid grid-cols-4">
-                  {PILLAR_LABELS_JW.map(label => (
-                    <div key={label} className="py-1.5 text-center text-[13px] font-bold" style={{ color: "#2a2320", background: "#efe3df" }}>{label}</div>
-                  ))}
+            <div className="grid grid-cols-4 gap-2">
+              {(pillars ?? Array(4).fill(null)).map((p, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <p className="text-[11px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
+                  <span className="text-[11px]" style={{ color: LABEL_CLR }}>{p?.stemSs || ""}</span>
+                  <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
+                    {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
+                  </div>
+                  <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
+                    {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
+                  </div>
+                  <span className="text-[11px]" style={{ color: LABEL_CLR }}>{p?.branchSs || ""}</span>
                 </div>
-                {/* 십성 (천간) */}
-                <div className="grid grid-cols-4" style={{ borderTop: "1px solid rgba(42,35,32,0.05)" }}>
-                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
-                    <div key={i} className="py-0.5 text-center" style={{ background: "#fff" }}>
-                      <span style={{ color: "#5b504a", fontSize: 13 }}>{p?.stemSs || "—"}</span>
-                    </div>
-                  ))}
-                </div>
-                {/* 천간 이미지 */}
-                <div className="grid grid-cols-4" style={{ borderTop: "1px solid rgba(42,35,32,0.05)" }}>
-                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
-                    <div key={i} className="flex items-center justify-center" style={{ background: "#fff", padding: "0px 4px" }}>
-                      {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: 64, height: 64, objectFit: "contain" }} /> : <div style={{ width: 64, height: 64, background: "#eee", borderRadius: 8 }} />}
-                    </div>
-                  ))}
-                </div>
-                {/* 지지 이미지 */}
-                <div className="grid grid-cols-4">
-                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
-                    <div key={i} className="flex items-center justify-center" style={{ background: "#fff", padding: "0px 4px" }}>
-                      {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: 64, height: 64, objectFit: "contain" }} /> : <div style={{ width: 64, height: 64, background: "#eee", borderRadius: 8 }} />}
-                    </div>
-                  ))}
-                </div>
-                {/* 십성 (지지) */}
-                <div className="grid grid-cols-4" style={{ borderTop: "1px solid rgba(42,35,32,0.05)" }}>
-                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
-                    <div key={i} className="py-0.5 text-center" style={{ background: "#fff" }}>
-                      <span style={{ color: "#5b504a", fontSize: 13 }}>{p?.branchSs || "—"}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         )}
