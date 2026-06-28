@@ -224,10 +224,9 @@ function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext:
 
 // ─── Step 3: 이별 날짜 ────────────────────────────────────────────────────────
 function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
-  const now = new Date();
-  const [year, setYear]   = useState(initial ? initial.split(".")[0] : String(now.getFullYear()));
-  const [month, setMonth] = useState(initial ? initial.split(".")[1] ?? "" : String(now.getMonth() + 1).padStart(2, "0"));
-  const [day, setDay]     = useState(initial ? initial.split(".")[2] ?? "" : String(now.getDate()).padStart(2, "0"));
+  const [year, setYear]   = useState(initial ? initial.split(".")[0] : "");
+  const [month, setMonth] = useState(initial ? initial.split(".")[1] ?? "" : "");
+  const [day, setDay]     = useState(initial ? initial.split(".")[2] ?? "" : "");
 
   const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
   const yNum = parseInt(year, 10);
@@ -245,8 +244,9 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
         {/* 년/월/일 입력 */}
         <div className="flex items-end gap-2 mb-5">
           <div className="flex items-end gap-1 flex-1">
+            <style>{`input::placeholder { color: rgba(255,255,255,0.25); }`}</style>
             <input
-              type="text" inputMode="numeric" placeholder={String(now.getFullYear())}
+              type="text" inputMode="numeric" placeholder="2026"
               value={year}
               onChange={(e) => setYear(pad(e.target.value, 4))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
@@ -266,7 +266,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           </div>
           <div className="flex items-end gap-1">
             <input
-              type="text" inputMode="numeric" placeholder="13"
+              type="text" inputMode="numeric" placeholder="10"
               value={day}
               onChange={(e) => setDay(pad(e.target.value, 2))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
