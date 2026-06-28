@@ -48,7 +48,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
       style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%", backgroundColor: "#131921" }}
     >
       {/* 이미지 영역 — 화면 상단 50% */}
-      <div className="absolute top-0 left-0 right-0" style={{ height: "50%" }}>
+      <div className="absolute top-0 left-0 right-0" style={{ height: "40%" }}>
         <img
           src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg"
           aria-hidden
