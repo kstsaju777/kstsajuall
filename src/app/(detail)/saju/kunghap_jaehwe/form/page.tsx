@@ -224,59 +224,68 @@ function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext:
 
 // ─── Step 3: 이별 날짜 ────────────────────────────────────────────────────────
 function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
-  const [date, setDate] = useState(initial ?? "");
-  const interacted = useRef(false);
+  const now = new Date();
+  const [year, setYear]   = useState(initial ? initial.split(".")[0] : String(now.getFullYear()));
+  const [month, setMonth] = useState(initial ? initial.split(".")[1] ?? "" : String(now.getMonth() + 1).padStart(2, "0"));
+  const [day, setDay]     = useState(initial ? initial.split(".")[2] ?? "" : String(now.getDate()).padStart(2, "0"));
 
-  const formatDate = (raw: string) => {
-    const nums = raw.replace(/\D/g, "").slice(0, 8);
-    if (nums.length <= 4) return nums;
-    if (nums.length <= 6) return nums.slice(0, 4) + "." + nums.slice(4);
-    return nums.slice(0, 4) + "." + nums.slice(4, 6) + "." + nums.slice(6);
-  };
-
-  const nums = date.replace(/\./g, "");
-  const isFilled = nums.length >= 8;
-  const isValidDate = (() => {
-    if (!isFilled) return true;
-    const y = parseInt(nums.slice(0, 4), 10);
-    const m = parseInt(nums.slice(4, 6), 10);
-    const d = parseInt(nums.slice(6, 8), 10);
-    if (m < 1 || m > 12 || d < 1) return false;
-    return d <= new Date(y, m, 0).getDate();
-  })();
-  const isValid = isFilled && isValidDate;
-
-  useEffect(() => {
-    if (isValid && interacted.current) {
-      const t = setTimeout(() => onNext(date), 600);
-      return () => clearTimeout(t);
-    }
-  }, [isValid, date]);
+  const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
+  const yNum = parseInt(year, 10);
+  const mNum = parseInt(month, 10);
+  const dNum = parseInt(day, 10);
+  const isValid = year.length === 4 && mNum >= 1 && mNum <= 12 && dNum >= 1 && dNum <= new Date(yNum, mNum, 0).getDate();
+  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")}`;
 
   return (
     <>
-      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>기억이 나시오?</p>
-        <h2 className="text-[24px] mb-6" style={{ color: TEXT_CLR }}>
-          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대들이 </span>
-          <span className="font-bold">이별한 날짜는?</span>
-        </h2>
-        <input
-          type="text" inputMode="numeric" placeholder="2024.03.15"
-          value={date}
-          onChange={(e) => { interacted.current = true; setDate(formatDate(e.target.value)); }}
-          autoFocus
-          className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
-          style={{
-            borderBottom: `1.5px solid ${!isValidDate && isFilled ? "#e03" : BORDER_CLR}`,
-            color: date ? TEXT_CLR : PH_CLR, caretColor: NAVY,
-          }}
-        />
-        {!isValidDate && isFilled && (
-          <p className="mt-2 text-[13px] font-medium" style={{ color: "#e03" }}>날짜를 다시 확인해주세요!</p>
-        )}
+      <div className="px-6 pt-6 pb-4" style={{ backgroundColor: CARD_BG }}>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별의 시기</p>
+        <h2 className="text-[24px] font-bold mb-6" style={{ color: TEXT_CLR }}>언제 이별을 하셨나요?</h2>
+
+        {/* 년/월/일 입력 */}
+        <div className="flex items-end gap-2 mb-5">
+          <div className="flex items-end gap-1 flex-1">
+            <input
+              type="text" inputMode="numeric" placeholder={String(now.getFullYear())}
+              value={year}
+              onChange={(e) => setYear(pad(e.target.value, 4))}
+              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+              style={{ width: 90, borderBottom: `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
+            />
+            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>년</span>
+          </div>
+          <div className="flex items-end gap-1">
+            <input
+              type="text" inputMode="numeric" placeholder="06"
+              value={month}
+              onChange={(e) => setMonth(pad(e.target.value, 2))}
+              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+              style={{ width: 52, borderBottom: `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
+            />
+            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>월</span>
+          </div>
+          <div className="flex items-end gap-1">
+            <input
+              type="text" inputMode="numeric" placeholder="13"
+              value={day}
+              onChange={(e) => setDay(pad(e.target.value, 2))}
+              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+              style={{ width: 52, borderBottom: `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
+            />
+            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>일</span>
+          </div>
+        </div>
+
+        {/* 안내 텍스트 */}
+        <div className="rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+            헤어진 날짜를 통해 해당 시기에서{" "}
+            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>상대방과 나의 사주적인 흐름을 비교</span>해서{" "}
+            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>원인까지 분석</span>해드리고 있습니다.
+          </p>
+        </div>
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(date)} nextLabel="다음으로" nextDisabled={!isValid} />
+      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(dateStr)} nextLabel="다음으로" nextDisabled={!isValid} />
     </>
   );
 }
