@@ -282,9 +282,9 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
         {/* 안내 텍스트 */}
         <div className="rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-            이별 시점의 사주 흐름을 살펴보면{" "}
-            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>왜 그때 헤어질 수밖에 없었는지</span>,{" "}
-            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>두 사람의 기운이 어떻게 엇갈렸는지</span> 짚어드릴 수 있습니다.
+            이별한 날을 알면{" "}
+            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>그때 그대들의 사주가 어떻게 엇갈렸는지</span>,{" "}
+            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>왜 그리 될 수밖에 없었는지</span> 소인이 살펴볼 수 있소이다.
           </p>
         </div>
       </div>
