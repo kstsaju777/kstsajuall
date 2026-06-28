@@ -256,7 +256,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           <style>{`input::placeholder { color: rgba(255,255,255,0.25); }`}</style>
           <div className="flex items-end gap-1">
             <input
-              type="text" inputMode="numeric" placeholder="2026"
+              type="text" inputMode="numeric" placeholder="2026" autoComplete="off"
               value={year}
               onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) monthRef.current?.focus(); }}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
@@ -267,7 +267,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           <div className="flex items-end gap-1">
             <input
               ref={monthRef}
-              type="text" inputMode="numeric" placeholder="06"
+              type="text" inputMode="numeric" placeholder="06" autoComplete="off"
               value={month}
               onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); if (v.length === 2) dayRef.current?.focus(); }}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
@@ -278,7 +278,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           <div className="flex items-end gap-1">
             <input
               ref={dayRef}
-              type="text" inputMode="numeric" placeholder="10"
+              type="text" inputMode="numeric" placeholder="10" autoComplete="off"
               value={dayUnknown ? "-" : day}
               disabled={dayUnknown}
               onChange={(e) => setDay(pad(e.target.value, 2))}
