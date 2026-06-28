@@ -637,7 +637,7 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }:
         {name && (
           <div className="mb-2">
             <p className="text-[12px] font-medium mb-3" style={{ color: "#8a8a8a" }}>{name}님의 사주팔자</p>
-            <div style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", border: "1px solid #d8c4a0", borderRadius: 16, padding: "16px 12px" }}>
+            <div style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", borderRadius: 16, padding: "16px 12px" }}>
               <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(42,35,32,0.08)" }}>
                 {/* 기둥 헤더 */}
                 <div className="grid grid-cols-4">
