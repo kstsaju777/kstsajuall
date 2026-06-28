@@ -59,7 +59,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, transparent 30%, rgba(19,25,33,0.6) 70%, rgba(19,25,33,1) 100%)",
+              "linear-gradient(to bottom, transparent 0%, rgba(19,25,33,0.1) 40%, rgba(19,25,33,0.5) 65%, rgba(19,25,33,0.85) 82%, rgba(19,25,33,1) 100%)",
           }}
         />
       </div>
