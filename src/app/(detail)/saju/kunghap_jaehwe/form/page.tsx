@@ -224,13 +224,21 @@ function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext:
 
 // ─── Step 3: 이별 날짜 ────────────────────────────────────────────────────────
 function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
-  const [year, setYear]   = useState(initial ? initial.split(".")[0] : "");
-  const [month, setMonth] = useState(initial ? initial.split(".")[1] ?? "" : "");
+  const [year, setYear]     = useState(initial ? initial.split(".")[0] : "");
+  const [month, setMonth]   = useState(initial ? initial.split(".")[1] ?? "" : "");
+  const [day, setDay]       = useState(initial ? initial.split(".")[2] ?? "" : "");
+  const [dayUnknown, setDayUnknown] = useState(false);
 
   const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
   const mNum = parseInt(month, 10);
-  const isValid = year.length === 4 && mNum >= 1 && mNum <= 12;
-  const dateStr = `${year}.${month.padStart(2,"0")}`;
+  const dNum = parseInt(day, 10);
+  const yNum = parseInt(year, 10);
+  const dayValid = dayUnknown || (dNum >= 1 && dNum <= new Date(yNum, mNum, 0).getDate());
+  const isValid = year.length === 4 && mNum >= 1 && mNum <= 12 && dayValid;
+  const dateStr = `${year}.${month.padStart(2,"0")}.${dayUnknown ? "00" : day.padStart(2,"0")}`;
+
+  const activeBorder = `2px solid ${NAVY}`;
+  const normalBorder = `2px solid ${BORDER_CLR}`;
 
   return (
     <>
@@ -242,15 +250,15 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
         </h2>
 
         {/* 년/월/일 입력 */}
-        <div className="flex items-end gap-2 mb-5">
-          <div className="flex items-end gap-1 flex-1">
-            <style>{`input::placeholder { color: rgba(255,255,255,0.25); }`}</style>
+        <div className="flex items-end gap-3 mb-2">
+          <style>{`input::placeholder { color: rgba(255,255,255,0.25); }`}</style>
+          <div className="flex items-end gap-1">
             <input
               type="text" inputMode="numeric" placeholder="2026"
               value={year}
               onChange={(e) => setYear(pad(e.target.value, 4))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 90, borderBottom: `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
+              style={{ width: 80, borderBottom: dayUnknown ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
             <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>년</span>
           </div>
@@ -260,10 +268,34 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               value={month}
               onChange={(e) => setMonth(pad(e.target.value, 2))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 52, borderBottom: `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
+              style={{ width: 48, borderBottom: dayUnknown ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
             <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>월</span>
           </div>
+          <div className="flex items-end gap-1">
+            <input
+              type="text" inputMode="numeric" placeholder="10"
+              value={dayUnknown ? "" : day}
+              disabled={dayUnknown}
+              onChange={(e) => setDay(pad(e.target.value, 2))}
+              className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+              style={{ width: 48, borderBottom: normalBorder, color: dayUnknown ? "rgba(255,255,255,0.2)" : TEXT_CLR, caretColor: NAVY }}
+            />
+            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>일</span>
+          </div>
+        </div>
+
+        {/* 기억안남 체크 */}
+        <div className="flex items-center gap-2 mb-5" onClick={() => { setDayUnknown(v => !v); setDay(""); }} style={{ cursor: "pointer" }}>
+          <div style={{
+            width: 18, height: 18, borderRadius: 4, flexShrink: 0,
+            border: `1.5px solid ${dayUnknown ? NAVY : "rgba(255,255,255,0.3)"}`,
+            backgroundColor: dayUnknown ? NAVY : "transparent",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            {dayUnknown && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 2.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+          </div>
+          <span className="text-[13px]" style={{ color: dayUnknown ? "#fff" : "rgba(255,255,255,0.5)" }}>정확한 날짜가 기억안남 (년·월만 알고 있소)</span>
         </div>
 
         {/* 안내 텍스트 */}
