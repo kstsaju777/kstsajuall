@@ -374,31 +374,29 @@ function StepIntro({ onNext }: { onNext: () => void }) {
 }
 
 // ─── Step 5: 성별 + 태어난 시간 ───────────────────────────────────────────────
-const TIME_SLOTS = [
-  { label: "자시", desc: "23:00 – 01:00" },
-  { label: "축시", desc: "01:00 – 03:00" },
-  { label: "인시", desc: "03:00 – 05:00" },
-  { label: "묘시", desc: "05:00 – 07:00" },
-  { label: "진시", desc: "07:00 – 09:00" },
-  { label: "사시", desc: "09:00 – 11:00" },
-  { label: "오시", desc: "11:00 – 13:00" },
-  { label: "미시", desc: "13:00 – 15:00" },
-  { label: "신시", desc: "15:00 – 17:00" },
-  { label: "유시", desc: "17:00 – 19:00" },
-  { label: "술시", desc: "19:00 – 21:00" },
-  { label: "해시", desc: "21:00 – 23:00" },
-  { label: "모름", desc: "" },
-];
-
-function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, time: string) => void; initial?: string }) {
+function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, date: string) => void; initial?: string }) {
   const [gender, setGender] = useState(initial ?? "");
-  const [time, setTime] = useState("");
-  const [showTime, setShowTime] = useState(!!initial);
+  const [showDate, setShowDate] = useState(!!initial);
+  const [year, setYear]   = useState("");
+  const [month, setMonth] = useState("");
+  const [day, setDay]     = useState("");
+  const [yearErr, setYearErr]   = useState(false);
+  const [monthErr, setMonthErr] = useState(false);
+  const [dayErr, setDayErr]     = useState(false);
+  const monthRef2 = useRef<HTMLInputElement>(null);
+  const dayRef2   = useRef<HTMLInputElement>(null);
 
-  const handleGender = (g: string) => {
-    setGender(g);
-    setShowTime(true);
-  };
+  const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
+  const mNum = parseInt(month, 10);
+  const dNum = parseInt(day, 10);
+  const dateValid = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr;
+  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")}`;
+
+  const activeBorder = `2px solid ${NAVY}`;
+  const normalBorder = `2px solid ${BORDER_CLR}`;
+  const errorBorder  = `2px solid #ff4444`;
+
+  const handleGender = (g: string) => { setGender(g); setShowDate(true); };
 
   return (
     <>
@@ -424,32 +422,52 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
           ))}
         </div>
 
-        {/* 태어난 시간 — 성별 선택 시 슬라이드업 */}
-        {showTime && (
+        {/* 태어난 날짜 — 성별 선택 시 슬라이드업 */}
+        {showDate && (
           <div style={{ animation: "slideUp 0.35s ease" }}>
             <div className="w-full mb-4" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
-            <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>태어난 시간</p>
-            <h2 className="text-[24px] mb-4" style={{ color: TEXT_CLR }}>
+            <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>태어난 날짜</p>
+            <h2 className="text-[24px] mb-5" style={{ color: TEXT_CLR }}>
               <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
-              <span className="font-bold">태어난 시간은?</span>
+              <span className="font-bold">태어난 날짜는?</span>
             </h2>
-            <div className="grid grid-cols-3 gap-2">
-              {TIME_SLOTS.map((t) => (
-                <button key={t.label} onClick={() => setTime(t.label)}
-                  className="rounded-xl py-2.5 flex flex-col items-center transition-all"
-                  style={{
-                    backgroundColor: time === t.label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
-                    border: `1.5px solid ${time === t.label ? NAVY : "rgba(255,255,255,0.1)"}`,
-                  }}>
-                  <span className="text-[14px] font-bold" style={{ color: time === t.label ? "#fff" : "rgba(255,255,255,0.7)" }}>{t.label}</span>
-                  {t.desc && <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{t.desc}</span>}
-                </button>
-              ))}
+            <style>{`input::placeholder { color: rgba(255,255,255,0.25); }`}</style>
+            <div className="flex items-end gap-3">
+              <div className="flex flex-col items-center">
+                <div className="flex items-end gap-1">
+                  <input type="text" inputMode="numeric" placeholder="2000" autoComplete="off" value={year}
+                    onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) { const y = parseInt(v,10); const err = y<1900||y>2025; setYearErr(err); if (!err) monthRef2.current?.focus(); } else setYearErr(false); }}
+                    className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+                    style={{ width: 80, borderBottom: yearErr ? errorBorder : year ? activeBorder : normalBorder, color: yearErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
+                  <span className="pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>년</span>
+                </div>
+                {yearErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="flex items-end gap-1">
+                  <input ref={monthRef2} type="text" inputMode="numeric" placeholder="01" autoComplete="off" value={month}
+                    onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); if (v.length === 2) { const m = parseInt(v,10); const err = m<1||m>12; setMonthErr(err); if (!err) dayRef2.current?.focus(); } else setMonthErr(false); }}
+                    className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+                    style={{ width: 48, borderBottom: monthErr ? errorBorder : month ? activeBorder : normalBorder, color: monthErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
+                  <span className="pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>월</span>
+                </div>
+                {monthErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="flex items-end gap-1">
+                  <input ref={dayRef2} type="text" inputMode="numeric" placeholder="01" autoComplete="off" value={day}
+                    onChange={(e) => { const v = pad(e.target.value, 2); setDay(v); if (v.length === 2) { const d = parseInt(v,10); setDayErr(d<1||d>31); } else setDayErr(false); }}
+                    className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
+                    style={{ width: 48, borderBottom: dayErr ? errorBorder : day ? activeBorder : normalBorder, color: dayErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
+                  <span className="pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>일</span>
+                </div>
+                {dayErr && <span style={{ fontSize: 10, color: "#ff4444", marginTop: 2 }}>잘못 입력</span>}
+              </div>
             </div>
           </div>
         )}
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => gender && time && onNext(gender, time)} nextLabel="다음으로" nextDisabled={!gender || !time} />
+      <BottomNav onPrev={onPrev} onNext={() => gender && dateValid && onNext(gender, dateStr)} nextLabel="다음으로" nextDisabled={!gender || !dateValid} />
     </>
   );
 }
@@ -711,7 +729,7 @@ export default function JaehweFormPage() {
             <StepBreakupDate initial={form.breakupDate} onPrev={() => setStep(2)} onNext={(breakupDate) => next({ breakupDate }, 4)} />
           )}
           {step === 5 && (
-            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, time) => next({ gender, time }, 6)} />
+            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, date) => next({ gender, date }, 6)} />
           )}
           {step === 6 && (
             <StepName initial={form.name} onPrev={() => setStep(5)} onNext={(name) => next({ name }, 7)} />
