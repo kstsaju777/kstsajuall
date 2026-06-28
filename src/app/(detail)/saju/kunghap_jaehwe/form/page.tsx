@@ -384,14 +384,16 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const [monthErr, setMonthErr] = useState(false);
   const [dayErr, setDayErr]     = useState(false);
   const [calendar, setCalendar] = useState("");
+  const [btime, setBtime] = useState("");
   const monthRef2 = useRef<HTMLInputElement>(null);
   const dayRef2   = useRef<HTMLInputElement>(null);
 
   const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
   const mNum = parseInt(month, 10);
   const dNum = parseInt(day, 10);
-  const dateValid = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr && !!calendar;
-  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")} (${calendar})`;
+  const dateEntered = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr && !!calendar;
+  const dateValid = dateEntered && !!btime;
+  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")} (${calendar}) ${btime}`;
 
   const activeBorder = `2px solid ${NAVY}`;
   const normalBorder = `2px solid ${BORDER_CLR}`;
@@ -481,6 +483,38 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
               </div>
             </div>
 
+            {/* 태어난 시간 — 날짜 완성 시 슬라이드업 */}
+            {dateEntered && (
+              <div style={{ animation: "slideUp 0.35s ease" }}>
+                <div className="w-full my-4" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+                <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>태어난 시간</p>
+                <h2 className="text-[24px] mb-4" style={{ color: TEXT_CLR }}>
+                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
+                  <span className="font-bold">태어난 시간은?</span>
+                </h2>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: "자시", desc: "23–01시" }, { label: "축시", desc: "01–03시" },
+                    { label: "인시", desc: "03–05시" }, { label: "묘시", desc: "05–07시" },
+                    { label: "진시", desc: "07–09시" }, { label: "사시", desc: "09–11시" },
+                    { label: "오시", desc: "11–13시" }, { label: "미시", desc: "13–15시" },
+                    { label: "신시", desc: "15–17시" }, { label: "유시", desc: "17–19시" },
+                    { label: "술시", desc: "19–21시" }, { label: "해시", desc: "21–23시" },
+                    { label: "모름", desc: "" },
+                  ].map((t) => (
+                    <button key={t.label} onClick={() => setBtime(t.label)}
+                      className="rounded-xl py-2.5 flex flex-col items-center transition-all"
+                      style={{
+                        backgroundColor: btime === t.label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                        border: `1.5px solid ${btime === t.label ? NAVY : "rgba(255,255,255,0.1)"}`,
+                      }}>
+                      <span className="text-[14px] font-bold" style={{ color: btime === t.label ? "#fff" : "rgba(255,255,255,0.7)" }}>{t.label}</span>
+                      {t.desc && <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{t.desc}</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
