@@ -101,8 +101,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
               .map(slug => products.find(p => p.slug === slug))
               .filter(Boolean) as Product[];
             const isBig = catIdx % 2 === 0;
-            const cardW = isBig ? 180 : 120;
-            const cardH = isBig ? 220 : 120;
+            const cardW = isBig ? 160 : 110;
+            const cardH = isBig ? 200 : 110;
             const fontSize = isBig ? 13 : 10;
             const badgeFontSize = isBig ? 10 : 8;
 
@@ -115,7 +115,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                   </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
                 </div>
-                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
+                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 32, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
                   {catProducts.map((product, i) => {
                     const imageUrl = product.image_url;
                     const isDummy = !imageUrl;
