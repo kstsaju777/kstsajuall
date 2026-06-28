@@ -47,22 +47,23 @@ function FormShell({ children }: { children: React.ReactNode }) {
       className="relative w-full overflow-hidden"
       style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%", backgroundColor: "#131921" }}
     >
-      {/* 이미지 영역 — 화면 상단 50% */}
+      {/* 이미지 영역 — 화면 상단 40% */}
       <div className="absolute top-0 left-0 right-0" style={{ height: "40%" }}>
         <img
           src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg"
           aria-hidden
           className="w-full h-full object-cover" style={{ objectPosition: "center -50px" }}
         />
-        {/* 이미지 → 카드 배경 그라데이션 */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, transparent 0%, rgba(19,25,33,0.1) 40%, rgba(19,25,33,0.5) 65%, rgba(19,25,33,0.85) 82%, rgba(19,25,33,1) 100%)",
-          }}
-        />
       </div>
+      {/* 그라데이션 — 이미지 경계 넘어 자연스럽게 연결 */}
+      <div
+        className="absolute top-0 left-0 right-0 pointer-events-none"
+        style={{
+          height: "60%",
+          background:
+            "linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(19,25,33,0.3) 50%, rgba(19,25,33,0.75) 65%, rgba(19,25,33,1) 80%)",
+        }}
+      />
       {/* 하단 카드 */}
       <div className="absolute bottom-0 left-0 right-0">
         <div style={{ height: 56, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
