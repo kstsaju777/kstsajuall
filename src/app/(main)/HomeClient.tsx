@@ -220,8 +220,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
               >
                 <div className="px-4 flex items-center justify-between mb-3">
                   <div>
-                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 700, marginBottom: 2, letterSpacing: 1 }}>{cat.tag}</p>
-                    <p style={{ fontSize: 18, color: "#fff", fontWeight: 900, lineHeight: 1.3 }}>{cat.title}</p>
+                    <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 700, marginBottom: 2, letterSpacing: 1 }}>{cat.tag}</p>
+                    <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, lineHeight: 1.3 }}>{cat.title}</p>
                   </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
                 </div>
