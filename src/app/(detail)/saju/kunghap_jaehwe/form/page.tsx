@@ -665,6 +665,40 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
   );
 }
 
+// ─── 고민 입력 ───────────────────────────────────────────────────────────────
+function StepConcernInput({ onPrev, onSubmit, initial }: { onPrev: () => void; onSubmit: (v: string) => void; initial?: string }) {
+  const [text, setText] = useState(initial ?? "");
+  const MAX = 200;
+  const filled = text.trim().length > 0;
+  return (
+    <>
+      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
+        <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
+          고민을 상세히 적어주겠소?{" "}
+          <span className="text-[15px] font-normal" style={{ color: "#888" }}>(선택)</span>
+        </h2>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value.slice(0, MAX))}
+          placeholder="헤어진 이유, 상대방과의 관계, 재회를 원하는 이유 등을 자유롭게 적어주세요."
+          rows={5}
+          className="w-full rounded-2xl p-4 text-[14px] outline-none resize-none leading-relaxed"
+          style={{
+            backgroundColor: "rgba(255,255,255,0.05)",
+            border: "1.5px solid rgba(255,255,255,0.15)",
+            color: TEXT_CLR, caretColor: NAVY,
+          }}
+        />
+        <p className="text-right text-[12px] mt-1.5 pr-0.5" style={{ color: text.length >= MAX ? "#e55" : "#c0a8b0" }}>
+          {text.length}/{MAX}
+        </p>
+      </div>
+      <BottomNav onPrev={onPrev} onNext={() => onSubmit(text)} nextLabel={filled ? "다음으로" : "고민은 딱히 없소"} />
+    </>
+  );
+}
+
 // ─── 이메일 도메인 ────────────────────────────────────────────────────────────
 const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "hotmail.com", "직접입력"];
 const MONO_FONT = "'Pretendard', 'Apple SD Gothic Neo', sans-serif";
@@ -857,7 +891,7 @@ export default function JaehweFormPage() {
   return (
     <>
       {step === 4 && <StepIntro onNext={() => setStep(5)} />}
-      {(step <= 3 || (step >= 5 && step <= 9)) && (
+      {(step <= 3 || (step >= 5 && step <= 10)) && (
         <FormShell>
           {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
@@ -881,11 +915,14 @@ export default function JaehweFormPage() {
               date={form.partnerDate} btime={form.partnerTime} calendar={form.partnerCalendar} name={form.partnerName} />
           )}
           {step === 9 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(8)} onNext={(email) => next({ email }, 10)} />
+            <StepConcernInput initial={form.concern} onPrev={() => setStep(8)} onSubmit={(concern) => next({ concern }, 10)} />
+          )}
+          {step === 10 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(9)} onNext={(email) => next({ email }, 11)} />
           )}
         </FormShell>
       )}
-      {step === 10 && (
+      {step === 11 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""}
