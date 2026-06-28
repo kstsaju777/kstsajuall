@@ -374,7 +374,7 @@ function StepIntro({ onNext }: { onNext: () => void }) {
 }
 
 // ─── Step 5: 성별 + 태어난 시간 ───────────────────────────────────────────────
-function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, date: string) => void; initial?: string }) {
+function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, date: string, name: string) => void; initial?: string }) {
   const [gender, setGender] = useState(initial ?? "");
   const [showDate, setShowDate] = useState(!!initial);
   const [year, setYear]   = useState("");
@@ -386,6 +386,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const [calendar, setCalendar] = useState("");
   const [btime, setBtime] = useState("");
   const [timeOpen, setTimeOpen] = useState(false);
+  const [name, setName] = useState("");
   const monthRef2 = useRef<HTMLInputElement>(null);
   const dayRef2   = useRef<HTMLInputElement>(null);
 
@@ -393,7 +394,8 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const mNum = parseInt(month, 10);
   const dNum = parseInt(day, 10);
   const dateEntered = year.length === 4 && !yearErr && mNum >= 1 && mNum <= 12 && !monthErr && dNum >= 1 && dNum <= 31 && !dayErr && !!calendar;
-  const dateValid = dateEntered && !!btime;
+  const timeSelected = dateEntered && !!btime;
+  const dateValid = timeSelected && !!name.trim();
   const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")} (${calendar}) ${btime}`;
 
   const activeBorder = `2px solid ${NAVY}`;
@@ -557,12 +559,29 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                     시간 모름
                   </button>
                 </div>
+
+                {/* 이름 입력 — 시간 선택 후 슬라이드업 */}
+                {timeSelected && (
+                  <div style={{ animation: "slideUp 0.35s ease" }}>
+                    <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
+                    <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>이름</p>
+                    <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
+                      <span className="font-bold">그대의 이름을 알려주시오.</span>
+                    </h2>
+                    <input
+                      type="text" placeholder="홍길동" autoComplete="off"
+                      value={name} onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-transparent text-[22px] font-bold pb-1 outline-none"
+                      style={{ borderBottom: name ? `2px solid ${NAVY}` : `2px solid ${BORDER_CLR}`, color: TEXT_CLR, caretColor: NAVY }}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => gender && dateValid && onNext(gender, dateStr)} nextLabel="다음으로" nextDisabled={!gender || !dateValid} />
+      <BottomNav onPrev={onPrev} onNext={() => gender && dateValid && onNext(gender, dateStr, name.trim())} nextLabel="다음으로" nextDisabled={!gender || !dateValid} />
     </>
   );
 }
@@ -814,7 +833,7 @@ export default function JaehweFormPage() {
   return (
     <>
       {step === 4 && <StepIntro onNext={() => setStep(5)} />}
-      {(step <= 3 || (step >= 5 && step <= 8)) && (
+      {(step <= 3 || (step >= 5 && step <= 7)) && (
         <FormShell>
           {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
@@ -824,20 +843,18 @@ export default function JaehweFormPage() {
             <StepBreakupDate initial={form.breakupDate} onPrev={() => setStep(2)} onNext={(breakupDate) => next({ breakupDate }, 4)} />
           )}
           {step === 5 && (
-            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, date) => next({ gender, date }, 6)} />
+            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, date, name) => next({ gender, date, name }, 6)} />
           )}
           {step === 6 && (
-            <StepName initial={form.name} onPrev={() => setStep(5)} onNext={(name) => next({ name }, 7)} />
+            <StepConcern initial={form.concern} onPrev={() => setStep(5)} onSubmit={(concern) => next({ concern }, 7)} />
           )}
           {step === 7 && (
-            <StepConcern initial={form.concern} onPrev={() => setStep(6)} onSubmit={(concern) => next({ concern }, 8)} />
-          )}
-          {step === 8 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(7)} onNext={(email) => next({ email }, 9)} />
+            <StepEmail initial={form.email} onPrev={() => setStep(6)} onNext={(email) => next({ email }, 8)} />
+
           )}
         </FormShell>
       )}
-      {step === 9 && (
+      {step === 8 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""}
