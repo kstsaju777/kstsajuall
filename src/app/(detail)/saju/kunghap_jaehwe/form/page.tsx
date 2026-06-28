@@ -52,7 +52,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
         <img
           src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg"
           aria-hidden
-          className="w-full h-full object-cover" style={{ objectPosition: "center -80px" }}
+          className="w-full h-full object-cover" style={{ objectPosition: "center -50px" }}
         />
         {/* 이미지 → 카드 배경 그라데이션 */}
         <div
