@@ -194,6 +194,79 @@ export default function JaehwePage() {
         })}
       </div>
 
+      {/* 리포트 미리보기 */}
+      <div style={{ backgroundColor: "#111", padding: "32px 20px 40px", fontSize: "initial", lineHeight: "initial" }}>
+        <p style={{ fontSize: 13, color: "#9b2335", fontWeight: 700, marginBottom: 6 }}>재회사주</p>
+        <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 20 }}>리포트 미리보기</p>
+        <div style={{ background: "#1a1a1a", borderRadius: 16, overflow: "hidden", marginBottom: 8 }}>
+          <img src="/media/cards/kunghap_jaehwe/jaehwe-0.jpg" alt="미리보기" style={{ display: "block", width: "100%", height: "auto" }} />
+          <div style={{ padding: "20px 20px 24px" }}>
+            <p style={{ fontSize: 12, color: "#9b2335", fontWeight: 700, marginBottom: 4 }}>+20,000자</p>
+            <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 12 }}>2026 재회사주</p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 20 }}>
+              사랑은 때로, 사라지는 것이 아니라 잠시 길을 잃는 것일지도 몰라요.<br /><br />
+              사주로 모든 마음을 헤아릴 수 조차 없겠지만, 조금이나마 간절하신 분들의 고민을 덜어드리고자 재회사주를 준비했습니다.
+            </p>
+            {[
+              "사주로 본 나의 성향과 상대방 성향",
+              "왜 그때 헤어질 수 밖에 없었을까?",
+              "상대는 나에 대해 어떻게 생각하고 있을까?",
+              "재회를 방해하는 결정적 실수 🚩",
+              "우리의 재회 시기는 언제일까? 📅",
+              "최악의 연락 타이밍 vs\n무조건 반응하는 골든타임",
+              "'매달리는 사람'에서\n'다시 갖고 싶은 사람'으로",
+              "사주 애착유형별 재회 접근법",
+              "[주의 🔥] 재회 초기 꼭 하면 안되는 행동",
+              "재회 이후 더 좋은 관계를 위하여...",
+            ].map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#9b2335", flexShrink: 0, marginTop: 6 }} />
+                <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, whiteSpace: "pre-line" }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 실제 이용 후기 */}
+      <div style={{ backgroundColor: "#0a0a0a", padding: "32px 20px 40px", fontSize: "initial", lineHeight: "initial" }}>
+        <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 24 }}>실제 이용 후기</p>
+        {[
+          {
+            name: "김**", avatar: "🐻", tag: "금목일간 ✨ | 전 애인이 그리운 사람 😢",
+            stars: 5, product: "재회 사주 💗",
+            text: "헤어진 지 3개월 됐는데 아직도 잊지 못해서 재회 가능성이 궁금해서 봤어요. 저와 전 남친의 사주 궁합이랑 재회 시기까지 자세하게 나와서 놀랐습니다. 특히 우리가 왜 헤어졌는지, 어떤 부분에서 안 맞았는지 사주로 보니까 진짜 맞더라고요ㅠㅠ 재회 확률이랑 다시 만났을 때 주의점까지 알려줘서 마음의 준비가 됐어요.",
+          },
+          {
+            name: "이**", avatar: "🌙", tag: "정화일간 🌸 | 재회를 고민중인 사람 😔",
+            stars: 5, product: "재회 사주 💗",
+            text: "전 여친이랑 1년 사귀다 헤어졌는데 요즘 자꾸 생각나서 연락할까 말까 고민이었어요. 사주 보니까 재회 운이 있긴 한데 시기가 중요하다고 하더라고요. 지금 바로 연락하면 안 된다는 거 보고 조금 더 기다리기로 했어요ㅋㅋ 감정적으로 행동하려던 거 막아줘서 감사합니다.",
+          },
+          {
+            name: "박**", avatar: "🐷", tag: "임수일간 🌊 | 이별 후 힘든 사람 😭",
+            stars: 5, product: "재회 사주 💗",
+            text: "솔직히 반신반의하면서 봤는데 저희 이별 원인 분석이 소름 돋게 맞아서 깜짝 놀랐어요. 제가 너무 집착했던 것도 사주에 다 나오더라고요... 재회 가능성보다 제가 어떻게 변해야 하는지 알려준 게 더 도움이 됐습니다. 덕분에 마음 정리도 되고 앞으로 어떻게 해야 할지 방향이 잡혔어요.",
+          },
+        ].map((review, i) => (
+          <div key={i} style={{ backgroundColor: "#1a1a1a", borderRadius: 16, padding: "20px", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{review.avatar}</div>
+              <div>
+                <p style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>{review.name}</p>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{review.tag}</p>
+              </div>
+              <div style={{ marginLeft: "auto", display: "flex", gap: 2 }}>
+                {Array.from({ length: review.stars }).map((_, si) => (
+                  <span key={si} style={{ color: "#ffc107", fontSize: 14 }}>★</span>
+                ))}
+              </div>
+            </div>
+            <p style={{ fontSize: 12, color: "#9b2335", fontWeight: 700, marginBottom: 8 }}>선택: {review.product}</p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.7 }}>{review.text}</p>
+          </div>
+        ))}
+      </div>
+
       <div style={{ height: "110px" }} />
       <StickyCTA />
     </div>
