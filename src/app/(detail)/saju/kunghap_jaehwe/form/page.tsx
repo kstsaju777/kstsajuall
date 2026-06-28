@@ -385,6 +385,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const [dayErr, setDayErr]     = useState(false);
   const [calendar, setCalendar] = useState("");
   const [btime, setBtime] = useState("");
+  const [timeOpen, setTimeOpen] = useState(false);
   const monthRef2 = useRef<HTMLInputElement>(null);
   const dayRef2   = useRef<HTMLInputElement>(null);
 
@@ -492,33 +493,20 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                   <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
                   <span className="font-bold">태어난 시간은?</span>
                 </h2>
-                <style>{`
-                  .time-select option { background: #1a1a2e; color: #fff; }
-                  .time-select { -webkit-appearance: none; appearance: none; }
-                `}</style>
                 <div className="flex gap-3">
-                  {/* 시간 선택 드롭다운 */}
-                  <div className="flex-1 relative">
-                    <select
-                      className="time-select w-full py-3 px-4 rounded-xl text-[15px] font-bold outline-none transition-all"
-                      value={btime.startsWith("모름") ? "" : btime}
-                      onChange={(e) => setBtime(e.target.value)}
-                      style={{
-                        backgroundColor: (btime && !btime.startsWith("모름")) ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
-                        border: `1.5px solid ${(btime && !btime.startsWith("모름")) ? NAVY : "rgba(255,255,255,0.1)"}`,
-                        color: (btime && !btime.startsWith("모름")) ? "#fff" : "rgba(255,255,255,0.5)",
-                      }}>
-                      <option value="" disabled>시간 선택</option>
-                      {[
-                        "자시 (23–01시)", "축시 (01–03시)", "인시 (03–05시)", "묘시 (05–07시)",
-                        "진시 (07–09시)", "사시 (09–11시)", "오시 (11–13시)", "미시 (13–15시)",
-                        "신시 (15–17시)", "유시 (17–19시)", "술시 (19–21시)", "해시 (21–23시)",
-                      ].map((t) => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>▼</span>
-                  </div>
+                  {/* 커스텀 시간 드롭다운 버튼 */}
+                  <button className="flex-1 py-3 px-4 rounded-xl text-[15px] font-bold transition-all flex items-center justify-between"
+                    onClick={() => setTimeOpen(true)}
+                    style={{
+                      backgroundColor: (btime && btime !== "모름") ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                      border: `1.5px solid ${(btime && btime !== "모름") ? NAVY : "rgba(255,255,255,0.1)"}`,
+                      color: (btime && btime !== "모름") ? "#fff" : "rgba(255,255,255,0.45)",
+                    }}>
+                    <span>{(btime && btime !== "모름") ? btime : "시간 선택"}</span>
+                    <span style={{ fontSize: 11, opacity: 0.5 }}>▼</span>
+                  </button>
                   {/* 시간 모름 */}
-                  <button onClick={() => setBtime("모름")}
+                  <button onClick={() => { setBtime("모름"); setTimeOpen(false); }}
                     className="px-4 py-3 rounded-xl text-[15px] font-bold transition-all"
                     style={{
                       backgroundColor: btime === "모름" ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
@@ -529,6 +517,51 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                     시간 모름
                   </button>
                 </div>
+
+                {/* 시간 선택 모달 — 위로 슬라이드업 */}
+                {timeOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" style={{ backdropFilter: "blur(4px)", backgroundColor: "rgba(0,0,0,0.45)" }}
+                      onClick={() => setTimeOpen(false)} />
+                    <div className="fixed z-50 rounded-t-2xl overflow-hidden"
+                      style={{
+                        bottom: 0,
+                        left: "max(0px, calc(50vw - 240px))",
+                        width: "min(100%, 480px)",
+                        backgroundColor: "rgba(18,20,26,0.92)",
+                        backdropFilter: "blur(16px)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        animation: "slideUp 0.3s ease",
+                      }}>
+                      <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+                        <p className="text-[15px] font-bold" style={{ color: "#fff" }}>태어난 시간 선택</p>
+                        <button onClick={() => setTimeOpen(false)} style={{ color: "rgba(255,255,255,0.4)", fontSize: 20 }}>✕</button>
+                      </div>
+                      <div className="overflow-y-auto" style={{ maxHeight: "55vh" }}>
+                        {[
+                          { label: "자시", range: "23:30 – 01:30" }, { label: "축시", range: "01:30 – 03:30" },
+                          { label: "인시", range: "03:30 – 05:30" }, { label: "묘시", range: "05:30 – 07:30" },
+                          { label: "진시", range: "07:30 – 09:30" }, { label: "사시", range: "09:30 – 11:30" },
+                          { label: "오시", range: "11:30 – 13:30" }, { label: "미시", range: "13:30 – 15:30" },
+                          { label: "신시", range: "15:30 – 17:30" }, { label: "유시", range: "17:30 – 19:30" },
+                          { label: "술시", range: "19:30 – 21:30" }, { label: "해시", range: "21:30 – 23:30" },
+                        ].map((t) => {
+                          const val = `${t.label}(${t.range})`;
+                          const selected = btime === val;
+                          return (
+                            <button key={t.label} className="w-full px-5 py-3.5 flex items-center justify-between transition-all"
+                              onClick={() => { setBtime(val); setTimeOpen(false); }}
+                              style={{ backgroundColor: selected ? "rgba(255,107,157,0.15)" : "transparent", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                              <span className="text-[16px] font-bold" style={{ color: selected ? "#fff" : "rgba(255,255,255,0.8)" }}>{t.label}</span>
+                              <span className="text-[13px]" style={{ color: selected ? NAVY : "rgba(255,255,255,0.35)" }}>{t.range}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div style={{ height: "env(safe-area-inset-bottom, 16px)", minHeight: 16 }} />
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
