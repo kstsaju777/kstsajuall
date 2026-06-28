@@ -719,7 +719,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX))}
-          placeholder="헤어진 이유, 상대방과의 관계, 재회를 원하는 이유 등을 자유롭게 적어주세요."
+          placeholder="예) 3년을 사귀다 작년 여름에 헤어졌습니다. 제가 너무 감정적으로 굴었던 것 같아요. 아직도 많이 보고 싶고, 다시 만날 수 있을지 궁금합니다."
           rows={5}
           className="w-full rounded-2xl p-4 text-[14px] outline-none resize-none leading-relaxed"
           style={{
