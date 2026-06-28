@@ -64,12 +64,10 @@ function FormShell({ children }: { children: React.ReactNode }) {
             "linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(19,25,33,0.3) 50%, rgba(19,25,33,0.75) 65%, rgba(19,25,33,1) 80%)",
         }}
       />
-      {/* 하단 카드 — 높이 60%로 고정, 내용 넘치면 스크롤 */}
-      <div className="absolute bottom-0 left-0 right-0" style={{ maxHeight: "60%", display: "flex", flexDirection: "column" }}>
-        <div style={{ height: 56, flexShrink: 0, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
-        <div style={{ overflowY: "auto", flex: 1 }}>
-          {children}
-        </div>
+      {/* 하단 카드 */}
+      <div className="absolute bottom-0 left-0 right-0">
+        <div style={{ height: 56, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
+        {children}
       </div>
     </div>
   );
@@ -160,18 +158,18 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별한 이유</p>
-        <h2 className="text-[24px] mb-6" style={{ color: TEXT_CLR }}>
+        <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
           <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대들이 </span>
           <span className="font-bold">이별한 이유는?</span>
         </h2>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {BREAKUP_REASONS.map((reason) => {
             const active = selected === reason;
             return (
               <button
                 key={reason}
                 onClick={() => setSelected(reason)}
-                className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
+                className="w-full py-2.5 rounded-xl text-[14px] font-semibold transition-all"
                 style={{
                   backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
                   border: `1.5px solid ${active ? NAVY : "rgba(255,255,255,0.18)"}`,
