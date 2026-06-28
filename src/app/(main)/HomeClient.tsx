@@ -42,7 +42,7 @@ const CATEGORIES = [
   {
     tag: "나를 알고 싶을 때",
     title: "나는 어떤 사람일까?",
-    slugs: ["saju_youare", "saju_banryeo"],
+    slugs: ["saju_youare"],
   },
 ];
 
