@@ -39,11 +39,6 @@ const CATEGORIES = [
     title: "이것도 궁금해요",
     slugs: ["kunghap_banryeo", "saju_health", "total"],
   },
-  {
-    tag: "나를 알고 싶을 때",
-    title: "나는 어떤 사람일까?",
-    slugs: ["saju_youare"],
-  },
 ];
 
 const DUMMY_GRADIENTS = [
