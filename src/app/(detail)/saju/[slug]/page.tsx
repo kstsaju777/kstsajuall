@@ -25,8 +25,8 @@ export default function ComingSoonPage() {
           상품 준비중
         </p>
         <p style={{ fontSize: 14, color: "rgba(255,255,255,0.35)", lineHeight: 1.8 }}>
-          현재 열심히 제작 중이에요.<br />
-          조금만 기다려 주세요 🙏
+          멋진 상품으로 찾아뵙겠습니다.<br />
+          감사합니다.
         </p>
       </div>
 
