@@ -129,7 +129,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                           overflow: "hidden", position: "relative", cursor: "pointer",
                           scrollSnapAlign: "start",
                           background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
-                          opacity: product.is_active ? 1 : 0.6,
+                          opacity: 1,
                         }}
                       >
                         {!isDummy && (isVideo ? (
