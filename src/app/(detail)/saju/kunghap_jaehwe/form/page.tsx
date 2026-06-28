@@ -54,19 +54,17 @@ function FormShell({ children }: { children: React.ReactNode }) {
           aria-hidden
           className="w-full h-full object-cover" style={{ objectPosition: "center -50px" }}
         />
+        {/* 이미지 하단 그라데이션 */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 30%, rgba(19,25,33,0.5) 65%, rgba(19,25,33,0.9) 85%, rgba(19,25,33,1) 100%)",
+          }}
+        />
       </div>
-      {/* 그라데이션 — 이미지 경계 넘어 자연스럽게 연결 */}
-      <div
-        className="absolute top-0 left-0 right-0 pointer-events-none"
-        style={{
-          height: "60%",
-          background:
-            "linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(19,25,33,0.3) 50%, rgba(19,25,33,0.75) 65%, rgba(19,25,33,1) 80%)",
-        }}
-      />
       {/* 하단 카드 */}
       <div className="absolute bottom-0 left-0 right-0">
-        <div style={{ height: 56, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
         {children}
       </div>
     </div>
@@ -156,7 +154,7 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
   const [selected, setSelected] = useState<string | null>(initial ?? null);
   return (
     <>
-      <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+      <div className="px-6 pt-3 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별한 이유</p>
         <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
           <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대들이 </span>
