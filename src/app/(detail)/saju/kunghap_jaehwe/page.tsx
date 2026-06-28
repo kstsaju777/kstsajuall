@@ -28,56 +28,14 @@ const TIME_COLORS: Record<string, string> = {
 
 const GAPS: { height: string; text?: string; line?: boolean; bg?: string }[] = [
   { height: "0px" },
-  { height: "60px", bg: "#131921" },
-  { height: "300px", text: "그 사람이\n아직도 생각나나요?" },
-  { height: "300px", text: "홍연이\n답을 알고 있소" },
   { height: "180px" },
 ];
 
 const CHAPTERS = [
   {
     chapter: "1장",
-    media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-0.jpg" },
-    bubble: null,
-    bottomGrad: { color: "#131921", height: "15%" },
-  },
-  {
-    chapter: "2장",
     media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-1.png" },
     bubble: null,
-    topGrad: { color: "#131921", height: "15%" },
-    cornerBubbles: [
-      {
-        top: "10%", left: "6%", width: "50%", height: "28%",
-        panels: [
-          { top: "0%", left: "0%", width: "115%", height: "65%", text: "헤어진 그 사람,\n아직 마음에 남아있소?" },
-        ],
-      },
-      {
-        top: "85%", left: "30%", width: "60%", height: "22%",
-        panels: [
-          { top: "-5%", left: "-10%", width: "80%", height: "70%", text: "사주에 이미\n답이 적혀있소.." },
-        ],
-      },
-    ],
-  },
-  {
-    chapter: "3장",
-    media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-0.jpg" },
-    bubble: null,
-    circleBubbles: [
-      { text: "다시 만날\n운명인지", top: "5%", left: "5%", width: "42%", ratio: "4/3" },
-      { text: "그 시기가\n언제인지", top: "75%", left: "52%", width: "42%", ratio: "4/3" },
-    ],
-  },
-  {
-    chapter: "4장",
-    media: { type: "image", src: "/media/cards/kunghap_jaehwe/jaehwe-1.png" },
-    bubble: null,
-    circleBubbles: [
-      { text: "두 사람의\n인연을", top: "0%", left: "8%", width: "40%", ratio: "3/2" },
-      { text: "내가\n풀어드리겠소", top: "80%", left: "48%", width: "44%", ratio: "3/2" },
-    ],
     isCTA: true,
   },
 ];
