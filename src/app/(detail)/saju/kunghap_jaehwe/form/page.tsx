@@ -47,27 +47,22 @@ function FormShell({ children }: { children: React.ReactNode }) {
       className="relative w-full overflow-hidden"
       style={{ height: vh ? `${vh}px` : "100%", maxHeight: "100%", backgroundColor: "#131921" }}
     >
-      {/* 배경 이미지 — 블러 채움 */}
-      <img
-        src="/media/cards/kunghap_jaehwe/jaehwe-1.jpg"
-        aria-hidden
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ filter: "blur(24px)", transform: "scale(1.15)" }}
-      />
-      {/* 배경 이미지 — 메인 */}
-      <img
-        src="/media/cards/kunghap_jaehwe/jaehwe-1.jpg"
-        aria-hidden
-        className="absolute inset-0 w-full h-full object-contain object-top"
-      />
-      {/* 그라데이션 오버레이 */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent 20%, rgba(19,25,33,0.15) 45%, rgba(19,25,33,0.55) 60%, rgba(19,25,33,0.85) 72%, rgba(19,25,33,0.97) 82%)",
-        }}
-      />
+      {/* 이미지 영역 — 화면 상단 50% */}
+      <div className="absolute top-0 left-0 right-0" style={{ height: "50%" }}>
+        <img
+          src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg"
+          aria-hidden
+          className="w-full h-full object-cover"
+        />
+        {/* 이미지 → 카드 배경 그라데이션 */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 30%, rgba(19,25,33,0.6) 70%, rgba(19,25,33,1) 100%)",
+          }}
+        />
+      </div>
       {/* 하단 카드 */}
       <div className="absolute bottom-0 left-0 right-0">
         <div style={{ height: 56, background: `linear-gradient(to bottom, transparent, ${CARD_BG})`, pointerEvents: "none" }} />
