@@ -108,14 +108,14 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 
             return (
               <div key={cat.tag} style={{ padding: "0 0 4px" }}>
-                <div className="px-4 flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-3" style={{ paddingLeft: 10, paddingRight: 10 }}>
                   <div>
                     <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 700, marginBottom: 2, letterSpacing: 1 }}>{cat.tag}</p>
                     <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, lineHeight: 1.3 }}>{cat.title}</p>
                   </div>
                   <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap" }}>더보기 →</span>
                 </div>
-                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 16, paddingRight: 16, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", scrollPaddingLeft: 16, WebkitOverflowScrolling: "touch" }}>
+                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 10, paddingRight: 10, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", scrollPaddingLeft: 10, WebkitOverflowScrolling: "touch" }}>
                   {catProducts.map((product, i) => {
                     const imageUrl = product.image_url;
                     const isDummy = !imageUrl;
