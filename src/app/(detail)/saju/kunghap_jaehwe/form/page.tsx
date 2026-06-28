@@ -407,7 +407,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
       <style>{`@keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <div className="px-6 pt-4 pb-3" style={{ backgroundColor: CARD_BG }}>
         {/* 성별 */}
-        <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>내담자 1</p>
+        <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 성별</p>
         <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
           <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대의 </span>
           <span className="font-bold">성별은 무엇이오?</span>
@@ -430,7 +430,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
         {showDate && (
           <div style={{ animation: "slideUp 0.35s ease" }}>
             <div className="w-full mb-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
-            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>태어난 날짜</p>
+            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 태어난 날짜</p>
             <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
               <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
               <span className="font-bold">태어난 날짜는?</span>
@@ -488,7 +488,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
             {dateEntered && (
               <div style={{ animation: "slideUp 0.35s ease" }}>
                 <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
-                <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>태어난 시간</p>
+                <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>나의 태어난 시간</p>
                 <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
                   <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
                   <span className="font-bold">태어난 시간은?</span>
