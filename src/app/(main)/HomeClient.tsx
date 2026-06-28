@@ -167,7 +167,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       {/* 로고 구분선 */}
       {isAdmin && (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "8px 0" }}>
-          <img src="/logo.png" alt="홍연당" style={{ width: 64, height: 64, objectFit: "contain", opacity: 0.7 }} />
+          <img src="/logo_128.jpg" alt="홍연당" style={{ width: 64, height: 64, objectFit: "cover", borderRadius: "50%" }} />
         </div>
       )}
 
