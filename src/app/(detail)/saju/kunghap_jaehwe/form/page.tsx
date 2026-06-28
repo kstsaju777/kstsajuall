@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { calcSaju, ELEMENT_COLORS } from "@/lib/saju/local-manseryeok";
+import { calcSaju } from "@/lib/saju/local-manseryeok";
+import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
 const NAVY       = "#ff6b9d";
@@ -635,32 +636,48 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name }:
         {/* 명식 그리드 */}
         {name && (
           <div className="mb-2">
-            <p className="text-[12px] font-medium mb-2" style={{ color: "#8a8a8a" }}>{name}님의 사주팔자</p>
-            <div className="grid grid-cols-4 gap-2">
-              {pillars ? pillars.map((p, i) => {
-                const cgC = ELEMENT_COLORS[p.stemClass]   ?? ELEMENT_COLORS.unknown;
-                const jjC = ELEMENT_COLORS[p.branchClass] ?? ELEMENT_COLORS.unknown;
-                return (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <p className="text-[10px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
-                    <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5" style={{ backgroundColor: cgC.bg }}>
-                      <span className="text-[9px] font-medium" style={{ color: cgC.text }}>{p.stemSs || ""}</span>
-                      <span className="text-[24px] font-bold leading-none" style={{ color: cgC.text }}>{p.stem}</span>
-                      <span className="text-[9px]" style={{ color: cgC.text }}>{p.stemHg}</span>
-                    </div>
-                    <div className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5" style={{ backgroundColor: jjC.bg }}>
-                      <span className="text-[24px] font-bold leading-none" style={{ color: jjC.text }}>{p.branch}</span>
-                      <span className="text-[9px]" style={{ color: jjC.text }}>{p.branchHg}</span>
-                    </div>
-                  </div>
-                );
-              }) : Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <p className="text-[10px] mb-0.5" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
-                  <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.1)" }} />
-                  <div className="w-full aspect-square rounded-xl animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.1)" }} />
+            <p className="text-[12px] font-medium mb-3" style={{ color: "#8a8a8a" }}>{name}님의 사주팔자</p>
+            <div style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", border: "1px solid #d8c4a0", borderRadius: 16, padding: "16px 12px" }}>
+              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(42,35,32,0.08)" }}>
+                {/* 기둥 헤더 */}
+                <div className="grid grid-cols-4">
+                  {PILLAR_LABELS_JW.map(label => (
+                    <div key={label} className="py-1.5 text-center text-[13px] font-bold" style={{ color: "#2a2320", background: "#efe3df" }}>{label}</div>
+                  ))}
                 </div>
-              ))}
+                {/* 십성 (천간) */}
+                <div className="grid grid-cols-4" style={{ borderTop: "1px solid rgba(42,35,32,0.05)" }}>
+                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
+                    <div key={i} className="py-0.5 text-center" style={{ background: "#fff" }}>
+                      <span style={{ color: "#5b504a", fontSize: 13 }}>{p?.stemSs || "—"}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* 천간 이미지 */}
+                <div className="grid grid-cols-4" style={{ borderTop: "1px solid rgba(42,35,32,0.05)" }}>
+                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
+                    <div key={i} className="flex items-center justify-center" style={{ background: "#fff", padding: "0px 4px" }}>
+                      {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: 64, height: 64, objectFit: "contain" }} /> : <div style={{ width: 64, height: 64, background: "#eee", borderRadius: 8 }} />}
+                    </div>
+                  ))}
+                </div>
+                {/* 지지 이미지 */}
+                <div className="grid grid-cols-4">
+                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
+                    <div key={i} className="flex items-center justify-center" style={{ background: "#fff", padding: "0px 4px" }}>
+                      {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: 64, height: 64, objectFit: "contain" }} /> : <div style={{ width: 64, height: 64, background: "#eee", borderRadius: 8 }} />}
+                    </div>
+                  ))}
+                </div>
+                {/* 십성 (지지) */}
+                <div className="grid grid-cols-4" style={{ borderTop: "1px solid rgba(42,35,32,0.05)" }}>
+                  {(pillars ?? Array(4).fill(null)).map((p, i) => (
+                    <div key={i} className="py-0.5 text-center" style={{ background: "#fff" }}>
+                      <span style={{ color: "#5b504a", fontSize: 13 }}>{p?.branchSs || "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
