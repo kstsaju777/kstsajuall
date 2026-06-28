@@ -260,7 +260,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
               style={{ width: 80, borderBottom: dayUnknown ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
-            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>년</span>
+            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>년</span>
           </div>
           <div className="flex items-end gap-1">
             <input
@@ -270,7 +270,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
               style={{ width: 48, borderBottom: dayUnknown ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
-            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>월</span>
+            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>월</span>
           </div>
           <div className="flex items-end gap-1">
             <input
@@ -281,7 +281,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
               style={{ width: 48, borderBottom: normalBorder, color: dayUnknown ? "rgba(255,255,255,0.2)" : TEXT_CLR, caretColor: NAVY }}
             />
-            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)" }}>일</span>
+            <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>일</span>
           </div>
         </div>
 
