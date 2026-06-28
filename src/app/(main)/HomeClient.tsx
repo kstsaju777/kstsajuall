@@ -167,7 +167,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       {/* 로고 구분선 */}
       {isAdmin && (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 0 0px" }}>
-          <img src="/logo_128.jpg" alt="홍연당" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ width: 100, height: 100, objectFit: "cover", borderRadius: "50%", cursor: "pointer" }} />
+          <img src="/logo_128.jpg" alt="홍연당" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "50%", cursor: "pointer" }} />
         </div>
       )}
 
