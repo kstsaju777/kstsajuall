@@ -54,17 +54,19 @@ function FormShell({ children }: { children: React.ReactNode }) {
           aria-hidden
           className="w-full h-full object-cover" style={{ objectPosition: "center -50px" }}
         />
-        {/* 이미지 하단 그라데이션 */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to bottom, transparent 30%, rgba(19,25,33,0.5) 65%, rgba(19,25,33,0.9) 85%, rgba(19,25,33,1) 100%)",
-          }}
-        />
       </div>
+      {/* 그라데이션 오버레이 — 이미지 위에 z-index 높여서 경계 덮기 */}
+      <div
+        className="absolute left-0 right-0 pointer-events-none"
+        style={{
+          top: "20%",
+          height: "30%",
+          zIndex: 1,
+          background: "linear-gradient(to bottom, transparent 0%, rgba(19,25,33,0.6) 50%, rgba(19,25,33,1) 100%)",
+        }}
+      />
       {/* 하단 카드 */}
-      <div className="absolute bottom-0 left-0 right-0">
+      <div className="absolute bottom-0 left-0 right-0" style={{ zIndex: 2 }}>
         {children}
       </div>
     </div>
