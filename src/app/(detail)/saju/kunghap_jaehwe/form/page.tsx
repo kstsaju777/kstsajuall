@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
-const NAVY       = "#9b2335";
-const CARD_BG    = "#131921";
+const NAVY       = "#ff6b9d";
+const CARD_BG    = "#0a0c10";
 const LABEL_CLR  = "#e0a8b0";
 const BORDER_CLR = "#4a5560";
 const PH_CLR     = "#7a8590";
