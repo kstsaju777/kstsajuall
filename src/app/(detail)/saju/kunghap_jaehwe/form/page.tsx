@@ -141,21 +141,29 @@ function BottomNav({
   );
 }
 
-// ─── Step 1: 성별 ─────────────────────────────────────────────────────────────
-function StepGender({ onNext, initial }: { onNext: (v: string) => void; initial?: string }) {
-  const [gender, setGender] = useState<"여자" | "남자" | null>((initial as "여자" | "남자") ?? null);
+// ─── Step 1: 이별 이유 ────────────────────────────────────────────────────────
+const BREAKUP_REASONS = [
+  "성격 차이",
+  "연락 두절 / 잠수",
+  "외도 / 배신",
+  "장거리 / 환경 변화",
+  "기타",
+];
+
+function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; initial?: string }) {
+  const [selected, setSelected] = useState<string | null>(initial ?? null);
   return (
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>내 질문에 답을 해주시오</p>
-        <Title>그대의 성별은 무엇이오?</Title>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별한 이유</p>
+        <Title>그대들이 이별한 이유는 무엇이오?</Title>
         <div className="flex flex-col gap-3">
-          {(["여자", "남자"] as const).map((g) => {
-            const active = gender === g;
+          {BREAKUP_REASONS.map((reason) => {
+            const active = selected === reason;
             return (
               <button
-                key={g}
-                onClick={() => { setGender(g); setTimeout(() => onNext(g), 350); }}
+                key={reason}
+                onClick={() => { setSelected(reason); setTimeout(() => onNext(reason), 350); }}
                 className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
                 style={{
                   backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
@@ -164,13 +172,13 @@ function StepGender({ onNext, initial }: { onNext: (v: string) => void; initial?
                   opacity: active ? 1 : 0.55,
                 }}
               >
-                {g}
+                {reason}
               </button>
             );
           })}
         </div>
       </div>
-      <BottomNav onNext={() => gender && onNext(gender)} nextLabel="다음으로" nextDisabled={!gender} />
+      <BottomNav onNext={() => selected && onNext(selected)} nextLabel="다음으로" nextDisabled={!selected} />
     </>
   );
 }
@@ -569,7 +577,7 @@ function StepLoading({ name, date, time, calendar, gender, email }: {
 }
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
-type FormData = { gender: string; date: string; calendar: string; time: string; name: string; concern: string; email: string; };
+type FormData = { breakupReason: string; gender: string; date: string; calendar: string; time: string; name: string; concern: string; email: string; };
 
 export default function JaehweFormPage() {
   const router = useRouter();
@@ -585,7 +593,7 @@ export default function JaehweFormPage() {
     <>
       {step <= 6 && (
         <FormShell>
-          {step === 1 && <StepGender initial={form.gender} onNext={(gender) => next({ gender }, 2)} />}
+          {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
             <StepBirthDate
               gender={form.gender} initialDate={form.date} initialCalendar={form.calendar}
