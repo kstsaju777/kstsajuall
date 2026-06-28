@@ -452,7 +452,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
               <div className="flex flex-col items-center">
                 <div className="flex items-end gap-1">
                   <input type="text" inputMode="numeric" placeholder="2000" autoComplete="off" value={year}
-                    onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) { const y = parseInt(v,10); const err = y<1900||y>2025; setYearErr(err); if (!err) monthRef2.current?.focus(); } else setYearErr(false); }}
+                    onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) { const y = parseInt(v,10); const err = y<1950||y>2050; setYearErr(err); if (!err) monthRef2.current?.focus(); } else setYearErr(false); }}
                     className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
                     style={{ width: 80, borderBottom: yearErr ? errorBorder : year ? activeBorder : normalBorder, color: yearErr ? "#ff4444" : TEXT_CLR, caretColor: NAVY }} />
                   <span className="pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>년</span>
