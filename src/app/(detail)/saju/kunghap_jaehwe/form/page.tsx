@@ -235,7 +235,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
   const yNum = parseInt(year, 10);
   const dayValid = dayUnknown || (dNum >= 1 && dNum <= new Date(yNum, mNum, 0).getDate());
   const isValid = year.length === 4 && mNum >= 1 && mNum <= 12 && dayValid;
-  const dateStr = `${year}.${month.padStart(2,"0")}.${dayUnknown ? "00" : day.padStart(2,"0")}`;
+  const dateStr = `${year}.${month.padStart(2,"0")}.${dayUnknown ? "01" : day.padStart(2,"0")}`;
 
   const activeBorder = `2px solid ${NAVY}`;
   const normalBorder = `2px solid ${BORDER_CLR}`;
@@ -275,11 +275,11 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           <div className="flex items-end gap-1">
             <input
               type="text" inputMode="numeric" placeholder="10"
-              value={dayUnknown ? "" : day}
+              value={dayUnknown ? "-" : day}
               disabled={dayUnknown}
               onChange={(e) => setDay(pad(e.target.value, 2))}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
-              style={{ width: 48, borderBottom: day && !dayUnknown ? activeBorder : normalBorder, color: dayUnknown ? "rgba(255,255,255,0.2)" : TEXT_CLR, caretColor: NAVY }}
+              style={{ width: 48, borderBottom: day && !dayUnknown ? activeBorder : normalBorder, color: dayUnknown ? "rgba(255,255,255,0.35)" : TEXT_CLR, caretColor: NAVY }}
             />
             <span className="text-[16px] pb-2" style={{ color: "rgba(255,255,255,0.5)", fontSize: 22 }}>일</span>
           </div>
