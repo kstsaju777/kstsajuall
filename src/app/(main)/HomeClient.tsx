@@ -101,8 +101,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
               .map(slug => products.find(p => p.slug === slug))
               .filter(Boolean) as Product[];
             const isBig = catIdx % 2 === 1;
-            const cardW = isBig ? "42vw" : "28vw";
-            const cardH = isBig ? "52vw" : "28vw";
+            const cardW = catIdx === 0 ? "38vw" : isBig ? "42vw" : "28vw";
+            const cardH = catIdx === 0 ? "50vw" : isBig ? "52vw" : "28vw";
             const fontSize = isBig ? 13 : 10;
             const badgeFontSize = isBig ? 10 : 8;
 
