@@ -185,80 +185,39 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
   );
 }
 
-// ─── Step 2: 생년월일 ─────────────────────────────────────────────────────────
-function StepBirthDate({
-  onPrev, onNext, gender, initialDate, initialCalendar,
-}: {
-  onPrev: () => void;
-  onNext: (v: { date: string; calendar: string }) => void;
-  gender?: string;
-  initialDate?: string;
-  initialCalendar?: string;
-}) {
-  const [date, setDate] = useState(initialDate ?? "");
-  const [calendar, setCalendar] = useState<"양력" | "음력" | "윤달">((initialCalendar as "양력" | "음력" | "윤달") ?? "양력");
-  const interacted = useRef(false);
-
-  const formatDate = (raw: string) => {
-    const nums = raw.replace(/\D/g, "").slice(0, 8);
-    if (nums.length <= 4) return nums;
-    if (nums.length <= 6) return nums.slice(0, 4) + "." + nums.slice(4);
-    return nums.slice(0, 4) + "." + nums.slice(4, 6) + "." + nums.slice(6);
-  };
-
-  const nums = date.replace(/\./g, "");
-  const isFilled = nums.length >= 8;
-  const isValidDate = (() => {
-    if (!isFilled) return true;
-    const y = parseInt(nums.slice(0, 4), 10);
-    const m = parseInt(nums.slice(4, 6), 10);
-    const d = parseInt(nums.slice(6, 8), 10);
-    if (m < 1 || m > 12 || d < 1) return false;
-    return d <= new Date(y, m, 0).getDate();
-  })();
-  const isValid = isFilled && isValidDate;
-
-  useEffect(() => {
-    if (isValid && interacted.current) {
-      const t = setTimeout(() => onNext({ date, calendar }), 600);
-      return () => clearTimeout(t);
-    }
-  }, [isValid, date, calendar]);
-
-  const greeting = gender === "남자" ? "멋진 도련님, 잘 찾아오셨소" : "어여쁜 아가씨, 잘 찾아오셨소";
-  const greetColor = gender === "남자" ? "#7ec8e3" : "#f8a5c2";
-
+// ─── Step 2: 이별 통보자 ─────────────────────────────────────────────────────
+function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
+  const [selected, setSelected] = useState<string | null>(initial ?? null);
   return (
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: greetColor }}>{greeting}</p>
-        <Title>언제 태어났는지 말해주게</Title>
-        <div className="flex items-end gap-3">
-          <div className="flex-1">
-            <input
-              type="text" inputMode="numeric" placeholder="1999.01.01"
-              value={date}
-              onChange={(e) => { interacted.current = true; setDate(formatDate(e.target.value)); }}
-              className="w-full bg-transparent text-[17px] pb-2.5 outline-none"
-              style={{
-                borderBottom: `1.5px solid ${!isValidDate && isFilled ? "#e03" : BORDER_CLR}`,
-                color: date ? TEXT_CLR : PH_CLR, caretColor: NAVY,
-              }}
-            />
-          </div>
-          <div className="pb-1.5">
-            <PillToggle
-              options={["양력", "음력", "윤달"] as const}
-              value={calendar}
-              onChange={(c) => { interacted.current = true; setCalendar(c); }}
-            />
-          </div>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별 통보</p>
+        <h2 className="text-[24px] mb-6" style={{ color: TEXT_CLR }}>
+          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>누가 </span>
+          <span className="font-bold">헤어지자고 했소?</span>
+        </h2>
+        <div className="flex flex-col gap-3">
+          {(["내가", "상대방이", "둘 다"] as const).map((opt) => {
+            const active = selected === opt;
+            return (
+              <button
+                key={opt}
+                onClick={() => setSelected(opt)}
+                className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
+                style={{
+                  backgroundColor: active ? "rgba(255,107,157,0.18)" : "rgba(255,255,255,0.04)",
+                  border: `1.5px solid ${active ? NAVY : "rgba(255,255,255,0.18)"}`,
+                  color: active ? "#ffffff" : "#dddddd",
+                  opacity: active ? 1 : 0.55,
+                }}
+              >
+                {opt}
+              </button>
+            );
+          })}
         </div>
-        {!isValidDate && isFilled && (
-          <p className="mt-2 text-[13px] font-medium" style={{ color: "#e03" }}>생년월일을 다시 확인해주세요!</p>
-        )}
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext({ date, calendar })} nextLabel="다음으로" nextDisabled={!isValid} />
+      <BottomNav onPrev={onPrev} onNext={() => selected && onNext(selected)} nextLabel="다음으로" nextDisabled={!selected} />
     </>
   );
 }
@@ -579,7 +538,7 @@ function StepLoading({ name, date, time, calendar, gender, email }: {
 }
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
-type FormData = { breakupReason: string; gender: string; date: string; calendar: string; time: string; name: string; concern: string; email: string; };
+type FormData = { breakupReason: string; whoEnded: string; gender: string; date: string; calendar: string; time: string; name: string; concern: string; email: string; };
 
 export default function JaehweFormPage() {
   const router = useRouter();
@@ -597,11 +556,7 @@ export default function JaehweFormPage() {
         <FormShell>
           {step === 1 && <StepBreakupReason initial={form.breakupReason} onNext={(breakupReason) => next({ breakupReason }, 2)} />}
           {step === 2 && (
-            <StepBirthDate
-              gender={form.gender} initialDate={form.date} initialCalendar={form.calendar}
-              onPrev={() => setStep(1)}
-              onNext={({ date, calendar }) => next({ date, calendar }, 3)}
-            />
+            <StepWhoEnded initial={form.whoEnded} onPrev={() => setStep(1)} onNext={(whoEnded) => next({ whoEnded }, 3)} />
           )}
           {step === 3 && (
             <StepBirthTime initialTime={form.time} onPrev={() => setStep(2)} onNext={(time) => next({ time }, 4)} />
