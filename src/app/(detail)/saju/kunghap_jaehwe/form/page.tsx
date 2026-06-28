@@ -492,26 +492,42 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                   <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
                   <span className="font-bold">태어난 시간은?</span>
                 </h2>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { label: "자시", desc: "23–01시" }, { label: "축시", desc: "01–03시" },
-                    { label: "인시", desc: "03–05시" }, { label: "묘시", desc: "05–07시" },
-                    { label: "진시", desc: "07–09시" }, { label: "사시", desc: "09–11시" },
-                    { label: "오시", desc: "11–13시" }, { label: "미시", desc: "13–15시" },
-                    { label: "신시", desc: "15–17시" }, { label: "유시", desc: "17–19시" },
-                    { label: "술시", desc: "19–21시" }, { label: "해시", desc: "21–23시" },
-                    { label: "모름", desc: "" },
-                  ].map((t) => (
-                    <button key={t.label} onClick={() => setBtime(t.label)}
-                      className="rounded-xl py-2.5 flex flex-col items-center transition-all"
+                <style>{`
+                  .time-select option { background: #1a1a2e; color: #fff; }
+                  .time-select { -webkit-appearance: none; appearance: none; }
+                `}</style>
+                <div className="flex gap-3">
+                  {/* 시간 선택 드롭다운 */}
+                  <div className="flex-1 relative">
+                    <select
+                      className="time-select w-full py-3 px-4 rounded-xl text-[15px] font-bold outline-none transition-all"
+                      value={btime.startsWith("모름") ? "" : btime}
+                      onChange={(e) => setBtime(e.target.value)}
                       style={{
-                        backgroundColor: btime === t.label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
-                        border: `1.5px solid ${btime === t.label ? NAVY : "rgba(255,255,255,0.1)"}`,
+                        backgroundColor: (btime && !btime.startsWith("모름")) ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                        border: `1.5px solid ${(btime && !btime.startsWith("모름")) ? NAVY : "rgba(255,255,255,0.1)"}`,
+                        color: (btime && !btime.startsWith("모름")) ? "#fff" : "rgba(255,255,255,0.5)",
                       }}>
-                      <span className="text-[14px] font-bold" style={{ color: btime === t.label ? "#fff" : "rgba(255,255,255,0.7)" }}>{t.label}</span>
-                      {t.desc && <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{t.desc}</span>}
-                    </button>
-                  ))}
+                      <option value="" disabled>시간 선택</option>
+                      {[
+                        "자시 (23–01시)", "축시 (01–03시)", "인시 (03–05시)", "묘시 (05–07시)",
+                        "진시 (07–09시)", "사시 (09–11시)", "오시 (11–13시)", "미시 (13–15시)",
+                        "신시 (15–17시)", "유시 (17–19시)", "술시 (19–21시)", "해시 (21–23시)",
+                      ].map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>▼</span>
+                  </div>
+                  {/* 시간 모름 */}
+                  <button onClick={() => setBtime("모름")}
+                    className="px-4 py-3 rounded-xl text-[15px] font-bold transition-all"
+                    style={{
+                      backgroundColor: btime === "모름" ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                      border: `1.5px solid ${btime === "모름" ? NAVY : "rgba(255,255,255,0.1)"}`,
+                      color: btime === "모름" ? "#fff" : "rgba(255,255,255,0.5)",
+                      whiteSpace: "nowrap",
+                    }}>
+                    시간 모름
+                  </button>
                 </div>
               </div>
             )}
