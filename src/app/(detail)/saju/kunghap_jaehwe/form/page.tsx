@@ -228,6 +228,8 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
   const [month, setMonth]   = useState(initial ? initial.split(".")[1] ?? "" : "");
   const [day, setDay]       = useState(initial ? initial.split(".")[2] ?? "" : "");
   const [dayUnknown, setDayUnknown] = useState(false);
+  const monthRef = useRef<HTMLInputElement>(null);
+  const dayRef   = useRef<HTMLInputElement>(null);
 
   const pad = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
   const mNum = parseInt(month, 10);
@@ -256,7 +258,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
             <input
               type="text" inputMode="numeric" placeholder="2026"
               value={year}
-              onChange={(e) => setYear(pad(e.target.value, 4))}
+              onChange={(e) => { const v = pad(e.target.value, 4); setYear(v); if (v.length === 4) monthRef.current?.focus(); }}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
               style={{ width: 80, borderBottom: dayUnknown ? activeBorder : year ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
@@ -264,9 +266,10 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           </div>
           <div className="flex items-end gap-1">
             <input
+              ref={monthRef}
               type="text" inputMode="numeric" placeholder="06"
               value={month}
-              onChange={(e) => setMonth(pad(e.target.value, 2))}
+              onChange={(e) => { const v = pad(e.target.value, 2); setMonth(v); if (v.length === 2) dayRef.current?.focus(); }}
               className="bg-transparent text-[28px] font-bold pb-1 outline-none text-center"
               style={{ width: 48, borderBottom: dayUnknown ? activeBorder : month ? activeBorder : normalBorder, color: TEXT_CLR, caretColor: NAVY }}
             />
@@ -274,6 +277,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
           </div>
           <div className="flex items-end gap-1">
             <input
+              ref={dayRef}
               type="text" inputMode="numeric" placeholder="10"
               value={dayUnknown ? "-" : day}
               disabled={dayUnknown}
