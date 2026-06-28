@@ -98,6 +98,13 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
     { image: "/media/hero/hero-8.jpg",   badge: "자녀", tag: "인기", name: "우리 아이 사주",  desc: "우리 아이는 영재일까? 자녀의 천재성과 재능을 분석합니다", href: "/saju/jeongtong" },
   ],
 
+  가족: [
+    { image: "/media/cards/saju_janyeo/janyeo-0.jpg", badge: "사주", tag: "인기", name: "자녀 사주", desc: "우리 아이의 타고난 재능과 성격을 분석합니다", href: "/saju/saju_janyeo" },
+    { image: "/media/cards/kunghap_janyeo/kunghap_janyeo-0.jpg", badge: "궁합", tag: "추천", name: "자녀 궁합", desc: "부모와 아이의 궁합을 분석합니다", href: "/saju/kunghap_janyeo" },
+    { image: "/media/cards/saju_imshin/imshin-0.jpg", badge: "임신", tag: "NEW", name: "임신 사주", desc: "임신 시기와 아이 성별을 사주로 분석합니다", href: "/saju/saju_imshin" },
+    { image: "/media/cards/saju_youare/youare-0.jpg", badge: "사주", tag: "", name: "유아 사주", desc: "우리 아이의 유아기 기질과 발달을 분석합니다", href: "/saju/saju_youare" },
+  ],
+
   기타: [
     { image: "/media/cards/saju_total/total-1.jpg",  badge: "종합", tag: "베스트", name: "종합 사주 감명",  desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",   href: "/saju/jeongtong" },
   ],
