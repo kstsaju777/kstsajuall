@@ -665,14 +665,51 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
   );
 }
 
+// ─── 미니 명식 (고민 입력 상단용) ────────────────────────────────────────────
+function MiniMyeongsik({ date, time, calendar, name, label }: { date?: string; time?: string; calendar?: string; name?: string; label: string }) {
+  const saju = useMemo(() => {
+    if (!date) return null;
+    try { return calcSaju(date, time ?? "모름", calendar ?? "양력"); } catch { return null; }
+  }, [date, time, calendar]);
+  const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
+  return (
+    <div className="flex-1">
+      <p className="text-[11px] font-medium mb-1 text-center" style={{ color: "#8a8a8a" }}>{label}</p>
+      <p className="text-[13px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}</p>
+      <div className="grid grid-cols-4 gap-1 rounded-2xl p-2" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        {(pillars ?? Array(4).fill(null)).map((p, i) => (
+          <div key={i} className="flex flex-col items-center gap-0.5">
+            <div className="w-full rounded-xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1" }}>
+              {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "90%", height: "90%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
+            </div>
+            <div className="w-full rounded-xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1" }}>
+              {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "90%", height: "90%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── 고민 입력 ───────────────────────────────────────────────────────────────
-function StepConcernInput({ onPrev, onSubmit, initial }: { onPrev: () => void; onSubmit: (v: string) => void; initial?: string }) {
+function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalendar, myName, partnerDate, partnerTime, partnerCalendar, partnerName }: {
+  onPrev: () => void; onSubmit: (v: string) => void; initial?: string;
+  myDate?: string; myTime?: string; myCalendar?: string; myName?: string;
+  partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerName?: string;
+}) {
   const [text, setText] = useState(initial ?? "");
   const MAX = 200;
   const filled = text.trim().length > 0;
   return (
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
+        {/* 나 / 상대방 명식 나란히 */}
+        <div className="flex gap-3 mb-5">
+          <MiniMyeongsik date={myDate} time={myTime} calendar={myCalendar} name={myName} label="나의 사주팔자" />
+          <div style={{ width: 1, backgroundColor: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
+          <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} label="상대방 사주팔자" />
+        </div>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
         <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
           고민을 상세히 적어주겠소?{" "}
@@ -915,7 +952,9 @@ export default function JaehweFormPage() {
               date={form.partnerDate} btime={form.partnerTime} calendar={form.partnerCalendar} name={form.partnerName} />
           )}
           {step === 9 && (
-            <StepConcernInput initial={form.concern} onPrev={() => setStep(8)} onSubmit={(concern) => next({ concern }, 10)} />
+            <StepConcernInput initial={form.concern} onPrev={() => setStep(8)} onSubmit={(concern) => next({ concern }, 10)}
+              myDate={form.date} myTime={form.time} myCalendar={form.calendar} myName={form.name}
+              partnerDate={form.partnerDate} partnerTime={form.partnerTime} partnerCalendar={form.partnerCalendar} partnerName={form.partnerName} />
           )}
           {step === 10 && (
             <StepEmail initial={form.email} onPrev={() => setStep(9)} onNext={(email) => next({ email }, 11)} />
