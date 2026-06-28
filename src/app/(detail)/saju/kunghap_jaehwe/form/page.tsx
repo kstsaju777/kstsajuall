@@ -666,7 +666,7 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
 }
 
 // ─── 미니 명식 (고민 입력 상단용) ────────────────────────────────────────────
-function MiniMyeongsik({ date, time, calendar, name, label }: { date?: string; time?: string; calendar?: string; name?: string; label: string }) {
+function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: string; calendar?: string; name?: string }) {
   const saju = useMemo(() => {
     if (!date) return null;
     try { return calcSaju(date, time ?? "모름", calendar ?? "양력"); } catch { return null; }
@@ -674,8 +674,7 @@ function MiniMyeongsik({ date, time, calendar, name, label }: { date?: string; t
   const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
   return (
     <div className="flex-1">
-      <p className="text-[11px] font-medium mb-1 text-center" style={{ color: "#8a8a8a" }}>{label}</p>
-      <p className="text-[13px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}</p>
+      <p className="text-[13px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}님 사주팔자</p>
       <div className="grid grid-cols-4 gap-1 rounded-2xl p-2" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
@@ -706,9 +705,9 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         {/* 나 / 상대방 명식 나란히 */}
         <div className="flex gap-3 mb-5">
-          <MiniMyeongsik date={myDate} time={myTime} calendar={myCalendar} name={myName} label="나의 사주팔자" />
+          <MiniMyeongsik date={myDate} time={myTime} calendar={myCalendar} name={myName} />
           <div style={{ width: 1, backgroundColor: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
-          <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} label="상대방 사주팔자" />
+          <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
         </div>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
         <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
