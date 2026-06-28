@@ -732,7 +732,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
           {text.length}/{MAX}
         </p>
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => onSubmit(text)} nextLabel={filled ? "다음으로" : "고민은 딱히 없소"} />
+      <BottomNav onPrev={onPrev} onNext={() => onSubmit(text)} nextLabel={filled ? "입력했어요" : "고민은 딱히 없소"} />
     </>
   );
 }
