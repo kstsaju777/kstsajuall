@@ -375,7 +375,7 @@ function StepIntro({ onNext }: { onNext: () => void }) {
 }
 
 // ─── Step 5: 성별 + 태어난 시간 ───────────────────────────────────────────────
-function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, date: string, name: string) => void; initial?: string }) {
+function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (gender: string, date: string, time: string, calendar: string, name: string) => void; initial?: string }) {
   const [gender, setGender] = useState(initial ?? "");
   const [showDate, setShowDate] = useState(!!initial);
   const [year, setYear]   = useState("");
@@ -398,7 +398,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
   const timeSelected = dateEntered && !!btime;
   const nameValid = !!name.trim() && /^[가-힣ㄱ-ㅎㅏ-ㅣ\s]+$/.test(name.trim());
   const dateValid = timeSelected && nameValid;
-  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")} (${calendar}) ${btime}`;
+  const dateStr = `${year}.${month.padStart(2,"0")}.${day.padStart(2,"0")}`;
 
   const activeBorder = `2px solid ${NAVY}`;
   const normalBorder = `2px solid ${BORDER_CLR}`;
@@ -586,7 +586,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
           </div>
         )}
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => gender && dateValid && onNext(gender, dateStr, name.trim())} nextLabel="다음으로" nextDisabled={!gender || !dateValid} />
+      <BottomNav onPrev={onPrev} onNext={() => gender && dateValid && onNext(gender, dateStr, btime, calendar, name.trim())} nextLabel="다음으로" nextDisabled={!gender || !dateValid} />
     </>
   );
 }
@@ -872,7 +872,7 @@ export default function JaehweFormPage() {
             <StepBreakupDate initial={form.breakupDate} onPrev={() => setStep(2)} onNext={(breakupDate) => next({ breakupDate }, 4)} />
           )}
           {step === 5 && (
-            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, date, name) => next({ gender, date, name }, 6)} />
+            <StepGender initial={form.gender} onPrev={() => setStep(4)} onNext={(gender, date, time, calendar, name) => next({ gender, date, time, calendar, name }, 6)} />
           )}
           {step === 6 && (
             <StepConcern initial={form.concern} onPrev={() => setStep(5)} onSubmit={(concern) => next({ concern }, 7)}
