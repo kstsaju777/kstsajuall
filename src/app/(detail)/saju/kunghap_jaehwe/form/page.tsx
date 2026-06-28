@@ -52,7 +52,7 @@ function FormShell({ children }: { children: React.ReactNode }) {
         <img
           src="/media/cards/kunghap_jaehwe/jaehwe-apply-1.jpg"
           aria-hidden
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
         />
         {/* 이미지 → 카드 배경 그라데이션 */}
         <div
@@ -163,7 +163,7 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
             return (
               <button
                 key={reason}
-                onClick={() => { setSelected(reason); setTimeout(() => onNext(reason), 350); }}
+                onClick={() => setSelected(reason)}
                 className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
                 style={{
                   backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
