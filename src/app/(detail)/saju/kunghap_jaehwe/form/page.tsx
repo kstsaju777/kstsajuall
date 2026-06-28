@@ -387,7 +387,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
         <div className="flex gap-3">
           {["남성", "여성"].map((label) => (
             <button key={label} onClick={() => setGender(label)}
-              className="flex-1 py-5 rounded-2xl text-[18px] font-bold transition-all"
+              className="flex-1 py-3 rounded-2xl text-[18px] font-bold transition-all"
               style={{
                 backgroundColor: gender === label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
                 border: `2px solid ${gender === label ? NAVY : "rgba(255,255,255,0.1)"}`,
