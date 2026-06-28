@@ -20,14 +20,14 @@ export type Product = {
 
 const CATEGORIES = [
   {
+    tag: "사랑",
+    title: "사랑이 궁금할 때",
+    slugs: ["saju_yeonae", "kunghap_yeonae", "kunghap_jaehwe", "saju_gyeolhon", "saju_ehon"],
+  },
+  {
     tag: "사주",
     title: "내 사주의 모든것",
     slugs: ["kunghap_yeonae", "kunghap_banryeo", "kunghap_janyeo", "kunghap_jaehwe", "kunghap_business"],
-  },
-  {
-    tag: "연애·결혼",
-    title: "사랑이 궁금할 때",
-    slugs: ["saju_yeonae", "saju_gyeolhon", "saju_ehon"],
   },
   {
     tag: "임신·육아",
