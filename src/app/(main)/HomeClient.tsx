@@ -20,8 +20,8 @@ export type Product = {
 
 const CATEGORIES = [
   {
-    tag: "궁합",
-    title: "우리, 잘 맞는 걸까?",
+    tag: "사주",
+    title: "내 사주의 모든것",
     slugs: ["kunghap_yeonae", "kunghap_banryeo", "kunghap_janyeo", "kunghap_jaehwe", "kunghap_business"],
   },
   {
