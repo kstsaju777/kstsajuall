@@ -510,7 +510,7 @@ function StepGender({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (
                     {/* 위로 펼쳐지는 리스트 */}
                     {timeOpen && (
                       <>
-                        <div className="fixed inset-0 z-40" onClick={() => setTimeOpen(false)} />
+                        <div className="fixed inset-0 z-40" onClick={() => setTimeOpen(false)} style={{ backdropFilter: "blur(3px)", backgroundColor: "rgba(0,0,0,0.25)" }} />
                         <div className="absolute z-50 w-full rounded-xl overflow-hidden"
                           style={{
                             bottom: "calc(100% + 8px)",
