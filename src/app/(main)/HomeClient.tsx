@@ -37,7 +37,7 @@ const CATEGORIES = [
   {
     tag: "기타",
     title: "이것도 궁금해요",
-    slugs: ["total", "kunghap_banryeo"],
+    slugs: ["total", "kunghap_banryeo", "saju_health"],
   },
   {
     tag: "나를 알고 싶을 때",
