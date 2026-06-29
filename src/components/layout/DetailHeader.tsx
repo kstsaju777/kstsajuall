@@ -35,7 +35,7 @@ export function DetailHeader() {
         </button>
 
         {/* 가운데: 로고 (홈으로) */}
-        <Link href="/" aria-label="홈으로" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center px-3 py-2">
+        <Link href="/" prefetch={true} aria-label="홈으로" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center px-3 py-2">
           <img
             src="/logo.png"
             alt="홍연당"

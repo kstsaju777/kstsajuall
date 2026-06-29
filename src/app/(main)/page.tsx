@@ -3,6 +3,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
 import { HomeClient } from "./HomeClient";
 
+// 60초마다 재빌드 — 매 요청마다 Supabase 쿼리 실행하지 않음
+export const revalidate = 60;
+
 const ADMIN_EMAIL = "admin@hongyeondang.com";
 
 export default async function HomePage() {

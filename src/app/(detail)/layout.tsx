@@ -11,7 +11,7 @@ export default function DetailLayout({ children }: { children: React.ReactNode }
       <div
         className="fixed top-0 bottom-0 flex flex-col shadow-2xl"
         style={{
-          backgroundColor: "#fdf8f4",
+          backgroundColor: "#000",
           width: "min(100%, 480px)",
           left: "max(0px, calc(50vw - 240px))",
         }}

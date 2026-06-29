@@ -120,6 +120,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                       <Link
                         key={product.id}
                         href={`/saju/${product.slug}`}
+                        prefetch={true}
                         style={{
                           display: "block",
                           flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
@@ -428,7 +429,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 )}
               </div>
               {isCurrent && (
-                <Link href={href} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
+                <Link href={href} prefetch={true} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
               )}
             </div>
           );

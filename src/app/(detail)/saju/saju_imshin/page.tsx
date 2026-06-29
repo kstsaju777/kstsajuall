@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const BG = "#080a0f";
-const PINK = "#5bbfea";
+const BG = "#080c0a";
+const ACCENT = "#738e6f";
+const ACCENT_D = "#4f6b4b";
 
 const SURNAMES = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"];
 const ENDINGS = ["지", "은", "현", "수", "민", "아", "연", "준", "서", "우"];
@@ -16,8 +17,8 @@ function randomTime() {
   return TIMES[Math.floor(Math.random() * TIMES.length)];
 }
 const TIME_COLORS: Record<string, string> = {
-  "방금": "#c9184a", "방금 전": "#c9184a",
-  "1분 전": "#9b2335", "2분 전": "#9b2335",
+  "방금": "#4f6b4b", "방금 전": "#4f6b4b",
+  "1분 전": "#738e6f", "2분 전": "#738e6f",
   "3분 전": "#b5651d", "5분 전": "#6c757d",
 };
 
@@ -71,19 +72,19 @@ function StickyCTA() {
             backgroundColor: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)",
             borderRadius: "9999px", padding: "5px 12px", fontSize: "12px", color: "#fff", whiteSpace: "nowrap",
           }}>
-            <span style={{ backgroundColor: TIME_COLORS[t.time] ?? "#9b2335", color: "#fff", fontSize: "10px", fontWeight: 700, borderRadius: "9999px", padding: "2px 7px" }}>{t.time}</span>
+            <span style={{ backgroundColor: TIME_COLORS[t.time] ?? "#4f6b4b", color: "#fff", fontSize: "10px", fontWeight: 700, borderRadius: "9999px", padding: "2px 7px" }}>{t.time}</span>
             <span><b>{t.name}</b>님이 신청하였습니다.</span>
           </div>
         ))}
       </div>
       <p className="text-center text-[13px] font-bold mb-1">
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
-        <span style={{ color: PINK }}>{timeLeft}</span>
+        <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
       <button
         onClick={() => router.push("/saju/saju_imshin/form")}
         className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: PINK, fontSize: "22px" }}
+        style={{ backgroundColor: ACCENT, fontSize: "22px" }}
       >
         임신사주 보러가기
       </button>
@@ -91,7 +92,7 @@ function StickyCTA() {
   );
 }
 
-export default function ChildSajuPage() {
+export default function ImshinSajuPage() {
   const router = useRouter();
 
   return (
@@ -113,31 +114,31 @@ export default function ChildSajuPage() {
       </div>
 
       {/* 리포트 미리보기 */}
-      <div style={{ backgroundColor: "#0f0f14", padding: "32px 20px 40px" }}>
-        <p style={{ fontSize: 13, color: PINK, fontWeight: 700, marginBottom: 6 }}>임신사주</p>
+      <div style={{ backgroundColor: "#0c120b", padding: "32px 20px 40px" }}>
+        <p style={{ fontSize: 13, color: ACCENT, fontWeight: 700, marginBottom: 6 }}>임신사주</p>
         <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 20 }}>리포트 미리보기</p>
-        <div style={{ background: "#1a1a22", borderRadius: 16, overflow: "hidden", marginBottom: 8 }}>
+        <div style={{ background: "#131a12", borderRadius: 16, overflow: "hidden", marginBottom: 8 }}>
           <img src="/media/cards/saju_imshin/imshin-0.jpg" alt="미리보기"
             style={{ display: "block", width: "100%", height: "auto" }} />
           <div style={{ padding: "20px 20px 24px" }}>
-            <p style={{ fontSize: 12, color: PINK, fontWeight: 700, marginBottom: 4 }}>+15,000자</p>
+            <p style={{ fontSize: 12, color: ACCENT, fontWeight: 700, marginBottom: 4 }}>+15,000자</p>
             <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 12 }}>2026 임신사주</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 20 }}>
-              아이의 사주에는 타고난 재능, 성격, 그리고 앞으로 걸어갈 길이 담겨 있어요.<br /><br />
-              홍연이 아이의 사주팔자를 꼼꼼히 살펴보고, 부모가 어떻게 도와줄 수 있는지까지 풀어드릴게요.
+              임신이 가능한 시기가 사주에 담겨 있어요.<br /><br />
+              홍연이 그대의 사주팔자를 살펴보고, 아이가 올 수 있는 시기와 준비해야 할 것들을 따뜻하게 풀어드릴게요.
             </p>
             {[
-              "아이의 타고난 기질과 성격",
-              "숨겨진 재능과 잠재력 발견",
-              "어떤 공부 / 직업이 잘 맞을까?",
-              "아이가 힘든 시기는 언제? 미리 대비하기",
-              "부모와의 궁합 — 어떻게 키워야 할까",
-              "아이의 건강 취약 부위",
-              "2026년 아이에게 오는 운의 흐름",
-              "부모가 꼭 알아야 할 육아 주의사항",
+              "사주로 본 나의 자녀운 — 아이가 올 운이 있는가",
+              "임신이 가능한 사주적 시기 분석",
+              "아이와 나의 인연 — 어떤 아이가 올까",
+              "임신을 방해하는 사주적 요인과 해소법",
+              "2026년 임신·출산 운의 흐름",
+              "태교와 임신 중 주의해야 할 것",
+              "출산 이후 변화 — 운이 어떻게 바뀔까",
+              "홍연이 전하는 따뜻한 한 마디",
             ].map((item, i) => (
               <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: PINK, flexShrink: 0, marginTop: 6 }} />
+                <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: ACCENT, flexShrink: 0, marginTop: 6 }} />
                 <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{item}</p>
               </div>
             ))}
@@ -146,25 +147,25 @@ export default function ChildSajuPage() {
       </div>
 
       {/* 후기 */}
-      <div style={{ backgroundColor: "#080a0f", padding: "32px 20px 40px" }}>
+      <div style={{ backgroundColor: BG, padding: "32px 20px 40px" }}>
         <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 24 }}>실제 이용 후기</p>
         {[
           {
-            name: "김**", avatar: "👶", tag: "7살 아이 엄마",
-            stars: 5, text: "아이가 왜 이렇게 고집이 센지, 왜 특정 과목만 싫어하는지 항상 궁금했는데 사주로 보니 다 이유가 있더라고요. 아이를 이해하는 데 정말 많은 도움이 됐어요.",
+            name: "김**", avatar: "🌿", tag: "30대 임신 준비 중",
+            stars: 5, text: "임신이 잘 안 되서 너무 힘들었는데 사주로 보니 내년이 맞는 시기라고 나왔어요. 마음이 조금 편해졌고 준비 방향이 잡혔어요. 실제로 그 시기에 임신 소식이 있었어요.",
           },
           {
-            name: "이**", avatar: "🌙", tag: "5살 아이 아빠",
-            stars: 5, text: "처음엔 반신반의했는데 아이 성격 분석이 너무 정확해서 깜짝 놀랐어요. 앞으로 어떤 분야를 지원해줘야 할지 방향이 잡혔습니다.",
+            name: "이**", avatar: "🌸", tag: "2년째 임신 준비 중",
+            stars: 5, text: "어떤 시기에 노력을 집중해야 할지 몰랐는데 사주로 보니 구체적인 달까지 나와서 신기했어요. 준비하는 마음가짐이 달라졌어요.",
           },
           {
-            name: "박**", avatar: "⭐", tag: "10살 아이 엄마",
-            stars: 5, text: "아이가 힘든 시기가 언제인지 미리 알 수 있어서 좋았어요. 그 시기에 더 잘 챙겨줄 수 있을 것 같아요. 육아에 실질적인 도움이 되는 내용이었습니다.",
+            name: "박**", avatar: "☘️", tag: "임신 성공 후 재방문",
+            stars: 5, text: "임신 전에 봤는데 홍연이 알려준 시기에 정말 임신이 됐어요. 태교 관련 내용도 유용했고 앞으로 어떻게 달라질지 알 수 있어서 좋았어요.",
           },
         ].map((r, i) => (
-          <div key={i} style={{ backgroundColor: "#1a1a22", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+          <div key={i} style={{ backgroundColor: "#131a12", borderRadius: 16, padding: 20, marginBottom: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-              <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#2a2a32", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{r.avatar}</div>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#1e2b1d", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{r.avatar}</div>
               <div>
                 <p style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>{r.name}</p>
                 <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{r.tag}</p>

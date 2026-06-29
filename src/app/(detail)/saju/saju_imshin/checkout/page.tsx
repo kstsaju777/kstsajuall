@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect } from "react";
@@ -7,41 +7,56 @@ import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 토큰 ────────────────────────────────────────────────────────────────────
-const CREAM  = "#fdf8f4";
-const WHITE  = "#ffffff";
-const PINK   = "#5bbfea";
-const PINK_D = "#1a86c8";
-const PINK_P = "#f0f8fd";
-const GRAY1  = "#1a1a1a";
-const GRAY2  = "#444444";
-const GRAY3  = "#888888";
-const GRAY4  = "#dddddd";
+const CREAM   = "#f4f9f2";
+const WHITE   = "#ffffff";
+const GREEN   = "#738e6f";
+const GREEN_D = "#4f6b4b";
+const GREEN_P = "#eef4ec";
+const GRAY1   = "#1a1a1a";
+const GRAY2   = "#444444";
+const GRAY3   = "#888888";
+const GRAY4   = "#dddddd";
 
 const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
-const PRODUCT = { name: "임신사주", original: 49800, discount: 50, price: 24900 };
+const PRODUCT = { name: "임신사주", original: 59800, discount: 50, price: 29900 };
 
 // ─── 명식 그리드 ──────────────────────────────────────────────────────────────
-function SajuGrid({ date, time, calendar, name, gender }: { date: string; time: string; calendar: string; name: string; gender: string }) {
-  const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
+function SajuGrid({ date, time, calendar, name }: { date: string; time: string; calendar: string; name: string }) {
+  const saju = useMemo(() => { try { return calcSaju(date, time, calendar); } catch { return null; } }, [date, time, calendar]);
   const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
-  const suffix = gender === "남아" ? "군" : gender === "여아" ? "양" : "님";
   return (
-    <div className="px-5 py-4">
-      <p className="text-[12px] font-bold mb-3" style={{ color: GRAY3 }}>{name}{suffix}의 사주팔자</p>
-      <div className="grid grid-cols-4 gap-2">
+    <div className="flex-1">
+      <p className="text-[12px] font-bold mb-2 text-center" style={{ color: GRAY3 }}>{name}님의 사주팔자</p>
+      <div className="grid grid-cols-4 gap-1.5">
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
-            <p className="text-[10px] tracking-wide mb-0.5" style={{ color: GRAY3 }}>{PILLAR_LABELS[i]}</p>
-            <span className="text-[11px]" style={{ color: GRAY2 }}>{p?.stemSs || ""}</span>
+            <p className="text-[9px] tracking-wide" style={{ color: GRAY3 }}>{PILLAR_LABELS[i]}</p>
+            <span className="text-[10px]" style={{ color: GRAY2 }}>{p?.stemSs || ""}</span>
             <div className="w-full aspect-square flex items-center justify-center">
               {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse rounded-xl" style={{ backgroundColor: "#eee" }} />}
             </div>
             <div className="w-full aspect-square flex items-center justify-center">
               {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse rounded-xl" style={{ backgroundColor: "#eee" }} />}
             </div>
-            <span className="text-[11px]" style={{ color: GRAY2 }}>{p?.branchSs || ""}</span>
+            <span className="text-[10px]" style={{ color: GRAY2 }}>{p?.branchSs || ""}</span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── 두 명식 나란히 ───────────────────────────────────────────────────────────
+function DualSajuGrid({ myDate, myTime, myCalendar, myName, partnerDate, partnerTime, partnerCalendar, partnerName }: {
+  myDate: string; myTime: string; myCalendar: string; myName: string;
+  partnerDate: string; partnerTime: string; partnerCalendar: string; partnerName: string;
+}) {
+  return (
+    <div className="px-4 py-5" style={{ backgroundColor: WHITE }}>
+      <div className="flex gap-3">
+        <SajuGrid date={myDate} time={myTime} calendar={myCalendar} name={myName} />
+        <div style={{ width: 1, backgroundColor: GRAY4, flexShrink: 0 }} />
+        <SajuGrid date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
       </div>
     </div>
   );
@@ -58,14 +73,14 @@ function ImageTextBlock({ label, headline, accent }: { label: string; headline: 
         <div className="absolute bottom-0 left-0 right-0 h-24" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
       </div>
       <div className="px-6 py-2 text-center">
-        <p className="text-[12px] mb-2 tracking-wide" style={{ color: PINK_D }}>{label}</p>
+        <p className="text-[12px] mb-2 tracking-wide" style={{ color: GREEN_D }}>{label}</p>
         <h2 className="text-[26px] font-black leading-snug" style={{ color: GRAY1 }}>
           {parts.map((part, i) => (
             <span key={i}>
               {part.split("\n").map((line, j, arr) => (
                 <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
               ))}
-              {i < parts.length - 1 && <span style={{ color: PINK_D }}>{accent}</span>}
+              {i < parts.length - 1 && <span style={{ color: GREEN_D }}>{accent}</span>}
             </span>
           ))}
         </h2>
@@ -77,25 +92,25 @@ function ImageTextBlock({ label, headline, accent }: { label: string; headline: 
 // ─── 분석 섹션 ───────────────────────────────────────────────────────────────
 const SECTIONS = [
   {
-    icon: "🌱", title: "아이의 타고난 기질", free: true,
-    content: "아이의 일간과 사주 구성을 바탕으로 타고난 성격과 기질을 분석합니다. 왜 이 아이가 이런 행동을 하는지, 무엇을 좋아하고 힘들어하는지 사주 속에 담겨 있어요.",
+    icon: "🌱", title: "사주로 본 자녀운 — 아이가 올 운이 있는가", free: true,
+    content: "두 사람의 사주팔자를 바탕으로 자녀와의 인연을 분석합니다. 사주에 자녀성이 어떻게 나타나는지, 아이와의 인연이 얼마나 강한지 살펴봅니다.",
     blurLines: [],
   },
   {
-    icon: "✨", title: "숨겨진 재능과 잠재력", free: false,
-    blurLines: ["아이의 사주에서 ████재와 ████성이 강하게 나타납니다.", "특히 ████ 방면에서 탁월한 재능을 보일 가능성이 높습니다.", "이 재능을 ████ 시기에 집중적으로 개발하면 크게 빛날 거예요."],
+    icon: "📅", title: "임신이 가능한 사주적 시기 분석", free: false,
+    blurLines: ["████년 ████월 전후가 임신 에너지가 가장 강한 시기입니다.", "특히 ████ 대운과 ████ 세운이 겹치는 시점을 주목하시오.", "이 시기를 놓치지 않으면 ████의 기운이 도움이 될 것이오."],
   },
   {
-    icon: "📚", title: "잘 맞는 공부 방식과 진로", free: false,
-    blurLines: ["아이에게 맞는 공부법은 ████ 방식입니다.", "일간 기준으로 ████ 계열 직업과의 궁합이 좋습니다.", "억지로 ████ 분야를 강요하면 오히려 역효과가 날 수 있어요."],
+    icon: "👶", title: "어떤 아이가 올까 — 아이와의 인연", free: false,
+    blurLines: ["사주 구성상 ████ 기질을 가진 아이와의 인연이 강합니다.", "아이의 성별은 ████ 쪽이 사주에서 더 또렷이 보입니다.", "이 아이와의 만남은 ████의 의미를 담고 있소이다."],
   },
   {
-    icon: "⏰", title: "아이가 힘든 시기와 대비법", free: false,
-    blurLines: ["████년 ~ ████년 사이가 아이에게 가장 힘든 시기로 분석됩니다.", "이 시기에는 ████ 방면의 스트레스가 커질 수 있어요.", "미리 ████ 방식으로 준비하면 큰 고비를 넘길 수 있습니다."],
+    icon: "⚠️", title: "임신을 방해하는 사주적 요인과 해소법", free: false,
+    blurLines: ["현재 사주에서 ████ 기운이 임신을 방해하고 있습니다.", "이를 해소하기 위해서는 ████ 방면의 조율이 필요합니다.", "████ 시기까지 ████ 방법으로 준비하면 도움이 됩니다."],
   },
   {
-    icon: "👨‍👩‍👧", title: "부모와 아이의 궁합", free: false,
-    blurLines: ["아이의 사주 기준으로 ████ 스타일의 육아가 가장 잘 맞습니다.", "████ 방식의 훈육은 오히려 아이를 위축시킬 수 있어요.", "아이와의 관계에서 가장 중요한 것은 ████입니다."],
+    icon: "✨", title: "2026년 임신·출산 운의 흐름", free: false,
+    blurLines: ["2026년 두 사람의 합산 임신운은 ████ 수준입니다.", "특히 ████월과 ████월 전후로 큰 흐름이 바뀝니다.", "이 흐름을 타면 ████의 가능성이 높아집니다."],
   },
 ];
 
@@ -104,11 +119,11 @@ function AnalysisSection({ s }: { s: typeof SECTIONS[number] }) {
     <div className="mx-5 mb-4 rounded-2xl overflow-hidden"
       style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}>
       <div className="flex items-center gap-2.5 px-4 py-3.5"
-        style={{ borderBottom: `1px solid ${GRAY4}`, backgroundColor: s.free ? PINK_P : WHITE }}>
+        style={{ borderBottom: `1px solid ${GRAY4}`, backgroundColor: s.free ? GREEN_P : WHITE }}>
         <span className="text-[18px]">{s.icon}</span>
         <span className="text-[15px] font-bold" style={{ color: GRAY1 }}>{s.title}</span>
-        <span className="ml-auto text-[10px] px-2.5 py-0.5 rounded-full font-medium"
-          style={{ backgroundColor: s.free ? `${PINK_D}15` : "#f5f5f5", color: s.free ? PINK_D : GRAY3, border: `1px solid ${s.free ? PINK_D + "30" : GRAY4}` }}>
+        <span className="ml-auto text-[10px] px-2.5 py-0.5 rounded-full font-medium flex-shrink-0"
+          style={{ backgroundColor: s.free ? `${GREEN_D}15` : "#f5f5f5", color: s.free ? GREEN_D : GRAY3, border: `1px solid ${s.free ? GREEN_D + "30" : GRAY4}` }}>
           {s.free ? "✓ 공개" : "🔒 잠김"}
         </span>
       </div>
@@ -124,12 +139,12 @@ function AnalysisSection({ s }: { s: typeof SECTIONS[number] }) {
             </div>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <div className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: PINK_P, border: `1px solid ${PINK}` }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={PINK_D} strokeWidth="2.5">
+                style={{ backgroundColor: GREEN_P, border: `1px solid ${GREEN}` }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GREEN_D} strokeWidth="2.5">
                   <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
               </div>
-              <span className="text-[11px] font-semibold" style={{ color: PINK_D }}>결제 후 열람 가능</span>
+              <span className="text-[11px] font-semibold" style={{ color: GREEN_D }}>결제 후 열람 가능</span>
             </div>
           </div>
         )}
@@ -140,15 +155,15 @@ function AnalysisSection({ s }: { s: typeof SECTIONS[number] }) {
 
 // ─── 후기 ────────────────────────────────────────────────────────────────────
 const REVIEWS = [
-  { star: 5, text: "아이 성격 분석이 너무 정확해서 놀랐어요. 왜 우리 아이가 이런지 이해가 됐고 어떻게 대해야 할지 방향이 잡혔습니다.", name: "30대 엄마 김○○", date: "2025.05.12" },
-  { star: 5, text: "숨겨진 재능 분야가 제가 전혀 생각못했던 부분이었는데 실제로 아이가 그쪽에 관심이 많더라고요. 신기했어요.", name: "40대 아빠 이○○", date: "2025.04.28" },
-  { star: 5, text: "아이가 힘든 시기가 언제인지 미리 알 수 있어서 좋았어요. 그 시기에 더 잘 챙겨줄 수 있을 것 같아서 마음의 준비가 됐습니다.", name: "30대 엄마 박○○", date: "2025.05.03" },
+  { star: 5, text: "임신이 잘 안 돼서 너무 힘들었는데 사주로 보니 내년이 맞는 시기라고 나왔어요. 그 시기에 준비했더니 정말 임신 소식이 왔어요.", name: "30대 김○○", date: "2025.05.12" },
+  { star: 5, text: "어떤 시기에 노력을 집중해야 할지 몰랐는데 구체적인 달까지 나와서 신기했어요. 준비하는 마음가짐이 달라졌습니다.", name: "30대 이○○", date: "2025.04.28" },
+  { star: 5, text: "임신을 방해하는 요인이 사주에 있다고 했는데 그 부분을 해소하고 나서 임신이 됐어요. 두 사람 사주를 같이 봐주는 게 더 좋았어요.", name: "30대 박○○", date: "2025.05.03" },
 ];
 
 function ReviewSection() {
   return (
     <div className="px-5 py-6" style={{ backgroundColor: CREAM }}>
-      <p className="text-center text-[12px] tracking-widest mb-1" style={{ color: PINK_D }}>✦ 실제 후기 ✦</p>
+      <p className="text-center text-[12px] tracking-widest mb-1" style={{ color: GREEN_D }}>✦ 실제 후기 ✦</p>
       <h3 className="text-center text-[17px] font-bold mb-4" style={{ color: GRAY1 }}>이용하신 분들의 이야기</h3>
       <div className="space-y-3">
         {REVIEWS.map((r, i) => (
@@ -185,7 +200,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   }, [open]);
   if (!open) return null;
 
-  const DBG = "#1b1820"; const DCARD = "#262229"; const DTXT = "#ffffff";
+  const DBG = "#111a10"; const DCARD = "#1e2b1d"; const DTXT = "#ffffff";
   const DMUTE = "rgba(255,255,255,0.5)"; const DSTRIKE = "rgba(255,255,255,0.38)";
   const saved = PRODUCT.original - PRODUCT.price;
   const visible = mounted && !closing;
@@ -204,18 +219,18 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             <button onClick={requestClose} style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
-            style={{ background: "rgba(201,24,74,0.16)", border: `1px solid ${PINK_D}55`, color: "#ff9ab0" }}>
-            총 <span style={{ color: "#ff6b85" }}>{saved.toLocaleString()}원</span> 할인받았어요!
+            style={{ background: "rgba(115,142,111,0.16)", border: `1px solid ${GREEN}55`, color: "#a8d4a4" }}>
+            총 <span style={{ color: "#7ecf7a" }}>{saved.toLocaleString()}원</span> 할인받았어요!
           </div>
-          <div className="w-full text-left rounded-2xl px-4 py-3.5 mb-5" style={{ backgroundColor: DCARD, border: `1.5px solid ${PINK_D}`, boxShadow: `0 0 0 3px ${PINK_D}22` }}>
+          <div className="w-full text-left rounded-2xl px-4 py-3.5 mb-5" style={{ backgroundColor: DCARD, border: `1.5px solid ${GREEN}`, boxShadow: `0 0 0 3px ${GREEN}22` }}>
             <div className="flex items-start justify-between gap-2">
               <div>
                 <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>임신사주</span>
-                <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 아이의 운명 이야기</p>
+                <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 두 사람의 임신 이야기</p>
               </div>
               <div className="text-right flex-shrink-0">
                 <p className="text-[11px]" style={{ color: DSTRIKE }}>
-                  <span style={{ color: PINK_D, fontWeight: 700 }}>{PRODUCT.discount}%</span>{" "}
+                  <span style={{ color: GREEN, fontWeight: 700 }}>{PRODUCT.discount}%</span>{" "}
                   <span className="line-through">{PRODUCT.original.toLocaleString()}</span>
                 </p>
                 <p className="text-[16px] font-black mt-0.5" style={{ color: DTXT }}>{PRODUCT.price.toLocaleString()}원</p>
@@ -223,11 +238,11 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             </div>
           </div>
           <button onClick={onConfirm} className="w-full py-4 rounded-2xl font-black text-[17px] text-white"
-            style={{ background: `linear-gradient(135deg, ${PINK}, ${PINK_D})`, boxShadow: `0 6px 20px ${PINK_D}44` }}>
+            style={{ background: `linear-gradient(135deg, ${GREEN}, ${GREEN_D})`, boxShadow: `0 6px 20px ${GREEN_D}44` }}>
             결제하기
           </button>
           <div className="flex items-center justify-center gap-2 mt-3.5">
-            <span className="flex-shrink-0 flex items-center justify-center rounded" style={{ width: 16, height: 16, background: PINK_D, color: "#fff", fontSize: 10 }}>✓</span>
+            <span className="flex-shrink-0 flex items-center justify-center rounded" style={{ width: 16, height: 16, background: GREEN_D, color: "#fff", fontSize: 10 }}>✓</span>
             <p className="text-[11px] leading-relaxed" style={{ color: DMUTE }}>
               결제 시{" "}
               <button onClick={() => setLegalDoc("privacy")} className="underline" style={{ color: "rgba(255,255,255,0.78)" }}>개인정보 처리방침</button>과{" "}
@@ -240,12 +255,12 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
       {confirmExit && (
         <div className="fixed z-[60] px-6" style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", top: "34%", pointerEvents: "none" }}>
           <div className="relative mx-auto rounded-2xl px-5 py-4"
-            style={{ pointerEvents: "auto", maxWidth: 290, background: "#211d27", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            style={{ pointerEvents: "auto", maxWidth: 290, background: "#152012", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             <button onClick={() => setConfirmExit(false)} className="absolute top-2.5 right-2.5 flex items-center justify-center rounded-full"
               style={{ width: 22, height: 22, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", fontSize: 12 }}>✕</button>
-            <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
+            <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🌿 {saved.toLocaleString()}원 할인이 사라져요!</p>
             <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.</p>
-            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: `linear-gradient(135deg, ${PINK}, ${PINK_D})` }}>혜택 받고 계속하기</button>
+            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: `linear-gradient(135deg, ${GREEN}, ${GREEN_D})` }}>혜택 받고 계속하기</button>
             <button onClick={doExit} className="w-full mt-2 py-2.5 rounded-xl text-[13px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)" }}>나가기</button>
           </div>
           <style>{`@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}`}</style>
@@ -272,7 +287,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
 }
 
 // ─── 고정 CTA ────────────────────────────────────────────────────────────────
-function StickyPayCTA({ onPay, name, gender }: { onPay: () => void; name: string; gender: string }) {
+function StickyPayCTA({ onPay, myName, partnerName }: { onPay: () => void; myName: string; partnerName: string }) {
   const [glow, setGlow] = useState(false);
   useEffect(() => { const t = setInterval(() => setGlow((g) => !g), 1800); return () => clearInterval(t); }, []);
   const saved = PRODUCT.original - PRODUCT.price;
@@ -281,14 +296,14 @@ function StickyPayCTA({ onPay, name, gender }: { onPay: () => void; name: string
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
           <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩{PRODUCT.original.toLocaleString()}</span>
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#fff0f2", color: PINK_D, border: `1px solid ${PINK}` }}>특가 -{PRODUCT.discount}%</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: GREEN_P, color: GREEN_D, border: `1px solid ${GREEN}` }}>특가 -{PRODUCT.discount}%</span>
         </div>
         <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩{PRODUCT.price.toLocaleString()}</span>
       </div>
       <button onClick={onPay} className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
-        style={{ background: `linear-gradient(135deg, ${PINK}, ${PINK_D})`, boxShadow: glow ? `0 4px 24px ${PINK_D}88` : `0 2px 12px ${PINK_D}44`, transition: "box-shadow 1s ease" }}>
-        <span>🔓</span>
-        <span>{name}{gender === "남아" ? "군" : gender === "여아" ? "양" : "님"} 임신사주 확인하기</span>
+        style={{ background: `linear-gradient(135deg, ${GREEN}, ${GREEN_D})`, boxShadow: glow ? `0 4px 24px ${GREEN_D}88` : `0 2px 12px ${GREEN_D}44`, transition: "box-shadow 1s ease" }}>
+        <span>🌿</span>
+        <span>{myName} & {partnerName}님 임신사주 확인하기</span>
       </button>
     </div>
   );
@@ -298,36 +313,35 @@ function StickyPayCTA({ onPay, name, gender }: { onPay: () => void; name: string
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const name     = searchParams.get("name")     ?? "아이";
-  const date     = searchParams.get("date")     ?? "";
-  const time     = searchParams.get("time")     ?? "시간 모름";
-  const calendar = searchParams.get("calendar") ?? "양력";
-  const gender   = searchParams.get("gender")   ?? "";
-  const email    = searchParams.get("email")    ?? "";
-  const concern  = searchParams.get("concern")  ?? "";
+  const name            = searchParams.get("name")            ?? "고객";
+  const date            = searchParams.get("date")            ?? "";
+  const time            = searchParams.get("time")            ?? "시간 모름";
+  const calendar        = searchParams.get("calendar")        ?? "양력";
+  const gender          = searchParams.get("gender")          ?? "";
+  const email           = searchParams.get("email")           ?? "";
+  const concern         = searchParams.get("concern")         ?? "";
+  const partnerName     = searchParams.get("partnerName")     ?? "상대방";
+  const partnerDate     = searchParams.get("partnerDate")     ?? "";
+  const partnerTime     = searchParams.get("partnerTime")     ?? "시간 모름";
+  const partnerCalendar = searchParams.get("partnerCalendar") ?? "양력";
+  const partnerGender   = searchParams.get("partnerGender")   ?? "";
   const [showSheet, setShowSheet] = useState(false);
 
   const handleConfirm = () => {
-    setShowSheet(false);
-    const reportParams = new URLSearchParams({ name, date, time, calendar, gender, email, concern, ch: "0" });
+    const reportParams = new URLSearchParams({ name, date, time, calendar, gender, email, concern, ch: "0", partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender });
     const reportUrl = `https://www.hongyeondang.com/saju/saju_imshin/report-preview?${reportParams.toString()}`;
     router.push(`/saju/saju_imshin/report-preview?${reportParams.toString()}`);
+    setShowSheet(false);
     if (email) {
-      try {
-        fetch("/api/send-order-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ customerEmail: email, customerName: name, productName: PRODUCT.name, price: PRODUCT.price, reportUrl }),
-        });
-      } catch {}
+      fetch("/api/send-order-email", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customerEmail: email, customerName: name, productName: PRODUCT.name, price: PRODUCT.price, reportUrl }),
+      }).catch(() => {});
     }
-    try {
-      fetch("/api/send-order-sms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerName: name, productName: PRODUCT.name, price: PRODUCT.price }),
-      });
-    } catch {}
+    fetch("/api/send-order-sms", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ customerName: name, productName: PRODUCT.name, price: PRODUCT.price }),
+    }).catch(() => {});
   };
 
   return (
@@ -335,36 +349,43 @@ function CheckoutContent() {
       <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
         <style>{`div::-webkit-scrollbar{display:none}`}</style>
 
-        <ImageTextBlock label="임신사주 · 정밀 리포트" headline={`${name}${gender === "남아" ? "군" : gender === "여아" ? "양" : "님"}의\n운명을\n살펴봤어요`} accent="살펴봤어요" />
+        <ImageTextBlock
+          label="임신사주 · 정밀 리포트"
+          headline={`${name}님의\n운명을\n살펴봤어요`}
+          accent="살펴봤어요"
+        />
 
-        {/* 명식 */}
-        <div style={{ backgroundColor: WHITE }}>
-          <SajuGrid date={date} time={time} calendar={calendar} name={name} gender={gender} />
-        </div>
+        {/* 두 사람 명식 나란히 */}
+        {date && partnerDate && (
+          <DualSajuGrid
+            myDate={date} myTime={time} myCalendar={calendar} myName={name}
+            partnerDate={partnerDate} partnerTime={partnerTime} partnerCalendar={partnerCalendar} partnerName={partnerName}
+          />
+        )}
 
-        <ImageTextBlock label="AI 정밀 자녀 분석 · 5가지 항목" headline={`아이의 미래,\n이제\n알려드릴게요`} accent="이제" />
+        <ImageTextBlock label="AI 정밀 임신 분석 · 5가지 항목" headline={`두 사람의\n임신 시기,\n알려드릴게요`} accent="임신 시기," />
 
         <div className="pb-5" style={{ backgroundColor: CREAM }}>
           {SECTIONS.map((s, i) => <AnalysisSection key={i} s={s} />)}
         </div>
 
-        <ImageTextBlock label="실제 이용 후기" headline={`이미 수천 명의\n부모님이\n확인했어요`} accent="수천 명의" />
+        <ImageTextBlock label="실제 이용 후기" headline={`이미 수천 명이\n임신사주로\n준비했어요`} accent="임신사주로" />
 
         <ReviewSection />
         <div className="h-4" />
       </div>
 
-      <StickyPayCTA onPay={() => setShowSheet(true)} name={name} gender={gender} />
+      <StickyPayCTA onPay={() => setShowSheet(true)} myName={name} partnerName={partnerName} />
       <PayBottomSheet open={showSheet} onClose={() => setShowSheet(false)} onConfirm={handleConfirm} />
     </div>
   );
 }
 
-export default function ChildCheckoutPage() {
+export default function ImshinCheckoutPage() {
   return (
     <Suspense fallback={
       <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: CREAM }}>
-        <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: PINK_D, borderTopColor: "transparent" }} />
+        <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: GREEN_D, borderTopColor: "transparent" }} />
       </div>
     }>
       <CheckoutContent />
