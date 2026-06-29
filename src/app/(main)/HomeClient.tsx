@@ -241,13 +241,14 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 {isHot ? (
                 <HotCarousel cardW={cardW} gap={10}>
                   {catProducts.map((product, i) => {
-                    const imageUrl = product.image_url;
+                    const _hc = SLUG_CARD_MAP[product.slug];
+                    const imageUrl = _hc?.image ?? product.image_url;
                     const isDummy = !imageUrl;
-                    const isVideo = product.is_video ?? false;
+                    const isVideo = (_hc?.type === "video") || (product.is_video ?? false);
                     return (
                       <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true}
                         style={{ display: "block", flexShrink: 0, width: cardW, height: cardH, borderRadius: 16, overflow: "hidden", position: "relative", cursor: "pointer", background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined }}>
-                        {!isDummy && (isVideo ? <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} autoPlay muted loop playsInline preload="auto" /> : <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />)}
+                        {!isDummy && (isVideo ? <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} autoPlay muted loop playsInline preload="none" /> : <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />)}
                         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85))" }} />
                         <div style={{ position: "absolute", bottom: 12, left: 12, right: 12 }}>
                           {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, margin: "0 0 1px" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 800, fontSize: 25, lineHeight: 1.3, margin: 0 }}>{n}</p> : <p style={{ fontSize: 25, lineHeight: 1.3, margin: 0 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
@@ -259,9 +260,10 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 ) : (
                 <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 10, paddingRight: 10, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", scrollPaddingLeft: 10, WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
                   {catProducts.map((product, i) => {
-                    const imageUrl = product.image_url;
+                    const _card = SLUG_CARD_MAP[product.slug];
+                    const imageUrl = (_card?.smallImage ?? _card?.image) ?? product.image_url;
                     const isDummy = !imageUrl;
-                    const isVideo = product.is_video ?? false;
+                    const isVideo = (_card?.smallType === "video" || _card?.type === "video") || (product.is_video ?? false);
                     return (
                       <Link
                         key={product.id}
@@ -277,7 +279,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         }}
                       >
                         {!isDummy && (isVideo ? (
-                          <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline preload="auto" />
+                          <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline preload="none" />
                         ) : (
                           <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ))}
@@ -324,8 +326,9 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           const active = product.is_active;
           const comingSoon = !isAdmin && !active;
           const href = getHref(product.slug);
-          const isVideo = product.is_video ?? false;
-          const imageUrl = product.image_url;
+          const _c = SLUG_CARD_MAP[product.slug];
+          const isVideo = (_c?.type === "video") || (product.is_video ?? false);
+          const imageUrl = _c?.image ?? product.image_url;
           const isDummy = !imageUrl;
 
           return (
@@ -341,7 +344,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 }}
               >
                 {!isDummy && (isVideo ? (
-                  <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline preload="auto"
+                  <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline preload="none"
                     style={comingSoon ? { filter: "blur(8px) brightness(0.15)", transform: "scale(1.05)" } : {}} />
                 ) : (
                   <img src={imageUrl!} alt={product.name} className="w-full h-full object-cover"
@@ -515,9 +518,10 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
           const rotateY = d === 0 ? -tiltAngle : (d < 0 ? 8 : -8);
           const opacity = Math.abs(d) > 1 ? 0 : d === 0 ? 1 : 0.5;
           const zIndex = d === 0 ? 2 : 1;
-          const imageUrl = product.image_url;
+          const _cc = SLUG_CARD_MAP[product.slug];
+          const imageUrl = _cc?.image ?? product.image_url;
           const isDummy = !imageUrl;
-          const isVideo = product.is_video ?? false;
+          const isVideo = (_cc?.type === "video") || (product.is_video ?? false);
           const href = getHref(product.slug);
           const isCurrent = d === 0;
 
@@ -539,7 +543,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
               }}
             >
               {!isDummy && (isVideo ? (
-                <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} autoPlay muted loop playsInline preload="auto" />
+                <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} autoPlay muted loop playsInline preload="none" />
               ) : (
                 <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
               ))}
