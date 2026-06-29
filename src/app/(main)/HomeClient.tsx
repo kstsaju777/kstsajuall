@@ -261,9 +261,10 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 10, paddingRight: 10, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", scrollPaddingLeft: 10, WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
                   {catProducts.map((product, i) => {
                     const _card = SLUG_CARD_MAP[product.slug];
-                    const imageUrl = (_card?.smallImage ?? _card?.image) ?? product.image_url;
+                    const useSmall = !isBig && !!_card?.smallImage;
+                    const imageUrl = (useSmall ? _card?.smallImage : _card?.image) ?? product.image_url;
                     const isDummy = !imageUrl;
-                    const isVideo = _card?.type === "video";
+                    const isVideo = useSmall ? _card?.smallType === "video" : _card?.type === "video";
                     return (
                       <Link
                         key={product.id}
