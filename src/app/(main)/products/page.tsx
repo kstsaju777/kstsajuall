@@ -64,7 +64,8 @@ const TAG_ANIMATIONS = `
 
 // ─── 카드 컴포넌트 ─────────────────────────────────────────────────────────────
 function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard; aspectRatio?: string; small?: boolean }) {
-  const isVideo = card.type === "video";
+  const isVideo = !!card.videoUrl || card.type === "video";
+  const mediaSrc = card.videoUrl ?? card.image;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [imgErr, setImgErr] = useState(false);
 
@@ -76,14 +77,14 @@ function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard
       {isVideo ? (
         <video
           ref={videoRef}
-          src={card.image}
+          src={mediaSrc}
           className="w-full h-full object-cover"
           autoPlay muted loop playsInline
         />
       ) : imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
       ) : (
-        <img src={card.image} alt={card.name}
+        <img src={mediaSrc} alt={card.name}
           className="w-full h-full object-cover"
           onError={() => setImgErr(true)} />
       )}
