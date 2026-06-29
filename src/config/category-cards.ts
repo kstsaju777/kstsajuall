@@ -85,7 +85,7 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   ],
 
   사랑: [
-    { image: "/media/cards/saju_yeonae/saju_yeonae-0.jpg", videoUrl: "/media/cards/saju_yeonae/saju_yeonae-big-0.mp4", smallImage: "/media/cards/saju_yeonae/saju_yeonae-small-0.mp4", smallType: "video", badge: "연애", tag: "추천", tag2: "사주", name: "나만솔로? 연애사주", tagline: "나의 짝은 언제, 어디서?", desc: "내 단짝이 누구이며, 언제 어디서 오는지 봅니다", shortDesc: "내 짝이 언제 어디서 오는지", href: "/saju/saju_yeonae" },
+    { image: "/media/cards/saju_yeonae/saju_yeonae-0.jpg", videoUrl: "/media/cards/saju_yeonae/saju_yeonae-big-0.mp4", badge: "연애", tag: "추천", tag2: "사주", name: "나만솔로? 연애사주", tagline: "나의 짝은 언제, 어디서?", desc: "내 단짝이 누구이며, 언제 어디서 오는지 봅니다", shortDesc: "내 짝이 언제 어디서 오는지", href: "/saju/saju_yeonae" },
     { image: "/media/cards/kunghap_yeonae/yeonae-0.jpg", videoUrl: "/media/cards/kunghap_yeonae/yeonae-0.mp4", badge: "연애", tag: "BEST", tag2: "궁합", name: "찰떡콩떡 연애궁합", tagline: "우리, 찰떡 궁합인걸까?", desc: "두 사람의 감정 흐름과 시기 흐름을 분석합니다", shortDesc: "두 사람의 감정과 시기 흐름", href: "/saju/kunghap_yeonae" },
     { image: "/media/cards/kunghap_jaehwe/jaehwe-0.jpg", videoUrl: "/media/cards/kunghap_jaehwe/jaehwe-0.mp4", badge: "재회", tag: "NEW", tag2: "궁합", name: "보고싶어 재회궁합", tagline: "우리, 다시 만날 운명일까?", desc: "헤어진 전 연인과의 재회 가능성을 분석합니다", shortDesc: "헤어진 연인과의 재회 가능성", href: "/saju/kunghap_jaehwe" },
     { image: "/media/cards/saju_gyeolhon/gyeolhon-0.jpg", videoUrl: "/media/cards/saju_gyeolhon/gyeolhon-0.mp4", badge: "결혼", tag: "HOT", tag2: "궁합", name: "평생내짝 결혼궁합", tagline: "우리, 결혼해도 괜찮을까?", desc: "평생 함께할 상대인지 결혼 궁합을 분석합니다", shortDesc: "평생 함께할 상대인지 확인", href: "/saju/saju_gyeolhon" },
