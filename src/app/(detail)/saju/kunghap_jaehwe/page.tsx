@@ -175,15 +175,15 @@ export default function JaehwePage() {
             <div key={i} className="w-full">
               {gap.height !== "0px" && (
                 <div className="relative w-full flex items-center justify-center" style={{ height: gap.height, backgroundColor: (gap as any).bg }}>
-                  {gap.line && (
+                  {(gap as any).line && (
                     <div style={{ position: "absolute", top: "10%", left: "50%", width: "1px", height: "40%", backgroundColor: "#ffffff", opacity: 0.7 }} />
                   )}
-                  {gap.text && (
+                  {(gap as any).text && (
                     <p className="whitespace-pre-line text-center leading-snug" style={{
                       fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
                       fontSize: "30px", fontWeight: 700, color: "#ffffff", letterSpacing: "0.05em",
                     }}>
-                      {gap.text}
+                      {(gap as any).text}
                     </p>
                   )}
                 </div>

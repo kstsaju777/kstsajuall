@@ -718,11 +718,12 @@ function CheckoutContent() {
 
     // 이메일 발송 — 고객이 입력한 주소로
     const email = searchParams.get("email") ?? "";
+    router.push(`/saju/jeongtong/report-preview?${params.toString()}`);
     if (email) {
       try {
         const reportParams = new URLSearchParams({ name, date, time, calendar, gender, email });
         const reportUrl = `https://www.hongyeondang.com/saju/jeongtong/report-preview?${reportParams.toString()}`;
-        await fetch("/api/send-order-email", {
+        fetch("/api/send-order-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -740,7 +741,7 @@ function CheckoutContent() {
 
     // SMS 주문 알림 발송
     try {
-      await fetch("/api/send-order-sms", {
+      fetch("/api/send-order-sms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -754,7 +755,6 @@ function CheckoutContent() {
     }
 
     const params = new URLSearchParams({ name, date, time, calendar, gender, email });
-    router.push(`/saju/jeongtong/report-preview?${params.toString()}`);
   };
 
   return (

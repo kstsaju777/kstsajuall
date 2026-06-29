@@ -117,10 +117,11 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const isDummy = !imageUrl;
                     const isVideo = product.is_video ?? false;
                     return (
-                      <div
+                      <Link
                         key={product.id}
-                        onClick={() => router.push(`/saju/${product.slug}`)}
+                        href={`/saju/${product.slug}`}
                         style={{
+                          display: "block",
                           flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
                           overflow: "hidden", position: "relative", cursor: "pointer",
                           scrollSnapAlign: "start",
@@ -150,7 +151,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         {!product.is_active && (
                           <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.5)", borderRadius: 8, padding: "2px 5px", fontSize: 8, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>비공개</div>
                         )}
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>

@@ -479,8 +479,17 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
             <div className="w-full mb-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
             <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{prefix} 태어난 날짜</p>
             <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-              <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
-              <span className="font-bold">태어난 날짜는?</span>
+              {isPartner ? (
+                <>
+                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>상대방이 </span>
+                  <span className="font-bold">태어난 날짜는?</span>
+                </>
+              ) : (
+                <>
+                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
+                  <span className="font-bold">태어난 날짜는?</span>
+                </>
+              )}
             </h2>
             {/* 양력/음력/윤달 — 항상 노출 */}
             <div className="flex gap-2 mb-3">
@@ -537,8 +546,17 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                 <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
                 <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{prefix} 태어난 시간</p>
                 <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
-                  <span className="font-bold">태어난 시간은?</span>
+                  {isPartner ? (
+                    <>
+                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>상대방이 </span>
+                      <span className="font-bold">태어난 시간은?</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
+                      <span className="font-bold">태어난 시간은?</span>
+                    </>
+                  )}
                 </h2>
                 <div className="flex gap-3">
                   {/* 커스텀 시간 드롭다운 */}
@@ -611,7 +629,8 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                     <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
                     <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>이름</p>
                     <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-                      <span className="font-bold">{isPartner ? "상대방의 " : "그대의 "}이름을 알려주시오.</span>
+                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{isPartner ? "상대방의 " : "그대의 "}</span>
+                      <span className="font-bold">이름을 알려주시오.</span>
                     </h2>
                     <input
                       type="text" placeholder="홍길동" autoComplete="off"
@@ -871,8 +890,9 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (e
 }
 
 // ─── Step 7: 로딩 ─────────────────────────────────────────────────────────────
-function StepLoading({ name, date, time, calendar, gender, email }: {
+function StepLoading({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern }: {
   name: string; date: string; time: string; calendar: string; gender?: string; email: string;
+  partnerName?: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string; concern?: string;
 }) {
   const [progress, setProgress] = useState(0);
   const [b1, setB1] = useState(false);
@@ -905,7 +925,11 @@ function StepLoading({ name, date, time, calendar, gender, email }: {
   }, []);
 
   const goNext = () => {
-    const params = new URLSearchParams({ name, date, time, calendar, gender: gender ?? "", email });
+    const params = new URLSearchParams({
+      name, date, time, calendar, gender: gender ?? "", email, concern: concern ?? "",
+      partnerName: partnerName ?? "", partnerDate: partnerDate ?? "", partnerTime: partnerTime ?? "",
+      partnerCalendar: partnerCalendar ?? "", partnerGender: partnerGender ?? "",
+    });
     router.push(`/saju/kunghap_jaehwe/checkout?${params.toString()}`);
   };
 
@@ -1007,7 +1031,9 @@ export default function JaehweFormPage() {
       {step === 12 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
-          calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""}
+          calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""} concern={form.concern ?? ""}
+          partnerName={form.partnerName ?? ""} partnerDate={form.partnerDate ?? ""} partnerTime={form.partnerTime ?? "시간 모름"}
+          partnerCalendar={form.partnerCalendar ?? "양력"} partnerGender={form.partnerGender ?? ""}
         />
       )}
     </>
