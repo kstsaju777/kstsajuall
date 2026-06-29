@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const BG = "#0a0a0a";
-const ACCENT = "#ff6b9d";
-const ACCENT_D = "#c9184a";
+const ACCENT = "#00b4d8";
+const ACCENT_D = "#0077b6";
 
 const SURNAMES = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서", "신", "권"];
 const ENDINGS = ["지", "은", "현", "수", "민", "호", "아", "연", "준", "서", "영", "우", "빈", "진"];
@@ -17,7 +17,7 @@ function randomName() {
 }
 function randomTime() { return TIMES[Math.floor(Math.random() * TIMES.length)]; }
 const TIME_COLORS: Record<string, string> = {
-  "방금": "#c9184a", "방금 전": "#c9184a",
+  "방금": "#0077b6", "방금 전": "#0077b6",
   "1분 전": "#9b2335", "2분 전": "#9b2335",
   "3분 전": "#b5651d", "5분 전": "#6c757d", "7분 전": "#6c757d",
 };
@@ -90,12 +90,30 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes waterRise {
+          0%        { transform: translateY(100%); }
+          40%, 60%  { transform: translateY(0%); }
+          100%      { transform: translateY(100%); }
+        }
+        @keyframes waveShape {
+          0%, 100% { border-radius: 42% 58% 0 0 / 22px 22px 0 0; }
+          25%      { border-radius: 58% 42% 0 0 / 18px 18px 0 0; }
+          50%      { border-radius: 44% 56% 0 0 / 26px 26px 0 0; }
+          75%      { border-radius: 56% 44% 0 0 / 16px 16px 0 0; }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/kunghap_janyeo/form")}
         className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: ACCENT, fontSize: "22px" }}
+        style={{ fontSize: "22px", backgroundColor: "#00b4d8", position: "relative", overflow: "hidden" }}
       >
-        자녀궁합 보러가기
+        <span style={{
+          position: "absolute", bottom: 0, left: "-5%", right: "-5%", height: "110%",
+          background: "linear-gradient(to top, #0077b6 0%, #00b4d8 50%, #90e0ef 100%)",
+          animation: "waterRise 3.5s ease-in-out infinite, waveShape 1.2s ease-in-out infinite",
+        }} />
+        <span style={{ position: "relative", zIndex: 1 }}>자녀궁합 보러가기</span>
       </button>
     </div>
   );

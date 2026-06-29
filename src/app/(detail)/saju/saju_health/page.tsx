@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const BG = "#080a0f";
-const PINK = "#5bbfea";
+const BG = "#0d0905";
+const PINK = "#ca884b";
 
 const SURNAMES = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"];
 const ENDINGS = ["지", "은", "현", "수", "민", "아", "연", "준", "서", "우"];
@@ -80,13 +80,40 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: PINK }}>{timeLeft}</span>
       </p>
-      <button
-        onClick={() => router.push("/saju/saju_health/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: PINK, fontSize: "22px" }}
-      >
-        건강운사주 보러가기
-      </button>
+      <style>{`
+        @keyframes rotateSweep {
+          from { transform: translate(-50%, -50%) rotate(-45deg); }
+          to   { transform: translate(-50%, -50%) rotate(315deg); }
+        }
+      `}</style>
+      <div style={{ position: "relative", borderRadius: "12px", padding: "2px", overflow: "hidden", background: "#3a2010" }}>
+        <div style={{
+          position: "absolute", top: "50%", left: "50%",
+          width: "200%", height: "200%",
+          background: "conic-gradient(from 0deg, transparent 0%, transparent 70%, #C8962E 82%, #ffe8a0 88%, #C8962E 94%, transparent 100%)",
+          animation: "rotateSweep 2s linear infinite",
+          pointerEvents: "none",
+        }} />
+        <button
+          onClick={() => router.push("/saju/saju_health/form")}
+          className="w-full active:scale-95 transition-transform"
+          style={{
+            position: "relative", zIndex: 1,
+            background: "linear-gradient(180deg, #3a2010 0%, #2C1A0E 50%, #1e1008 100%)",
+            borderRadius: "10px",
+            padding: "14px 20px",
+            border: "none",
+            width: "100%",
+          }}
+        >
+          <span style={{
+            fontSize: "18px", fontWeight: 800,
+            color: "#ca884b",
+            letterSpacing: "0.05em",
+            textShadow: "0 1px 4px rgba(0,0,0,0.8)",
+          }}>건강운사주 보러가기</span>
+        </button>
+      </div>
     </div>
   );
 }

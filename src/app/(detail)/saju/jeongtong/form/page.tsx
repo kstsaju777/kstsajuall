@@ -189,21 +189,21 @@ function BottomNav({
 
 // ─── Step 1: 성별 ─────────────────────────────────────────────────────────────
 function StepGender({ onNext, initial }: { onNext: (v: string) => void; initial?: string }) {
-  const [gender, setGender] = useState<"여자" | "남자" | null>((initial as "여자" | "남자") ?? null);
+  const [gender, setGender] = useState<"남성" | "여성" | null>((initial as "남성" | "여성") ?? null);
 
   return (
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>내 질문에 답을 해주시오</p>
         <Title>그대의 성별은 무엇이오?</Title>
-        <div className="flex flex-col gap-3">
-          {(["여자", "남자"] as const).map((g) => {
+        <div className="flex gap-3">
+          {(["남성", "여성"] as const).map((g) => {
             const active = gender === g;
             return (
               <button
                 key={g}
                 onClick={() => { setGender(g); setTimeout(() => onNext(g), 350); }}
-                className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
+                className="flex-1 py-4 rounded-2xl text-[16px] font-semibold transition-all"
                 style={{
                   backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
                   border: `1.5px solid ${active ? NAVY : "rgba(255,255,255,0.18)"}`,
@@ -271,8 +271,8 @@ function StepBirthDate({
     }
   }, [isValid, date, calendar]);
 
-  const greeting = gender === "남자" ? "멋진 도련님, 잘 찾아오셨소" : "어여쁜 아가씨, 잘 찾아오셨소";
-  const greetColor = gender === "남자" ? "#7ec8e3" : "#f8a5c2";
+  const greeting = gender === "남성" ? "멋진 도련님, 잘 찾아오셨소" : "어여쁜 아가씨, 잘 찾아오셨소";
+  const greetColor = gender === "남성" ? "#7ec8e3" : "#f8a5c2";
 
   return (
     <>
@@ -494,9 +494,9 @@ function StepConcern({
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
-        <h2 className="text-[24px] font-bold mb-4" style={{ color: TEXT_CLR }}>
+        <h2 className="text-[20px] font-bold mb-4 whitespace-nowrap" style={{ color: TEXT_CLR }}>
           고민을 상세히 적어주겠소?{" "}
-          <span className="text-[15px] font-normal" style={{ color: "#888" }}>(선택)</span>
+          <span className="text-[13px] font-normal" style={{ color: "#888" }}>(선택)</span>
         </h2>
         <textarea
           value={text}
@@ -702,6 +702,43 @@ function LoadBubble({ text, size, width }: { text: string; size?: string; width?
   );
 }
 
+function JeongtongEmailIntro({ onNext }: { onNext: () => void }) {
+  const SCENES = ["거의 다 왔소.", "마지막 하나만\n남았소!"];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) setScene((s) => s + 1);
+          else setTimeout(onNext, 700);
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/jeongtong/jeongtong-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#9b2335", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function StepLoading({
   name, date, time, calendar, gender, email,
 }: {
@@ -714,7 +751,7 @@ function StepLoading({
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const honor = gender === "남자" ? "군" : "양";
+  const honor = gender === "남성" ? "군" : "양";
 
   useEffect(() => {
     videoRef.current?.play().catch(() => {});
@@ -805,7 +842,7 @@ export default function SajuFormPage() {
 
   return (
     <>
-      {step <= 6 && (
+      {(step <= 5 || step === 7) && (
         <FormShell>
           {step === 1 && <StepGender initial={form.gender} onNext={(gender) => next({ gender }, 2)} />}
           {step === 2 && (
@@ -838,16 +875,17 @@ export default function SajuFormPage() {
               onSubmit={(concern) => next({ concern }, 6)}
             />
           )}
-          {step === 6 && (
+          {step === 7 && (
             <StepEmail
               initial={form.email}
-              onPrev={() => setStep(5)}
-              onNext={(email) => next({ email }, 7)}
+              onPrev={() => setStep(6)}
+              onNext={(email) => next({ email }, 8)}
             />
           )}
         </FormShell>
       )}
-      {step === 7 && (
+      {step === 6 && <JeongtongEmailIntro onNext={() => setStep(7)} />}
+      {step === 8 && (
         <StepLoading
           name={form.name ?? ""}
           date={form.date ?? ""}

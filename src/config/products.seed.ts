@@ -40,7 +40,7 @@ export const productsSeed: ProductSeed[] = [
   },
   {
     slug: "premium-saju",
-    name: "종합 사주 감명",
+    name: "종합사주풀이",
     description: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",
     price: 29900,
     display_order: 40,

@@ -80,12 +80,33 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes btnPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(225,51,125,0.5); }
+          50% { box-shadow: 0 0 0 8px rgba(225,51,125,0); }
+        }
+        @keyframes btnBounce {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.06); }
+          50% { transform: scale(1.04); }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/saju_gyeolhon/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: ACCENT, fontSize: "22px" }}
+        className="w-full relative flex items-center justify-center active:scale-95"
+        style={{
+          backgroundImage: "url('/media/cards/saju_gyeolhon/button1.png')",
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+          height: "52px",
+          borderRadius: "12px",
+          border: "none",
+          backgroundColor: "transparent",
+          animation: "btnPulse 2s ease-in-out infinite, btnBounce 2.5s ease-in-out infinite",
+          transition: "transform 0.1s",
+        }}
       >
-        결혼궁합 보러가기
+        <span style={{ fontSize: "22px", fontWeight: 900, color: ACCENT, textShadow: "0 1px 4px rgba(255,255,255,0.8)" }}>결혼궁합 보러가기</span>
       </button>
     </div>
   );

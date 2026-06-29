@@ -114,7 +114,7 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     image: "/media/hero/hero-13.jpg",
-    badge: "임신 사주",
+    badge: "임신 궁합",
     title: "올해 난 정말\n임실할 수 있을까?",
     desc: "임신날짜, 아이 성별, 총 자녀수를 점지해드립니다",
     href: "/saju/pregnancy",
@@ -180,7 +180,7 @@ export const cardSections = {
     moreHref: "/products?category=가정",
     layout: "medium" as const,
     cards: [
-      { image: "/media/cards/baby/baby-1.jpg", badge: "가정", tag: "추천", name: "임신 사주",       desc: "임신 시기와 아이 성별을 사주로 분석합니다",   href: "/saju/pregnancy" },
+      { image: "/media/cards/baby/baby-1.jpg", badge: "가정", tag: "추천", name: "임신 궁합",       desc: "임신 시기와 아이 성별을 사주로 분석합니다",   href: "/saju/pregnancy" },
       { image: "/media/cards/baby/baby-2.jpg", badge: "가정",              name: "영재 사주",       desc: "우리 아이는 어떤 영재일까",                   href: "/saju/gifted" },
       { image: "/media/cards/baby/baby-3.jpg", badge: "가정", tag: "NEW",  name: "자녀 사주",       desc: "타고난 재능과 맞춤 양육법 분석",              href: "/saju/child" },
       { image: "/media/cards/baby/baby-4.jpg", badge: "가정",              name: "태명 작명",       desc: "사주에 맞는 좋은 태명과 이름 짓기",           href: "/saju/naming" },
@@ -260,7 +260,7 @@ export const cardSections = {
     moreHref: "/products?category=종합",
     layout: "tall" as const,
     cards: [
-      { image: "/media/cards/saju_total/total-1.jpg", badge: "종합", tag: "베스트", name: "종합 사주 감명", desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이", href: "/saju/total" },
+      { image: "/media/cards/saju_total/total-1.jpg", badge: "종합", tag: "베스트", name: "종합사주풀이", desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이", href: "/saju/total" },
       { image: "/media/cards/saju_total/total-2.jpg", badge: "종합",               name: "오늘의 일진",   desc: "하루의 기운을 사주로 읽는 일진 풀이",         href: "/saju/daily" },
       { image: "/media/cards/saju_total/total-3.jpg", badge: "종합", tag: "NEW",   name: "신년 사주",     desc: "새해 한 해 전체 운세 종합 분석",               href: "/saju/new-year" },
       { image: "/media/cards/saju_total/total-4.jpg", badge: "종합", tag: "인기",  name: "사주 기본 감명", desc: "사주 4기둥으로 보는 타고난 성향",             href: "/saju/basic" },

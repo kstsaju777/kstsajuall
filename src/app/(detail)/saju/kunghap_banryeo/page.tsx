@@ -90,13 +90,70 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
-      <button
-        onClick={() => router.push("/saju/kunghap_banryeo/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: ACCENT, fontSize: "22px" }}
-      >
-        반려궁합 보러가기
-      </button>
+      <style>{`
+        @keyframes banryeoBeat {
+          0%, 100% { transform: scale(1); }
+          15% { transform: scale(1.07); }
+          30% { transform: scale(0.97); }
+          45% { transform: scale(1.05); }
+          60% { transform: scale(1); }
+        }
+        @keyframes pawStamp {
+          0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+          30%  { transform: scale(1.3) rotate(-20deg); opacity: 1; }
+          60%  { transform: scale(1) rotate(-20deg); opacity: 1; }
+          100% { transform: scale(1) rotate(-20deg); opacity: 0; }
+        }
+        @keyframes pawStamp2 {
+          0%   { transform: scale(0) rotate(15deg); opacity: 0; }
+          30%  { transform: scale(1.3) rotate(15deg); opacity: 1; }
+          60%  { transform: scale(1) rotate(15deg); opacity: 1; }
+          100% { transform: scale(1) rotate(15deg); opacity: 0; }
+        }
+        @keyframes pawStamp3 {
+          0%   { transform: scale(0) rotate(-5deg); opacity: 0; }
+          30%  { transform: scale(1.3) rotate(-5deg); opacity: 1; }
+          60%  { transform: scale(1) rotate(-5deg); opacity: 1; }
+          100% { transform: scale(1) rotate(-5deg); opacity: 0; }
+        }
+      `}</style>
+      <div className="relative">
+        <button
+          onClick={() => router.push("/saju/kunghap_banryeo/form")}
+          className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 overflow-hidden relative"
+          style={{
+            fontSize: "22px",
+            background: "linear-gradient(105deg, #b47221 35%, #e8c97a 48%, #f5e0a0 53%, #e8c97a 58%, #b47221 72%)",
+            backgroundSize: "200% auto",
+            animation: "banryeoBeat 1.8s ease-in-out infinite",
+          }}
+        >
+          {/* 발바닥 SVG들 */}
+          {[
+            { top: "10%", left: "6%", rot: -25, delay: "0s", size: 28 },
+            { top: "15%", left: "22%", rot: 10, delay: "0.6s", size: 22 },
+            { top: "8%", right: "18%", rot: -10, delay: "1.2s", size: 24 },
+            { top: "20%", right: "5%", rot: 20, delay: "0.3s", size: 20 },
+          ].map((p, i) => (
+            <span key={i} style={{
+              position: "absolute", top: p.top, left: p.left, right: p.right,
+              pointerEvents: "none", zIndex: 2,
+              animation: `pawStamp${(i % 3) + 1} 1.8s ease-in-out ${p.delay} infinite`,
+              transform: `rotate(${p.rot}deg)`,
+            }}>
+              <svg width={p.size} height={p.size} viewBox="0 0 40 40" fill="#3b1a06">
+                <ellipse cx="20" cy="26" rx="10" ry="8" />
+                <ellipse cx="10" cy="15" rx="4.5" ry="3.5" />
+                <ellipse cx="20" cy="11" rx="4.5" ry="3.5" />
+                <ellipse cx="30" cy="15" rx="4.5" ry="3.5" />
+                <ellipse cx="5" cy="23" rx="3.5" ry="3" />
+                <ellipse cx="35" cy="23" rx="3.5" ry="3" />
+              </svg>
+            </span>
+          ))}
+          <span style={{ position: "relative", zIndex: 3 }}>반려궁합 보러가기</span>
+        </button>
+      </div>
     </div>
   );
 }

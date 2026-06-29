@@ -185,7 +185,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   }, [open]);
   if (!open) return null;
 
-  const DBG = "#1b1820"; const DCARD = "#262229"; const DTXT = "#ffffff";
+  const DBG = "#0d141f"; const DCARD = "#162030"; const DTXT = "#ffffff";
   const DMUTE = "rgba(255,255,255,0.5)"; const DSTRIKE = "rgba(255,255,255,0.38)";
   const saved = PRODUCT.original - PRODUCT.price;
   const visible = mounted && !closing;
@@ -204,8 +204,8 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             <button onClick={requestClose} style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
-            style={{ background: "rgba(201,24,74,0.16)", border: `1px solid ${PINK_D}55`, color: "#ff9ab0" }}>
-            총 <span style={{ color: "#ff6b85" }}>{saved.toLocaleString()}원</span> 할인받았어요!
+            style={{ background: "rgba(91,191,234,0.16)", border: `1px solid ${PINK_D}55`, color: "#5bbfea" }}>
+            총 <span style={{ color: "#1a86c8" }}>{saved.toLocaleString()}원</span> 할인받았어요!
           </div>
           <div className="w-full text-left rounded-2xl px-4 py-3.5 mb-5" style={{ backgroundColor: DCARD, border: `1.5px solid ${PINK_D}`, boxShadow: `0 0 0 3px ${PINK_D}22` }}>
             <div className="flex items-start justify-between gap-2">
@@ -240,7 +240,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
       {confirmExit && (
         <div className="fixed z-[60] px-6" style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", top: "34%", pointerEvents: "none" }}>
           <div className="relative mx-auto rounded-2xl px-5 py-4"
-            style={{ pointerEvents: "auto", maxWidth: 290, background: "#211d27", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            style={{ pointerEvents: "auto", maxWidth: 290, background: "#0d141f", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             <button onClick={() => setConfirmExit(false)} className="absolute top-2.5 right-2.5 flex items-center justify-center rounded-full"
               style={{ width: 22, height: 22, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", fontSize: 12 }}>✕</button>
             <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
@@ -281,7 +281,7 @@ function StickyPayCTA({ onPay, name, gender }: { onPay: () => void; name: string
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
           <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩{PRODUCT.original.toLocaleString()}</span>
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#fff0f2", color: PINK_D, border: `1px solid ${PINK}` }}>특가 -{PRODUCT.discount}%</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#e8f6fd", color: PINK_D, border: `1px solid ${PINK}` }}>특가 -{PRODUCT.discount}%</span>
         </div>
         <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩{PRODUCT.price.toLocaleString()}</span>
       </div>

@@ -81,12 +81,26 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes imshinPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(115,142,111,0.6); }
+          50% { box-shadow: 0 0 0 10px rgba(115,142,111,0); }
+        }
+        @keyframes imshinBeat {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/saju_imshin/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: ACCENT, fontSize: "22px" }}
+        className="w-full py-2 rounded-2xl font-bold text-white"
+        style={{
+          backgroundColor: ACCENT, fontSize: "22px",
+          animation: "imshinPulse 2s ease-in-out infinite, imshinBeat 2.5s ease-in-out infinite",
+        }}
       >
-        임신사주 보러가기
+        임신 궁합 보러가기
       </button>
     </div>
   );
@@ -109,20 +123,20 @@ export default function ImshinSajuPage() {
 
       {/* 메인 이미지 */}
       <div style={{ fontSize: 0 }}>
-        <img src="/media/cards/saju_imshin/imshin-0.jpg" alt="임신사주"
+        <img src="/media/cards/saju_imshin/imshin-0.jpg" alt="임신 궁합"
           style={{ display: "block", width: "100%", height: "auto" }} />
       </div>
 
       {/* 리포트 미리보기 */}
       <div style={{ backgroundColor: "#0c120b", padding: "32px 20px 40px" }}>
-        <p style={{ fontSize: 13, color: ACCENT, fontWeight: 700, marginBottom: 6 }}>임신사주</p>
+        <p style={{ fontSize: 13, color: ACCENT, fontWeight: 700, marginBottom: 6 }}>임신 궁합</p>
         <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 20 }}>리포트 미리보기</p>
         <div style={{ background: "#131a12", borderRadius: 16, overflow: "hidden", marginBottom: 8 }}>
           <img src="/media/cards/saju_imshin/imshin-0.jpg" alt="미리보기"
             style={{ display: "block", width: "100%", height: "auto" }} />
           <div style={{ padding: "20px 20px 24px" }}>
             <p style={{ fontSize: 12, color: ACCENT, fontWeight: 700, marginBottom: 4 }}>+15,000자</p>
-            <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 12 }}>2026 임신사주</p>
+            <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 12 }}>2026 임신 궁합</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 20 }}>
               임신이 가능한 시기가 사주에 담겨 있어요.<br /><br />
               홍연이 그대의 사주팔자를 살펴보고, 아이가 올 수 있는 시기와 준비해야 할 것들을 따뜻하게 풀어드릴게요.

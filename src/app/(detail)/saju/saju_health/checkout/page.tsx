@@ -7,11 +7,11 @@ import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 토큰 ────────────────────────────────────────────────────────────────────
-const CREAM  = "#fdf8f4";
+const CREAM  = "#faf4ec";
 const WHITE  = "#ffffff";
-const PINK   = "#5bbfea";
-const PINK_D = "#1a86c8";
-const PINK_P = "#f0f8fd";
+const PINK   = "#ca884b";
+const PINK_D = "#9a5f28";
+const PINK_P = "#f7efe4";
 const GRAY1  = "#1a1a1a";
 const GRAY2  = "#444444";
 const GRAY3  = "#888888";
@@ -24,7 +24,7 @@ const PRODUCT = { name: "건강운사주", original: 49800, discount: 50, price:
 function SajuGrid({ date, time, calendar, name, gender }: { date: string; time: string; calendar: string; name: string; gender: string }) {
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
   const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
-  const suffix = gender === "남아" ? "군" : gender === "여아" ? "양" : "님";
+  const suffix = gender === "남성" ? "씨" : gender === "여성" ? "씨" : "님";
   return (
     <div className="px-5 py-4">
       <p className="text-[12px] font-bold mb-3" style={{ color: GRAY3 }}>{name}{suffix}의 사주팔자</p>
@@ -185,7 +185,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   }, [open]);
   if (!open) return null;
 
-  const DBG = "#1b1820"; const DCARD = "#262229"; const DTXT = "#ffffff";
+  const DBG = "#1a1008"; const DCARD = "#2a1c0a"; const DTXT = "#ffffff";
   const DMUTE = "rgba(255,255,255,0.5)"; const DSTRIKE = "rgba(255,255,255,0.38)";
   const saved = PRODUCT.original - PRODUCT.price;
   const visible = mounted && !closing;
@@ -204,8 +204,8 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             <button onClick={requestClose} style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
-            style={{ background: "rgba(201,24,74,0.16)", border: `1px solid ${PINK_D}55`, color: "#ff9ab0" }}>
-            총 <span style={{ color: "#ff6b85" }}>{saved.toLocaleString()}원</span> 할인받았어요!
+            style={{ background: "rgba(202,136,75,0.16)", border: `1px solid ${PINK_D}55`, color: "#ca884b" }}>
+            총 <span style={{ color: "#9a5f28" }}>{saved.toLocaleString()}원</span> 할인받았어요!
           </div>
           <div className="w-full text-left rounded-2xl px-4 py-3.5 mb-5" style={{ backgroundColor: DCARD, border: `1.5px solid ${PINK_D}`, boxShadow: `0 0 0 3px ${PINK_D}22` }}>
             <div className="flex items-start justify-between gap-2">
@@ -240,7 +240,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
       {confirmExit && (
         <div className="fixed z-[60] px-6" style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", top: "34%", pointerEvents: "none" }}>
           <div className="relative mx-auto rounded-2xl px-5 py-4"
-            style={{ pointerEvents: "auto", maxWidth: 290, background: "#211d27", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            style={{ pointerEvents: "auto", maxWidth: 290, background: "#1e1008", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             <button onClick={() => setConfirmExit(false)} className="absolute top-2.5 right-2.5 flex items-center justify-center rounded-full"
               style={{ width: 22, height: 22, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", fontSize: 12 }}>✕</button>
             <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
@@ -288,7 +288,7 @@ function StickyPayCTA({ onPay, name, gender }: { onPay: () => void; name: string
       <button onClick={onPay} className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
         style={{ background: `linear-gradient(135deg, ${PINK}, ${PINK_D})`, boxShadow: glow ? `0 4px 24px ${PINK_D}88` : `0 2px 12px ${PINK_D}44`, transition: "box-shadow 1s ease" }}>
         <span>🔓</span>
-        <span>{name}{gender === "남아" ? "군" : gender === "여아" ? "양" : "님"} 건강운사주 확인하기</span>
+        <span>{name}{gender === "남성" ? "씨" : gender === "여성" ? "씨" : "님"} 건강운사주 확인하기</span>
       </button>
     </div>
   );
@@ -335,7 +335,7 @@ function CheckoutContent() {
       <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
         <style>{`div::-webkit-scrollbar{display:none}`}</style>
 
-        <ImageTextBlock label="건강운사주 · 정밀 리포트" headline={`${name}${gender === "남아" ? "군" : gender === "여아" ? "양" : "님"}의\n운명을\n살펴봤어요`} accent="살펴봤어요" />
+        <ImageTextBlock label="건강운사주 · 정밀 리포트" headline={`${name}${gender === "남성" ? "씨" : gender === "여성" ? "씨" : "님"}의\n운명을\n살펴봤어요`} accent="살펴봤어요" />
 
         {/* 명식 */}
         <div style={{ backgroundColor: WHITE }}>

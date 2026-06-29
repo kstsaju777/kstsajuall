@@ -90,10 +90,18 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes ehonNeon {
+          0%   { background: #7c6af7; box-shadow: 0 0 12px 3px rgba(124,106,247,0.7); }
+          33%  { background: #4b3bbf; box-shadow: 0 0 12px 3px rgba(75,59,191,0.7); }
+          66%  { background: #2d2080; box-shadow: 0 0 12px 3px rgba(45,32,128,0.7); }
+          100% { background: #7c6af7; box-shadow: 0 0 12px 3px rgba(124,106,247,0.7); }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/saju_ehon/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: ACCENT, fontSize: "22px" }}
+        className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform"
+        style={{ color: "#ffffff", fontSize: "22px", animation: "ehonNeon 3s ease-in-out infinite" }}
       >
         이혼사주 보러가기
       </button>

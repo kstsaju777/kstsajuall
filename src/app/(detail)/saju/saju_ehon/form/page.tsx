@@ -120,6 +120,14 @@ function BottomNav({
 }) {
   return (
     <div className="flex items-center gap-3 px-5 pb-8 pt-4" style={{ backgroundColor: CARD_BG }}>
+      <style>{`
+        @keyframes ehonNavNeon {
+          0%   { background: #7c6af7; box-shadow: 0 0 12px 3px rgba(124,106,247,0.7); }
+          33%  { background: #4b3bbf; box-shadow: 0 0 12px 3px rgba(75,59,191,0.7); }
+          66%  { background: #2d2080; box-shadow: 0 0 12px 3px rgba(45,32,128,0.7); }
+          100% { background: #7c6af7; box-shadow: 0 0 12px 3px rgba(124,106,247,0.7); }
+        }
+      `}</style>
       {onPrev && (
         <button
           onClick={onPrev}
@@ -132,8 +140,13 @@ function BottomNav({
       <button
         onClick={onNext}
         disabled={nextDisabled}
-        className="flex-1 py-3.5 rounded-2xl text-white text-[16px] font-bold transition-all"
-        style={{ backgroundColor: NAVY, opacity: nextDisabled ? 0.35 : 1, letterSpacing: "-0.3px" }}
+        className="flex-1 py-3.5 rounded-2xl text-white text-[16px] font-bold"
+        style={{
+          opacity: nextDisabled ? 0.35 : 1,
+          letterSpacing: "-0.3px",
+          backgroundColor: NAVY,
+          animation: nextDisabled ? "none" : "ehonNavNeon 3s ease-in-out infinite",
+        }}
       >
         {nextLabel}
       </button>
@@ -890,6 +903,43 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (e
 }
 
 // ─── Step 7: 로딩 ─────────────────────────────────────────────────────────────
+function EhonEmailIntro({ onNext }: { onNext: () => void }) {
+  const SCENES = ["거의 다 왔소.", "마지막 하나만\n남았소!"];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) setScene((s) => s + 1);
+          else setTimeout(onNext, 700);
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/saju_ehon/saju_ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#7c6af6", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function StepLoading({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern }: {
   name: string; date: string; time: string; calendar: string; gender?: string; email: string;
   partnerName?: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string; concern?: string;
@@ -992,7 +1042,7 @@ export default function EhonFormPage() {
 
   return (
     <>
-      {(step >= 1 && step <= 6) && (
+      {((step >= 1 && step <= 5) || step === 7) && (
         <FormShell>
           {step === 1 && (
             <StepGender initial={form.gender} onPrev={() => history.back()} onNext={(gender, date, time, calendar, name) => next({ gender, date, time, calendar, name }, 2)} />
@@ -1013,12 +1063,13 @@ export default function EhonFormPage() {
               myDate={form.date} myTime={form.time} myCalendar={form.calendar} myName={form.name}
               partnerDate={form.partnerDate} partnerTime={form.partnerTime} partnerCalendar={form.partnerCalendar} partnerName={form.partnerName} />
           )}
-          {step === 6 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(5)} onNext={(email) => next({ email }, 7)} />
+          {step === 7 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(6)} onNext={(email) => next({ email }, 8)} />
           )}
         </FormShell>
       )}
-      {step === 7 && (
+      {step === 6 && <EhonEmailIntro onNext={() => setStep(7)} />}
+      {step === 8 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""} concern={form.concern ?? ""}

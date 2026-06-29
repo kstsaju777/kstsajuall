@@ -86,13 +86,37 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
-      <button
-        onClick={() => router.push("/saju/kunghap_business/form")}
-        className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform"
-        style={{ backgroundColor: ACCENT, fontSize: "22px", color: "#fff" }}
-      >
-        비즈니스궁합 보러가기
-      </button>
+      <style>{`
+        @keyframes bizRotate {
+          from { transform: translate(-50%, -50%) rotate(-45deg); }
+          to   { transform: translate(-50%, -50%) rotate(315deg); }
+        }
+        @keyframes bizBeat {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
+        }
+        @keyframes bizPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(78,158,255,0.5); }
+          50% { box-shadow: 0 0 0 8px rgba(78,158,255,0); }
+        }
+      `}</style>
+      <div style={{ position: "relative", borderRadius: "16px", padding: "2px", overflow: "hidden", background: "#1d6fce" }}>
+        <div style={{
+          position: "absolute", top: "50%", left: "50%",
+          width: "200%", height: "200%",
+          background: "conic-gradient(from 0deg, transparent 0%, transparent 65%, #4e9eff 78%, #a8d4ff 85%, #4e9eff 92%, transparent 100%)",
+          animation: "bizRotate 2s linear infinite",
+          pointerEvents: "none",
+        }} />
+        <button
+          onClick={() => router.push("/saju/kunghap_business/form")}
+          className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform relative"
+          style={{ backgroundColor: ACCENT, fontSize: "22px", color: "#fff", animation: "bizPulse 2s ease-in-out infinite, bizBeat 2.5s ease-in-out infinite" }}
+        >
+          비즈니스궁합 보러가기
+        </button>
+      </div>
     </div>
   );
 }

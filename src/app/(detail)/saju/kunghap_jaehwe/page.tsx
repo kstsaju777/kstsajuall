@@ -142,10 +142,21 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: "#ff69b4" }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes jaehweNeon {
+          0%   { background: #7b2fff; box-shadow: 0 0 12px 3px rgba(123,47,255,0.7); }
+          33%  { background: #ff6b9d; box-shadow: 0 0 12px 3px rgba(255,107,157,0.7); }
+          66%  { background: #ffb347; box-shadow: 0 0 12px 3px rgba(255,179,71,0.7); }
+          100% { background: #7b2fff; box-shadow: 0 0 12px 3px rgba(123,47,255,0.7); }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/kunghap_jaehwe/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: "#ff6b9d", color: "#ffffff", fontSize: "22px" }}
+        className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform"
+        style={{
+          color: "#ffffff", fontSize: "22px",
+          animation: "jaehweNeon 3s ease-in-out infinite",
+        }}
       >
         재회궁합 보러가기
       </button>

@@ -558,7 +558,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern,
           <span style={{ color: ACCENT }}>{partnerName}</span>
           <span style={{ color: "#fff" }}>님의</span>
         </p>
-        <p className="text-[18px] font-black mb-2" style={{ color: "#fff" }}>임신사주</p>
+        <p className="text-[18px] font-black mb-2" style={{ color: "#fff" }}>임신 궁합</p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 분의 사주를 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
           <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: ACCENT }} />

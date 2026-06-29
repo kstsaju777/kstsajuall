@@ -6,9 +6,9 @@ import { calcSaju } from "@/lib/saju/local-manseryeok";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 
 // ─── 디자인 토큰 ─────────────────────────────────────────────────────────────
-const NAVY       = "#ff6b9d";
+const NAVY       = "#00b4d8";
 const CARD_BG    = "#0a0c10";
-const LABEL_CLR  = "#e0a8b0";
+const LABEL_CLR  = "#90e0ef";
 const BORDER_CLR = "#4a5560";
 const PH_CLR     = "#7a8590";
 const TEXT_CLR   = "#f5f5f5";
@@ -132,8 +132,8 @@ function BottomNav({
       <button
         onClick={onNext}
         disabled={nextDisabled}
-        className="flex-1 py-3.5 rounded-2xl text-white text-[16px] font-bold transition-all"
-        style={{ backgroundColor: NAVY, opacity: nextDisabled ? 0.35 : 1, letterSpacing: "-0.3px" }}
+        className="flex-1 py-3.5 rounded-2xl text-[16px] font-bold transition-all"
+        style={{ backgroundColor: NAVY, color: "#000", opacity: nextDisabled ? 0.35 : 1, letterSpacing: "-0.3px" }}
       >
         {nextLabel}
       </button>
@@ -158,7 +158,7 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
       <div className="px-6 pt-3 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>이별한 이유</p>
         <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대들이 </span>
+          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>보호자들이 </span>
           <span className="font-bold">이별한 이유는?</span>
         </h2>
         <div className="flex flex-col gap-2">
@@ -170,7 +170,7 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
                 onClick={() => setSelected(reason)}
                 className="w-full py-2.5 rounded-xl text-[14px] font-semibold transition-all"
                 style={{
-                  backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
+                  backgroundColor: active ? "rgba(0,180,216,0.18)" : "rgba(255,255,255,0.04)",
                   border: `1.5px solid ${active ? NAVY : "rgba(255,255,255,0.18)"}`,
                   color: active ? "#ffffff" : "#dddddd",
                   opacity: active ? 1 : 0.55,
@@ -199,7 +199,7 @@ function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext:
           <span className="font-bold">헤어지자고 했소?</span>
         </h2>
         <div className="flex flex-col gap-3">
-          {(["내가", "상대방이", "둘 다"] as const).map((opt) => {
+          {(["내가", "자녀가", "둘 다"] as const).map((opt) => {
             const active = selected === opt;
             return (
               <button
@@ -207,7 +207,7 @@ function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext:
                 onClick={() => setSelected(opt)}
                 className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
                 style={{
-                  backgroundColor: active ? "rgba(255,107,157,0.18)" : "rgba(255,255,255,0.04)",
+                  backgroundColor: active ? "rgba(0,180,216,0.18)" : "rgba(255,255,255,0.04)",
                   border: `1.5px solid ${active ? NAVY : "rgba(255,255,255,0.18)"}`,
                   color: active ? "#ffffff" : "#dddddd",
                   opacity: active ? 1 : 0.55,
@@ -253,7 +253,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
       <div className="px-6 pt-6 pb-4" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>기억이 나시오?</p>
         <h2 className="text-[24px] mb-6" style={{ color: TEXT_CLR }}>
-          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대들이 </span>
+          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>보호자들이 </span>
           <span className="font-bold">이별한 날짜는?</span>
         </h2>
 
@@ -324,7 +324,7 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
         <div className="rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
             이별한 날을 알면{" "}
-            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>그때 그대들의 사주가 어떻게 엇갈렸는지</span>,{" "}
+            <span style={{ color: TEXT_CLR, fontWeight: 700 }}>그때 보호자들의 사주가 어떻게 엇갈렸는지</span>,{" "}
             <span style={{ color: TEXT_CLR, fontWeight: 700 }}>왜 그리 될 수밖에 없었는지</span> 소인이 살펴볼 수 있소.
           </p>
         </div>
@@ -335,8 +335,119 @@ function StepBreakupDate({ onPrev, onNext, initial }: { onPrev: () => void; onNe
 }
 
 // ─── Step 4: 타이핑 안내 ──────────────────────────────────────────────────────
+function StepWelcome({ onNext }: { onNext: () => void }) {
+  const SCENES = ["자녀분과의\n궁합분석을 위해", "가장 먼저\n보호자 분의\n정보가 필요하오."];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) setScene((s) => s + 1);
+          else setTimeout(onNext, 700);
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_janyeo/kunghap_janyeo-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#00b4d8", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function StepEmailIntro({ onNext }: { onNext: () => void }) {
+  const SCENES = ["입력해주셔서\n감사하오.", "이제 마지막\n하나만 남았소!"];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) setScene((s) => s + 1);
+          else setTimeout(onNext, 700);
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_janyeo/kunghap_janyeo-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#00b4d8", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function StepChildIntro({ onNext }: { onNext: () => void }) {
+  const SCENES = ["보호자분의\n사주는 잘 알겠소", "이제, 자녀분의\n정보를 알려주시오."];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) setScene((s) => s + 1);
+          else setTimeout(onNext, 700);
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_janyeo/kunghap_janyeo-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#00b4d8", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function StepIntro({ onNext }: { onNext: () => void }) {
-  const SCENES = ["적느라 수고 많았소.", "이제 그대들의\n정보를 부탁하오."];
+  const SCENES = ["적느라 수고 많았소.", "이제 보호자들의\n정보를 부탁하오."];
   const [scene, setScene] = useState(0);
   const [displayed, setDisplayed] = useState("");
 
@@ -368,7 +479,7 @@ function StepIntro({ onNext }: { onNext: () => void }) {
       <div className="relative z-10 px-8 text-center">
         <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
           {displayed}
-          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#ff6b9d", verticalAlign: "middle" }} />
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#00b4d8", verticalAlign: "middle" }} />
         </p>
       </div>
     </div>
@@ -409,7 +520,7 @@ function StepIntro2({ onNext }: { onNext: () => void }) {
       <div className="relative z-10 px-8 text-center">
         <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
           {displayed}
-          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#ff6b9d", verticalAlign: "middle" }} />
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#00b4d8", verticalAlign: "middle" }} />
         </p>
       </div>
     </div>
@@ -418,7 +529,7 @@ function StepIntro2({ onNext }: { onNext: () => void }) {
 
 // ─── Step 5: 성별 + 태어난 시간 ───────────────────────────────────────────────
 function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void; onNext: (gender: string, date: string, time: string, calendar: string, name: string) => void; initial?: string; isPartner?: boolean }) {
-  const prefix = isPartner ? "상대방의" : "나의";
+  const prefix = isPartner ? "자녀의" : "나의";
   const [gender, setGender] = useState(initial ?? "");
   const [showDate, setShowDate] = useState(!!initial);
   const [year, setYear]   = useState("");
@@ -456,15 +567,15 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
         {/* 성별 */}
         <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{prefix} 성별</p>
         <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{isPartner ? "상대방의 " : "그대의 "}</span>
+          <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{isPartner ? "자녀의 " : "보호자의 "}</span>
           <span className="font-bold">성별은 무엇이오?</span>
         </h2>
         <div className="flex gap-3 mb-4">
-          {["남성", "여성"].map((label) => (
+          {(isPartner ? ["남아", "여아"] : ["남성", "여성"]).map((label) => (
             <button key={label} onClick={() => handleGender(label)}
               className="flex-1 py-2 rounded-2xl text-[16px] font-bold transition-all"
               style={{
-                backgroundColor: gender === label ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                backgroundColor: gender === label ? "rgba(0,180,216,0.15)" : "rgba(255,255,255,0.04)",
                 border: `2px solid ${gender === label ? NAVY : "rgba(255,255,255,0.1)"}`,
                 color: gender === label ? "#fff" : "rgba(255,255,255,0.6)",
               }}>
@@ -481,12 +592,12 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
             <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
               {isPartner ? (
                 <>
-                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>상대방이 </span>
+                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>자녀가 </span>
                   <span className="font-bold">태어난 날짜는?</span>
                 </>
               ) : (
                 <>
-                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
+                  <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>보호자가 </span>
                   <span className="font-bold">태어난 날짜는?</span>
                 </>
               )}
@@ -497,7 +608,7 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                 <button key={c} onClick={() => setCalendar(c)}
                   className="flex-1 py-2 rounded-xl text-[13px] font-bold transition-all"
                   style={{
-                    backgroundColor: calendar === c ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                    backgroundColor: calendar === c ? "rgba(0,180,216,0.15)" : "rgba(255,255,255,0.04)",
                     border: `1.5px solid ${calendar === c ? NAVY : "rgba(255,255,255,0.1)"}`,
                     color: calendar === c ? "#fff" : "rgba(255,255,255,0.6)",
                   }}>
@@ -548,12 +659,12 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                 <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
                   {isPartner ? (
                     <>
-                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>상대방이 </span>
+                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>자녀가 </span>
                       <span className="font-bold">태어난 시간은?</span>
                     </>
                   ) : (
                     <>
-                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>그대가 </span>
+                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>보호자가 </span>
                       <span className="font-bold">태어난 시간은?</span>
                     </>
                   )}
@@ -564,7 +675,7 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                     <button className="w-full py-3 px-4 rounded-xl text-[15px] font-bold transition-all flex items-center justify-between"
                       onClick={() => setTimeOpen((v) => !v)}
                       style={{
-                        backgroundColor: (btime && btime !== "모름") ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                        backgroundColor: (btime && btime !== "모름") ? "rgba(0,180,216,0.15)" : "rgba(255,255,255,0.04)",
                         border: `1.5px solid ${(btime && btime !== "모름") ? NAVY : "rgba(255,255,255,0.1)"}`,
                         color: (btime && btime !== "모름") ? "#fff" : "rgba(255,255,255,0.45)",
                       }}>
@@ -600,7 +711,7 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                             return (
                               <button key={t.label} className="w-full px-4 py-3 flex items-center justify-between transition-all"
                                 onClick={() => { setBtime(val); setTimeOpen(false); }}
-                                style={{ backgroundColor: selected ? "rgba(255,107,157,0.18)" : "transparent", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                                style={{ backgroundColor: selected ? "rgba(0,180,216,0.18)" : "transparent", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                                 <span className="text-[15px] font-bold" style={{ color: selected ? "#fff" : "rgba(255,255,255,0.8)" }}>{t.label}</span>
                                 <span className="text-[12px]" style={{ color: selected ? NAVY : "rgba(255,255,255,0.35)" }}>{t.range}</span>
                               </button>
@@ -614,7 +725,7 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                   <button onClick={() => { setBtime("모름"); setTimeOpen(false); }}
                     className="px-4 py-3 rounded-xl text-[15px] font-bold transition-all"
                     style={{
-                      backgroundColor: btime === "모름" ? "rgba(255,107,157,0.15)" : "rgba(255,255,255,0.04)",
+                      backgroundColor: btime === "모름" ? "rgba(0,180,216,0.15)" : "rgba(255,255,255,0.04)",
                       border: `1.5px solid ${btime === "모름" ? NAVY : "rgba(255,255,255,0.1)"}`,
                       color: btime === "모름" ? "#fff" : "rgba(255,255,255,0.5)",
                       whiteSpace: "nowrap",
@@ -629,7 +740,7 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                     <div className="w-full my-3" style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }} />
                     <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>이름</p>
                     <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{isPartner ? "상대방의 " : "그대의 "}</span>
+                      <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>{isPartner ? "자녀의 " : "보호자의 "}</span>
                       <span className="font-bold">이름을 알려주시오.</span>
                     </h2>
                     <input
@@ -677,9 +788,9 @@ function StepName({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v:
 // ─── Step 5: 고민 ─────────────────────────────────────────────────────────────
 const PILLAR_LABELS_JW = ["시주", "일주", "월주", "년주"] as const;
 
-function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, isPartner }: {
+function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, isPartner, gender }: {
   onPrev: () => void; onSubmit: (v: string) => void; initial?: string;
-  date?: string; btime?: string; calendar?: string; name?: string; isPartner?: boolean;
+  date?: string; btime?: string; calendar?: string; name?: string; isPartner?: boolean; gender?: string;
 }) {
 
   const saju = useMemo(() => {
@@ -697,9 +808,9 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
         {/* 명식 그리드 */}
         {name && (
           <div className="mb-2">
-            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{isPartner ? "상대방의" : "나의"} 사주팔자</p>
+            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{isPartner ? "자녀의" : "보호자의"} 사주팔자</p>
             <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-              <span className="font-bold" style={{ color: TEXT_CLR }}>{name}님의 </span>
+              <span className="font-bold" style={{ color: TEXT_CLR }}>{name}{isPartner ? (gender === "남아" ? "군" : gender === "여아" ? "양" : "님") : "님"}의</span>
               <span className="font-bold">사주팔자이오</span>
             </h2>
             <div className="grid grid-cols-4 gap-2 rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -726,7 +837,7 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
 }
 
 // ─── 미니 명식 (고민 입력 상단용) ────────────────────────────────────────────
-function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: string; calendar?: string; name?: string }) {
+function MiniMyeongsik({ date, time, calendar, name, label, suffix }: { date?: string; time?: string; calendar?: string; name?: string; label?: string; suffix?: string }) {
   const saju = useMemo(() => {
     if (!date) return null;
     try { return calcSaju(date, time ?? "모름", calendar ?? "양력"); } catch { return null; }
@@ -734,7 +845,15 @@ function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: s
   const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
   return (
     <div className="flex-1">
-      <p className="text-[14px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}님 사주팔자</p>
+      {label && (
+        <div className="flex justify-center mb-1.5">
+          <span className="px-3 py-0.5 rounded-full text-[11px] font-bold"
+            style={{ backgroundColor: "rgba(0,180,216,0.18)", border: "1px solid rgba(0,180,216,0.5)", color: "#00b4d8" }}>
+            {label}
+          </span>
+        </div>
+      )}
+      <p className="text-[14px] font-bold mb-2 text-center" style={{ color: TEXT_CLR }}>{name ?? "—"}{suffix ?? "님"} 사주팔자</p>
       <div className="grid grid-cols-4 gap-1.5 rounded-2xl p-3" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-1.5">
@@ -754,10 +873,10 @@ function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: s
 }
 
 // ─── 고민 입력 ───────────────────────────────────────────────────────────────
-function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalendar, myName, partnerDate, partnerTime, partnerCalendar, partnerName }: {
+function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalendar, myName, partnerDate, partnerTime, partnerCalendar, partnerName, partnerGender }: {
   onPrev: () => void; onSubmit: (v: string) => void; initial?: string;
   myDate?: string; myTime?: string; myCalendar?: string; myName?: string;
-  partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerName?: string;
+  partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerName?: string; partnerGender?: string;
 }) {
   const [text, setText] = useState(initial ?? "");
   const MAX = 200;
@@ -767,9 +886,9 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         {/* 나 / 상대방 명식 나란히 */}
         <div className="flex gap-2 mb-5">
-          <MiniMyeongsik date={myDate} time={myTime} calendar={myCalendar} name={myName} />
+          <MiniMyeongsik date={myDate} time={myTime} calendar={myCalendar} name={myName} label="보호자" />
           <div style={{ width: 1, backgroundColor: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
-          <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
+          <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} label="자녀" suffix={partnerGender === "남아" ? "군" : partnerGender === "여아" ? "양" : "님"} />
         </div>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
         <h2 className="text-[18px] font-bold mb-4" style={{ color: TEXT_CLR }}>
@@ -779,7 +898,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX))}
-          placeholder="예) 3년 만났는데 결혼을 해도 괜찮을지 궁금해요. 우리 궁합이 잘 맞는지, 어떤걸 조심해야 하는지도 궁금해요"
+          placeholder="예) 아이가 요즘 말을 잘 안 듣고 자꾸 부딪혀요. 제가 너무 강하게 대하는 건지, 아이 기질에 맞는 양육 방식이 궁금해요. 앞으로 어떤 부분을 더 신경 써줘야 할지도 알고 싶어요."
           rows={5}
           className="w-full rounded-2xl p-4 text-[14px] outline-none resize-none leading-relaxed"
           style={{
@@ -788,7 +907,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
             color: TEXT_CLR, caretColor: NAVY,
           }}
         />
-        <p className="text-right text-[12px] mt-0.5 pr-0.5" style={{ color: text.length >= MAX ? "#e55" : "#c0a8b0" }}>
+        <p className="text-right text-[12px] mt-0.5 pr-0.5" style={{ color: text.length >= MAX ? "#e55" : "rgba(0,180,216,0.45)" }}>
           {text.length}/{MAX}
         </p>
       </div>
@@ -843,7 +962,7 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (e
                     onClick={() => { setDomain(d); setOpen(false); }}
                     className="px-4 py-3 text-[14px] cursor-pointer"
                     style={{
-                      backgroundColor: domain === d ? "rgba(155,35,53,0.25)" : "transparent",
+                      backgroundColor: domain === d ? "rgba(0,180,216,0.25)" : "transparent",
                       color: domain === d ? "#fff" : "#ddd",
                       borderBottom: "1px solid rgba(255,255,255,0.06)",
                     }}
@@ -968,10 +1087,10 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
 
       <div className="absolute bottom-0 left-0 right-0 px-6 pb-12">
         <p className="text-center text-[15px] font-bold mb-3" style={{ color: "#ffffff" }}>
-          사주팔자 정밀분석중... <span style={{ color: "#ff69b4" }}>{pct}%</span>
+          사주팔자 정밀분석중... <span style={{ color: "#00b4d8" }}>{pct}%</span>
         </p>
         <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#9b2335", transition: "width 0.2s" }} />
+          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#00b4d8", transition: "width 0.2s" }} />
         </div>
       </div>
     </div>
@@ -982,7 +1101,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
 type FormData = { gender: string; date: string; calendar: string; time: string; name: string; concern: string; partnerGender: string; partnerDate: string; partnerCalendar: string; partnerTime: string; partnerName: string; email: string; };
 
 export default function JanyeoCompat() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState<Partial<FormData>>({});
 
   const next = (data: Partial<FormData>, to: number) => {
@@ -992,7 +1111,9 @@ export default function JanyeoCompat() {
 
   return (
     <>
-      {(step >= 1 && step <= 6) && (
+      {step === 0 && <StepWelcome onNext={() => setStep(1)} />}
+      {step === 3 && <StepChildIntro onNext={() => setStep(4)} />}
+      {(step >= 1 && step <= 2) || (step >= 4 && step <= 6) || step === 8 ? (
         <FormShell>
           {step === 1 && (
             <StepGender initial={form.gender} onPrev={() => history.back()} onNext={(gender, date, time, calendar, name) => next({ gender, date, time, calendar, name }, 2)} />
@@ -1001,24 +1122,27 @@ export default function JanyeoCompat() {
             <StepConcern initial="" onPrev={() => setStep(1)} onSubmit={() => next({}, 3)}
               date={form.date} btime={form.time} calendar={form.calendar} name={form.name} />
           )}
-          {step === 3 && (
-            <StepGender isPartner initial={form.partnerGender} onPrev={() => setStep(2)} onNext={(gender, date, time, calendar, name) => next({ partnerGender: gender, partnerDate: date, partnerTime: time, partnerCalendar: calendar, partnerName: name }, 4)} />
-          )}
           {step === 4 && (
-            <StepConcern isPartner initial="" onPrev={() => setStep(3)} onSubmit={() => next({}, 5)}
-              date={form.partnerDate} btime={form.partnerTime} calendar={form.partnerCalendar} name={form.partnerName} />
+            <StepGender isPartner initial={form.partnerGender} onPrev={() => setStep(3)} onNext={(gender, date, time, calendar, name) => next({ partnerGender: gender, partnerDate: date, partnerTime: time, partnerCalendar: calendar, partnerName: name }, 5)} />
           )}
           {step === 5 && (
-            <StepConcernInput initial={form.concern} onPrev={() => setStep(4)} onSubmit={(concern) => next({ concern }, 6)}
-              myDate={form.date} myTime={form.time} myCalendar={form.calendar} myName={form.name}
-              partnerDate={form.partnerDate} partnerTime={form.partnerTime} partnerCalendar={form.partnerCalendar} partnerName={form.partnerName} />
+            <StepConcern isPartner initial="" onPrev={() => setStep(4)} onSubmit={() => next({}, 6)}
+              date={form.partnerDate} btime={form.partnerTime} calendar={form.partnerCalendar} name={form.partnerName} gender={form.partnerGender} />
           )}
           {step === 6 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(5)} onNext={(email) => next({ email }, 7)} />
+            <StepConcernInput initial={form.concern} onPrev={() => setStep(5)} onSubmit={(concern) => next({ concern }, 7)}
+              myDate={form.date} myTime={form.time} myCalendar={form.calendar} myName={form.name}
+              partnerDate={form.partnerDate} partnerTime={form.partnerTime} partnerCalendar={form.partnerCalendar} partnerName={form.partnerName} partnerGender={form.partnerGender} />
+          )}
+          {step === 8 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(7)} onNext={(email) => next({ email }, 9)} />
           )}
         </FormShell>
-      )}
+      ) : null}
       {step === 7 && (
+        <StepEmailIntro onNext={() => setStep(8)} />
+      )}
+      {step === 9 && (
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""} concern={form.concern ?? ""}

@@ -3,6 +3,58 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { CATEGORY_CARDS } from "@/config/category-cards";
+
+// slug → CategoryCard 맵
+const SLUG_CARD_MAP = Object.values(CATEGORY_CARDS).flat().reduce<Record<string, (typeof CATEGORY_CARDS)[string][number]>>((acc, card) => {
+  const slug = card.href.replace("/saju/", "");
+  if (!acc[slug]) acc[slug] = card;
+  return acc;
+}, {});
+
+const BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
+  "재물": "#eac660", "건강": "#2e7d32", "결혼": "#c2185b", "임신": "#6a1b9a",
+  "연애": "#e1337d", "자녀": "#0077b6", "유아": "#dddbd1", "재회": "#7b2fff",
+  "이혼": "#444", "비즈니스": "#1d6fce",
+};
+const BADGE_DARK_TEXT = ["유아", "재물"];
+
+const TAG_COLORS: Record<string, string> = {
+  "반려동물": "#b47221", "사주": "#111111", "HOT": "#ff4500", "궁합": "#e1337d",
+  "비즈니스": "#1d6fce", "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b",
+  "NEW": "#4fd5e8", "FREE": "#555",
+};
+
+const TAG_ANIMATIONS = `
+  @keyframes hotShimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+  @keyframes bestShimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+  @keyframes newBounce { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } 60% { transform: translateY(-2px); } }
+  @keyframes tagBeat { 0%, 40%, 60%, 100% { transform: scale(1); } 20% { transform: scale(1.18); } 50% { transform: scale(1.1); } }
+  @keyframes chukNeon { 0%, 100% { box-shadow: 0 0 3px 1px rgba(0,255,115,0.5), 0 0 6px 2px rgba(0,255,115,0.2); } 50% { box-shadow: 0 0 7px 2px rgba(0,255,115,0.9), 0 0 12px 4px rgba(0,255,115,0.4); } }
+`;
+
+function TagBadge({ value, size = 11 }: { value: string; size?: number }) {
+  const p = `${size <= 10 ? 1 : 2}px ${size <= 10 ? 5 : 8}px`;
+  const base: React.CSSProperties = { display: "inline-block", fontSize: size, fontWeight: 700, padding: p, borderRadius: 20 };
+  if (value === "HOT") return <span style={{ ...base, color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>;
+  if (value === "BEST") return <span style={{ ...base, color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>;
+  if (value === "NEW") return <span style={{ ...base, backgroundColor: "#4fd5e8", color: "#000", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>;
+  if (value === "추천") return <span style={{ ...base, backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>;
+  if (value === "궁합") return <span style={{ ...base, backgroundColor: TAG_COLORS["궁합"], color: "#fff", animation: "tagBeat 1.5s ease-in-out infinite" }}>궁합</span>;
+  return <span style={{ ...base, backgroundColor: TAG_COLORS[value] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{value}</span>;
+}
+
+function BadgeTag({ badge, tag, tag2, size = 11 }: { badge?: string | null; tag?: string | null; tag2?: string | null; size?: number }) {
+  const p = `${size <= 10 ? 1 : 2}px ${size <= 10 ? 5 : 8}px`;
+  return (
+    <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>
+      {tag && <TagBadge value={tag} size={size} />}
+      {tag2 && <TagBadge value={tag2} size={size} />}
+      {badge && <span style={{ display: "inline-block", fontSize: size, fontWeight: 700, padding: p, borderRadius: 20, backgroundColor: BADGE_COLORS[badge] ?? "#711b20", color: BADGE_DARK_TEXT.includes(badge) ? "#000" : "#fff" }}>{badge}</span>}
+    </div>
+  );
+}
 
 export type Product = {
   id: string;
@@ -77,6 +129,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 
   return (
     <div className={`flex flex-col gap-4 pt-4 ${isAdmin ? "pb-10" : "pb-4"}`}>
+      <style>{TAG_ANIMATIONS}</style>
       {/* 캐러셀 — 어드민만 */}
       {isAdmin && products.length > 0 && (
         <AdminSlider
@@ -99,7 +152,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             const isSmallBig = catIdx === 0 || catIdx === 2;
             const cardW = isSmallBig ? "38vw" : isBig ? "65vw" : "28vw";
             const cardH = isSmallBig ? "50vw" : isBig ? "81vw" : "28vw";
-            const fontSize = isBig ? 13 : 10;
+            const fontSize = isBig ? 25 : 18;
             const badgeFontSize = isBig ? 10 : 8;
 
             return (
@@ -131,7 +184,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         }}
                       >
                         {!isDummy && (isVideo ? (
-                          <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline />
+                          <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline preload="auto" />
                         ) : (
                           <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ))}
@@ -142,12 +195,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         )}
                         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85))" }} />
                         <div style={{ position: "absolute", bottom: isBig ? 12 : 8, left: isBig ? 12 : 8, right: isBig ? 12 : 8 }}>
-                          {product.badge && (
-                            <span style={{ display: "inline-block", fontSize: badgeFontSize, fontWeight: 700, padding: "1px 5px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 3 }}>
-                              {product.badge}
-                            </span>
-                          )}
-                          <p style={{ color: "#fff", fontWeight: 800, fontSize, lineHeight: 1.3, margin: 0 }}>{product.name}</p>
+                          {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={badgeFontSize} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: isBig ? 11 : 8, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}<p style={{ color: "#fff", fontWeight: 800, fontSize, lineHeight: 1.3, margin: 0 }}>{product.name}</p>{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: isBig ? 12 : 9, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
                         </div>
                         {!product.is_active && (
                           <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.5)", borderRadius: 8, padding: "2px 5px", fontSize: 8, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}>비공개</div>
@@ -200,7 +248,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 }}
               >
                 {!isDummy && (isVideo ? (
-                  <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline
+                  <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline preload="auto"
                     style={comingSoon ? { filter: "blur(8px) brightness(0.15)", transform: "scale(1.05)" } : {}} />
                 ) : (
                   <img src={imageUrl!} alt={product.name} className="w-full h-full object-cover"
@@ -214,17 +262,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 ) : (
                   <>
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.7))" }} />
-                    <div className="absolute top-3 left-3 flex gap-1.5">
-                      {product.badge && (
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#9b2335", color: "#fff" }}>{product.badge}</span>
-                      )}
-                      {product.tag && (
-                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}>{product.tag}</span>
-                      )}
-                    </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <p className="text-white font-bold text-[18px] leading-tight">{product.name}</p>
-                      {product.description && <p className="text-white/80 text-[12px] mt-1">{product.description}</p>}
+                      {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={12} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}<p className="text-white font-bold text-[30px] leading-tight">{product.name}</p>{(c?.desc ?? product.description) && <p className="text-white/80 text-[15px] mt-0.5">{c?.desc ?? product.description}</p>}</>; })()}
                     </div>
                   </>
                 )}
@@ -407,7 +446,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
               }}
             >
               {!isDummy && (isVideo ? (
-                <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline />
+                <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop playsInline preload="auto" />
               ) : (
                 <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ))}
@@ -418,15 +457,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
               )}
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85))" }} />
               <div style={{ position: "absolute", bottom: 16, left: 14, right: 14 }}>
-                {product.badge && (
-                  <span style={{ display: "inline-block", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: "#9b2335", color: "#fff", marginBottom: 5 }}>
-                    {product.badge}
-                  </span>
-                )}
-                <p style={{ color: "#fff", fontWeight: 900, fontSize: 16, lineHeight: 1.3, margin: "0 0 3px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}>{product.name}</p>
-                {product.description && isCurrent && (
-                  <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: 0 }}>{product.description}</p>
-                )}
+                {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={12} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px" }}>{c.tagline}</p>}<p style={{ color: "#fff", fontWeight: 900, fontSize: 30, lineHeight: 1.3, margin: "0 0 1px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}>{product.name}</p>{isCurrent && (c?.desc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, margin: 0, marginTop: 1 }}>{c?.desc ?? product.description}</p>}</>; })()}
               </div>
               {isCurrent && (
                 <Link href={href} prefetch={true} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />

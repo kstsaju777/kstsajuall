@@ -80,10 +80,19 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: PINK }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes yeonaeBgFlow {
+          0%, 100% { background-color: #e9bdae; }
+          50% { background-color: #e1337d; }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/saju_yeonae/form")}
         className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform"
-        style={{ backgroundColor: PINK, fontSize: "22px", color: "#3a1a0a" }}
+        style={{
+          fontSize: "22px", color: "#ffffff",
+          animation: "yeonaeBgFlow 3s ease-in-out infinite",
+        }}
       >
         연애운사주 보러가기
       </button>

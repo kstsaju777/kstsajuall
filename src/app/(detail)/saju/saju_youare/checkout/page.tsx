@@ -7,11 +7,11 @@ import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 토큰 ────────────────────────────────────────────────────────────────────
-const CREAM  = "#fdf8f4";
+const CREAM  = "#faf6ef";
 const WHITE  = "#ffffff";
-const PINK   = "#5bbfea";
-const PINK_D = "#1a86c8";
-const PINK_P = "#f0f8fd";
+const PINK   = "#e4d1b2";
+const PINK_D = "#b89d72";
+const PINK_P = "#f7f0e4";
 const GRAY1  = "#1a1a1a";
 const GRAY2  = "#444444";
 const GRAY3  = "#888888";
@@ -185,7 +185,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
   }, [open]);
   if (!open) return null;
 
-  const DBG = "#1b1820"; const DCARD = "#262229"; const DTXT = "#ffffff";
+  const DBG = "#1a1508"; const DCARD = "#2a2010"; const DTXT = "#ffffff";
   const DMUTE = "rgba(255,255,255,0.5)"; const DSTRIKE = "rgba(255,255,255,0.38)";
   const saved = PRODUCT.original - PRODUCT.price;
   const visible = mounted && !closing;
@@ -204,8 +204,8 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             <button onClick={requestClose} style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
-            style={{ background: "rgba(201,24,74,0.16)", border: `1px solid ${PINK_D}55`, color: "#ff9ab0" }}>
-            총 <span style={{ color: "#ff6b85" }}>{saved.toLocaleString()}원</span> 할인받았어요!
+            style={{ background: "rgba(184,157,114,0.16)", border: `1px solid ${PINK_D}55`, color: "#e4d1b2" }}>
+            총 <span style={{ color: "#c8a96e" }}>{saved.toLocaleString()}원</span> 할인받았어요!
           </div>
           <div className="w-full text-left rounded-2xl px-4 py-3.5 mb-5" style={{ backgroundColor: DCARD, border: `1.5px solid ${PINK_D}`, boxShadow: `0 0 0 3px ${PINK_D}22` }}>
             <div className="flex items-start justify-between gap-2">
@@ -222,8 +222,8 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               </div>
             </div>
           </div>
-          <button onClick={onConfirm} className="w-full py-4 rounded-2xl font-black text-[17px] text-white"
-            style={{ background: `linear-gradient(135deg, ${PINK}, ${PINK_D})`, boxShadow: `0 6px 20px ${PINK_D}44` }}>
+          <button onClick={onConfirm} className="w-full py-4 rounded-2xl font-black text-[17px]"
+            style={{ background: "linear-gradient(135deg, #e4d1b2, #b89d72)", color: "#1a1408", boxShadow: `0 6px 20px ${PINK_D}44` }}>
             결제하기
           </button>
           <div className="flex items-center justify-center gap-2 mt-3.5">
@@ -240,12 +240,12 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
       {confirmExit && (
         <div className="fixed z-[60] px-6" style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", top: "34%", pointerEvents: "none" }}>
           <div className="relative mx-auto rounded-2xl px-5 py-4"
-            style={{ pointerEvents: "auto", maxWidth: 290, background: "#211d27", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
+            style={{ pointerEvents: "auto", maxWidth: 290, background: "#1e1a08", boxShadow: "0 14px 40px rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.1)", animation: "popIn 0.2s cubic-bezier(0.34,1.4,0.5,1)" }}>
             <button onClick={() => setConfirmExit(false)} className="absolute top-2.5 right-2.5 flex items-center justify-center rounded-full"
               style={{ width: 22, height: 22, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", fontSize: 12 }}>✕</button>
             <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
             <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.</p>
-            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: `linear-gradient(135deg, ${PINK}, ${PINK_D})` }}>혜택 받고 계속하기</button>
+            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: "linear-gradient(135deg, #e4d1b2, #b89d72)", color: "#1a1408" }}>혜택 받고 계속하기</button>
             <button onClick={doExit} className="w-full mt-2 py-2.5 rounded-xl text-[13px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)" }}>나가기</button>
           </div>
           <style>{`@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}`}</style>
@@ -281,12 +281,12 @@ function StickyPayCTA({ onPay, name, gender }: { onPay: () => void; name: string
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
           <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩{PRODUCT.original.toLocaleString()}</span>
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#fff0f2", color: PINK_D, border: `1px solid ${PINK}` }}>특가 -{PRODUCT.discount}%</span>
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#f7f0e4", color: PINK_D, border: `1px solid ${PINK}` }}>특가 -{PRODUCT.discount}%</span>
         </div>
         <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩{PRODUCT.price.toLocaleString()}</span>
       </div>
-      <button onClick={onPay} className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
-        style={{ background: `linear-gradient(135deg, ${PINK}, ${PINK_D})`, boxShadow: glow ? `0 4px 24px ${PINK_D}88` : `0 2px 12px ${PINK_D}44`, transition: "box-shadow 1s ease" }}>
+      <button onClick={onPay} className="w-full py-4 rounded-2xl font-bold text-[16px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+        style={{ background: "linear-gradient(135deg, #e4d1b2, #b89d72)", color: "#1a1408", boxShadow: glow ? `0 4px 24px ${PINK_D}88` : `0 2px 12px ${PINK_D}44`, transition: "box-shadow 1s ease" }}>
         <span>🔓</span>
         <span>{name}{gender === "남아" ? "군" : gender === "여아" ? "양" : "님"} 유아사주 확인하기</span>
       </button>

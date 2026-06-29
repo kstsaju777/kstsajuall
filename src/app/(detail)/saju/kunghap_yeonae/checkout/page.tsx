@@ -9,10 +9,10 @@ import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/lega
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM    = "#fdf8f4";
 const WHITE    = "#ffffff";
-const RED      = "#9b2335";
-const RED_SOFT = "#c9474f";
-const RED_PALE = "#fdf0f0";
-const ROSE     = "#e8a598";
+const RED      = "#e1337d";
+const RED_SOFT = "#ff6b9d";
+const RED_PALE = "#fff0f6";
+const ROSE     = "#ffb3d0";
 const GRAY1    = "#1a1a1a";
 const GRAY2    = "#444444";
 const GRAY3    = "#888888";
@@ -269,7 +269,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
 
   const DBG = "#1b1820"; const DCARD = "#262229"; const DTXT = "#ffffff";
   const DMUTE = "rgba(255,255,255,0.5)"; const DSTRIKE = "rgba(255,255,255,0.38)";
-  const ACCENT = "#e0465a";
+  const ACCENT = "#ff6b9d";
   const sel = PRODUCTS[0];
   const saved = sel.original - sel.price;
   const visible = mounted && !closing;
@@ -291,7 +291,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
             style={{ background: "rgba(224,70,90,0.16)", border: `1px solid ${ACCENT}55`, color: "#ff9aa6" }}>
-            총 <span style={{ color: "#ff6b7e" }}>{saved.toLocaleString()}원</span> 할인받았어요!
+            총 <span style={{ color: "#ff6b9d" }}>{saved.toLocaleString()}원</span> 할인받았어요!
           </div>
           <div className="mb-5">
             <div className="w-full text-left rounded-2xl px-4 py-3.5" style={{ backgroundColor: DCARD, border: `1.5px solid ${ACCENT}`, boxShadow: `0 0 0 3px ${ACCENT}22` }}>
@@ -316,12 +316,12 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               <span style={{ color: "rgba(255,255,255,0.85)" }}>{sel.original.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between text-[13px]">
-              <span style={{ color: "#ff6b7e", fontWeight: 700 }}>지금 결제 시 할인 ({sel.discount}% 특가)</span>
-              <span style={{ color: "#ff6b7e", fontWeight: 700 }}>-{saved.toLocaleString()}</span>
+              <span style={{ color: "#ff6b9d", fontWeight: 700 }}>지금 결제 시 할인 ({sel.discount}% 특가)</span>
+              <span style={{ color: "#ff6b9d", fontWeight: 700 }}>-{saved.toLocaleString()}</span>
             </div>
           </div>
           <button onClick={() => onConfirm(selected)} className="w-full py-4 rounded-2xl font-black text-[17px] text-white active:scale-[0.99] transition-transform"
-            style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)", boxShadow: "0 6px 20px rgba(224,70,90,0.4)" }}>
+            style={{ background: "linear-gradient(135deg, #ff6b9d, #e1337d)", boxShadow: "0 6px 20px rgba(255,107,157,0.4)" }}>
             결제하기
           </button>
           <div className="flex items-center justify-center gap-2 mt-3.5">
@@ -343,7 +343,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               style={{ width: 22, height: 22, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", fontSize: 12, lineHeight: 1 }}>✕</button>
             <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
             <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.</p>
-            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: "linear-gradient(135deg, #ec4d6e, #c01e3c)" }}>혜택 받고 계속하기</button>
+            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: "linear-gradient(135deg, #ff6b9d, #e1337d)" }}>혜택 받고 계속하기</button>
             <button onClick={doExit} className="w-full mt-2 py-2.5 rounded-xl text-[13px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)" }}>나가기</button>
           </div>
           <style>{`@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}`}</style>

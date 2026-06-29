@@ -702,6 +702,43 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (e
 }
 
 // ─── 로딩 ─────────────────────────────────────────────────────────────────────
+function BanryeoEmailIntro({ onNext }: { onNext: () => void }) {
+  const SCENES = ["거의 다 왔소! 🐾", "마지막 하나만\n남았소!"];
+  const [scene, setScene] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    const text = SCENES[scene];
+    let i = 0;
+    setDisplayed("");
+    const iv = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(iv);
+        setTimeout(() => {
+          if (scene < SCENES.length - 1) setScene((s) => s + 1);
+          else setTimeout(onNext, 700);
+        }, 1000);
+      }
+    }, 65);
+    return () => clearInterval(iv);
+  }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_banryeo/kunghap_banryeo-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
+      <div className="relative z-10 px-8 text-center">
+        <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
+          {displayed}
+          <span className="inline-block w-[2px] h-[1.1em] ml-1 align-middle animate-pulse" style={{ backgroundColor: "#b47221", verticalAlign: "middle" }} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function StepLoading({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern }: {
   name: string; date: string; time: string; calendar: string; gender?: string; email: string;
   partnerName?: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string; concern?: string;
@@ -801,7 +838,7 @@ export default function BanryeoFormPage() {
 
   return (
     <>
-      {(step >= 1 && step <= 8) && (
+      {((step >= 1 && step <= 7) || step === 9) && (
         <FormShell>
           {step === 1 && (
             <StepGender initial={form.gender} onPrev={() => history.back()} onNext={(gender, date, time, calendar, name) => next({ gender, date, time, calendar, name }, 2)} />
@@ -828,12 +865,13 @@ export default function BanryeoFormPage() {
               myDate={form.date} myTime={form.time} myCalendar={form.calendar} myName={form.name}
               partnerDate={form.partnerDate} partnerTime={form.partnerTime} partnerCalendar={form.partnerCalendar} partnerName={form.partnerName} />
           )}
-          {step === 8 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(7)} onNext={(email) => next({ email }, 9)} />
+          {step === 9 && (
+            <StepEmail initial={form.email} onPrev={() => setStep(8)} onNext={(email) => next({ email }, 10)} />
           )}
         </FormShell>
       )}
-      {step === 9 && (
+      {step === 8 && <BanryeoEmailIntro onNext={() => setStep(9)} />}
+      {step === 10 && ( // StepLoading
         <StepLoading
           name={form.name ?? ""} date={form.date ?? ""} time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""} concern={form.concern ?? ""}

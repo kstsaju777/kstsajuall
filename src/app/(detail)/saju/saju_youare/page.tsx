@@ -1,14 +1,15 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const BG = "#080a0f";
-const PINK = "#5bbfea";
+const BG     = "#0d0b08";
+const ACCENT = "#e4d1b2";
+const ACCENT_D = "#b89d72";
 
 const SURNAMES = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"];
-const ENDINGS = ["지", "은", "현", "수", "민", "아", "연", "준", "서", "우"];
-const TIMES = ["방금", "방금 전", "1분 전", "2분 전", "3분 전", "5분 전"];
+const ENDINGS  = ["지", "은", "현", "수", "민", "아", "연", "준", "서", "우"];
+const TIMES    = ["방금", "방금 전", "1분 전", "2분 전", "3분 전", "5분 전"];
 function randomName() {
   return `${SURNAMES[Math.floor(Math.random() * SURNAMES.length)]}*${ENDINGS[Math.floor(Math.random() * ENDINGS.length)]}`;
 }
@@ -16,8 +17,8 @@ function randomTime() {
   return TIMES[Math.floor(Math.random() * TIMES.length)];
 }
 const TIME_COLORS: Record<string, string> = {
-  "방금": "#c9184a", "방금 전": "#c9184a",
-  "1분 전": "#9b2335", "2분 전": "#9b2335",
+  "방금": "#b89d72", "방금 전": "#b89d72",
+  "1분 전": "#e4d1b2", "2분 전": "#e4d1b2",
   "3분 전": "#b5651d", "5분 전": "#6c757d",
 };
 
@@ -71,19 +72,33 @@ function StickyCTA() {
             backgroundColor: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)",
             borderRadius: "9999px", padding: "5px 12px", fontSize: "12px", color: "#fff", whiteSpace: "nowrap",
           }}>
-            <span style={{ backgroundColor: TIME_COLORS[t.time] ?? "#9b2335", color: "#fff", fontSize: "10px", fontWeight: 700, borderRadius: "9999px", padding: "2px 7px" }}>{t.time}</span>
+            <span style={{ backgroundColor: TIME_COLORS[t.time] ?? ACCENT_D, color: "#1a1408", fontSize: "10px", fontWeight: 700, borderRadius: "9999px", padding: "2px 7px" }}>{t.time}</span>
             <span><b>{t.name}</b>님이 신청하였습니다.</span>
           </div>
         ))}
       </div>
       <p className="text-center text-[13px] font-bold mb-1">
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
-        <span style={{ color: PINK }}>{timeLeft}</span>
+        <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes youarePulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(228,209,178,0.6); }
+          50% { box-shadow: 0 0 0 10px rgba(228,209,178,0); }
+        }
+        @keyframes youareBeat {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/saju_youare/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: PINK, fontSize: "22px" }}
+        className="w-full py-2 rounded-2xl font-bold"
+        style={{
+          backgroundColor: ACCENT, color: "#1a1408", fontSize: "22px",
+          animation: "youarePulse 2s ease-in-out infinite, youareBeat 2.5s ease-in-out infinite",
+        }}
       >
         유아사주 보러가기
       </button>
@@ -91,7 +106,7 @@ function StickyCTA() {
   );
 }
 
-export default function ChildSajuPage() {
+export default function YouareSajuPage() {
   const router = useRouter();
 
   return (
@@ -113,14 +128,14 @@ export default function ChildSajuPage() {
       </div>
 
       {/* 리포트 미리보기 */}
-      <div style={{ backgroundColor: "#0f0f14", padding: "32px 20px 40px" }}>
-        <p style={{ fontSize: 13, color: PINK, fontWeight: 700, marginBottom: 6 }}>유아사주</p>
+      <div style={{ backgroundColor: "#110f0a", padding: "32px 20px 40px" }}>
+        <p style={{ fontSize: 13, color: ACCENT, fontWeight: 700, marginBottom: 6 }}>유아사주</p>
         <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 20 }}>리포트 미리보기</p>
-        <div style={{ background: "#1a1a22", borderRadius: 16, overflow: "hidden", marginBottom: 8 }}>
+        <div style={{ background: "#1c190f", borderRadius: 16, overflow: "hidden", marginBottom: 8 }}>
           <img src="/media/cards/saju_youare/youare-0.jpg" alt="미리보기"
             style={{ display: "block", width: "100%", height: "auto" }} />
           <div style={{ padding: "20px 20px 24px" }}>
-            <p style={{ fontSize: 12, color: PINK, fontWeight: 700, marginBottom: 4 }}>+15,000자</p>
+            <p style={{ fontSize: 12, color: ACCENT, fontWeight: 700, marginBottom: 4 }}>+15,000자</p>
             <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 12 }}>2026 유아사주</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, marginBottom: 20 }}>
               아이의 사주에는 타고난 재능, 성격, 그리고 앞으로 걸어갈 길이 담겨 있어요.<br /><br />
@@ -137,7 +152,7 @@ export default function ChildSajuPage() {
               "부모가 꼭 알아야 할 육아 주의사항",
             ].map((item, i) => (
               <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: PINK, flexShrink: 0, marginTop: 6 }} />
+                <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: ACCENT, flexShrink: 0, marginTop: 6 }} />
                 <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{item}</p>
               </div>
             ))}
@@ -146,7 +161,7 @@ export default function ChildSajuPage() {
       </div>
 
       {/* 후기 */}
-      <div style={{ backgroundColor: "#080a0f", padding: "32px 20px 40px" }}>
+      <div style={{ backgroundColor: BG, padding: "32px 20px 40px" }}>
         <p style={{ fontSize: 22, color: "#fff", fontWeight: 900, marginBottom: 24 }}>실제 이용 후기</p>
         {[
           {
@@ -162,9 +177,9 @@ export default function ChildSajuPage() {
             stars: 5, text: "아이가 힘든 시기가 언제인지 미리 알 수 있어서 좋았어요. 그 시기에 더 잘 챙겨줄 수 있을 것 같아요. 육아에 실질적인 도움이 되는 내용이었습니다.",
           },
         ].map((r, i) => (
-          <div key={i} style={{ backgroundColor: "#1a1a22", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+          <div key={i} style={{ backgroundColor: "#1c190f", borderRadius: 16, padding: 20, marginBottom: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-              <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#2a2a32", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{r.avatar}</div>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: "#2a2516", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{r.avatar}</div>
               <div>
                 <p style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>{r.name}</p>
                 <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{r.tag}</p>

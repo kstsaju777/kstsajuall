@@ -8,8 +8,11 @@ export type CategoryCard = {
   type?: "video";
   badge: string;
   tag?: string;
+  tag2?: string;
   name: string;
+  tagline?: string;
   desc: string;
+  shortDesc?: string;
   href: string;
 };
 
@@ -74,16 +77,16 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   ],
 
   재물: [
-    { image: "/media/cards/saju_jaemul/jaemul-0.jpg", badge: "재물", tag: "인기", name: "재물사주", desc: "평생 재물운과 돈이 들어오는 시기를 분석합니다", href: "/saju/saju_jaemul" },
-    { image: "/media/cards/kunghap_business/business-0.jpg", badge: "궁합", tag: "비즈니스", name: "비즈니스 궁합", desc: "사업 파트너와의 궁합 분석", href: "/saju/kunghap_business" },
+    { image: "/media/cards/saju_jaemul/jaemul-0.jpg", badge: "재물", tag: "HOT", tag2: "사주", name: "재물사주", tagline: "나는 부자될 수 있을까?", desc: "돈이 들어오는 시기와 평생 재물운을 분석합니다", shortDesc: "평생 재물운과 돈 들어오는 시기", href: "/saju/saju_jaemul" },
+    { image: "/media/cards/kunghap_business/business-0.jpg", badge: "비즈니스", tag: "궁합", name: "비즈니스 궁합", tagline: "직장상사, 동업 괜찮을까?", desc: "함께하면 돈버는 파트너인지 궁합 봐드립니다", shortDesc: "돈 버는 파트너인지 궁합 확인", href: "/saju/kunghap_business" },
   ],
 
   사랑: [
-    { image: "/media/cards/saju_yeonae/saju_yeonae-0.jpg", badge: "연애", tag: "인기", name: "연애운 사주", desc: "내 연애운과 이성운을 사주로 분석합니다", href: "/saju/saju_yeonae" },
-    { image: "/media/cards/kunghap_yeonae/yeonae-0.jpg", badge: "궁합", tag: "인기", name: "연애 궁합", desc: "우리 둘의 연애 궁합을 분석합니다", href: "/saju/kunghap_yeonae" },
-    { image: "/media/cards/kunghap_jaehwe/jaehwe-0.jpg", badge: "궁합", tag: "재회", name: "재회 궁합", desc: "헤어진 그 사람과 다시 만날 수 있을까", href: "/saju/kunghap_jaehwe" },
-    { image: "/media/cards/saju_gyeolhon/gyeolhon-0.jpg", badge: "결혼", tag: "추천", name: "결혼 궁합", desc: "두 사람의 결혼 궁합을 사주로 분석합니다", href: "/saju/saju_gyeolhon" },
-    { image: "/media/cards/saju_ehon/ehon-0.jpg", badge: "이혼", tag: "", name: "이혼 사주", desc: "이혼 위기, 사주로 먼저 알아보세요", href: "/saju/saju_ehon" },
+    { image: "/media/cards/saju_yeonae/saju_yeonae-0.jpg", badge: "연애", tag: "추천", tag2: "사주", name: "연애운 사주", tagline: "나의 짝은 언제, 어디서?", desc: "내 단짝이 누구이며, 언제 어디서 오는지 봅니다", shortDesc: "내 짝이 언제 어디서 오는지", href: "/saju/saju_yeonae" },
+    { image: "/media/cards/kunghap_yeonae/yeonae-0.jpg", badge: "연애", tag: "BEST", tag2: "궁합", name: "연애 궁합", tagline: "우리, 찰떡 궁합인걸까?", desc: "두 사람의 감정 흐름과 시기 흐름을 분석합니다", shortDesc: "두 사람의 감정과 시기 흐름", href: "/saju/kunghap_yeonae" },
+    { image: "/media/cards/kunghap_jaehwe/jaehwe-0.jpg", badge: "재회", tag: "NEW", tag2: "궁합", name: "재회 궁합", tagline: "우리, 다시 만날 운명일까?", desc: "헤어진 전 연인과의 재회 가능성을 분석합니다", shortDesc: "헤어진 연인과의 재회 가능성", href: "/saju/kunghap_jaehwe" },
+    { image: "/media/cards/saju_gyeolhon/gyeolhon-0.jpg", badge: "결혼", tag: "HOT", tag2: "궁합", name: "결혼 궁합", tagline: "우리, 결혼해도 괜찮을까?", desc: "평생 함께할 상대인지 결혼 궁합을 분석합니다", shortDesc: "평생 함께할 상대인지 확인", href: "/saju/saju_gyeolhon" },
+    { image: "/media/cards/saju_ehon/ehon-0.jpg", badge: "이혼", tag: "NEW", tag2: "궁합", name: "이혼 사주", tagline: "우리, 이혼해도 괜찮을까?", desc: "위기의 부부, 관계 흐름과 해결법을 분석합니다", shortDesc: "위기의 부부, 관계 흐름 분석", href: "/saju/saju_ehon" },
   ],
 
   재회: [
@@ -99,16 +102,16 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   ],
 
   가족: [
-    { image: "/media/cards/saju_janyeo/janyeo-0.jpg", badge: "사주", tag: "인기", name: "자녀 사주", desc: "우리 아이의 타고난 재능과 성격을 분석합니다", href: "/saju/saju_janyeo" },
-    { image: "/media/cards/kunghap_janyeo/kunghap_janyeo-0.jpg", badge: "궁합", tag: "추천", name: "자녀 궁합", desc: "부모와 아이의 궁합을 분석합니다", href: "/saju/kunghap_janyeo" },
-    { image: "/media/cards/saju_imshin/imshin-0.jpg", badge: "임신", tag: "NEW", name: "임신 사주", desc: "임신 시기와 아이 성별을 사주로 분석합니다", href: "/saju/saju_imshin" },
-    { image: "/media/cards/saju_youare/youare-0.jpg", badge: "사주", tag: "", name: "유아 사주", desc: "우리 아이의 유아기 기질과 발달을 분석합니다", href: "/saju/saju_youare" },
+    { image: "/media/cards/saju_janyeo/janyeo-0.jpg", badge: "자녀", tag: "HOT", tag2: "사주", name: "자녀 사주", tagline: "우리 아이, 잘 키워보자!", desc: "우리 아이의 타고난 재능과 미래를 말씀드립니다", shortDesc: "우리 아이 타고난 재능과 미래", href: "/saju/saju_janyeo" },
+    { image: "/media/cards/kunghap_janyeo/kunghap_janyeo-0.jpg", badge: "자녀", tag: "추천", tag2: "궁합", name: "자녀 궁합", tagline: "엄마,아빠와의 궁합은?", desc: "부모와 아이의 궁합과 관계 흐름을 분석합니다", shortDesc: "부모와 아이의 궁합과 관계 흐름", href: "/saju/kunghap_janyeo" },
+    { image: "/media/cards/saju_imshin/imshin-0.jpg", badge: "임신", tag: "NEW", tag2: "궁합", name: "임신 궁합", tagline: "우리 사이에 아기가 올까?", desc: "임신 가능시기와 아이 성별을 사주로 분석합니다", shortDesc: "임신 시기와 아이 성별 분석", href: "/saju/saju_imshin" },
+    { image: "/media/cards/saju_youare/youare-0.jpg", badge: "유아", tag: "NEW", tag2: "사주", name: "유아 사주", tagline: "자장자장, 우리 아가 사주", desc: "0~5세 영유아 기질과 성장기 육아 조언드립니다", shortDesc: "영유아 기질과 성장기 육아 조언", href: "/saju/saju_youare" },
   ],
 
   기타: [
-    { image: "/media/cards/kunghap_banryeo/banryeo-0.jpg", badge: "궁합", tag: "반려", name: "반려 궁합", desc: "나와 반려동물의 궁합을 분석합니다", href: "/saju/kunghap_banryeo" },
-    { image: "/media/cards/saju_health/health-0.jpg", badge: "건강", tag: "", name: "건강운 사주", desc: "타고난 체질과 건강 주의 시기를 분석합니다", href: "/saju/saju_health" },
-    { image: "/media/cards/saju_total/total-0.mp4", type: "video", badge: "종합", tag: "베스트", name: "종합 사주 감명", desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이", href: "/saju/total" },
+    { image: "/media/cards/kunghap_banryeo/banryeo-0.jpg", badge: "반려동물", tag: "HOT", tag2: "궁합", name: "반려 궁합", tagline: "우리 강아지, 행복했음 좋겠어", desc: "나와 반려동물의 궁합과 함께할 흐름을 봅니다", shortDesc: "반려동물과의 궁합과 인연", href: "/saju/kunghap_banryeo" },
+    { image: "/media/cards/saju_health/health-0.jpg", badge: "건강", tag: "사주", name: "건강운 사주", tagline: "건강하게 오래오래 살고싶다", desc: "타고난 체질과 건강 조심 시기를 분석합니다", shortDesc: "체질과 건강 조심 시기 분석", href: "/saju/saju_health" },
+    { image: "/media/cards/saju_total/total-0.mp4", type: "video", badge: "종합", tag: "BEST", tag2: "사주", name: "종합사주풀이", tagline: "내 인생 완전 정복하자", desc: "기질·직업·연애·재물·건강·대운·세운 종합풀이", shortDesc: "직업·재물·연애·건강·흐름 내 인생 종합", href: "/saju/total" },
   ],
 
   /*
@@ -124,7 +127,7 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
 
   재물_전체: [
     { image: "/media/hero/hero-4.jpg",  badge: "재물", tag: "NEW",  name: "자미두수 재물운",   desc: "동양 별자리로 보는 내 재물의 흐름과 재테크 타이밍",       href: "/saju/jamisusu" },
-    { image: "/media/cards/saju_total/total-1.jpg",badge: "재물", tag: "베스트",name: "종합 사주 감명",   desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",           href: "/saju/total" },
+    { image: "/media/cards/saju_total/total-1.jpg",badge: "재물", tag: "BEST",name: "종합사주풀이",   desc: "대운·세운·직업운·재물운·건강운 정통 종합 풀이",           href: "/saju/total" },
     { image: "/media/cards/saju_total/total-3.jpg",badge: "재물",              name: "신년 사주",         desc: "새해 한 해 전체 운세 종합 분석",                          href: "/saju/new-year" },
     { image: "/media/hero/hero-16.jpg", badge: "재물",              name: "자미두수 인생 흐름",desc: "12궁과 14주성으로 향후 10년의 기운 흐름을 분석합니다",    href: "/saju/jamisusu-life" },
   ],
@@ -163,7 +166,7 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
 
   자녀_전체: [
     { image: "/media/hero/hero-9.jpg",   badge: "자녀", tag: "추천", name: "영재 사주",       desc: "타고난 영재성·재능분야·맞춤 양육법까지 정통 사주로 풀어드립니다", href: "/saju/gifted" },
-    { image: "/media/hero/hero-13.jpg",  badge: "자녀",              name: "임신 사주",       desc: "임신날짜, 아이 성별, 총 자녀수를 점지해드립니다",         href: "/saju/pregnancy" },
+    { image: "/media/hero/hero-13.jpg",  badge: "자녀",              name: "임신 궁합",       desc: "임신날짜, 아이 성별, 총 자녀수를 점지해드립니다",         href: "/saju/pregnancy" },
     { image: "/media/hero/hero-14.jpg",  badge: "자녀", tag: "NEW",  name: "천운 임신사주",   desc: "임신 길일, 합궁 택일, 태아 기운까지 50년 전통 명리학으로 풀어드립니다", href: "/saju/premium-pregnancy" },
     { image: "/media/cards/baby/baby-4.jpg",  badge: "자녀",              name: "태명 작명",       desc: "사주에 맞는 좋은 태명과 이름 짓기",                       href: "/saju/naming" },
     { image: "/media/cards/baby/baby-6.jpg",  badge: "자녀", tag: "추천", name: "합궁 택일",       desc: "임신 길일과 합궁 택일 분석",                              href: "/saju/hapgung" },

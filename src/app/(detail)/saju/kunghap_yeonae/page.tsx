@@ -90,13 +90,46 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
-      <button
-        onClick={() => router.push("/saju/kunghap_yeonae/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: ACCENT, fontSize: "22px" }}
-      >
-        연애궁합 보러가기
-      </button>
+      <style>{`
+        @keyframes yeonaeBtnNeon {
+          0%   { background: #ff6b9d; box-shadow: 0 0 12px 3px rgba(255,107,157,0.7); }
+          33%  { background: #e1337d; box-shadow: 0 0 12px 3px rgba(225,51,125,0.7); }
+          66%  { background: #ff0a6c; box-shadow: 0 0 12px 3px rgba(255,10,108,0.7); }
+          100% { background: #ff6b9d; box-shadow: 0 0 12px 3px rgba(255,107,157,0.7); }
+        }
+        @keyframes yeonaeBtnBeat {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
+        }
+        @keyframes heartFloat {
+          0%   { transform: translateY(0) scale(1);   opacity: 1; }
+          80%  { transform: translateY(-80px) scale(1.2); opacity: 0.6; }
+          100% { transform: translateY(-110px) scale(0.8); opacity: 0; }
+        }
+      `}</style>
+      <div style={{ position: "relative" }}>
+        {[
+          { right: "12%", size: 18, delay: "0s",    dur: "1.8s" },
+          { right: "6%",  size: 14, delay: "0.6s",  dur: "2.1s" },
+          { right: "20%", size: 12, delay: "1.1s",  dur: "1.6s" },
+          { right: "3%",  size: 20, delay: "1.6s",  dur: "2.3s" },
+          { right: "16%", size: 10, delay: "0.3s",  dur: "1.9s" },
+        ].map((h, i) => (
+          <span key={i} style={{
+            position: "absolute", bottom: "50%", right: h.right,
+            fontSize: h.size, pointerEvents: "none", zIndex: 10,
+            animation: `heartFloat ${h.dur} ease-out ${h.delay} infinite`,
+          }}>💗</span>
+        ))}
+        <button
+          onClick={() => router.push("/saju/kunghap_yeonae/form")}
+          className="w-full py-2 rounded-2xl font-bold active:scale-95"
+          style={{ color: "#fff", fontSize: "22px", animation: "yeonaeBtnNeon 3s ease-in-out infinite, yeonaeBtnBeat 2s ease-in-out infinite" }}
+        >
+          연애궁합 보러가기
+        </button>
+      </div>
     </div>
   );
 }

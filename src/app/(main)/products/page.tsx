@@ -5,6 +5,63 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useRef, useState } from "react";
 import { CATEGORY_CARDS, FREE_SECTIONS, type CategoryCard } from "@/config/category-cards";
 
+// ─── 뱃지/태그 색상 맵 ────────────────────────────────────────────────────────
+const BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d",
+  "반려동물": "#b47221",
+  "사주": "#711b20",
+  "종합": "#711b20",
+  "재물": "#eac660",
+  "건강": "#2e7d32",
+  "결혼": "#c2185b",
+  "임신": "#6a1b9a",
+  "연애": "#e1337d",
+  "자녀": "#0077b6",
+  "유아": "#dddbd1",
+  "재회": "#7b2fff",
+  "이혼": "#444",
+  "비즈니스": "#1d6fce",
+};
+
+const TAG_COLORS: Record<string, string> = {
+  "반려동물": "#b47221",
+  "사주": "#111111",
+  "HOT": "#ff4500",
+  "궁합": "#e1337d",
+  "비즈니스": "#1d6fce",
+  "재회": "#7b2fff",
+  "추천": "#00ff73",
+  "인기": "#c0392b",
+  "NEW": "#4fd5e8",
+  "베스트": "#b47221",
+  "FREE": "#555",
+};
+
+const TAG_ANIMATIONS = `
+  @keyframes hotShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes bestShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes tagBeat {
+    0%, 40%, 60%, 100% { transform: scale(1); }
+    20% { transform: scale(1.18); }
+    50% { transform: scale(1.1); }
+  }
+  @keyframes newBounce {
+    0%, 100% { transform: translateY(0); }
+    30%       { transform: translateY(-5px); }
+    60%       { transform: translateY(-2px); }
+  }
+  @keyframes chukNeon {
+    0%, 100% { box-shadow: 0 0 3px 1px rgba(0,255,115,0.5), 0 0 6px 2px rgba(0,255,115,0.2); }
+    50%       { box-shadow: 0 0 7px 2px rgba(0,255,115,0.9), 0 0 12px 4px rgba(0,255,115,0.4); }
+  }
+`;
+
 // ─── 카드 컴포넌트 ─────────────────────────────────────────────────────────────
 function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard; aspectRatio?: string; small?: boolean }) {
   const isVideo = card.type === "video";
@@ -38,28 +95,85 @@ function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard
       {/* 텍스트 + 뱃지 (하단 통합) */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
         {/* 뱃지 & 태그 */}
-        <div className="flex gap-1.5 mb-1.5">
-          <span className="font-bold rounded-full"
-            style={{ fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", backgroundColor: "#711b20", color: "#fff" }}>
-            {card.badge}
-          </span>
+        <div className="flex gap-1.5" style={{ marginBottom: 3 }}>
           {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full"
+                style={{
+                  fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", color: "#fff",
+                  background: "linear-gradient(105deg, #ff4500 30%, #ffd700 48%, #fff8e0 53%, #ffd700 58%, #ff4500 72%)",
+                  backgroundSize: "200% auto",
+                  animation: "hotShimmer 1.8s linear infinite",
+                }}>
+                HOT
+              </span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full"
+                style={{
+                  fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", color: "#111",
+                  background: "linear-gradient(105deg, #e6a800 30%, #ffe566 48%, #fffbe0 53%, #ffe566 58%, #e6a800 72%)",
+                  backgroundSize: "200% auto",
+                  animation: "bestShimmer 2s linear infinite",
+                }}>
+                BEST
+              </span>
+            ) : card.tag === "NEW" ? (
+              <span className="font-bold rounded-full"
+                style={{
+                  fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px",
+                  backgroundColor: "#4fd5e8", color: "#000", display: "inline-block",
+                  animation: "newBounce 1.2s ease-in-out infinite",
+                }}>
+                NEW
+              </span>
+            ) : card.tag === "추천" ? (
+              <span className="font-bold rounded-full"
+                style={{
+                  fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px",
+                  backgroundColor: "#00ff73", color: "#000",
+                  animation: "chukNeon 1.6s ease-in-out infinite",
+                }}>
+                추천
+              </span>
+            ) : card.tag === "궁합" ? (
+              <span className="font-bold rounded-full"
+                style={{ fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", backgroundColor: TAG_COLORS["궁합"], color: "#fff", display: "inline-block", animation: "tagBeat 1.5s ease-in-out infinite" }}>
+                궁합
+              </span>
+            ) : (
+              <span className="font-bold rounded-full"
+                style={{ fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", backgroundColor: TAG_COLORS[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
+                {card.tag}
+              </span>
+            )
+          )}
+          {card.tag2 && (
             <span className="font-bold rounded-full"
-              style={{ fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)" }}>
-              {card.tag}
+              style={{
+                fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px",
+                backgroundColor: TAG_COLORS[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff", backdropFilter: "blur(4px)",
+                ...(card.tag2 === "궁합" ? { animation: "tagBeat 1.5s ease-in-out infinite", display: "inline-block" } : {}),
+              }}>
+              {card.tag2}
             </span>
           )}
+          <span className="font-bold rounded-full"
+            style={{ fontSize: small ? 8 : 12, padding: small ? "2px 6px" : "2px 10px", backgroundColor: BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아", "BEST", "재물"].includes(card.badge) ? "#000" : "#fff" }}>
+            {card.badge}
+          </span>
         </div>
-        {/* 서브 태그라인 */}
-        <p className="font-medium mb-1" style={{ fontSize: small ? 8 : 12, color: "rgba(255,255,255,0.55)" }}>
-          {card.desc}
-        </p>
+        {/* 꾸밈어 */}
+        {card.tagline && (
+          <p style={{ fontSize: small ? 8 : 13, color: "rgba(255,255,255,0.6)", marginBottom: 1, fontStyle: "normal" }}>
+            {card.tagline}
+          </p>
+        )}
         {/* 메인 타이틀 */}
-        <p className="text-white font-bold leading-tight mb-1" style={{ fontSize: small ? 20 : 33 }}>
+        <p className="text-white font-bold leading-tight" style={{ fontSize: small ? 16 : 30, marginBottom: 2 }}>
           {card.name}
         </p>
         {/* 부연 설명 */}
-        <p className="leading-relaxed" style={{ fontSize: small ? 10 : 16, color: "rgba(255,255,255,0.45)" }}>
+        <p className="leading-snug" style={{ fontSize: small ? 9 : 15, color: "rgba(255,255,255,0.45)" }}>
           {card.desc}
         </p>
       </div>
@@ -89,13 +203,13 @@ function FreeCard({ card, idx }: { card: CategoryCard; idx: number }) {
         <img src={card.image} alt={card.name} className="absolute inset-0 w-full h-full object-cover" onError={() => setImgOk(false)} />
       )}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)" }} />
-      {card.badge && (
-        <div className="absolute top-2.5 left-2.5 flex gap-1">
-          <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span>
-          {card.tag && <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)" }}>{card.tag}</span>}
-        </div>
-      )}
       <div className="absolute bottom-0 left-0 right-0" style={{ padding: "0 12px 14px" }}>
+        {card.badge && (
+          <div className="flex gap-1" style={{ marginBottom: 5 }}>
+            <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span>
+            {card.tag && <span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "rgba(255,255,255,0.18)", backdropFilter: "blur(4px)" }}>{card.tag}</span>}
+          </div>
+        )}
         <p className="font-black text-white leading-tight" style={{ fontSize: 14, marginBottom: 4 }}>{card.name}</p>
         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{card.desc}</p>
       </div>
@@ -173,6 +287,8 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
+    <>
+    <style>{TAG_ANIMATIONS}</style>
     <Suspense fallback={
       <div className="flex items-center justify-center py-20">
         <div className="w-6 h-6 rounded-full border-2 border-white border-t-transparent animate-spin" />
@@ -180,5 +296,6 @@ export default function ProductsPage() {
     }>
       <ProductsContent />
     </Suspense>
+    </>
   );
 }

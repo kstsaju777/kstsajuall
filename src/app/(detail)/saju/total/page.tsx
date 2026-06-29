@@ -434,13 +434,39 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: "#ffc107" }}>{timeLeft}</span>
       </p>
-      <button
-        onClick={() => router.push("/saju/jeongtong/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: "#9b2335", fontSize: "22px" }}
-      >
-        홍연에게 사주보러 가기
-      </button>
+      <style>{`
+        @keyframes totalNeon {
+          0%   { background: #9b2335; box-shadow: 0 0 14px 4px rgba(155,35,53,0.8); }
+          33%  { background: #c0392b; box-shadow: 0 0 14px 4px rgba(192,57,43,0.8); }
+          66%  { background: #7b0d1e; box-shadow: 0 0 14px 4px rgba(123,13,30,0.8); }
+          100% { background: #9b2335; box-shadow: 0 0 14px 4px rgba(155,35,53,0.8); }
+        }
+        @keyframes totalBeat {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
+        }
+        @keyframes totalShimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
+      <div style={{ position: "relative" }}>
+        <button
+          onClick={() => router.push("/saju/jeongtong/form")}
+          className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 overflow-hidden relative"
+          style={{ fontSize: "22px", animation: "totalNeon 3s ease-in-out infinite, totalBeat 2.2s ease-in-out infinite" }}
+        >
+          <span style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(105deg, transparent 35%, rgba(255,215,0,0.25) 48%, rgba(255,255,200,0.35) 53%, rgba(255,215,0,0.25) 58%, transparent 72%)",
+            backgroundSize: "200% auto",
+            animation: "totalShimmer 2.5s linear infinite",
+            pointerEvents: "none",
+          }} />
+          <span style={{ position: "relative", zIndex: 1 }}>홍연에게 사주보러 가기</span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -80,10 +80,24 @@ function StickyCTA() {
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: PINK }}>{timeLeft}</span>
       </p>
+      <style>{`
+        @keyframes janyeoPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(91,191,234,0.6); }
+          50% { box-shadow: 0 0 0 10px rgba(91,191,234,0); }
+        }
+        @keyframes janyeoBeat {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
+        }
+      `}</style>
       <button
         onClick={() => router.push("/saju/saju_janyeo/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ backgroundColor: PINK, fontSize: "22px" }}
+        className="w-full py-2 rounded-2xl font-bold"
+        style={{
+          backgroundColor: PINK, fontSize: "22px", color: "#000",
+          animation: "janyeoPulse 2s ease-in-out infinite, janyeoBeat 2.5s ease-in-out infinite",
+        }}
       >
         자녀사주 보러가기
       </button>

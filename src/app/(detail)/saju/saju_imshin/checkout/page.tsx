@@ -18,7 +18,7 @@ const GRAY3   = "#888888";
 const GRAY4   = "#dddddd";
 
 const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
-const PRODUCT = { name: "임신사주", original: 59800, discount: 50, price: 29900 };
+const PRODUCT = { name: "임신 궁합", original: 59800, discount: 50, price: 29900 };
 
 // ─── 명식 그리드 ──────────────────────────────────────────────────────────────
 function SajuGrid({ date, time, calendar, name }: { date: string; time: string; calendar: string; name: string }) {
@@ -215,7 +215,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
         <div className="flex justify-center pt-3 pb-1"><div style={{ width: 40, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.2)" }} /></div>
         <div className="px-5 pt-2 pb-7">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[18px] font-black" style={{ color: DTXT }}>임신사주 결제 안내</h3>
+            <h3 className="text-[18px] font-black" style={{ color: DTXT }}>임신 궁합 결제 안내</h3>
             <button onClick={requestClose} style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
@@ -225,7 +225,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
           <div className="w-full text-left rounded-2xl px-4 py-3.5 mb-5" style={{ backgroundColor: DCARD, border: `1.5px solid ${GREEN}`, boxShadow: `0 0 0 3px ${GREEN}22` }}>
             <div className="flex items-start justify-between gap-2">
               <div>
-                <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>임신사주</span>
+                <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>임신 궁합</span>
                 <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 두 사람의 임신 이야기</p>
               </div>
               <div className="text-right flex-shrink-0">
@@ -303,7 +303,7 @@ function StickyPayCTA({ onPay, myName, partnerName }: { onPay: () => void; myNam
       <button onClick={onPay} className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
         style={{ background: `linear-gradient(135deg, ${GREEN}, ${GREEN_D})`, boxShadow: glow ? `0 4px 24px ${GREEN_D}88` : `0 2px 12px ${GREEN_D}44`, transition: "box-shadow 1s ease" }}>
         <span>🌿</span>
-        <span>{myName} & {partnerName}님 임신사주 확인하기</span>
+        <span>{myName} & {partnerName}님 임신 궁합 확인하기</span>
       </button>
     </div>
   );
@@ -350,7 +350,7 @@ function CheckoutContent() {
         <style>{`div::-webkit-scrollbar{display:none}`}</style>
 
         <ImageTextBlock
-          label="임신사주 · 정밀 리포트"
+          label="임신 궁합 · 정밀 리포트"
           headline={`${name}님의\n운명을\n살펴봤어요`}
           accent="살펴봤어요"
         />
@@ -369,7 +369,7 @@ function CheckoutContent() {
           {SECTIONS.map((s, i) => <AnalysisSection key={i} s={s} />)}
         </div>
 
-        <ImageTextBlock label="실제 이용 후기" headline={`이미 수천 명이\n임신사주로\n준비했어요`} accent="임신사주로" />
+        <ImageTextBlock label="실제 이용 후기" headline={`이미 수천 명이\n임신 궁합로\n준비했어요`} accent="임신 궁합로" />
 
         <ReviewSection />
         <div className="h-4" />

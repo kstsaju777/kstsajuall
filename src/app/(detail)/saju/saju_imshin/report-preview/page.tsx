@@ -20,7 +20,7 @@ const SERIF    = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 const TOTAL_CH = Object.keys(IMSHIN_CHAPTER_SECTIONS).length;
 
 const CH_TITLES: Record<number, string> = {
-  0: "임신사주 들어가며", 1: "나의 타고난 기질과 모성 에너지", 2: "임신 시기와 운의 흐름", 3: "아이와의 인연", 4: "임신 중 건강 관리", 5: "주의사항과 올바른 접근", 6: "홍연의 편지",
+  0: "임신 궁합 들어가며", 1: "나의 타고난 기질과 모성 에너지", 2: "임신 시기와 운의 흐름", 3: "아이와의 인연", 4: "임신 중 건강 관리", 5: "주의사항과 올바른 접근", 6: "홍연의 편지",
 };
 
 const CH_SUBS: Record<number, string> = {
@@ -55,7 +55,7 @@ function TopBar({ progress, title, onMenu }: { progress: number; title: string; 
         </button>
         <p className="flex-1 text-[13px] font-black truncate" style={{ color: INK }}>{title}</p>
         <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${PINKD}12`, color: PINKD }}>
-          임신사주
+          임신 궁합
         </span>
       </div>
     </div>
@@ -177,7 +177,7 @@ function ChapterIntro({ name, concern, onStart }: { name: string; concern: strin
         <img src="/media/cards/saju_imshin/imshin-0.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-top" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(253,248,244,0.2) 0%, rgba(253,248,244,1) 90%)" }} />
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 text-center">
-          <p className="text-[11px] tracking-widest mb-2" style={{ color: PINKD }}>✦ 임신사주 리포트 ✦</p>
+          <p className="text-[11px] tracking-widest mb-2" style={{ color: PINKD }}>✦ 임신 궁합 리포트 ✦</p>
           <h1 className="text-[26px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>
             {name}님의<br />사주 이야기를 시작할게요
           </h1>
@@ -280,7 +280,7 @@ function ChapterFooter({ ch, name, onNext }: { ch: number; name: string; onNext:
   if (isLast) {
     return (
       <div className="mt-8 text-center rounded-2xl py-8 px-6" style={{ backgroundColor: CALLOUT, border: `1px solid ${ROSE}40` }}>
-        <p className="text-[11px] tracking-widest mb-3" style={{ color: PINKD }}>✦ 임신사주 완료 ✦</p>
+        <p className="text-[11px] tracking-widest mb-3" style={{ color: PINKD }}>✦ 임신 궁합 완료 ✦</p>
         <p className="text-[20px] font-black mb-2" style={{ color: INK, fontFamily: SERIF }}>
           {name}님의<br />사주를 모두 살펴봤어요
         </p>
@@ -337,7 +337,7 @@ function InitLoading() {
         style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.4) 0%, rgba(10,12,16,0.9) 70%, #0a0c10 100%)" }} />
       <div className="relative z-10 flex flex-col items-center gap-4">
         <div className="rounded-full animate-spin" style={{ width: 44, height: 44, border: "3px solid rgba(255,255,255,0.15)", borderTopColor: "#5bbfea" }} />
-        <p className="text-[15px] font-bold" style={{ color: "rgba(255,255,255,0.9)" }}>임신사주 리포트 준비 중</p>
+        <p className="text-[15px] font-bold" style={{ color: "rgba(255,255,255,0.9)" }}>임신 궁합 리포트 준비 중</p>
         <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.45)" }}>잠시만 기다려 주세요</p>
       </div>
     </div>
