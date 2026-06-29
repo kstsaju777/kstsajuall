@@ -263,7 +263,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const _card = SLUG_CARD_MAP[product.slug];
                     const imageUrl = (_card?.smallImage ?? _card?.image) ?? product.image_url;
                     const isDummy = !imageUrl;
-                    const isVideo = false;
+                    const isVideo = _card?.type === "video";
                     return (
                       <Link
                         key={product.id}
@@ -327,7 +327,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           const comingSoon = !isAdmin && !active;
           const href = getHref(product.slug);
           const _c = SLUG_CARD_MAP[product.slug];
-          const isVideo = false;
+          const isVideo = _c?.type === "video";
           const imageUrl = _c?.image ?? product.image_url;
           const isDummy = !imageUrl;
 
