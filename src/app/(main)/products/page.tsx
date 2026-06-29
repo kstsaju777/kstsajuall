@@ -169,11 +169,20 @@ function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard
           </p>
         )}
         {/* 메인 타이틀 */}
-        <p className="text-white font-bold leading-tight" style={{ fontSize: small ? 16 : 30, marginBottom: 2 }}>
-          {card.name}
-        </p>
+        {(() => {
+          const idx = card.name.indexOf(" ");
+          if (idx === -1) return <p className="text-white font-bold leading-tight" style={{ fontSize: small ? 16 : 30, marginBottom: 2 }}>{card.name}</p>;
+          const prefix = card.name.slice(0, idx);
+          const main = card.name.slice(idx + 1);
+          return (
+            <p className="leading-tight" style={{ fontSize: small ? 16 : 30, marginBottom: 2 }}>
+              <span style={{ color: "#fff", fontWeight: 400 }}>{prefix} </span>
+              <span style={{ color: "#fff", fontWeight: 800 }}>{main}</span>
+            </p>
+          );
+        })()}
         {/* 부연 설명 */}
-        <p className="leading-snug" style={{ fontSize: small ? 9 : 15, color: "rgba(255,255,255,0.45)" }}>
+        <p className="leading-snug" style={{ fontSize: small ? 9 : 15, color: "rgba(255,255,255,0.5)" }}>
           {card.desc}
         </p>
       </div>
