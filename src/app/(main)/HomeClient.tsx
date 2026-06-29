@@ -242,9 +242,9 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 <HotCarousel cardW={cardW} gap={10}>
                   {catProducts.map((product, i) => {
                     const _hc = SLUG_CARD_MAP[product.slug];
-                    const imageUrl = _hc?.image ?? product.image_url;
+                    const imageUrl = _hc?.videoUrl ?? _hc?.image ?? product.image_url;
                     const isDummy = !imageUrl;
-                    const isVideo = (_hc?.type === "video") || (product.is_video ?? false);
+                    const isVideo = !!_hc?.videoUrl;
                     return (
                       <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true}
                         style={{ display: "block", flexShrink: 0, width: cardW, height: cardH, borderRadius: 16, overflow: "hidden", position: "relative", cursor: "pointer", background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined }}>
@@ -263,7 +263,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const _card = SLUG_CARD_MAP[product.slug];
                     const imageUrl = (_card?.smallImage ?? _card?.image) ?? product.image_url;
                     const isDummy = !imageUrl;
-                    const isVideo = (_card?.smallType === "video" || _card?.type === "video") || (product.is_video ?? false);
+                    const isVideo = false;
                     return (
                       <Link
                         key={product.id}
@@ -327,7 +327,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           const comingSoon = !isAdmin && !active;
           const href = getHref(product.slug);
           const _c = SLUG_CARD_MAP[product.slug];
-          const isVideo = (_c?.type === "video") || (product.is_video ?? false);
+          const isVideo = false;
           const imageUrl = _c?.image ?? product.image_url;
           const isDummy = !imageUrl;
 

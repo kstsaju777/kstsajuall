@@ -64,7 +64,7 @@ const TAG_ANIMATIONS = `
 
 // ─── 카드 컴포넌트 ─────────────────────────────────────────────────────────────
 function Card({ card, aspectRatio = "4/3", small = false }: { card: CategoryCard; aspectRatio?: string; small?: boolean }) {
-  const isVideo = card.type === "video";
+  const isVideo = false;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [imgErr, setImgErr] = useState(false);
 
