@@ -712,12 +712,11 @@ function CheckoutContent() {
 
   const [showSheet, setShowSheet] = useState(false);
 
-  const handleConfirm = async (productId: string) => {
+  const handleConfirm = (productId: string) => {
     setShowSheet(false);
     const product = PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0];
-
-    // 이메일 발송 — 고객이 입력한 주소로
     const email = searchParams.get("email") ?? "";
+    const params = new URLSearchParams({ name, date, time, calendar, gender, email });
     router.push(`/saju/jeongtong/report-preview?${params.toString()}`);
     if (email) {
       try {
@@ -754,7 +753,6 @@ function CheckoutContent() {
       // SMS 실패해도 리포트는 진행
     }
 
-    const params = new URLSearchParams({ name, date, time, calendar, gender, email });
   };
 
   return (

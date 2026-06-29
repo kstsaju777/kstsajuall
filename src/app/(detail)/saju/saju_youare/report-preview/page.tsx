@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { calcSaju } from "@/lib/saju/local-manseryeok";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
-import { YOUARE_CHAPTER_SECTIONS, isYOUAREChapterReady } from "@/lib/saju/youare-report-content";
+import { YOUARE_CHAPTER_SECTIONS, isYouareChapterReady as isYOUAREChapterReady } from "@/lib/saju/youare-report-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM    = "#fdf8f4";
