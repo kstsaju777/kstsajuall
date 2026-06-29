@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { calcSaju } from "@/lib/saju/local-manseryeok";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
-import { GYEOLHON_CHAPTER_SECTIONS, isGYEOLHONChapterReady } from "@/lib/saju/gyeolhon-report-content";
+import { GYEOLHON_CHAPTER_SECTIONS, isGyeolhonChapterReady } from "@/lib/saju/gyeolhon-report-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM    = "#fdf8f4";
@@ -80,7 +80,7 @@ function TocPanel({ open, onClose, currentCh, content, onSelect }: {
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {items.map((n) => {
-            const ready = content ? isGYEOLHONChapterReady(content, n) : false;
+            const ready = content ? isGyeolhonChapterReady(content, n) : false;
             const active = currentCh === n;
             return (
               <button key={n} onClick={() => { onSelect(n); onClose(); }}
@@ -213,7 +213,7 @@ function ChapterView({ ch, content, generating, name, onRetry, onNext }: {
   name: string; onRetry: () => void; onNext: () => void;
 }) {
   const sectionKeys = GYEOLHON_CHAPTER_SECTIONS[ch] ?? [];
-  const ready = content ? isGYEOLHONChapterReady(content, ch) : false;
+  const ready = content ? isGyeolhonChapterReady(content, ch) : false;
   const title = CH_TITLES[ch] ?? "";
   const sub = CH_SUBS[ch] ?? "";
   const imgSrc = CH_IMAGES[ch] ?? CH_IMAGES[1];
@@ -418,7 +418,7 @@ function ReportPreviewInner() {
   useEffect(() => {
     if (loading || !resultId || generatedRef.current) return;
     const allNums = Object.keys(GYEOLHON_CHAPTER_SECTIONS).map(Number);
-    const missing = allNums.filter((n) => !isGYEOLHONChapterReady(content, n));
+    const missing = allNums.filter((n) => !isGyeolhonChapterReady(content, n));
     if (missing.length === 0) { setRevealed(true); return; }
     generatedRef.current = true;
     setGenerating(true);

@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { calcSaju } from "@/lib/saju/local-manseryeok";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
-import { HEALTH_CHAPTER_SECTIONS, isHEALTHChapterReady } from "@/lib/saju/health-saju-report-content";
+import { HEALTH_CHAPTER_SECTIONS, isHealthChapterReady } from "@/lib/saju/health-saju-report-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM    = "#fdf8f4";
@@ -80,7 +80,7 @@ function TocPanel({ open, onClose, currentCh, content, onSelect }: {
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {items.map((n) => {
-            const ready = content ? isHEALTHChapterReady(content, n) : false;
+            const ready = content ? isHealthChapterReady(content, n) : false;
             const active = currentCh === n;
             return (
               <button key={n} onClick={() => { onSelect(n); onClose(); }}
@@ -213,7 +213,7 @@ function ChapterView({ ch, content, generating, name, onRetry, onNext }: {
   name: string; onRetry: () => void; onNext: () => void;
 }) {
   const sectionKeys = HEALTH_CHAPTER_SECTIONS[ch] ?? [];
-  const ready = content ? isHEALTHChapterReady(content, ch) : false;
+  const ready = content ? isHealthChapterReady(content, ch) : false;
   const title = CH_TITLES[ch] ?? "";
   const sub = CH_SUBS[ch] ?? "";
   const imgSrc = CH_IMAGES[ch] ?? CH_IMAGES[1];
@@ -418,7 +418,7 @@ function ReportPreviewInner() {
   useEffect(() => {
     if (loading || !resultId || generatedRef.current) return;
     const allNums = Object.keys(HEALTH_CHAPTER_SECTIONS).map(Number);
-    const missing = allNums.filter((n) => !isHEALTHChapterReady(content, n));
+    const missing = allNums.filter((n) => !isHealthChapterReady(content, n));
     if (missing.length === 0) { setRevealed(true); return; }
     generatedRef.current = true;
     setGenerating(true);
