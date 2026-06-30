@@ -138,7 +138,7 @@ export default function YeonaePage() {
   const router = useRouter();
 
   return (
-    <div className="w-full flex flex-col relative" style={{ backgroundColor: BG }}>
+    <div className="w-full relative" style={{ height: "100dvh", backgroundColor: BG, overflow: "hidden" }}>
       <button
         onClick={() => router.back()}
         className="fixed z-50 w-9 h-9 rounded-full flex items-center justify-center"
@@ -149,21 +149,19 @@ export default function YeonaePage() {
         </svg>
       </button>
 
-      {/* 영상 + 타이포 오버레이 */}
-      <div style={{ position: "relative", width: "100%", fontSize: 0, lineHeight: 0 }}>
-        <video
-          src="/media/cards/kunghap_yeonae/yeonae-0.mp4"
-          autoPlay muted loop playsInline
-          style={{ display: "block", width: "100%", height: "auto" }}
-        />
-        <img
-          src="/media/cards/kunghap_yeonae/typo-0.png"
-          alt=""
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
-        />
-      </div>
+      {/* 영상 풀스크린 */}
+      <video
+        src="/media/cards/kunghap_yeonae/yeonae-0.mp4"
+        autoPlay muted loop playsInline
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+      />
+      {/* 타이포 오버레이 */}
+      <img
+        src="/media/cards/kunghap_yeonae/typo-0.png"
+        alt=""
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+      />
 
-      <div style={{ height: "110px" }} />
       <StickyCTA />
     </div>
   );
