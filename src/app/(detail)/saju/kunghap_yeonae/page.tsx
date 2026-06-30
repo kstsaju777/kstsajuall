@@ -146,7 +146,7 @@ export default function YeonaePage() {
       <img
         src="/media/cards/kunghap_yeonae/typo-1.png"
         alt=""
-        style={{ position: "absolute", bottom: "140px", left: 0, width: "100%", objectFit: "contain", pointerEvents: "none", zIndex: 41 }}
+        style={{ position: "absolute", bottom: "180px", left: 0, width: "100%", objectFit: "contain", pointerEvents: "none", zIndex: 41 }}
       />
 
       {/* 상단 토스트 */}
