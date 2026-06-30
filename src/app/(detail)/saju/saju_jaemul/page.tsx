@@ -32,10 +32,11 @@ function StickyCTA() {
   }, []);
 
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+    <div className="fixed bottom-0 z-40 px-5 pb-6" style={{
+      paddingTop: "260px",
       left: "max(0px, calc(50vw - 240px))",
       width: "min(100%, 480px)",
-      background: `linear-gradient(to top, ${BG} 55%, transparent)`,
+      background: "linear-gradient(to top, rgba(10,10,10,0.95) 35%, rgba(10,10,10,0.7) 60%, rgba(10,10,10,0.3) 80%, transparent)",
     }}>
       <style>{`
         @keyframes goldGlow {
@@ -71,7 +72,7 @@ function StickyCTA() {
             letterSpacing: "0.02em",
           }}
         >
-          재물운사주 보러가기
+          재물사주 보러가기
         </button>
       </div>
     </div>
@@ -93,7 +94,7 @@ export default function JaemulPage() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
       <video src="/media/cards/saju_jaemul/jaemul-0.mp4" autoPlay muted loop playsInline style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
-      <img src="/media/cards/saju_jaemul/typo-1.png" alt="" style={{position:"absolute",bottom:"130px",left:0,width:"100%",objectFit:"contain",pointerEvents:"none",zIndex:41}}/>
+      <img src="/media/cards/saju_jaemul/typo-jaemul.png" alt="" style={{position:"absolute",bottom:"160px",left:"2.5%",width:"95%",objectFit:"contain",pointerEvents:"none",zIndex:41}}/>
       <style>{`@keyframes toastIn { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <div style={{position:"fixed",top:64,left:"max(0px,calc(50vw - 240px))",width:"min(100%,480px)",zIndex:50,display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"0 20px",pointerEvents:"none"}}>
         {toasts.map(t=>(

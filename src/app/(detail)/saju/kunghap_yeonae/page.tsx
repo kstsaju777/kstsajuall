@@ -50,8 +50,8 @@ function StickyCTA() {
     <div className="fixed bottom-0 z-40 px-5 pb-6" style={{
       left: "max(0px, calc(50vw - 240px))",
       width: "min(100%, 480px)",
-      paddingTop: "180px",
-      background: "linear-gradient(to top, #0a0a0a 65%, transparent)",
+      paddingTop: "260px",
+      background: "linear-gradient(to top, rgba(10,10,10,0.95) 35%, rgba(10,10,10,0.7) 60%, rgba(10,10,10,0.3) 80%, transparent)",
     }}>
       <p className="text-center text-[13px] font-bold mb-1">
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
@@ -146,7 +146,7 @@ export default function YeonaePage() {
       <img
         src="/media/cards/kunghap_yeonae/typo-1.png"
         alt=""
-        style={{ position: "absolute", bottom: "130px", left: 0, width: "100%", objectFit: "contain", pointerEvents: "none", zIndex: 41 }}
+        style={{ position: "absolute", bottom: "145px", left: "7.5%", width: "85%", objectFit: "contain", pointerEvents: "none", zIndex: 41 }}
       />
 
       {/* 상단 토스트 */}

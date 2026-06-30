@@ -46,8 +46,8 @@ function StickyCTA() {
     <div className="fixed bottom-0 z-40 px-5 pb-6" style={{
       left: "max(0px, calc(50vw - 240px))",
       width: "min(100%, 480px)",
-      paddingTop: "180px",
-      background: "linear-gradient(to top, #0a0a0a 65%, transparent)",
+      paddingTop: "260px",
+      background: "linear-gradient(to top, rgba(10,10,10,0.95) 35%, rgba(10,10,10,0.7) 60%, rgba(10,10,10,0.3) 80%, transparent)",
     }}>
       <p className="text-center text-[13px] font-bold mb-1">
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
@@ -66,7 +66,7 @@ function StickyCTA() {
         className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform"
         style={{ color: "#ffffff", fontSize: "22px", animation: "ehonNeon 3s ease-in-out infinite" }}
       >
-        이혼사주 보러가기
+        이혼궁합 보러가기
       </button>
     </div>
   );
