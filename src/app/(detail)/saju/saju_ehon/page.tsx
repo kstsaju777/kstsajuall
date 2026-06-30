@@ -76,6 +76,11 @@ export default function EhonPage() {
   const router = useRouter();
   const [toasts, setToasts] = useState<{ id: number; name: string; time: string }[]>([]);
   useEffect(() => {
+    const main = document.querySelector("main");
+    if (main) { main.style.overflow = "hidden"; }
+    return () => { if (main) main.style.overflow = ""; };
+  }, []);
+  useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     const addToast = () => {
       const id = Date.now() + Math.random();
@@ -106,11 +111,11 @@ export default function EhonPage() {
       <video
         src="/media/cards/saju_ehon/ehon-0.mp4"
         autoPlay muted loop playsInline
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center -10%" }}
       />
       {/* 타이포 오버레이 (임시: jpg) */}
       <img
-        src="/media/cards/saju_ehon/ehon-0.jpg"
+        src="/media/cards/saju_ehon/typo-ehon.png"
         alt=""
         style={{ position: "absolute", bottom: "140px", left: 0, width: "100%", objectFit: "contain", pointerEvents: "none", zIndex: 41 }}
       />

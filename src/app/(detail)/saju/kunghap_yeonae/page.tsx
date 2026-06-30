@@ -105,6 +105,11 @@ export default function YeonaePage() {
   const router = useRouter();
   const [toasts, setToasts] = useState<{ id: number; name: string; time: string }[]>([]);
   useEffect(() => {
+    const main = document.querySelector("main");
+    if (main) { main.style.overflow = "hidden"; }
+    return () => { if (main) main.style.overflow = ""; };
+  }, []);
+  useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     const addToast = () => {
       const id = Date.now() + Math.random();
