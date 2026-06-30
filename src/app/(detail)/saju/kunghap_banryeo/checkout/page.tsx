@@ -422,31 +422,41 @@ function CheckoutContent() {
   const partnerSaju = useMemo(() => calcSaju(partnerDate, partnerTime, partnerCalendar), [partnerDate, partnerTime, partnerCalendar]);
 
   const [showSheet, setShowSheet] = useState(false);
+  const [creating, setCreating] = useState(false);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setShowSheet(false);
     const product = PRODUCTS[0];
-    const reportParams = new URLSearchParams({ name, date, time, calendar, gender, email, concern, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" });
-    const reportUrl = `https://www.hongyeondang.com/saju/kunghap_banryeo/report-preview?${reportParams.toString()}`;
-    router.push(`/saju/kunghap_banryeo/report-preview?${reportParams.toString()}`);
-    if (email) {
-      try {
-        fetch("/api/send-order-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ customerEmail: email, customerName: name, productName: product.name, price: product.price, reportUrl }),
-        });
-      } catch {}
-    }
+    setCreating(true);
     try {
-      fetch("/api/send-order-sms", {
+      const res = await fetch("/api/kunghap_banryeo-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customerName: name, productName: product.name, price: product.price }),
+        body: JSON.stringify({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender }),
       });
-    } catch {}
-
+      const d = res.ok ? await res.json() : null;
+      const reportUrl = d?.resultId
+        ? `https://www.hongyeondang.com/saju/kunghap_banryeo/report?id=${d.resultId}`
+        : `https://www.hongyeondang.com/saju/kunghap_banryeo/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`;
+      if (email) fetch("/api/send-order-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerEmail: email, customerName: name, productName: product.name, price: product.price, reportUrl }) });
+      fetch("/api/send-order-sms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerName: name, productName: product.name, price: product.price }) });
+      router.push(d?.resultId ? `/saju/kunghap_banryeo/report?id=${d.resultId}` : `/saju/kunghap_banryeo/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);
+    } catch {
+      router.push(`/saju/kunghap_banryeo/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);
+    } finally {
+      setCreating(false);
+    }
   };
+
+  if (creating) return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 z-50" style={{ background: "#fdf8f4" }}>
+      <svg className="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8b2e14" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+      <div className="text-center">
+        <p className="text-[16px] font-bold" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 생성하고 있소…</p>
+        <p className="text-[13px] mt-1" style={{ color: "#7a5a40" }}>두 사람의 사주 원국 이미지까지 만들고 있으니<br />잠시만 기다려 주시오</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>

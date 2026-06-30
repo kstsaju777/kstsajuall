@@ -711,49 +711,48 @@ function CheckoutContent() {
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
   const [showSheet, setShowSheet] = useState(false);
+  const [creating, setCreating] = useState(false);
 
-  const handleConfirm = (productId: string) => {
+  const handleConfirm = async (productId: string) => {
     setShowSheet(false);
     const product = PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0];
     const email = searchParams.get("email") ?? "";
-    const params = new URLSearchParams({ name, date, time, calendar, gender, email });
-    router.push(`/saju/saju_jeongtong/report-preview?${params.toString()}`);
-    if (email) {
-      try {
-        const reportParams = new URLSearchParams({ name, date, time, calendar, gender, email });
-        const reportUrl = `https://www.hongyeondang.com/saju/saju_jeongtong/report-preview?${reportParams.toString()}`;
-        fetch("/api/send-order-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            customerEmail: email,
-            customerName: name,
-            productName: product.name,
-            price: product.price,
-            reportUrl,
-          }),
-        });
-      } catch (e) {
-        // 이메일 실패해도 리포트는 진행
-      }
-    }
-
-    // SMS 주문 알림 발송
+    setCreating(true);
     try {
-      fetch("/api/send-order-sms", {
+      const res = await fetch("/api/jeongtong-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: name,
-          productName: product.name,
-          price: product.price,
-        }),
+        body: JSON.stringify({ name, date, time, calendar, gender, email }),
       });
-    } catch (e) {
-      // SMS 실패해도 리포트는 진행
+      const d = res.ok ? await res.json() : null;
+      const reportUrl = d?.resultId
+        ? `https://www.hongyeondang.com/saju/saju_jeongtong/report-preview?id=${d.resultId}`
+        : `https://www.hongyeondang.com/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`;
+      if (email) {
+        fetch("/api/send-order-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerEmail: email, customerName: name, productName: product.name, price: product.price, reportUrl }) });
+      }
+      fetch("/api/send-order-sms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerName: name, productName: product.name, price: product.price }) });
+      if (d?.resultId) {
+        router.push(`/saju/saju_jeongtong/report-preview?id=${d.resultId}`);
+      } else {
+        router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
+      }
+    } catch {
+      router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
+    } finally {
+      setCreating(false);
     }
-
   };
+
+  if (creating) return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 z-50" style={{ background: "#fdf8f4" }}>
+      <svg className="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8b2e14" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+      <div className="text-center">
+        <p className="text-[16px] font-bold" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 생성하고 있소…</p>
+        <p className="text-[13px] mt-1" style={{ color: "#7a5a40" }}>사주 원국 이미지까지 만들고 있으니<br />잠시만 기다려 주시오</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
