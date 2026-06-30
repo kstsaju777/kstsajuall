@@ -149,14 +149,18 @@ export default function YeonaePage() {
         </svg>
       </button>
 
-      {/* 이미지 */}
-      <div style={{ display: "flex", flexDirection: "column", fontSize: 0, lineHeight: 0 }}>
-        {CHAPTERS.map((ch, i) => (
-          <div key={i} className="w-full">
-            <img src={ch.media.src} alt="" loading={i === 0 ? "eager" : "lazy"}
-              style={{ display: "block", width: "100%", height: "auto", margin: 0, padding: 0, verticalAlign: "bottom" }} />
-          </div>
-        ))}
+      {/* 영상 + 타이포 오버레이 */}
+      <div style={{ position: "relative", width: "100%", fontSize: 0, lineHeight: 0 }}>
+        <video
+          src="/media/cards/kunghap_yeonae/yeonae-0.mp4"
+          autoPlay muted loop playsInline
+          style={{ display: "block", width: "100%", height: "auto" }}
+        />
+        <img
+          src="/media/cards/kunghap_yeonae/typo-0.png"
+          alt=""
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+        />
       </div>
 
       {/* 리포트 미리보기 */}
