@@ -51,7 +51,7 @@ export default function BusinessPage() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
       <video src="/media/cards/kunghap_business/business-0.mp4" autoPlay muted loop playsInline style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
-      <img src="/media/cards/kunghap_business/typo-1.png" alt="" style={{position:"absolute",bottom:"130px",left:0,width:"100%",objectFit:"contain",pointerEvents:"none",zIndex:41}}/>
+      <img src="/media/cards/kunghap_business/typo-business.png" alt="" style={{position:"absolute",bottom:"130px",left:0,width:"100%",objectFit:"contain",pointerEvents:"none",zIndex:41}}/>
       <style>{`@keyframes toastIn { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <div style={{position:"fixed",top:64,left:"max(0px,calc(50vw - 240px))",width:"min(100%,480px)",zIndex:50,display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"0 20px",pointerEvents:"none"}}>
         {toasts.map(t=>(
