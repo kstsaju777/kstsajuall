@@ -310,8 +310,8 @@ function CheckoutContent() {
   const handleConfirm = () => {
     setShowSheet(false);
     const reportParams = new URLSearchParams({ name, date, time, calendar, gender, email, concern, ch: "0" });
-    const reportUrl = `https://www.hongyeondang.com/saju/saju_yeonae/report-preview?${reportParams.toString()}`;
-    router.push(`/saju/saju_yeonae/report-preview?${reportParams.toString()}`);
+    const reportUrl = `https://www.hongyeondang.com/saju/saju_yeonae/report?${reportParams.toString()}`;
+    router.push(`/saju/saju_yeonae/report?${reportParams.toString()}`);
     if (email) {
       try {
         fetch("/api/send-order-email", {

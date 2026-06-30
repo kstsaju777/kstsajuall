@@ -4,7 +4,7 @@
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
 // 토막 스크린샷을 받을 때마다 아래로 섹션을 누적해서 추가/수정한다.
 //
-// 미리보기: http://localhost:3000/saju/saju_jaemul/report
+// 미리보기: http://localhost:3000/saju/saju_health/report
 //
 // ⚠️ 이미지는 전부 임시(placeholder)다. 레퍼런스의 한복 일러스트 대신
 //    기존 hero 이미지를 끼워둠 — 추후 전용 일러스트로 교체.
@@ -3827,13 +3827,13 @@ function ReportPreviewInner() {
     if (startedRef.current) return;
     startedRef.current = true;
     if (id) {
-      fetch(`/api/jaemul-report?id=${encodeURIComponent(id)}`)
+      fetch(`/api/saju_health-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
-      fetch("/api/jaemul-report", {
+      fetch("/api/saju_health-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: nameParam, date, time, calendar, gender, email }),
@@ -3841,7 +3841,7 @@ function ReportPreviewInner() {
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => {
           setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null });
-          if (d.resultId) router.replace(`/saju/saju_jaemul/report?id=${d.resultId}&gender=${encodeURIComponent(d.gender ?? gender)}`);
+          if (d.resultId) router.replace(`/saju/saju_health/report?id=${d.resultId}&gender=${encodeURIComponent(d.gender ?? gender)}`);
         })
         .catch(() => {})
         .finally(() => setLoading(false));
@@ -3859,7 +3859,7 @@ function ReportPreviewInner() {
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
   const persist = (mergedContent: Record<string, unknown>) => {
-    fetch("/api/jaemul-report", {
+    fetch("/api/saju_health-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, content: mergedContent }),
@@ -3876,7 +3876,7 @@ function ReportPreviewInner() {
     setGenerating(true);
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), 90_000); // 90초 타임아웃
-    fetch("/api/jaemul-report", {
+    fetch("/api/saju_health-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, chapter: toApiChapter(n), force }),
@@ -3908,7 +3908,7 @@ function ReportPreviewInner() {
     setGenerating(true);
     Promise.all(
       missing.map((n) =>
-        fetch("/api/jaemul-report", {
+        fetch("/api/saju_health-report", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id, chapter: n }),
@@ -3973,7 +3973,7 @@ function ReportPreviewInner() {
   const ilganHanja = (report?.view?.ilgan ?? "乙")[0];
   const ilganLabel = (report?.view?.ilgan ?? "乙 (을목)").match(/\(([^)]+)\)/)?.[1] ?? "을목";
 
-  const next = (n: string) => router.push(`/saju/saju_jaemul/report?${id ? `id=${id}&` : ""}ch=${n}`);
+  const next = (n: string) => router.push(`/saju/saju_health/report?${id ? `id=${id}&` : ""}ch=${n}`);
 
   return (
     <div ref={rootRef} style={{ backgroundColor: CREAM, minHeight: "100%" }}>
@@ -4470,7 +4470,7 @@ function ReportPreviewInner() {
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                     <button
                       onClick={() => {
-                        fetch("/api/jaemul-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
+                        fetch("/api/saju_health-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
                           .then((r) => r.ok ? r.json() : Promise.reject())
                           .then((d) => { if (d.sajuImageUrl) setReport((p) => p ? { ...p, sajuImageUrl: d.sajuImageUrl } : p); })
                           .catch(() => {});

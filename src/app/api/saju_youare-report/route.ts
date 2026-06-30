@@ -23,7 +23,7 @@ import { serverEnv } from "@/lib/env";
 
 export const maxDuration = 60;
 
-const PRODUCT_SLUG = "saju_jaemul";
+const PRODUCT_SLUG = "saju_youare";
 
 const createSchema = z.object({
   name: z.string().optional().default(""),
