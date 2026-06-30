@@ -46,46 +46,13 @@ function StickyCTA() {
     return () => clearInterval(id);
   }, []);
 
-  const [toasts, setToasts] = useState<{ id: number; name: string; time: string }[]>([]);
-  useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const addToast = () => {
-      const id = Date.now() + Math.random();
-      setToasts((prev) => [...prev, { id, name: randomName(), time: randomTime() }]);
-      timers.push(setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500));
-    };
-    const schedule = () => {
-      const delay = 2500 + Math.random() * 5500;
-      timers.push(setTimeout(() => {
-        addToast();
-        if (Math.random() < 0.3) timers.push(setTimeout(addToast, 500));
-        schedule();
-      }, delay));
-    };
-    schedule();
-    return () => timers.forEach(clearTimeout);
-  }, []);
-
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+    <div className="fixed bottom-0 z-40 px-5 pb-6" style={{
       left: "max(0px, calc(50vw - 240px))",
       width: "min(100%, 480px)",
-      background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
+      paddingTop: "180px",
+      background: "linear-gradient(to top, #0a0a0a 65%, transparent)",
     }}>
-      <style>{`@keyframes spFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-      <div className="flex flex-col items-end gap-1 mb-2" style={{ minHeight: "30px" }}>
-        {toasts.map((t) => (
-          <div key={t.id} style={{
-            animation: "spFadeIn 0.4s ease",
-            display: "flex", alignItems: "center", gap: "6px",
-            backgroundColor: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: "9999px", padding: "5px 12px", fontSize: "12px", color: "#fff", whiteSpace: "nowrap",
-          }}>
-            <span style={{ backgroundColor: TIME_COLORS[t.time] ?? "#9b2335", color: "#fff", fontSize: "10px", fontWeight: 700, borderRadius: "9999px", padding: "2px 7px" }}>{t.time}</span>
-            <span><b>{t.name}</b>님이 신청하였습니다.</span>
-          </div>
-        ))}
-      </div>
       <p className="text-center text-[13px] font-bold mb-1">
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: ACCENT }}>{timeLeft}</span>
@@ -136,6 +103,21 @@ function StickyCTA() {
 
 export default function YeonaePage() {
   const router = useRouter();
+  const [toasts, setToasts] = useState<{ id: number; name: string; time: string }[]>([]);
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const addToast = () => {
+      const id = Date.now() + Math.random();
+      setToasts((prev) => [...prev, { id, name: randomName(), time: randomTime() }]);
+      timers.push(setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000));
+    };
+    const schedule = () => {
+      const delay = 2500 + Math.random() * 5500;
+      timers.push(setTimeout(() => { addToast(); if (Math.random() < 0.3) timers.push(setTimeout(addToast, 500)); schedule(); }, delay));
+    };
+    schedule();
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   return (
     <div className="w-full relative" style={{ height: "100dvh", backgroundColor: BG, overflow: "hidden" }}>
@@ -157,10 +139,30 @@ export default function YeonaePage() {
       />
       {/* 타이포 오버레이 */}
       <img
-        src="/media/cards/kunghap_yeonae/typo-0.png"
+        src="/media/cards/kunghap_yeonae/typo-1.png"
         alt=""
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+        style={{ position: "absolute", bottom: "140px", left: 0, width: "100%", objectFit: "contain", pointerEvents: "none", zIndex: 41 }}
       />
+
+      {/* 상단 토스트 */}
+      <style>{`
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-16px); } }
+      `}</style>
+      <div style={{ position: "fixed", top: 64, left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", zIndex: 50, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "0 20px", pointerEvents: "none" }}>
+        {toasts.map((t) => (
+          <div key={t.id} style={{
+            animation: "toastIn 0.35s ease",
+            display: "flex", alignItems: "center", gap: "6px",
+            backgroundColor: "rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: "9999px", padding: "6px 14px", fontSize: "12px", color: "#fff", whiteSpace: "nowrap",
+            backdropFilter: "blur(6px)",
+          }}>
+            <span style={{ backgroundColor: TIME_COLORS[t.time] ?? "#9b2335", color: "#fff", fontSize: "10px", fontWeight: 700, borderRadius: "9999px", padding: "2px 7px" }}>{t.time}</span>
+            <span><b>{t.name}</b>님이 신청하였습니다.</span>
+          </div>
+        ))}
+      </div>
 
       <StickyCTA />
     </div>
