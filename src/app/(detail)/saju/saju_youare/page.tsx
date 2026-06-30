@@ -83,11 +83,30 @@ export default function YouarePage() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
       <video src="/media/cards/saju_youare/youare-0.mp4" autoPlay muted loop playsInline style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
+      <style>{`
+        @keyframes cardAppear { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes floatA{0%,100%{transform:translateY(0px) rotate(-2deg)}50%{transform:translateY(-8px) rotate(-2deg)}}
+        @keyframes floatB{0%,100%{transform:translateY(0px) rotate(1.5deg)}50%{transform:translateY(-10px) rotate(1.5deg)}}
+        @keyframes floatC{0%,100%{transform:translateY(0px) rotate(-1deg)}50%{transform:translateY(-7px) rotate(-1deg)}}
+      `}</style>
+      {[
+        {top:"72px",left:"5%",appearDelay:"1s",floatDelay:"1.6s",floatAnim:"floatA",name:"한*서",stars:5,text:"아기 사주 보고 이름 짓는 데 정말 도움 됐어요 🌟"},
+        {top:"24%",left:"52%",appearDelay:"2s",floatDelay:"2.6s",floatAnim:"floatB",name:"임*은",stars:5,text:"아이 타고난 기질이 그대로 나와서 신기했어요!"},
+        {top:"45%",left:"4%",appearDelay:"3s",floatDelay:"3.6s",floatAnim:"floatC",name:"권*준",stars:5,text:"우리 아이 잘 키울 수 있다는 자신감 생겼어요 ㅎㅎ"},
+      ].map((r,i)=>(
+        <div key={i} style={{position:"absolute",top:r.top,left:r.left,animation:`cardAppear 0.6s ease ${r.appearDelay} forwards, ${r.floatAnim} 3.8s ease-in-out ${r.floatDelay} infinite`,animationFillMode:"both",opacity:0,backgroundColor:"rgba(255,255,255,0.3)",backdropFilter:"blur(6px)",border:"1px solid rgba(255,255,255,0.3)",borderRadius:"14px",padding:"8px 12px",maxWidth:"185px",zIndex:42,pointerEvents:"none"}}>
+          <div style={{display:"flex",alignItems:"center",gap:"5px",marginBottom:"4px"}}>
+            <span style={{fontSize:"13px",fontWeight:700,color:"#111"}}>{r.name}</span>
+            <span style={{fontSize:"13px",color:"#ffcc00"}}>{"★".repeat(r.stars)}</span>
+          </div>
+          <p style={{fontSize:"13px",color:"#222",margin:0,lineHeight:1.5,wordBreak:"keep-all"}}>{r.text}</p>
+        </div>
+      ))}
       <img src="/media/cards/saju_youare/typo-youare.png" alt="" style={{position:"absolute",bottom:"145px",left:"-2%",width:"100%",objectFit:"contain",pointerEvents:"none",zIndex:41}}/>
-      <style>{`@keyframes toastIn { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }`}</style>
-      <div style={{position:"fixed",top:64,left:"max(0px,calc(50vw - 240px))",width:"min(100%,480px)",zIndex:50,display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"0 20px",pointerEvents:"none"}}>
+      <style>{`@keyframes toastInRight { from { opacity:0; transform:translateX(60px); } to { opacity:1; transform:translateX(0); } }`}</style>
+      <div style={{position:"fixed",bottom:"260px",right:"max(8px,calc(50vw - 232px))",zIndex:50,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6,pointerEvents:"none"}}>
         {toasts.map(t=>(
-          <div key={t.id} style={{animation:"toastIn 0.35s ease",display:"flex",alignItems:"center",gap:"6px",backgroundColor:"rgba(0,0,0,0.7)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:"9999px",padding:"6px 14px",fontSize:"12px",color:"#fff",whiteSpace:"nowrap",backdropFilter:"blur(6px)"}}>
+          <div key={t.id} style={{animation:"toastInRight 0.35s ease",display:"flex",alignItems:"center",gap:"6px",backgroundColor:"rgba(0,0,0,0.7)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:"9999px",padding:"6px 14px",fontSize:"12px",color:"#fff",whiteSpace:"nowrap",backdropFilter:"blur(6px)"}}>
             <span style={{backgroundColor:TIME_COLORS[t.time]??"#555",color:"#fff",fontSize:"10px",fontWeight:700,borderRadius:"9999px",padding:"2px 7px"}}>{t.time}</span>
             <span><b>{t.name}</b>님이 신청하였습니다.</span>
           </div>

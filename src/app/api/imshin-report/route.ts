@@ -201,7 +201,7 @@ async function createReport(body: unknown) {
   const service = createServiceClient();
 
   const orderCode = `ch-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const { data: product } = await service.from("products").select("id").eq("slug", "saju_imshin").maybeSingle();
+  const { data: product } = await service.from("products").select("id").eq("slug", "kunghap_imshin").maybeSingle();
   const { data: fallback } = product ? { data: null } : await service.from("products").select("id").limit(1).maybeSingle();
   const productId = product?.id ?? fallback?.id ?? null;
 

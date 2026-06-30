@@ -2,33 +2,32 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const BG = "#0a0a0a";
-const ACCENT = "#00b4d8";
+const BG = "#080c0a";
+const ACCENT = "#738e6f";
 
 const SURNAMES = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권"];
 const ENDINGS = ["지","은","현","수","민","호","아","연","준","서","영","우","빈","진"];
 const TIMES = ["방금","방금 전","1분 전","2분 전","3분 전","5분 전","7분 전"];
 function randomName() { const s=SURNAMES[Math.floor(Math.random()*SURNAMES.length)]; const e=ENDINGS[Math.floor(Math.random()*ENDINGS.length)]; return `${s}*${e}`; }
 function randomTime() { return TIMES[Math.floor(Math.random()*TIMES.length)]; }
-const TIME_COLORS: Record<string,string> = { "방금": "#00b4d8", "방금 전": "#00b4d8", "1분 전": "#00b4d8", "2분 전": "#00b4d8", "3분 전": "#6c757d", "5분 전": "#6c757d", "7분 전": "#6c757d" };
+const TIME_COLORS: Record<string,string> = { "방금": "#738e6f", "방금 전": "#738e6f", "1분 전": "#738e6f", "2분 전": "#738e6f", "3분 전": "#6c757d", "5분 전": "#6c757d", "7분 전": "#6c757d" };
 
 function StickyCTA() {
   const router = useRouter();
-  const [timeLeft, setTimeLeft] = useState("06:22:14:08");
+  const [timeLeft, setTimeLeft] = useState("05:42:11:08");
+
   useEffect(() => {
     const pad = (n: number) => String(n).padStart(2, "0");
-    const DURATION = 6 * 3600000 + 22 * 60000 + 14 * 1000 + 80;
+    const DURATION = 5 * 3600000 + 42 * 60000 + 11 * 1000 + 80;
     const endTime = Date.now() + DURATION;
-    const tick = () => {
+    const id = setInterval(() => {
       let diff = Math.max(0, endTime - Date.now());
       const h = Math.floor(diff / 3600000); diff %= 3600000;
       const m = Math.floor(diff / 60000);   diff %= 60000;
       const s = Math.floor(diff / 1000);    diff %= 1000;
       const cs = Math.floor(diff / 10);
       setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`);
-    };
-    tick();
-    const id = setInterval(tick, 50);
+    }, 50);
     return () => clearInterval(id);
   }, []);
 
@@ -44,35 +43,31 @@ function StickyCTA() {
         <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
       <style>{`
-        @keyframes waterRise {
-          0%        { transform: translateY(100%); }
-          40%, 60%  { transform: translateY(0%); }
-          100%      { transform: translateY(100%); }
+        @keyframes imshinPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(115,142,111,0.6); }
+          50% { box-shadow: 0 0 0 10px rgba(115,142,111,0); }
         }
-        @keyframes waveShape {
-          0%, 100% { border-radius: 42% 58% 0 0 / 22px 22px 0 0; }
-          25%      { border-radius: 58% 42% 0 0 / 18px 18px 0 0; }
-          50%      { border-radius: 44% 56% 0 0 / 26px 26px 0 0; }
-          75%      { border-radius: 56% 44% 0 0 / 16px 16px 0 0; }
+        @keyframes imshinBeat {
+          0%, 40%, 60%, 100% { transform: scale(1); }
+          20% { transform: scale(1.05); }
+          50% { transform: scale(1.03); }
         }
       `}</style>
       <button
-        onClick={() => router.push("/saju/kunghap_janyeo/form")}
-        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
-        style={{ fontSize: "22px", backgroundColor: "#00b4d8", position: "relative", overflow: "hidden" }}
+        onClick={() => router.push("/saju/kunghap_imshin/form")}
+        className="w-full py-2 rounded-2xl font-bold text-white"
+        style={{
+          backgroundColor: ACCENT, fontSize: "22px",
+          animation: "imshinPulse 2s ease-in-out infinite, imshinBeat 2.5s ease-in-out infinite",
+        }}
       >
-        <span style={{
-          position: "absolute", bottom: 0, left: "-5%", right: "-5%", height: "110%",
-          background: "linear-gradient(to top, #0077b6 0%, #00b4d8 50%, #90e0ef 100%)",
-          animation: "waterRise 3.5s ease-in-out infinite, waveShape 1.2s ease-in-out infinite",
-        }} />
-        <span style={{ position: "relative", zIndex: 1 }}>자녀궁합 보러가기</span>
+        임신궁합 보러가기
       </button>
     </div>
   );
 }
 
-export default function JanyeoKunghapPage() {
+export default function ImshinPage() {
   const router = useRouter();
   const [toasts,setToasts] = useState<{id:number;name:string;time:string}[]>([]);
   useEffect(()=>{ const main=document.querySelector("main"); if(main){main.style.overflow="hidden";} return ()=>{if(main)main.style.overflow="";}; },[]);
@@ -86,7 +81,7 @@ export default function JanyeoKunghapPage() {
       <button onClick={()=>router.back()} className="fixed z-50 w-9 h-9 rounded-full flex items-center justify-center" style={{top:"16px",left:"max(16px,calc(50vw - 224px))",backgroundColor:"rgba(0,0,0,0.5)"}}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
-      <video src="/media/cards/kunghap_janyeo/kunghap_janyeo-0.mp4" autoPlay muted loop playsInline style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
+      <video src="/media/cards/kunghap_imshin/imshin-0.mp4" autoPlay muted loop playsInline style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
       <style>{`
         @keyframes cardAppear { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @keyframes floatA{0%,100%{transform:translateY(0px) rotate(-2deg)}50%{transform:translateY(-8px) rotate(-2deg)}}
@@ -94,9 +89,9 @@ export default function JanyeoKunghapPage() {
         @keyframes floatC{0%,100%{transform:translateY(0px) rotate(-1deg)}50%{transform:translateY(-7px) rotate(-1deg)}}
       `}</style>
       {[
-        {top:"72px",left:"5%",appearDelay:"1s",floatDelay:"1.6s",floatAnim:"floatA",name:"조*현",stars:5,text:"아이와 내 궁합 보고 육아 방향이 잡혔어요 👶"},
-        {top:"24%",left:"52%",appearDelay:"2s",floatDelay:"2.6s",floatAnim:"floatB",name:"이*영",stars:5,text:"아이가 왜 고집이 센지 이유를 알게 됐어요 신기해요!"},
-        {top:"45%",left:"4%",appearDelay:"3s",floatDelay:"3.6s",floatAnim:"floatC",name:"김*수",stars:5,text:"부모와 자녀 사이 갈등이 왜 생기는지 이해됐어요 ㅠㅠ"},
+        {top:"72px",left:"5%",appearDelay:"1s",floatDelay:"1.6s",floatAnim:"floatA",name:"이*현",stars:5,text:"임신 가능 시기 나왔는데 그 달에 생겼어요 진짜 신기 🍀"},
+        {top:"24%",left:"52%",appearDelay:"2s",floatDelay:"2.6s",floatAnim:"floatB",name:"정*수",stars:5,text:"아이 가질 운이 있는지 봤는데 위로가 많이 됐어요"},
+        {top:"45%",left:"4%",appearDelay:"3s",floatDelay:"3.6s",floatAnim:"floatC",name:"박*진",stars:5,text:"임신 준비 중인데 마음이 한결 편해졌어요 감사해요!"},
       ].map((r,i)=>(
         <div key={i} style={{position:"absolute",top:r.top,left:r.left,animation:`cardAppear 0.6s ease ${r.appearDelay} forwards, ${r.floatAnim} 3.8s ease-in-out ${r.floatDelay} infinite`,animationFillMode:"both",opacity:0,backgroundColor:"rgba(255,255,255,0.3)",backdropFilter:"blur(6px)",border:"1px solid rgba(255,255,255,0.3)",borderRadius:"14px",padding:"8px 12px",maxWidth:"185px",zIndex:42,pointerEvents:"none"}}>
           <div style={{display:"flex",alignItems:"center",gap:"5px",marginBottom:"4px"}}>
@@ -106,9 +101,9 @@ export default function JanyeoKunghapPage() {
           <p style={{fontSize:"13px",color:"#222",margin:0,lineHeight:1.5,wordBreak:"keep-all"}}>{r.text}</p>
         </div>
       ))}
-      <img src="/media/cards/kunghap_janyeo/typo-kunghap-janyeo-1.png" alt="" style={{position:"absolute",bottom:"145px",left:"7.5%",width:"85%",objectFit:"contain",pointerEvents:"none",zIndex:41}}/>
+      <img src="/media/cards/kunghap_imshin/typo-imshin.png" alt="" style={{position:"absolute",bottom:"130px",left:"7.5%",width:"85%",objectFit:"contain",pointerEvents:"none",zIndex:41}}/>
       <style>{`@keyframes toastInRight { from { opacity:0; transform:translateX(60px); } to { opacity:1; transform:translateX(0); } }`}</style>
-      <div style={{position:"fixed",bottom:"250px",right:"max(8px,calc(50vw - 232px))",zIndex:50,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6,pointerEvents:"none"}}>
+      <div style={{position:"fixed",bottom:"200px",right:"max(8px,calc(50vw - 232px))",zIndex:50,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6,pointerEvents:"none"}}>
         {toasts.map(t=>(
           <div key={t.id} style={{animation:"toastInRight 0.35s ease",display:"flex",alignItems:"center",gap:"6px",backgroundColor:"rgba(0,0,0,0.7)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:"9999px",padding:"6px 14px",fontSize:"12px",color:"#fff",whiteSpace:"nowrap",backdropFilter:"blur(6px)"}}>
             <span style={{backgroundColor:TIME_COLORS[t.time]??"#555",color:"#fff",fontSize:"10px",fontWeight:700,borderRadius:"9999px",padding:"2px 7px"}}>{t.time}</span>

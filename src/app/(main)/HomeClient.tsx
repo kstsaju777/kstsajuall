@@ -118,13 +118,13 @@ const CATEGORIES = [
     id: "hot",
     tag: "핫하다핫해",
     title: "BEST 인기상품",
-    slugs: ["saju_janyeo", "saju_ehon", "kunghap_janyeo", "kunghap_banryeo", "saju_youare"],
+    slugs: ["saju_janyeo", "kunghap_ehon", "kunghap_janyeo", "kunghap_banryeo", "saju_youare"],
     layout: "big",
   },
   {
     tag: "사랑",
     title: "사랑이 전부인 그대에게",
-    slugs: ["saju_yeonae", "kunghap_yeonae", "kunghap_jaehwe", "saju_gyeolhon", "saju_ehon"],
+    slugs: ["saju_yeonae", "kunghap_yeonae", "kunghap_jaehwe", "kunghap_gyeolhon", "kunghap_ehon"],
     layout: "small",
   },
   {
@@ -136,7 +136,7 @@ const CATEGORIES = [
   {
     tag: "가족",
     title: "우리 아이 가족 궁금해요",
-    slugs: ["saju_janyeo", "kunghap_janyeo", "saju_imshin", "saju_youare"],
+    slugs: ["saju_janyeo", "kunghap_janyeo", "kunghap_imshin", "saju_youare"],
     layout: "small",
   },
   {

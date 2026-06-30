@@ -453,7 +453,7 @@ function StickyCTA() {
       `}</style>
       <div style={{ position: "relative" }}>
         <button
-          onClick={() => router.push("/saju/jeongtong/form")}
+          onClick={() => router.push("/saju/saju_jeongtong/form")}
           className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 overflow-hidden relative"
           style={{ fontSize: "22px", animation: "totalNeon 3s ease-in-out infinite, totalBeat 2.2s ease-in-out infinite" }}
         >
