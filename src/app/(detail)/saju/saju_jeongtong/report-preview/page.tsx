@@ -3827,13 +3827,13 @@ function ReportPreviewInner() {
     if (startedRef.current) return;
     startedRef.current = true;
     if (id) {
-      fetch(`/api/saju_jeongtong-report?id=${encodeURIComponent(id)}`)
+      fetch(`/api/jeongtong-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
-      fetch("/api/saju_jeongtong-report", {
+      fetch("/api/jeongtong-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: nameParam, date, time, calendar, gender, email }),
@@ -3859,7 +3859,7 @@ function ReportPreviewInner() {
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
   const persist = (mergedContent: Record<string, unknown>) => {
-    fetch("/api/saju_jeongtong-report", {
+    fetch("/api/jeongtong-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, content: mergedContent }),
@@ -3876,7 +3876,7 @@ function ReportPreviewInner() {
     setGenerating(true);
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), 90_000); // 90초 타임아웃
-    fetch("/api/saju_jeongtong-report", {
+    fetch("/api/jeongtong-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, chapter: toApiChapter(n), force }),
@@ -3908,7 +3908,7 @@ function ReportPreviewInner() {
     setGenerating(true);
     Promise.all(
       missing.map((n) =>
-        fetch("/api/saju_jeongtong-report", {
+        fetch("/api/jeongtong-report", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id, chapter: n }),
@@ -4470,7 +4470,7 @@ function ReportPreviewInner() {
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                     <button
                       onClick={() => {
-                        fetch("/api/saju_jeongtong-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
+                        fetch("/api/jeongtong-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
                           .then((r) => r.ok ? r.json() : Promise.reject())
                           .then((d) => { if (d.sajuImageUrl) setReport((p) => p ? { ...p, sajuImageUrl: d.sajuImageUrl } : p); })
                           .catch(() => {});
@@ -4893,10 +4893,20 @@ function ReportPreviewInner() {
                 금: { hanja: "金", color: "#222", bg: "#fffde7", desc: "절제·결단" },
                 수: { hanja: "水", color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
               };
+              // LLM이 yongsinEl 등 필드를 빠뜨린 경우 텍스트에서 추출
+              const OHAENG_LIST = ["금", "목", "화", "토", "수"] as const;
+              const yText = [c.yongsin.callout, c.yongsin.intro, ...(c.yongsin.paragraphs ?? [])].filter(Boolean).join(" ");
+              const extractEl = (role: string, text: string) => {
+                const m = text.match(new RegExp(`${role}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+                return m?.[1] ?? "";
+              };
+              const yongsinEl = c.yongsin.yongsinEl || extractEl("용신", yText) || (() => { const f: string[] = []; for (const ch of yText) { if ((OHAENG_LIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length) return f[0]; } return ""; })();
+              const heusinEl  = c.yongsin.heusinEl  || extractEl("희신", yText) || (() => { const f: string[] = []; for (const ch of yText) { if ((OHAENG_LIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 2) return f[1]; } return ""; })();
+              const gisinEl   = c.yongsin.gisinEl   || extractEl("기신", yText) || (() => { const f: string[] = []; for (const ch of yText) { if ((OHAENG_LIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 3) return f[2]; } return ""; })();
               const rows = [
-                { role: "용신", el: c.yongsin.yongsinEl, reason: c.yongsin.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
-                { role: "희신", el: c.yongsin.heusinEl,  reason: c.yongsin.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★" } },
-                { role: "기신", el: c.yongsin.gisinEl,   reason: c.yongsin.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕" } },
+                { role: "용신", el: yongsinEl, reason: c.yongsin.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
+                { role: "희신", el: heusinEl,  reason: c.yongsin.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★" } },
+                { role: "기신", el: gisinEl,   reason: c.yongsin.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕" } },
               ];
               return (
                 <div className="my-4 rounded-2xl overflow-hidden" style={{ border: "1px solid #e0d8cc" }}>

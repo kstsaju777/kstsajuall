@@ -155,11 +155,11 @@ function StepBirthDate({ onPrev, onNext, gender, initial, initialCalendar }: {
 
   const interacted = useRef(false);
   useEffect(() => {
-    if (isValid && interacted.current) {
+    if (isValid && interacted.current && day.length === 2) {
       const t = setTimeout(() => onNext(dateStr, calendar), 500);
       return () => clearTimeout(t);
     }
-  }, [isValid]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isValid, day, dateStr, calendar, onNext]);
 
   const greeting = "자녀 태어난 날짜";
 

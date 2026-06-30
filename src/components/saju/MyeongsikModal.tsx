@@ -181,7 +181,7 @@ function CellJijang({ text, ilgan }: { text: string; ilgan: string }) {
     <div className="py-1 flex flex-col items-center justify-center gap-1" style={{ background: WHITE }}>
       {rows.map((r, i) => (
         <div key={i} className="flex items-center justify-center" style={{ gap: 4, width: "100%" }}>
-          <div style={{ display: "flex", justifyContent: "center", flexShrink: 0 }}>
+          <div style={{ width: 18, height: 18, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {r.ch === null ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src="/media/saju/cheongan/hipeun.png" alt="-" style={{ width: 18, height: 18, objectFit: "contain" }} />
@@ -189,7 +189,7 @@ function CellJijang({ text, ilgan }: { text: string; ilgan: string }) {
               <SmallGan ch={r.ch} />
             )}
           </div>
-          <span style={{ fontSize: 12, color: MUTE, whiteSpace: "nowrap" }}>{r.sip}</span>
+          <span style={{ fontSize: 12, color: MUTE, whiteSpace: "nowrap", minWidth: 24 }}>{r.ch === null ? "-" : r.sip}</span>
         </div>
       ))}
     </div>

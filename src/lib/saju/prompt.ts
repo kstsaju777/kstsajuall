@@ -44,6 +44,10 @@ const STYLE_BY_SLUG: Record<string, { length: string; focus: string }> = {
     length: "1500-2000자",
     focus: "대운/세운 흐름, 직업운, 재물운, 건강운, 인간관계 종합",
   },
+  "saju-jaemul": {
+    length: "1200-1600자",
+    focus: "재물운 흐름, 돈이 들어오고 나가는 패턴, 재물복 강약, 재물운이 트이는 시기, 돈을 버는 방식(직업/사업/투자), 재물 관리 조언",
+  },
 };
 
 export function buildSajuPrompt(input: PromptInput): { system: string; user: string } {

@@ -23,7 +23,7 @@ import { serverEnv } from "@/lib/env";
 
 export const maxDuration = 60;
 
-const PRODUCT_SLUG = "premium-saju";
+const PRODUCT_SLUG = "total";
 
 const createSchema = z.object({
   name: z.string().optional().default(""),
@@ -65,6 +65,34 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
             } catch { /* 재시도 */ }
           }
         }));
+      }
+      // 2장 후처리: yongsinEl/heusinEl/gisinEl 빠진 경우 텍스트에서 추출
+      if (chapter === 2) {
+        const y = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
+        if (y) {
+          const OHAENG = ["금", "목", "화", "토", "수"] as const;
+          const allText = [y.callout, y.intro, ...((y.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
+          if (!y.yongsinEl) {
+            const m = allText.match(/용신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
+            if (m) y.yongsinEl = m[1];
+          }
+          if (!y.heusinEl) {
+            const m = allText.match(/희신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
+            if (m) y.heusinEl = m[1];
+          }
+          if (!y.gisinEl) {
+            const m = allText.match(/기신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
+            if (m) y.gisinEl = m[1];
+          }
+          // 그래도 없으면 callout에서 첫 번째 오행 순서대로 추출
+          if (!y.yongsinEl || !y.heusinEl || !y.gisinEl) {
+            const found: string[] = [];
+            for (const ch of allText) { if (OHAENG.includes(ch as typeof OHAENG[number]) && !found.includes(ch)) found.push(ch); if (found.length === 3) break; }
+            if (!y.yongsinEl && found[0]) y.yongsinEl = found[0];
+            if (!y.heusinEl  && found[1]) y.heusinEl  = found[1];
+            if (!y.gisinEl   && found[2]) y.gisinEl   = found[2];
+          }
+        }
       }
       if (isChapterReady(obj, chapter)) return { obj, ...meta };
     } catch {
