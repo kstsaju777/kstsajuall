@@ -14,22 +14,50 @@ const TIME_COLORS: Record<string,string> = { "방금": "#9b2335", "방금 전": 
 
 function StickyCTA() {
   const router = useRouter();
-  const [timeLeft, setTimeLeft] = useState("06:22:14:08");
+  const [timeLeft, setTimeLeft] = useState("07:35:24:15");
   useEffect(() => {
-    const pad = (n:number) => String(n).padStart(2,"0");
-    const DURATION = 6*3600000+22*60000+14*1000+80;
-    const endTime = Date.now()+DURATION;
-    const tick = () => { let diff=Math.max(0,endTime-Date.now()); const h=Math.floor(diff/3600000); diff%=3600000; const m=Math.floor(diff/60000); diff%=60000; const s=Math.floor(diff/1000); diff%=1000; const cs=Math.floor(diff/10); setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`); };
-    tick(); const id=setInterval(tick,50); return ()=>clearInterval(id);
-  },[]);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const DURATION = 7 * 3600000 + 35 * 60000 + 24 * 1000 + 15 * 10;
+    const endTime = Date.now() + DURATION;
+    const tick = () => {
+      let diff = Math.max(0, endTime - Date.now());
+      const h = Math.floor(diff / 3600000); diff %= 3600000;
+      const m = Math.floor(diff / 60000);   diff %= 60000;
+      const s = Math.floor(diff / 1000);    diff %= 1000;
+      const cs = Math.floor(diff / 10);
+      setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`);
+    };
+    tick();
+    const id = setInterval(tick, 50);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6" style={{ left:"max(0px,calc(50vw - 240px))", width:"min(100%,480px)", paddingTop:"180px", background:"linear-gradient(to top, #0a0a0a 65%, transparent)" }}>
+    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+      left: "max(0px, calc(50vw - 240px))",
+      width: "min(100%, 480px)",
+      background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
+    }}>
       <p className="text-center text-[13px] font-bold mb-1">
-        <span style={{color:"#ffffff"}}>할인혜택 종료까지 </span>
-        <span style={{color:ACCENT}}>{timeLeft}</span>
+        <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
+        <span style={{ color: "#ff69b4" }}>{timeLeft}</span>
       </p>
-      <style>{`@keyframes btnNeon { 0%,100% { background:#9b2335; box-shadow:0 0 12px 3px #9b233588; } 50% { background:#6b1020; box-shadow:0 0 12px 3px #6b102088; } }`}</style>
-      <button onClick={()=>router.push("/saju/kunghap_jaehwe/form")} className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform" style={{color:"#fff",fontSize:"22px",animation:"btnNeon 3s ease-in-out infinite"}}>
+      <style>{`
+        @keyframes jaehweNeon {
+          0%   { background: #7b2fff; box-shadow: 0 0 12px 3px rgba(123,47,255,0.7); }
+          33%  { background: #ff6b9d; box-shadow: 0 0 12px 3px rgba(255,107,157,0.7); }
+          66%  { background: #ffb347; box-shadow: 0 0 12px 3px rgba(255,179,71,0.7); }
+          100% { background: #7b2fff; box-shadow: 0 0 12px 3px rgba(123,47,255,0.7); }
+        }
+      `}</style>
+      <button
+        onClick={() => router.push("/saju/kunghap_jaehwe/form")}
+        className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform"
+        style={{
+          color: "#ffffff", fontSize: "22px",
+          animation: "jaehweNeon 3s ease-in-out infinite",
+        }}
+      >
         재회궁합 보러가기
       </button>
     </div>

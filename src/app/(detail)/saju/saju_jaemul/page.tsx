@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const BG = "#0a0a0a";
+const BG = "#080a0f";
 const ACCENT = "#f9dc64";
 
 const SURNAMES = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권"];
@@ -14,24 +14,66 @@ const TIME_COLORS: Record<string,string> = { "방금": "#f9dc64", "방금 전": 
 
 function StickyCTA() {
   const router = useRouter();
-  const [timeLeft, setTimeLeft] = useState("06:22:14:08");
+  const [timeLeft, setTimeLeft] = useState("05:42:11:08");
+
   useEffect(() => {
-    const pad = (n:number) => String(n).padStart(2,"0");
-    const DURATION = 6*3600000+22*60000+14*1000+80;
-    const endTime = Date.now()+DURATION;
-    const tick = () => { let diff=Math.max(0,endTime-Date.now()); const h=Math.floor(diff/3600000); diff%=3600000; const m=Math.floor(diff/60000); diff%=60000; const s=Math.floor(diff/1000); diff%=1000; const cs=Math.floor(diff/10); setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`); };
-    tick(); const id=setInterval(tick,50); return ()=>clearInterval(id);
-  },[]);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const DURATION = 5 * 3600000 + 42 * 60000 + 11 * 1000 + 80;
+    const endTime = Date.now() + DURATION;
+    const id = setInterval(() => {
+      let diff = Math.max(0, endTime - Date.now());
+      const h = Math.floor(diff / 3600000); diff %= 3600000;
+      const m = Math.floor(diff / 60000);   diff %= 60000;
+      const s = Math.floor(diff / 1000);    diff %= 1000;
+      const cs = Math.floor(diff / 10);
+      setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`);
+    }, 50);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6" style={{ left:"max(0px,calc(50vw - 240px))", width:"min(100%,480px)", paddingTop:"180px", background:"linear-gradient(to top, #0a0a0a 65%, transparent)" }}>
-      <p className="text-center text-[13px] font-bold mb-1">
-        <span style={{color:"#ffffff"}}>할인혜택 종료까지 </span>
-        <span style={{color:ACCENT}}>{timeLeft}</span>
+    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+      left: "max(0px, calc(50vw - 240px))",
+      width: "min(100%, 480px)",
+      background: `linear-gradient(to top, ${BG} 55%, transparent)`,
+    }}>
+      <style>{`
+        @keyframes goldGlow {
+          0%, 100% { box-shadow: 0 0 12px 3px rgba(212,160,23,0.5), 0 0 30px 6px rgba(212,160,23,0.25), inset 0 1px 0 rgba(255,220,80,0.4); }
+          50% { box-shadow: 0 0 22px 8px rgba(255,200,40,0.7), 0 0 50px 14px rgba(212,160,23,0.35), inset 0 1px 0 rgba(255,240,120,0.6); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
+      <p className="text-center text-[13px] font-bold mb-2">
+        <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
+        <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
-      <style>{`@keyframes btnNeon { 0%,100% { background:#f9dc64; box-shadow:0 0 12px 3px #f9dc6488; } 50% { background:#c9a800; box-shadow:0 0 12px 3px #c9a80088; } }`}</style>
-      <button onClick={()=>router.push("/saju/saju_jaemul/form")} className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform" style={{color:"#000",fontSize:"22px",animation:"btnNeon 3s ease-in-out infinite"}}>
-        재물운사주 보러가기
-      </button>
+      <div style={{
+        padding: "2px",
+        borderRadius: "18px",
+        background: "linear-gradient(135deg, #ffe066 0%, #d4a017 30%, #fff5a0 50%, #d4a017 70%, #ffe066 100%)",
+        boxShadow: "0 0 18px 4px rgba(212,160,23,0.4)",
+      }}>
+        <button
+          onClick={() => router.push("/saju/saju_jaemul/form")}
+          className="w-full rounded-2xl font-bold text-white active:scale-95 transition-transform relative overflow-hidden"
+          style={{
+            fontSize: "22px",
+            padding: "10px 0",
+            background: "linear-gradient(135deg, #b8860b 0%, #d4a017 25%, #f5c842 50%, #d4a017 75%, #b8860b 100%)",
+            backgroundSize: "200% auto",
+            animation: "goldGlow 2s ease-in-out infinite, shimmer 3s linear infinite",
+            color: "#3a1f00",
+            textShadow: "0 1px 2px rgba(255,220,80,0.5)",
+            letterSpacing: "0.02em",
+          }}
+        >
+          재물운사주 보러가기
+        </button>
+      </div>
     </div>
   );
 }

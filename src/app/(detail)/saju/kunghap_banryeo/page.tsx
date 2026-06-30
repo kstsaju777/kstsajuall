@@ -16,22 +16,95 @@ function StickyCTA() {
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState("06:22:14:08");
   useEffect(() => {
-    const pad = (n:number) => String(n).padStart(2,"0");
-    const DURATION = 6*3600000+22*60000+14*1000+80;
-    const endTime = Date.now()+DURATION;
-    const tick = () => { let diff=Math.max(0,endTime-Date.now()); const h=Math.floor(diff/3600000); diff%=3600000; const m=Math.floor(diff/60000); diff%=60000; const s=Math.floor(diff/1000); diff%=1000; const cs=Math.floor(diff/10); setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`); };
-    tick(); const id=setInterval(tick,50); return ()=>clearInterval(id);
-  },[]);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const DURATION = 6 * 3600000 + 22 * 60000 + 14 * 1000 + 80;
+    const endTime = Date.now() + DURATION;
+    const tick = () => {
+      let diff = Math.max(0, endTime - Date.now());
+      const h = Math.floor(diff / 3600000); diff %= 3600000;
+      const m = Math.floor(diff / 60000);   diff %= 60000;
+      const s = Math.floor(diff / 1000);    diff %= 1000;
+      const cs = Math.floor(diff / 10);
+      setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`);
+    };
+    tick();
+    const id = setInterval(tick, 50);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6" style={{ left:"max(0px,calc(50vw - 240px))", width:"min(100%,480px)", paddingTop:"180px", background:"linear-gradient(to top, #0a0a0a 65%, transparent)" }}>
+    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+      left: "max(0px, calc(50vw - 240px))",
+      width: "min(100%, 480px)",
+      background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
+    }}>
       <p className="text-center text-[13px] font-bold mb-1">
-        <span style={{color:"#ffffff"}}>할인혜택 종료까지 </span>
-        <span style={{color:ACCENT}}>{timeLeft}</span>
+        <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
+        <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
-      <style>{`@keyframes btnNeon { 0%,100% { background:#b47221; box-shadow:0 0 12px 3px #b4722188; } 50% { background:#7a4e17; box-shadow:0 0 12px 3px #7a4e1788; } }`}</style>
-      <button onClick={()=>router.push("/saju/kunghap_banryeo/form")} className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform" style={{color:"#fff",fontSize:"22px",animation:"btnNeon 3s ease-in-out infinite"}}>
-        반려궁합 보러가기
-      </button>
+      <style>{`
+        @keyframes banryeoBeat {
+          0%, 100% { transform: scale(1); }
+          15% { transform: scale(1.07); }
+          30% { transform: scale(0.97); }
+          45% { transform: scale(1.05); }
+          60% { transform: scale(1); }
+        }
+        @keyframes pawStamp {
+          0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+          30%  { transform: scale(1.3) rotate(-20deg); opacity: 1; }
+          60%  { transform: scale(1) rotate(-20deg); opacity: 1; }
+          100% { transform: scale(1) rotate(-20deg); opacity: 0; }
+        }
+        @keyframes pawStamp2 {
+          0%   { transform: scale(0) rotate(15deg); opacity: 0; }
+          30%  { transform: scale(1.3) rotate(15deg); opacity: 1; }
+          60%  { transform: scale(1) rotate(15deg); opacity: 1; }
+          100% { transform: scale(1) rotate(15deg); opacity: 0; }
+        }
+        @keyframes pawStamp3 {
+          0%   { transform: scale(0) rotate(-5deg); opacity: 0; }
+          30%  { transform: scale(1.3) rotate(-5deg); opacity: 1; }
+          60%  { transform: scale(1) rotate(-5deg); opacity: 1; }
+          100% { transform: scale(1) rotate(-5deg); opacity: 0; }
+        }
+      `}</style>
+      <div className="relative">
+        <button
+          onClick={() => router.push("/saju/kunghap_banryeo/form")}
+          className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 overflow-hidden relative"
+          style={{
+            fontSize: "22px",
+            background: "linear-gradient(105deg, #b47221 35%, #e8c97a 48%, #f5e0a0 53%, #e8c97a 58%, #b47221 72%)",
+            backgroundSize: "200% auto",
+            animation: "banryeoBeat 1.8s ease-in-out infinite",
+          }}
+        >
+          {[
+            { top: "10%", left: "6%", rot: -25, delay: "0s", size: 28 },
+            { top: "15%", left: "22%", rot: 10, delay: "0.6s", size: 22 },
+            { top: "8%", right: "18%", rot: -10, delay: "1.2s", size: 24 },
+            { top: "20%", right: "5%", rot: 20, delay: "0.3s", size: 20 },
+          ].map((p, i) => (
+            <span key={i} style={{
+              position: "absolute", top: p.top, left: p.left, right: p.right,
+              pointerEvents: "none", zIndex: 2,
+              animation: `pawStamp${(i % 3) + 1} 1.8s ease-in-out ${p.delay} infinite`,
+              transform: `rotate(${p.rot}deg)`,
+            }}>
+              <svg width={p.size} height={p.size} viewBox="0 0 40 40" fill="#3b1a06">
+                <ellipse cx="20" cy="26" rx="10" ry="8" />
+                <ellipse cx="10" cy="15" rx="4.5" ry="3.5" />
+                <ellipse cx="20" cy="11" rx="4.5" ry="3.5" />
+                <ellipse cx="30" cy="15" rx="4.5" ry="3.5" />
+                <ellipse cx="5" cy="23" rx="3.5" ry="3" />
+                <ellipse cx="35" cy="23" rx="3.5" ry="3" />
+              </svg>
+            </span>
+          ))}
+          <span style={{ position: "relative", zIndex: 3 }}>반려궁합 보러가기</span>
+        </button>
+      </div>
     </div>
   );
 }

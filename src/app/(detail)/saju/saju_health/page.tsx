@@ -2,8 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-const BG = "#0a0a0a";
-const ACCENT = "#2e7d32";
+const BG = "#0d0905";
+const PINK = "#ca884b";
 
 const SURNAMES = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권"];
 const ENDINGS = ["지","은","현","수","민","호","아","연","준","서","영","우","빈","진"];
@@ -14,24 +14,67 @@ const TIME_COLORS: Record<string,string> = { "방금": "#2e7d32", "방금 전": 
 
 function StickyCTA() {
   const router = useRouter();
-  const [timeLeft, setTimeLeft] = useState("06:22:14:08");
+  const [timeLeft, setTimeLeft] = useState("05:42:11:08");
+
   useEffect(() => {
-    const pad = (n:number) => String(n).padStart(2,"0");
-    const DURATION = 6*3600000+22*60000+14*1000+80;
-    const endTime = Date.now()+DURATION;
-    const tick = () => { let diff=Math.max(0,endTime-Date.now()); const h=Math.floor(diff/3600000); diff%=3600000; const m=Math.floor(diff/60000); diff%=60000; const s=Math.floor(diff/1000); diff%=1000; const cs=Math.floor(diff/10); setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`); };
-    tick(); const id=setInterval(tick,50); return ()=>clearInterval(id);
-  },[]);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const DURATION = 5 * 3600000 + 42 * 60000 + 11 * 1000 + 80;
+    const endTime = Date.now() + DURATION;
+    const id = setInterval(() => {
+      let diff = Math.max(0, endTime - Date.now());
+      const h = Math.floor(diff / 3600000); diff %= 3600000;
+      const m = Math.floor(diff / 60000);   diff %= 60000;
+      const s = Math.floor(diff / 1000);    diff %= 1000;
+      const cs = Math.floor(diff / 10);
+      setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`);
+    }, 50);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6" style={{ left:"max(0px,calc(50vw - 240px))", width:"min(100%,480px)", paddingTop:"180px", background:"linear-gradient(to top, #0a0a0a 65%, transparent)" }}>
+    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+      left: "max(0px, calc(50vw - 240px))",
+      width: "min(100%, 480px)",
+      background: `linear-gradient(to top, ${BG} 55%, transparent)`,
+    }}>
       <p className="text-center text-[13px] font-bold mb-1">
-        <span style={{color:"#ffffff"}}>할인혜택 종료까지 </span>
-        <span style={{color:ACCENT}}>{timeLeft}</span>
+        <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
+        <span style={{ color: PINK }}>{timeLeft}</span>
       </p>
-      <style>{`@keyframes btnNeon { 0%,100% { background:#2e7d32; box-shadow:0 0 12px 3px #2e7d3288; } 50% { background:#1b5e20; box-shadow:0 0 12px 3px #1b5e2088; } }`}</style>
-      <button onClick={()=>router.push("/saju/saju_health/form")} className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform" style={{color:"#fff",fontSize:"22px",animation:"btnNeon 3s ease-in-out infinite"}}>
-        건강운사주 보러가기
-      </button>
+      <style>{`
+        @keyframes rotateSweep {
+          from { transform: translate(-50%, -50%) rotate(-45deg); }
+          to   { transform: translate(-50%, -50%) rotate(315deg); }
+        }
+      `}</style>
+      <div style={{ position: "relative", borderRadius: "12px", padding: "2px", overflow: "hidden", background: "#3a2010" }}>
+        <div style={{
+          position: "absolute", top: "50%", left: "50%",
+          width: "200%", height: "200%",
+          background: "conic-gradient(from 0deg, transparent 0%, transparent 70%, #C8962E 82%, #ffe8a0 88%, #C8962E 94%, transparent 100%)",
+          animation: "rotateSweep 2s linear infinite",
+          pointerEvents: "none",
+        }} />
+        <button
+          onClick={() => router.push("/saju/saju_health/form")}
+          className="w-full active:scale-95 transition-transform"
+          style={{
+            position: "relative", zIndex: 1,
+            background: "linear-gradient(180deg, #3a2010 0%, #2C1A0E 50%, #1e1008 100%)",
+            borderRadius: "10px",
+            padding: "14px 20px",
+            border: "none",
+            width: "100%",
+          }}
+        >
+          <span style={{
+            fontSize: "18px", fontWeight: 800,
+            color: "#ca884b",
+            letterSpacing: "0.05em",
+            textShadow: "0 1px 4px rgba(0,0,0,0.8)",
+          }}>건강운사주 보러가기</span>
+        </button>
+      </div>
     </div>
   );
 }

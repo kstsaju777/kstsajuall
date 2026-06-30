@@ -16,21 +16,56 @@ function StickyCTA() {
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState("06:22:14:08");
   useEffect(() => {
-    const pad = (n:number) => String(n).padStart(2,"0");
-    const DURATION = 6*3600000+22*60000+14*1000+80;
-    const endTime = Date.now()+DURATION;
-    const tick = () => { let diff=Math.max(0,endTime-Date.now()); const h=Math.floor(diff/3600000); diff%=3600000; const m=Math.floor(diff/60000); diff%=60000; const s=Math.floor(diff/1000); diff%=1000; const cs=Math.floor(diff/10); setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`); };
-    tick(); const id=setInterval(tick,50); return ()=>clearInterval(id);
-  },[]);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const DURATION = 6 * 3600000 + 22 * 60000 + 14 * 1000 + 80;
+    const endTime = Date.now() + DURATION;
+    const tick = () => {
+      let diff = Math.max(0, endTime - Date.now());
+      const h = Math.floor(diff / 3600000); diff %= 3600000;
+      const m = Math.floor(diff / 60000);   diff %= 60000;
+      const s = Math.floor(diff / 1000);    diff %= 1000;
+      const cs = Math.floor(diff / 10);
+      setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}:${pad(cs)}`);
+    };
+    tick();
+    const id = setInterval(tick, 50);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6" style={{ left:"max(0px,calc(50vw - 240px))", width:"min(100%,480px)", paddingTop:"180px", background:"linear-gradient(to top, #0a0a0a 65%, transparent)" }}>
+    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+      left: "max(0px, calc(50vw - 240px))",
+      width: "min(100%, 480px)",
+      background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
+    }}>
       <p className="text-center text-[13px] font-bold mb-1">
-        <span style={{color:"#ffffff"}}>할인혜택 종료까지 </span>
-        <span style={{color:ACCENT}}>{timeLeft}</span>
+        <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
+        <span style={{ color: ACCENT }}>{timeLeft}</span>
       </p>
-      <style>{`@keyframes btnNeon { 0%,100% { background:#00b4d8; box-shadow:0 0 12px 3px #00b4d888; } 50% { background:#007a99; box-shadow:0 0 12px 3px #007a9988; } }`}</style>
-      <button onClick={()=>router.push("/saju/kunghap_janyeo/form")} className="w-full py-2 rounded-2xl font-bold active:scale-95 transition-transform" style={{color:"#fff",fontSize:"22px",animation:"btnNeon 3s ease-in-out infinite"}}>
-        자녀궁합 보러가기
+      <style>{`
+        @keyframes waterRise {
+          0%        { transform: translateY(100%); }
+          40%, 60%  { transform: translateY(0%); }
+          100%      { transform: translateY(100%); }
+        }
+        @keyframes waveShape {
+          0%, 100% { border-radius: 42% 58% 0 0 / 22px 22px 0 0; }
+          25%      { border-radius: 58% 42% 0 0 / 18px 18px 0 0; }
+          50%      { border-radius: 44% 56% 0 0 / 26px 26px 0 0; }
+          75%      { border-radius: 56% 44% 0 0 / 16px 16px 0 0; }
+        }
+      `}</style>
+      <button
+        onClick={() => router.push("/saju/kunghap_janyeo/form")}
+        className="w-full py-2 rounded-2xl font-bold text-white active:scale-95 transition-transform"
+        style={{ fontSize: "22px", backgroundColor: "#00b4d8", position: "relative", overflow: "hidden" }}
+      >
+        <span style={{
+          position: "absolute", bottom: 0, left: "-5%", right: "-5%", height: "110%",
+          background: "linear-gradient(to top, #0077b6 0%, #00b4d8 50%, #90e0ef 100%)",
+          animation: "waterRise 3.5s ease-in-out infinite, waveShape 1.2s ease-in-out infinite",
+        }} />
+        <span style={{ position: "relative", zIndex: 1 }}>자녀궁합 보러가기</span>
       </button>
     </div>
   );
