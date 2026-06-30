@@ -205,8 +205,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             const layout = (cat as any).layout ?? "small";
             const isBig = layout === "big";
             const isSmallBig = layout === "small";
-            const cardW = isBig ? "65vw" : isSmallBig ? "38vw" : "28vw";
-            const cardH = isBig ? "81vw" : isSmallBig ? "50vw" : "28vw";
+            const cardW = isBig ? "min(65vw, 280px)" : isSmallBig ? "min(38vw, 163px)" : "min(28vw, 120px)";
+            const cardH = isBig ? "min(81vw, 349px)" : isSmallBig ? "min(50vw, 215px)" : "min(28vw, 120px)";
             const fontSize = isBig ? 23 : 15;
             const badgeFontSize = isBig ? 10 : 8;
 
