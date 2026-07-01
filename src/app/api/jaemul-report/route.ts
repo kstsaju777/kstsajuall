@@ -25,7 +25,7 @@ import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 export const maxDuration = 300;
 
 const PRODUCT_SLUG = "saju_jaemul";
-const PRODUCT_NAME = "재물운사주";
+const PRODUCT_NAME = "재물사주";
 const PRODUCT_PRICE = 29900;
 const REPORT_PATH = "saju/saju_jaemul/report-preview";
 
