@@ -809,7 +809,7 @@ export function buildSajuImagePrompt(pillars: { gan: string; ji: string }[]): st
     ? `ZODIAC ANIMAL: A ${animalColor} ${animal} appears naturally within the scene — placed in a fitting position (e.g. resting near the primary subject, perched on a rock, or partially hidden in the environment). The animal should feel like a natural part of the landscape, not forced. Its color is distinctly ${animalColor}.`
     : "";
 
-  return `A breathtaking cinematic nature painting, Studio Ghibli / Makoto Shinkai style. No people, no text, no watermarks. Wide landscape composition.
+  return `A breathtaking cinematic nature painting, hand-painted anime watercolor style, East Asian aesthetic. No people, no text, no watermarks. Wide landscape composition.
 
 PRIMARY SUBJECT: ${subject}. This is the DOMINANT visual centerpiece of the painting.
 

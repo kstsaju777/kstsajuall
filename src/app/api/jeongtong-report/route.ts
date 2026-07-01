@@ -43,7 +43,8 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
   const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
+    if (i > 0) await new Promise(r => setTimeout(r, 2000 * i));
     try {
       const llm = await generateInterpretation({ system, user, json: true });
       meta = { provider: llm.provider, model: llm.model };
@@ -251,8 +252,9 @@ async function createReport(body: unknown) {
 
     // 16장을 4개씩 배치로 순차 생성 (rate limit 방지)
     const content: Record<string, unknown> = {};
-    const BATCH = 4;
+    const BATCH = 2;
     for (let start = 1; start <= 16; start += BATCH) {
+      if (start > 1) await new Promise(r => setTimeout(r, 500));
       const batch = Array.from({ length: Math.min(BATCH, 17 - start) }, (_, i) => genChapterContent(start + i, chapterInput));
       const results = await Promise.allSettled(batch);
       for (const r of results) {
