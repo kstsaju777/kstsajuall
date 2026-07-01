@@ -775,7 +775,7 @@ function CheckoutContent() {
       }));
 
       // 3단계: 결과지 열기
-      router.push(`/saju/saju_jeongtong/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}`);
+      router.push(`/saju/saju_jeongtong/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     } catch {
       router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
     }

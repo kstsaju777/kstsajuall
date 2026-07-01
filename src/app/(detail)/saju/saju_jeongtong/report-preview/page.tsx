@@ -3920,7 +3920,7 @@ function ReportPreviewInner() {
   }, []);
 
 
-  const name = report?.name?.trim() || "고객";
+  const name = report?.name?.trim() || nameParam.trim() || "고객";
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
@@ -3990,7 +3990,7 @@ function ReportPreviewInner() {
 
           {/* 인사말 */}
           <section className="px-6 pt-10 pb-6">
-            <P>안녕하시오, <Term>{report ? (name.slice(1) || name) : ""}{effectiveGender === "female" ? "양" : "군"}</Term>.</P>
+            <P>안녕하시오, <Term>{name.slice(1) || name}{effectiveGender === "female" ? "양" : "군"}</Term>.</P>
             <P>본격적으로 사주풀이에 들어가기 전에,<br />사주팔자가 무엇인지 먼저 짚고 넘어가겠소.</P>
           </section>
 
