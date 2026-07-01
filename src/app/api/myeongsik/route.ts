@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   const timeVal = parseTimeVal(time); // 'unknown' | 'HH:MM'
   const hasTime = timeVal !== "unknown";
   const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
-  const g: "male" | "female" = gender === "여자" || gender === "여성" || gender === "female" ? "female" : "male";
+  const g: "male" | "female" = gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
 
   const birthInfo: BirthInfo = {
     birthYear: String(ymd.year),

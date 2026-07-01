@@ -34,7 +34,7 @@ function sajuToText(saju: LocalSajuResult | null, name: string, gender: string):
     const jiEl = ohaengMap[p.branch]?.el ?? "";
     return `${label}: ${p.stem}(${p.stemHg}·${ganEl}·${p.stemSs}) / ${p.branch}(${p.branchHg}·${jiEl}·${p.branchSs})`;
   });
-  const genderLabel = gender === "여자" || gender === "여성" || gender === "female" ? "여성" : "남성";
+  const genderLabel = gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "여성" : "남성";
   return `[${name}·${genderLabel}]\n${lines.join("\n")}`;
 }
 
@@ -45,8 +45,8 @@ function buildJaehweChapterPrompt(chapter: number, input: {
   concern: string;
 }): { system: string; user: string } {
   const { name, gender, mySajuText, partnerName, partnerGender, partnerSajuText, concern } = input;
-  const gLabel = gender === "여자" || gender === "여성" || gender === "female" ? "여자" : "남자";
-  const pgLabel = partnerGender === "여자" || partnerGender === "여성" || partnerGender === "female" ? "여자" : "남자";
+  const gLabel = gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "여자" : "남자";
+  const pgLabel = partnerGender === "여자" || partnerGender === "여성" || partnerGender === "여아" || partnerGender === "female" ? "여자" : "남자";
 
   const system = `당신은 홍연(洪緣)이라는 이름의 조선 시대 역학(易學) 전문가입니다.
 사주팔자를 바탕으로 두 사람의 재회 가능성과 인연을 깊이 풀어주세요.
