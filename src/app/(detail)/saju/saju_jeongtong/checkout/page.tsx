@@ -710,43 +710,108 @@ function CheckoutContent() {
 
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
+  const CHAPTER_TITLES = [
+    "제1장 — 사주 원국",
+    "제2장 — 운명의 구조",
+    "제3장 — 인간관계",
+    "제4장 — 숨겨진 특징",
+    "제5장 — 재물과 직업",
+    "제6장 — 사랑과 결혼",
+    "제7장 — 건강",
+    "제8장 — 귀인",
+    "제9장 — 주의할 사람",
+    "제10장 — 굴곡과 위기",
+    "제11장 — 대운 흐름",
+    "제12장 — 주의 시기",
+    "제13장 — 당부의 말",
+    "제14장 — 개운법",
+    "제15장 — 중심 잡기",
+    "제16장 — 마무리",
+  ];
+  const TOTAL = 16;
+
   const [showSheet, setShowSheet] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [doneCount, setDoneCount] = useState(0);
+  const [currentChapter, setCurrentChapter] = useState(1);
 
   const handleConfirm = async (productId: string) => {
     setShowSheet(false);
-    const product = PRODUCTS.find((p) => p.id === productId) ?? PRODUCTS[0];
     const email = searchParams.get("email") ?? "";
     setCreating(true);
+    setDoneCount(0);
+    setCurrentChapter(1);
     try {
       const res = await fetch("/api/jeongtong-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, date, time, calendar, gender, email }),
       });
-      const d = res.ok ? await res.json() : null;
-      const reportUrl = d?.resultId
-        ? `https://www.hongyeondang.com/saju/saju_jeongtong/report-preview?id=${d.resultId}`
-        : `https://www.hongyeondang.com/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`;
-      if (d?.resultId) {
-        router.push(`/saju/saju_jeongtong/report-preview?id=${d.resultId}`);
-      } else {
+      if (!res.ok || !res.body) {
         router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
+        return;
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.chapter) {
+              setDoneCount(data.chapter);
+              setCurrentChapter(Math.min(data.chapter + 1, TOTAL));
+            }
+            if (data.done && data.resultId) {
+              router.push(`/saju/saju_jeongtong/report-preview?id=${data.resultId}`);
+              return;
+            }
+            if (data.error) {
+              router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
+              return;
+            }
+          } catch { /* JSON 파싱 실패 무시 */ }
+        }
       }
     } catch {
       router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
     }
   };
 
-  if (creating) return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 z-50" style={{ background: "#fdf8f4" }}>
-      <svg className="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8b2e14" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-      <div className="text-center px-8">
-        <p className="text-[16px] font-bold" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 완성하고 있소…</p>
-        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "#7a5a40" }}>16장 풀이와 사주 원국 이미지를<br />모두 생성하는 중이오.<br /><br />1~2분 정도 소요되오니<br />이 화면을 벗어나도 괜찮소.<br /><br />입력하신 이메일로 결과지 링크를<br />보내드렸으니 언제든 확인하실 수 있소.</p>
+  if (creating) {
+    const pct = Math.round((doneCount / TOTAL) * 100);
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center gap-8 z-50 px-8" style={{ background: "#fdf8f4" }}>
+        <div className="text-center">
+          <p className="text-[17px] font-bold mb-1" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 완성하고 있소…</p>
+          <p className="text-[13px]" style={{ color: "#7a5a40" }}>
+            {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
+          </p>
+        </div>
+        <div className="w-full max-w-[280px]">
+          <div className="flex justify-between text-[11px] mb-2" style={{ color: "#7a5a40" }}>
+            <span>{doneCount} / {TOTAL} 장 완성</span>
+            <span>{pct}%</span>
+          </div>
+          <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "#e8d8c8" }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${pct}%`, background: "#8b2e14" }}
+            />
+          </div>
+        </div>
+        <p className="text-[12px] text-center leading-relaxed" style={{ color: "#9a7a60" }}>
+          풀이가 완성되면 자동으로 결과지가 열리오.<br />이 화면을 벗어나지 마시오.
+        </p>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
