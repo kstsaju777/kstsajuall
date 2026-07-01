@@ -27,7 +27,7 @@ export const maxDuration = 300;
 const PRODUCT_SLUG = "saju_yeonae";
 const PRODUCT_NAME = "연애운사주";
 const PRODUCT_PRICE = 29900;
-const REPORT_PATH = "saju/saju_yeonae/report";
+const REPORT_PATH = "saju/saju_yeonae/report-preview";
 
 const createSchema = z.object({
   name: z.string().optional().default(""),
@@ -41,17 +41,30 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
-  const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
+  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
     try {
       const llm = await generateInterpretation({ system, user, json: true });
       meta = { provider: llm.provider, model: llm.model };
-      const obj = parseContentJson(llm.text);
-      // 6장: 서버 계산된 tags를 LLM 결과에 덮어씌우기
-      if (compatTags && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
+      let obj: Record<string, unknown>;
+      try {
+        obj = parseContentJson(llm.text);
+      } catch (parseErr) {
+        console.error(`[saju_yeonae] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
+        // 16장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
+        if (chapter === 14) {
+          const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
+        } else {
+          continue;
+        }
+      }
+      // 6장: 서버 계산된 tags + pillars를 LLM 결과에 덮어씌우기
+      if (Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
         const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
-        compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
+        if (compatTags) compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
+        if (ch6Pillars) ch6Pillars.forEach((p, idx) => { if (cj[idx]) cj[idx].pillars = p; });
       }
       // 6장: desc를 각 순위별 별도 호출로 생성 (정확도 보장)
       if (chapter === 6 && ch6RankData && ch6RankData.length > 0 && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
@@ -70,37 +83,47 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
           }
         }));
       }
-      // 2장 후처리: yongsinEl/heusinEl/gisinEl 빠진 경우 텍스트에서 추출
+      // 2장: yongsinEl/heusinEl/gisinEl — 십성→오행 변환 포함
       if (chapter === 2) {
         const y = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
         if (y) {
-          const OHAENG = ["금", "목", "화", "토", "수"] as const;
+          const OHAENG = ["금","목","화","토","수"] as const;
+          // 일간 오행 추출
+          const ilganEl = (input.pillars?.find(p => p.pos === "일주")?.ganEl) ?? "";
+          // 십성→오행 변환 테이블 (일간 오행 기준)
+          const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+          const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+          const CLASHED_BY: Record<string,string> = { 목:"금",화:"수",토:"목",금:"화",수:"토" }; // 나를 극하는
+          const GENERATED_BY: Record<string,string> = { 목:"수",화:"목",토:"화",금:"토",수:"금" }; // 나를 생하는
+          function sipToEl(sip: string): string {
+            if (["비견","겁재"].some(s => sip.includes(s))) return ilganEl;
+            if (["식신","상관"].some(s => sip.includes(s))) return GEN[ilganEl] ?? "";
+            if (["편재","정재","재성"].some(s => sip.includes(s))) return CTL[ilganEl] ?? "";
+            if (["편관","정관","관성"].some(s => sip.includes(s))) return CLASHED_BY[ilganEl] ?? "";
+            if (["편인","정인","인성"].some(s => sip.includes(s))) return GENERATED_BY[ilganEl] ?? "";
+            return "";
+          }
+          function resolveEl(fieldVal: unknown, keyword: string, allText: string): string {
+            const v = String(fieldVal ?? "").trim();
+            if ((OHAENG as readonly string[]).includes(v)) return v; // 이미 오행이면 그대로
+            // 텍스트에서 십성 키워드 + 오행 순으로 탐색
+            const sipMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*[''""]?([가-힣]{2,3})[''""]?`));
+            if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; const direct = sipMatch[1]; if ((OHAENG as readonly string[]).includes(direct)) return direct; }
+            // 오행 직접 언급
+            const elMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+            if (elMatch) return elMatch[1];
+            return "";
+          }
           const allText = [y.callout, y.intro, ...((y.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
-          if (!y.yongsinEl) {
-            const m = allText.match(/용신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.yongsinEl = m[1];
-          }
-          if (!y.heusinEl) {
-            const m = allText.match(/희신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.heusinEl = m[1];
-          }
-          if (!y.gisinEl) {
-            const m = allText.match(/기신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.gisinEl = m[1];
-          }
-          // 그래도 없으면 callout에서 첫 번째 오행 순서대로 추출
-          if (!y.yongsinEl || !y.heusinEl || !y.gisinEl) {
-            const found: string[] = [];
-            for (const ch of allText) { if (OHAENG.includes(ch as typeof OHAENG[number]) && !found.includes(ch)) found.push(ch); if (found.length === 3) break; }
-            if (!y.yongsinEl && found[0]) y.yongsinEl = found[0];
-            if (!y.heusinEl  && found[1]) y.heusinEl  = found[1];
-            if (!y.gisinEl   && found[2]) y.gisinEl   = found[2];
-          }
+          y.yongsinEl = resolveEl(y.yongsinEl, "용신", allText);
+          y.heusinEl  = resolveEl(y.heusinEl,  "희신", allText);
+          y.gisinEl   = resolveEl(y.gisinEl,   "기신", allText);
         }
       }
       if (isChapterReady(obj, chapter)) return { obj, ...meta };
-    } catch {
-      /* 재시도 */
+      console.error(`[saju_yeonae] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
+    } catch (e) {
+      console.error(`[saju_yeonae] ${chapter}장 예외 (시도${i+1}):`, e);
     }
   }
   throw new Error(`${chapter}장 생성 실패(LLM 응답 불량)`);
@@ -150,12 +173,15 @@ async function saveContent(id: string, content: Record<string, unknown>) {
   return NextResponse.json({ ok: true });
 }
 
-// ── 초기 생성: SSE 스트리밍 (1장씩 순차, 진행률 전송) ──
+// ── 초기 생성: 명식 생성 + resultId 반환 (장 생성은 클라이언트가 병렬로) ──
 async function createReport(body: unknown) {
-  if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
+  if (!isSajuApiConfigured()) {
+    return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
+  }
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
   const { name, date, time, calendar, gender, email } = parsed.data;
+
   const ymd = parseDate(date);
   if (!ymd) return NextResponse.json({ error: "생년월일 형식 오류" }, { status: 400 });
   const cal = parseCalendar(calendar);
@@ -164,89 +190,86 @@ async function createReport(body: unknown) {
   const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
   const g: "male" | "female" = gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
   const pad = (n: number | string) => String(n).padStart(2, "0");
-  const encoder = new TextEncoder();
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      const send = (data: object) => {
-        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`)); } catch { /* 연결 종료 */ }
-      };
-      try {
-        const birthInfo: BirthInfo = {
-          birthYear: String(ymd.year), birthMonth: String(ymd.month), birthDay: String(ymd.day),
-          ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
-          calendarType: cal === "solar" ? "양력" : "음력", gender: g, isLeapMonth: cal === "leap",
-        };
-        const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
-        const view = buildMyeongsikView(analysis);
-        const manseryeokText = formatSajuToManseryeok(analysis, birthInfo);
-        const env = serverEnv();
-        const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
-        const birth = {
-          date: `${ymd.year}.${pad(ymd.month)}.${pad(ymd.day)}`,
-          calendar: cal === "solar" ? "양력" : cal === "leap" ? "윤달" : "음력",
-          time: hasTime ? `${pad(hh)}:${pad(mm)}` : "시간 모름", gender: g,
-        };
-        const service = createServiceClient();
-        const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
-        if (!product) { send({ error: "상품을 찾을 수 없습니다." }); controller.close(); return; }
-        const orderCode = `jt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        const { data: order, error: orderErr } = await service.from("orders")
-          .insert({ order_id: orderCode, product_id: product.id, guest_email: email || "guest@hongyeondang.com", amount: 0, status: "paid", paid_at: new Date().toISOString() })
-          .select("id").single();
-        if (orderErr || !order) { send({ error: "주문 생성 실패" }); controller.close(); return; }
+  try {
+    const birthInfo: BirthInfo = {
+      birthYear: String(ymd.year),
+      birthMonth: String(ymd.month),
+      birthDay: String(ymd.day),
+      ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
+      calendarType: cal === "solar" ? "양력" : "음력",
+      gender: g,
+      isLeapMonth: cal === "leap",
+    };
+
+    const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
+    const view = buildMyeongsikView(analysis);
+    const manseryeokText = formatSajuToManseryeok(analysis, birthInfo);
+
+    const env = serverEnv();
+    const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
+
+    const birth = {
+      date: `${ymd.year}.${pad(ymd.month)}.${pad(ymd.day)}`,
+      calendar: cal === "solar" ? "양력" : cal === "leap" ? "윤달" : "음력",
+      time: hasTime ? `${pad(hh)}:${pad(mm)}` : "시간 모름",
+      gender: g,
+    };
+
+    const service = createServiceClient();
+
+    // 1단계: 주문 + 초기 결과 레코드 생성
+    const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
+    if (!product) return NextResponse.json({ error: "상품을 찾을 수 없습니다." }, { status: 500 });
+
+    const orderCode = `jt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const { data: order, error: orderErr } = await service
+      .from("orders")
+      .insert({ order_id: orderCode, product_id: product.id, guest_email: email || "guest@hongyeondang.com", amount: 0, status: "paid", paid_at: new Date().toISOString() })
+      .select("id").single();
+    if (orderErr || !order) return NextResponse.json({ error: "주문 생성 실패" }, { status: 500 });
+
         await service.from("saju_inputs").insert({
           order_id: order.id, name: name || null,
           birth_date: `${ymd.year}-${pad(ymd.month)}-${pad(ymd.day)}`,
           birth_time: hasTime ? `${pad(hh)}:${pad(mm)}` : null,
-          time_unknown: !hasTime, gender: g, calendar: cal === "solar" ? "solar" : "lunar", concerns: [],
+          time_unknown: !hasTime, gender: g,
+          calendar: cal === "solar" ? "solar" : "lunar", concerns: [],
         });
-        const { data: result, error: resultErr } = await service.from("saju_results")
+
+        const { data: result, error: resultErr } = await service
+          .from("saju_results")
           .insert({ order_id: order.id, myeongsik: { view, name, birth, manseryeokText, gender: g } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
           .select("id").single();
-        if (resultErr || !result) { send({ error: "결과 저장 실패" }); controller.close(); return; }
+        if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패" }, { status: 500 });
+
+        // 2단계: SMS + 이메일 즉시 발송
         const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
         sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
         if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
-        const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
-        const imagePromise = (async () => {
-          const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
-          const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-          const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-          const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-          if (uploadErr) throw uploadErr;
-          return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
-        })();
-        const content: Record<string, unknown> = {};
-        for (let ch = 1; ch <= 16; ch++) {
-          try {
-            const r = await genChapterContent(ch, chapterInput);
-            Object.assign(content, r.obj);
-            send({ chapter: ch, total: 16 });
-          } catch (e) {
-            console.error(`[${PRODUCT_SLUG}] ${ch}장 생성 실패:`, e);
-            send({ chapter: ch, total: 16, failed: true });
-          }
-        }
-        const imageResult = await Promise.allSettled([imagePromise]);
-        if (imageResult[0].status === "rejected") console.error(`[${PRODUCT_SLUG}] 이미지 생성 실패:`, imageResult[0].reason);
-        const sajuImageUrl = imageResult[0].status === "fulfilled" ? (imageResult[0].value as string) : null;
-        await service.from("saju_results").update({
-          myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl } as never,
-          interpretation_md: JSON.stringify(content),
-        }).eq("id", result.id);
-        send({ done: true, resultId: result.id, sajuImageUrl });
-      } catch (err) {
-        send({ error: err instanceof Error ? err.message : String(err) });
-      } finally {
-        controller.close();
-      }
-    }
-  });
 
-  return new Response(stream, {
-    headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no" },
-  });
+        // 3단계: 이미지 백그라운드 시작 (클라이언트 병렬 장 생성 중에 동시 실행)
+        const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
+        (async () => {
+          for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+              const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
+              const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+              const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+              if (uploadErr) throw uploadErr;
+              const sajuImageUrl = service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
+              await service.from("saju_results").update({ myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl } as never }).eq("id", result.id);
+              break;
+            } catch (e) {
+              console.error(`[saju_yeonae] 이미지 생성 실패 (시도${attempt + 1}):`, e);
+            }
+          }
+        })();
+
+        return NextResponse.json({ resultId: result.id });
+      } catch (err) {
+        return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+      }
 }
 
 // ── 특정 장 온디맨드 생성 ──
