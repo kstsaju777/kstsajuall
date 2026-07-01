@@ -1,10 +1,9 @@
 ﻿// =====================================================
-// 정통사주 결과지 생성 + 저장 API (장별 온디맨드)
+// 연애궁합 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
-// POST {name,date,time,calendar,gender,email}  → 명식 + 1장 풀이 생성·저장 → {resultId, view, content, ...}
-// POST {id, chapter}                            → 그 장만 생성·병합 → {content}
-// GET  ?id=<resultId>                           → 저장된 {view, content, name, birth}
-//   장을 열 때 그 장만 생성하므로 한 호출이 짧아 Vercel 타임아웃에 안전.
+// POST {name,date,time,calendar,gender,email,partnerName,...}  → 명식 + resultId 반환
+// POST {id, chapter}                            → 그 장만 생성·반환
+// GET  ?id=<resultId>                           → 저장된 {view, content, name, birth, ...}
 
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
@@ -27,7 +26,7 @@ export const maxDuration = 300;
 const PRODUCT_SLUG = "kunghap_janyeo";
 const PRODUCT_NAME = "자녀궁합";
 const PRODUCT_PRICE = 29900;
-const REPORT_PATH = "saju/kunghap_janyeo/report";
+const REPORT_PATH = "saju/kunghap_janyeo/report-preview";
 
 const createSchema = z.object({
   name: z.string().optional().default(""),
@@ -37,7 +36,7 @@ const createSchema = z.object({
   gender: z.string().optional().default(""),
   email: z.string().optional().default(""),
   partnerName: z.string().optional().default(""),
-  partnerDate: z.string().min(1),
+  partnerDate: z.string().optional().default(""),
   partnerTime: z.string().optional().default(""),
   partnerCalendar: z.string().optional().default("양력"),
   partnerGender: z.string().optional().default(""),
@@ -46,17 +45,29 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
-  const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
+  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
     try {
       const llm = await generateInterpretation({ system, user, json: true });
       meta = { provider: llm.provider, model: llm.model };
-      const obj = parseContentJson(llm.text);
-      // 6장: 서버 계산된 tags를 LLM 결과에 덮어씌우기
-      if (compatTags && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
+      let obj: Record<string, unknown>;
+      try {
+        obj = parseContentJson(llm.text);
+      } catch (parseErr) {
+        console.error(`[kunghap_janyeo] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
+        if (chapter === 14) {
+          const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
+        } else {
+          continue;
+        }
+      }
+      // 6장: 서버 계산된 tags + pillars를 LLM 결과에 덮어씌우기
+      if (Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
         const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
-        compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
+        if (compatTags) compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
+        if (ch6Pillars) ch6Pillars.forEach((p, idx) => { if (cj[idx]) cj[idx].pillars = p; });
       }
       // 6장: desc를 각 순위별 별도 호출로 생성 (정확도 보장)
       if (chapter === 6 && ch6RankData && ch6RankData.length > 0 && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
@@ -75,37 +86,43 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
           }
         }));
       }
-      // 2장 후처리: yongsinEl/heusinEl/gisinEl 빠진 경우 텍스트에서 추출
+      // 2장: yongsinEl/heusinEl/gisinEl — 십성→오행 변환 포함
       if (chapter === 2) {
         const y = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
         if (y) {
-          const OHAENG = ["금", "목", "화", "토", "수"] as const;
+          const OHAENG = ["금","목","화","토","수"] as const;
+          const ilganEl = (input.pillars?.find(p => p.pos === "일주")?.ganEl) ?? "";
+          const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+          const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+          const CLASHED_BY: Record<string,string> = { 목:"금",화:"수",토:"목",금:"화",수:"토" };
+          const GENERATED_BY: Record<string,string> = { 목:"수",화:"목",토:"화",금:"토",수:"금" };
+          function sipToEl(sip: string): string {
+            if (["비견","겁재"].some(s => sip.includes(s))) return ilganEl;
+            if (["식신","상관"].some(s => sip.includes(s))) return GEN[ilganEl] ?? "";
+            if (["편재","정재","재성"].some(s => sip.includes(s))) return CTL[ilganEl] ?? "";
+            if (["편관","정관","관성"].some(s => sip.includes(s))) return CLASHED_BY[ilganEl] ?? "";
+            if (["편인","정인","인성"].some(s => sip.includes(s))) return GENERATED_BY[ilganEl] ?? "";
+            return "";
+          }
+          function resolveEl(fieldVal: unknown, keyword: string, allText: string): string {
+            const v = String(fieldVal ?? "").trim();
+            if ((OHAENG as readonly string[]).includes(v)) return v;
+            const sipMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*[''""]?([가-힣]{2,3})[''""]?`));
+            if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; const direct = sipMatch[1]; if ((OHAENG as readonly string[]).includes(direct)) return direct; }
+            const elMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+            if (elMatch) return elMatch[1];
+            return "";
+          }
           const allText = [y.callout, y.intro, ...((y.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
-          if (!y.yongsinEl) {
-            const m = allText.match(/용신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.yongsinEl = m[1];
-          }
-          if (!y.heusinEl) {
-            const m = allText.match(/희신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.heusinEl = m[1];
-          }
-          if (!y.gisinEl) {
-            const m = allText.match(/기신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.gisinEl = m[1];
-          }
-          // 그래도 없으면 callout에서 첫 번째 오행 순서대로 추출
-          if (!y.yongsinEl || !y.heusinEl || !y.gisinEl) {
-            const found: string[] = [];
-            for (const ch of allText) { if (OHAENG.includes(ch as typeof OHAENG[number]) && !found.includes(ch)) found.push(ch); if (found.length === 3) break; }
-            if (!y.yongsinEl && found[0]) y.yongsinEl = found[0];
-            if (!y.heusinEl  && found[1]) y.heusinEl  = found[1];
-            if (!y.gisinEl   && found[2]) y.gisinEl   = found[2];
-          }
+          y.yongsinEl = resolveEl(y.yongsinEl, "용신", allText);
+          y.heusinEl  = resolveEl(y.heusinEl,  "희신", allText);
+          y.gisinEl   = resolveEl(y.gisinEl,   "기신", allText);
         }
       }
       if (isChapterReady(obj, chapter)) return { obj, ...meta };
-    } catch {
-      /* 재시도 */
+      console.error(`[kunghap_janyeo] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
+    } catch (e) {
+      console.error(`[kunghap_janyeo] ${chapter}장 예외 (시도${i+1}):`, e);
     }
   }
   throw new Error(`${chapter}장 생성 실패(LLM 응답 불량)`);
@@ -139,7 +156,7 @@ export async function POST(request: NextRequest) {
     return saveContent(body.id, body.content as Record<string, unknown>);
   }
   if (body && typeof body.id === "string" && typeof body.chapter === "number") {
-    return generateChapter(body); // 그 장 생성해서 반환만(저장은 클라가 합본 1회)
+    return generateChapter(body);
   }
   return createReport(body);
 }
@@ -155,7 +172,7 @@ async function saveContent(id: string, content: Record<string, unknown>) {
   return NextResponse.json({ ok: true });
 }
 
-// ── 초기 생성: 명식 + 1장 풀이 ──
+// ── 초기 생성: 명식 생성 + resultId 반환 (장 생성은 클라이언트가 병렬로) ──
 async function createReport(body: unknown) {
   if (!isSajuApiConfigured()) {
     return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
@@ -175,46 +192,56 @@ async function createReport(body: unknown) {
   const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
   const g: "male" | "female" = gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
 
-  const birthInfo: BirthInfo = {
-    birthYear: String(ymd.year),
-    birthMonth: String(ymd.month),
-    birthDay: String(ymd.day),
-    ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
-    calendarType: cal === "solar" ? "양력" : "음력",
-    gender: g,
-    isLeapMonth: cal === "leap",
-  };
-
-  // 상대방
-  const pymd = parseDate(partnerDate);
-  if (!pymd) return NextResponse.json({ error: "상대방 생년월일 형식 오류" }, { status: 400 });
+  // 상대방 (optional)
+  const pymd = partnerDate ? parseDate(partnerDate) : null;
   const pcal = parseCalendar(partnerCalendar);
   const ptimeVal = parseTimeVal(partnerTime);
   const phasTime = ptimeVal !== "unknown";
   const [phh, pmm] = phasTime ? ptimeVal.split(":") : ["", ""];
   const pg: "male" | "female" = partnerGender === "여자" || partnerGender === "여성" || partnerGender === "여아" || partnerGender === "female" ? "female" : "male";
 
-  const partnerBirthInfo: BirthInfo = {
-    birthYear: String(pymd.year),
-    birthMonth: String(pymd.month),
-    birthDay: String(pymd.day),
-    ...(phasTime ? { birthHour: String(Number(phh)), birthMinute: String(Number(pmm)) } : {}),
-    calendarType: pcal === "solar" ? "양력" : "음력",
-    gender: pg,
-    isLeapMonth: pcal === "leap",
-  };
-
   try {
-    // 두 사람 만세력 병렬 호출
-    const [analysis, partnerAnalysis] = await Promise.all([
-      fetchSajuAnalysis(birthInfo, [], { source: "confirm" }),
-      fetchSajuAnalysis(partnerBirthInfo, [], { source: "confirm" }),
-    ]);
+    const birthInfo: BirthInfo = {
+      birthYear: String(ymd.year),
+      birthMonth: String(ymd.month),
+      birthDay: String(ymd.day),
+      ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
+      calendarType: cal === "solar" ? "양력" : "음력",
+      gender: g,
+      isLeapMonth: cal === "leap",
+    };
+
+    const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
+    let partnerView = null;
+    let partnerManseryeokText = "";
+    let partnerBirth = null;
+
+    if (pymd) {
+      const partnerBirthInfo: BirthInfo = {
+        birthYear: String(pymd.year),
+        birthMonth: String(pymd.month),
+        birthDay: String(pymd.day),
+        ...(phasTime ? { birthHour: String(Number(phh)), birthMinute: String(Number(pmm)) } : {}),
+        calendarType: pcal === "solar" ? "양력" : "음력",
+        gender: pg,
+        isLeapMonth: pcal === "leap",
+      };
+      const partnerAnalysis = await fetchSajuAnalysis(partnerBirthInfo, [], { source: "confirm" });
+      partnerView = buildMyeongsikView(partnerAnalysis);
+      partnerManseryeokText = formatSajuToManseryeok(partnerAnalysis, partnerBirthInfo);
+      partnerBirth = {
+        date: `${pymd.year}.${pad(pymd.month)}.${pad(pymd.day)}`,
+        calendar: pcal === "solar" ? "양력" : pcal === "leap" ? "윤달" : "음력",
+        time: phasTime ? `${pad(phh)}:${pad(pmm)}` : "시간 모름",
+        gender: pg,
+      };
+    }
+
     const view = buildMyeongsikView(analysis);
-    const partnerView = buildMyeongsikView(partnerAnalysis);
     const myManseryeokText = formatSajuToManseryeok(analysis, birthInfo);
-    const partnerManseryeokText = formatSajuToManseryeok(partnerAnalysis, partnerBirthInfo);
-    const manseryeokText = `[${name || "나"}의 사주]\n${myManseryeokText}\n\n[${partnerName || "상대방"}의 사주]\n${partnerManseryeokText}`;
+    const manseryeokText = partnerManseryeokText
+      ? `[${name || "나"}의 사주]\n${myManseryeokText}\n\n[${partnerName || "상대방"}의 사주]\n${partnerManseryeokText}`
+      : myManseryeokText;
 
     const env = serverEnv();
     const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
@@ -225,16 +252,9 @@ async function createReport(body: unknown) {
       time: hasTime ? `${pad(hh)}:${pad(mm)}` : "시간 모름",
       gender: g,
     };
-    const partnerBirth = {
-      date: `${pymd.year}.${pad(pymd.month)}.${pad(pymd.day)}`,
-      calendar: pcal === "solar" ? "양력" : pcal === "leap" ? "윤달" : "음력",
-      time: phasTime ? `${pad(phh)}:${pad(pmm)}` : "시간 모름",
-      gender: pg,
-    };
 
     const service = createServiceClient();
 
-    // 1단계: 주문 + 초기 결과 레코드 먼저 생성 (알림 발송에 resultId 필요)
     const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
     if (!product) return NextResponse.json({ error: "상품을 찾을 수 없습니다." }, { status: 500 });
 
@@ -242,79 +262,54 @@ async function createReport(body: unknown) {
     const { data: order, error: orderErr } = await service
       .from("orders")
       .insert({ order_id: orderCode, product_id: product.id, guest_email: email || "guest@hongyeondang.com", amount: 0, status: "paid", paid_at: new Date().toISOString() })
-      .select("id")
-      .single();
-    if (orderErr || !order) return NextResponse.json({ error: "주문 생성 실패", detail: orderErr?.message }, { status: 500 });
+      .select("id").single();
+    if (orderErr || !order) return NextResponse.json({ error: "주문 생성 실패" }, { status: 500 });
 
     await service.from("saju_inputs").insert({
-      order_id: order.id,
-      name: name || null,
+      order_id: order.id, name: name || null,
       birth_date: `${ymd.year}-${pad(ymd.month)}-${pad(ymd.day)}`,
       birth_time: hasTime ? `${pad(hh)}:${pad(mm)}` : null,
-      time_unknown: !hasTime,
-      gender: g,
-      calendar: cal === "solar" ? "solar" : "lunar",
-      concerns: [],
+      time_unknown: !hasTime, gender: g,
+      calendar: cal === "solar" ? "solar" : "lunar", concerns: [],
     });
+
+    const storedMyeongsik = { view, name, birth, manseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg };
 
     const { data: result, error: resultErr } = await service
       .from("saju_results")
-      .insert({
-        order_id: order.id,
-        myeongsik: { view, name, birth, manseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg } as never,
-        interpretation_md: JSON.stringify({}),
-        llm_provider: llm.provider,
-        llm_model: llm.model,
-      })
-      .select("id")
-      .single();
-    if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패", detail: resultErr?.message }, { status: 500 });
+      .insert({ order_id: order.id, myeongsik: storedMyeongsik as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
+      .select("id").single();
+    if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패" }, { status: 500 });
 
-    // 2단계: SMS + 이메일 즉시 발송 (fire-and-forget)
+    // SMS + 이메일 즉시 발송
     const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
     sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
     if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
 
-    // 3단계: 이미지(2명) + 16장 동시 병렬 생성
-    const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
-    const [imagesResult, ...chapterResults] = await Promise.allSettled([
-      (async () => {
-        const [imgBuffer, partnerImgBuffer] = await Promise.all([
+    // 이미지 두 사람 각각 백그라운드 생성 (fire-and-forget)
+    (async () => {
+      try {
+        const buffers = await Promise.all([
           generateSajuImage(buildSajuImagePrompt(view.pillars ?? []), process.env.OPENAI_API_KEY!),
-          generateSajuImage(buildSajuImagePrompt(partnerView.pillars ?? []), process.env.OPENAI_API_KEY!),
+          ...(partnerView?.pillars ? [generateSajuImage(buildSajuImagePrompt(partnerView.pillars), process.env.OPENAI_API_KEY!)] : []),
         ]);
         const ts = Date.now();
-        const rand1 = Math.random().toString(36).slice(2, 8);
-        const rand2 = Math.random().toString(36).slice(2, 8);
-        const [up1, up2] = await Promise.all([
-          service.storage.from("saju-images").upload(`wonguk/${ts}-${rand1}.png`, imgBuffer, { contentType: "image/png", upsert: false }),
-          service.storage.from("saju-images").upload(`wonguk/${ts}-${rand2}.png`, partnerImgBuffer, { contentType: "image/png", upsert: false }),
-        ]);
-        return {
-          sajuImageUrl: up1.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand1}.png`).data.publicUrl,
-          partnerSajuImageUrl: up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand2}.png`).data.publicUrl,
-        };
-      })(),
-      ...Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput)),
-    ]);
-    const { sajuImageUrl = null, partnerSajuImageUrl = null } = imagesResult.status === "fulfilled"
-      ? (imagesResult.value as { sajuImageUrl: string | null; partnerSajuImageUrl: string | null })
-      : {};
-    const content: Record<string, unknown> = {};
-    for (let i = 0; i < 16; i++) {
-      const r = chapterResults[i];
-      if (r.status === "fulfilled") Object.assign(content, (r.value as { obj: Record<string, unknown> }).obj);
-    }
+        const r1 = Math.random().toString(36).slice(2,8);
+        const up1 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r1}.png`, buffers[0], { contentType: "image/png", upsert: false });
+        const sajuImageUrl = up1.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r1}.png`).data.publicUrl;
+        let partnerSajuImageUrl = null;
+        if (buffers[1]) {
+          const r2 = Math.random().toString(36).slice(2,8);
+          const up2 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r2}.png`, buffers[1], { contentType: "image/png", upsert: false });
+          partnerSajuImageUrl = up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r2}.png`).data.publicUrl;
+        }
+        await service.from("saju_results").update({ myeongsik: { ...storedMyeongsik, sajuImageUrl, partnerSajuImageUrl } as never }).eq("id", result.id);
+      } catch { /* 이미지 실패 무시 */ }
+    })();
 
-    // 4단계: 최종 내용으로 업데이트
-    await service.from("saju_results").update({
-      myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl, partnerView, partnerName, partnerBirth, partnerGender: pg, partnerSajuImageUrl } as never,
-      interpretation_md: JSON.stringify(content),
-    }).eq("id", result.id);
-
-    return NextResponse.json({ resultId: result.id, view, content, name, birth, sajuImageUrl, partnerView, partnerName, partnerBirth, partnerGender: pg, partnerSajuImageUrl });
+    return NextResponse.json({ resultId: result.id });
   } catch (err) {
-    return NextResponse.json({ error: "결과지 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }
 }
 
@@ -331,7 +326,6 @@ async function generateChapter(body: unknown) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
 
-  // myeongsik에 gender가 없으면 saju_inputs에서 fallback
   if (!stored?.gender && data.order_id && stored) {
     const { data: si } = await service.from("saju_inputs").select("gender").eq("order_id", data.order_id).maybeSingle();
     if (si?.gender) stored.gender = (si.gender as string) === "female" || (si.gender as string) === "여자" || (si.gender as string) === "여성" || (si.gender as string) === "여아" ? "female" : "male";
@@ -341,7 +335,6 @@ async function generateChapter(body: unknown) {
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
   if (!force && isChapterReady(content, chapter)) {
-    // 이미 저장돼 있으면 그 장 섹션만 반환
     const sections: Record<string, unknown> = {};
     for (const k of CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
     return NextResponse.json({ sections });
@@ -350,12 +343,12 @@ async function generateChapter(body: unknown) {
   let manseryeokText: string | undefined = stored?.manseryeokText;
   if (!manseryeokText) {
     if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
-    manseryeokText = (await loadManseryeokFromInputs(service, id)) ?? undefined; // 옛 결과 복원
+    manseryeokText = (await loadManseryeokFromInputs(service, id)) ?? undefined;
   }
   if (!manseryeokText) return NextResponse.json({ error: "명식 정보를 찾을 수 없습니다." }, { status: 500 });
 
   try {
-    const birthDateStr: string = stored?.birth?.date ?? ""; // "yyyy.mm.dd"
+    const birthDateStr: string = stored?.birth?.date ?? "";
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
@@ -384,7 +377,19 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, content, partnerView: stored?.partnerView ?? null, partnerName: stored?.partnerName ?? "", partnerBirth: stored?.partnerBirth ?? null, partnerGender: stored?.partnerGender ?? "", partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null });
+  return NextResponse.json({
+    view: stored?.view ?? stored,
+    name: stored?.name ?? "",
+    birth: stored?.birth ?? null,
+    gender: stored?.gender ?? "",
+    sajuImageUrl: stored?.sajuImageUrl ?? null,
+    content,
+    partnerView: stored?.partnerView ?? null,
+    partnerName: stored?.partnerName ?? "",
+    partnerBirth: stored?.partnerBirth ?? null,
+    partnerGender: stored?.partnerGender ?? "",
+    partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null,
+  });
 }
 
 // ── 이미지 재생성 ──
