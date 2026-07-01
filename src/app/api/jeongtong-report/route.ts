@@ -53,7 +53,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
       } catch (parseErr) {
         console.error(`[jeongtong] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         // 16장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
-        if (chapter === 16) {
+        if (chapter === 14) {
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else {
@@ -258,7 +258,7 @@ async function createReport(body: unknown) {
         })();
 
         // 4단계: 실제 결과지에 표시되는 장만 순차 생성 (1~13 + 마무리16), 완료마다 SSE 이벤트 전송
-        const CHAPTERS_TO_GEN = [1,2,3,4,5,6,7,8,9,10,11,12,13,16];
+        const CHAPTERS_TO_GEN = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
         const TOTAL_CHAPTERS = CHAPTERS_TO_GEN.length; // 14
         const content: Record<string, unknown> = {};
         for (let idx = 0; idx < CHAPTERS_TO_GEN.length; idx++) {

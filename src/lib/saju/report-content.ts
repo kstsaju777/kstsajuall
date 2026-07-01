@@ -132,9 +132,7 @@ export const CHAPTER_SECTIONS: Record<number, string[]> = {
   11: ["daeFlow", "seun", "openLuck", "domains"],               // 제11장 흐름
   12: ["samjae", "samjaeFocus"],                                // 제12장 주의
   13: ["sumEssence", "sumTime", "sumRelation"],                 // 제13장 당부
-  14: ["openMethod", "tomorrow", "weekFlow", "monthFlow"],      // 제14장 개운
-  15: ["simju", "shake", "forge"],                              // 제15장 중심
-  16: ["letter"],                                               // 마무리
+  14: ["letter"],                                               // 마무리
 };
 
 // 해당 장의 콘텐츠가 이미 생성됐는지 (모든 섹션 키 확인, paragraphs 빈 배열도 미완성)
@@ -640,7 +638,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["귀인과 협력할 때 기회·재물이 흐른다는 마무리 한 문단"]
   }
 }`,
-  14: `{
+  _unused14: `{
   "openMethod": {
     "intro": "부족하거나 조후를 조율해 줄 핵심 기운을 일상에서 채우는 생활 처방 도입",
     "callout": "그 기운(용신/희신 오행 한자 포함)이 십성으로 무엇을 뜻하며 어떤 약이 되는지 짚는 문장",
@@ -675,7 +673,7 @@ const CH_SCHEMA: Record<number, string> = {
     ]
   }
 }`,
-  15: `{
+  _unused15: `{
   "simju": {
     "intro": "마음이 흔들릴 때 중심을 잡아줄 '심주'(용신 기둥)를 짚는 도입",
     "callout": "심주가 되는 기운(용신 간지 한자+십성)이 어떤 단단한 바탕을 의미하는지 짚는 문장",
@@ -693,7 +691,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["원칙 점검·기록 등 일상 훈련","중심을 세우면 흔들리지 않는다는 격려"]
   }
 }`,
-  16: `{
+  14: `{
   "letter": {
     "paragraphs": [
       "이름을 부르며 시작하는 인사와, 어떤 고민(올해 운세·재물·결혼 등)을 안고 찾아왔는지 따뜻하게 회상하는 한 문단",
