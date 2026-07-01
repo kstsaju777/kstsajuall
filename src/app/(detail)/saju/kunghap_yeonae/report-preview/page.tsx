@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useRef, useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { calcSaju } from "@/lib/saju/local-manseryeok";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
-import { YEONAE_CHAPTER_SECTIONS, isYeonaeChapterReady } from "@/lib/saju/yeonae-report-content";
+import { isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM    = "#fdf8f4";
@@ -17,36 +17,60 @@ const ROSE     = "#b56576";
 const MAROON   = "#9b2335";
 const CALLOUT  = "#f7e9ec";
 const SERIF    = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
-const TOTAL_CH = Object.keys(YEONAE_CHAPTER_SECTIONS).length;
+const TOTAL_CH = 14;
 
 const CH_TITLES: Record<number, string> = {
-  0: "연애궁합 들어가며",
-  1: "두 사람의 타고난 기질",
-  2: "두 사람의 궁합 분석",
-  3: "상대방의 마음",
-  4: "연애 시기와 운의 흐름",
-  5: "관계를 방해하는 요인",
-  6: "홍연의 편지",
+  0:  "연애궁합 들어가며",
+  1:  "사주 원국",
+  2:  "운명의 구조",
+  3:  "인간관계",
+  4:  "숨겨진 특징",
+  5:  "재물과 직업",
+  6:  "사랑과 결혼",
+  7:  "건강",
+  8:  "귀인",
+  9:  "주의할 사람",
+  10: "굴곡과 위기",
+  11: "대운 흐름",
+  12: "주의 시기",
+  13: "당부의 말",
+  14: "개운법",
 };
 
 const CH_SUBS: Record<number, string> = {
-  0: "",
-  1: "두 사람이 끌리는 이유, 사주에 담겨 있어요",
-  2: "두 사람의 궁합이 얼마나 잘 맞는지 살펴봅니다",
-  3: "지금 이 순간, 상대방의 마음속을 들여다봅니다",
-  4: "두 사람의 사랑이 깊어지는 때를 찾습니다",
-  5: "관계를 가로막는 것들, 미리 알고 피하세요",
-  6: "홍연이 당신에게 전하는 마지막 이야기",
+  0:  "",
+  1:  "두 사람의 사주 원국을 살펴봅니다",
+  2:  "운명의 큰 구조와 흐름을 분석합니다",
+  3:  "두 사람의 인간관계 패턴을 봅니다",
+  4:  "숨겨진 재능과 특징을 발견합니다",
+  5:  "재물운과 직업 적성을 풀어드립니다",
+  6:  "두 사람의 사랑과 결혼 궁합을 분석합니다",
+  7:  "건강과 주의해야 할 부분을 살펴봅니다",
+  8:  "당신의 귀인을 찾아드립니다",
+  9:  "주의해야 할 사람의 유형을 알려드립니다",
+  10: "삶의 굴곡과 위기를 함께 살펴봅니다",
+  11: "대운의 큰 흐름을 분석합니다",
+  12: "주의해야 할 시기를 알려드립니다",
+  13: "홍연이 드리는 당부의 말씀입니다",
+  14: "개운하는 방법을 알려드립니다",
 };
 
 const CH_IMAGES: Record<number, string> = {
-  0: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
-  1: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
-  2: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
-  3: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
-  4: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
-  5: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
-  6: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  0:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  1:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  2:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  3:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  4:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  5:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  6:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  7:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  8:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  9:  "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  10: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  11: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  12: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  13: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
+  14: "/media/cards/kunghap_yeonae/yeonae-0.jpg",
 };
 
 type Section = { title: string; paragraphs: string[] };
@@ -92,7 +116,7 @@ function TocPanel({ open, onClose, currentCh, content, onSelect }: {
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {items.map((n) => {
-            const ready = content ? isYeonaeChapterReady(content, n) : false;
+            const ready = content ? isChapterReady(content as Record<string, unknown>, n) : false;
             const active = currentCh === n;
             return (
               <button key={n} onClick={() => { onSelect(n); onClose(); }}
@@ -116,11 +140,16 @@ function TocPanel({ open, onClose, currentCh, content, onSelect }: {
 }
 
 // ─── 두 사람 명식 헤더 ───────────────────────────────────────────────────────
-function MiniSaju({ saju, name }: { saju: LocalSajuResult | null; name: string }) {
+function MiniSaju({ saju, name, sajuImageUrl }: { saju: LocalSajuResult | null; name: string; sajuImageUrl?: string | null }) {
   const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
   return (
     <div className="flex-1">
       <p className="text-[11px] font-bold text-center mb-2" style={{ color: MUTE }}>{name}님</p>
+      {sajuImageUrl && (
+        <div className="mb-2 rounded-xl overflow-hidden" style={{ height: 80 }}>
+          <img src={sajuImageUrl} alt="" className="w-full h-full object-cover" />
+        </div>
+      )}
       <div className="grid grid-cols-4 gap-1">
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
@@ -135,8 +164,10 @@ function MiniSaju({ saju, name }: { saju: LocalSajuResult | null; name: string }
   );
 }
 
-function SajuHeader({ saju, partnerSaju, name, partnerName }: {
-  saju: LocalSajuResult | null; partnerSaju: LocalSajuResult | null; name: string; partnerName: string;
+function SajuHeader({ saju, partnerSaju, name, partnerName, sajuImageUrl, partnerSajuImageUrl }: {
+  saju: LocalSajuResult | null; partnerSaju: LocalSajuResult | null;
+  name: string; partnerName: string;
+  sajuImageUrl?: string | null; partnerSajuImageUrl?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -149,9 +180,9 @@ function SajuHeader({ saju, partnerSaju, name, partnerName }: {
       </button>
       {open && (
         <div className="px-4 py-4 flex gap-3 items-start" style={{ backgroundColor: WHITE, borderBottom: `1px solid ${INK}08` }}>
-          <MiniSaju saju={saju} name={name} />
+          <MiniSaju saju={saju} name={name} sajuImageUrl={sajuImageUrl} />
           <div style={{ width: 1, backgroundColor: `${INK}12`, flexShrink: 0, alignSelf: "stretch" }} />
-          <MiniSaju saju={partnerSaju} name={partnerName} />
+          <MiniSaju saju={partnerSaju} name={partnerName} sajuImageUrl={partnerSajuImageUrl} />
         </div>
       )}
     </>
@@ -186,8 +217,8 @@ function SectionBlock({ sectionKey, section, accent = false }: { sectionKey: str
 }
 
 // ─── 인트로 (ch=0) ───────────────────────────────────────────────────────────
-function ChapterIntro({ name, partnerName, concern, onStart }: {
-  name: string; partnerName: string; concern: string; onStart: () => void;
+function ChapterIntro({ name, partnerName, onStart }: {
+  name: string; partnerName: string; onStart: () => void;
 }) {
   return (
     <div>
@@ -202,17 +233,11 @@ function ChapterIntro({ name, partnerName, concern, onStart }: {
         </div>
       </div>
       <div className="px-5 pb-8">
-        <div className="rounded-2xl p-5 mb-6" style={{ backgroundColor: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-          <p className="text-[12px] font-bold mb-2" style={{ color: MUTE }}>의뢰인의 고민</p>
-          <p className="text-[14px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>
-            {concern || "특별한 고민 없이 두 사람의 재회 가능성을 알고 싶어하셨어요."}
-          </p>
-        </div>
         <div className="space-y-2 mb-8">
-          {Object.entries(CH_TITLES).filter(([k]) => Number(k) >= 1).map(([k, title]) => (
+          {Array.from({ length: TOTAL_CH }, (_, i) => i + 1).map((k) => (
             <div key={k} className="flex items-center gap-3 py-2.5 px-4 rounded-xl" style={{ backgroundColor: `${INK}05` }}>
               <span className="text-[11px] font-bold w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${MAROON}15`, color: MAROON }}>{k}</span>
-              <p className="text-[13px] font-bold" style={{ color: INK }}>{title}</p>
+              <p className="text-[13px] font-bold" style={{ color: INK }}>{CH_TITLES[k]}</p>
             </div>
           ))}
         </div>
@@ -231,15 +256,14 @@ function ChapterView({ ch, content, generating, name, partnerName, onRetry, onNe
   name: string; partnerName: string;
   onRetry: () => void; onNext: () => void;
 }) {
-  const sectionKeys = YEONAE_CHAPTER_SECTIONS[ch] ?? [];
-  const ready = content ? isYeonaeChapterReady(content, ch) : false;
+  const sectionKeys = CHAPTER_SECTIONS[ch] ?? [];
+  const ready = content ? isChapterReady(content as Record<string, unknown>, ch) : false;
   const title = CH_TITLES[ch] ?? "";
   const sub = CH_SUBS[ch] ?? "";
   const imgSrc = CH_IMAGES[ch] ?? CH_IMAGES[1];
 
   return (
     <div>
-      {/* 챕터 커버 */}
       <div className="relative overflow-hidden" style={{ height: 220 }}>
         <img src={imgSrc} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
         <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, rgba(253,248,244,0.15) 0%, ${CREAM} 100%)` }} />
@@ -377,8 +401,6 @@ function ReportPreviewInner() {
   const time           = searchParams.get("time")           ?? "시간 모름";
   const calendar       = searchParams.get("calendar")       ?? "양력";
   const gender         = searchParams.get("gender")         ?? "";
-  const email          = searchParams.get("email")          ?? "";
-  const concern        = searchParams.get("concern")        ?? "";
   const partnerName    = searchParams.get("partnerName")    ?? "상대방";
   const partnerDate    = searchParams.get("partnerDate")    ?? "";
   const partnerTime    = searchParams.get("partnerTime")    ?? "시간 모름";
@@ -394,6 +416,8 @@ function ReportPreviewInner() {
   const [generating, setGenerating] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [tocOpen, setTocOpen] = useState(false);
+  const [sajuImageUrl, setSajuImageUrl] = useState<string | null>(null);
+  const [partnerSajuImageUrl, setPartnerSajuImageUrl] = useState<string | null>(null);
   const startedRef = useRef(false);
   const generatedRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -420,26 +444,12 @@ function ReportPreviewInner() {
     if (startedRef.current) return;
     startedRef.current = true;
     if (id) {
-      fetch(`/api/yeonae-report?id=${encodeURIComponent(id)}`)
-        .then((r) => r.ok ? r.json() : Promise.reject())
-        .then((d) => { setContent(d.content ?? {}); })
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    } else if (date && partnerDate) {
-      fetch("/api/yeonae-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, date, time, calendar, gender, email, concern, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender }),
-      })
+      fetch(`/api/kunghap_yeonae-report?id=${encodeURIComponent(id)}`)
         .then((r) => r.ok ? r.json() : Promise.reject())
         .then((d) => {
           setContent(d.content ?? {});
-          const rid = d.resultId ?? "";
-          setResultId(rid);
-          if (rid) {
-            const base = `name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName)}&gender=${encodeURIComponent(gender)}&partnerGender=${encodeURIComponent(partnerGender)}`;
-            router.replace(`/saju/kunghap_yeonae/report-preview?id=${rid}&${base}&ch=0`);
-          }
+          setSajuImageUrl(d.sajuImageUrl ?? null);
+          setPartnerSajuImageUrl(d.partnerSajuImageUrl ?? null);
         })
         .catch(() => {})
         .finally(() => setLoading(false));
@@ -448,11 +458,11 @@ function ReportPreviewInner() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 전 장 병렬 생성
+  // 전 장 병렬 생성 (resultId 있을 때)
   useEffect(() => {
     if (loading || !resultId || generatedRef.current) return;
-    const allNums = Object.keys(YEONAE_CHAPTER_SECTIONS).map(Number);
-    const missing = allNums.filter((n) => !isYeonaeChapterReady(content, n));
+    const allNums = Array.from({ length: TOTAL_CH }, (_, i) => i + 1);
+    const missing = allNums.filter((n) => !isChapterReady(content as Record<string, unknown> | null, n));
     if (missing.length === 0) { setRevealed(true); return; }
     generatedRef.current = true;
     setGenerating(true);
@@ -460,7 +470,7 @@ function ReportPreviewInner() {
 
     Promise.all(
       missing.map((n) =>
-        fetch("/api/yeonae-report", {
+        fetch("/api/kunghap_yeonae-report", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: resultId, chapter: n }),
@@ -473,7 +483,7 @@ function ReportPreviewInner() {
       const patch = Object.assign({}, ...results.filter(Boolean).map((r: any) => r.sections || {}));
       setContent((prev) => {
         const merged = { ...(prev ?? {}), ...patch } as ReportContent;
-        fetch("/api/yeonae-report", {
+        fetch("/api/kunghap_yeonae-report", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: resultId, content: merged }),
@@ -487,7 +497,7 @@ function ReportPreviewInner() {
   const retryChapter = (n: number) => {
     if (!resultId) return;
     setGenerating(true);
-    fetch("/api/yeonae-report", {
+    fetch("/api/kunghap_yeonae-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: resultId, chapter: n, force: true }),
@@ -511,12 +521,19 @@ function ReportPreviewInner() {
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
       <TopBar progress={scrollPct} title={CH_TITLES[chNum] ?? `제${chNum}장`} onMenu={() => setTocOpen(true)} />
       <TocPanel open={tocOpen} onClose={() => setTocOpen(false)} currentCh={chNum} content={content} onSelect={goTo} />
-      <SajuHeader saju={saju} partnerSaju={partnerSaju} name={name} partnerName={partnerName} />
+      <SajuHeader
+        saju={saju}
+        partnerSaju={partnerSaju}
+        name={name}
+        partnerName={partnerName}
+        sajuImageUrl={sajuImageUrl}
+        partnerSajuImageUrl={partnerSajuImageUrl}
+      />
 
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
 
         {chNum === 0 ? (
-          <ChapterIntro name={name} partnerName={partnerName} concern={concern} onStart={() => goTo(1)} />
+          <ChapterIntro name={name} partnerName={partnerName} onStart={() => goTo(1)} />
         ) : generating && !revealed ? (
           <GeneratingWait />
         ) : !revealed ? (
@@ -537,7 +554,7 @@ function ReportPreviewInner() {
   );
 }
 
-export default function JaehweReportPreviewPage() {
+export default function KunghapYeonaeReportPreviewPage() {
   return (
     <Suspense fallback={<InitLoading />}>
       <ReportPreviewInner />
