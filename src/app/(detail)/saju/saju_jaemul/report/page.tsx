@@ -4461,27 +4461,10 @@ function ReportPreviewInner() {
                 <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 15%, transparent 80%, ${CREAM} 100%)` }} />
               </div>
             ) : (
-              <div className="relative">
-                <WongukIllustration
-                  ilgan={report?.view?.pillars?.[1]?.gan ?? "甲"}
-                  wolji={report?.view?.pillars?.[2]?.ji ?? "子"}
-                />
-                {id && (
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                    <button
-                      onClick={() => {
-                        fetch("/api/jaemul-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
-                          .then((r) => r.ok ? r.json() : Promise.reject())
-                          .then((d) => { if (d.sajuImageUrl) setReport((p) => p ? { ...p, sajuImageUrl: d.sajuImageUrl } : p); })
-                          .catch(() => {});
-                      }}
-                      className="text-xs px-3 py-1 rounded-full bg-white/70 border border-amber-300 text-amber-800"
-                    >
-                      이미지 재생성
-                    </button>
-                  </div>
-                )}
-              </div>
+              <WongukIllustration
+                ilgan={report?.view?.pillars?.[1]?.gan ?? "甲"}
+                wolji={report?.view?.pillars?.[2]?.ji ?? "子"}
+              />
             )}
             <div className="px-6 pt-4">
               {c.wonguk.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
