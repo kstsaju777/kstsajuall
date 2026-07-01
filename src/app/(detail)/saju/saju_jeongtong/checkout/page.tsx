@@ -742,43 +742,40 @@ function CheckoutContent() {
     setDoneCount(0);
     setCurrentChapter(1);
     try {
+      // 1단계: 명식 생성 + resultId 받기
       const res = await fetch("/api/jeongtong-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, date, time, calendar, gender, email }),
       });
-      if (!res.ok || !res.body) {
+      if (!res.ok) {
         router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
         return;
       }
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split("\n");
-        buf = lines.pop() ?? "";
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.chapter) {
-              setDoneCount(data.chapter);
-              setCurrentChapter(Math.min(data.chapter + 1, TOTAL));
-            }
-            if (data.done && data.resultId) {
-              router.push(`/saju/saju_jeongtong/report-preview?id=${data.resultId}`);
-              return;
-            }
-            if (data.error) {
-              router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
-              return;
-            }
-          } catch { /* JSON 파싱 실패 무시 */ }
-        }
+      const { resultId } = await res.json();
+      if (!resultId) {
+        router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
+        return;
       }
+
+      // 2단계: 14장 병렬 생성 (각 요청은 독립적으로 짧게 끝남)
+      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+      let done = 0;
+      await Promise.all(chapters.map(async (ch) => {
+        try {
+          await fetch("/api/jeongtong-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: resultId, chapter: ch }),
+          });
+        } catch { /* 장 실패해도 계속 */ }
+        done++;
+        setDoneCount(done);
+        setCurrentChapter(Math.min(done + 1, TOTAL));
+      }));
+
+      // 3단계: 결과지 열기
+      router.push(`/saju/saju_jeongtong/report-preview?id=${resultId}`);
     } catch {
       router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
     }
