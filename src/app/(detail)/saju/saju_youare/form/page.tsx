@@ -507,7 +507,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern }: {
           style={{ backgroundColor: "rgba(233,189,174,0.15)", border: "2px solid rgba(233,189,174,0.4)" }}>
           <span style={{ fontSize: 28 }}>✨</span>
         </div>
-        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name}{suffix}의 나는누구사주</p>
+        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name}{suffix}의 유아사주</p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
           <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />
