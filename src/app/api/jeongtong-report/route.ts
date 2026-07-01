@@ -179,8 +179,6 @@ async function createReport(body: unknown) {
     const view = buildMyeongsikView(analysis);
     const manseryeokText = formatSajuToManseryeok(analysis, birthInfo);
 
-    // 풀이는 여기서 생성하지 않음 → 빈 상태로 저장하고, 결제 직후 클라가 전 장을 병렬 생성
-    const content: Record<string, unknown> = {};
     const env = serverEnv();
     const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
 
@@ -215,6 +213,17 @@ async function createReport(body: unknown) {
     } catch (e) {
       console.error("[이미지생성] 전체 실패:", e);
     }
+    // 16장 전부 병렬 생성
+    const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
+    const chapterResults = await Promise.allSettled(
+      Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput))
+    );
+    const content: Record<string, unknown> = {};
+    for (let i = 0; i < 16; i++) {
+      const r = chapterResults[i];
+      if (r.status === "fulfilled") Object.assign(content, r.value.obj);
+    }
+
     const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
     if (!product) return NextResponse.json({ error: "상품을 찾을 수 없습니다." }, { status: 500 });
 

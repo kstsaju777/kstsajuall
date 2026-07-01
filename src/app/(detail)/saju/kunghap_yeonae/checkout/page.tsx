@@ -455,9 +455,9 @@ function CheckoutContent() {
   if (creating) return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 z-50" style={{ background: "#fdf8f4" }}>
       <svg className="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8b2e14" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-      <div className="text-center">
-        <p className="text-[16px] font-bold" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 생성하고 있소…</p>
-        <p className="text-[13px] mt-1" style={{ color: "#7a5a40" }}>두 사람의 사주 원국 이미지까지 만들고 있으니<br />잠시만 기다려 주시오</p>
+      <div className="text-center px-8">
+        <p className="text-[16px] font-bold" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 완성하고 있소…</p>
+        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "#7a5a40" }}>16장 풀이와 사주 원국 이미지를<br />모두 생성하는 중이오.<br /><br />1~2분 정도 소요되오니<br />이 화면을 벗어나도 괜찮소.<br /><br />입력하신 이메일로 결과지 링크를<br />보내드렸으니 언제든 확인하실 수 있소.</p>
       </div>
     </div>
   );
