@@ -43,11 +43,23 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
   const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
     try {
       const llm = await generateInterpretation({ system, user, json: true });
       meta = { provider: llm.provider, model: llm.model };
-      const obj = parseContentJson(llm.text);
+      let obj: Record<string, unknown>;
+      try {
+        obj = parseContentJson(llm.text);
+      } catch (parseErr) {
+        console.error(`[jeongtong] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
+        // 16장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
+        if (chapter === 16) {
+          const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
+        } else {
+          continue;
+        }
+      }
       // 6장: 서버 계산된 tags를 LLM 결과에 덮어씌우기
       if (compatTags && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
         const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
@@ -245,16 +257,19 @@ async function createReport(body: unknown) {
           return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
         })();
 
-        // 4단계: 16장 1장씩 순차 생성, 완료마다 SSE 이벤트 전송
+        // 4단계: 실제 결과지에 표시되는 장만 순차 생성 (1~13 + 마무리16), 완료마다 SSE 이벤트 전송
+        const CHAPTERS_TO_GEN = [1,2,3,4,5,6,7,8,9,10,11,12,13,16];
+        const TOTAL_CHAPTERS = CHAPTERS_TO_GEN.length; // 14
         const content: Record<string, unknown> = {};
-        for (let ch = 1; ch <= 16; ch++) {
+        for (let idx = 0; idx < CHAPTERS_TO_GEN.length; idx++) {
+          const ch = CHAPTERS_TO_GEN[idx];
           try {
             const r = await genChapterContent(ch, chapterInput);
             Object.assign(content, r.obj);
-            send({ chapter: ch, total: 16 });
+            send({ chapter: idx + 1, total: TOTAL_CHAPTERS });
           } catch (e) {
             console.error(`[jeongtong] ${ch}장 생성 실패:`, e);
-            send({ chapter: ch, total: 16, failed: true });
+            send({ chapter: idx + 1, total: TOTAL_CHAPTERS, failed: true });
           }
         }
 

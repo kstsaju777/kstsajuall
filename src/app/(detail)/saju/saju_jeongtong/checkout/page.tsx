@@ -728,7 +728,7 @@ function CheckoutContent() {
     "제15장 — 중심 잡기",
     "제16장 — 마무리",
   ];
-  const TOTAL = 16;
+  const TOTAL = 14;
 
   const [showSheet, setShowSheet] = useState(false);
   const [creating, setCreating] = useState(false);
