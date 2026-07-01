@@ -90,19 +90,20 @@ function ImageTextBlock({
         <video src="/media/cards/kunghap_yeonae/yeonae-0.mp4" autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover object-top" />
         <div className="absolute inset-0" style={{ backgroundColor: "rgba(255,255,255,0.6)" }} />
         <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${bgColor})` }} />
-      </div>
-      <div className="px-6 py-1 text-center">
-        <p className="text-[12px] mb-2 tracking-wide" style={{ color: RED }}>{label}</p>
-        <h2 className="text-[28px] font-black leading-snug" style={{ color: GRAY1 }}>
-          {parts.map((part, i) => (
-            <span key={i}>
-              {part.split("\n").map((line, j, arr) => (
-                <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
-              ))}
-              {i < parts.length - 1 && <span style={{ color: RED }}>{accentWord}</span>}
-            </span>
-          ))}
-        </h2>
+        {/* 텍스트를 영상 위에 오버레이 */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center z-10">
+          <p className="text-[12px] mb-2 tracking-wide" style={{ color: RED }}>{label}</p>
+          <h2 className="text-[28px] font-black leading-snug" style={{ color: GRAY1 }}>
+            {parts.map((part, i) => (
+              <span key={i}>
+                {part.split("\n").map((line, j, arr) => (
+                  <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
+                ))}
+                {i < parts.length - 1 && <span style={{ color: RED }}>{accentWord}</span>}
+              </span>
+            ))}
+          </h2>
+        </div>
       </div>
       <div className="relative overflow-hidden" style={{ height: 260 }}>
         <div className="absolute top-0 left-0 right-0 h-24 pointer-events-none z-10" style={{ background: `linear-gradient(to bottom, ${bgColor}, transparent)` }} />
