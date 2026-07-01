@@ -492,8 +492,9 @@ function StepEmail({ onPrev, onNext, initial }: {
 }
 
 // ─── 로딩 ────────────────────────────────────────────────────────────────────
-function StepLoading({ name, partnerName, date, time, calendar, gender, email, concern }: {
-  name: string; partnerName: string; date: string; time: string; calendar: string; gender: string; email: string; concern: string;
+function StepLoading({ name, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, date, time, calendar, gender, email, concern }: {
+  name: string; partnerName: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string;
+  date: string; time: string; calendar: string; gender: string; email: string; concern: string;
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
@@ -523,7 +524,13 @@ function StepLoading({ name, partnerName, date, time, calendar, gender, email, c
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goNext = () => {
-    const params = new URLSearchParams({ name, date, time, calendar, gender, email, concern, ch: "0" });
+    const params = new URLSearchParams({ name, date, time, calendar, gender, email, concern, ch: "0",
+      ...(partnerName ? { partnerName } : {}),
+      ...(partnerDate ? { partnerDate } : {}),
+      ...(partnerTime ? { partnerTime } : {}),
+      ...(partnerCalendar ? { partnerCalendar } : {}),
+      ...(partnerGender ? { partnerGender } : {}),
+    });
     router.push(`/saju/kunghap_gyeolhon/checkout?${params.toString()}`);
   };
 
@@ -634,6 +641,10 @@ export default function GyeolhonFormPage() {
         <StepLoading
           name={form.name ?? ""}
           partnerName={form.partnerName ?? ""}
+          partnerDate={form.partnerDate ?? ""}
+          partnerTime={form.partnerTime ?? "시간 모름"}
+          partnerCalendar={form.partnerCalendar ?? "양력"}
+          partnerGender={form.partnerGender ?? ""}
           date={form.date ?? ""}
           time={form.time ?? "시간 모름"}
           calendar={form.calendar ?? "양력"}
