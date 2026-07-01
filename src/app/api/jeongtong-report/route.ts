@@ -107,10 +107,10 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
             const v = String(fieldVal ?? "").trim();
             if ((OHAENG as readonly string[]).includes(v)) return v; // 이미 오행이면 그대로
             // 텍스트에서 십성 키워드 + 오행 순으로 탐색
-            const sipMatch = allText.match(new RegExp(`${keyword}[은이가]?\\s*['"]?([가-힣]{2,3})['"]?`));
+            const sipMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*[''""]?([가-힣]{2,3})[''""]?`));
             if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; const direct = sipMatch[1]; if ((OHAENG as readonly string[]).includes(direct)) return direct; }
             // 오행 직접 언급
-            const elMatch = allText.match(new RegExp(`${keyword}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+            const elMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
             if (elMatch) return elMatch[1];
             return "";
           }
