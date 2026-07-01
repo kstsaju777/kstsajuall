@@ -243,7 +243,7 @@ function ReviewSection() {
 
 // ─── 결제 모달 ────────────────────────────────────────────────────────────────
 const PRODUCTS = [
-  { id: "yeonae", name: "연애궁합", original: 59800, discount: 50, price: 29900 },
+  { id: "yeonae", name: "연애궁합", original: 49800, discount: 50, price: 24900 },
 ];
 
 function PayBottomSheet({ open, onClose, onConfirm }: {
@@ -384,11 +384,11 @@ function StickyPayCTA({ onPay, name, partnerName }: { onPay: () => void; name: s
       style={{ backgroundColor: WHITE, boxShadow: "0 -4px 20px rgba(0,0,0,0.08)" }}>
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩59,800</span>
+          <span className="text-[13px] line-through" style={{ color: GRAY3 }}>₩49,800</span>
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
             style={{ backgroundColor: "#fff0f2", color: RED_SOFT, border: `1px solid ${ROSE}` }}>특가 -50%</span>
         </div>
-        <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩29,900</span>
+        <span className="text-[24px] font-bold" style={{ color: GRAY1 }}>₩24,900</span>
       </div>
       <button onClick={onPay}
         className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
