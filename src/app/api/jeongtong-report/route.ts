@@ -43,8 +43,7 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
   const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
-  for (let i = 0; i < 3; i++) {
-    if (i > 0) await new Promise(r => setTimeout(r, 2000 * i));
+  for (let i = 0; i < 2; i++) {
     try {
       const llm = await generateInterpretation({ system, user, json: true });
       meta = { provider: llm.provider, model: llm.model };
@@ -100,8 +99,9 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
         }
       }
       if (isChapterReady(obj, chapter)) return { obj, ...meta };
-    } catch {
-      /* 재시도 */
+      console.error(`[jeongtong] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
+    } catch (e) {
+      console.error(`[jeongtong] ${chapter}장 예외 (시도${i+1}):`, e);
     }
   }
   throw new Error(`${chapter}장 생성 실패(LLM 응답 불량)`);
