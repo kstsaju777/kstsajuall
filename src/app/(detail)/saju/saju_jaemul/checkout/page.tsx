@@ -336,8 +336,6 @@ function CheckoutContent() {
       router.push(d?.resultId ? `/saju/saju_jaemul/report?id=${d.resultId}` : `/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`);
     } catch {
       router.push(`/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`);
-    } finally {
-      setCreating(false);
     }
   };
 

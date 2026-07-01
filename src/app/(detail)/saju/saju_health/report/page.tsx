@@ -3951,16 +3951,6 @@ function ReportPreviewInner() {
     return () => target.removeEventListener("scroll", onScroll);
   }, []);
 
-  // 생성/조회 중 로딩 화면
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center px-6 text-center" style={{ backgroundColor: CREAM, minHeight: "100%", height: "100%" }}>
-        <div className="rounded-full animate-spin" style={{ width: 44, height: 44, border: `3px solid ${MAROON}22`, borderTopColor: MAROON }} />
-        <p className="mt-5 text-[15px] font-bold" style={{ color: INK }}>사주를 풀이하고 있어요</p>
-        <p className="mt-1 text-[13px]" style={{ color: MUTE }}>명식을 세우고 해석을 작성하는 중입니다…</p>
-      </div>
-    );
-  }
 
   const name = report?.name?.trim() || "고객";
   const rawGender = report?.gender || gender;
