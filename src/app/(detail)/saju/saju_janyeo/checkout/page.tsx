@@ -494,7 +494,7 @@ function ReviewSection() {
 
 // ─── 상품 옵션 ───────────────────────────────────────────────────────────────
 const PRODUCTS = [
-  { id: "basic",   name: "정통사주",                  badge: null,  desc: null,
+  { id: "basic",   name: "자녀사주",                  badge: null,  desc: null,
     tags: [],                              original: 39800,  discount: 50, price: 19900 },
 ];
 
