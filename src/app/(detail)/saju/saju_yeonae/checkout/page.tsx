@@ -61,14 +61,14 @@ function MyeongsikCard({
     <div className="rounded-2xl overflow-hidden"
       style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
       <div className="py-2.5 text-center" style={{ backgroundColor: RED_PALE, borderBottom: `1px solid ${ROSE}` }}>
-        <p className="text-[12px] font-bold" style={{ color: "#b07060" }}>{label}</p>
+        <p className="text-[15px] font-bold" style={{ color: "#b07060" }}>{label}</p>
       </div>
       <div className="p-3">
         <div className="grid grid-cols-4 gap-1.5">
           {(pillars ?? Array(4).fill(null)).map((p, i) => (
-            <div key={i} className="flex flex-col items-center gap-0.5">
-              <p className="text-[9px] font-medium tracking-wider" style={{ color: GRAY3 }}>{PILLAR_LABELS[i]}</p>
-              <span style={{ fontSize: 9, color: "#b07060", lineHeight: 1 }}>{p?.stemSs || " "}</span>
+            <div key={i} className="flex flex-col items-center gap-0">
+              <p className="text-[13px] font-medium tracking-wider" style={{ color: GRAY3, marginBottom: 1 }}>{PILLAR_LABELS[i]}</p>
+              <span style={{ fontSize: 13, color: "#b07060", lineHeight: 1, marginBottom: 6 }}>{p?.stemSs || " "}</span>
               <div className="w-full aspect-square flex items-center justify-center">
                 {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                   : <div className="w-full h-full animate-pulse rounded" style={{ backgroundColor: "#eee" }} />}
@@ -77,7 +77,7 @@ function MyeongsikCard({
                 {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                   : <div className="w-full h-full animate-pulse rounded" style={{ backgroundColor: "#eee" }} />}
               </div>
-              <span style={{ fontSize: 9, color: "#b07060", lineHeight: 1 }}>{p?.branchSs || " "}</span>
+              <span style={{ fontSize: 13, color: "#b07060", lineHeight: 1, marginTop: 6 }}>{p?.branchSs || " "}</span>
             </div>
           ))}
         </div>
@@ -131,9 +131,9 @@ function MyeongsikSection({
 
   return (
     <div style={{ backgroundColor: WHITE }}>
-      <div className="px-5 pb-2">
-        <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#b07060" }}>✦ 사주 명식 ✦</p>
-        <p className="text-center text-[13px] font-bold mb-4" style={{ color: GRAY1 }}>{name}님의 팔자가 품은 이야기</p>
+      <div className="px-5 pb-2 pt-6">
+        <p className="text-center text-[13px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#b07060" }}>✦ 사주 명식 ✦</p>
+        <p className="text-center text-[17px] font-bold mb-4" style={{ color: GRAY1 }}>{name}님의 팔자가 품은 이야기</p>
         <div ref={ref} style={{ ...style, display: "flex", justifyContent: "center" }}>
           <div style={{ width: "100%", maxWidth: 280 }}>
             <MyeongsikCard saju={saju} label={`${name}님`} />

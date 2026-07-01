@@ -504,7 +504,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern }: {
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
         <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center"
-          style={{ backgroundColor: "rgba(233,189,174,0.15)", border: "2px solid rgba(233,189,174,0.4)" }}>
+          style={{ backgroundColor: "rgba(228,209,178,0.15)", border: "2px solid rgba(228,209,178,0.4)" }}>
           <span style={{ fontSize: 28 }}>✨</span>
         </div>
         <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name}{suffix}의 유아사주</p>
