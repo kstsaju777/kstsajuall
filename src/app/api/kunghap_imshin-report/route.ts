@@ -25,7 +25,7 @@ export const maxDuration = 300;
 
 const PRODUCT_SLUG = "kunghap_imshin";
 const PRODUCT_NAME = "임신궁합";
-const PRODUCT_PRICE = 29900;
+const PRODUCT_PRICE = 24900;
 const REPORT_PATH = "saju/kunghap_imshin/report-preview";
 
 const createSchema = z.object({

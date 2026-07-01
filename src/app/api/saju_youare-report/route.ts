@@ -26,7 +26,7 @@ export const maxDuration = 300;
 
 const PRODUCT_SLUG = "saju_youare";
 const PRODUCT_NAME = "유아사주";
-const PRODUCT_PRICE = 24900;
+const PRODUCT_PRICE = 19900;
 const REPORT_PATH = "saju/saju_youare/report-preview";
 
 const createSchema = z.object({

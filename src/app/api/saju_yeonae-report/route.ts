@@ -26,7 +26,7 @@ export const maxDuration = 300;
 
 const PRODUCT_SLUG = "saju_yeonae";
 const PRODUCT_NAME = "연애사주";
-const PRODUCT_PRICE = 24900;
+const PRODUCT_PRICE = 19900;
 const REPORT_PATH = "saju/saju_yeonae/report-preview";
 
 const createSchema = z.object({
