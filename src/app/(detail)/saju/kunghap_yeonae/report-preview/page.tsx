@@ -491,7 +491,7 @@ function ChapterView({
         ) : (
           <>
             {sectionKeys.map((key, i) => {
-              const sec = content?.[key] as Section | undefined;
+              const sec = content?.[key as keyof typeof content] as Section | undefined;
               if (!sec || !sec.paragraphs?.length) return null;
               return <SectionBlock key={key} sectionKey={key} section={sec} accent={i === 0} />;
             })}
