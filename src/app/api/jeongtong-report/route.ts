@@ -251,6 +251,7 @@ async function createReport(body: unknown) {
       })(),
       ...Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput)),
     ]);
+    if (imageResult.status === "rejected") console.error("[jeongtong] 이미지 생성 실패:", imageResult.reason);
     const sajuImageUrl = imageResult.status === "fulfilled" ? (imageResult.value as string) : null;
     const content: Record<string, unknown> = {};
     for (let i = 0; i < 16; i++) {
