@@ -951,7 +951,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
 
   const MSGS = [
     "두 사람의 사주팔자를 세우고 있어요...",
-    "이혼 인연의 흐름을 살펴보고 있어요...",
+    "이별 인연의 흐름을 살펴보고 있어요...",
     "두 사람의 궁합을 분석하고 있어요...",
     "홍연이 이혼 풀이를 정리하고 있어요...",
   ];
@@ -980,19 +980,19 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
     router.push(`/saju/kunghap_ehon/checkout?${params.toString()}`);
   };
 
-  const PINK = "#e1337d";
+  const CLR = "#7c6af7";
 
   return (
     <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#080a0f" }}>
       <img src="/media/cards/kunghap_ehon/ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,8,20,0.5), rgba(10,8,20,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
         <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
-          {name}님 <span style={{ color: PINK }}>♥</span> {partnerName}님
+          {name}님 <span>⚖️</span> {partnerName}님
         </p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 이혼 궁합을 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />
+          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: CLR }} />
         </div>
         <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>{msg}</p>
       </div>

@@ -501,9 +501,11 @@ function StepLoading({ name, partnerName, partnerDate, partnerTime, partnerCalen
   const [msg, setMsg] = useState("두 사람의 사주팔자를 세우고 있어요...");
   const doneRef = useRef(false);
 
+  const CLR = "#e1337d";
+
   const MSGS = [
     "두 사람의 사주팔자를 세우고 있어요...",
-    "결혼 인연의 깊이를 살펴보고 있어요...",
+    "결혼 인연의 흐름을 살펴보고 있어요...",
     "두 사람의 궁합을 분석하고 있어요...",
     "홍연이 결혼 풀이를 정리하고 있어요...",
   ];
@@ -540,11 +542,11 @@ function StepLoading({ name, partnerName, partnerDate, partnerTime, partnerCalen
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
         <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
-          {name}님 <span style={{ color: PINK }}>♥</span> {partnerName}님
+          {name}님 <span style={{ color: CLR }}>💍</span> {partnerName}님
         </p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 결혼 궁합을 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />
+          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: CLR }} />
         </div>
         <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>{msg}</p>
       </div>

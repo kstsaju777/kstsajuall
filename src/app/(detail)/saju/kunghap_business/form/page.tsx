@@ -997,19 +997,19 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
     router.push(`/saju/kunghap_business/checkout?${params.toString()}`);
   };
 
-  const PINK = "#e1337d";
+  const CLR = "#4e9eff";
 
   return (
     <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#080a0f" }}>
       <img src="/media/cards/kunghap_business/business-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,18,0.5), rgba(8,10,18,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
         <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
-          {name}님 <span style={{ color: PINK }}>♥</span> {partnerName}님
+          {name}님 🤝 {partnerName}님
         </p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 비즈니스 궁합을 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />
+          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: CLR }} />
         </div>
         <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>{msg}</p>
       </div>
