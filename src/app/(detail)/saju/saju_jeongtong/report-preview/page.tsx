@@ -3968,26 +3968,8 @@ function ReportPreviewInner() {
         </div>
       )}
 
-      {showLoading ? (
-        <div className="flex flex-col items-center justify-center px-6 text-center" style={{ minHeight: "70vh" }}>
-          <div className="rounded-full animate-spin" style={{ width: 44, height: 44, border: `3px solid ${MAROON}22`, borderTopColor: MAROON }} />
-          <p className="mt-5 text-[15px] font-bold" style={{ color: INK }}>전체 풀이를 준비하고 있어요</p>
-          <p className="mt-1 text-[13px]" style={{ color: MUTE }}>명식을 세우고 모든 장을 작성하는 중입니다…</p>
-        </div>
-      ) : needGen ? (
-        <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
-          <p className="text-[15px] font-bold" style={{ color: INK }}>이 장 풀이 생성에 실패했어요</p>
-          <p className="mt-1 text-[13px] leading-relaxed" style={{ color: MUTE }}>일시적인 오류일 수 있어요.<br />다시 시도해 주세요.</p>
-          <button onClick={() => genChapter(chNum)} className="mt-6 px-6 py-3 rounded-xl text-[14px] font-bold text-white active:scale-95 transition-all" style={{ background: MAROON }}>다시 시도</button>
-        </div>
-      ) : !revealed ? (
-        <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
-          <p className="text-[15px] font-bold" style={{ color: INK }}>{name}님의 결과지가 준비됐어요</p>
-          <p className="mt-1 text-[13px] leading-relaxed" style={{ color: MUTE }}>모든 장의 풀이가 완성되었습니다.<br />아래 버튼을 눌러 확인해 보세요.</p>
-          <button onClick={() => setRevealed(true)} className="mt-6 px-8 py-3.5 rounded-xl text-[15px] font-bold text-white active:scale-95 transition-all" style={{ background: MAROON }}>결과 보기</button>
-        </div>
-      ) : (
-      <>
+      {(
+<>
       {/* ═══════════ 인트로 ═══════════ */}
       {ch === "0" && (
         <>
