@@ -127,7 +127,7 @@ async function loadManseryeokFromInputs(service: any, resultId: string): Promise
     birthDay: String(Number(d)),
     ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
     calendarType: si.calendar === "lunar" ? "음력" : "양력",
-    gender: si.gender === "female" ? "female" : "male",
+    gender: si.gender === "female" || si.gender === "여성" || si.gender === "여자" ? "female" : "male",
   };
   const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
   return formatSajuToManseryeok(analysis, birthInfo);
@@ -173,7 +173,7 @@ async function createReport(body: unknown) {
   const timeVal = parseTimeVal(time);
   const hasTime = timeVal !== "unknown";
   const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
-  const g: "male" | "female" = gender === "여자" || gender === "female" ? "female" : "male";
+  const g: "male" | "female" = gender === "여자" || gender === "여성" || gender === "female" ? "female" : "male";
 
   const birthInfo: BirthInfo = {
     birthYear: String(ymd.year),
@@ -192,7 +192,7 @@ async function createReport(body: unknown) {
   const ptimeVal = parseTimeVal(partnerTime);
   const phasTime = ptimeVal !== "unknown";
   const [phh, pmm] = phasTime ? ptimeVal.split(":") : ["", ""];
-  const pg: "male" | "female" = partnerGender === "여자" || partnerGender === "female" ? "female" : "male";
+  const pg: "male" | "female" = partnerGender === "여자" || partnerGender === "여성" || partnerGender === "female" ? "female" : "male";
 
   const partnerBirthInfo: BirthInfo = {
     birthYear: String(pymd.year),
@@ -334,7 +334,7 @@ async function generateChapter(body: unknown) {
   // myeongsik에 gender가 없으면 saju_inputs에서 fallback
   if (!stored?.gender && data.order_id && stored) {
     const { data: si } = await service.from("saju_inputs").select("gender").eq("order_id", data.order_id).maybeSingle();
-    if (si?.gender) stored.gender = (si.gender as string) === "female" || (si.gender as string) === "여자" ? "female" : "male";
+    if (si?.gender) stored.gender = (si.gender as string) === "female" || (si.gender as string) === "여자" || (si.gender as string) === "여성" ? "female" : "male";
   }
 
   let content: Record<string, unknown> = {};

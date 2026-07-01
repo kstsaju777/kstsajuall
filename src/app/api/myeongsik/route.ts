@@ -1,4 +1,4 @@
-// =====================================================
+﻿// =====================================================
 // 명식 모달 데이터 API
 // =====================================================
 // 결제자가 입력한 생년월일/시간/성별(funnel 쿼리 형식)을 받아
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   const timeVal = parseTimeVal(time); // 'unknown' | 'HH:MM'
   const hasTime = timeVal !== "unknown";
   const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
-  const g: "male" | "female" = gender === "여자" || gender === "female" ? "female" : "male";
+  const g: "male" | "female" = gender === "여자" || gender === "여성" || gender === "female" ? "female" : "male";
 
   const birthInfo: BirthInfo = {
     birthYear: String(ymd.year),
