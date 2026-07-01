@@ -315,8 +315,6 @@ function CheckoutContent() {
       const res = await fetch("/api/saju_janyeo-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, date, time, calendar, gender, email }) });
       const d = res.ok ? await res.json() : null;
       const reportUrl = d?.resultId ? `https://www.hongyeondang.com/saju/saju_janyeo/report?id=${d.resultId}` : `https://www.hongyeondang.com/saju/saju_janyeo/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`;
-      if (email) fetch("/api/send-order-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerEmail: email, customerName: name, productName: PRODUCT.name, price: PRODUCT.price, reportUrl }) });
-      fetch("/api/send-order-sms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerName: name, productName: PRODUCT.name, price: PRODUCT.price }) });
       router.push(d?.resultId ? `/saju/saju_janyeo/report?id=${d.resultId}` : `/saju/saju_janyeo/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`);
     } catch {
       router.push(`/saju/saju_janyeo/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`);

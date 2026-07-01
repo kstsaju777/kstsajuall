@@ -324,8 +324,6 @@ function CheckoutContent() {
       });
       const d = res.ok ? await res.json() : null;
       const reportUrl = d?.resultId ? `https://www.hongyeondang.com/saju/kunghap_gyeolhon/report?id=${d.resultId}` : `https://www.hongyeondang.com/saju/kunghap_gyeolhon/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`;
-      if (email) fetch("/api/send-order-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerEmail: email, customerName: name, productName: PRODUCT.name, price: PRODUCT.price, reportUrl }) });
-      fetch("/api/send-order-sms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerName: name, productName: PRODUCT.name, price: PRODUCT.price }) });
       router.push(d?.resultId ? `/saju/kunghap_gyeolhon/report?id=${d.resultId}` : `/saju/kunghap_gyeolhon/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);
     } catch {
       router.push(`/saju/kunghap_gyeolhon/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);

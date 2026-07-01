@@ -20,10 +20,14 @@ import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS,
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
+import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
 export const maxDuration = 60;
 
 const PRODUCT_SLUG = "kunghap_ehon";
+const PRODUCT_NAME = "이혼사주";
+const PRODUCT_PRICE = 29900;
+const REPORT_PATH = "saju/kunghap_ehon/report";
 
 const createSchema = z.object({
   name: z.string().optional().default(""),
@@ -230,37 +234,7 @@ async function createReport(body: unknown) {
 
     const service = createServiceClient();
 
-    // 두 사람 원국 이미지 병렬 생성 → Supabase Storage 영구 저장
-    let sajuImageUrl: string | null = null;
-    let partnerSajuImageUrl: string | null = null;
-    try {
-      const [imgBuffer, partnerImgBuffer] = await Promise.all([
-        generateSajuImage(buildSajuImagePrompt(view.pillars ?? []), process.env.OPENAI_API_KEY!),
-        generateSajuImage(buildSajuImagePrompt(partnerView.pillars ?? []), process.env.OPENAI_API_KEY!),
-      ]);
-      const ts = Date.now();
-      const rand1 = Math.random().toString(36).slice(2, 8);
-      const rand2 = Math.random().toString(36).slice(2, 8);
-      const [up1, up2] = await Promise.all([
-        service.storage.from("saju-images").upload(`wonguk/${ts}-${rand1}.png`, imgBuffer, { contentType: "image/png", upsert: false }),
-        service.storage.from("saju-images").upload(`wonguk/${ts}-${rand2}.png`, partnerImgBuffer, { contentType: "image/png", upsert: false }),
-      ]);
-      if (!up1.error) sajuImageUrl = service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand1}.png`).data.publicUrl;
-      if (!up2.error) partnerSajuImageUrl = service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand2}.png`).data.publicUrl;
-    } catch (e) {
-      console.error("[이미지생성] 실패:", e);
-    }
-    // 16장 전부 병렬 생성
-    const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
-    const chapterResults = await Promise.allSettled(
-      Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput))
-    );
-    const content: Record<string, unknown> = {};
-    for (let i = 0; i < 16; i++) {
-      const r = chapterResults[i];
-      if (r.status === "fulfilled") Object.assign(content, r.value.obj);
-    }
-
+    // 1단계: 주문 + 초기 결과 레코드 먼저 생성 (알림 발송에 resultId 필요)
     const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
     if (!product) return NextResponse.json({ error: "상품을 찾을 수 없습니다." }, { status: 500 });
 
@@ -287,15 +261,55 @@ async function createReport(body: unknown) {
       .from("saju_results")
       .insert({
         order_id: order.id,
-        // manseryeokText/gender 도 저장 → 이후 장 생성에 재사용(운세위키 재호출 불필요)
-        myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl, partnerView, partnerName, partnerBirth, partnerGender: pg, partnerSajuImageUrl } as never,
-        interpretation_md: JSON.stringify(content),
+        myeongsik: { view, name, birth, manseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg } as never,
+        interpretation_md: JSON.stringify({}),
         llm_provider: llm.provider,
         llm_model: llm.model,
       })
       .select("id")
       .single();
     if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패", detail: resultErr?.message }, { status: 500 });
+
+    // 2단계: SMS + 이메일 즉시 발송 (fire-and-forget)
+    const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
+    sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
+    if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
+
+    // 3단계: 이미지 + 16장 병렬 생성
+    let sajuImageUrl: string | null = null;
+    let partnerSajuImageUrl: string | null = null;
+    try {
+      const [imgBuffer, partnerImgBuffer] = await Promise.all([
+        generateSajuImage(buildSajuImagePrompt(view.pillars ?? []), process.env.OPENAI_API_KEY!),
+        generateSajuImage(buildSajuImagePrompt(partnerView.pillars ?? []), process.env.OPENAI_API_KEY!),
+      ]);
+      const ts = Date.now();
+      const rand1 = Math.random().toString(36).slice(2, 8);
+      const rand2 = Math.random().toString(36).slice(2, 8);
+      const [up1, up2] = await Promise.all([
+        service.storage.from("saju-images").upload(`wonguk/${ts}-${rand1}.png`, imgBuffer, { contentType: "image/png", upsert: false }),
+        service.storage.from("saju-images").upload(`wonguk/${ts}-${rand2}.png`, partnerImgBuffer, { contentType: "image/png", upsert: false }),
+      ]);
+      if (!up1.error) sajuImageUrl = service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand1}.png`).data.publicUrl;
+      if (!up2.error) partnerSajuImageUrl = service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand2}.png`).data.publicUrl;
+    } catch (e) {
+      console.error("[이미지생성] 실패:", e);
+    }
+    const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
+    const chapterResults = await Promise.allSettled(
+      Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput))
+    );
+    const content: Record<string, unknown> = {};
+    for (let i = 0; i < 16; i++) {
+      const r = chapterResults[i];
+      if (r.status === "fulfilled") Object.assign(content, r.value.obj);
+    }
+
+    // 4단계: 최종 내용으로 업데이트
+    await service.from("saju_results").update({
+      myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl, partnerView, partnerName, partnerBirth, partnerGender: pg, partnerSajuImageUrl } as never,
+      interpretation_md: JSON.stringify(content),
+    }).eq("id", result.id);
 
     return NextResponse.json({ resultId: result.id, view, content, name, birth, sajuImageUrl, partnerView, partnerName, partnerBirth, partnerGender: pg, partnerSajuImageUrl });
   } catch (err) {

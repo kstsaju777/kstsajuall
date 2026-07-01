@@ -438,8 +438,6 @@ function CheckoutContent() {
       const reportUrl = d?.resultId
         ? `https://www.hongyeondang.com/saju/kunghap_business/report?id=${d.resultId}`
         : `https://www.hongyeondang.com/saju/kunghap_business/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`;
-      if (email) fetch("/api/send-order-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerEmail: email, customerName: name, productName: product.name, price: product.price, reportUrl }) });
-      fetch("/api/send-order-sms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerName: name, productName: product.name, price: product.price }) });
       router.push(d?.resultId ? `/saju/kunghap_business/report?id=${d.resultId}` : `/saju/kunghap_business/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);
     } catch {
       router.push(`/saju/kunghap_business/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);

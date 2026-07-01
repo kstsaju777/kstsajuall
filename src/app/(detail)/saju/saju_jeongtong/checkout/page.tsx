@@ -728,10 +728,6 @@ function CheckoutContent() {
       const reportUrl = d?.resultId
         ? `https://www.hongyeondang.com/saju/saju_jeongtong/report-preview?id=${d.resultId}`
         : `https://www.hongyeondang.com/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`;
-      if (email) {
-        fetch("/api/send-order-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerEmail: email, customerName: name, productName: product.name, price: product.price, reportUrl }) });
-      }
-      fetch("/api/send-order-sms", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerName: name, productName: product.name, price: product.price }) });
       if (d?.resultId) {
         router.push(`/saju/saju_jeongtong/report-preview?id=${d.resultId}`);
       } else {
