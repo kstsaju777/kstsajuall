@@ -735,8 +735,6 @@ function CheckoutContent() {
       }
     } catch {
       router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);
-    } finally {
-      setCreating(false);
     }
   };
 
