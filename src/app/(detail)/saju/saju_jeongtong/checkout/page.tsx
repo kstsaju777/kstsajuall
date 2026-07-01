@@ -787,27 +787,85 @@ function CheckoutContent() {
   if (creating) {
     const pct = Math.round((doneCount / TOTAL) * 100);
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center gap-8 z-50 px-8" style={{ background: "#fdf8f4" }}>
-        <div className="text-center">
-          <p className="text-[17px] font-bold mb-1" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 완성하고 있소…</p>
-          <p className="text-[13px]" style={{ color: "#7a5a40" }}>
-            {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
-          </p>
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-50 px-8" style={{ background: "radial-gradient(ellipse at 50% 40%, #2a0a00 0%, #0d0200 100%)" }}>
+        <style>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+          }
+          @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 8px 2px #ff4400aa, 0 0 20px 4px #ff220055; }
+            50% { box-shadow: 0 0 16px 4px #ff6600cc, 0 0 40px 10px #ff440088; }
+          }
+          @keyframes float-up {
+            0% { opacity: 0; transform: translateY(0) scale(0.5); }
+            30% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-60px) scale(1); }
+          }
+          @keyframes title-fade {
+            0% { opacity: 0; transform: translateY(6px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-6px); }
+          }
+          @keyframes orbit {
+            0% { transform: rotate(0deg) translateX(38px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(38px) rotate(-360deg); }
+          }
+        `}</style>
+
+        {/* 별자리 장식 */}
+        <div className="relative w-20 h-20 mb-6">
+          <div className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, #ff330022 0%, transparent 70%)" }} />
+          {[0,1,2,3,4,5].map(i => (
+            <div key={i} className="absolute w-1 h-1 rounded-full" style={{
+              top: "50%", left: "50%", marginTop: "-2px", marginLeft: "-2px",
+              background: i % 2 === 0 ? "#ff6633" : "#ffaa44",
+              boxShadow: `0 0 6px 2px ${i % 2 === 0 ? "#ff4400" : "#ff8800"}`,
+              animation: `orbit ${2.5 + i * 0.4}s linear infinite`,
+              animationDelay: `${i * -0.5}s`,
+            }} />
+          ))}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span style={{ fontSize: 28, filter: "drop-shadow(0 0 8px #ff4400)" }}>✦</span>
+          </div>
         </div>
-        <div className="w-full max-w-[280px]">
-          <div className="flex justify-between text-[11px] mb-2" style={{ color: "#7a5a40" }}>
+
+        {/* 타이틀 */}
+        <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5ee", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #ff440088" }}>
+          결과지를 완성하고 있소…
+        </p>
+        <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#ff9966", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
+          {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
+        </p>
+
+        {/* 게이지 */}
+        <div className="w-full max-w-[280px] mb-3">
+          <div className="flex justify-between text-[11px] mb-2" style={{ color: "#cc7755" }}>
             <span>{doneCount} / {TOTAL} 장 완성</span>
             <span>{pct}%</span>
           </div>
-          <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "#e8d8c8" }}>
+          <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a0800" }}>
             <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${pct}%`, background: "#8b2e14" }}
-            />
+              className="h-full rounded-full relative overflow-hidden transition-all duration-700"
+              style={{
+                width: `${pct}%`,
+                background: "linear-gradient(90deg, #8b1a00, #ff4400, #ff8833)",
+                animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none",
+              }}
+            >
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+                background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)",
+                animation: "shimmer 1.6s linear infinite",
+                width: "40%",
+              }} />
+            </div>
           </div>
         </div>
-        <p className="text-[12px] text-center leading-relaxed" style={{ color: "#9a7a60" }}>
-          풀이가 완성되면 자동으로 결과지가 열리오.<br />이 화면을 벗어나지 마시오.
+
+        <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#886655" }}>
+          풀이가 완성되면 자동으로 열리오.<br />잠시만 기다려 주시오.
         </p>
       </div>
     );
