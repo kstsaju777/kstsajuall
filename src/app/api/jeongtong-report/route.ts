@@ -83,32 +83,41 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
           }
         }));
       }
-      // 2장 후처리: yongsinEl/heusinEl/gisinEl 빠진 경우 텍스트에서 추출
+      // 2장: yongsinEl/heusinEl/gisinEl — 십성→오행 변환 포함
       if (chapter === 2) {
         const y = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
         if (y) {
-          const OHAENG = ["금", "목", "화", "토", "수"] as const;
+          const OHAENG = ["금","목","화","토","수"] as const;
+          // 일간 오행 추출
+          const ilganEl = (input.pillars?.find(p => p.pos === "일주")?.ganEl) ?? "";
+          // 십성→오행 변환 테이블 (일간 오행 기준)
+          const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+          const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+          const CLASHED_BY: Record<string,string> = { 목:"금",화:"수",토:"목",금:"화",수:"토" }; // 나를 극하는
+          const GENERATED_BY: Record<string,string> = { 목:"수",화:"목",토:"화",금:"토",수:"금" }; // 나를 생하는
+          function sipToEl(sip: string): string {
+            if (["비견","겁재"].some(s => sip.includes(s))) return ilganEl;
+            if (["식신","상관"].some(s => sip.includes(s))) return GEN[ilganEl] ?? "";
+            if (["편재","정재","재성"].some(s => sip.includes(s))) return CTL[ilganEl] ?? "";
+            if (["편관","정관","관성"].some(s => sip.includes(s))) return CLASHED_BY[ilganEl] ?? "";
+            if (["편인","정인","인성"].some(s => sip.includes(s))) return GENERATED_BY[ilganEl] ?? "";
+            return "";
+          }
+          function resolveEl(fieldVal: unknown, keyword: string, allText: string): string {
+            const v = String(fieldVal ?? "").trim();
+            if ((OHAENG as readonly string[]).includes(v)) return v; // 이미 오행이면 그대로
+            // 텍스트에서 십성 키워드 + 오행 순으로 탐색
+            const sipMatch = allText.match(new RegExp(`${keyword}[은이가]?\\s*['"]?([가-힣]{2,3})['"]?`));
+            if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; const direct = sipMatch[1]; if ((OHAENG as readonly string[]).includes(direct)) return direct; }
+            // 오행 직접 언급
+            const elMatch = allText.match(new RegExp(`${keyword}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+            if (elMatch) return elMatch[1];
+            return "";
+          }
           const allText = [y.callout, y.intro, ...((y.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
-          if (!y.yongsinEl) {
-            const m = allText.match(/용신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.yongsinEl = m[1];
-          }
-          if (!y.heusinEl) {
-            const m = allText.match(/희신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.heusinEl = m[1];
-          }
-          if (!y.gisinEl) {
-            const m = allText.match(/기신[은이가]?\s*(?:오행인\s*)?(금|목|화|토|수)/);
-            if (m) y.gisinEl = m[1];
-          }
-          // 그래도 없으면 callout에서 첫 번째 오행 순서대로 추출
-          if (!y.yongsinEl || !y.heusinEl || !y.gisinEl) {
-            const found: string[] = [];
-            for (const ch of allText) { if (OHAENG.includes(ch as typeof OHAENG[number]) && !found.includes(ch)) found.push(ch); if (found.length === 3) break; }
-            if (!y.yongsinEl && found[0]) y.yongsinEl = found[0];
-            if (!y.heusinEl  && found[1]) y.heusinEl  = found[1];
-            if (!y.gisinEl   && found[2]) y.gisinEl   = found[2];
-          }
+          y.yongsinEl = resolveEl(y.yongsinEl, "용신", allText);
+          y.heusinEl  = resolveEl(y.heusinEl,  "희신", allText);
+          y.gisinEl   = resolveEl(y.gisinEl,   "기신", allText);
         }
       }
       if (isChapterReady(obj, chapter)) return { obj, ...meta };
