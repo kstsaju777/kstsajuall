@@ -7,12 +7,12 @@ import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
-const CREAM    = "#f4f7fd";
+const CREAM    = "#fdf8f4";
 const WHITE    = "#ffffff";
-const RED      = "#1d6fce";
-const RED_SOFT = "#3b82f6";
-const RED_PALE = "#eff6ff";
-const ROSE     = "#93c5fd";
+const RED      = "#e1337d";
+const RED_SOFT = "#ff6b9d";
+const RED_PALE = "#fff0f6";
+const ROSE     = "#ffb3d0";
 const GRAY1    = "#1a1a1a";
 const GRAY2    = "#444444";
 const GRAY3    = "#888888";
@@ -124,44 +124,44 @@ function ImageDivider({ src = "/media/hero/hero-1.jpg", bgColor = WHITE }: { src
 // ─── 분석 섹션 ───────────────────────────────────────────────────────────────
 const SECTIONS = [
   {
-    icon: "🧭", title: "두 사람의 비즈니스 기질", free: true,
-    content: "각자의 일간과 오행 구성을 바탕으로 두 사람의 일하는 방식과 의사결정 스타일을 분석합니다. 서로의 차이가 갈등을 만드는지, 아니면 오히려 시너지가 되는지 사주 속에 답이 있습니다.\n\n함께했을 때 강해지는 부분과 주의해야 할 충돌 지점까지 사주는 조용히 기록하고 있습니다.",
+    icon: "🔮", title: "두 사람의 타고난 기질", free: true,
+    content: "각자의 일간과 오행 구성을 바탕으로 두 사람의 타고난 성향과 기질을 분석합니다. 서로의 차이가 갈등을 만드는지, 아니면 오히려 보완이 되는지 사주 속에 답이 있습니다.\n\n처음 만났을 때 끌렸던 이유, 그리고 함께 할 때 빛나는 순간까지 사주는 조용히 기록하고 있습니다.",
     blurLines: ["", "", ""],
   },
   {
-    icon: "⚡", title: "함께할 때 시너지와 충돌 포인트", free: false,
+    icon: "💑", title: "두 사람의 궁합 분석", free: false,
     content: "",
     blurLines: [
-      "두 사람의 ████간 조합이 비즈니스에서 강한 시너지를 냅니다.",
-      "의사결정 속도 차이가 ████한 상황에서 충돌로 이어질 수 있습니다.",
-      "████ 영역에서 역할을 나누면 갈등을 크게 줄일 수 있습니다.",
+      "두 사람의 ████간 상생·상극 관계가 궁합의 핵심입니다.",
+      "████년 ████월, 운의 흐름이 두 사람을 더 가깝게 합니다.",
+      "이 시기의 선택은 사주상 ████한 영향을 받고 있습니다.",
     ],
   },
   {
-    icon: "👁️", title: "상대방이 나를 어떤 파트너로 보는지", free: false,
+    icon: "❤️", title: "상대방의 마음", free: false,
     content: "",
     blurLines: [
-      "상대방의 일간 기준으로 당신은 ████에 해당하는 파트너입니다.",
-      "상대방이 당신에게 기대하는 역할은 ████로 분석됩니다.",
-      "신뢰를 쌓으려면 ████한 방식으로 접근하는 것이 효과적입니다.",
+      "상대방의 일간 기준으로 당신은 ████에 해당합니다.",
+      "현재 상대방의 마음속에 당신은 ████한 존재로 남아있습니다.",
+      "관계를 깊게 하려면 ████한 접근이 효과적입니다.",
     ],
   },
   {
-    icon: "💰", title: "동업했을 때 재물운의 흐름", free: false,
+    icon: "📅", title: "연애 시기와 운의 흐름", free: false,
     content: "",
     blurLines: [
-      "두 사람이 함께할 때 재물운이 강해지는 시기는 ████년입니다.",
+      "두 사람이 더 가까워질 수 있는 시기는 ████년 ████월입니다.",
       "현재 두 사람의 대운은 ████으로 ████한 기운이 작용합니다.",
-      "이 시기 전에 계약·투자 결정을 내리는 것이 유리합니다.",
+      "이 시기를 놓치면 다음 기회는 ████년 이후로 밀립니다.",
     ],
   },
   {
-    icon: "🛡️", title: "이 파트너십이 성공하려면", free: false,
+    icon: "⚡", title: "관계를 방해하는 요인", free: false,
     content: "",
     blurLines: [
-      "두 사람 사이에서 ████한 역할 분담이 가장 중요합니다.",
-      "████ 시기에 중요한 결정을 미루면 기회를 놓칠 수 있습니다.",
-      "장기적으로 신뢰를 유지하려면 ████을 반드시 지켜야 합니다.",
+      "당신의 사주에서 ████살이 관계를 방해하고 있습니다.",
+      "████ 방향의 접근과 ████한 행동은 반드시 피하세요.",
+      "████년 ████월은 특별히 주의가 필요한 시기입니다.",
     ],
   },
 ];
@@ -210,9 +210,9 @@ function AnalysisSection({ s }: { s: typeof SECTIONS[number] }) {
 
 // ─── 후기 ─────────────────────────────────────────────────────────────────────
 const REVIEWS = [
-  { star: 5, text: "공동창업자와 의사결정마다 부딪혔는데 사주로 보니 일하는 스타일 자체가 달랐더라고요. 역할을 다시 나눴더니 훨씬 잘 돌아가고 있어요.", name: "40대 스타트업 대표 김○○", date: "2025.05.12" },
-  { star: 5, text: "동업 제안을 받았는데 계약 전에 비즈니스궁합을 봤어요. 어떤 부분에서 충돌할 수 있는지 미리 알고 조율하니 훨씬 수월했습니다.", name: "30대 사업가 이○○", date: "2025.04.28" },
-  { star: 5, text: "장기 프로젝트 파트너를 고르는 중이었는데 두 후보 중 누구와 맞는지 비교해봤어요. 결정하는 데 정말 도움이 됐습니다.", name: "30대 프리랜서 박○○", date: "2025.05.03" },
+  { star: 5, text: "두 사람의 궁합이 이렇게 정확하게 나올 줄 몰랐어요. 상대방 성격 분석이 소름돋을 정도로 맞았습니다.", name: "30대 직장인 김○○", date: "2025.05.12" },
+  { star: 5, text: "연애 시기가 딱 맞았어요. 홍연이 알려준 대로 접근했더니 관계가 더 깊어졌습니다.", name: "20대 대학생 이○○", date: "2025.04.28" },
+  { star: 5, text: "두 사람 모두 분석해주는 게 정말 좋았어요. 상대방 입장에서 이해할 수 있게 됐습니다.", name: "30대 자영업자 박○○", date: "2025.05.03" },
 ];
 
 function ReviewSection() {
@@ -243,13 +243,13 @@ function ReviewSection() {
 
 // ─── 결제 모달 ────────────────────────────────────────────────────────────────
 const PRODUCTS = [
-  { id: "business", name: "비즈니스궁합", original: 59800, discount: 50, price: 29900 },
+  { id: "yeonae", name: "연애궁합", original: 59800, discount: 50, price: 29900 },
 ];
 
 function PayBottomSheet({ open, onClose, onConfirm }: {
   open: boolean; onClose: () => void; onConfirm: (id: string) => void;
 }) {
-  const [selected] = useState("business");
+  const [selected] = useState("yeonae");
   const [legalDoc, setLegalDoc] = useState<null | "terms" | "privacy">(null);
   const [confirmExit, setConfirmExit] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -267,9 +267,9 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
 
   if (!open) return null;
 
-  const DBG = "#111827"; const DCARD = "#1e2a3d"; const DTXT = "#ffffff";
+  const DBG = "#1b1820"; const DCARD = "#262229"; const DTXT = "#ffffff";
   const DMUTE = "rgba(255,255,255,0.5)"; const DSTRIKE = "rgba(255,255,255,0.38)";
-  const ACCENT = "#4e9eff";
+  const ACCENT = "#ff6b9d";
   const sel = PRODUCTS[0];
   const saved = sel.original - sel.price;
   const visible = mounted && !closing;
@@ -290,15 +290,15 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
             <button onClick={requestClose} className="flex items-center justify-center" style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
-            style={{ background: "rgba(78,158,255,0.16)", border: `1px solid ${ACCENT}55`, color: "#93c5fd" }}>
-            총 <span style={{ color: "#4e9eff" }}>{saved.toLocaleString()}원</span> 할인받았어요!
+            style={{ background: "rgba(224,70,90,0.16)", border: `1px solid ${ACCENT}55`, color: "#ff9aa6" }}>
+            총 <span style={{ color: "#ff6b9d" }}>{saved.toLocaleString()}원</span> 할인받았어요!
           </div>
           <div className="mb-5">
             <div className="w-full text-left rounded-2xl px-4 py-3.5" style={{ backgroundColor: DCARD, border: `1.5px solid ${ACCENT}`, boxShadow: `0 0 0 3px ${ACCENT}22` }}>
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>비즈니스궁합</span>
-                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 비즈니스궁합 이야기</p>
+                  <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>연애궁합</span>
+                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 두 사람의 궁합 이야기</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-[11px]" style={{ color: DSTRIKE }}>
@@ -316,12 +316,12 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               <span style={{ color: "rgba(255,255,255,0.85)" }}>{sel.original.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between text-[13px]">
-              <span style={{ color: "#4e9eff", fontWeight: 700 }}>지금 결제 시 할인 ({sel.discount}% 특가)</span>
-              <span style={{ color: "#4e9eff", fontWeight: 700 }}>-{saved.toLocaleString()}</span>
+              <span style={{ color: "#ff6b9d", fontWeight: 700 }}>지금 결제 시 할인 ({sel.discount}% 특가)</span>
+              <span style={{ color: "#ff6b9d", fontWeight: 700 }}>-{saved.toLocaleString()}</span>
             </div>
           </div>
           <button onClick={() => onConfirm(selected)} className="w-full py-4 rounded-2xl font-black text-[17px] text-white active:scale-[0.99] transition-transform"
-            style={{ background: "linear-gradient(135deg, #3b82f6, #1d6fce)", boxShadow: "0 6px 20px rgba(78,158,255,0.4)" }}>
+            style={{ background: "linear-gradient(135deg, #ff6b9d, #e1337d)", boxShadow: "0 6px 20px rgba(255,107,157,0.4)" }}>
             결제하기
           </button>
           <div className="flex items-center justify-center gap-2 mt-3.5">
@@ -343,7 +343,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               style={{ width: 22, height: 22, background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", fontSize: 12, lineHeight: 1 }}>✕</button>
             <p className="text-[14px] font-black pr-5" style={{ color: "#fff" }}>🎁 {saved.toLocaleString()}원 할인이 사라져요!</p>
             <p className="text-[12px] mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>이 혜택은 지금만 적용됩니다.</p>
-            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: "linear-gradient(135deg, #3b82f6, #1d6fce)" }}>혜택 받고 계속하기</button>
+            <button onClick={() => setConfirmExit(false)} className="w-full mt-3 py-2.5 rounded-xl text-[13.5px] font-bold text-white" style={{ background: "linear-gradient(135deg, #ff6b9d, #e1337d)" }}>혜택 받고 계속하기</button>
             <button onClick={doExit} className="w-full mt-2 py-2.5 rounded-xl text-[13px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)" }}>나가기</button>
           </div>
           <style>{`@keyframes popIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}`}</style>
@@ -392,9 +392,9 @@ function StickyPayCTA({ onPay, name, partnerName }: { onPay: () => void; name: s
       </div>
       <button onClick={onPay}
         className="w-full py-4 rounded-2xl font-bold text-[16px] text-white flex items-center justify-center gap-2 active:scale-95 transition-all"
-        style={{ background: "linear-gradient(135deg, #3b82f6, #1d6fce)", boxShadow: glow ? "0 4px 24px rgba(78,158,255,0.55)" : "0 2px 12px rgba(78,158,255,0.3)", transition: "box-shadow 1s ease" }}>
+        style={{ backgroundColor: RED, boxShadow: glow ? `0 4px 24px ${RED}88` : `0 2px 12px ${RED}44`, transition: "box-shadow 1s ease" }}>
         <span>🔓</span>
-        <span>두 사람의 비즈니스궁합 확인하기</span>
+        <span>{name}님 · {partnerName}님 연애궁합 확인하기</span>
       </button>
     </div>
   );
@@ -405,56 +405,177 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const name           = searchParams.get("name")           ?? "고객";
-  const date           = searchParams.get("date")           ?? "";
-  const time           = searchParams.get("time")           ?? "시간 모름";
-  const calendar       = searchParams.get("calendar")       ?? "양력";
-  const gender         = searchParams.get("gender")         ?? "";
-  const email          = searchParams.get("email")          ?? "";
-  const concern        = searchParams.get("concern")        ?? "";
-  const partnerName    = searchParams.get("partnerName")    ?? "상대방";
-  const partnerDate    = searchParams.get("partnerDate")    ?? "";
-  const partnerTime    = searchParams.get("partnerTime")    ?? "시간 모름";
+  const name            = searchParams.get("name")            ?? "고객";
+  const date            = searchParams.get("date")            ?? "";
+  const time            = searchParams.get("time")            ?? "시간 모름";
+  const calendar        = searchParams.get("calendar")        ?? "양력";
+  const gender          = searchParams.get("gender")          ?? "";
+  const email           = searchParams.get("email")           ?? "";
+  const partnerName     = searchParams.get("partnerName")     ?? "상대방";
+  const partnerDate     = searchParams.get("partnerDate")     ?? "";
+  const partnerTime     = searchParams.get("partnerTime")     ?? "시간 모름";
   const partnerCalendar = searchParams.get("partnerCalendar") ?? "양력";
-  const partnerGender  = searchParams.get("partnerGender")  ?? "";
+  const partnerGender   = searchParams.get("partnerGender")   ?? "";
 
   const saju        = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
   const partnerSaju = useMemo(() => calcSaju(partnerDate, partnerTime, partnerCalendar), [partnerDate, partnerTime, partnerCalendar]);
 
+  const CHAPTER_TITLES = [
+    "제1장 — 사주 원국",
+    "제2장 — 운명의 구조",
+    "제3장 — 인간관계",
+    "제4장 — 숨겨진 특징",
+    "제5장 — 재물과 직업",
+    "제6장 — 사랑과 결혼",
+    "제7장 — 건강",
+    "제8장 — 귀인",
+    "제9장 — 주의할 사람",
+    "제10장 — 굴곡과 위기",
+    "제11장 — 대운 흐름",
+    "제12장 — 주의 시기",
+    "제13장 — 당부의 말",
+    "제14장 — 개운법",
+  ];
+  const TOTAL = 14;
+
   const [showSheet, setShowSheet] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [doneCount, setDoneCount] = useState(0);
+  const [currentChapter, setCurrentChapter] = useState(1);
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (_productId: string) => {
     setShowSheet(false);
-    const product = PRODUCTS[0];
     setCreating(true);
+    setDoneCount(0);
+    setCurrentChapter(1);
     try {
+      // 1단계: 명식 생성 + resultId 받기
       const res = await fetch("/api/kunghap_business-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender }),
       });
-      const d = res.ok ? await res.json() : null;
-      const reportUrl = d?.resultId
-        ? `https://www.hongyeondang.com/saju/kunghap_business/report?id=${d.resultId}`
-        : `https://www.hongyeondang.com/saju/kunghap_business/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`;
-      router.push(d?.resultId ? `/saju/kunghap_business/report?id=${d.resultId}` : `/saju/kunghap_business/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);
+      if (!res.ok) {
+        router.push(`/saju/kunghap_business/report-preview?${new URLSearchParams({ name, gender, partnerName, partnerGender }).toString()}`);
+        return;
+      }
+      const { resultId } = await res.json();
+      if (!resultId) {
+        router.push(`/saju/kunghap_business/report-preview?${new URLSearchParams({ name, gender, partnerName, partnerGender }).toString()}`);
+        return;
+      }
+
+      // 2단계: 14장 병렬 생성 후 결과 수집
+      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+      let done = 0;
+      const allContent: Record<string, unknown> = {};
+      await Promise.all(chapters.map(async (ch) => {
+        try {
+          const r = await fetch("/api/kunghap_business-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: resultId, chapter: ch }),
+          });
+          const data = await r.json();
+          if (data.sections) Object.assign(allContent, data.sections);
+        } catch { /* 장 실패해도 계속 */ }
+        done++;
+        setDoneCount(done);
+        setCurrentChapter(Math.min(done + 1, TOTAL));
+      }));
+
+      // 3단계: 전체 내용 한 번에 저장
+      await fetch("/api/kunghap_business-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: allContent }),
+      });
+
+      // 4단계: 결과지 열기
+      router.push(`/saju/kunghap_business/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName)}&partnerGender=${encodeURIComponent(partnerGender)}`);
     } catch {
-      router.push(`/saju/kunghap_business/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);
-    } finally {
-      setCreating(false);
+      router.push(`/saju/kunghap_business/report-preview?${new URLSearchParams({ name, gender, partnerName, partnerGender }).toString()}`);
     }
   };
 
-  if (creating) return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 z-50" style={{ background: "#fdf8f4" }}>
-      <svg className="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8b2e14" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-      <div className="text-center px-8">
-        <p className="text-[16px] font-bold" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 완성하고 있소…</p>
-        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "#7a5a40" }}>16장 풀이와 사주 원국 이미지를<br />모두 생성하는 중이오.<br /><br />1~2분 정도 소요되오니<br />이 화면을 벗어나도 괜찮소.<br /><br />입력하신 이메일로 결과지 링크를<br />보내드렸으니 언제든 확인하실 수 있소.</p>
+  if (creating) {
+    const pct = Math.round((doneCount / TOTAL) * 100);
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-50 px-8" style={{ background: "radial-gradient(ellipse at 50% 40%, #1a0010 0%, #0a0208 100%)" }}>
+        <style>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+          }
+          @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 8px 2px #ff4499aa, 0 0 20px 4px #cc007755; }
+            50% { box-shadow: 0 0 16px 4px #ff66bbcc, 0 0 40px 10px #ff44aa88; }
+          }
+          @keyframes title-fade {
+            0% { opacity: 0; transform: translateY(6px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-6px); }
+          }
+          @keyframes orbit {
+            0% { transform: rotate(0deg) translateX(38px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(38px) rotate(-360deg); }
+          }
+        `}</style>
+
+        <div className="relative w-20 h-20 mb-6">
+          <div className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, #ff336622 0%, transparent 70%)" }} />
+          {[0,1,2,3,4,5].map(i => (
+            <div key={i} className="absolute w-1 h-1 rounded-full" style={{
+              top: "50%", left: "50%", marginTop: "-2px", marginLeft: "-2px",
+              background: i % 2 === 0 ? "#ff6699" : "#ffaacc",
+              boxShadow: `0 0 6px 2px ${i % 2 === 0 ? "#ff3366" : "#ff88aa"}`,
+              animation: `orbit ${2.5 + i * 0.4}s linear infinite`,
+              animationDelay: `${i * -0.5}s`,
+            }} />
+          ))}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span style={{ fontSize: 28, filter: "drop-shadow(0 0 8px #ff3366)" }}>✦</span>
+          </div>
+        </div>
+
+        <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5ee", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #ff336688" }}>
+          결과지를 완성하고 있소…
+        </p>
+        <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#ff99bb", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
+          {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
+        </p>
+
+        <div className="w-full max-w-[280px] mb-3">
+          <div className="flex justify-between text-[11px] mb-2" style={{ color: "#cc7799" }}>
+            <span>{doneCount} / {TOTAL} 장 완성</span>
+            <span>{pct}%</span>
+          </div>
+          <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a0810" }}>
+            <div
+              className="h-full rounded-full relative overflow-hidden transition-all duration-700"
+              style={{
+                width: `${pct}%`,
+                background: "linear-gradient(90deg, #8b1a40, #ff4488, #ff88bb)",
+                animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none",
+              }}
+            >
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+                background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)",
+                animation: "shimmer 1.6s linear infinite",
+                width: "40%",
+              }} />
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#886677" }}>
+          풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.
+        </p>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>
@@ -485,7 +606,7 @@ function CheckoutContent() {
         <ImageTextBlock
           topImgSrc="/media/cards/kunghap_business/jaehwe-3.jpg"
           bottomImgSrc="/media/cards/kunghap_business/jaehwe-1.jpg"
-          label="AI 정밀 재회 분석 · 5가지 항목"
+          label="AI 정밀 궁합 분석 · 14장 리포트"
           headline={`두 사람의 운명,\n이제\n알려드릴게요`}
           accentWord="이제"
           bgColor={CREAM}
@@ -523,7 +644,7 @@ function CheckoutContent() {
   );
 }
 
-export default function JaehweCheckoutPage() {
+export default function KunghapYeonaeCheckoutPage() {
   return (
     <Suspense fallback={
       <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: CREAM }}>
