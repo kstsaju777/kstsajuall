@@ -5626,7 +5626,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 마무리 · 단하의 편지 ═══════════ */}
-      {ch === "16" && (
+      {ch === "14" && (
         <>
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           {/* 표지 */}
