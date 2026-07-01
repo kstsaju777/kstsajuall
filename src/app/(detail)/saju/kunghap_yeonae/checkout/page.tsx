@@ -86,7 +86,7 @@ function ImageTextBlock({
   const parts = headline.split(accentWord);
   return (
     <div style={{ backgroundColor: bgColor }}>
-      <div className="relative overflow-hidden" style={{ height: 260 }}>
+      <div className="relative overflow-hidden" style={{ aspectRatio: "9/16", maxHeight: "70vh" }}>
         <video src="/media/cards/kunghap_yeonae/yeonae-0.mp4" autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover object-top" />
         <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${bgColor})` }} />
       </div>
