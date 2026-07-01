@@ -758,23 +758,33 @@ function CheckoutContent() {
         return;
       }
 
-      // 2단계: 14장 병렬 생성 (각 요청은 독립적으로 짧게 끝남)
+      // 2단계: 14장 병렬 생성 후 결과 수집
       const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
       let done = 0;
+      const allContent: Record<string, unknown> = {};
       await Promise.all(chapters.map(async (ch) => {
         try {
-          await fetch("/api/jeongtong-report", {
+          const r = await fetch("/api/jeongtong-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: resultId, chapter: ch }),
           });
+          const data = await r.json();
+          if (data.sections) Object.assign(allContent, data.sections);
         } catch { /* 장 실패해도 계속 */ }
         done++;
         setDoneCount(done);
         setCurrentChapter(Math.min(done + 1, TOTAL));
       }));
 
-      // 3단계: 결과지 열기
+      // 3단계: 전체 내용 한 번에 저장 (race condition 없음)
+      await fetch("/api/jeongtong-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: allContent }),
+      });
+
+      // 4단계: 결과지 열기
       router.push(`/saju/saju_jeongtong/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     } catch {
       router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, date, time, calendar, gender, email }).toString()}`);

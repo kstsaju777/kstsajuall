@@ -310,12 +310,6 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
     });
 
-    // 생성 완료 후 DB에 merge 저장
-    const { data: cur } = await service.from("saju_results").select("interpretation_md").eq("id", id).maybeSingle();
-    let existing: Record<string, unknown> = {};
-    try { existing = JSON.parse(cur?.interpretation_md || "{}") || {}; } catch { existing = {}; }
-    await service.from("saju_results").update({ interpretation_md: JSON.stringify({ ...existing, ...obj }) }).eq("id", id);
-
     return NextResponse.json({ sections: obj });
   } catch (err) {
     return NextResponse.json({ error: "장 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
