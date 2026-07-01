@@ -445,8 +445,6 @@ function CheckoutContent() {
       }
     } catch {
       router.push(`/saju/kunghap_yeonae/report?${new URLSearchParams({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, ch: "0" }).toString()}`);
-    } finally {
-      setCreating(false);
     }
   };
 
