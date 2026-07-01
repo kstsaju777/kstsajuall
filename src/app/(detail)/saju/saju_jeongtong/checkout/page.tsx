@@ -865,7 +865,7 @@ function CheckoutContent() {
         </div>
 
         <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#886655" }}>
-          풀이가 완성되면 자동으로 열리오.<br />잠시만 기다려 주시오.
+          풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.
         </p>
       </div>
     );
