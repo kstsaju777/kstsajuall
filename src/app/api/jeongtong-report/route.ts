@@ -271,9 +271,11 @@ async function createReport(body: unknown) {
         const content: Record<string, unknown> = {};
         for (let idx = 0; idx < CHAPTERS_TO_GEN.length; idx++) {
           const ch = CHAPTERS_TO_GEN[idx];
+          console.log(`[jeongtong] ${ch}장 시작 (${idx+1}/${TOTAL_CHAPTERS})`);
           try {
             const r = await genChapterContent(ch, chapterInput);
             Object.assign(content, r.obj);
+            console.log(`[jeongtong] ${ch}장 완료`);
             send({ chapter: idx + 1, total: TOTAL_CHAPTERS });
           } catch (e) {
             console.error(`[jeongtong] ${ch}장 생성 실패:`, e);
