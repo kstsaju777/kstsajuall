@@ -236,28 +236,33 @@ async function createReport(body: unknown) {
     sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
     if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
 
-    // 3단계: 이미지 + 16장 동시 병렬 생성
+    // 3단계: 이미지(병렬) + 16장(4개씩 배치) 생성
     const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
-    const [imageResult, ...chapterResults] = await Promise.allSettled([
-      (async () => {
-        const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
-        const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-        const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-        const { error: uploadErr } = await service.storage
-          .from("saju-images")
-          .upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-        if (uploadErr) throw uploadErr;
-        return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
-      })(),
-      ...Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput)),
-    ]);
-    if (imageResult.status === "rejected") console.error("[jeongtong] 이미지 생성 실패:", imageResult.reason);
-    const sajuImageUrl = imageResult.status === "fulfilled" ? (imageResult.value as string) : null;
+
+    // 이미지는 별도로 병렬 시작
+    const imagePromise = (async () => {
+      const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
+      const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
+      const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+      const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+      if (uploadErr) throw uploadErr;
+      return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
+    })();
+
+    // 16장을 4개씩 배치로 순차 생성 (rate limit 방지)
     const content: Record<string, unknown> = {};
-    for (let i = 0; i < 16; i++) {
-      const r = chapterResults[i];
-      if (r.status === "fulfilled") Object.assign(content, (r.value as { obj: Record<string, unknown> }).obj);
+    const BATCH = 4;
+    for (let start = 1; start <= 16; start += BATCH) {
+      const batch = Array.from({ length: Math.min(BATCH, 17 - start) }, (_, i) => genChapterContent(start + i, chapterInput));
+      const results = await Promise.allSettled(batch);
+      for (const r of results) {
+        if (r.status === "fulfilled") Object.assign(content, (r.value as { obj: Record<string, unknown> }).obj);
+      }
     }
+
+    const imageResult = await Promise.allSettled([imagePromise]);
+    if (imageResult[0].status === "rejected") console.error("[jeongtong] 이미지 생성 실패:", imageResult[0].reason);
+    const sajuImageUrl = imageResult[0].status === "fulfilled" ? (imageResult[0].value as string) : null;
 
     // 4단계: 최종 내용으로 업데이트
     await service.from("saju_results").update({
