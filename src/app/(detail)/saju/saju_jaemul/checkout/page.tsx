@@ -323,31 +323,63 @@ function CheckoutContent() {
   const gender   = searchParams.get("gender")   ?? "";
   const email    = searchParams.get("email")    ?? "";
   const concern  = searchParams.get("concern")  ?? "";
+  const CHAPTER_TITLES = ["제1장 — 사주 원국","제2장 — 운명의 구조","제3장 — 인간관계","제4장 — 숨겨진 특징","제5장 — 재물과 직업","제6장 — 사랑과 결혼","제7장 — 건강","제8장 — 귀인","제9장 — 주의할 사람","제10장 — 굴곡과 위기","제11장 — 대운 흐름","제12장 — 주의 시기","제13장 — 당부의 말","제14장 — 개운법","제15장 — 중심 잡기","제16장 — 마무리"];
+  const TOTAL = 16;
   const [showSheet, setShowSheet] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [doneCount, setDoneCount] = useState(0);
+  const [currentChapter, setCurrentChapter] = useState(1);
 
   const handleConfirm = async () => {
     setShowSheet(false);
     setCreating(true);
+    setDoneCount(0);
+    setCurrentChapter(1);
     try {
       const res = await fetch("/api/saju_jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, date, time, calendar, gender, email }) });
-      const d = res.ok ? await res.json() : null;
-      const reportUrl = d?.resultId ? `https://www.hongyeondang.com/saju/saju_jaemul/report?id=${d.resultId}` : `https://www.hongyeondang.com/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`;
-      router.push(d?.resultId ? `/saju/saju_jaemul/report?id=${d.resultId}` : `/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`);
-    } catch {
-      router.push(`/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`);
-    }
+      if (!res.ok || !res.body) { router.push(`/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`); return; }
+      const reader = res.body.getReader(); const decoder = new TextDecoder(); let buf = "";
+      while (true) {
+        const { done, value } = await reader.read(); if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split("\n"); buf = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.chapter) { setDoneCount(data.chapter); setCurrentChapter(Math.min(data.chapter + 1, TOTAL)); }
+            if (data.done && data.resultId) { router.push(`/saju/saju_jaemul/report?id=${data.resultId}`); return; }
+            if (data.error) { router.push(`/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`); return; }
+          } catch { /* JSON 파싱 실패 무시 */ }
+        }
+      }
+    } catch { router.push(`/saju/saju_jaemul/report?${new URLSearchParams({ name, date, time, calendar, gender, email, ch: "0" }).toString()}`); }
   };
 
-  if (creating) return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 z-50" style={{ background: "#fdf8f4" }}>
-      <svg className="animate-spin" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8b2e14" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-      <div className="text-center px-8">
-        <p className="text-[16px] font-bold" style={{ color: "#3a1a0a", fontFamily: "'Noto Serif KR', serif" }}>결과지를 완성하고 있소…</p>
-        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "#7a5a40" }}>16장 풀이와 사주 원국 이미지를<br />모두 생성하는 중이오.<br /><br />1~2분 정도 소요되오니<br />이 화면을 벗어나도 괜찮소.<br /><br />입력하신 이메일로 결과지 링크를<br />보내드렸으니 언제든 확인하실 수 있소.</p>
+  if (creating) {
+    const pct = Math.round((doneCount / TOTAL) * 100);
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-50 px-8" style={{ background: "radial-gradient(ellipse at 50% 40%, #2a0a00 0%, #0d0200 100%)" }}>
+        <style>{`@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}@keyframes glow-pulse{0%,100%{box-shadow:0 0 8px 2px #ff4400aa,0 0 20px 4px #ff220055}50%{box-shadow:0 0 16px 4px #ff6600cc,0 0 40px 10px #ff440088}}@keyframes orbit{0%{transform:rotate(0deg) translateX(38px) rotate(0deg)}100%{transform:rotate(360deg) translateX(38px) rotate(-360deg)}}@keyframes title-fade{0%{opacity:0;transform:translateY(6px)}20%{opacity:1;transform:translateY(0)}80%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}`}</style>
+        <div className="relative w-20 h-20 mb-6">
+          <div className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, #ff330022 0%, transparent 70%)" }} />
+          {[0,1,2,3,4,5].map(i => (<div key={i} className="absolute w-1 h-1 rounded-full" style={{ top:"50%",left:"50%",marginTop:"-2px",marginLeft:"-2px",background:i%2===0?"#ff6633":"#ffaa44",boxShadow:`0 0 6px 2px ${i%2===0?"#ff4400":"#ff8800"}`,animation:`orbit ${2.5+i*0.4}s linear infinite`,animationDelay:`${i*-0.5}s` }} />))}
+          <div className="absolute inset-0 flex items-center justify-center"><span style={{ fontSize:28,filter:"drop-shadow(0 0 8px #ff4400)" }}>✦</span></div>
+        </div>
+        <p className="text-[18px] font-bold mb-1" style={{ color:"#fff5ee",fontFamily:"'Noto Serif KR',serif",textShadow:"0 0 20px #ff440088" }}>결과지를 완성하고 있소…</p>
+        <p key={currentChapter} className="text-[13px] mb-8" style={{ color:"#ff9966",animation:"title-fade 4s ease-in-out",minHeight:20 }}>{doneCount < TOTAL ? CHAPTER_TITLES[currentChapter-1]+" 풀이 중" : "마무리 중이오…"}</p>
+        <div className="w-full max-w-[280px] mb-3">
+          <div className="flex justify-between text-[11px] mb-2" style={{ color:"#cc7755" }}><span>{doneCount} / {TOTAL} 장 완성</span><span>{pct}%</span></div>
+          <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background:"#1a0800" }}>
+            <div className="h-full rounded-full relative overflow-hidden transition-all duration-700" style={{ width:`${pct}%`,background:"linear-gradient(90deg,#8b1a00,#ff4400,#ff8833)",animation:pct>0?"glow-pulse 1.8s ease-in-out infinite":"none" }}>
+              <div style={{ position:"absolute",top:0,left:0,right:0,bottom:0,background:"linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.4) 50%,transparent 100%)",animation:"shimmer 1.6s linear infinite",width:"40%" }} />
+            </div>
+          </div>
+        </div>
+        <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color:"#886655" }}>풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.</p>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col" style={{ backgroundColor: CREAM }}>

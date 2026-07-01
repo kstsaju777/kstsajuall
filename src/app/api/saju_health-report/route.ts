@@ -43,7 +43,8 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
   const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
+    if (i > 0) await new Promise(r => setTimeout(r, 2000 * i));
     try {
       const llm = await generateInterpretation({ system, user, json: true });
       meta = { provider: llm.provider, model: llm.model };
@@ -150,15 +151,12 @@ async function saveContent(id: string, content: Record<string, unknown>) {
   return NextResponse.json({ ok: true });
 }
 
-// ── 초기 생성: 명식 + 1장 풀이 ──
+// ── 초기 생성: SSE 스트리밍 (1장씩 순차, 진행률 전송) ──
 async function createReport(body: unknown) {
-  if (!isSajuApiConfigured()) {
-    return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
-  }
+  if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
   const { name, date, time, calendar, gender, email } = parsed.data;
-
   const ymd = parseDate(date);
   if (!ymd) return NextResponse.json({ error: "생년월일 형식 오류" }, { status: 400 });
   const cal = parseCalendar(calendar);
@@ -167,107 +165,89 @@ async function createReport(body: unknown) {
   const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
   const g: "male" | "female" = gender === "여자" || gender === "female" ? "female" : "male";
   const pad = (n: number | string) => String(n).padStart(2, "0");
+  const encoder = new TextEncoder();
 
-  const birthInfo: BirthInfo = {
-    birthYear: String(ymd.year),
-    birthMonth: String(ymd.month),
-    birthDay: String(ymd.day),
-    ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
-    calendarType: cal === "solar" ? "양력" : "음력",
-    gender: g,
-    isLeapMonth: cal === "leap",
-  };
-
-  try {
-    const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
-    const view = buildMyeongsikView(analysis);
-    const manseryeokText = formatSajuToManseryeok(analysis, birthInfo);
-
-    const env = serverEnv();
-    const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
-
-    const birth = {
-      date: `${ymd.year}.${pad(ymd.month)}.${pad(ymd.day)}`,
-      calendar: cal === "solar" ? "양력" : cal === "leap" ? "윤달" : "음력",
-      time: hasTime ? `${pad(hh)}:${pad(mm)}` : "시간 모름",
-      gender: g,
-    };
-
-    const service = createServiceClient();
-
-    // 1단계: 주문 + 초기 결과 레코드 먼저 생성 (알림 발송에 resultId 필요)
-    const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
-    if (!product) return NextResponse.json({ error: "상품을 찾을 수 없습니다." }, { status: 500 });
-
-    const orderCode = `jt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const { data: order, error: orderErr } = await service
-      .from("orders")
-      .insert({ order_id: orderCode, product_id: product.id, guest_email: email || "guest@hongyeondang.com", amount: 0, status: "paid", paid_at: new Date().toISOString() })
-      .select("id")
-      .single();
-    if (orderErr || !order) return NextResponse.json({ error: "주문 생성 실패", detail: orderErr?.message }, { status: 500 });
-
-    await service.from("saju_inputs").insert({
-      order_id: order.id,
-      name: name || null,
-      birth_date: `${ymd.year}-${pad(ymd.month)}-${pad(ymd.day)}`,
-      birth_time: hasTime ? `${pad(hh)}:${pad(mm)}` : null,
-      time_unknown: !hasTime,
-      gender: g,
-      calendar: cal === "solar" ? "solar" : "lunar",
-      concerns: [],
-    });
-
-    const { data: result, error: resultErr } = await service
-      .from("saju_results")
-      .insert({
-        order_id: order.id,
-        myeongsik: { view, name, birth, manseryeokText, gender: g } as never,
-        interpretation_md: JSON.stringify({}),
-        llm_provider: llm.provider,
-        llm_model: llm.model,
-      })
-      .select("id")
-      .single();
-    if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패", detail: resultErr?.message }, { status: 500 });
-
-    // 2단계: SMS + 이메일 즉시 발송 (fire-and-forget)
-    const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
-    sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
-    if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
-
-    // 3단계: 이미지 + 16장 동시 병렬 생성
-    const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
-    const [imageResult, ...chapterResults] = await Promise.allSettled([
-      (async () => {
-        const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
-        const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-        const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-        const { error: uploadErr } = await service.storage
-          .from("saju-images")
-          .upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-        if (uploadErr) throw uploadErr;
-        return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
-      })(),
-      ...Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput)),
-    ]);
-    const sajuImageUrl = imageResult.status === "fulfilled" ? (imageResult.value as string) : null;
-    const content: Record<string, unknown> = {};
-    for (let i = 0; i < 16; i++) {
-      const r = chapterResults[i];
-      if (r.status === "fulfilled") Object.assign(content, (r.value as { obj: Record<string, unknown> }).obj);
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (data: object) => {
+        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`)); } catch { /* 연결 종료 */ }
+      };
+      try {
+        const birthInfo: BirthInfo = {
+          birthYear: String(ymd.year), birthMonth: String(ymd.month), birthDay: String(ymd.day),
+          ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
+          calendarType: cal === "solar" ? "양력" : "음력", gender: g, isLeapMonth: cal === "leap",
+        };
+        const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
+        const view = buildMyeongsikView(analysis);
+        const manseryeokText = formatSajuToManseryeok(analysis, birthInfo);
+        const env = serverEnv();
+        const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
+        const birth = {
+          date: `${ymd.year}.${pad(ymd.month)}.${pad(ymd.day)}`,
+          calendar: cal === "solar" ? "양력" : cal === "leap" ? "윤달" : "음력",
+          time: hasTime ? `${pad(hh)}:${pad(mm)}` : "시간 모름", gender: g,
+        };
+        const service = createServiceClient();
+        const { data: product } = await service.from("products").select("id").eq("slug", PRODUCT_SLUG).maybeSingle();
+        if (!product) { send({ error: "상품을 찾을 수 없습니다." }); controller.close(); return; }
+        const orderCode = `jt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const { data: order, error: orderErr } = await service.from("orders")
+          .insert({ order_id: orderCode, product_id: product.id, guest_email: email || "guest@hongyeondang.com", amount: 0, status: "paid", paid_at: new Date().toISOString() })
+          .select("id").single();
+        if (orderErr || !order) { send({ error: "주문 생성 실패" }); controller.close(); return; }
+        await service.from("saju_inputs").insert({
+          order_id: order.id, name: name || null,
+          birth_date: `${ymd.year}-${pad(ymd.month)}-${pad(ymd.day)}`,
+          birth_time: hasTime ? `${pad(hh)}:${pad(mm)}` : null,
+          time_unknown: !hasTime, gender: g, calendar: cal === "solar" ? "solar" : "lunar", concerns: [],
+        });
+        const { data: result, error: resultErr } = await service.from("saju_results")
+          .insert({ order_id: order.id, myeongsik: { view, name, birth, manseryeokText, gender: g } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
+          .select("id").single();
+        if (resultErr || !result) { send({ error: "결과 저장 실패" }); controller.close(); return; }
+        const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
+        sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
+        if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
+        const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
+        const imagePromise = (async () => {
+          const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
+          const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
+          const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+          const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+          if (uploadErr) throw uploadErr;
+          return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
+        })();
+        const content: Record<string, unknown> = {};
+        for (let ch = 1; ch <= 16; ch++) {
+          try {
+            const r = await genChapterContent(ch, chapterInput);
+            Object.assign(content, r.obj);
+            send({ chapter: ch, total: 16 });
+          } catch (e) {
+            console.error(`[${PRODUCT_SLUG}] ${ch}장 생성 실패:`, e);
+            send({ chapter: ch, total: 16, failed: true });
+          }
+        }
+        const imageResult = await Promise.allSettled([imagePromise]);
+        if (imageResult[0].status === "rejected") console.error(`[${PRODUCT_SLUG}] 이미지 생성 실패:`, imageResult[0].reason);
+        const sajuImageUrl = imageResult[0].status === "fulfilled" ? (imageResult[0].value as string) : null;
+        await service.from("saju_results").update({
+          myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl } as never,
+          interpretation_md: JSON.stringify(content),
+        }).eq("id", result.id);
+        send({ done: true, resultId: result.id, sajuImageUrl });
+      } catch (err) {
+        send({ error: err instanceof Error ? err.message : String(err) });
+      } finally {
+        controller.close();
+      }
     }
+  });
 
-    // 4단계: 최종 내용으로 업데이트
-    await service.from("saju_results").update({
-      myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl } as never,
-      interpretation_md: JSON.stringify(content),
-    }).eq("id", result.id);
-
-    return NextResponse.json({ resultId: result.id, view, content, name, birth, sajuImageUrl });
-  } catch (err) {
-    return NextResponse.json({ error: "결과지 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
-  }
+  return new Response(stream, {
+    headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no" },
+  });
 }
 
 // ── 특정 장 온디맨드 생성 ──
