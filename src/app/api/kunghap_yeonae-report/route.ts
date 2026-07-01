@@ -36,7 +36,7 @@ const createSchema = z.object({
   gender: z.string().optional().default(""),
   email: z.string().optional().default(""),
   partnerName: z.string().optional().default(""),
-  partnerDate: z.string().min(1),
+  partnerDate: z.string().optional().default(""),
   partnerTime: z.string().optional().default(""),
   partnerCalendar: z.string().optional().default("양력"),
   partnerGender: z.string().optional().default(""),
@@ -192,9 +192,8 @@ async function createReport(body: unknown) {
   const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
   const g: "male" | "female" = gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
 
-  // 상대방
-  const pymd = parseDate(partnerDate);
-  if (!pymd) return NextResponse.json({ error: "상대방 생년월일 형식 오류" }, { status: 400 });
+  // 상대방 (optional)
+  const pymd = partnerDate ? parseDate(partnerDate) : null;
   const pcal = parseCalendar(partnerCalendar);
   const ptimeVal = parseTimeVal(partnerTime);
   const phasTime = ptimeVal !== "unknown";
@@ -212,25 +211,37 @@ async function createReport(body: unknown) {
       isLeapMonth: cal === "leap",
     };
 
-    const partnerBirthInfo: BirthInfo = {
-      birthYear: String(pymd.year),
-      birthMonth: String(pymd.month),
-      birthDay: String(pymd.day),
-      ...(phasTime ? { birthHour: String(Number(phh)), birthMinute: String(Number(pmm)) } : {}),
-      calendarType: pcal === "solar" ? "양력" : "음력",
-      gender: pg,
-      isLeapMonth: pcal === "leap",
-    };
+    const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
+    let partnerView = null;
+    let partnerManseryeokText = "";
+    let partnerBirth = null;
 
-    const [analysis, partnerAnalysis] = await Promise.all([
-      fetchSajuAnalysis(birthInfo, [], { source: "confirm" }),
-      fetchSajuAnalysis(partnerBirthInfo, [], { source: "confirm" }),
-    ]);
+    if (pymd) {
+      const partnerBirthInfo: BirthInfo = {
+        birthYear: String(pymd.year),
+        birthMonth: String(pymd.month),
+        birthDay: String(pymd.day),
+        ...(phasTime ? { birthHour: String(Number(phh)), birthMinute: String(Number(pmm)) } : {}),
+        calendarType: pcal === "solar" ? "양력" : "음력",
+        gender: pg,
+        isLeapMonth: pcal === "leap",
+      };
+      const partnerAnalysis = await fetchSajuAnalysis(partnerBirthInfo, [], { source: "confirm" });
+      partnerView = buildMyeongsikView(partnerAnalysis);
+      partnerManseryeokText = formatSajuToManseryeok(partnerAnalysis, partnerBirthInfo);
+      partnerBirth = {
+        date: `${pymd.year}.${pad(pymd.month)}.${pad(pymd.day)}`,
+        calendar: pcal === "solar" ? "양력" : pcal === "leap" ? "윤달" : "음력",
+        time: phasTime ? `${pad(phh)}:${pad(pmm)}` : "시간 모름",
+        gender: pg,
+      };
+    }
+
     const view = buildMyeongsikView(analysis);
-    const partnerView = buildMyeongsikView(partnerAnalysis);
     const myManseryeokText = formatSajuToManseryeok(analysis, birthInfo);
-    const partnerManseryeokText = formatSajuToManseryeok(partnerAnalysis, partnerBirthInfo);
-    const manseryeokText = `[${name || "나"}의 사주]\n${myManseryeokText}\n\n[${partnerName || "상대방"}의 사주]\n${partnerManseryeokText}`;
+    const manseryeokText = partnerManseryeokText
+      ? `[${name || "나"}의 사주]\n${myManseryeokText}\n\n[${partnerName || "상대방"}의 사주]\n${partnerManseryeokText}`
+      : myManseryeokText;
 
     const env = serverEnv();
     const llm = { provider: env.LLM_PROVIDER, model: env.LLM_MODEL };
@@ -240,12 +251,6 @@ async function createReport(body: unknown) {
       calendar: cal === "solar" ? "양력" : cal === "leap" ? "윤달" : "음력",
       time: hasTime ? `${pad(hh)}:${pad(mm)}` : "시간 모름",
       gender: g,
-    };
-    const partnerBirth = {
-      date: `${pymd.year}.${pad(pymd.month)}.${pad(pymd.day)}`,
-      calendar: pcal === "solar" ? "양력" : pcal === "leap" ? "윤달" : "음력",
-      time: phasTime ? `${pad(phh)}:${pad(pmm)}` : "시간 모름",
-      gender: pg,
     };
 
     const service = createServiceClient();
@@ -284,19 +289,20 @@ async function createReport(body: unknown) {
     // 이미지 두 사람 각각 백그라운드 생성 (fire-and-forget)
     (async () => {
       try {
-        const [imgBuffer, partnerImgBuffer] = await Promise.all([
+        const buffers = await Promise.all([
           generateSajuImage(buildSajuImagePrompt(view.pillars ?? []), process.env.OPENAI_API_KEY!),
-          generateSajuImage(buildSajuImagePrompt(partnerView.pillars ?? []), process.env.OPENAI_API_KEY!),
+          ...(partnerView?.pillars ? [generateSajuImage(buildSajuImagePrompt(partnerView.pillars), process.env.OPENAI_API_KEY!)] : []),
         ]);
         const ts = Date.now();
         const r1 = Math.random().toString(36).slice(2,8);
-        const r2 = Math.random().toString(36).slice(2,8);
-        const [up1, up2] = await Promise.all([
-          service.storage.from("saju-images").upload(`wonguk/${ts}-${r1}.png`, imgBuffer, { contentType: "image/png", upsert: false }),
-          service.storage.from("saju-images").upload(`wonguk/${ts}-${r2}.png`, partnerImgBuffer, { contentType: "image/png", upsert: false }),
-        ]);
+        const up1 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r1}.png`, buffers[0], { contentType: "image/png", upsert: false });
         const sajuImageUrl = up1.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r1}.png`).data.publicUrl;
-        const partnerSajuImageUrl = up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r2}.png`).data.publicUrl;
+        let partnerSajuImageUrl = null;
+        if (buffers[1]) {
+          const r2 = Math.random().toString(36).slice(2,8);
+          const up2 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r2}.png`, buffers[1], { contentType: "image/png", upsert: false });
+          partnerSajuImageUrl = up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r2}.png`).data.publicUrl;
+        }
         await service.from("saju_results").update({ myeongsik: { ...storedMyeongsik, sajuImageUrl, partnerSajuImageUrl } as never }).eq("id", result.id);
       } catch { /* 이미지 실패 무시 */ }
     })();
