@@ -22,7 +22,7 @@ import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-mansery
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const PRODUCT_SLUG = "saju_yeonae";
 const PRODUCT_NAME = "연애운사주";

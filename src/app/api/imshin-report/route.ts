@@ -13,7 +13,7 @@ import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { IMSHIN_CHAPTER_SECTIONS, isImshinChapterReady } from "@/lib/saju/imshin-report-content";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // ─── 사주 → 텍스트 ───────────────────────────────────────────────────────────
 function sajuToText(saju: LocalSajuResult | null, name: string, gender: string): string {

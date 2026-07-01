@@ -1,4 +1,4 @@
-// =====================================================
+﻿// =====================================================
 // 재회궁합 결과지 생성 + 저장 API
 // =====================================================
 // POST {name,date,time,calendar,gender,email,partnerName,partnerDate,...,concern}
@@ -15,7 +15,7 @@ import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { JAEHWE_CHAPTER_SECTIONS, isJaehweChapterReady } from "@/lib/saju/jaehwe-report-content";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // JAEHWE_CHAPTER_SECTIONS / isJaehweChapterReady는 @/lib/saju/jaehwe-report-content 에서 직접 import 하세요
 

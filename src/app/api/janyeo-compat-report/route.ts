@@ -8,7 +8,7 @@ import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { JANYEO_COMPAT_CHAPTER_SECTIONS, isJanyeoCompatChapterReady } from "@/lib/saju/janyeo-compat-report-content";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function sajuToText(saju: LocalSajuResult | null, name: string, gender: string): string {
   if (!saju) return `${name}의 생년월일 정보가 없습니다.`;

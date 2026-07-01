@@ -1,4 +1,4 @@
-// 자녀사주 결과지 생성 + 저장 API
+﻿// 자녀사주 결과지 생성 + 저장 API
 // POST {name,date,time,calendar,gender,email,concern} → createReport
 // POST {id, chapter}                                  → generateChapter
 // POST {id, content}                                  → saveContent
@@ -13,7 +13,7 @@ import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { CHILD_CHAPTER_SECTIONS, isChildChapterReady } from "@/lib/saju/child-report-content";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 // ─── 사주 → 텍스트 ───────────────────────────────────────────────────────────
 function sajuToText(saju: LocalSajuResult | null, name: string, gender: string): string {
