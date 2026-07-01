@@ -3897,38 +3897,6 @@ function ReportPreviewInner() {
       .finally(() => { clearTimeout(timer); setGenerating(false); });
   };
 
-  // 결제 직후/조회 후: 빠진 "모든" 장을 병렬 생성 → 합본 1회 저장 (이후 장 이동 즉시)
-  useEffect(() => {
-    if (!report || !id || loading || generatedRef.current) return;
-    const all = Object.keys(CHAPTER_SECTIONS).map(Number);
-    const missing = all.filter((n) => !isChapterReady(report.content as Record<string, unknown>, n));
-    if (missing.length === 0) return;
-    generatedRef.current = true;
-    setRevealed(false); // 다 만들어지면 '결과 보기' 버튼으로 공개
-    setGenerating(true);
-    Promise.all(
-      missing.map((n) =>
-        fetch("/api/jeongtong-report", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, chapter: n }),
-        })
-          .then((r) => (r.ok ? r.json() : null))
-          .catch(() => null),
-      ),
-    )
-      .then((results) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const patch = Object.assign({}, ...results.filter(Boolean).map((r: any) => r.sections || {}));
-        setReport((p) => {
-          if (!p) return p;
-          const merged = { ...(p.content as Record<string, unknown>), ...patch };
-          persist(merged);
-          return { ...p, content: merged as ReportContent };
-        });
-      })
-      .finally(() => setGenerating(false));
-  }, [report, id, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // (detail) 레이아웃의 스크롤 컨테이너(<main>)를 찾아 진행률 계산
   useEffect(() => {
