@@ -771,7 +771,7 @@ Composition: cinematic wide landscape, dramatic natural lighting, volumetric atm
 const GAN_KR: Record<string, string> = { 甲:"갑", 乙:"을", 丙:"병", 丁:"정", 戊:"무", 己:"기", 庚:"경", 辛:"신", 壬:"임", 癸:"계" };
 const JI_KR: Record<string, string> = { 子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
 
-export function buildChapterPrompt(chapter: number, input: ReportPromptInput): { system: string; user: string; compatTags?: string[][]; ch6RankData?: DescRankData[] } {
+export function buildChapterPrompt(chapter: number, input: ReportPromptInput): { system: string; user: string; compatTags?: string[][]; ch6RankData?: DescRankData[]; ch6Pillars?: { nyeon:{gan:string;ji:string;ganEl:string;jiEl:string}; wol:{gan:string;ji:string;ganEl:string;jiEl:string}; il:{gan:string;ji:string;ganEl:string;jiEl:string}; si:{gan:string;ji:string;ganEl:string;jiEl:string}; birthDate:string; siName:string; tags:string[] }[] } {
   const honorSuffix = input.gender === "male" ? "군" : "양";
   const honor = input.name?.trim() ? `${input.name}${honorSuffix}` : "이분";
 
@@ -812,6 +812,7 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
   let pillarTable = "";
   const top3Tags: string[][] = [];
   let ch6RankData: DescRankData[] = [];
+  let ch6Pillars: { nyeon:{gan:string;ji:string;ganEl:string;jiEl:string}; wol:{gan:string;ji:string;ganEl:string;jiEl:string}; il:{gan:string;ji:string;ganEl:string;jiEl:string}; si:{gan:string;ji:string;ganEl:string;jiEl:string}; birthDate:string; siName:string; tags:string[] }[] = [];
   if (chapter === 1 && input.pillars && input.pillars.length > 0) {
     // pillars 순서: [0]=시주, [1]=일주, [2]=월주, [3]=년주
     const ORDER = ["년주", "월주", "일주", "시주"];
@@ -1366,6 +1367,21 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
           `[pillars JSON — compatibleJuju[${i}].pillars 에 그대로 사용]\n${JSON.stringify(pillarObj)}`;
       }).join("\n\n");
 
+      // pillars 확정값 저장 (LLM 응답 대신 직접 주입용)
+      ch6Pillars = top3.map((t, i) => {
+        const siGz = assignedSi[i] ?? "";
+        const JI_SI_NAME: Record<string,string> = { 子:"자시",丑:"축시",寅:"인시",卯:"묘시",辰:"진시",巳:"사시",午:"오시",未:"미시",申:"신시",酉:"유시",戌:"술시",亥:"해시" };
+        const birthDate = `${t.year}.${String(t.month).padStart(2,"0")}.${String(t.day).padStart(2,"0")}`;
+        const siName = siGz[1] ? (JI_SI_NAME[siGz[1]] ?? "") : "";
+        return {
+          nyeon: { gan:t.nyeonGan, ji:t.nyeonJi, ganEl:STEM_EL_C[t.nyeonGan]??"", jiEl:BRANCH_EL_C[t.nyeonJi]??"" },
+          wol:   { gan:t.wolGan,   ji:t.wolJi,   ganEl:STEM_EL_C[t.wolGan]??"",   jiEl:BRANCH_EL_C[t.wolJi]??"" },
+          il:    { gan:t.ilGan,    ji:t.ilJi,     ganEl:STEM_EL_C[t.ilGan]??"",    jiEl:BRANCH_EL_C[t.ilJi]??"" },
+          si:    { gan:siGz[0]??"", ji:siGz[1]??"", ganEl:STEM_EL_C[siGz[0]]??"", jiEl:BRANCH_EL_C[siGz[1]]??"" },
+          birthDate, siName, tags: t.reasons,
+        };
+      });
+
       // desc 지시용 확정값 — LLM이 추론 없이 바로 쓸 수 있도록 미리 계산
       ch6RankData = top3.map(t => {
         const iKrD = `${GAN_KR_C[t.ilGan]??t.ilGan}${JI_KR_C[t.ilJi]??t.ilJi}`;
@@ -1534,7 +1550,7 @@ ${CH_GUIDE[chapter]?.trim() ? `\n[이 장에서 특히 신경 쓸 것]\n${CH_GUI
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
 
 ${chapter === 6 ? CH_SCHEMA[6] : (CH_SCHEMA[chapter] ?? "{}")}`;
-  return { system: SYSTEM, user, compatTags: compatTagsResult, ch6RankData: chapter === 6 ? ch6RankData : undefined };
+  return { system: SYSTEM, user, compatTags: compatTagsResult, ch6RankData: chapter === 6 ? ch6RankData : undefined, ch6Pillars: chapter === 6 ? ch6Pillars : undefined };
 }
 
 // LLM 응답 텍스트 → JSON 오브젝트 (코드펜스 제거 후 파싱)

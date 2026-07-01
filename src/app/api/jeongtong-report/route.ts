@@ -41,7 +41,7 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
-  const { system, user, compatTags, ch6RankData } = buildChapterPrompt(chapter, input);
+  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
@@ -60,10 +60,11 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
           continue;
         }
       }
-      // 6장: 서버 계산된 tags를 LLM 결과에 덮어씌우기
-      if (compatTags && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
+      // 6장: 서버 계산된 tags + pillars를 LLM 결과에 덮어씌우기
+      if (Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
         const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
-        compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
+        if (compatTags) compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
+        if (ch6Pillars) ch6Pillars.forEach((p, idx) => { if (cj[idx]) cj[idx].pillars = p; });
       }
       // 6장: desc를 각 순위별 별도 호출로 생성 (정확도 보장)
       if (chapter === 6 && ch6RankData && ch6RankData.length > 0 && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
