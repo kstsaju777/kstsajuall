@@ -246,15 +246,23 @@ async function createReport(body: unknown) {
         sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
         if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
 
-        // 3단계: 이미지 백그라운드 시작 (로딩 게이지에는 미포함)
+        // 3단계: 이미지 백그라운드 시작 (로딩 게이지에는 미포함, 실패시 2회 재시도)
         const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
         const imagePromise = (async () => {
           const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
-          const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-          const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-          const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-          if (uploadErr) throw uploadErr;
-          return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
+          for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+              const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
+              const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+              const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+              if (uploadErr) throw uploadErr;
+              return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
+            } catch (e) {
+              console.error(`[jeongtong] 이미지 생성 실패 (시도${attempt + 1}):`, e);
+              if (attempt === 2) throw e;
+            }
+          }
+          throw new Error("이미지 생성 3회 모두 실패");
         })();
 
         // 4단계: 실제 결과지에 표시되는 장만 순차 생성 (1~13 + 마무리16), 완료마다 SSE 이벤트 전송
