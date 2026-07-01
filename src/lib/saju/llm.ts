@@ -73,21 +73,19 @@ async function callGemini(req: LlmRequest, model: string, key: string | undefine
   return { text, provider: "gemini", model };
 }
 
-// dall-e-3로 사주 원국 이미지 생성 → Buffer 반환
+// gpt-image-1-mini로 사주 원국 이미지 생성 → Buffer 반환
 export async function generateSajuImage(prompt: string, apiKey: string | undefined): Promise<Buffer> {
   if (!apiKey) throw new Error("OPENAI_API_KEY is required for image generation");
   const { default: OpenAI } = await import("openai");
   const client = new OpenAI({ apiKey });
   const res = await client.images.generate({
-    model: "dall-e-3",
+    model: "gpt-image-1-mini",
     prompt,
     n: 1,
-    size: "1792x1024",
-    quality: "standard",
+    size: "1536x1024",
+    quality: "medium",
   });
-  const url = res.data?.[0]?.url;
-  if (!url) throw new Error("이미지 URL 없음");
-  const imgRes = await fetch(url);
-  if (!imgRes.ok) throw new Error(`이미지 다운로드 실패: ${imgRes.status}`);
-  return Buffer.from(await imgRes.arrayBuffer());
+  const b64 = res.data?.[0]?.b64_json;
+  if (!b64) throw new Error("이미지 데이터 없음");
+  return Buffer.from(b64, "base64");
 }
