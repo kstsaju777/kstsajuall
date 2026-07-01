@@ -492,13 +492,14 @@ function StepLoading({ name, date, time, calendar, gender, email, concern }: {
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-  const [msg, setMsg] = useState("사주팔자를 세우고 있어요...");
+  const [msg, setMsg] = useState("그대의 사주팔자를 세우고 있어요...");
   const doneRef = useRef(false);
+  const suffix = gender === "남성" ? "군" : gender === "여성" ? "양" : "님";
 
   const MSGS = [
-    "사주팔자를 세우고 있어요...",
-    "재물 그릇의 크기를 살펴보고 있어요...",
-    "돈이 오고 가는 흐름을 분석하고 있어요...",
+    "그대의 사주팔자를 세우고 있어요...",
+    "타고난 재물 그릇을 분석하고 있어요...",
+    "재물운이 오는 시기를 살펴보고 있어요...",
     "홍연이 재물운 풀이를 정리하고 있어요...",
   ];
 
@@ -528,10 +529,10 @@ function StepLoading({ name, date, time, calendar, gender, email, concern }: {
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
         <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center"
-          style={{ backgroundColor: "rgba(249,220,100,0.12)", border: "2px solid rgba(249,220,100,0.4)" }}>
+          style={{ backgroundColor: "rgba(233,189,174,0.15)", border: "2px solid rgba(233,189,174,0.4)" }}>
           <span style={{ fontSize: 28 }}>💰</span>
         </div>
-        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name}님의 재물운사주</p>
+        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name}{suffix}의 재물운사주</p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
           <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: GOLD }} />
