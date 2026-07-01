@@ -503,14 +503,14 @@ function StepLoading({ name, date, time, calendar, gender, email, concern,
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-  const [msg, setMsg] = useState("사주팔자를 세우고 있어요...");
+  const [msg, setMsg] = useState("두 사람의 사주팔자를 세우고 있어요...");
   const doneRef = useRef(false);
 
   const MSGS = [
-    "사주팔자를 세우고 있어요...",
-    "자녀운을 살펴보고 있어요...",
-    "임신 시기를 분석하고 있어요...",
-    "홍연이 풀이를 완성하고 있어요...",
+    "두 사람의 사주팔자를 세우고 있어요...",
+    "임신 인연의 흐름을 살펴보고 있어요...",
+    "두 사람의 궁합을 분석하고 있어요...",
+    "홍연이 임신 풀이를 정리하고 있어요...",
   ];
 
   useEffect(() => {
@@ -530,38 +530,25 @@ function StepLoading({ name, date, time, calendar, gender, email, concern,
 
   const goNext = () => {
     const params = new URLSearchParams({
-      name, date, time, calendar, gender, email, concern, ch: "0",
+      name, date, time, calendar, gender, email, concern: concern ?? "", ch: "0",
       partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender,
     });
     router.push(`/saju/kunghap_imshin/checkout?${params.toString()}`);
   };
 
+  const PINK = "#e1337d";
+
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: CARD_BG }}>
-      <img src={IMG_BG} className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,12,10,0.5), rgba(8,12,10,0.95))" }} />
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#080a0f" }}>
+      <img src="/media/cards/kunghap_imshin/imshin-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
-        <div className="flex items-center justify-center gap-2 mb-5">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "rgba(115,142,111,0.15)", border: "2px solid rgba(115,142,111,0.4)" }}>
-            <span style={{ fontSize: 20 }}>🌿</span>
-          </div>
-          <span style={{ color: "rgba(115,142,111,0.6)", fontSize: 18, fontWeight: 700 }}>♡</span>
-          <div className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "rgba(115,142,111,0.15)", border: "2px solid rgba(115,142,111,0.4)" }}>
-            <span style={{ fontSize: 20 }}>🌱</span>
-          </div>
-        </div>
-        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>
-          <span style={{ color: ACCENT }}>{name}</span>
-          <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 16 }}> & </span>
-          <span style={{ color: ACCENT }}>{partnerName}</span>
-          <span style={{ color: "#fff" }}>님의</span>
+        <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
+          {name}님 <span style={{ color: PINK }}>♥</span> {partnerName}님
         </p>
-        <p className="text-[18px] font-black mb-2" style={{ color: "#fff" }}>임신 궁합</p>
-        <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 분의 사주를 살펴보고 있어요</p>
+        <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 임신 궁합을 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: ACCENT }} />
+          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />
         </div>
         <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>{msg}</p>
       </div>

@@ -894,35 +894,32 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
   name: string; date: string; time: string; calendar: string; gender?: string; email: string;
   partnerName?: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string; concern?: string;
 }) {
-  const [progress, setProgress] = useState(0);
-  const [b1, setB1] = useState(false);
-  const [b2, setB2] = useState(false);
-  const [b3, setB3] = useState(false);
   const router = useRouter();
+  const [progress, setProgress] = useState(0);
+  const [msg, setMsg] = useState("두 사람의 사주팔자를 세우고 있어요...");
+  const doneRef = useRef(false);
 
-  const honor = gender === "남자" ? "군" : "양";
+  const MSGS = [
+    "두 사람의 사주팔자를 세우고 있어요...",
+    "재회 인연의 흐름을 살펴보고 있어요...",
+    "두 사람의 궁합을 분석하고 있어요...",
+    "홍연이 재회 풀이를 정리하고 있어요...",
+  ];
 
   useEffect(() => {
-    const t1 = setTimeout(() => setB1(true), 1000);
-    const t2 = setTimeout(() => setB2(true), 3500);
-    const t3 = setTimeout(() => { setB3(true); setB1(false); setB2(false); }, 6000);
-    // 8초 후 자동 이동
-    const tEnd = setTimeout(() => goNext(), 8500);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(tEnd); };
-  }, []);
-
-  useEffect(() => {
-    let start: number | null = null;
-    const DURATION = 8500;
-    const tick = (ts: number) => {
-      if (!start) start = ts;
-      const pct = Math.min(100, ((ts - start) / DURATION) * 100);
-      setProgress(pct);
-      if (pct < 100) requestAnimationFrame(tick);
-    };
-    const id = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(id);
-  }, []);
+    let p = 0;
+    const iv = setInterval(() => {
+      p = Math.min(p + (Math.random() * 3 + 0.5), 95);
+      setProgress(p);
+      setMsg(MSGS[Math.floor((p / 100) * MSGS.length)] ?? MSGS[MSGS.length - 1]);
+    }, 120);
+    const t = setTimeout(() => {
+      clearInterval(iv);
+      setProgress(100);
+      if (!doneRef.current) { doneRef.current = true; goNext(); }
+    }, 4500);
+    return () => { clearInterval(iv); clearTimeout(t); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goNext = () => {
     const params = new URLSearchParams({
@@ -933,46 +930,21 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
     router.push(`/saju/kunghap_jaehwe/checkout?${params.toString()}`);
   };
 
-  const pct = Math.min(100, Math.round(progress));
-
-  function LoadBubble({ text, size, width }: { text: string; size?: string; width?: string }) {
-    return (
-      <div className="flex items-center justify-center text-center" style={{
-        backgroundColor: "#ffffff", borderRadius: "50%", aspectRatio: "4/3",
-        width: width ?? "190px", padding: "0 26px", boxSizing: "border-box", boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-      }}>
-        <p className="font-bold leading-snug whitespace-pre-line" style={{ color: "#1a1a1a", fontSize: size ?? "16px", fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif" }}>
-          {text}
-        </p>
-      </div>
-    );
-  }
+  const PINK = "#e1337d";
 
   return (
-    <div className="relative w-full h-full overflow-hidden" style={{ backgroundColor: "#0a0a0a" }}>
-      <style>{`@keyframes loadFade { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }`}</style>
-      <img src="/media/cards/kunghap_jaehwe/jaehwe-1.jpg" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(8px)", transform: "scale(1.1)" }} />
-      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.4), rgba(10,10,10,0.7))" }} />
-
-      <div className="absolute" style={{ top: "10%", left: "6%", opacity: b1 ? 1 : 0, transition: "opacity 0.5s ease" }}>
-        <LoadBubble text={`${name}${honor}\n사주를 보니`} size="20px" width="200px" />
-      </div>
-      <div className="absolute" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: b2 ? 1 : 0, transition: "opacity 0.5s ease" }}>
-        <LoadBubble text={"재회의 기운이\n보이는군.."} size="25px" width="200px" />
-      </div>
-      {b3 && (
-        <div className="absolute" style={{ bottom: "20%", left: "15%", animation: "loadFade 0.5s ease" }}>
-          <LoadBubble text={"한번\n들어보겠소?"} size="35px" width="300px" />
-        </div>
-      )}
-
-      <div className="absolute bottom-0 left-0 right-0 px-6 pb-12">
-        <p className="text-center text-[15px] font-bold mb-3" style={{ color: "#ffffff" }}>
-          사주팔자 정밀분석중... <span style={{ color: "#ff69b4" }}>{pct}%</span>
+    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#080a0f" }}>
+      <img src="/media/cards/kunghap_jaehwe/jaehwe-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
+      <div className="relative z-10 px-8 w-full max-w-sm text-center">
+        <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
+          {name}님 <span style={{ color: PINK }}>♥</span> {partnerName}님
         </p>
-        <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#9b2335", transition: "width 0.2s" }} />
+        <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 재회 궁합을 살펴보고 있어요</p>
+        <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+          <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />
         </div>
+        <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>{msg}</p>
       </div>
     </div>
   );
