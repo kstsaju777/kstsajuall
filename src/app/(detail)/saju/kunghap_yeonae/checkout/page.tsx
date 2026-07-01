@@ -88,7 +88,7 @@ function ImageTextBlock({
     <div style={{ backgroundColor: bgColor }}>
       <div className="relative overflow-hidden" style={{ aspectRatio: "9/16", maxHeight: "70vh" }}>
         <video src="/media/cards/kunghap_yeonae/yeonae-0.mp4" autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover object-top" />
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(255,255,255,0.35)" }} />
+        <div className="absolute inset-0" style={{ backgroundColor: "rgba(255,255,255,0.6)" }} />
         <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${bgColor})` }} />
       </div>
       <div className="px-6 py-1 text-center">
