@@ -275,34 +275,35 @@ async function createReport(body: unknown) {
     sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
     if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
 
-    // 3단계: 이미지 + 16장 병렬 생성
-    let sajuImageUrl: string | null = null;
-    let partnerSajuImageUrl: string | null = null;
-    try {
-      const [imgBuffer, partnerImgBuffer] = await Promise.all([
-        generateSajuImage(buildSajuImagePrompt(view.pillars ?? []), process.env.OPENAI_API_KEY!),
-        generateSajuImage(buildSajuImagePrompt(partnerView.pillars ?? []), process.env.OPENAI_API_KEY!),
-      ]);
-      const ts = Date.now();
-      const rand1 = Math.random().toString(36).slice(2, 8);
-      const rand2 = Math.random().toString(36).slice(2, 8);
-      const [up1, up2] = await Promise.all([
-        service.storage.from("saju-images").upload(`wonguk/${ts}-${rand1}.png`, imgBuffer, { contentType: "image/png", upsert: false }),
-        service.storage.from("saju-images").upload(`wonguk/${ts}-${rand2}.png`, partnerImgBuffer, { contentType: "image/png", upsert: false }),
-      ]);
-      if (!up1.error) sajuImageUrl = service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand1}.png`).data.publicUrl;
-      if (!up2.error) partnerSajuImageUrl = service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand2}.png`).data.publicUrl;
-    } catch (e) {
-      console.error("[이미지생성] 실패:", e);
-    }
+    // 3단계: 이미지(2명) + 16장 동시 병렬 생성
     const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
-    const chapterResults = await Promise.allSettled(
-      Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput))
-    );
+    const [imagesResult, ...chapterResults] = await Promise.allSettled([
+      (async () => {
+        const [imgBuffer, partnerImgBuffer] = await Promise.all([
+          generateSajuImage(buildSajuImagePrompt(view.pillars ?? []), process.env.OPENAI_API_KEY!),
+          generateSajuImage(buildSajuImagePrompt(partnerView.pillars ?? []), process.env.OPENAI_API_KEY!),
+        ]);
+        const ts = Date.now();
+        const rand1 = Math.random().toString(36).slice(2, 8);
+        const rand2 = Math.random().toString(36).slice(2, 8);
+        const [up1, up2] = await Promise.all([
+          service.storage.from("saju-images").upload(`wonguk/${ts}-${rand1}.png`, imgBuffer, { contentType: "image/png", upsert: false }),
+          service.storage.from("saju-images").upload(`wonguk/${ts}-${rand2}.png`, partnerImgBuffer, { contentType: "image/png", upsert: false }),
+        ]);
+        return {
+          sajuImageUrl: up1.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand1}.png`).data.publicUrl,
+          partnerSajuImageUrl: up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${rand2}.png`).data.publicUrl,
+        };
+      })(),
+      ...Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput)),
+    ]);
+    const { sajuImageUrl = null, partnerSajuImageUrl = null } = imagesResult.status === "fulfilled"
+      ? (imagesResult.value as { sajuImageUrl: string | null; partnerSajuImageUrl: string | null })
+      : {};
     const content: Record<string, unknown> = {};
     for (let i = 0; i < 16; i++) {
       const r = chapterResults[i];
-      if (r.status === "fulfilled") Object.assign(content, r.value.obj);
+      if (r.status === "fulfilled") Object.assign(content, (r.value as { obj: Record<string, unknown> }).obj);
     }
 
     // 4단계: 최종 내용으로 업데이트

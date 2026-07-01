@@ -236,29 +236,26 @@ async function createReport(body: unknown) {
     sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
     if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
 
-    // 3단계: 이미지 + 16장 병렬 생성
-    let sajuImageUrl: string | null = null;
-    try {
-      const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
-      const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-      const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-      const { error: uploadErr } = await service.storage
-        .from("saju-images")
-        .upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-      if (!uploadErr) {
-        sajuImageUrl = service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
-      }
-    } catch (e) {
-      console.error("[이미지생성] 실패:", e);
-    }
+    // 3단계: 이미지 + 16장 동시 병렬 생성
     const chapterInput = { name: name || "", gender: g, manseryeokText, pillars: view.pillars, birthYear: ymd.year };
-    const chapterResults = await Promise.allSettled(
-      Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput))
-    );
+    const [imageResult, ...chapterResults] = await Promise.allSettled([
+      (async () => {
+        const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
+        const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
+        const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+        const { error: uploadErr } = await service.storage
+          .from("saju-images")
+          .upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+        if (uploadErr) throw uploadErr;
+        return service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
+      })(),
+      ...Array.from({ length: 16 }, (_, i) => genChapterContent(i + 1, chapterInput)),
+    ]);
+    const sajuImageUrl = imageResult.status === "fulfilled" ? (imageResult.value as string) : null;
     const content: Record<string, unknown> = {};
     for (let i = 0; i < 16; i++) {
       const r = chapterResults[i];
-      if (r.status === "fulfilled") Object.assign(content, r.value.obj);
+      if (r.status === "fulfilled") Object.assign(content, (r.value as { obj: Record<string, unknown> }).obj);
     }
 
     // 4단계: 최종 내용으로 업데이트
