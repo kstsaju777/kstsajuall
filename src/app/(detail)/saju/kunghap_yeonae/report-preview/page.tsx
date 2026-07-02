@@ -4553,29 +4553,11 @@ function ReportPreviewInner() {
             <P>이 열 가지 십성의 의미를 알면<br />풀이를 읽을 때 한결 수월할 것이오.</P>
           </section>
 
-          {/* 삽화 */}
-          <Illust src="/media/report/kunghap/kh-intro-1.jpg" h={360} />
-
-          {/* ─ 두 사람을 만나겠소 ─ */}
-          <section className="px-6 pt-8 pb-6">
-            <Heading>두 사람의 명식을 펼쳐보겠소</Heading>
-            <P>
-              나와 상대방, 두 사주팔자를 함께 펼쳐<br />
-              어떻게 얽히고 맞닿는지 살펴보겠소.
-            </P>
-            <div className="flex gap-3 mb-4">
-              {[
-                { name: name, hanja: "我", color: MAROON },
-                { name: report?.partnerName || "상대방", hanja: "彼", color: NAVY },
-              ].map((r) => (
-                <div key={r.name} className="flex-1 rounded-2xl px-3 py-4 flex flex-col items-center gap-1 text-center" style={{ background: `${r.color}0c`, border: `1.5px solid ${r.color}30` }}>
-                  <p className="text-[22px] font-black" style={{ color: r.color, fontFamily: SERIF }}>{r.hanja}</p>
-                  <p className="text-[13px] font-bold" style={{ color: INK }}>{r.name}</p>
-                </div>
-              ))}
-            </div>
-            <P>두 명식은 상단 버튼을 눌러 언제든 확인할 수 있소.</P>
-          </section>
+          {/* 맺음말 삽화 mp4 */}
+          <div className="relative overflow-hidden mx-0" style={{ background: CREAM }}>
+            <video src="/media/report/total/total-0/total-0-3.mp4" autoPlay muted loop playsInline className="w-full object-cover" />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 35%, transparent 65%, ${CREAM} 100%)` }} />
+          </div>
 
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
