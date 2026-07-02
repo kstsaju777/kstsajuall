@@ -642,9 +642,9 @@ const CHAPTER_TITLES = [
   "제4장 — 숨겨진 특징", "제5장 — 재물과 직업", "제6장 — 사랑과 결혼",
   "제7장 — 건강", "제8장 — 귀인", "제9장 — 주의할 사람",
   "제10장 — 굴곡과 위기", "제11장 — 대운 흐름", "제12장 — 주의 시기",
-  "제13장 — 당부의 말", "제14장 — 개운법", "제15장 — 중심 잡기", "제16장 — 마무리",
+  "제13장 — 당부의 말", "마무리 — 홍연의 서신",
 ];
-const TOTAL = 16;
+const TOTAL = 14;
 
 function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; currentChapter: number }) {
   const pct = Math.round((doneCount / TOTAL) * 100);
@@ -737,7 +737,7 @@ function CheckoutContent() {
         return;
       }
 
-      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
       let done = 0;
       const allContent: Record<string, unknown> = {};
       await Promise.all(chapters.map(async (ch) => {

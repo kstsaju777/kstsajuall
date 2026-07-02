@@ -5667,7 +5667,7 @@ function ReportPreviewInner() {
           <RecoGrid />
 
           {/* 네비 */}
-          <ChapterNav cur="16" go={next} />
+          <ChapterNav cur="14" go={next} />
         </div>
         {eventOpen && (
           <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
