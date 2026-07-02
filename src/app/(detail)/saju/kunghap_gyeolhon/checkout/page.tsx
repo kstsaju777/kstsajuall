@@ -655,39 +655,39 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
       style={{ background: "radial-gradient(ellipse at 50% 40%, #1a0010 0%, #0a0208 100%)" }}>
       <style>{`
         @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(400%)} }
-        @keyframes glow-pulse { 0%,100%{box-shadow:0 0 8px 2px #ff4499aa,0 0 20px 4px #cc007755} 50%{box-shadow:0 0 16px 4px #ff66bbcc,0 0 40px 10px #ff44aa88} }
+        @keyframes glow-pulse { 0%,100%{box-shadow:0 0 8px 2px #e1337daa,0 0 20px 4px #aa195555} 50%{box-shadow:0 0 16px 4px #f055a0cc,0 0 40px 10px #e1337d88} }
         @keyframes title-fade { 0%{opacity:0;transform:translateY(6px)} 20%{opacity:1;transform:translateY(0)} 80%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-6px)} }
         @keyframes orbit { 0%{transform:rotate(0deg) translateX(38px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(38px) rotate(-360deg)} }
       `}</style>
       <div className="relative w-20 h-20 mb-6">
-        <div className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, #ff336622 0%, transparent 70%)" }} />
+        <div className="absolute inset-0 rounded-full" style={{ background: "radial-gradient(circle, #e1337d22 0%, transparent 70%)" }} />
         {[0,1,2,3,4,5].map(i => (
           <div key={i} className="absolute w-1 h-1 rounded-full" style={{
             top: "50%", left: "50%", marginTop: "-2px", marginLeft: "-2px",
-            background: i % 2 === 0 ? "#ff6699" : "#ffaacc",
-            boxShadow: `0 0 6px 2px ${i % 2 === 0 ? "#ff3366" : "#ff88aa"}`,
+            background: i % 2 === 0 ? "#f055a0" : "#f8a0c8",
+            boxShadow: `0 0 6px 2px ${i % 2 === 0 ? "#e1337d" : "#f077b0"}`,
             animation: `orbit ${2.5 + i * 0.4}s linear infinite`,
             animationDelay: `${i * -0.5}s`,
           }} />
         ))}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span style={{ fontSize: 28, filter: "drop-shadow(0 0 8px #ff3366)" }}>✦</span>
+          <span style={{ fontSize: 28, filter: "drop-shadow(0 0 8px #e1337d)" }}>✦</span>
         </div>
       </div>
-      <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5ee", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #ff336688" }}>
+      <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5ee", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #e1337d88" }}>
         결과지를 완성하고 있소…
       </p>
-      <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#ff99bb", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
+      <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#f088bb", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
         {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
       </p>
       <div className="w-full max-w-[280px] mb-3">
-        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#cc7799" }}>
+        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#bb4488" }}>
           <span>{doneCount} / {TOTAL} 장 완성</span>
           <span>{pct}%</span>
         </div>
         <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a0810" }}>
           <div className="h-full rounded-full relative overflow-hidden transition-all duration-700"
-            style={{ width: `${pct}%`, background: "linear-gradient(90deg, #8b1a40, #ff4488, #ff88bb)", animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none" }}>
+            style={{ width: `${pct}%`, background: "linear-gradient(90deg, #7a1040, #e1337d, #f088bb)", animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)", animation: "shimmer 1.6s linear infinite", width: "40%" }} />
           </div>
         </div>

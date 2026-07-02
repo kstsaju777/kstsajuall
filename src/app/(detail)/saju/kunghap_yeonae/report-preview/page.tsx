@@ -4264,7 +4264,7 @@ function ReportPreviewInner() {
           {/* 커버 이미지 */}
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-intro-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_intro/kunghap_yeonae_intro_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -4581,7 +4581,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 300 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-1-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_1/kunghap_yeonae_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -4615,7 +4615,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 300 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-2-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_2/kunghap_yeonae_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -4657,7 +4657,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_3/kunghap_yeonae_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"사주에는 이성을 끌어당기는 기운이\n숨겨져 있소.\n두 사람이 왜 서로에게 끌렸는지\n사주로 풀어보겠소."`}</Quote>
@@ -4687,7 +4687,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-4-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_4/kunghap_yeonae_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"내 일간의 눈으로 상대방을 바라보면\n어떤 십성으로 보이는지,\n그 의미가 무엇인지 살펴보겠소."`}</Quote>
@@ -4719,7 +4719,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-5-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_5/kunghap_yeonae_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"상대방의 일간이 나를 바라볼 때\n어떤 기운으로 느끼는지\n살펴보겠소."`}</Quote>
@@ -4751,7 +4751,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-6-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_6/kunghap_yeonae_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
@@ -4780,7 +4780,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-7-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_7/kunghap_yeonae_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"사람마다 연애하는 방식이 다르오.\n두 사람이 어디서 맞고,\n어디서 다른지 보겠소."`}</Quote>
@@ -4809,7 +4809,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-8-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_8/kunghap_yeonae_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"모든 인연에는 빛도 있고 그림자도 있소.\n두 사람의 관계에서\n그 둘이 무엇인지 살펴보겠소."`}</Quote>
@@ -4839,7 +4839,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-9-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_9/kunghap_yeonae_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
@@ -4871,7 +4871,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-10-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_10/kunghap_yeonae_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"많은 분들이 가장 궁금해하시오.\n이 사람과 결혼할 수 있을지,\n홍연이 솔직하게 말씀드리겠소."`}</Quote>
@@ -4913,7 +4913,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-11-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_11/kunghap_yeonae_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"두 사람에게 찾아올\n봄날 같은 시절이 있소.\n그때를 미리 알고 준비하시오."`}</Quote>
@@ -4946,7 +4946,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-12-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_12/kunghap_yeonae_12_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
