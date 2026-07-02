@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect, useRef } from "react";
@@ -646,7 +646,7 @@ const CHAPTER_TITLES = [
   "제10장 — 굴곡과 위기", "제11장 — 대운 흐름", "제12장 — 주의 시기",
   "제13장 — 당부의 말", "제14장 — 개운법",
 ];
-const TOTAL = 14;
+const TOTAL = 12;
 
 function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; currentChapter: number }) {
   const pct = Math.round((doneCount / TOTAL) * 100);
@@ -745,7 +745,7 @@ function CheckoutContent() {
         return;
       }
 
-      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12];
       let done = 0;
       const allContent: Record<string, unknown> = {};
       await Promise.all(chapters.map(async (ch) => {
