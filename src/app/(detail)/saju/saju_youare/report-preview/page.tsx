@@ -2204,25 +2204,19 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 
 // 장번호 → 표시 제목 (이제 장수와 키가 1:1로 일치)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0": "인트로 · 사주팔자란 무엇인가",
-  "1": "제1장 · 나는 어떤 그릇으로 태어났나",
-  "2": "제2장 · 나의 진짜 모습은 무엇일까",
-  "3": "제3장 · 나는 세상을 어떻게 대하는가",
-  "4": "제4장 · 내 사주에 나타나는 특이점",
-  "5": "제5장 · 내 재물과 천직은 어떠한가",
-  "6": "제6장 · 내 인연과 혼인의 때는 언제인가",
-  "7": "제7장 · 내 건강과 약한 곳은 어디인가",
-  "8": "제8장 · 나를 살릴 귀인은 누구인가",
-  "9": "제9장 · 나는 왜 그 시간을 견뎌야 했나",
-  "10": "제10장 · 내 대운은 앞으로 어디로 흐르나",
-  "11": "제11장 · 내가 조심해야 할 때는 언제인가",
-  "12": "제12장 · 내가 꼭 기억할 세 가지는 무엇인가",
-  "13": "제13장 · 나는 어떻게 운을 바꿀 수 있나",
-  "14": "마무리 · 그대에게 남기는 홍연의 서신",
+  "0": "인트로 · 유아사주에 대하여",
+  "1": "제1장 · 이 아이는 어떤 기질로 태어났나",
+  "2": "제2장 · 아이의 건강과 주의할 부분",
+  "3": "제3장 · 잘 맞는 양육 환경과 방식",
+  "4": "제4장 · 타고난 기운과 오행 균형",
+  "5": "제5장 · 아이에게 맞는 이름·색·방향",
+  "6": "제6장 · 성장하면서 두드러질 재능",
+  "7": "제7장 · 부모가 조심해야 할 시기",
+  "8": "마무리 · 그대에게 남기는 홍연의 서신",
 };
 
-// A안 읽기 순서 (장수와 일치하므로 1~16 순차)
-const A_ORDER = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"];
+// A안 읽기 순서
+const A_ORDER = ["0", "1", "2", "3", "4", "5", "6", "7", "8"];
 
 // 개발용 장 재생성 플로팅 버튼 (배포 전 제거 예정)
 function RegenButton({ chapter, onRegen }: { chapter: number; onRegen: (n: number) => void }) {
@@ -3257,21 +3251,15 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "서론", title: "사주팔자란 무엇인가", no: "0" },
-  { disp: "제1장", chip: "환경", title: "나는 어떤 그릇으로 태어났나", no: "1" },
-  { disp: "제2장", chip: "운명", title: "나의 진짜 모습은 무엇일까", no: "2" },
-  { disp: "제3장", chip: "관계", title: "나는 세상을 어떻게 대하는가", no: "3" },
-  { disp: "제4장", chip: "특징", title: "내 사주에 나타나는 특이점", no: "4" },
-  { disp: "제5장", chip: "재물", title: "내 재물과 천직은 어떠한가", no: "5" },
-  { disp: "제6장", chip: "사랑", title: "내 인연과 혼인의 때는 언제인가", no: "6" },
-  { disp: "제7장", chip: "건강", title: "내 건강과 약한 곳은 어디인가", no: "7" },
-  { disp: "제8장", chip: "귀인", title: "나를 살릴 귀인은 누구인가", no: "8" },
-  { disp: "제9장", chip: "굴곡", title: "나는 왜 그 시간을 견뎌야 했나", no: "9" },
-  { disp: "제10장", chip: "흐름", title: "내 대운은 어디로 흐르나", no: "10" },
-  { disp: "제11장", chip: "주의", title: "내가 조심해야 할 때는 언제인가", no: "11" },
-  { disp: "제12장", chip: "당부", title: "꼭 기억할 세 가지는 무엇인가", no: "12" },
-  { disp: "제13장", chip: "개운", title: "나는 어떻게 운을 바꿀 수 있나", no: "13" },
-  { disp: "마무리", chip: "결론", title: "그대에게 남기는 홍연의 서신", no: "16" },
+  { disp: "인트로", chip: "서론",   title: "유아사주에 대하여",             no: "0" },
+  { disp: "제1장",  chip: "기질",   title: "이 아이는 어떤 기질로 태어났나", no: "1" },
+  { disp: "제2장",  chip: "건강",   title: "아이의 건강과 주의할 부분",     no: "2" },
+  { disp: "제3장",  chip: "양육",   title: "잘 맞는 양육 환경과 방식",     no: "3" },
+  { disp: "제4장",  chip: "오행",   title: "타고난 기운과 오행 균형",       no: "4" },
+  { disp: "제5장",  chip: "이름",   title: "아이에게 맞는 이름·색·방향",   no: "5" },
+  { disp: "제6장",  chip: "재능",   title: "성장하면서 두드러질 재능",     no: "6" },
+  { disp: "제7장",  chip: "시기",   title: "부모가 조심해야 할 시기",       no: "7" },
+  { disp: "마무리", chip: "결론",   title: "그대에게 남기는 홍연의 서신",   no: "8" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
