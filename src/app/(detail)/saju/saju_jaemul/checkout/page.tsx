@@ -737,7 +737,7 @@ function CheckoutContent() {
         return;
       }
 
-      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+      const chapters = [1,2,3,4,5,6,7];
       let done = 0;
       const allContent: Record<string, unknown> = {};
       await Promise.all(chapters.map(async (ch) => {

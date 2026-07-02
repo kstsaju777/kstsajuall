@@ -3956,8 +3956,7 @@ function ReportPreviewInner() {
         </div>
       )}
 
-      {(
-<>
+      <>
       {/* ═══════════ 인트로 ═══════════ */}
       {ch === "0" && (
         <>
@@ -4347,684 +4346,371 @@ function ReportPreviewInner() {
       )}
 
 
-      {/* ═══════════ 제1장 · 나는 어떤 그릇으로 태어났나 ═══════════ */}
+      {/* ═══════════ 제1장 — 나는 어떤 그릇으로 태어났나 ═══════════ */}
       {ch === "1" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 그릇</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              나는 어떤 그릇으로 태어났나
+              {name}님은<br />어떤 그릇으로 태어났나
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/jaemul/jaemul-1-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} onError={(e) => { (e.target as HTMLImageElement).src = "/media/report/total/total-1/total-1-cover.jpg"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          <div className="relative w-full" style={{ height: 220 }}>
+            <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_cover.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
-
-          <Quote>{`재물의 그릇을 보기 전에,\n먼저 ${name}${effectiveGender === "female" ? "양" : "군"}이\n어떤 기운으로 태어났는지\n살펴보겠소.`}</Quote>
-
-          {/* 명식표 */}
-          <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-
-          {/* 원국 텍스트 */}
-          {(() => {
-            const w = (jc.wonguk as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            return (
-              <section className="px-6 pt-6 pb-4">
-                <Heading>나란 사람의 본바탕</Heading>
-                {w.intro && <P>{w.intro}</P>}
-                {w.callout && <Callout>{w.callout}</Callout>}
-                {w.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-              </section>
-            );
-          })()}
-
-          {/* 신강신약 게이지 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>내 기운의 강도 — 신강 · 신약</Heading>
-            <SinStrengthGauge view={report?.view ?? null} />
-          </section>
-
-          {/* 오행 도넛 */}
-          <OhaengDonut view={report?.view ?? null} />
-
+          <div className="px-5 py-6" style={{ background: CREAM }}>
+            {!!(jc.wonguk as Record<string,unknown>)?.intro && (
+              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
+                {String((jc.wonguk as Record<string,unknown>).intro)}
+              </p>
+            )}
+            {!!(jc.wonguk as Record<string,unknown>)?.callout && (
+              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
+                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
+                  {String((jc.wonguk as Record<string,unknown>).callout)}
+                </p>
+              </div>
+            )}
+            {((jc.wonguk as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
+              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+            ))}
+          </div>
           <ChapterNav cur="1" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제2장 · 내 재물 기질 ═══════════ */}
+      {/* ═══════════ 제2장 — 재물 기질 ═══════════ */}
       {ch === "2" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 재물기질</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              내 재물 기질 — 돈을 대하는 나의 방식
+              내 재물 기질<br />돈을 대하는 나의 방식
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/jaemul/jaemul-2-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} onError={(e) => { (e.target as HTMLImageElement).src = "/media/report/total/total-2/total-2-cover.jpg"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          <div className="relative w-full" style={{ height: 220 }}>
+            <img src="/media/report/saju_jaemul/saju_jaemul_2/saju_jaemul_2_cover.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
-
-          <Quote>{`돈을 대하는 방식은\n사람마다 다르오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}만의\n재물 기질을 살펴보겠소.`}</Quote>
-
-          {(() => {
-            const w = (jc.wealthStyle as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            return (
-              <section className="px-6 pt-4 pb-4">
-                <Heading>나의 재물 기질</Heading>
-                {w.intro && <P>{w.intro}</P>}
-                {w.callout && <Callout>{w.callout}</Callout>}
-                {w.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-              </section>
-            );
-          })()}
-
-          {/* 세운별 재물 흐름 차트 (자동 계산) */}
-          <section className="px-6 pt-2 pb-6">
-            <Heading>연도별 재물 기운 흐름</Heading>
-            <WealthLineChart view={report?.view ?? null} />
-            <p className="text-[12px] mt-2" style={{ color: MUTE }}>천간·지지와 재성 관계를 기반으로 자동 계산한 흐름입니다.</p>
-          </section>
-
+          <div className="px-5 py-6" style={{ background: CREAM }}>
+            {!!(jc.wealthStyle as Record<string,unknown>)?.intro && (
+              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
+                {String((jc.wealthStyle as Record<string,unknown>).intro)}
+              </p>
+            )}
+            {!!(jc.wealthStyle as Record<string,unknown>)?.callout && (
+              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
+                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
+                  {String((jc.wealthStyle as Record<string,unknown>).callout)}
+                </p>
+              </div>
+            )}
+            {((jc.wealthStyle as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
+              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+            ))}
+          </div>
           <ChapterNav cur="2" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제3장 · 내 사주에 재물이 보이는가 ═══════════ */}
+      {/* ═══════════ 제3장 — 내 사주에 재물이 보이는가 ═══════════ */}
       {ch === "3" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 재물</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              내 사주에 재물이 보이는가
+              내 사주에<br />재물이 보이는가
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/jaemul/jaemul-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} onError={(e) => { (e.target as HTMLImageElement).src = "/media/report/total/total-3/total-3-cover.jpg"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          <div className="relative w-full" style={{ height: 220 }}>
+            <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_cover.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
-
-          <Quote>{`사주 안에서\n재물이 어떻게 드러나는지,\n직접 꺼내 보겠소.`}</Quote>
-
-          {(() => {
-            const w = (jc.wealthPresence as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            const jf = (jc.jobFit as { clusters?: { category: string; keywords: string[]; jobs: string[] }[] } | undefined) ?? {};
-            const inv = (jc.investStyle as { types?: { category: string; icon: string; score: number; products: string[]; tip: string }[] } | undefined) ?? {};
-            const sp = (jc.splitType as { leftLabel?: string; left?: number; rightLabel?: string; right?: number; leftDesc?: string; rightDesc?: string } | undefined) ?? {};
-            const splitData = sp.leftLabel ? {
-              leftLabel: sp.leftLabel ?? "직장인형",
-              left: sp.left ?? 50,
-              rightLabel: sp.rightLabel ?? "사업가형",
-              right: sp.right ?? 50,
-              leftDesc: sp.leftDesc ?? "",
-              rightDesc: sp.rightDesc ?? "",
-            } : null;
-            return (
-              <>
-                <section className="px-6 pt-4 pb-4">
-                  <Heading>내 사주의 재물 구조</Heading>
-                  {w.intro && <P>{w.intro}</P>}
-                  {w.callout && <Callout>{w.callout}</Callout>}
-                  {w.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                {jf.clusters && jf.clusters.length > 0 && (
-                  <section className="px-6 pt-2 pb-4">
-                    <Heading>내 사주에 맞는 직군</Heading>
-                    <JobClusters clusters={jf.clusters} />
-                  </section>
-                )}
-                {inv.types && inv.types.length > 0 && (
-                  <section className="px-6 pt-2 pb-4">
-                    <Heading>내 사주에 맞는 투자 방식</Heading>
-                    <InvestTypeCards types={inv.types} />
-                  </section>
-                )}
-                {splitData && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>직장인형 vs 사업가형</Heading>
-                    <SplitGauge split={splitData} />
-                  </section>
-                )}
-              </>
-            );
-          })()}
-
+          <div className="px-5 py-6" style={{ background: CREAM }}>
+            {/* 재성 존재 여부 */}
+            {!!(jc.wealthPresence as Record<string,unknown>)?.intro && (
+              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
+                {String((jc.wealthPresence as Record<string,unknown>).intro)}
+              </p>
+            )}
+            {!!(jc.wealthPresence as Record<string,unknown>)?.callout && (
+              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
+                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
+                  {String((jc.wealthPresence as Record<string,unknown>).callout)}
+                </p>
+              </div>
+            )}
+            {((jc.wealthPresence as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
+              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+            ))}
+            {/* 어울리는 직군 */}
+            {((jc.jobFit as Record<string,unknown>)?.clusters as {category:string;keywords:string[];jobs:string[]}[] | undefined)?.length ? (
+              <div className="mt-6 mb-5">
+                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GOLD }}>어울리는 직군</p>
+                <div className="space-y-3">
+                  {((jc.jobFit as Record<string,unknown>).clusters as {category:string;keywords:string[];jobs:string[]}[]).map((cl, i) => (
+                    <div key={i} className="rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[13px] font-bold" style={{ color: INK }}>{cl.category}</span>
+                        {cl.keywords.map((kw, j) => (
+                          <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: CALLOUT_BG, color: MAROON }}>{kw}</span>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {cl.jobs.map((job, j) => (
+                          <span key={j} className="text-[11px] px-2 py-1 rounded-lg" style={{ background: "#f3f0eb", color: INK_SOFT }}>{job}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {/* 투자 스타일 */}
+            {((jc.investStyle as Record<string,unknown>)?.types as {category:string;icon:string;score:number;products:string[];tip:string}[] | undefined)?.length ? (
+              <div className="mb-5">
+                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GOLD }}>투자 스타일</p>
+                <div className="space-y-3">
+                  {((jc.investStyle as Record<string,unknown>).types as {category:string;icon:string;score:number;products:string[];tip:string}[]).map((t, i) => (
+                    <div key={i} className="rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{t.icon}</span>
+                          <span className="text-[13px] font-bold" style={{ color: INK }}>{t.category}</span>
+                        </div>
+                        <span className="text-[12px] font-bold" style={{ color: GOLD }}>적합도 {t.score}%</span>
+                      </div>
+                      <div className="w-full rounded-full h-1.5 mb-2" style={{ background: "#e8ddd8" }}>
+                        <div className="h-1.5 rounded-full" style={{ width: `${t.score}%`, background: GOLD }} />
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {t.products.map((pr, j) => (
+                          <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "#fff8e6", color: "#8a6a00" }}>{pr}</span>
+                        ))}
+                      </div>
+                      <p className="text-[11px]" style={{ color: INK_SOFT }}>{t.tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {/* 직장인 vs 사업가 */}
+            {!!(jc.splitType as Record<string,unknown>)?.leftLabel && (
+              <div className="rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
+                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: INK }}>직장인형 vs 사업가형</p>
+                <div className="flex gap-3 mb-3">
+                  {[
+                    { label: String((jc.splitType as Record<string,unknown>).leftLabel), pct: Number((jc.splitType as Record<string,unknown>).left), desc: String((jc.splitType as Record<string,unknown>).leftDesc), color: BLUE },
+                    { label: String((jc.splitType as Record<string,unknown>).rightLabel), pct: Number((jc.splitType as Record<string,unknown>).right), desc: String((jc.splitType as Record<string,unknown>).rightDesc), color: GOLD },
+                  ].map((side, i) => (
+                    <div key={i} className="flex-1 rounded-xl p-3 text-center" style={{ background: CREAM }}>
+                      <p className="text-[12px] font-bold mb-1" style={{ color: side.color }}>{side.label}</p>
+                      <p className="text-[22px] font-black mb-1" style={{ color: side.color }}>{side.pct}%</p>
+                      <p className="text-[10px]" style={{ color: MUTE }}>{side.desc}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex rounded-full overflow-hidden h-3">
+                  <div style={{ width: `${Number((jc.splitType as Record<string,unknown>).left)}%`, background: BLUE }} />
+                  <div style={{ flex: 1, background: GOLD }} />
+                </div>
+              </div>
+            )}
+          </div>
           <ChapterNav cur="3" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제4장 · 돈이 되는 일과 나의 천직 ═══════════ */}
+      {/* ═══════════ 제4장 — 천직과 황금기 ═══════════ */}
       {ch === "4" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 천직</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              돈이 되는 일과 나의 천직
+              돈이 되는 일과<br />나의 천직
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/jaemul/jaemul-4-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} onError={(e) => { (e.target as HTMLImageElement).src = "/media/report/total/total-5/total-5-cover.jpg"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          <div className="relative w-full" style={{ height: 220 }}>
+            <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_cover.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
-
-          <Quote>{`${name}${effectiveGender === "female" ? "양" : "군"}에게\n돈이 따라오는 일이 무엇인지\n사주가 알려주고 있소.`}</Quote>
-
-          {(() => {
-            const w = (jc.careerWealth as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            const pk = (jc.wealthPeak as { title?: string; when?: string; todo?: string } | undefined) ?? {};
-            return (
-              <>
-                <section className="px-6 pt-4 pb-4">
-                  <Heading>돈이 따르는 일의 특징</Heading>
-                  {w.intro && <P>{w.intro}</P>}
-                  {w.callout && <Callout>{w.callout}</Callout>}
-                  {w.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>대운의 큰 흐름</Heading>
-                  <DaeunTable view={report?.view ?? null} />
-                </section>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>연도별 재물 흐름</Heading>
-                  <WealthLineChart view={report?.view ?? null} />
-                </section>
-                {pk.title && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>재물 황금기</Heading>
-                    <PeakBox peak={{ title: pk.title ?? "", when: pk.when ?? "", todo: pk.todo ?? "" }} />
-                  </section>
-                )}
-              </>
-            );
-          })()}
-
+          <div className="px-5 py-6" style={{ background: CREAM }}>
+            {!!(jc.careerWealth as Record<string,unknown>)?.intro && (
+              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
+                {String((jc.careerWealth as Record<string,unknown>).intro)}
+              </p>
+            )}
+            {!!(jc.careerWealth as Record<string,unknown>)?.callout && (
+              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
+                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
+                  {String((jc.careerWealth as Record<string,unknown>).callout)}
+                </p>
+              </div>
+            )}
+            {((jc.careerWealth as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
+              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+            ))}
+            {/* 황금기 */}
+            {!!(jc.wealthPeak as Record<string,unknown>)?.title && (
+              <div className="mt-4 rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #1a1200 0%, #3a2800 100%)", border: `1px solid ${GOLD}44` }}>
+                <p className="text-[10px] tracking-widest mb-2" style={{ color: GOLD }}>💰 재물 황금기</p>
+                <p className="text-[16px] font-black mb-1" style={{ color: "#fff", fontFamily: SERIF }}>
+                  {String((jc.wealthPeak as Record<string,unknown>).title)}
+                </p>
+                <p className="text-[13px] mb-3" style={{ color: `${GOLD}cc` }}>
+                  {String((jc.wealthPeak as Record<string,unknown>).when)}
+                </p>
+                <div className="rounded-xl px-3 py-2" style={{ background: `${GOLD}22` }}>
+                  <p className="text-[12px]" style={{ color: "#fff" }}>
+                    ✦ {String((jc.wealthPeak as Record<string,unknown>).todo)}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
           <ChapterNav cur="4" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제5장 · 내 재물 대운 ═══════════ */}
+      {/* ═══════════ 제5장 — 재물 대운 ═══════════ */}
       {ch === "5" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 대운</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              내 재물 대운 — 언제 벌고 언제 조심할까
+              내 재물 대운<br />언제 벌고 언제 조심할까
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/jaemul/jaemul-5-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} onError={(e) => { (e.target as HTMLImageElement).src = "/media/report/total/total-4/total-4-cover.jpg"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          <div className="relative w-full" style={{ height: 220 }}>
+            <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_cover.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
-
-          <Quote>{`재물은 흐르오.\n언제 벌고, 언제 조심해야 하는지\n대운이 알려주고 있소.`}</Quote>
-
-          {(() => {
-            const mt = (jc.moneyTrap as { title?: string; desc?: string; items?: string[] } | undefined) ?? {};
-            const wf = (jc.warningFlow as { items?: { label: string; tone: string; text: string }[] } | undefined) ?? {};
-            return (
-              <>
-                {mt.title && (
-                  <section className="px-6 pt-4 pb-4">
-                    <Heading>돈의 함정 — 조심해야 할 패턴</Heading>
-                    <div className="rounded-2xl p-5 mb-4" style={{ background: `linear-gradient(135deg, ${WARN}0a, ${GOLD}0d)`, border: `1px solid ${WARN}22` }}>
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${WARN}14`, color: WARN }}>주의</span>
-                      <p className="mt-3 text-[17px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{mt.title}</p>
-                      {mt.desc && <p className="mt-3 text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{mt.desc}</p>}
-                      {mt.items && mt.items.length > 0 && (
-                        <ul className="mt-3 space-y-1.5">
-                          {mt.items.map((item, i) => (
-                            <li key={i} className="flex items-start gap-2 text-[13px]" style={{ color: INK_SOFT }}>
-                              <span style={{ color: WARN, flexShrink: 0 }}>•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+          <div className="px-5 py-6" style={{ background: CREAM }}>
+            {/* 돈의 함정 */}
+            {!!(jc.moneyTrap as Record<string,unknown>)?.title && (
+              <div className="mb-6 rounded-xl p-4" style={{ background: "#fff0f0", border: `1px solid ${WARN}44` }}>
+                <p className="text-[10px] font-bold tracking-widest mb-2" style={{ color: WARN }}>⚠️ 돈의 함정</p>
+                <p className="text-[14px] font-bold mb-2" style={{ color: INK }}>
+                  {String((jc.moneyTrap as Record<string,unknown>).title)}
+                </p>
+                <p className="text-[12px] leading-relaxed mb-3" style={{ color: INK_SOFT }}>
+                  {String((jc.moneyTrap as Record<string,unknown>).desc)}
+                </p>
+                {((jc.moneyTrap as Record<string,unknown>)?.items as string[] | undefined)?.length ? (
+                  <ul className="space-y-1">
+                    {((jc.moneyTrap as Record<string,unknown>).items as string[]).map((item, i) => (
+                      <li key={i} className="flex gap-2 text-[11px]" style={{ color: WARN }}>
+                        <span>•</span>{item}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            )}
+            {/* 시기별 흐름 */}
+            {((jc.warningFlow as Record<string,unknown>)?.items as {label:string;tone:string;text:string}[] | undefined)?.length ? (
+              <div>
+                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: INK }}>시기별 재물 흐름</p>
+                <div className="space-y-2">
+                  {((jc.warningFlow as Record<string,unknown>).items as {label:string;tone:string;text:string}[]).map((item, i) => (
+                    <div key={i} className="rounded-xl px-4 py-3" style={{ background: item.tone === "warn" ? "#fff0f0" : "#eef6f0", borderLeft: `3px solid ${item.tone === "warn" ? WARN : GREEN}` }}>
+                      <p className="text-[11px] font-bold mb-0.5" style={{ color: item.tone === "warn" ? WARN : GREEN }}>{item.label}</p>
+                      <p className="text-[12px]" style={{ color: INK_SOFT }}>{item.text}</p>
                     </div>
-                  </section>
-                )}
-                {wf.items && wf.items.length > 0 && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>시기별 재물 흐름</Heading>
-                    <div className="space-y-2.5">
-                      {wf.items.map((item, i) => (
-                        <div key={i} className="flex items-start gap-3 rounded-xl p-3.5" style={{ background: item.tone === "warn" ? `${WARN}0c` : `${GREEN}0c`, border: `1px solid ${item.tone === "warn" ? WARN : GREEN}22` }}>
-                          <span className="mt-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: item.tone === "warn" ? `${WARN}18` : `${GREEN}18`, color: item.tone === "warn" ? WARN : GREEN }}>{item.tone === "warn" ? "주의" : "좋음"}</span>
-                          <div>
-                            <p className="text-[12px] font-bold mb-0.5" style={{ color: INK }}>{item.label}</p>
-                            <p className="text-[13px]" style={{ color: INK_SOFT }}>{item.text}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </>
-            );
-          })()}
-
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
           <ChapterNav cur="5" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제6장 · 내 재물운을 바꾸는 개운법 ═══════════ */}
+      {/* ═══════════ 제6장 — 개운법 & 종합 ═══════════ */}
       {ch === "6" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 개운법</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              내 재물운을 바꾸는 개운법
+              내 재물운을 바꾸는<br />개운법
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/jaemul/jaemul-6-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} onError={(e) => { (e.target as HTMLImageElement).src = "/media/report/total/total-6/total-6-cover.jpg"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          <div className="relative w-full" style={{ height: 220 }}>
+            <img src="/media/report/saju_jaemul/saju_jaemul_6/saju_jaemul_6_cover.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
-
-          <Quote>{`재물운은 바꿀 수 있소.\n부족한 기운을 채우면\n흐름이 달라지오.`}</Quote>
-
-          {(() => {
-            const wc = (jc.wealthCare as { element?: string; tips?: string[] } | undefined) ?? {};
-            const ws = (jc.wealthSummary as { title?: string; items?: { title: string; desc: string }[] } | undefined) ?? {};
-            const OHAENG_IMG: Record<string, string> = { 목:"mok", 화:"hwa", 토:"to", 금:"geum", 수:"su" };
-            return (
-              <>
-                {wc.element && (
-                  <section className="px-6 pt-4 pb-4">
-                    <Heading>보강해야 할 기운</Heading>
-                    <div className="flex items-center gap-4 rounded-2xl p-4 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
-                      {OHAENG_IMG[wc.element] && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={`/media/ohaeng/${OHAENG_IMG[wc.element]}.png`} alt={wc.element} style={{ width: 60, height: 60, objectFit: "contain" }} />
-                      )}
-                      <div>
-                        <p className="text-[14px] font-bold mb-1" style={{ color: MUTE }}>부족한 오행</p>
-                        <p className="text-[26px] font-black" style={{ color: INK }}>{wc.element}</p>
-                      </div>
-                    </div>
-                    {wc.tips && wc.tips.length > 0 && (
-                      <div className="space-y-2.5">
-                        {wc.tips.map((tip, i) => (
-                          <div key={i} className="flex items-start gap-3 rounded-xl p-3.5" style={{ background: `${GOLD}0a`, border: `1px solid ${GOLD}22` }}>
-                            <span className="font-black text-[15px] shrink-0" style={{ color: GOLD }}>{i + 1}</span>
-                            <p className="text-[13px]" style={{ color: INK_SOFT }}>{tip}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </section>
-                )}
-                {ws.title && ws.items && ws.items.length > 0 && (
-                  <section className="px-6 pt-4 pb-6">
-                    <Heading>종합 정리</Heading>
-                    <SummaryCard title={ws.title ?? ""} items={ws.items} />
-                  </section>
-                )}
-              </>
-            );
-          })()}
-
+          <div className="px-5 py-6" style={{ background: CREAM }}>
+            {/* 오행 개운 */}
+            {!!(jc.wealthCare as Record<string,unknown>)?.element && (
+              <div className="mb-5 rounded-xl p-4 text-center" style={{ background: "#7cc47f22", border: "1px solid #7cc47f66" }}>
+                <p className="text-[13px] font-bold" style={{ color: INK }}>
+                  보강해야 할 오행 — {String((jc.wealthCare as Record<string,unknown>).element)}(오행)
+                </p>
+              </div>
+            )}
+            {((jc.wealthCare as Record<string,unknown>)?.tips as string[] | undefined)?.length ? (
+              <div className="mb-6 rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
+                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GOLD }}>재물 개운 실천법</p>
+                <ul className="space-y-2">
+                  {((jc.wealthCare as Record<string,unknown>).tips as string[]).map((tip, i) => (
+                    <li key={i} className="flex gap-2 text-[12px]" style={{ color: INK_SOFT }}>
+                      <span style={{ color: GOLD }}>✦</span>{tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {/* 종합 정리 */}
+            {!!(jc.wealthSummary as Record<string,unknown>)?.title && (
+              <div className="rounded-xl p-5" style={{ background: CALLOUT_BG, border: `1px solid ${ROSE}44` }}>
+                <p className="text-[10px] font-bold tracking-widest mb-2" style={{ color: MAROON }}>종합 정리</p>
+                <p className="text-[15px] font-black mb-4" style={{ color: INK, fontFamily: SERIF }}>
+                  {String((jc.wealthSummary as Record<string,unknown>).title)}
+                </p>
+                {((jc.wealthSummary as Record<string,unknown>)?.items as {title:string;desc:string}[] | undefined)?.map((item, i) => (
+                  <div key={i} className="mb-3">
+                    <p className="text-[12px] font-bold mb-1" style={{ color: MAROON }}>{item.title}</p>
+                    <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <ChapterNav cur="6" go={next} />
         </>
       )}
 
-      {/* ═══════════ 마무리 · 그대에게 남기는 홍연의 서신 ═══════════ */}
+      {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "7" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              그대에게 남기는 홍연의 서신
+              {name}님께<br />홍연의 서신
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/jaemul/jaemul-7-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} onError={(e) => { (e.target as HTMLImageElement).src = "/media/report/total/total-16/total-16-cover.jpg"; }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          <div className="relative w-full" style={{ height: 220 }}>
+            <img src="/media/report/saju_jaemul/saju_jaemul_7/saju_jaemul_7_cover.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
-
-          <SealStamp />
-
-          {(() => {
-            const lt = (jc.letter as { paragraphs?: string[] } | undefined) ?? {};
-            return (
-              <section className="px-6 pt-6 pb-8" style={{ fontFamily: SERIF }}>
-                {lt.paragraphs?.map((p, i) => (
-                  <p key={i} className="text-[15px] leading-[2.2] mb-5" style={{ color: INK }}>{p}</p>
-                ))}
-              </section>
-            );
-          })()}
-
-          <ReviewBox />
-
+          <div className="px-5 py-8" style={{ background: CREAM }}>
+            <div className="text-center mb-6">
+              <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
+                <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
+              </div>
+            </div>
+            {((jc.letter as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
+              <p key={i} className="text-[13px] leading-[2] mb-5" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+            ))}
+            <div className="text-right mt-6">
+              <p className="text-[12px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
+            </div>
+          </div>
           <ChapterNav cur="7" go={next} />
         </>
       )}
-      {/* ═══════════ 제10장 ═══════════ */}
-      {ch === "8" && (
-        <>
-          {/* 표지 */}
-          {/* 헤드라인 블록 */}
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 귀인</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              “나를 살릴 귀인은 누구인가”
-            </h1>
-          </div>
-          {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-8/total-8-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 50%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"사주팔자에는\n반드시 그대를 살릴 사람이 있소.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의 귀인,\n지금 꺼내 보겠소."`}</Quote>
-
-          {/* 귀인은 어떤 사람일까 */}
-          <section className="pt-2 pb-4">
-            <div className="px-6"><Heading>내 사주팔자속 귀인들</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} rows={["gan","ji","sinsal"]} hideLabel />
-            <div className="px-6 mt-6">{c.helper.paragraphs?.length > 0 && <GuiinP>{c.helper.paragraphs.join("\n")}</GuiinP>}</div>
-          </section>
-
-
-          {/* 삽화 */}
-          <Illust src="/media/report/total/total-8/total-8-2.jpg" h={400} />
-
-          {/* 마무리 인용 */}
-          <Quote>{`"나를 깎아내리는 칼날이 아니라\n나를 다듬어 주는 정교한\n정(金)처럼,\n귀인의 쓴소리를 성장의 발판으로\n삼아 보세요."`}</Quote>
-
-          {/* 다음 장 네비 */}
-          <ChapterNav cur="8" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제11장 ═══════════ */}
-      {ch === "11" && (
-        <>
-          {/* 표지 */}
-          {/* 헤드라인 블록 */}
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 주의</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              “내가 조심해야 할 때는 언제인가”
-            </h1>
-          </div>
-          {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-12/total-12-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"가장 거친 3년,\n삼재가 언제\n찾아오는지 살펴보겠습니다."`}</Quote>
-
-          {/* 삼재는 언제 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>가장 거친 3년, 삼재는 언제일까</Heading>
-            <TrapBox trap={c.samjae.trap} />
-            {c.samjae.intro && <P>{[c.samjae.intro, ...c.samjae.paragraphs].join("\n")}</P>}
-          </section>
-
-          <Quote>{`"삼재가 흐르는 삼 년 동안\n연차별로 가장 조심할 일을\n알려드릴게요."`}</Quote>
-
-          {/* 삼재 3년, 해마다 이렇게 보내요 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>삼재 3년, 해마다 이렇게 보내요</Heading>
-            <SamjaeYearly items={c.samjae.yearly} />
-            {c.samjae.guide.length > 0 && <P>{c.samjae.guide.join("\n")}</P>}
-          </section>
-
-          {/* 그때 조심할 것 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>그때 조심할 것: 변동·관계·건강</Heading>
-            {c.samjaeFocus.intro && <P>{[c.samjaeFocus.intro, ...c.samjaeFocus.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 삽화 */}
-          <Illust src="/media/report/total/total-12/total-12-1.jpg" h={400} />
-
-          {/* 마무리 인용 */}
-          <Quote>{`"삼재라는 겨울바람이 불 때는\n억지로 꽃을 피우려 하지 말고,\n뿌리를 더 깊이 내리는 시간으로\n삼으면 안전하답니다."`}</Quote>
-
-          {/* 다음 장 네비 */}
-          <ChapterNav cur="11" go={next} />
-        </>
-      )}
-
-
-      {/* ═══════════ 제13장 · 핵심 정리 ═══════════ */}
-      {ch === "12" && (
-        <>
-          {/* 표지 */}
-          {/* 헤드라인 블록 */}
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 12 장 · 당부</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              “꼭 기억할 세 가지는 무엇인가”
-            </h1>
-          </div>
-          {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-13/total-13-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 70%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"지금까지의 이야기를\n세 가지로\n정리해 보겠습니다."`}</Quote>
-
-          {/* 1. 본질 */}
-          <section className="px-6 pt-4 pb-2">
-            <Heading>본질, 타고난 본바탕</Heading>
-            {c.sumEssence.intro && <P>{[c.sumEssence.intro, ...c.sumEssence.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 2. 시기 */}
-          <section className="px-6 pt-4 pb-2">
-            <Heading>시기, 지금 흐르는 운의 때</Heading>
-            {c.sumTime.intro && <P>{[c.sumTime.intro, ...c.sumTime.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 3. 관계 */}
-          <section className="px-6 pt-4 pb-2">
-            <Heading>관계, 기운끼리의 충과 합</Heading>
-            {c.sumRelation.intro && <P>{[c.sumRelation.intro, ...c.sumRelation.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 삽화 */}
-          <Illust src="/media/report/total/total-13/total-13-1.jpg" h={400} />
-
-          {/* 마무리 인용 */}
-          <Quote>{`"나의 굳건한 뿌리를 믿고,\n다가올 황금빛 계절을 향해\n한 걸음씩 당당하게 걸어가시기를\n응원해 드려요."`}</Quote>
-
-          {/* 다음 장 네비 */}
-          <ChapterNav cur="12" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제14장 · 지금부터 해야 할 일들 ═══════════ */}
-      {ch === "13" && (
-        <>
-          {/* 표지 */}
-          {/* 헤드라인 블록 */}
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 13 장 · 개운</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              “나는 어떻게 운을 바꿀 수 있나”
-            </h1>
-          </div>
-          {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-14/total-14-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 70%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"이제, 오늘부터\n무엇을 하면 좋을지\n정리해 드리겠습니다."`}</Quote>
-
-          {/* 나만의 개운법 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나만의 개운법</Heading>
-            <HealthCareCard element={c.openMethod.element} tips={c.openMethod.tips} />
-            {c.openMethod.intro && <P>{[c.openMethod.intro, ...c.openMethod.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 내일의 할 일 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>내일은 어떤 날일까</Heading>
-            {c.tomorrow.intro && <P>{[c.tomorrow.intro, ...c.tomorrow.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 이번 주 할 일 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>이번 주, 운의 흐름 한눈에</Heading>
-            <FlowStrip items={c.weekFlow.days} />
-            {c.weekFlow.intro && <P>{[c.weekFlow.intro, ...c.weekFlow.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 향후 3개월 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>달마다 달라지는 기운</Heading>
-            <FlowStrip items={c.monthFlow.months} />
-            {c.monthFlow.intro && <P>{[c.monthFlow.intro, ...c.monthFlow.paragraphs].join("\n")}</P>}
-          </section>
-
-          {/* 삽화 */}
-          <Illust src="/media/report/total/total-14/total-14-1.jpg" h={400} />
-
-          {/* 마무리 인용 */}
-          <Quote>{`"매일의 작은 습관이 모여\n거대한 운명의 물결을 바꾸듯,\n오늘 전해드린 처방을 가볍게\n시작해 보세요."`}</Quote>
-
-          {/* 다음 장 네비 */}
-          <ChapterNav cur="13" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 마무리 · 단하의 편지 ═══════════ */}
-      {ch === "14" && (
-        <>
-        <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
-          {/* 표지 */}
-          {/* 헤드라인 블록 */}
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>맺음 · 결론</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              그대에게 남기는 홍연의 서신
-            </h1>
-          </div>
-          {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-16/total-16-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          {/* 편지 본문 */}
-          <section className="px-7 pt-8 pb-2">
-            {c.letter.paragraphs.map((p, i) => (
-              <P key={i}>{p}</P>
-            ))}
-            {/* 서명 + 낙관 */}
-            <div className="flex items-center justify-end gap-3 mt-8 mb-2">
-              <span className="text-[13.5px] font-bold" style={{ color: INK }}>홍연 올림</span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/dojang.png" alt="도장" style={{ width: 56, height: 56, objectFit: "contain" }} />
-            </div>
-          </section>
-
-          {/* 만족도 리뷰 */}
-          <ReviewBox />
-
-          {/* 후기 이벤트 */}
-          <EventBox />
-
-          {/* 추천 상품 (크로스셀) */}
-          <RecoGrid />
-
-          {/* 네비 */}
-          <ChapterNav cur="16" go={next} />
-        </div>
-        {eventOpen && (
-          <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
-        )}
-        </>
-      )}
-
-      {/* ═══════════ 제17장 이후 — 준비 중 ═══════════ */}
-      {ch !== "0" && ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && ch !== "13" && ch !== "14" && ch !== "16" && (
-        <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
-          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
-          <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중입니다.</p>
-          <button onClick={() => next("1")} className="mt-6 px-5 py-3 rounded-xl text-[13px] font-bold" style={{ color: INK_SOFT, border: `1px solid ${INK}22` }}>← 처음으로</button>
-        </div>
-      )}
-
-      {/* ═══════════ 제1장 ═══════════ */}
-      {ch === "9" && (
-      <>
-      {/* ── 표지 ── */}
-      <Cover />
-
-      {/* ── 도입 인용 ── */}
-      <Quote>
-        {`"오늘의 ${name}님이 되기까지,\n${name}님은 어떤 선택들을\n거쳐 왔는지 살펴보겠습니다."`}
-      </Quote>
-
-      {/* ── 본문: 힘들었던 시기 ── */}
-      <section className="px-6 pt-2 pb-4">
-        <Heading>{name}님 삶이 힘들 수밖에 없던 시기</Heading>
-        {c.hardSeason.intro && <P>{[c.hardSeason.intro, ...c.hardSeason.paragraphs].join("\n")}</P>}
-      </section>
-
-      {/* ── 본문: 사주 속 원인 + 운 흐름 차트 ── */}
-      <section className="px-6 pt-2 pb-4">
-        <Heading>왜 힘들었던 걸까, 사주 속 숨어있는 이유</Heading>
-        <RunFlowChart flow={c.cause.flow} />
-        {c.cause.intro && <P>{[c.cause.intro, ...c.cause.paragraphs].join("\n")}</P>}
-      </section>
-
-      {/* ── 본문: 반복되어 온 삶의 패턴 ── */}
-      <section className="px-6 pt-2 pb-4">
-        <Heading>반복되어 온 삶의 패턴</Heading>
-        <SummaryCard title="지난 흐름 요약" items={c.pattern.summary} />
-        {c.pattern.intro && <P>{[c.pattern.intro, ...c.pattern.paragraphs].join("\n")}</P>}
-      </section>
-
-      {/* ── 삽화 ── */}
-      <Illust src="/media/report/total/total-10/total-10-5.jpg" />
-
-      {/* ── 마무리 인용 ── */}
-      <Quote>
-        {`"지나온 모든 발걸음이 ${name}님만의\n단단한 지혜가 되었음을\n믿어 드려요."`}
-      </Quote>
-
-      {/* ── 마무리 인용 (천간 강조) ── */}
-      <div className="px-8 pb-10 text-center">
-        <p className="text-[18px] leading-[2]" style={{ color: INK, fontFamily: SERIF }}>
-          &quot;차가운 겨울 물속에서 견뎌낸
-          <br />
-          <Term>{ilganLabel}</Term>의 끈기가
-          <br />
-          이제 따뜻한 봄볕을 만나 싹을
-          <br />
-          틔울 준비를 마쳤네요.&quot;
-        </p>
-      </div>
-
-      {/* ── 다음 장 네비게이션 ── */}
-      <ChapterNav cur="9" go={next} />
       </>
-      )}
-      </>
-      )}
     </div>
   );
 }
