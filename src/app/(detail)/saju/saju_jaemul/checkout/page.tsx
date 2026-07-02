@@ -252,7 +252,7 @@ function PreviewSection() {
       transition: "opacity 0.6s ease, transform 0.6s ease",
     }}>
       <div className="pt-7 pb-2 text-center px-5">
-        <p className="text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#8a7200" }}>✦ AI 정밀 분석 · 14장 ✦</p>
+        <p className="text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#8a7200" }}>✦ AI 정밀 분석 · 7장 ✦</p>
         <h2 className="text-[20px] font-black mb-1.5" style={{ color: GRAY1 }}>나의 재물운, 이제 확인하오</h2>
         <p className="text-[12px]" style={{ color: GRAY3 }}>일부 내용은 결제 후 열람할 수 있소</p>
       </div>
@@ -300,7 +300,7 @@ function TableOfContents() {
       transition: "opacity 0.6s ease, transform 0.6s ease",
     }}>
       <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#8a7200" }}>✦ 목차 ✦</p>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>총 14장 구성</h2>
+      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>총 7장 구성</h2>
       <div className="space-y-2">
         {CHAPTER_LIST.map(({ ch, title, emoji }, i) => (
           <div key={ch} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
@@ -358,7 +358,7 @@ function ReviewSection() {
 const FAQS = [
   { q: "결과지는 얼마나 걸리나요?", a: "결제 직후 약 1~2분 내에 자동 생성됩니다. 입력하신 이메일로도 링크를 보내드려, 언제든 다시 확인하실 수 있소." },
   { q: "생년월일 시간을 모르면요?", a: "시주까지 입력할 수 있으나, 시간을 모르는 경우도 분석이 가능하오. 다만 시주 관련 항목의 정확도는 다소 낮을 수 있소." },
-  { q: "어떤 재물 항목을 분석하나요?", a: "타고난 재물 기질, 돈이 들어오는 시기, 지금 내 재물운, 투자와 사업 운, 재물을 방해하는 요인 등 총 14장에 걸쳐 상세히 풀이하오." },
+  { q: "어떤 재물 항목을 분석하나요?", a: "타고난 재물 기질, 돈이 되는 일과 천직, 재물 대운 흐름, 개운법 등 총 7장에 걸쳐 상세히 풀이하오." },
   { q: "환불이 가능한가요?", a: "AI가 생성한 콘텐츠 특성상, 결과지가 생성된 후에는 환불이 어렵습니다. 구매 전 신중히 결정해주시오." },
 ];
 
@@ -636,13 +636,15 @@ function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
 
 // ─── 생성 로딩 화면 ───────────────────────────────────────────────────────────
 const CHAPTER_TITLES = [
-  "제1장 — 사주 원국", "제2장 — 재물 기질", "제3장 — 돈 버는 방식",
-  "제4장 — 지출 패턴", "제5장 — 직업과 재물", "제6장 — 투자와 사업",
-  "제7장 — 재물 주의 시기", "제8장 — 대운 재물 흐름", "제9장 — 귀인과 도움",
-  "제10장 — 재물 방해 요인", "제11장 — 부동산과 재산", "제12장 — 노년 재물운",
-  "제13장 — 당부의 말", "제14장 — 개운법",
+  "제1장 — 나는 어떤 그릇으로 태어났나",
+  "제2장 — 내 재물 기질",
+  "제3장 — 내 사주에 재물이 보이는가",
+  "제4장 — 돈이 되는 일과 나의 천직",
+  "제5장 — 내 재물 대운",
+  "제6장 — 내 재물운을 바꾸는 개운법",
+  "마무리 — 그대에게 남기는 홍연의 서신",
 ];
-const TOTAL = 14;
+const TOTAL = 7;
 
 function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; currentChapter: number }) {
   const pct = Math.round((doneCount / TOTAL) * 100);
