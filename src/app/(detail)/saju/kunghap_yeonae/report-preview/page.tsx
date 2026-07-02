@@ -3378,7 +3378,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="min-w-0 flex-1 mr-3">
           <p className="text-[10px] font-bold mt-1" style={{ color: MUTE }}>{label}</p>
-          {subtitle && <p className="text-[15px] font-bold leading-tight mt-1" style={{ color: INK }}>{subtitle}</p>}
+          {subtitle && <p className="text-[12px] font-bold whitespace-nowrap mt-1" style={{ color: INK }}>{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
