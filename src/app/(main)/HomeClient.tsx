@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { CATEGORY_CARDS } from "@/config/category-cards";
+import { CATEGORY_CARDS, FREE_SECTIONS } from "@/config/category-cards";
 
 // slug → CategoryCard 맵
 const SLUG_CARD_MAP = Object.values(CATEGORY_CARDS).flat().reduce<Record<string, (typeof CATEGORY_CARDS)[string][number]>>((acc, card) => {
@@ -161,8 +161,85 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   const [slideIndex, setSlideIndex] = useState(0);
   const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category") ?? "";
 
   const getHref = (slug: string) => `/saju/${slug}`;
+
+  // 카테고리 탭 선택 시 필터 뷰
+  if (category) {
+    if (category === "무료") {
+      return (
+        <div className="pb-20">
+          <style>{TAG_ANIMATIONS}</style>
+          <div style={{ margin: "12px 12px 20px", background: "#fff", borderRadius: 16, padding: "16px 18px" }}>
+            <p style={{ fontSize: 16, fontWeight: 900, color: "#111", marginBottom: 8 }}>기간 한정 무료 이벤트 🔔</p>
+            <ul style={{ paddingLeft: 16, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+              <li style={{ fontSize: 13, color: "#333", lineHeight: 1.5 }}>아래 상품들은 곧 런칭될 아이템들이에요!</li>
+              <li style={{ fontSize: 13, color: "#c0392b", fontWeight: 700, lineHeight: 1.5 }}>아이템을 쭉 둘러보고 신중히 골라주세요! (인당 3개 제한)</li>
+            </ul>
+          </div>
+          {FREE_SECTIONS.map((section) => (
+            <div key={section.title} style={{ marginBottom: 36 }}>
+              <div style={{ padding: "0 16px 12px" }}>
+                <p style={{ fontSize: 18, fontWeight: 900, color: "#fff", marginBottom: 4 }}>{section.title}</p>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{section.subtitle}</p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 12px" }}>
+                {section.cards.map((card, i) => (
+                  <Link key={i} href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ aspectRatio: "3/4" }}>
+                    <div className="absolute inset-0" style={{ background: DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] }} />
+                    {card.image && <img src={card.image} alt={card.name} className="absolute inset-0 w-full h-full object-cover" />}
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)" }} />
+                    <div className="absolute bottom-0 left-0 right-0" style={{ padding: "0 12px 14px" }}>
+                      {card.badge && <div className="flex gap-1" style={{ marginBottom: 5 }}><span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span></div>}
+                      <p className="font-black text-white leading-tight" style={{ fontSize: 14, marginBottom: 4 }}>{card.name}</p>
+                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{card.desc}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    const cards = CATEGORY_CARDS[category] ?? [];
+    return (
+      <div className="px-3 pt-4 pb-20">
+        <style>{TAG_ANIMATIONS}</style>
+        <p className="text-[13px] font-bold mb-4 px-1" style={{ color: "rgba(255,255,255,0.5)" }}>
+          {category} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
+        </p>
+        <div className="flex flex-col gap-3">
+          {cards.map((card, i) => (
+            <Link key={i} href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ backgroundColor: "#1a1a1a", aspectRatio: "4/3" }}>
+              {card.videoUrl || card.type === "video" ? (
+                <video src={card.videoUrl ?? card.image} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+              ) : (
+                <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+              )}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+              <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
+                <div className="flex gap-1.5" style={{ marginBottom: 3 }}>
+                  {card.tag && <span className="font-bold rounded-full" style={{ fontSize: 12, padding: "2px 10px", backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>}
+                  <span className="font-bold rounded-full" style={{ fontSize: 12, padding: "2px 10px", backgroundColor: "#711b20", color: "#fff" }}>{card.badge}</span>
+                </div>
+                {card.tagline && <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+                {(() => {
+                  const idx2 = card.name.indexOf(" ");
+                  if (idx2 === -1) return <p className="text-white font-bold leading-tight" style={{ fontSize: 30, marginBottom: 2 }}>{card.name}</p>;
+                  return <p className="leading-tight" style={{ fontSize: 30, marginBottom: 2 }}><span style={{ color: "#fff", fontWeight: 400 }}>{card.name.slice(0, idx2)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{card.name.slice(idx2 + 1)}</span></p>;
+                })()}
+                <p className="leading-snug" style={{ fontSize: 15, color: "rgba(255,255,255,0.5)" }}>{card.desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const toggleCard = (id: string, current: boolean) => {
     setConfirm({ id, toActive: !current });
