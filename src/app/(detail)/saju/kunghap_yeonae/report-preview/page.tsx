@@ -3356,8 +3356,9 @@ const SAMPLE_CONTENT = {
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
 
 // 상단 앱바 (챕터 타이틀 + 공유/목차 + 진행 게이지)
-function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasPartner }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void; onPartnerMyeongsik?: () => void; hasPartner?: boolean }) {
+function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasPartner, myGender, partnerGender }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void; onPartnerMyeongsik?: () => void; hasPartner?: boolean; myGender?: string; partnerGender?: string }) {
   const [label, subtitle] = title.includes("·") ? title.split(" · ") : [title, ""];
+  const isFemale = (g?: string) => g === "female" || g === "여성" || g === "여자" || g === "여아";
   const ScrollBtn = ({ onClick, text, color }: { onClick: () => void; text: string; color: "blue" | "pink" }) => {
     const themes = {
       blue:  { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
@@ -3390,9 +3391,9 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
           <div className="flex flex-col gap-1.5" style={{ width: 96 }}>
-            <ScrollBtn onClick={onMyeongsik} text="나의 명식" color="blue" />
+            <ScrollBtn onClick={onMyeongsik} text="나의 명식" color={isFemale(myGender) ? "pink" : "blue"} />
             {hasPartner && onPartnerMyeongsik && (
-              <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" color="pink" />
+              <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" color={isFemale(partnerGender) ? "pink" : "blue"} />
             )}
           </div>
           {/* 목차 버튼 */}
@@ -3967,7 +3968,7 @@ function ReportPreviewInner() {
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
   type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string } | null>(null);
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string; partnerGender?: string } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -3988,7 +3989,7 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/kunghap_yeonae-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "" }))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "" }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -3999,7 +4000,7 @@ function ReportPreviewInner() {
       })
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => {
-          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "" });
+          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "" });
           if (d.resultId) router.replace(`/saju/kunghap_yeonae/report-preview?id=${d.resultId}&gender=${encodeURIComponent(d.gender ?? gender)}`);
         })
         .catch(() => {})
@@ -4093,7 +4094,7 @@ function ReportPreviewInner() {
 
   return (
     <div ref={rootRef} style={{ backgroundColor: CREAM, minHeight: "100%" }}>
-      <TopBar progress={progress} title={CHAPTER_TITLES[ch] ?? `제${ch}장`} onMenu={() => setTocOpen(true)} onMyeongsik={openMyeongsik} onPartnerMyeongsik={() => setPartnerMsOpen(true)} hasPartner={!!(report?.partnerView)} />
+      <TopBar progress={progress} title={CHAPTER_TITLES[ch] ?? `제${ch}장`} onMenu={() => setTocOpen(true)} onMyeongsik={openMyeongsik} onPartnerMyeongsik={() => setPartnerMsOpen(true)} hasPartner={!!(report?.partnerView)} myGender={report?.gender} partnerGender={report?.partnerGender} />
       <TocPanel
         open={tocOpen}
         onClose={() => setTocOpen(false)}
