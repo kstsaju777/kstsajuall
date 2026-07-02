@@ -100,6 +100,122 @@ function OhaengDonut({ view }: { view: MyeongsikView | null }) {
   );
 }
 
+// 오행 레이더(방사형) 차트
+function OhaengRadar({ view, color }: { view: MyeongsikView | null; color: string }) {
+  const EL_ORDER = ["목", "화", "토", "금", "수"] as const;
+  const EL_COLOR: Record<string, string> = { 목: "#3a7d44", 화: "#c0392b", 토: "#b07d2a", 금: "#7a7a7a", 수: "#1a4a9e" };
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const cx = 80, cy = 80, r = 58;
+  const pts = EL_ORDER.map((el, i) => {
+    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+    const ratio = counts[el] / total;
+    return { el, ratio, x: cx + r * ratio * Math.cos(angle), y: cy + r * ratio * Math.sin(angle), lx: cx + (r + 18) * Math.cos(angle), ly: cy + (r + 18) * Math.sin(angle) };
+  });
+  const polygon = pts.map((p) => `${p.x},${p.y}`).join(" ");
+  const bgPts = EL_ORDER.map((_, i) => {
+    const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+    return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+  }).join(" ");
+  return (
+    <svg viewBox="0 0 160 160" width={160} height={160}>
+      <polygon points={bgPts} fill={`${color}0a`} stroke={`${color}22`} strokeWidth={1} />
+      <polygon points={polygon} fill={`${color}30`} stroke={color} strokeWidth={1.5} />
+      {pts.map((p) => (
+        <g key={p.el}>
+          <circle cx={p.x} cy={p.y} r={3.5} fill={EL_COLOR[p.el]} />
+          <text x={p.lx} y={p.ly} textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="700" fill={EL_COLOR[p.el]}>{p.el}</text>
+          <text x={p.lx} y={p.ly + 11} textAnchor="middle" dominantBaseline="central" fontSize="9" fill="#888">{Math.round(p.ratio * 100)}%</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+// 연도별 관계 흐름 라인 차트 (향후 5년)
+function RelationFlowChart({ view, partnerView }: { view: MyeongsikView | null; partnerView: MyeongsikView | null }) {
+  const THIS_YEAR = new Date().getFullYear();
+  const YEARS = Array.from({ length: 5 }, (_, i) => THIS_YEAR + i);
+  const GANJIS = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+  const BASE_IDX = GANJIS.indexOf("甲辰"); // 2024=甲辰
+  const GJ_EL: Record<string, number> = { 목: 3, 화: 2, 토: 1, 금: 1, 수: 2 };
+  const MY_ILGAN = view?.pillars?.[1]?.gan ?? "";
+  const PT_ILGAN = partnerView?.pillars?.[1]?.gan ?? "";
+  const scores = YEARS.map((y) => {
+    const idx = (BASE_IDX + (y - 2024) + 60) % 60;
+    const gz = GANJIS[idx];
+    const gan = gz[0]; const ji = gz[1];
+    const ganEl = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" }[gan] ?? "토";
+    const jiEl  = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" }[ji] ?? "토";
+    const base = (GJ_EL[ganEl] ?? 1) + (GJ_EL[jiEl] ?? 1);
+    const myBonus  = MY_ILGAN && (ganEl === "화" || jiEl === "화") ? 8 : 0;
+    const ptBonus  = PT_ILGAN && (ganEl === "목" || jiEl === "목") ? 6 : 0;
+    return Math.min(95, Math.max(30, 50 + base * 5 + myBonus + ptBonus + Math.sin(y * 1.3) * 10));
+  });
+  const W = 280, H = 100, pad = 20;
+  const xOf = (i: number) => pad + (i / (YEARS.length - 1)) * (W - pad * 2);
+  const yOf = (s: number) => H - pad - ((s - 20) / 80) * (H - pad * 2);
+  const polyline = scores.map((s, i) => `${xOf(i)},${yOf(s)}`).join(" ");
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: "white", border: `1px solid ${MAROON}18` }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block" }}>
+        <defs>
+          <linearGradient id="rfGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={ROSE} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={ROSE} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <polygon points={`${xOf(0)},${H - pad} ${polyline} ${xOf(YEARS.length - 1)},${H - pad}`} fill="url(#rfGrad)" />
+        <polyline points={polyline} fill="none" stroke={MAROON} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {scores.map((s, i) => (
+          <g key={i}>
+            <circle cx={xOf(i)} cy={yOf(s)} r={4} fill={MAROON} />
+            <text x={xOf(i)} y={H - 4} textAnchor="middle" fontSize="9" fill="#888">{YEARS[i]}</text>
+            <text x={xOf(i)} y={yOf(s) - 8} textAnchor="middle" fontSize="9" fontWeight="700" fill={MAROON}>{Math.round(s)}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+// 궁합 에너지 바 차트 (월별/연도별)
+function CompatEnergyBarChart({ view, partnerView }: { view: MyeongsikView | null; partnerView: MyeongsikView | null }) {
+  const THIS_YEAR = new Date().getFullYear();
+  const MONTHS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+  const MY_ILGAN = view?.pillars?.[1]?.gan ?? "";
+  const PT_ILGAN = partnerView?.pillars?.[1]?.gan ?? "";
+  const scores = MONTHS.map((_, i) => {
+    const base = Math.sin((i / 12) * Math.PI * 2 + 0.5) * 20 + 60;
+    const bonus = MY_ILGAN && PT_ILGAN ? ((i + 3) % 4 === 0 ? 12 : 0) : 0;
+    return Math.min(95, Math.max(20, Math.round(base + bonus + Math.cos(i * 0.7) * 8)));
+  });
+  const maxS = Math.max(...scores);
+  return (
+    <div className="rounded-2xl p-4" style={{ background: "white", border: `1px solid ${MAROON}18` }}>
+      <p className="text-[11px] font-bold mb-3" style={{ color: MUTE }}>{THIS_YEAR}년 월별 궁합 에너지</p>
+      <div className="flex items-end gap-1" style={{ height: 80 }}>
+        {scores.map((s, i) => {
+          const isHigh = s === maxS;
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+              <div className="w-full rounded-t-sm" style={{ height: `${(s / 100) * 72}px`, background: isHigh ? MAROON : `${MAROON}55`, transition: "height 0.3s" }} />
+              <span className="text-[7px]" style={{ color: MUTE }}>{MONTHS[i].replace("월", "")}</span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[10px] mt-2 text-center" style={{ color: MUTE }}>짙은 색 = 가장 좋은 달</p>
+    </div>
+  );
+}
+
 // 미니 십성표 (내 명식 속 십성: 천간/지지 글자 + 천간십성/지지십성)
 function SipseongMini({ view }: { view: MyeongsikView | null }) {
   if (!view) return null;
@@ -2204,19 +2320,19 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 
 // 장번호 → 표시 제목 (연애궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0":  "인트로 · 두 사람의 인연이 시작되오",
-  "1":  "제1장 · 이 인연, 하늘이 맺어준 것인가",
-  "2":  "제2장 · 무엇이 서로를 끌어당기는가",
-  "3":  "제3장 · 내가 보는 상대는 어떤 사람인가",
-  "4":  "제4장 · 상대가 보는 나는 어떤 사람인가",
-  "5":  "제5장 · 두 사주 사이의 합·충·형은 무엇인가",
-  "6":  "제6장 · 연애 스타일이 맞는가 다른가",
-  "7":  "제7장 · 이 관계의 빛과 그림자는 무엇인가",
-  "8":  "제8장 · 위기는 언제 어디서 오는가",
-  "9":  "제9장 · 결혼까지 갈 수 있는 궁합인가",
-  "10": "제10장 · 두 사람에게 찾아올 좋은 때는",
-  "11": "제11장 · 홍연이 그대들에게 당부하는 말",
-  "12": "마무리 · 그대에게 남기는 홍연의 서신",
+  "0":  "인트로 · 연애궁합에 대하여",
+  "1":  "제1장 · 나의 사주 원국",
+  "2":  "제2장 · 상대의 사주 원국",
+  "3":  "제3장 · 첫인상과 끌림의 비밀",
+  "4":  "제4장 · 나는 이 사람을 어떻게 보는가",
+  "5":  "제5장 · 상대는 나를 어떻게 보는가",
+  "6":  "제6장 · 궁합의 핵심: 합과 충",
+  "7":  "제7장 · 연애 스타일의 차이",
+  "8":  "제8장 · 이 관계의 빛과 그림자",
+  "9":  "제9장 · 위기와 극복",
+  "10": "제10장 · 결혼으로 이어지는가",
+  "11": "제11장 · 두 사람이 함께하면 좋은 시기",
+  "12": "마무리 · 그대들에게 남기는 홍연의 서신",
 };
 
 // A안 읽기 순서 (연애궁합 0~12)
@@ -2582,19 +2698,19 @@ function ScrollMyeongsik({ view, name, birth }: { view: MyeongsikView | null; na
 
 // ─── 연애궁합 전용 섹션 정의 ──────────────────────────────────────
 const YEONAE_CHAPTER_SECTIONS: Record<number, string[]> = {
-  0: [],                       // 인트로 — 정적
-  1: ["kh_intro"],             // 제1장 — 궁합 첫인상
-  2: ["kh_attraction"],        // 제2장 — 끌림의 이유
-  3: ["kh_myView"],            // 제3장 — 내가 보는 상대
-  4: ["kh_partnerView"],       // 제4장 — 상대가 보는 나
-  5: ["kh_hapChung"],          // 제5장 — 합·충·형
-  6: ["kh_styleCompare"],      // 제6장 — 연애 스타일 비교
-  7: ["kh_lightShadow"],       // 제7장 — 빛과 그림자
-  8: ["kh_crisis"],            // 제8장 — 위기 포인트
-  9: ["kh_marriage"],          // 제9장 — 결혼 가능성
-  10: ["kh_goodTime"],         // 제10장 — 좋은 시절
-  11: ["kh_finalAdvice"],      // 제11장 — 홍연의 당부
-  12: [],                      // 마무리 — 정적
+  0:  [],                       // 인트로 — 정적
+  1:  [],                       // 제1장 — 나의 사주 원국 — 정적(로컬 명식)
+  2:  [],                       // 제2장 — 상대 사주 원국 — 정적(로컬 명식)
+  3:  ["kh_attraction"],        // 제3장 — 첫인상·끌림
+  4:  ["kh_myView"],            // 제4장 — 나는 이 사람을 어떻게 보는가
+  5:  ["kh_partnerView"],       // 제5장 — 상대는 나를 어떻게 보는가
+  6:  ["kh_hapChung"],          // 제6장 — 합·충·형
+  7:  ["kh_styleCompare"],      // 제7장 — 연애 스타일 비교
+  8:  ["kh_lightShadow"],       // 제8장 — 빛과 그림자
+  9:  ["kh_crisis"],            // 제9장 — 위기와 극복
+  10: ["kh_marriage"],          // 제10장 — 결혼 가능성
+  11: ["kh_goodTime"],          // 제11장 — 좋은 시기
+  12: [],                       // 마무리 — 정적
 };
 
 function isYeonaeChapterReady(content: Record<string, unknown> | null | undefined, chapter: number): boolean {
@@ -3417,19 +3533,19 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "시작",  title: "두 사람의 인연이 시작되오",          no: "0" },
-  { disp: "제1장",  chip: "인연",  title: "이 인연, 하늘이 맺어준 것인가",       no: "1" },
-  { disp: "제2장",  chip: "끌림",  title: "무엇이 서로를 끌어당기는가",          no: "2" },
-  { disp: "제3장",  chip: "내시각",title: "내가 보는 상대는 어떤 사람인가",      no: "3" },
-  { disp: "제4장",  chip: "상대시각",title:"상대가 보는 나는 어떤 사람인가",     no: "4" },
-  { disp: "제5장",  chip: "합충형",title: "두 사주 사이의 합·충·형은 무엇인가",  no: "5" },
-  { disp: "제6장",  chip: "스타일",title: "연애 스타일이 맞는가 다른가",          no: "6" },
-  { disp: "제7장",  chip: "빛그림자",title:"이 관계의 빛과 그림자는 무엇인가",   no: "7" },
-  { disp: "제8장",  chip: "위기",  title: "위기는 언제 어디서 오는가",            no: "8" },
-  { disp: "제9장",  chip: "결혼",  title: "결혼까지 갈 수 있는 궁합인가",         no: "9" },
-  { disp: "제10장", chip: "좋은때",title: "두 사람에게 찾아올 좋은 때는",         no: "10" },
-  { disp: "제11장", chip: "당부",  title: "홍연이 그대들에게 당부하는 말",        no: "11" },
-  { disp: "마무리", chip: "결론",  title: "그대에게 남기는 홍연의 서신",          no: "12" },
+  { disp: "인트로", chip: "서론",   title: "연애궁합에 대하여",                   no: "0" },
+  { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                    no: "1" },
+  { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                  no: "2" },
+  { disp: "제3장",  chip: "끌림",   title: "첫인상과 끌림의 비밀",                no: "3" },
+  { disp: "제4장",  chip: "내시각", title: "나는 이 사람을 어떻게 보는가",         no: "4" },
+  { disp: "제5장",  chip: "상대시각",title: "상대는 나를 어떻게 보는가",           no: "5" },
+  { disp: "제6장",  chip: "합충형", title: "궁합의 핵심: 합과 충",                no: "6" },
+  { disp: "제7장",  chip: "스타일", title: "연애 스타일의 차이",                   no: "7" },
+  { disp: "제8장",  chip: "빛그림자",title: "이 관계의 빛과 그림자",              no: "8" },
+  { disp: "제9장",  chip: "위기극복",title: "위기와 극복",                        no: "9" },
+  { disp: "제10장", chip: "결혼",   title: "결혼으로 이어지는가",                  no: "10" },
+  { disp: "제11장", chip: "좋은시기",title: "두 사람이 함께하면 좋은 시기",        no: "11" },
+  { disp: "마무리", chip: "당부",   title: "그대들에게 남기는 홍연의 서신",        no: "12" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -4142,7 +4258,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>홍연이 두 사람의 인연을 풀어드리겠소</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              두 사람의 인연이 시작되오
+              연애궁합에 대하여
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -4155,7 +4271,7 @@ function ReportPreviewInner() {
           {/* 인사말 */}
           <section className="px-6 pt-10 pb-6">
             <P>안녕하시오, <Term>{name.slice(1) || name}{effectiveGender === "female" ? "양" : "군"}</Term>.</P>
-            <P>두 사람의 인연을 사주로 풀어드리겠소.<br />서로의 기운이 어떻게 맞닿아 있는지,<br />홍연이 낱낱이 살펴보겠소.</P>
+            <P>본격적으로 풀이에 들어가기 전에,<br />연애궁합이 무엇인지 먼저 짚고 넘어가겠소.</P>
           </section>
 
           {/* ─ 궁합이란 ─ */}
@@ -4173,71 +4289,46 @@ function ReportPreviewInner() {
             </Callout>
           </section>
 
-          {/* ─ 두 명식 나란히 ─ */}
+          {/* ─ 사주팔자란 ─ */}
           <section className="px-6 pb-6">
-            <Heading>두 사람의 명식을 나란히 놓겠소</Heading>
+            <Heading>사주팔자(四柱八字)란 무엇인가</Heading>
             <P>
-              나와 상대방, 두 사주팔자를 함께 펼쳐<br />
-              어떻게 얽히고 맞닿는지 살펴보겠소.
+              태어난 년·월·일·시,<br />
+              이 네 개의 기둥을 <Term>사주(四柱)</Term>라 하오.<br />
+              각 기둥에 천간과 지지, 글자 두 개씩<br />
+              도합 여덟 글자를 <Term>팔자(八字)</Term>라 하니,<br />
+              <Term>사주팔자(四柱八字)</Term>라 부르는 것이오.
             </P>
+            <Callout>
+              사주명리학은 이 여덟 글자를 바탕으로<br />
+              기질·재능·관계·직업·사랑·건강·흐름<br />
+              모든 인생사를 통합적으로 해석하는<br />동양의 전통 철학이자 학문이오.
+            </Callout>
+          </section>
+
+          {/* ─ 사주의 네 기둥 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>사주의 네 기둥</Heading>
+            <P>사주에는 네 개의 기둥이 있다 하였소.<br />각 기둥이 무엇을 뜻하는지 살펴보겠소.</P>
             <div className="grid grid-cols-4 gap-2 mb-5">
               {[
-                { name: "나", color: MAROON, hanja: "我", desc: name },
-                { name: "상대", color: NAVY, hanja: "彼", desc: report?.partnerName || "상대방" },
+                { name: "시주", hanja: "時柱", time: "태어난 시", desc: "자녀·사고·말년", color: NAVY },
+                { name: "일주", hanja: "日柱", time: "태어난 날", desc: "나·배우자·중년", color: MAROON },
+                { name: "월주", hanja: "月柱", time: "태어난 달", desc: "부모·직업·청년", color: "#2c7a4b" },
+                { name: "년주", hanja: "年柱", time: "태어난 해", desc: "조상·배경·초년", color: "#a9791c" },
               ].map((r) => (
-                <div key={r.name} className="col-span-2 rounded-2xl px-3 py-4 flex flex-col items-center gap-2 text-center" style={{ background: `${r.color}0c`, border: `1.5px solid ${r.color}30` }}>
+                <div key={r.name} className="rounded-2xl px-2 py-4 flex flex-col items-center gap-2 text-center" style={{ background: `${r.color}0c`, border: `1.5px solid ${r.color}30` }}>
                   <p className="text-[15px] font-black" style={{ color: r.color }}>{r.name}</p>
-                  <p className="text-[20px] font-black" style={{ color: r.color, fontFamily: SERIF }}>{r.hanja}</p>
-                  <p className="text-[13px] font-bold" style={{ color: INK }}>{r.desc}</p>
+                  <p className="text-[11px]" style={{ color: MUTE }}>{r.hanja}</p>
+                  <p className="text-[11px]" style={{ color: INK_SOFT }}>{r.time}</p>
+                  <p className="text-[11px] font-bold leading-relaxed whitespace-pre-line" style={{ color: INK }}>{r.desc}</p>
                 </div>
               ))}
             </div>
-            <P>
-              두 명식 모두 상단 버튼을 눌러<br />
-              언제든 확인할 수 있소.
-            </P>
           </section>
-
-          {/* 나의 명식 */}
-          <section className="pb-2">
-            <div className="px-6"><Heading>나의 명식</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          </section>
-
-          {/* 상대방 명식 */}
-          {report?.partnerView && (
-            <section className="pb-4">
-              <div className="px-6"><Heading>상대방의 명식</Heading></div>
-              <MyeongsikTable view={report.partnerView} name={report?.partnerName || "상대방"} birth={null} />
-            </section>
-          )}
-
-          {/* 오행 도넛 두 개 */}
-          <section className="px-6 pb-4">
-            <Heading>두 사람의 오행 균형</Heading>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <p className="text-center text-[12px] font-bold mb-1" style={{ color: MAROON }}>나의 오행</p>
-                <OhaengDonut view={report?.view ?? null} />
-              </div>
-              {report?.partnerView && (
-                <div className="flex-1">
-                  <p className="text-center text-[12px] font-bold mb-1" style={{ color: NAVY }}>상대방 오행</p>
-                  <OhaengDonut view={report.partnerView} />
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* 삽화 */}
-          <div className="relative overflow-hidden" style={{ height: 300, background: PINK_PALE }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-0/total-0-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 35%, transparent 65%, ${CREAM} 100%)` }} />
-          </div>
 
           {/* ─ 천간과 지지 ─ */}
-          <section className="px-6 pt-8 pb-4">
+          <section className="px-6 pb-4">
             <Heading>천간(天干)과 지지(地支)</Heading>
             <P>
               <Term>천간(天干)</Term>은 하늘에 떠있는 글자, 총 10개요.<br />
@@ -4246,9 +4337,56 @@ function ReportPreviewInner() {
           </section>
 
           {/* ─ 10천간 표 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>10천간의 의미와 상징</Heading>
+            <div className="space-y-1.5">
+              {([
+                { hz: "甲", g: "갑목", oh: "목(木)", ohC: "#3a7d44", sym: "큰나무", key: "곧고 강하며, 타고난 리더의 기질을 지녔소" },
+                { hz: "乙", g: "을목", oh: "목(木)", ohC: "#3a7d44", sym: "풀·덩굴", key: "유연하고 생명력이 강하여 어디서나 잘 적응하오" },
+                { hz: "丙", g: "병화", oh: "화(火)", ohC: "#c0392b", sym: "태양", key: "외향적이고 존재감이 뚜렷하며 추진력이 강하오" },
+                { hz: "丁", g: "정화", oh: "화(火)", ohC: "#c0392b", sym: "촛불", key: "섬세하고 따뜻한 감성으로 주변을 밝히오" },
+                { hz: "戊", g: "무토", oh: "토(土)", ohC: "#b07d2a", sym: "산", key: "뚝심 있고 신뢰를 중시하며 완고한 면이 있소" },
+                { hz: "己", g: "기토", oh: "토(土)", ohC: "#b07d2a", sym: "논밭", key: "포근하고 배려심이 깊으며 현실 감각이 뛰어나오" },
+                { hz: "庚", g: "경금", oh: "금(金)", ohC: "#7a7a7a", sym: "바위", key: "원칙을 중시하고 묵직한 무게감이 있소" },
+                { hz: "辛", g: "신금", oh: "금(金)", ohC: "#7a7a7a", sym: "보석·금속", key: "날카롭고 세련되며 정제 능력이 탁월하오" },
+                { hz: "壬", g: "임수", oh: "수(水)", ohC: "#1a1a1a", sym: "바다", key: "깊고 넓은 사고로 유연하게 흐르는 기질이오" },
+                { hz: "癸", g: "계수", oh: "수(Water)", ohC: "#1a1a1a", sym: "샘물·이슬", key: "예리한 직관력과 순수함을 갖추었소" },
+              ] as const).map((r) => (
+                <div key={r.hz} className="flex items-center gap-2.5 px-3 py-2 rounded-xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={ganCharImage(r.hz)} alt={r.g} style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }} />
+                  <span className="text-[13px] flex-shrink-0 px-1.5 py-0.5 rounded-md font-bold" style={{ background: `${r.ohC}18`, color: r.ohC, minWidth: 40, textAlign: "center" }}>{r.g}</span>
+                  <div className="min-w-0">
+                    <p className="text-[12px]" style={{ color: INK_SOFT }}>{r.sym} — <span style={{ color: INK }}>{r.key}</span></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
-          {/* 맺음말 삽화 */}
+          {/* 삽화 */}
           <Illust src="/media/report/kunghap/kh-intro-1.jpg" h={360} />
+
+          {/* ─ 두 사람을 만나겠소 ─ */}
+          <section className="px-6 pt-8 pb-6">
+            <Heading>두 사람의 명식을 펼쳐보겠소</Heading>
+            <P>
+              나와 상대방, 두 사주팔자를 함께 펼쳐<br />
+              어떻게 얽히고 맞닿는지 살펴보겠소.
+            </P>
+            <div className="flex gap-3 mb-4">
+              {[
+                { name: name, hanja: "我", color: MAROON },
+                { name: report?.partnerName || "상대방", hanja: "彼", color: NAVY },
+              ].map((r) => (
+                <div key={r.name} className="flex-1 rounded-2xl px-3 py-4 flex flex-col items-center gap-1 text-center" style={{ background: `${r.color}0c`, border: `1.5px solid ${r.color}30` }}>
+                  <p className="text-[22px] font-black" style={{ color: r.color, fontFamily: SERIF }}>{r.hanja}</p>
+                  <p className="text-[13px] font-bold" style={{ color: INK }}>{r.name}</p>
+                </div>
+              ))}
+            </div>
+            <P>두 명식은 상단 버튼을 눌러 언제든 확인할 수 있소.</P>
+          </section>
 
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
@@ -4263,77 +4401,99 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제1장 · 인연 ═══════════ */}
+      {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
       {ch === "1" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 인연</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 인연, 하늘이 맺어준 것인가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 300 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-1-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"두 사람의 사주를 펼쳐보니\n이 인연이 어떻게 맺어졌는지\n조금은 알 것 같소."`}</Quote>
+          <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
 
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 사주의 일간을 살펴보겠소</Heading>
-            <div className="flex gap-4 justify-center mb-6">
-              {report?.view?.pillars?.[1] && (
-                <div className="flex flex-col items-center gap-2 px-6 py-4 rounded-2xl" style={{ background: `${MAROON}0a`, border: `1.5px solid ${MAROON}30` }}>
-                  <p className="text-[12px] font-bold" style={{ color: MAROON }}>나의 일간</p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={ganCharImage(report.view.pillars[1].gan)} alt={report.view.pillars[1].gan} style={{ width: 54, height: 54, objectFit: "contain" }} />
-                  <p className="text-[14px] font-black" style={{ color: MAROON }}>{report.view.pillars[1].gan}</p>
-                </div>
-              )}
-              <div className="flex items-center">
-                <span className="text-[28px]" style={{ color: ROSE }}>❤</span>
-              </div>
-              {report?.partnerView?.pillars?.[1] && (
-                <div className="flex flex-col items-center gap-2 px-6 py-4 rounded-2xl" style={{ background: `${NAVY}0a`, border: `1.5px solid ${NAVY}30` }}>
-                  <p className="text-[12px] font-bold" style={{ color: NAVY }}>상대 일간</p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={ganCharImage(report.partnerView.pillars[1].gan)} alt={report.partnerView.pillars[1].gan} style={{ width: 54, height: 54, objectFit: "contain" }} />
-                  <p className="text-[14px] font-black" style={{ color: NAVY }}>{report.partnerView.pillars[1].gan}</p>
-                </div>
-              )}
-            </div>
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_intro && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_intro} />
-            )}
+          <section className="pb-2">
+            <div className="px-6"><Heading>나의 명식</Heading></div>
+            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
           </section>
 
-          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={360} />
-          <Quote>{`"두 사람이 처음 만났을 때,\n어떤 기운이 서로를 끌어당겼는지\n다음 장에서 살펴보겠소."`}</Quote>
+          <section className="px-6 pt-6 pb-6">
+            <Heading>나의 오행 분포</Heading>
+            <P>목·화·토·금·수 다섯 기운이<br />내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
+            <div className="flex justify-center mt-4">
+              <OhaengRadar view={report?.view ?? null} color={MAROON} />
+            </div>
+          </section>
+
+          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
+          <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
           <ChapterNav cur="1" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제2장 · 끌림 ═══════════ */}
+      {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
       {ch === "2" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 끌림</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>무엇이 서로를 끌어당기는가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 300 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-2-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"사주에는 이성을 끌어당기는 기운이\n숨겨져 있소.\n두 사람이 왜 서로에게 끌렸는지\n사주로 풀어보겠소."`}</Quote>
+          <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
 
+          {report?.partnerView ? (
+            <>
+              <section className="pb-2">
+                <div className="px-6"><Heading>{report.partnerName || "상대방"}의 명식</Heading></div>
+                <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
+              </section>
+
+              <section className="px-6 pt-6 pb-6">
+                <Heading>상대방의 오행 분포</Heading>
+                <P>목·화·토·금·수 다섯 기운이<br />상대방 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
+                <div className="flex justify-center mt-4">
+                  <OhaengRadar view={report.partnerView} color={NAVY} />
+                </div>
+              </section>
+            </>
+          ) : (
+            <section className="px-6 pt-6 pb-6">
+              <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
+            </section>
+          )}
+
+          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
+          <Quote>{`"두 사람의 원국을 보았으니,\n이제 처음 만났을 때의 끌림을\n살펴보겠소."`}</Quote>
+          <ChapterNav cur="2" go={next} />
+        </>
+      )}
+
+      {/* ═══════════ 제3장 · 첫인상과 끌림의 비밀 ═══════════ */}
+      {ch === "3" && (
+        <>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 끌림</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>첫인상과 끌림의 비밀</h1>
+          </div>
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/kunghap/kh-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <Quote>{`"사주에는 이성을 끌어당기는 기운이\n숨겨져 있소.\n두 사람이 왜 서로에게 끌렸는지\n사주로 풀어보겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>두 사람의 궁합 에너지</Heading>
+            <Heading>첫 끌림 지수</Heading>
             {(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction?.score !== undefined ? (
-              <AttractionGauge
-                score={(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction!.score!}
-                label={(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction!.label || ""}
-              />
+              <AttractionGauge score={(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction!.score!} label={(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction!.label || ""} />
             ) : (
               <AttractionGauge score={72} label="서로를 강하게 끌어당기는 궁합이오" />
             )}
@@ -4341,263 +4501,213 @@ function ReportPreviewInner() {
               <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_attraction} />
             )}
           </section>
-
-          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={360} />
-          <Quote>{`"그렇다면, 내 눈에 상대방이\n어떻게 보이는지 살펴보겠소."`}</Quote>
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제3장 · 내가 보는 상대 ═══════════ */}
-      {ch === "3" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 내 시각</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>내가 보는 상대는 어떤 사람인가</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"내 일간의 눈으로 상대방을 바라보면\n어떤 십성으로 보이는지,\n그 의미가 무엇인지 살펴보겠소."`}</Quote>
-
-          <section className="px-6 pt-2 pb-4">
-            <Heading>내 눈에 상대방은 이런 사람이오</Heading>
-            {report?.view?.pillars?.[1] && report?.partnerView?.pillars?.[1] && (() => {
-              const myIlgan = report.view.pillars[1].gan;
-              const partnerIlgan = report.partnerView!.pillars[1].gan;
-              const sip = sipseongOfStem(myIlgan, partnerIlgan);
-              const COLOR_MAP: Record<string, string> = {
-                비견: NAVY, 겁재: MAROON, 식신: GREEN, 상관: ROSE,
-                편재: GOLD, 정재: "#9b7a2a", 편관: WARN, 정관: BLUE,
-                편인: "#7a3a8a", 정인: "#3a5a8a",
-              };
-              return (
-                <div className="mb-4">
-                  <SipseongBadge label={sip} color={COLOR_MAP[sip] ?? MUTE} desc={`내 일간 기준 상대방 천간의 십성`} />
-                </div>
-              );
-            })()}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_myView && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_myView} />
-            )}
-          </section>
-
           <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-          <Quote>{`"반대로, 상대방의 눈에는\n내가 어떻게 보이는지\n살펴보겠소."`}</Quote>
+          <Quote>{`"끌림의 이유를 알았으니,\n내 눈에 상대방이 어떻게 보이는지\n살펴보겠소."`}</Quote>
           <ChapterNav cur="3" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제4장 · 상대가 보는 나 ═══════════ */}
+      {/* ═══════════ 제4장 · 나는 이 사람을 어떻게 보는가 ═══════════ */}
       {ch === "4" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 상대 시각</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대가 보는 나는 어떤 사람인가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 내 시각</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 이 사람을 어떻게 보는가</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-4-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-
-          <Quote>{`"상대방의 일간이 나를 바라볼 때\n어떤 기운으로 느끼는지\n살펴보겠소."`}</Quote>
-
+          <Quote>{`"내 일간의 눈으로 상대방을 바라보면\n어떤 십성으로 보이는지,\n그 의미가 무엇인지 살펴보겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>상대 눈에 나는 이런 사람이오</Heading>
-            {report?.partnerView?.pillars?.[1] && report?.view?.pillars?.[1] && (() => {
-              const partnerIlgan = report.partnerView!.pillars[1].gan;
+            <Heading>내 눈에 상대방은 이런 사람이오</Heading>
+            {report?.view?.pillars?.[1] && report?.partnerView?.pillars?.[1] && (() => {
               const myIlgan = report.view.pillars[1].gan;
-              const sip = sipseongOfStem(partnerIlgan, myIlgan);
-              const COLOR_MAP: Record<string, string> = {
-                비견: NAVY, 겁재: MAROON, 식신: GREEN, 상관: ROSE,
-                편재: GOLD, 정재: "#9b7a2a", 편관: WARN, 정관: BLUE,
-                편인: "#7a3a8a", 정인: "#3a5a8a",
-              };
-              return (
-                <div className="mb-4">
-                  <SipseongBadge label={sip} color={COLOR_MAP[sip] ?? MUTE} desc={`상대 일간 기준 나의 천간 십성`} />
-                </div>
-              );
+              const partnerIlgan = report.partnerView!.pillars[1].gan;
+              const sip = sipseongOfStem(myIlgan, partnerIlgan);
+              const COLOR_MAP: Record<string, string> = { 비견: NAVY, 겁재: MAROON, 식신: GREEN, 상관: ROSE, 편재: GOLD, 정재: "#9b7a2a", 편관: WARN, 정관: BLUE, 편인: "#7a3a8a", 정인: "#3a5a8a" };
+              return <div className="mb-4"><SipseongBadge label={sip} color={COLOR_MAP[sip] ?? MUTE} desc="내 일간 기준 상대방 천간의 십성" /></div>;
             })()}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_partnerView && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_partnerView} />
+            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_myView && (
+              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_myView} />
             )}
           </section>
-
           <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"이제 두 사주 사이에서\n일어나는 합·충·형을\n짚어보겠소."`}</Quote>
+          <Quote>{`"반대로, 상대방의 눈에는\n내가 어떻게 보이는지\n살펴보겠소."`}</Quote>
           <ChapterNav cur="4" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제5장 · 합충형 ═══════════ */}
+      {/* ═══════════ 제5장 · 상대는 나를 어떻게 보는가 ═══════════ */}
       {ch === "5" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 합충형</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주 사이의 합·충·형은 무엇인가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 상대 시각</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대는 나를 어떻게 보는가</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-5-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-
-          <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
-
+          <Quote>{`"상대방의 일간이 나를 바라볼 때\n어떤 기운으로 느끼는지\n살펴보겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>두 명식을 합쳐서 보면</Heading>
-            <GanjiRelation view={report?.view ?? null} />
-          </section>
-
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 사주 사이에서 일어나는 일</Heading>
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_hapChung && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_hapChung} />
+            <Heading>상대 눈에 나는 이런 사람이오</Heading>
+            {report?.partnerView?.pillars?.[1] && report?.view?.pillars?.[1] && (() => {
+              const partnerIlgan = report.partnerView!.pillars[1].gan;
+              const myIlgan = report.view.pillars[1].gan;
+              const sip = sipseongOfStem(partnerIlgan, myIlgan);
+              const COLOR_MAP: Record<string, string> = { 비견: NAVY, 겁재: MAROON, 식신: GREEN, 상관: ROSE, 편재: GOLD, 정재: "#9b7a2a", 편관: WARN, 정관: BLUE, 편인: "#7a3a8a", 정인: "#3a5a8a" };
+              return <div className="mb-4"><SipseongBadge label={sip} color={COLOR_MAP[sip] ?? MUTE} desc="상대 일간 기준 나의 천간 십성" /></div>;
+            })()}
+            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_partnerView && (
+              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_partnerView} />
             )}
           </section>
-
           <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-          <Quote>{`"합·충·형을 파악했으니,\n이제 연애 스타일이\n얼마나 맞는지 살펴보겠소."`}</Quote>
+          <Quote>{`"두 시각을 알았으니,\n이제 두 사주 사이의\n합·충을 짚어보겠소."`}</Quote>
           <ChapterNav cur="5" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제6장 · 연애 스타일 ═══════════ */}
+      {/* ═══════════ 제6장 · 궁합의 핵심: 합과 충 ═══════════ */}
       {ch === "6" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 스타일</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>연애 스타일이 맞는가 다른가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-6-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-
-          <Quote>{`"사람마다 연애하는 방식이 다르오.\n두 사람이 어디서 맞고,\n어디서 다른지 보겠소."`}</Quote>
-
+          <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>연애 스타일 비교</Heading>
-            <StyleCompareChart
-              myStyle={[
-                { label: "표현력", v: 65 },
-                { label: "배려심", v: 70 },
-                { label: "주도성", v: 55 },
-                { label: "안정 추구", v: 60 },
-              ]}
-              partnerStyle={[
-                { label: "표현력", v: 75 },
-                { label: "배려심", v: 55 },
-                { label: "주도성", v: 80 },
-                { label: "안정 추구", v: 50 },
-              ]}
-            />
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_styleCompare && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_styleCompare} />
+            <Heading>두 명식을 합쳐서 보면</Heading>
+            <GanjiRelation view={report?.view ?? null} />
+          </section>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>합·충·형의 풀이</Heading>
+            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_hapChung && (
+              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_hapChung} />
             )}
           </section>
-
           <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-          <Quote>{`"스타일의 차이를 알았으니,\n이 관계의 빛과 그림자를\n살펴보겠소."`}</Quote>
+          <Quote>{`"합·충을 파악했으니,\n이제 연애 스타일이\n얼마나 맞는지 살펴보겠소."`}</Quote>
           <ChapterNav cur="6" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제7장 · 빛과 그림자 ═══════════ */}
+      {/* ═══════════ 제7장 · 연애 스타일의 차이 ═══════════ */}
       {ch === "7" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 빛과 그림자</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 관계의 빛과 그림자는 무엇인가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 스타일</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>연애 스타일의 차이</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-7-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-
-          <Quote>{`"모든 인연에는 빛도 있고 그림자도 있소.\n두 사람의 관계에서\n그 둘이 무엇인지 살펴보겠소."`}</Quote>
-
+          <Quote>{`"사람마다 연애하는 방식이 다르오.\n두 사람이 어디서 맞고,\n어디서 다른지 보겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>이 관계의 빛과 그림자</Heading>
-            {(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow?.lights ? (
-              <LightShadowCards
-                lights={(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow!.lights!}
-                shadows={(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow!.shadows ?? []}
-              />
-            ) : (
-              <LightShadowCards
-                lights={["서로의 부족한 기운을 채워주는 관계이오", "함께 있을 때 편안함과 안정감을 느끼오"]}
-                shadows={["때로는 서로의 방식이 달라 마찰이 생기오", "감정 표현 방식의 차이가 오해를 낳을 수 있소"]}
-              />
-            )}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_lightShadow && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_lightShadow} />
+            <Heading>두 사람의 연애 성향 비교</Heading>
+            <StyleCompareChart
+              myStyle={[ { label: "표현력", v: 65 }, { label: "배려심", v: 70 }, { label: "주도성", v: 55 }, { label: "안정 추구", v: 60 } ]}
+              partnerStyle={[ { label: "표현력", v: 75 }, { label: "배려심", v: 55 }, { label: "주도성", v: 80 }, { label: "안정 추구", v: 50 } ]}
+            />
+            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_styleCompare && (
+              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_styleCompare} />
             )}
           </section>
-
           <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-          <Quote>{`"빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소."`}</Quote>
+          <Quote>{`"스타일의 차이를 알았으니,\n이 관계의 빛과 그림자를\n살펴보겠소."`}</Quote>
           <ChapterNav cur="7" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제8장 · 위기 포인트 ═══════════ */}
+      {/* ═══════════ 제8장 · 이 관계의 빛과 그림자 ═══════════ */}
       {ch === "8" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 위기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>위기는 언제 어디서 오는가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 빛과 그림자</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 관계의 빛과 그림자</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-8-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-
-          <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기 포인트를\n미리 알려드리겠소."`}</Quote>
-
+          <Quote>{`"모든 인연에는 빛도 있고 그림자도 있소.\n두 사람의 관계에서\n그 둘이 무엇인지 살펴보겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>두 사람의 위기 포인트</Heading>
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_crisis && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_crisis} />
+            <Heading>관계의 강점과 과제</Heading>
+            {(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow?.lights ? (
+              <LightShadowCards lights={(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow!.lights!} shadows={(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow!.shadows ?? []} />
+            ) : (
+              <LightShadowCards lights={["서로의 부족한 기운을 채워주는 관계이오", "함께 있을 때 편안함과 안정감을 느끼오"]} shadows={["때로는 서로의 방식이 달라 마찰이 생기오", "감정 표현 방식의 차이가 오해를 낳을 수 있소"]} />
+            )}
+            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_lightShadow && (
+              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_lightShadow} />
             )}
           </section>
-
           <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-          <Quote>{`"위기를 알았다면 피할 수 있소.\n이제 가장 궁금한 것,\n결혼 가능성을 보겠소."`}</Quote>
+          <Quote>{`"빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소."`}</Quote>
           <ChapterNav cur="8" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제9장 · 결혼 가능성 ═══════════ */}
+      {/* ═══════════ 제9장 · 위기와 극복 ═══════════ */}
       {ch === "9" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 결혼</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼까지 갈 수 있는 궁합인가</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기·극복</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>위기와 극복</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-9-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-
-          <Quote>{`"많은 분들이 가장 궁금해하시오.\n이 사람과 결혼할 수 있을지,\n홍연이 솔직하게 말씀드리겠소."`}</Quote>
-
+          <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>결혼 궁합 지수</Heading>
+            <Heading>향후 5년 관계 흐름</Heading>
+            <P>두 사람의 사주 기운이 세운과 만나<br />관계에 어떤 파동을 만드는지 살펴보겠소.</P>
+            <div className="mt-4">
+              <RelationFlowChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
+            </div>
+          </section>
+          <section className="px-6 pt-4 pb-4">
+            <Heading>위기와 극복의 풀이</Heading>
+            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_crisis && (
+              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_crisis} />
+            )}
+          </section>
+          <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
+          <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 가장 궁금한 것,\n결혼 가능성을 보겠소."`}</Quote>
+          <ChapterNav cur="9" go={next} />
+        </>
+      )}
+
+      {/* ═══════════ 제10장 · 결혼으로 이어지는가 ═══════════ */}
+      {ch === "10" && (
+        <>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 결혼</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼으로 이어지는가</h1>
+          </div>
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/kunghap/kh-10-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <Quote>{`"많은 분들이 가장 궁금해하시오.\n이 사람과 결혼할 수 있을지,\n홍연이 솔직하게 말씀드리겠소."`}</Quote>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>결혼 가능성 지수</Heading>
             {(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage?.score !== undefined ? (
-              <MarriageGauge
-                score={(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage!.score!}
-                label={(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage!.label || ""}
-              />
+              <MarriageGauge score={(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage!.score!} label={(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage!.label || ""} />
             ) : (
               <MarriageGauge score={78} label="결혼까지 충분히 이어질 수 있는 궁합이오" />
             )}
@@ -4605,30 +4715,8 @@ function ReportPreviewInner() {
               <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_marriage} />
             )}
           </section>
-
-          <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-          <Quote>{`"결혼 가능성을 보았으니,\n이제 두 사람에게 찾아올\n좋은 때를 알려드리겠소."`}</Quote>
-          <ChapterNav cur="9" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제10장 · 좋은 시절 ═══════════ */}
-      {ch === "10" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 때</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람에게 찾아올 좋은 때는</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap/kh-10-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"두 사람에게 찾아올\n봄날 같은 시절이 있소.\n그때를 미리 알고 준비하시오."`}</Quote>
-
           <section className="px-6 pt-2 pb-4">
-            <Heading>두 사람의 황금 시절</Heading>
+            <Heading>최적 시기 타임라인</Heading>
             {(c as unknown as Record<string, {items?: Array<{year: string; desc: string; highlight?: boolean}>}>).kh_goodTime?.items ? (
               <GoodTimeTimeline items={(c as unknown as Record<string, {items?: Array<{year: string; desc: string; highlight?: boolean}>}>).kh_goodTime!.items!} />
             ) : (
@@ -4638,40 +4726,41 @@ function ReportPreviewInner() {
                 { year: "내년 하반기", desc: "두 사람 사이에 중요한 결정의 순간이 오오", highlight: false },
               ]} />
             )}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_goodTime && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_goodTime} />
-            )}
           </section>
-
           <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-          <Quote>{`"좋은 때를 알았으니,\n홍연의 마지막 당부를\n들어보시오."`}</Quote>
+          <Quote>{`"결혼 가능성을 보았으니,\n이제 두 사람에게 찾아올\n좋은 시기를 알려드리겠소."`}</Quote>
           <ChapterNav cur="10" go={next} />
         </>
       )}
 
-      {/* ═══════════ 제11장 · 홍연의 당부 ═══════════ */}
+      {/* ═══════════ 제11장 · 두 사람이 함께하면 좋은 시기 ═══════════ */}
       {ch === "11" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 당부</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>홍연이 그대들에게 당부하는 말</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 좋은 시기</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람이 함께하면 좋은 시기</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap/kh-11-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-
-          <Quote>{`"두 사람의 인연을 풀어보며\n홍연이 꼭 전하고 싶은 말이 있소.\n귀 기울여 들어주시오."`}</Quote>
-
+          <Quote>{`"두 사람에게 찾아올\n봄날 같은 시절이 있소.\n그때를 미리 알고 준비하시오."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>홍연의 당부</Heading>
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_finalAdvice && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_finalAdvice} />
+            <Heading>월별 궁합 에너지</Heading>
+            <P>이달부터 연말까지, 두 사람의 궁합 기운이<br />어느 달에 가장 빛나는지 살펴보겠소.</P>
+            <div className="mt-4">
+              <CompatEnergyBarChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
+            </div>
+          </section>
+          <section className="px-6 pt-4 pb-4">
+            <Heading>좋은 시기의 풀이</Heading>
+            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_goodTime && (
+              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_goodTime} />
             )}
           </section>
-
           <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
+          <Quote>{`"좋은 때를 알았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
           <ChapterNav cur="11" go={next} />
         </>
       )}
@@ -4681,8 +4770,8 @@ function ReportPreviewInner() {
         <>
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>맺음 · 결론</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대에게 남기는 홍연의 서신</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마무리 · 홍연의 당부</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대들에게 남기는 홍연의 서신</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -4713,7 +4802,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 알 수 없는 장 — 준비 중 ═══════════ */}
-      {ch !== "0" && ch !== "1" && ch !== "2" && ch !== "3" && ch !== "4" && ch !== "5" && ch !== "6" && ch !== "7" && ch !== "8" && ch !== "9" && ch !== "10" && ch !== "11" && ch !== "12" && (
+      {!["0","1","2","3","4","5","6","7","8","9","10","11","12"].includes(ch) && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중이오.</p>
