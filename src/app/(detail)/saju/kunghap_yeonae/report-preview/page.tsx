@@ -4327,8 +4327,15 @@ function ReportPreviewInner() {
             </div>
           </section>
 
+          {/* 삽화 */}
+          <div className="relative overflow-hidden" style={{ height: 300, background: PINK_PALE }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/total/total-0/total-0-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 35%, transparent 65%, ${CREAM} 100%)` }} />
+          </div>
+
           {/* ─ 천간과 지지 ─ */}
-          <section className="px-6 pb-4">
+          <section className="px-6 pt-8 pb-4">
             <Heading>천간(天干)과 지지(地支)</Heading>
             <P>
               <Term>천간(天干)</Term>은 하늘에 떠있는 글자, 총 10개요.<br />
