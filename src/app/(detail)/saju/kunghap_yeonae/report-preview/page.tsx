@@ -4270,7 +4270,7 @@ function ReportPreviewInner() {
 
           {/* 인사말 */}
           <section className="px-6 pt-10 pb-6">
-            <P>안녕하시오, <Term>{name.slice(1) || name}{effectiveGender === "female" ? "양" : "군"}</Term>.</P>
+            <P>안녕하시오.</P>
             <P>본격적으로 풀이에 들어가기 전에,<br />연애궁합이 무엇인지 먼저 짚고 넘어가겠소.</P>
           </section>
 
