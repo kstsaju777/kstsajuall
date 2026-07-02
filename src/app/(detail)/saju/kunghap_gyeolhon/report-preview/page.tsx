@@ -2318,20 +2318,20 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
   );
 }
 
-// 장번호 → 표시 제목 (연애궁합 13장 구조)
+// 장번호 → 표시 제목 (결혼궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0":  "인트로 · 연애궁합에 대하여",
+  "0":  "인트로 · 결혼궁합에 대하여",
   "1":  "제1장 · 나의 사주 원국",
   "2":  "제2장 · 상대의 사주 원국",
-  "3":  "제3장 · 첫인상과 끌림의 비밀",
-  "4":  "제4장 · 나는 이 사람을 어떻게 보는가",
-  "5":  "제5장 · 상대는 나를 어떻게 보는가",
+  "3":  "제3장 · 두 사람, 결혼할 수 있는 인연인가",
+  "4":  "제4장 · 결혼하면 어떤 부부가 될까",
+  "5":  "제5장 · 이 결혼의 장점과 단점",
   "6":  "제6장 · 궁합의 핵심: 합과 충",
-  "7":  "제7장 · 연애 스타일의 차이",
-  "8":  "제8장 · 이 관계의 빛과 그림자",
-  "9":  "제9장 · 위기와 극복",
-  "10": "제10장 · 결혼으로 이어지는가",
-  "11": "제11장 · 두 사람이 함께하면 좋은 시기",
+  "7":  "제7장 · 결혼 후 재물운과 가정운",
+  "8":  "제8장 · 자녀운 — 아이가 들어오는 인연인가",
+  "9":  "제9장 · 이 결혼의 위기와 극복",
+  "10": "제10장 · 결혼하기 좋은 시기는 언제인가",
+  "11": "제11장 · 두 사람의 미래는 어디로 흐르는가",
   "12": "마무리 · 그대들에게 남기는 홍연의 서신",
 };
 
@@ -3533,19 +3533,19 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "서론",   title: "연애궁합에 대하여",                   no: "0" },
-  { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                    no: "1" },
-  { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                  no: "2" },
-  { disp: "제3장",  chip: "끌림",   title: "첫인상과 끌림의 비밀",                no: "3" },
-  { disp: "제4장",  chip: "내시각", title: "나는 이 사람을 어떻게 보는가",         no: "4" },
-  { disp: "제5장",  chip: "상대시각",title: "상대는 나를 어떻게 보는가",           no: "5" },
-  { disp: "제6장",  chip: "합충형", title: "궁합의 핵심: 합과 충",                no: "6" },
-  { disp: "제7장",  chip: "스타일", title: "연애 스타일의 차이",                   no: "7" },
-  { disp: "제8장",  chip: "빛그림자",title: "이 관계의 빛과 그림자",              no: "8" },
-  { disp: "제9장",  chip: "위기극복",title: "위기와 극복",                        no: "9" },
-  { disp: "제10장", chip: "결혼",   title: "결혼으로 이어지는가",                  no: "10" },
-  { disp: "제11장", chip: "좋은시기",title: "두 사람이 함께하면 좋은 시기",        no: "11" },
-  { disp: "마무리", chip: "당부",   title: "그대들에게 남기는 홍연의 서신",        no: "12" },
+  { disp: "인트로", chip: "서론",   title: "결혼궁합에 대하여",                        no: "0" },
+  { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                         no: "1" },
+  { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                       no: "2" },
+  { disp: "제3장",  chip: "인연",   title: "두 사람, 결혼할 수 있는 인연인가",          no: "3" },
+  { disp: "제4장",  chip: "부부상",  title: "결혼하면 어떤 부부가 될까",               no: "4" },
+  { disp: "제5장",  chip: "장단점",  title: "이 결혼의 장점과 단점",                   no: "5" },
+  { disp: "제6장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                   no: "6" },
+  { disp: "제7장",  chip: "재물가정", title: "결혼 후 재물운과 가정운",               no: "7" },
+  { disp: "제8장",  chip: "자녀운",  title: "자녀운 — 아이가 들어오는 인연인가",       no: "8" },
+  { disp: "제9장",  chip: "위기극복", title: "이 결혼의 위기와 극복",                 no: "9" },
+  { disp: "제10장", chip: "결혼시기", title: "결혼하기 좋은 시기는 언제인가",          no: "10" },
+  { disp: "제11장", chip: "미래",    title: "두 사람의 미래는 어디로 흐르는가",        no: "11" },
+  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",           no: "12" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -4258,7 +4258,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>홍연이 두 사람의 인연을 풀어드리겠소</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              연애궁합에 대하여
+              결혼궁합에 대하여
             </h1>
           </div>
           {/* 커버 이미지 */}
