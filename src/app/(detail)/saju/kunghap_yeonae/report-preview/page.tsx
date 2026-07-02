@@ -3382,7 +3382,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
-          <div className="flex flex-col gap-1.5" style={{ width: 100 }}>
+          <div className="flex flex-col gap-1.5" style={{ width: 72 }}>
             <ScrollBtn onClick={onMyeongsik} text="나의 명식" />
             {hasPartner && onPartnerMyeongsik && (
               <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" />
