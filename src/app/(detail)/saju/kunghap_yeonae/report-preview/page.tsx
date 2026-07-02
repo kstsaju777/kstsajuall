@@ -3356,7 +3356,7 @@ const SAMPLE_CONTENT = {
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
 
 // 상단 앱바 (챕터 타이틀 + 공유/목차 + 진행 게이지)
-function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasPartner, myGender, partnerGender }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void; onPartnerMyeongsik?: () => void; hasPartner?: boolean; myGender?: string; partnerGender?: string }) {
+function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasPartner, myGender, partnerGender, myName, partnerName }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void; onPartnerMyeongsik?: () => void; hasPartner?: boolean; myGender?: string; partnerGender?: string; myName?: string; partnerName?: string }) {
   const [label, subtitle] = title.includes("·") ? title.split(" · ") : [title, ""];
   const isFemale = (g?: string) => g === "female" || g === "여성" || g === "여자" || g === "여아";
   const ScrollBtn = ({ onClick, text, color }: { onClick: () => void; text: string; color: "blue" | "pink" }) => {
@@ -3391,9 +3391,9 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
           <div className="flex flex-col gap-1.5" style={{ width: 96 }}>
-            <ScrollBtn onClick={onMyeongsik} text="나의 명식" color={isFemale(myGender) ? "pink" : "blue"} />
+            <ScrollBtn onClick={onMyeongsik} text={`명식(${myName ?? "나"})`} color={isFemale(myGender) ? "pink" : "blue"} />
             {hasPartner && onPartnerMyeongsik && (
-              <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" color={isFemale(partnerGender) ? "pink" : "blue"} />
+              <ScrollBtn onClick={onPartnerMyeongsik} text={`명식(${partnerName ?? "상대방"})`} color={isFemale(partnerGender) ? "pink" : "blue"} />
             )}
           </div>
           {/* 목차 버튼 */}
@@ -4094,7 +4094,7 @@ function ReportPreviewInner() {
 
   return (
     <div ref={rootRef} style={{ backgroundColor: CREAM, minHeight: "100%" }}>
-      <TopBar progress={progress} title={CHAPTER_TITLES[ch] ?? `제${ch}장`} onMenu={() => setTocOpen(true)} onMyeongsik={openMyeongsik} onPartnerMyeongsik={() => setPartnerMsOpen(true)} hasPartner={!!(report?.partnerView)} myGender={report?.gender} partnerGender={report?.partnerGender} />
+      <TopBar progress={progress} title={CHAPTER_TITLES[ch] ?? `제${ch}장`} onMenu={() => setTocOpen(true)} onMyeongsik={openMyeongsik} onPartnerMyeongsik={() => setPartnerMsOpen(true)} hasPartner={!!(report?.partnerView)} myGender={report?.gender} partnerGender={report?.partnerGender} myName={report?.name} partnerName={report?.partnerName} />
       <TocPanel
         open={tocOpen}
         onClose={() => setTocOpen(false)}
