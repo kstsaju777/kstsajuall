@@ -1,4 +1,4 @@
-// =====================================================
+﻿// =====================================================
 // 정통사주 결과지 (report)
 // =====================================================
 // checkout 결제 후 이동 / 이메일 링크 클릭 시 도착하는 고객용 결과지.
@@ -27,7 +27,7 @@ import { MyeongsikModalButton } from "@/components/saju/MyeongsikModal";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "정통사주 결과지" };
 
-// ─── 디자인 토큰 (saju_jeongtong 흐름과 동일) ───────────────────────────
+// ─── 디자인 토큰 (saju_total 흐름과 동일) ───────────────────────────
 const CREAM = "#fdf8f4";
 const WHITE = "#ffffff";
 const RED = "#9b2335";

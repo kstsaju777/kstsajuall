@@ -32,7 +32,7 @@ export const heroSlides: HeroSlide[] = [
     badge: "정통사주",
     title: "내 인생 전반을\n정통사주로",
     desc: "프리미엄 명리학 기반 내 인생 전반 알아보기",
-    href: "/saju/saju_jeongtong",
+    href: "/saju/saju_total",
   },
   {
     image: "/media/hero/hero-2.jpg",
@@ -46,7 +46,7 @@ export const heroSlides: HeroSlide[] = [
     badge: "정통사주",
     title: "프리미엄\n정통사주",
     desc: "평생 운명 심층 분석 : 연애, 결혼, 재물, 직장, 건강 총망라",
-    href: "/saju/saju_jeongtong",
+    href: "/saju/saju_total",
   },
   {
     image: "/media/hero/hero-4.jpg",

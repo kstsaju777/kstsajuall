@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
@@ -69,7 +69,7 @@ export default async function MyOrdersPage() {
             // 정통 리포트는 report-preview URL 재구성
             let reportHref: string | null = null;
             if (o.status === "paid" && input) {
-              if (product?.slug?.includes("saju_jeongtong")) {
+              if (product?.slug?.includes("saju_total")) {
                 const p = new URLSearchParams({
                   name: input.name ?? "",
                   date: input.birth_date,
@@ -77,7 +77,7 @@ export default async function MyOrdersPage() {
                   calendar: input.calendar,
                   gender: input.gender,
                 });
-                reportHref = `/saju/saju_jeongtong/report-preview?${p.toString()}`;
+                reportHref = `/saju/saju_total/report-preview?${p.toString()}`;
               } else if (resultId) {
                 reportHref = `/results/${resultId}`;
               }

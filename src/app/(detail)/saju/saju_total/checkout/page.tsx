@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect, useRef } from "react";
@@ -722,18 +722,18 @@ function CheckoutContent() {
     setDoneCount(0);
     setCurrentChapter(1);
     try {
-      const res = await fetch("/api/jeongtong-report", {
+      const res = await fetch("/api/saju_total-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, date, time, calendar, gender, email }),
       });
       if (!res.ok) {
-        router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
+        router.push(`/saju/saju_total/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
         return;
       }
       const { resultId } = await res.json();
       if (!resultId) {
-        router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
+        router.push(`/saju/saju_total/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
         return;
       }
 
@@ -742,7 +742,7 @@ function CheckoutContent() {
       const allContent: Record<string, unknown> = {};
       await Promise.all(chapters.map(async (ch) => {
         try {
-          const r = await fetch("/api/jeongtong-report", {
+          const r = await fetch("/api/saju_total-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: resultId, chapter: ch }),
@@ -755,15 +755,15 @@ function CheckoutContent() {
         setCurrentChapter(Math.min(done + 1, TOTAL));
       }));
 
-      await fetch("/api/jeongtong-report", {
+      await fetch("/api/saju_total-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
-      router.push(`/saju/saju_jeongtong/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
+      router.push(`/saju/saju_total/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     } catch {
-      router.push(`/saju/saju_jeongtong/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
+      router.push(`/saju/saju_total/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
     }
   };
 
@@ -783,13 +783,13 @@ function CheckoutContent() {
         <MyeongsikSection saju={saju} name={name} />
 
         {/* s1 */}
-        <img src="/media/checkout/saju_jeongtong/s1.jpg" alt="" className="w-full block" />
+        <img src="/media/checkout/saju_total/s1.jpg" alt="" className="w-full block" />
 
         {/* ③ 미리보기 티저 */}
         <PreviewSection />
 
         {/* s2 */}
-        <img src="/media/checkout/saju_jeongtong/s2.jpg" alt="" className="w-full block" />
+        <img src="/media/checkout/saju_total/s2.jpg" alt="" className="w-full block" />
 
         {/* ④ 목차 */}
         <TableOfContents />
@@ -798,7 +798,7 @@ function CheckoutContent() {
         <ReviewSection />
 
         {/* s3 */}
-        <img src="/media/checkout/saju_jeongtong/s3.jpg" alt="" className="w-full block" />
+        <img src="/media/checkout/saju_total/s3.jpg" alt="" className="w-full block" />
 
         {/* ⑥ FAQ */}
         <FAQSection />

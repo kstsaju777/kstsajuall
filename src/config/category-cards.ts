@@ -31,10 +31,10 @@ export const FREE_SECTIONS: FreeSection[] = [
     title: "나를 알고 싶을 때",
     subtitle: "내 타고난 기질과 운명을 무료로 먼저 확인해보세요 🔮",
     cards: [
-      { image: "/media/hero/hero-1.jpg", badge: "무료", tag: "FREE", name: "정통사주 맛보기", desc: "내 사주 4기둥과 오행 균형을 무료로 확인해보세요", href: "/saju/saju_jeongtong" },
-      { image: "/media/cards/saju_total/total-1.jpg", badge: "무료", tag: "FREE", name: "사주 기초 풀이", desc: "나는 어떤 사람일까? 기본 기질부터 확인해보세요", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-3.jpg", badge: "무료", tag: "FREE", name: "오행 균형 분석", desc: "내 에너지의 강약을 한눈에 파악해보세요", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-7.jpg", badge: "무료", tag: "FREE", name: "일주 성격 풀이", desc: "일주로 보는 내 숨겨진 성격과 매력", href: "/saju/saju_jeongtong" },
+      { image: "/media/hero/hero-1.jpg", badge: "무료", tag: "FREE", name: "정통사주 맛보기", desc: "내 사주 4기둥과 오행 균형을 무료로 확인해보세요", href: "/saju/saju_total" },
+      { image: "/media/cards/saju_total/total-1.jpg", badge: "무료", tag: "FREE", name: "사주 기초 풀이", desc: "나는 어떤 사람일까? 기본 기질부터 확인해보세요", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-3.jpg", badge: "무료", tag: "FREE", name: "오행 균형 분석", desc: "내 에너지의 강약을 한눈에 파악해보세요", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-7.jpg", badge: "무료", tag: "FREE", name: "일주 성격 풀이", desc: "일주로 보는 내 숨겨진 성격과 매력", href: "/saju/saju_total" },
     ],
     hasMore: true,
   },
@@ -42,10 +42,10 @@ export const FREE_SECTIONS: FreeSection[] = [
     title: "운세/점괘",
     subtitle: "이번 해 운세부터, 작명/개명, 점괘까지 운세를 봐드려요 🔥",
     cards: [
-      { image: "/media/hero/hero-2.jpg", badge: "무료", tag: "FREE", name: "길흉화복 사주", desc: "앞으로 3년, 좋은 달과 조심할 달을 한눈에", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-4.jpg", badge: "무료", tag: "FREE", name: "해외 이민 사주", desc: "내가 살아야 하는 곳은 따로 정해져 있어요", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-5.jpg", badge: "무료", tag: "FREE", name: "전환점 사주", desc: "내 인생 전환점은 언제 올까", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-6.jpg", badge: "무료", tag: "FREE", name: "꿈 해몽", desc: "어젯밤 그 꿈, 인생을 바꿀 겁니다", href: "/saju/saju_jeongtong" },
+      { image: "/media/hero/hero-2.jpg", badge: "무료", tag: "FREE", name: "길흉화복 사주", desc: "앞으로 3년, 좋은 달과 조심할 달을 한눈에", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-4.jpg", badge: "무료", tag: "FREE", name: "해외 이민 사주", desc: "내가 살아야 하는 곳은 따로 정해져 있어요", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-5.jpg", badge: "무료", tag: "FREE", name: "전환점 사주", desc: "내 인생 전환점은 언제 올까", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-6.jpg", badge: "무료", tag: "FREE", name: "꿈 해몽", desc: "어젯밤 그 꿈, 인생을 바꿀 겁니다", href: "/saju/saju_total" },
     ],
     hasMore: true,
   },
@@ -53,10 +53,10 @@ export const FREE_SECTIONS: FreeSection[] = [
     title: "연애/재회",
     subtitle: "썸, 속마음, 커플궁합, 재회 타이밍까지 관계 흐름을 분석해요 ❤️",
     cards: [
-      { image: "/media/cards/saju_total/total-2.jpg", badge: "무료", tag: "FREE", name: "재회vs환승 사주", desc: "X와 새로운 인연, 누구를 선택할까", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-3.jpg", badge: "무료", tag: "FREE", name: "속마음 사주", desc: "그 사람, 나에 대해 어떻게 생각할까", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-7.jpg", badge: "무료", tag: "FREE", name: "썸 타이밍 사주", desc: "지금 고백해도 될까? 최적의 타이밍 분석", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-1.jpg", badge: "무료", tag: "FREE", name: "커플 궁합", desc: "우리 둘, 오래 갈 수 있을까요?", href: "/saju/saju_jeongtong" },
+      { image: "/media/cards/saju_total/total-2.jpg", badge: "무료", tag: "FREE", name: "재회vs환승 사주", desc: "X와 새로운 인연, 누구를 선택할까", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-3.jpg", badge: "무료", tag: "FREE", name: "속마음 사주", desc: "그 사람, 나에 대해 어떻게 생각할까", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-7.jpg", badge: "무료", tag: "FREE", name: "썸 타이밍 사주", desc: "지금 고백해도 될까? 최적의 타이밍 분석", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-1.jpg", badge: "무료", tag: "FREE", name: "커플 궁합", desc: "우리 둘, 오래 갈 수 있을까요?", href: "/saju/saju_total" },
     ],
     hasMore: true,
   },
@@ -64,10 +64,10 @@ export const FREE_SECTIONS: FreeSection[] = [
     title: "돈/재테크",
     subtitle: "내 사주 맞춤 재테크 방향을 찾아 드립니다 📈",
     cards: [
-      { image: "/media/cards/saju_total/total-1.jpg", badge: "무료", tag: "FREE", name: "풍수지리 사주", desc: "이사가는 곳이 터가 맞을까? 이사 시기는?", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-5.jpg", badge: "무료", tag: "FREE", name: "귀인 사주", desc: "내 인생을 바꿀 운명의 귀인은 누구일까?", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-4.jpg", badge: "무료", tag: "FREE", name: "재물 흐름 사주", desc: "돈이 들어오고 나가는 시기를 미리 알아보세요", href: "/saju/saju_jeongtong" },
-      { image: "/media/hero/hero-6.jpg", badge: "무료", tag: "FREE", name: "사업 궁합 사주", desc: "이 파트너와 함께하면 성공할 수 있을까?", href: "/saju/saju_jeongtong" },
+      { image: "/media/cards/saju_total/total-1.jpg", badge: "무료", tag: "FREE", name: "풍수지리 사주", desc: "이사가는 곳이 터가 맞을까? 이사 시기는?", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-5.jpg", badge: "무료", tag: "FREE", name: "귀인 사주", desc: "내 인생을 바꿀 운명의 귀인은 누구일까?", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-4.jpg", badge: "무료", tag: "FREE", name: "재물 흐름 사주", desc: "돈이 들어오고 나가는 시기를 미리 알아보세요", href: "/saju/saju_total" },
+      { image: "/media/hero/hero-6.jpg", badge: "무료", tag: "FREE", name: "사업 궁합 사주", desc: "이 파트너와 함께하면 성공할 수 있을까?", href: "/saju/saju_total" },
     ],
     hasMore: true,
   },
@@ -76,7 +76,7 @@ export const FREE_SECTIONS: FreeSection[] = [
 export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
 
   무료: [
-    { image: "/media/hero/hero-1.jpg",  badge: "무료", tag: "FREE", name: "정통사주 맛보기",   desc: "내 사주 4기둥과 오행 균형을 무료로 확인해보세요",         href: "/saju/saju_jeongtong" },
+    { image: "/media/hero/hero-1.jpg",  badge: "무료", tag: "FREE", name: "정통사주 맛보기",   desc: "내 사주 4기둥과 오행 균형을 무료로 확인해보세요",         href: "/saju/saju_total" },
   ],
 
   재물: [
@@ -93,15 +93,15 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   ],
 
   재회: [
-    { image: "/media/cards/reunion/reunion-1.jpg", badge: "재회", tag: "추천", name: "재회 사주",      desc: "헤어진 그 사람과 다시 만날 수 있을까",        href: "/saju/saju_jeongtong" },
+    { image: "/media/cards/reunion/reunion-1.jpg", badge: "재회", tag: "추천", name: "재회 사주",      desc: "헤어진 그 사람과 다시 만날 수 있을까",        href: "/saju/saju_total" },
   ],
 
   결혼: [
-    { image: "/media/cards/marriage/marriage-1.jpg", badge: "결혼", tag: "추천", name: "배우자 사주",    desc: "내 운명의 상대 외모·성격·직업 분석",         href: "/saju/saju_jeongtong" },
+    { image: "/media/cards/marriage/marriage-1.jpg", badge: "결혼", tag: "추천", name: "배우자 사주",    desc: "내 운명의 상대 외모·성격·직업 분석",         href: "/saju/saju_total" },
   ],
 
   자녀: [
-    { image: "/media/hero/hero-8.jpg",   badge: "자녀", tag: "인기", name: "우리 아이 사주",  desc: "우리 아이는 영재일까? 자녀의 천재성과 재능을 분석합니다", href: "/saju/saju_jeongtong" },
+    { image: "/media/hero/hero-8.jpg",   badge: "자녀", tag: "인기", name: "우리 아이 사주",  desc: "우리 아이는 영재일까? 자녀의 천재성과 재능을 분석합니다", href: "/saju/saju_total" },
   ],
 
   가족: [

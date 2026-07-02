@@ -220,7 +220,7 @@ export default function JeongtongSajuPage() {
         style={{ backgroundColor: "#fdf8f4" }}
       >
         <button
-          onClick={() => router.push("/saju/saju_jeongtong/form")}
+          onClick={() => router.push("/saju/saju_total/form")}
           className="w-full py-4 rounded-2xl text-white text-[17px] font-bold shadow-xl"
           style={{ backgroundColor: "#1e1e1e" }}
         >
