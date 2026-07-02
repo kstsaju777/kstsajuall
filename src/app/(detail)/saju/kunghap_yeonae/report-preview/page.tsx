@@ -3359,10 +3359,10 @@ const SAMPLE_CONTENT = {
 function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasPartner }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void; onPartnerMyeongsik?: () => void; hasPartner?: boolean }) {
   const [label, subtitle] = title.includes("·") ? title.split(" · ") : [title, ""];
   const ScrollBtn = ({ onClick, text }: { onClick: () => void; text: string }) => (
-    <button onClick={onClick} className="relative flex items-center" style={{ background: "none", border: "none", padding: 0 }}>
-      <div className="flex items-center">
+    <button onClick={onClick} className="relative flex items-center w-full" style={{ background: "none", border: "none", padding: 0 }}>
+      <div className="flex items-center w-full">
         <div style={{ width: 7, height: 26, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 3, boxShadow: "1px 0 3px rgba(0,0,0,0.4)" }} />
-        <div style={{ padding: "4px 9px", background: "linear-gradient(to bottom, #f9f0d8 0%, #edd9a3 40%, #e8d090 60%, #f0e0b0 100%)", borderTop: "1.5px solid #b8892a", borderBottom: "1.5px solid #b8892a", color: "#5a2e14", fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>
+        <div style={{ flex: 1, textAlign: "center", padding: "4px 9px", background: "linear-gradient(to bottom, #f9f0d8 0%, #edd9a3 40%, #e8d090 60%, #f0e0b0 100%)", borderTop: "1.5px solid #b8892a", borderBottom: "1.5px solid #b8892a", color: "#5a2e14", fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>
           {text}
         </div>
         <div style={{ width: 7, height: 26, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 3, boxShadow: "-1px 0 3px rgba(0,0,0,0.4)" }} />
@@ -3381,17 +3381,17 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
           {subtitle && <p className="text-[16px] font-bold truncate mt-1" style={{ color: INK }}>{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* 명식 버튼 세로 배치 */}
-          <div className="flex flex-col gap-1.5">
+          {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
+          <div className="flex flex-col gap-1.5" style={{ width: 100 }}>
             <ScrollBtn onClick={onMyeongsik} text="나의 명식" />
             {hasPartner && onPartnerMyeongsik && (
               <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" />
             )}
           </div>
           {/* 목차 버튼 */}
-          <button onClick={onMenu} className="flex flex-col items-center" style={{ color: INK_SOFT, lineHeight: 1 }}>
-            <span className="text-[14px]">☰</span>
-            <span className="text-[9px] mt-0.5">목차</span>
+          <button onClick={onMenu} className="flex flex-col items-center justify-center ml-1" style={{ color: INK_SOFT, lineHeight: 1, minWidth: 36 }}>
+            <span className="text-[20px]">☰</span>
+            <span className="text-[10px] mt-0.5" style={{ fontWeight: 700 }}>목차</span>
           </button>
         </div>
       </div>
