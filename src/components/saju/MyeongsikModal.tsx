@@ -286,7 +286,7 @@ export function MyeongsikModalView({ open, onClose, view, loading, meta }: { ope
         >
           {/* 1행: 제목 + 닫기 */}
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-[18px] font-black" style={{ color: INK }}>나의 명식</h2>
+            <h2 className="text-[18px] font-black" style={{ color: INK }}>{meta?.name ? `${meta.name}님 명식` : "나의 명식"}</h2>
             <button
               onClick={onClose}
               className="flex items-center justify-center rounded-full"
