@@ -4349,33 +4349,29 @@ function ReportPreviewInner() {
       {/* ═══════════ 제1장 — 나는 어떤 그릇으로 태어났나 ═══════════ */}
       {ch === "1" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 그릇</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               {name}님은<br />어떤 그릇으로 태어났나
             </h1>
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
+          <div className="relative overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.wonguk as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.wonguk as Record<string,unknown>).intro)}
-              </p>
-            )}
-            {!!(jc.wonguk as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.wonguk as Record<string,unknown>).callout)}
-                </p>
-              </div>
-            )}
-            {((jc.wonguk as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
-            ))}
-          </div>
+          <Quote>{`재물을 담는 그릇도\n타고난 것이오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의\n사주 원국을 살펴보겠소.`}</Quote>
+          {(() => {
+            const w = (jc.wonguk as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
+            return (
+              <section className="px-6 pt-2 pb-6">
+                <Heading>나의 사주 원국</Heading>
+                {w.intro && <P>{w.intro}</P>}
+                {w.callout && <Callout>{w.callout}</Callout>}
+                {w.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+              </section>
+            );
+          })()}
           <ChapterNav cur="1" go={next} />
         </>
       )}
@@ -4383,33 +4379,29 @@ function ReportPreviewInner() {
       {/* ═══════════ 제2장 — 재물 기질 ═══════════ */}
       {ch === "2" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 재물기질</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               내 재물 기질<br />돈을 대하는 나의 방식
             </h1>
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_jaemul/saju_jaemul_2/saju_jaemul_2_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
+          <div className="relative overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_jaemul/saju_jaemul_2/saju_jaemul_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.wealthStyle as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.wealthStyle as Record<string,unknown>).intro)}
-              </p>
-            )}
-            {!!(jc.wealthStyle as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.wealthStyle as Record<string,unknown>).callout)}
-                </p>
-              </div>
-            )}
-            {((jc.wealthStyle as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
-            ))}
-          </div>
+          <Quote>{`돈을 대하는 방식은\n사람마다 다르오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의\n재물 기질을 살펴보겠소.`}</Quote>
+          {(() => {
+            const ws = (jc.wealthStyle as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
+            return (
+              <section className="px-6 pt-2 pb-6">
+                <Heading>나의 재물 기질</Heading>
+                {ws.intro && <P>{ws.intro}</P>}
+                {ws.callout && <Callout>{ws.callout}</Callout>}
+                {ws.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+              </section>
+            );
+          })()}
           <ChapterNav cur="2" go={next} />
         </>
       )}
@@ -4417,107 +4409,104 @@ function ReportPreviewInner() {
       {/* ═══════════ 제3장 — 내 사주에 재물이 보이는가 ═══════════ */}
       {ch === "3" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 재물</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               내 사주에<br />재물이 보이는가
             </h1>
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
+          <div className="relative overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {/* 재성 존재 여부 */}
-            {!!(jc.wealthPresence as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.wealthPresence as Record<string,unknown>).intro)}
-              </p>
-            )}
-            {!!(jc.wealthPresence as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.wealthPresence as Record<string,unknown>).callout)}
-                </p>
-              </div>
-            )}
-            {((jc.wealthPresence as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
-            ))}
-            {/* 어울리는 직군 */}
-            {((jc.jobFit as Record<string,unknown>)?.clusters as {category:string;keywords:string[];jobs:string[]}[] | undefined)?.length ? (
-              <div className="mt-6 mb-5">
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GOLD }}>어울리는 직군</p>
-                <div className="space-y-3">
-                  {((jc.jobFit as Record<string,unknown>).clusters as {category:string;keywords:string[];jobs:string[]}[]).map((cl, i) => (
-                    <div key={i} className="rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[13px] font-bold" style={{ color: INK }}>{cl.category}</span>
-                        {cl.keywords.map((kw, j) => (
-                          <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: CALLOUT_BG, color: MAROON }}>{kw}</span>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {cl.jobs.map((job, j) => (
-                          <span key={j} className="text-[11px] px-2 py-1 rounded-lg" style={{ background: "#f3f0eb", color: INK_SOFT }}>{job}</span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-            {/* 투자 스타일 */}
-            {((jc.investStyle as Record<string,unknown>)?.types as {category:string;icon:string;score:number;products:string[];tip:string}[] | undefined)?.length ? (
-              <div className="mb-5">
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GOLD }}>투자 스타일</p>
-                <div className="space-y-3">
-                  {((jc.investStyle as Record<string,unknown>).types as {category:string;icon:string;score:number;products:string[];tip:string}[]).map((t, i) => (
-                    <div key={i} className="rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{t.icon}</span>
-                          <span className="text-[13px] font-bold" style={{ color: INK }}>{t.category}</span>
+          <Quote>{`사주 안에 재물성이\n어디에 얼마나 있는가.\n\n그 구조가 삶의\n재물 흐름을 결정하오.`}</Quote>
+          {(() => {
+            const wp = (jc.wealthPresence as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
+            const jf = (jc.jobFit as { clusters?: {category:string;keywords:string[];jobs:string[]}[] } | undefined) ?? {};
+            const inv = (jc.investStyle as { types?: {category:string;icon:string;score:number;products:string[];tip:string}[] } | undefined) ?? {};
+            const sp = (jc.splitType as { leftLabel?: string; left?: number; rightLabel?: string; right?: number; leftDesc?: string; rightDesc?: string } | undefined) ?? {};
+            return (
+              <>
+                <section className="px-6 pt-2 pb-4">
+                  <Heading>재물성 분석</Heading>
+                  {wp.intro && <P>{wp.intro}</P>}
+                  {wp.callout && <Callout>{wp.callout}</Callout>}
+                  {wp.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+                </section>
+                {jf.clusters && jf.clusters.length > 0 && (
+                  <section className="px-6 pt-2 pb-4">
+                    <Heading>어울리는 직군</Heading>
+                    <div className="space-y-3">
+                      {jf.clusters.map((cl, i) => (
+                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[13px] font-bold" style={{ color: INK }}>{cl.category}</span>
+                            {cl.keywords.map((kw, j) => (
+                              <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: CALLOUT_BG, color: MAROON }}>{kw}</span>
+                            ))}
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {cl.jobs.map((job, j) => (
+                              <span key={j} className="text-[11px] px-2 py-1 rounded-lg" style={{ background: "#f3f0eb", color: INK_SOFT }}>{job}</span>
+                            ))}
+                          </div>
                         </div>
-                        <span className="text-[12px] font-bold" style={{ color: GOLD }}>적합도 {t.score}%</span>
-                      </div>
-                      <div className="w-full rounded-full h-1.5 mb-2" style={{ background: "#e8ddd8" }}>
-                        <div className="h-1.5 rounded-full" style={{ width: `${t.score}%`, background: GOLD }} />
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 mb-2">
-                        {t.products.map((pr, j) => (
-                          <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "#fff8e6", color: "#8a6a00" }}>{pr}</span>
-                        ))}
-                      </div>
-                      <p className="text-[11px]" style={{ color: INK_SOFT }}>{t.tip}</p>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-            {/* 직장인 vs 사업가 */}
-            {!!(jc.splitType as Record<string,unknown>)?.leftLabel && (
-              <div className="rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: INK }}>직장인형 vs 사업가형</p>
-                <div className="flex gap-3 mb-3">
-                  {[
-                    { label: String((jc.splitType as Record<string,unknown>).leftLabel), pct: Number((jc.splitType as Record<string,unknown>).left), desc: String((jc.splitType as Record<string,unknown>).leftDesc), color: BLUE },
-                    { label: String((jc.splitType as Record<string,unknown>).rightLabel), pct: Number((jc.splitType as Record<string,unknown>).right), desc: String((jc.splitType as Record<string,unknown>).rightDesc), color: GOLD },
-                  ].map((side, i) => (
-                    <div key={i} className="flex-1 rounded-xl p-3 text-center" style={{ background: CREAM }}>
-                      <p className="text-[12px] font-bold mb-1" style={{ color: side.color }}>{side.label}</p>
-                      <p className="text-[22px] font-black mb-1" style={{ color: side.color }}>{side.pct}%</p>
-                      <p className="text-[10px]" style={{ color: MUTE }}>{side.desc}</p>
+                  </section>
+                )}
+                {inv.types && inv.types.length > 0 && (
+                  <section className="px-6 pt-2 pb-4">
+                    <Heading>투자 스타일</Heading>
+                    <div className="space-y-3">
+                      {inv.types.map((t, i) => (
+                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{t.icon}</span>
+                              <span className="text-[13px] font-bold" style={{ color: INK }}>{t.category}</span>
+                            </div>
+                            <span className="text-[12px] font-bold" style={{ color: GOLD }}>적합도 {t.score}%</span>
+                          </div>
+                          <div className="w-full rounded-full h-1.5 mb-2" style={{ background: "#e8ddd8" }}>
+                            <div className="h-1.5 rounded-full" style={{ width: `${t.score}%`, background: GOLD }} />
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            {t.products.map((pr, j) => (
+                              <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "#fff8e6", color: "#8a6a00" }}>{pr}</span>
+                            ))}
+                          </div>
+                          <p className="text-[12px]" style={{ color: INK_SOFT }}>{t.tip}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <div className="flex rounded-full overflow-hidden h-3">
-                  <div style={{ width: `${Number((jc.splitType as Record<string,unknown>).left)}%`, background: BLUE }} />
-                  <div style={{ flex: 1, background: GOLD }} />
-                </div>
-              </div>
-            )}
-          </div>
+                  </section>
+                )}
+                {sp.leftLabel && (
+                  <section className="px-6 pt-2 pb-6">
+                    <Heading>직장인형 vs 사업가형</Heading>
+                    <div className="flex gap-3 mb-3">
+                      {[
+                        { label: sp.leftLabel!, pct: sp.left ?? 0, desc: sp.leftDesc ?? "", color: BLUE },
+                        { label: sp.rightLabel!, pct: sp.right ?? 0, desc: sp.rightDesc ?? "", color: GOLD },
+                      ].map((side, i) => (
+                        <div key={i} className="flex-1 rounded-2xl p-3 text-center" style={{ background: CREAM, border: `1px solid ${INK}08` }}>
+                          <p className="text-[12px] font-bold mb-1" style={{ color: side.color }}>{side.label}</p>
+                          <p className="text-[22px] font-black mb-1" style={{ color: side.color }}>{side.pct}%</p>
+                          <p className="text-[10px]" style={{ color: MUTE }}>{side.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex rounded-full overflow-hidden h-3">
+                      <div style={{ width: `${sp.left ?? 0}%`, background: BLUE }} />
+                      <div style={{ flex: 1, background: GOLD }} />
+                    </div>
+                  </section>
+                )}
+              </>
+            );
+          })()}
           <ChapterNav cur="3" go={next} />
         </>
       )}
@@ -4525,50 +4514,44 @@ function ReportPreviewInner() {
       {/* ═══════════ 제4장 — 천직과 황금기 ═══════════ */}
       {ch === "4" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 천직</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               돈이 되는 일과<br />나의 천직
             </h1>
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
+          <div className="relative overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.careerWealth as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.careerWealth as Record<string,unknown>).intro)}
-              </p>
-            )}
-            {!!(jc.careerWealth as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.careerWealth as Record<string,unknown>).callout)}
-                </p>
-              </div>
-            )}
-            {((jc.careerWealth as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
-            ))}
-            {/* 황금기 */}
-            {!!(jc.wealthPeak as Record<string,unknown>)?.title && (
-              <div className="mt-4 rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #1a1200 0%, #3a2800 100%)", border: `1px solid ${GOLD}44` }}>
-                <p className="text-[10px] tracking-widest mb-2" style={{ color: GOLD }}>💰 재물 황금기</p>
-                <p className="text-[16px] font-black mb-1" style={{ color: "#fff", fontFamily: SERIF }}>
-                  {String((jc.wealthPeak as Record<string,unknown>).title)}
-                </p>
-                <p className="text-[13px] mb-3" style={{ color: `${GOLD}cc` }}>
-                  {String((jc.wealthPeak as Record<string,unknown>).when)}
-                </p>
-                <div className="rounded-xl px-3 py-2" style={{ background: `${GOLD}22` }}>
-                  <p className="text-[12px]" style={{ color: "#fff" }}>
-                    ✦ {String((jc.wealthPeak as Record<string,unknown>).todo)}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+          <Quote>{`사주에는 나에게\n맞는 일이 새겨져 있소.\n\n돈이 되는 천직과\n황금기를 살펴보겠소.`}</Quote>
+          {(() => {
+            const cw = (jc.careerWealth as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
+            const pk = (jc.wealthPeak as { title?: string; when?: string; todo?: string } | undefined) ?? {};
+            return (
+              <>
+                <section className="px-6 pt-2 pb-4">
+                  <Heading>천직과 재물 방향</Heading>
+                  {cw.intro && <P>{cw.intro}</P>}
+                  {cw.callout && <Callout>{cw.callout}</Callout>}
+                  {cw.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+                </section>
+                {pk.title && (
+                  <section className="px-6 pt-2 pb-6">
+                    <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #1a1200 0%, #3a2800 100%)", border: `1px solid ${GOLD}44` }}>
+                      <p className="text-[10px] tracking-widest mb-2" style={{ color: GOLD }}>💰 재물 황금기</p>
+                      <p className="text-[16px] font-black mb-1" style={{ color: "#fff", fontFamily: SERIF }}>{pk.title}</p>
+                      <p className="text-[13px] mb-3" style={{ color: `${GOLD}cc` }}>{pk.when}</p>
+                      <div className="rounded-xl px-3 py-2" style={{ background: `${GOLD}22` }}>
+                        <p className="text-[12px]" style={{ color: "#fff" }}>✦ {pk.todo}</p>
+                      </div>
+                    </div>
+                  </section>
+                )}
+              </>
+            );
+          })()}
           <ChapterNav cur="4" go={next} />
         </>
       )}
@@ -4576,53 +4559,57 @@ function ReportPreviewInner() {
       {/* ═══════════ 제5장 — 재물 대운 ═══════════ */}
       {ch === "5" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 대운</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               내 재물 대운<br />언제 벌고 언제 조심할까
             </h1>
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
+          <div className="relative overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {/* 돈의 함정 */}
-            {!!(jc.moneyTrap as Record<string,unknown>)?.title && (
-              <div className="mb-6 rounded-xl p-4" style={{ background: "#fff0f0", border: `1px solid ${WARN}44` }}>
-                <p className="text-[10px] font-bold tracking-widest mb-2" style={{ color: WARN }}>⚠️ 돈의 함정</p>
-                <p className="text-[14px] font-bold mb-2" style={{ color: INK }}>
-                  {String((jc.moneyTrap as Record<string,unknown>).title)}
-                </p>
-                <p className="text-[12px] leading-relaxed mb-3" style={{ color: INK_SOFT }}>
-                  {String((jc.moneyTrap as Record<string,unknown>).desc)}
-                </p>
-                {((jc.moneyTrap as Record<string,unknown>)?.items as string[] | undefined)?.length ? (
-                  <ul className="space-y-1">
-                    {((jc.moneyTrap as Record<string,unknown>).items as string[]).map((item, i) => (
-                      <li key={i} className="flex gap-2 text-[11px]" style={{ color: WARN }}>
-                        <span>•</span>{item}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            )}
-            {/* 시기별 흐름 */}
-            {((jc.warningFlow as Record<string,unknown>)?.items as {label:string;tone:string;text:string}[] | undefined)?.length ? (
-              <div>
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: INK }}>시기별 재물 흐름</p>
-                <div className="space-y-2">
-                  {((jc.warningFlow as Record<string,unknown>).items as {label:string;tone:string;text:string}[]).map((item, i) => (
-                    <div key={i} className="rounded-xl px-4 py-3" style={{ background: item.tone === "warn" ? "#fff0f0" : "#eef6f0", borderLeft: `3px solid ${item.tone === "warn" ? WARN : GREEN}` }}>
-                      <p className="text-[11px] font-bold mb-0.5" style={{ color: item.tone === "warn" ? WARN : GREEN }}>{item.label}</p>
-                      <p className="text-[12px]" style={{ color: INK_SOFT }}>{item.text}</p>
+          <Quote>{`재물 대운에도\n흐름이 있소.\n\n벌 때와 조심할 때를\n미리 알고 대비하시오.`}</Quote>
+          {(() => {
+            const mt = (jc.moneyTrap as { title?: string; desc?: string; items?: string[] } | undefined) ?? {};
+            const wf = (jc.warningFlow as { items?: {label:string;tone:string;text:string}[] } | undefined) ?? {};
+            return (
+              <>
+                {mt.title && (
+                  <section className="px-6 pt-2 pb-4">
+                    <Heading>돈의 함정</Heading>
+                    <div className="rounded-2xl p-4 mb-2" style={{ background: "#fff0f0", border: `1px solid ${WARN}33` }}>
+                      <p className="text-[14px] font-bold mb-2" style={{ color: INK }}>{mt.title}</p>
+                      <p className="text-[13px] leading-relaxed mb-3" style={{ color: INK_SOFT }}>{mt.desc}</p>
+                      {mt.items && mt.items.length > 0 && (
+                        <ul className="space-y-1">
+                          {mt.items.map((item, i) => (
+                            <li key={i} className="flex gap-2 text-[12px]" style={{ color: WARN }}>
+                              <span>•</span>{item}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
+                  </section>
+                )}
+                {wf.items && wf.items.length > 0 && (
+                  <section className="px-6 pt-2 pb-6">
+                    <Heading>시기별 재물 흐름</Heading>
+                    <div className="space-y-2">
+                      {wf.items.map((item, i) => (
+                        <div key={i} className="rounded-xl px-4 py-3" style={{ background: item.tone === "warn" ? "#fff0f0" : "#eef6f0", borderLeft: `3px solid ${item.tone === "warn" ? WARN : GREEN}` }}>
+                          <p className="text-[12px] font-bold mb-1" style={{ color: item.tone === "warn" ? WARN : GREEN }}>{item.label}</p>
+                          <p className="text-[13px]" style={{ color: INK_SOFT }}>{item.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </>
+            );
+          })()}
           <ChapterNav cur="5" go={next} />
         </>
       )}
@@ -4630,53 +4617,58 @@ function ReportPreviewInner() {
       {/* ═══════════ 제6장 — 개운법 & 종합 ═══════════ */}
       {ch === "6" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 개운법</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               내 재물운을 바꾸는<br />개운법
             </h1>
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_jaemul/saju_jaemul_6/saju_jaemul_6_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
+          <div className="relative overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_jaemul/saju_jaemul_6/saju_jaemul_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {/* 오행 개운 */}
-            {!!(jc.wealthCare as Record<string,unknown>)?.element && (
-              <div className="mb-5 rounded-xl p-4 text-center" style={{ background: "#7cc47f22", border: "1px solid #7cc47f66" }}>
-                <p className="text-[13px] font-bold" style={{ color: INK }}>
-                  보강해야 할 오행 — {String((jc.wealthCare as Record<string,unknown>).element)}(오행)
-                </p>
-              </div>
-            )}
-            {((jc.wealthCare as Record<string,unknown>)?.tips as string[] | undefined)?.length ? (
-              <div className="mb-6 rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GOLD }}>재물 개운 실천법</p>
-                <ul className="space-y-2">
-                  {((jc.wealthCare as Record<string,unknown>).tips as string[]).map((tip, i) => (
-                    <li key={i} className="flex gap-2 text-[12px]" style={{ color: INK_SOFT }}>
-                      <span style={{ color: GOLD }}>✦</span>{tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {/* 종합 정리 */}
-            {!!(jc.wealthSummary as Record<string,unknown>)?.title && (
-              <div className="rounded-xl p-5" style={{ background: CALLOUT_BG, border: `1px solid ${ROSE}44` }}>
-                <p className="text-[10px] font-bold tracking-widest mb-2" style={{ color: MAROON }}>종합 정리</p>
-                <p className="text-[15px] font-black mb-4" style={{ color: INK, fontFamily: SERIF }}>
-                  {String((jc.wealthSummary as Record<string,unknown>).title)}
-                </p>
-                {((jc.wealthSummary as Record<string,unknown>)?.items as {title:string;desc:string}[] | undefined)?.map((item, i) => (
-                  <div key={i} className="mb-3">
-                    <p className="text-[12px] font-bold mb-1" style={{ color: MAROON }}>{item.title}</p>
-                    <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <Quote>{`부족한 기운을 채우면\n재물의 흐름이 달라지오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}에게\n맞는 개운법이오.`}</Quote>
+          {(() => {
+            const wc = (jc.wealthCare as { element?: string; tips?: string[] } | undefined) ?? {};
+            const ws = (jc.wealthSummary as { title?: string; items?: {title:string;desc:string}[] } | undefined) ?? {};
+            return (
+              <>
+                {(wc.element || (wc.tips && wc.tips.length > 0)) && (
+                  <section className="px-6 pt-2 pb-4">
+                    <Heading>재물 개운법</Heading>
+                    {wc.element && (
+                      <div className="mb-4 rounded-2xl p-4 text-center" style={{ background: "#7cc47f22", border: "1px solid #7cc47f66" }}>
+                        <p className="text-[13px] font-bold" style={{ color: GREEN }}>보강해야 할 오행 — {wc.element}</p>
+                      </div>
+                    )}
+                    {wc.tips && wc.tips.length > 0 && (
+                      <div className="space-y-2">
+                        {wc.tips.map((tip, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
+                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
+                {ws.title && (
+                  <section className="px-6 pt-2 pb-6">
+                    <Heading>종합 정리</Heading>
+                    <P>{ws.title}</P>
+                    {ws.items?.map((item, i) => (
+                      <div key={i} className="mb-4 pb-4" style={{ borderBottom: i < (ws.items!.length - 1) ? `1px solid ${INK}08` : "none" }}>
+                        <p className="text-[13px] font-bold mb-1" style={{ color: MAROON }}>{item.title}</p>
+                        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                      </div>
+                    ))}
+                  </section>
+                )}
+              </>
+            );
+          })()}
           <ChapterNav cur="6" go={next} />
         </>
       )}
@@ -4684,29 +4676,28 @@ function ReportPreviewInner() {
       {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "7" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               {name}님께<br />홍연의 서신
             </h1>
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_jaemul/saju_jaemul_7/saju_jaemul_7_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
+          <div className="relative overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_jaemul/saju_jaemul_7/saju_jaemul_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <div className="px-5 py-8" style={{ background: CREAM }}>
-            <div className="text-center mb-6">
+          <section className="px-6 pt-10 pb-8">
+            <div className="text-center mb-8">
               <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
                 <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
               </div>
             </div>
-            {((jc.letter as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[2] mb-5" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+            {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
+              <P key={i}>{p}</P>
             ))}
-            <div className="text-right mt-6">
-              <p className="text-[12px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
-            </div>
-          </div>
+            <p className="text-right mt-6 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
+          </section>
           <ChapterNav cur="7" go={next} />
         </>
       )}

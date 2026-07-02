@@ -4350,33 +4350,24 @@ function ReportPreviewInner() {
       {/* ═══════════ 제1장 — 기질과 성격 ═══════════ */}
       {ch === "1" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 기질</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name} 아이는<br />어떤 기질로 태어났나
-            </h1>
+          <Quote>{`${name} 아이는\n어떤 기질을\n타고났을까요.\n\n사주에서 그 빛을\n찾아보겠소.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.personality as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.personality as Record<string,unknown>).intro)}
-              </p>
+          <section className="px-6 pt-6 pb-4">
+            <Heading>기질과 성격</Heading>
+            {((jc.personality as Record<string,unknown>)?.intro as string | undefined) && (
+              <P>{String((jc.personality as Record<string,unknown>).intro)}</P>
             )}
-            {!!(jc.personality as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.personality as Record<string,unknown>).callout)}
-                </p>
-              </div>
+            {((jc.personality as Record<string,unknown>)?.callout as string | undefined) && (
+              <Callout>{String((jc.personality as Record<string,unknown>).callout)}</Callout>
             )}
             {((jc.personality as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+              <P key={i}>{p}</P>
             ))}
-          </div>
+          </section>
           <ChapterNav cur="1" go={next} />
         </>
       )}
@@ -4384,45 +4375,37 @@ function ReportPreviewInner() {
       {/* ═══════════ 제2장 — 건강 ═══════════ */}
       {ch === "2" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 건강</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name} 아이의<br />건강과 주의할 부분
-            </h1>
+          <Quote>{`몸의 약한 곳도\n사주에 새겨져 있소.\n\n${name} 아이의\n건강 특성을 살펴보겠소.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_2/saju_youare_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_2/saju_youare_2_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.health as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.health as Record<string,unknown>).intro)}
-              </p>
+          <section className="px-6 pt-6 pb-4">
+            <Heading>건강과 주의점</Heading>
+            {((jc.health as Record<string,unknown>)?.intro as string | undefined) && (
+              <P>{String((jc.health as Record<string,unknown>).intro)}</P>
             )}
-            {!!(jc.health as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: "#fff8e6", borderLeft: `3px solid ${GOLD}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: "#8a6a00" }}>
-                  {String((jc.health as Record<string,unknown>).callout)}
-                </p>
-              </div>
+            {((jc.health as Record<string,unknown>)?.callout as string | undefined) && (
+              <Callout>{String((jc.health as Record<string,unknown>).callout)}</Callout>
             )}
             {((jc.health as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+              <P key={i}>{p}</P>
             ))}
-            {((jc.health as Record<string,unknown>)?.tips as string[] | undefined)?.length ? (
-              <div className="mt-4 rounded-xl p-4" style={{ background: "#fff8e6", border: `1px solid ${GOLD}` }}>
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GOLD }}>건강 관리 팁</p>
-                <ul className="space-y-2">
-                  {((jc.health as Record<string,unknown>).tips as string[]).map((tip, i) => (
-                    <li key={i} className="flex gap-2 text-[12px]" style={{ color: INK_SOFT }}>
-                      <span style={{ color: GOLD }}>✦</span>{tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </div>
+          </section>
+          {((jc.health as Record<string,unknown>)?.tips as string[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-6">
+              <Heading>건강 관리 팁</Heading>
+              <ol className="space-y-3">
+                {((jc.health as Record<string,unknown>).tips as string[]).map((tip, i) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <span className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white mt-0.5" style={{ background: GOLD }}>{i + 1}</span>
+                    <p className="text-[13.5px] leading-relaxed flex-1" style={{ color: INK_SOFT }}>{tip}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
           <ChapterNav cur="2" go={next} />
         </>
       )}
@@ -4430,45 +4413,37 @@ function ReportPreviewInner() {
       {/* ═══════════ 제3장 — 양육 환경 ═══════════ */}
       {ch === "3" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 양육</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name} 아이에게<br />잘 맞는 양육 환경과 방식
-            </h1>
+          <Quote>{`아이가 꽃피려면\n맞는 환경이 있어야 하오.\n\n${name} 아이에게\n맞는 양육 방식을 살펴보겠소.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_3/saju_youare_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_3/saju_youare_3_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.parenting as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.parenting as Record<string,unknown>).intro)}
-              </p>
+          <section className="px-6 pt-6 pb-4">
+            <Heading>맞는 양육 방식</Heading>
+            {((jc.parenting as Record<string,unknown>)?.intro as string | undefined) && (
+              <P>{String((jc.parenting as Record<string,unknown>).intro)}</P>
             )}
-            {!!(jc.parenting as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.parenting as Record<string,unknown>).callout)}
-                </p>
-              </div>
+            {((jc.parenting as Record<string,unknown>)?.callout as string | undefined) && (
+              <Callout>{String((jc.parenting as Record<string,unknown>).callout)}</Callout>
             )}
             {((jc.parenting as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+              <P key={i}>{p}</P>
             ))}
-            {((jc.parenting as Record<string,unknown>)?.parentingTips as string[] | undefined)?.length ? (
-              <div className="mt-4 rounded-xl p-4" style={{ background: "#eef6f0", border: "1px solid #c0dbc8" }}>
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: GREEN }}>양육 팁</p>
-                <ul className="space-y-2">
-                  {((jc.parenting as Record<string,unknown>).parentingTips as string[]).map((tip, i) => (
-                    <li key={i} className="flex gap-2 text-[12px]" style={{ color: INK_SOFT }}>
-                      <span style={{ color: GREEN }}>✦</span>{tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </div>
+          </section>
+          {((jc.parenting as Record<string,unknown>)?.parentingTips as string[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-6">
+              <Heading>양육 팁</Heading>
+              <ol className="space-y-3">
+                {((jc.parenting as Record<string,unknown>).parentingTips as string[]).map((tip, i) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <span className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white mt-0.5" style={{ background: GREEN }}>{i + 1}</span>
+                    <p className="text-[13.5px] leading-relaxed flex-1" style={{ color: INK_SOFT }}>{tip}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
           <ChapterNav cur="3" go={next} />
         </>
       )}
@@ -4476,34 +4451,28 @@ function ReportPreviewInner() {
       {/* ═══════════ 제4장 — 오행 균형 ═══════════ */}
       {ch === "4" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 오행</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name} 아이의<br />타고난 기운과 오행 균형
-            </h1>
+          <Quote>{`오행이란\n하늘의 기운이오.\n\n${name} 아이의\n타고난 기운 균형을 살펴보겠소.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_4/saju_youare_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_4/saju_youare_4_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.ohaengBalance as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.ohaengBalance as Record<string,unknown>).intro)}
-              </p>
+          <section className="px-6 pt-6 pb-4">
+            <Heading>오행 균형</Heading>
+            {((jc.ohaengBalance as Record<string,unknown>)?.intro as string | undefined) && (
+              <P>{String((jc.ohaengBalance as Record<string,unknown>).intro)}</P>
             )}
-            {!!(jc.ohaengBalance as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.ohaengBalance as Record<string,unknown>).callout)}
-                </p>
-              </div>
+            {((jc.ohaengBalance as Record<string,unknown>)?.callout as string | undefined) && (
+              <Callout>{String((jc.ohaengBalance as Record<string,unknown>).callout)}</Callout>
             )}
             {((jc.ohaengBalance as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+              <P key={i}>{p}</P>
             ))}
-            {((jc.ohaengBalance as Record<string,unknown>)?.elements as {name:string;level:string;desc:string}[] | undefined)?.length ? (
-              <div className="mt-4 space-y-2">
+          </section>
+          {((jc.ohaengBalance as Record<string,unknown>)?.elements as {name:string;level:string;desc:string}[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-6">
+              <Heading>오행 기운 분석</Heading>
+              <div className="space-y-2">
                 {((jc.ohaengBalance as Record<string,unknown>).elements as {name:string;level:string;desc:string}[]).map((el, i) => {
                   const EL_COLOR: Record<string,string> = { 목:"#7cc47f", 화:"#e88aa0", 토:"#e8c97a", 금:"#b8c0c4", 수:"#8fb3e0" };
                   const levelLabel: Record<string,string> = { strong:"강함", normal:"보통", weak:"약함" };
@@ -4527,8 +4496,8 @@ function ReportPreviewInner() {
                   );
                 })}
               </div>
-            ) : null}
-          </div>
+            </section>
+          ) : null}
           <ChapterNav cur="4" go={next} />
         </>
       )}
@@ -4536,69 +4505,61 @@ function ReportPreviewInner() {
       {/* ═══════════ 제5장 — 이름·색·방향 ═══════════ */}
       {ch === "5" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 이름</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name} 아이에게 맞는<br />이름 · 색 · 방향
-            </h1>
+          <Quote>{`이름에도\n기운이 있소.\n\n${name} 아이에게\n맞는 이름·색·방향을 살펴보겠소.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.namingGuide as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.namingGuide as Record<string,unknown>).intro)}
-              </p>
+          <section className="px-6 pt-6 pb-4">
+            <Heading>이름 짓기 가이드</Heading>
+            {((jc.namingGuide as Record<string,unknown>)?.intro as string | undefined) && (
+              <P>{String((jc.namingGuide as Record<string,unknown>).intro)}</P>
             )}
-            {!!(jc.namingGuide as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.namingGuide as Record<string,unknown>).callout)}
-                </p>
-              </div>
+            {((jc.namingGuide as Record<string,unknown>)?.callout as string | undefined) && (
+              <Callout>{String((jc.namingGuide as Record<string,unknown>).callout)}</Callout>
             )}
-            {((jc.namingGuide as Record<string,unknown>)?.namingAdvice as string[] | undefined)?.length ? (
-              <div className="mb-5 rounded-xl p-4" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: MAROON }}>이름 짓기 조언</p>
-                <ul className="space-y-2">
-                  {((jc.namingGuide as Record<string,unknown>).namingAdvice as string[]).map((adv, i) => (
-                    <li key={i} className="flex gap-2 text-[12px]" style={{ color: INK_SOFT }}>
-                      <span style={{ color: ROSE }}>✦</span>{adv}
-                    </li>
-                  ))}
-                </ul>
+          </section>
+          {((jc.namingGuide as Record<string,unknown>)?.namingAdvice as string[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>이름 짓기 조언</Heading>
+              <ol className="space-y-3">
+                {((jc.namingGuide as Record<string,unknown>).namingAdvice as string[]).map((adv, i) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <span className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white mt-0.5" style={{ background: MAROON }}>{i + 1}</span>
+                    <p className="text-[13.5px] leading-relaxed flex-1" style={{ color: INK_SOFT }}>{adv}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
+          {((jc.namingGuide as Record<string,unknown>)?.colors as {name:string;hex:string;reason:string}[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>길한 색깔</Heading>
+              <div className="flex gap-3">
+                {((jc.namingGuide as Record<string,unknown>).colors as {name:string;hex:string;reason:string}[]).map((col, i) => (
+                  <div key={i} className="flex-1 rounded-xl p-3 text-center" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
+                    <div className="w-10 h-10 rounded-full mx-auto mb-2" style={{ background: col.hex }} />
+                    <p className="text-[12px] font-bold mb-1" style={{ color: INK }}>{col.name}</p>
+                    <p className="text-[10px]" style={{ color: MUTE }}>{col.reason}</p>
+                  </div>
+                ))}
               </div>
-            ) : null}
-            {((jc.namingGuide as Record<string,unknown>)?.colors as {name:string;hex:string;reason:string}[] | undefined)?.length ? (
-              <div className="mb-5">
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: INK }}>길한 색깔</p>
-                <div className="flex gap-3">
-                  {((jc.namingGuide as Record<string,unknown>).colors as {name:string;hex:string;reason:string}[]).map((col, i) => (
-                    <div key={i} className="flex-1 rounded-xl p-3 text-center" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
-                      <div className="w-10 h-10 rounded-full mx-auto mb-2" style={{ background: col.hex }} />
-                      <p className="text-[12px] font-bold mb-1" style={{ color: INK }}>{col.name}</p>
-                      <p className="text-[10px]" style={{ color: MUTE }}>{col.reason}</p>
-                    </div>
-                  ))}
-                </div>
+            </section>
+          ) : null}
+          {((jc.namingGuide as Record<string,unknown>)?.directions as {name:string;reason:string}[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-6">
+              <Heading>길한 방향</Heading>
+              <div className="flex gap-3">
+                {((jc.namingGuide as Record<string,unknown>).directions as {name:string;reason:string}[]).map((dir, i) => (
+                  <div key={i} className="flex-1 rounded-xl px-4 py-3" style={{ background: "#eef6f0", border: "1px solid #c0dbc8" }}>
+                    <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{dir.name}</p>
+                    <p className="text-[11px]" style={{ color: INK_SOFT }}>{dir.reason}</p>
+                  </div>
+                ))}
               </div>
-            ) : null}
-            {((jc.namingGuide as Record<string,unknown>)?.directions as {name:string;reason:string}[] | undefined)?.length ? (
-              <div>
-                <p className="text-[11px] font-bold mb-3 tracking-widest" style={{ color: INK }}>길한 방향</p>
-                <div className="flex gap-3">
-                  {((jc.namingGuide as Record<string,unknown>).directions as {name:string;reason:string}[]).map((dir, i) => (
-                    <div key={i} className="flex-1 rounded-xl px-4 py-3" style={{ background: "#eef6f0", border: "1px solid #c0dbc8" }}>
-                      <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{dir.name}</p>
-                      <p className="text-[11px]" style={{ color: INK_SOFT }}>{dir.reason}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
+            </section>
+          ) : null}
           <ChapterNav cur="5" go={next} />
         </>
       )}
@@ -4606,34 +4567,28 @@ function ReportPreviewInner() {
       {/* ═══════════ 제6장 — 재능 ═══════════ */}
       {ch === "6" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 재능</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name} 아이의<br />성장하면서 두드러질 재능
-            </h1>
+          <Quote>{`재능이란\n숨어 있을 뿐\n사라지지 않소.\n\n${name} 아이의\n타고난 재능을 살펴보겠소.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.talent as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.talent as Record<string,unknown>).intro)}
-              </p>
+          <section className="px-6 pt-6 pb-4">
+            <Heading>타고난 재능</Heading>
+            {((jc.talent as Record<string,unknown>)?.intro as string | undefined) && (
+              <P>{String((jc.talent as Record<string,unknown>).intro)}</P>
             )}
-            {!!(jc.talent as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.talent as Record<string,unknown>).callout)}
-                </p>
-              </div>
+            {((jc.talent as Record<string,unknown>)?.callout as string | undefined) && (
+              <Callout>{String((jc.talent as Record<string,unknown>).callout)}</Callout>
             )}
             {((jc.talent as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+              <P key={i}>{p}</P>
             ))}
-            {((jc.talent as Record<string,unknown>)?.fields as {icon:string;name:string;desc:string}[] | undefined)?.length ? (
-              <div className="mt-4 grid grid-cols-2 gap-3">
+          </section>
+          {((jc.talent as Record<string,unknown>)?.fields as {icon:string;name:string;desc:string}[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-6">
+              <Heading>재능 분야</Heading>
+              <div className="grid grid-cols-2 gap-3">
                 {((jc.talent as Record<string,unknown>).fields as {icon:string;name:string;desc:string}[]).map((f, i) => (
                   <div key={i} className="rounded-xl p-3 text-center" style={{ background: WHITE, border: "1px solid #e8ddd8" }}>
                     <div className="text-2xl mb-1">{f.icon}</div>
@@ -4642,8 +4597,8 @@ function ReportPreviewInner() {
                   </div>
                 ))}
               </div>
-            ) : null}
-          </div>
+            </section>
+          ) : null}
           <ChapterNav cur="6" go={next} />
         </>
       )}
@@ -4651,34 +4606,28 @@ function ReportPreviewInner() {
       {/* ═══════════ 제7장 — 주의 시기 ═══════════ */}
       {ch === "7" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              부모가 조심해야 할<br />성장 시기
-            </h1>
+          <Quote>{`아이의 성장에도\n파고가 있소.\n\n부모가 조심해야 할\n성장 시기를 알아보겠소.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_7/saju_youare_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_7/saju_youare_7_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-6" style={{ background: CREAM }}>
-            {!!(jc.cautionPeriod as Record<string,unknown>)?.intro && (
-              <p className="text-[14px] font-bold mb-3" style={{ color: INK, fontFamily: SERIF }}>
-                {String((jc.cautionPeriod as Record<string,unknown>).intro)}
-              </p>
+          <section className="px-6 pt-6 pb-4">
+            <Heading>주의해야 할 성장 시기</Heading>
+            {((jc.cautionPeriod as Record<string,unknown>)?.intro as string | undefined) && (
+              <P>{String((jc.cautionPeriod as Record<string,unknown>).intro)}</P>
             )}
-            {!!(jc.cautionPeriod as Record<string,unknown>)?.callout && (
-              <div className="rounded-xl px-4 py-3 mb-5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: MAROON }}>
-                  {String((jc.cautionPeriod as Record<string,unknown>).callout)}
-                </p>
-              </div>
+            {((jc.cautionPeriod as Record<string,unknown>)?.callout as string | undefined) && (
+              <Callout>{String((jc.cautionPeriod as Record<string,unknown>).callout)}</Callout>
             )}
             {((jc.cautionPeriod as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[1.85] mb-4" style={{ color: INK_SOFT }}>{p}</p>
+              <P key={i}>{p}</P>
             ))}
-            {((jc.cautionPeriod as Record<string,unknown>)?.periods as {label:string;tone:string;text:string}[] | undefined)?.length ? (
-              <div className="mt-4 space-y-2">
+          </section>
+          {((jc.cautionPeriod as Record<string,unknown>)?.periods as {label:string;tone:string;text:string}[] | undefined)?.length ? (
+            <section className="px-6 pt-2 pb-6">
+              <Heading>시기별 주의사항</Heading>
+              <div className="space-y-2">
                 {((jc.cautionPeriod as Record<string,unknown>).periods as {label:string;tone:string;text:string}[]).map((period, i) => (
                   <div key={i} className="rounded-xl px-4 py-3" style={{ background: period.tone === "warn" ? "#fff0f0" : "#eef6f0", borderLeft: `3px solid ${period.tone === "warn" ? WARN : GREEN}` }}>
                     <p className="text-[11px] font-bold mb-1" style={{ color: period.tone === "warn" ? WARN : GREEN }}>{period.label}</p>
@@ -4686,8 +4635,8 @@ function ReportPreviewInner() {
                   </div>
                 ))}
               </div>
-            ) : null}
-          </div>
+            </section>
+          ) : null}
           <ChapterNav cur="7" go={next} />
         </>
       )}
@@ -4695,29 +4644,25 @@ function ReportPreviewInner() {
       {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "8" && (
         <>
-          <div className="text-center px-6 py-8" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name} 아이의 부모님께<br />홍연의 서신
-            </h1>
+          <Quote>{`${name} 아이의 부모님께\n홍연이 드리는\n마지막 서신이오.`}</Quote>
+          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_youare/saju_youare_8/saju_youare_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 40%, #fdf8f4 100%)" }} />
           </div>
-          <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/saju_youare/saju_youare_8/saju_youare_8_cover.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
-          </div>
-          <div className="px-5 py-8" style={{ background: CREAM }}>
-            <div className="text-center mb-6">
+          <section className="px-6 pt-10 pb-8">
+            <div className="text-center mb-8">
               <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
                 <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
               </div>
             </div>
             {((jc.letter as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
-              <p key={i} className="text-[13px] leading-[2] mb-5" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+              <P key={i}>{p}</P>
             ))}
             <div className="text-right mt-6">
               <p className="text-[12px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
             </div>
-          </div>
+          </section>
           <ChapterNav cur="8" go={next} />
         </>
       )}

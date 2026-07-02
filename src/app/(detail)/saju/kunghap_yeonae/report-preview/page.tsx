@@ -14,7 +14,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
-import { isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
+import { isYeonaeKunghapChapterReady, YEONAE_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_yeonae-report-content";
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
@@ -2697,26 +2697,10 @@ function ScrollMyeongsik({ view, name, birth }: { view: MyeongsikView | null; na
 }
 
 // ─── 연애궁합 전용 섹션 정의 ──────────────────────────────────────
-const YEONAE_CHAPTER_SECTIONS: Record<number, string[]> = {
-  0:  [],                       // 인트로 — 정적
-  1:  [],                       // 제1장 — 나의 사주 원국 — 정적(로컬 명식)
-  2:  [],                       // 제2장 — 상대 사주 원국 — 정적(로컬 명식)
-  3:  ["kh_attraction"],        // 제3장 — 첫인상·끌림
-  4:  ["kh_myView"],            // 제4장 — 나는 이 사람을 어떻게 보는가
-  5:  ["kh_partnerView"],       // 제5장 — 상대는 나를 어떻게 보는가
-  6:  ["kh_hapChung"],          // 제6장 — 합·충·형
-  7:  ["kh_styleCompare"],      // 제7장 — 연애 스타일 비교
-  8:  ["kh_lightShadow"],       // 제8장 — 빛과 그림자
-  9:  ["kh_crisis"],            // 제9장 — 위기와 극복
-  10: ["kh_marriage"],          // 제10장 — 결혼 가능성
-  11: ["kh_goodTime"],          // 제11장 — 좋은 시기
-  12: [],                       // 마무리 — 정적
-};
-
+// YEONAE_KUNGHAP_CHAPTER_SECTIONS / isYeonaeKunghapChapterReady 는 kunghap_yeonae-report-content.ts 에서 import
 function isYeonaeChapterReady(content: Record<string, unknown> | null | undefined, chapter: number): boolean {
-  const keys = YEONAE_CHAPTER_SECTIONS[chapter];
-  if (!keys || keys.length === 0) return true;
-  return keys.every((k) => !!(content as Record<string, unknown> | null)?.[k]);
+  if (chapter === 0) return true; // 인트로 — 정적
+  return isYeonaeKunghapChapterReady(content, chapter);
 }
 
 // ─── 연애궁합 섹션 렌더 헬퍼 ─────────────────────────────────────
@@ -4200,8 +4184,9 @@ function ReportPreviewInner() {
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
   const c = { ...SAMPLE_CONTENT, ...(report?.content ?? {}) } as ReportContent;
+  const jc = (report?.content ?? {}) as Record<string, unknown>;
   // 실제 결제자(id 있음)인데 현재 장이 아직 생성 안 됨 → 샘플 대신 로딩/에러 표시
-  const needGen = !!id && !!YEONAE_CHAPTER_SECTIONS[chNum] && !isYeonaeChapterReady(report?.content as Record<string, unknown>, chNum);
+  const needGen = !!id && (chNum === 0 ? false : !!YEONAE_KUNGHAP_CHAPTER_SECTIONS[chNum]) && !isYeonaeChapterReady(report?.content as Record<string, unknown>, chNum);
   const showLoading = generating || (needGen && !generatedRef.current); // 일괄 생성 중/직전
   const ilganHanja = (report?.view?.ilgan ?? "乙")[0];
   const ilganLabel = (report?.view?.ilgan ?? "乙 (을목)").match(/\(([^)]+)\)/)?.[1] ?? "을목";
@@ -4592,9 +4577,32 @@ function ReportPreviewInner() {
             <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
           </section>
 
-          <section className="px-6 pt-6 pb-6">
+          <section className="px-6 pt-4 pb-4">
+            <Heading>나의 원국 풀이</Heading>
+            <ReportSec data={(jc.myWonguk as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
+          </section>
+
+          <section className="px-6 pt-2 pb-4">
+            <Heading>나의 기질</Heading>
+            {!!(jc.myNature as Record<string, unknown> | undefined)?.keywords && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {((jc.myNature as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
+                  <span key={i} className="px-3 py-1.5 rounded-full text-[12px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{kw}</span>
+                ))}
+              </div>
+            )}
+            {!!(jc.myNature as Record<string, unknown> | undefined)?.desc && (
+              <P>{(jc.myNature as { desc: string }).desc}</P>
+            )}
+          </section>
+
+          <section className="px-6 pt-2 pb-4">
+            <Heading>나의 연애 패턴</Heading>
+            <ReportSec data={(jc.myLovePattern as { intro?: string; paragraphs?: string[] }) ?? null} />
+          </section>
+
+          <section className="px-6 pt-4 pb-6">
             <Heading>나의 오행 분포</Heading>
-            <P>목·화·토·금·수 다섯 기운이<br />내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
             <div className="flex justify-center mt-4">
               <OhaengRadar view={report?.view ?? null} color={MAROON} />
             </div>
@@ -4628,9 +4636,32 @@ function ReportPreviewInner() {
                 <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
               </section>
 
-              <section className="px-6 pt-6 pb-6">
-                <Heading>상대방의 오행 분포</Heading>
-                <P>목·화·토·금·수 다섯 기운이<br />상대방 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
+              <section className="px-6 pt-4 pb-4">
+                <Heading>{report.partnerName || "상대방"}의 원국 풀이</Heading>
+                <ReportSec data={(jc.partnerWonguk as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
+              </section>
+
+              <section className="px-6 pt-2 pb-4">
+                <Heading>{report.partnerName || "상대방"}의 기질</Heading>
+                {!!(jc.partnerNature as Record<string, unknown> | undefined)?.keywords && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {((jc.partnerNature as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
+                      <span key={i} className="px-3 py-1.5 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
+                    ))}
+                  </div>
+                )}
+                {!!(jc.partnerNature as Record<string, unknown> | undefined)?.desc && (
+                  <P>{(jc.partnerNature as { desc: string }).desc}</P>
+                )}
+              </section>
+
+              <section className="px-6 pt-2 pb-4">
+                <Heading>{report.partnerName || "상대방"}의 연애 패턴</Heading>
+                <ReportSec data={(jc.partnerLovePattern as { intro?: string; paragraphs?: string[] }) ?? null} />
+              </section>
+
+              <section className="px-6 pt-4 pb-6">
+                <Heading>{report.partnerName || "상대방"}의 오행 분포</Heading>
                 <div className="flex justify-center mt-4">
                   <OhaengRadar view={report.partnerView} color={NAVY} />
                 </div>
@@ -4662,16 +4693,35 @@ function ReportPreviewInner() {
           </div>
           <Quote>{`"사주에는 이성을 끌어당기는 기운이\n숨겨져 있소.\n두 사람이 왜 서로에게 끌렸는지\n사주로 풀어보겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>첫 끌림 지수</Heading>
-            {(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction?.score !== undefined ? (
-              <AttractionGauge score={(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction!.score!} label={(c as unknown as Record<string, {score?: number; label?: string}>).kh_attraction!.label || ""} />
+            <Heading>케미 점수</Heading>
+            {(jc.chemistryScore as { score?: number } | undefined)?.score !== undefined ? (
+              <AttractionGauge score={(jc.chemistryScore as { score: number }).score} label={(jc.chemistryScore as { label?: string }).label ?? ""} />
             ) : (
               <AttractionGauge score={72} label="서로를 강하게 끌어당기는 궁합이오" />
             )}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_attraction && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_attraction} />
+            {!!(jc.chemistryScore as Record<string, unknown> | undefined)?.desc && (
+              <P>{(jc.chemistryScore as { desc: string }).desc}</P>
             )}
           </section>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>끌림의 이유</Heading>
+            <ReportSec data={(jc.attractionReason as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
+          </section>
+          {!!(jc.firstImpression as Record<string, unknown> | undefined) && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>첫인상</Heading>
+              <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}10` }}>
+                <div className="px-5 py-4" style={{ background: `${MAROON}08`, borderBottom: `1px solid ${INK}08` }}>
+                  <p className="text-[11px] font-bold mb-1" style={{ color: MAROON }}>내가 상대에게서 받은 첫인상</p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{(jc.firstImpression as { mine?: string }).mine}</p>
+                </div>
+                <div className="px-5 py-4" style={{ background: `${NAVY}08` }}>
+                  <p className="text-[11px] font-bold mb-1" style={{ color: NAVY }}>상대가 나에게서 받은 첫인상</p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{(jc.firstImpression as { partner?: string }).partner}</p>
+                </div>
+              </div>
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
           <Quote>{`"끌림의 이유를 알았으니,\n내 눈에 상대방이 어떻게 보이는지\n살펴보겠소."`}</Quote>
           <ChapterNav cur="3" go={next} />
@@ -4700,10 +4750,29 @@ function ReportPreviewInner() {
               const COLOR_MAP: Record<string, string> = { 비견: NAVY, 겁재: MAROON, 식신: GREEN, 상관: ROSE, 편재: GOLD, 정재: "#9b7a2a", 편관: WARN, 정관: BLUE, 편인: "#7a3a8a", 정인: "#3a5a8a" };
               return <div className="mb-4"><SipseongBadge label={sip} color={COLOR_MAP[sip] ?? MUTE} desc="내 일간 기준 상대방 천간의 십성" /></div>;
             })()}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_myView && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_myView} />
-            )}
+            <ReportSec data={(jc.myView as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
           </section>
+          {!!(jc.myExpectation as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>내가 상대에게 기대하는 것</Heading>
+              <div className="space-y-3">
+                {((jc.myExpectation as { items: Array<{ label: string; desc: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-3" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}15` }}>
+                    <p className="text-[13px] font-bold mb-1" style={{ color: MAROON }}>{item.label}</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.myWarning as Record<string, unknown> | undefined)?.desc && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>내가 주의할 점</Heading>
+              <div className="rounded-xl px-4 py-3.5" style={{ background: `${WARN}08`, borderLeft: `3px solid ${WARN}` }}>
+                <P>{(jc.myWarning as { desc: string }).desc}</P>
+              </div>
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
           <Quote>{`"반대로, 상대방의 눈에는\n내가 어떻게 보이는지\n살펴보겠소."`}</Quote>
           <ChapterNav cur="4" go={next} />
@@ -4732,10 +4801,29 @@ function ReportPreviewInner() {
               const COLOR_MAP: Record<string, string> = { 비견: NAVY, 겁재: MAROON, 식신: GREEN, 상관: ROSE, 편재: GOLD, 정재: "#9b7a2a", 편관: WARN, 정관: BLUE, 편인: "#7a3a8a", 정인: "#3a5a8a" };
               return <div className="mb-4"><SipseongBadge label={sip} color={COLOR_MAP[sip] ?? MUTE} desc="상대 일간 기준 나의 천간 십성" /></div>;
             })()}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_partnerView && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_partnerView} />
-            )}
+            <ReportSec data={(jc.partnerView as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
           </section>
+          {!!(jc.partnerExpectation as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>상대가 나에게 기대하는 것</Heading>
+              <div className="space-y-3">
+                {((jc.partnerExpectation as { items: Array<{ label: string; desc: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-3" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}15` }}>
+                    <p className="text-[13px] font-bold mb-1" style={{ color: NAVY }}>{item.label}</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.partnerWarning as Record<string, unknown> | undefined)?.desc && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>상대가 주의할 점</Heading>
+              <div className="rounded-xl px-4 py-3.5" style={{ background: `${WARN}08`, borderLeft: `3px solid ${WARN}` }}>
+                <P>{(jc.partnerWarning as { desc: string }).desc}</P>
+              </div>
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
           <Quote>{`"두 시각을 알았으니,\n이제 두 사주 사이의\n합·충을 짚어보겠소."`}</Quote>
           <ChapterNav cur="5" go={next} />
@@ -4760,11 +4848,48 @@ function ReportPreviewInner() {
             <GanjiRelation view={report?.view ?? null} />
           </section>
           <section className="px-6 pt-2 pb-4">
-            <Heading>합·충·형의 풀이</Heading>
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_hapChung && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_hapChung} />
+            <Heading>종합 궁합 점수</Heading>
+            {(jc.overallScore as { score?: number } | undefined)?.score !== undefined ? (
+              <AttractionGauge score={(jc.overallScore as { score: number }).score} label={(jc.overallScore as { label?: string }).label ?? ""} />
+            ) : (
+              <AttractionGauge score={75} label="전체적으로 잘 맞는 궁합이오" />
+            )}
+            {!!(jc.overallScore as Record<string, unknown> | undefined)?.desc && (
+              <P>{(jc.overallScore as { desc: string }).desc}</P>
             )}
           </section>
+          {!!(jc.hapList as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>합(合) 목록</Heading>
+              <div className="space-y-3">
+                {((jc.hapList as { items: Array<{ type: string; desc: string; strength: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-3" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}20` }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${GREEN}20`, color: GREEN }}>{item.type}</span>
+                      <span className="text-[11px]" style={{ color: MUTE }}>{item.strength}</span>
+                    </div>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.chungList as Record<string, unknown> | undefined)?.items && ((jc.chungList as { items: unknown[] }).items.length > 0) && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>충(沖) 목록</Heading>
+              <div className="space-y-3">
+                {((jc.chungList as { items: Array<{ type: string; desc: string; strength: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-3" style={{ background: `${WARN}08`, border: `1px solid ${WARN}20` }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${WARN}20`, color: WARN }}>{item.type}</span>
+                      <span className="text-[11px]" style={{ color: MUTE }}>{item.strength}</span>
+                    </div>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
           <Quote>{`"합·충을 파악했으니,\n이제 연애 스타일이\n얼마나 맞는지 살펴보겠소."`}</Quote>
           <ChapterNav cur="6" go={next} />
@@ -4785,15 +4910,57 @@ function ReportPreviewInner() {
           </div>
           <Quote>{`"사람마다 연애하는 방식이 다르오.\n두 사람이 어디서 맞고,\n어디서 다른지 보겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
-            <Heading>두 사람의 연애 성향 비교</Heading>
-            <StyleCompareChart
-              myStyle={[ { label: "표현력", v: 65 }, { label: "배려심", v: 70 }, { label: "주도성", v: 55 }, { label: "안정 추구", v: 60 } ]}
-              partnerStyle={[ { label: "표현력", v: 75 }, { label: "배려심", v: 55 }, { label: "주도성", v: 80 }, { label: "안정 추구", v: 50 } ]}
-            />
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_styleCompare && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_styleCompare} />
+            <Heading>나의 연애 스타일</Heading>
+            {!!(jc.myStyle as Record<string, unknown> | undefined) && (
+              <>
+                {!!(jc.myStyle as Record<string, unknown>).label && (
+                  <div className="mb-3 inline-block px-4 py-1.5 rounded-full text-[13px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{(jc.myStyle as { label: string }).label}</div>
+                )}
+                {!!(jc.myStyle as Record<string, unknown>).keywords && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {((jc.myStyle as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
+                      <span key={i} className="px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background: `${MAROON}10`, color: MAROON }}>{kw}</span>
+                    ))}
+                  </div>
+                )}
+                {!!(jc.myStyle as Record<string, unknown>).desc && <P>{(jc.myStyle as { desc: string }).desc}</P>}
+              </>
             )}
           </section>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>{report?.partnerName || "상대방"}의 연애 스타일</Heading>
+            {!!(jc.partnerStyle as Record<string, unknown> | undefined) && (
+              <>
+                {!!(jc.partnerStyle as Record<string, unknown>).label && (
+                  <div className="mb-3 inline-block px-4 py-1.5 rounded-full text-[13px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{(jc.partnerStyle as { label: string }).label}</div>
+                )}
+                {!!(jc.partnerStyle as Record<string, unknown>).keywords && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {((jc.partnerStyle as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
+                      <span key={i} className="px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background: `${NAVY}10`, color: NAVY }}>{kw}</span>
+                    ))}
+                  </div>
+                )}
+                {!!(jc.partnerStyle as Record<string, unknown>).desc && <P>{(jc.partnerStyle as { desc: string }).desc}</P>}
+              </>
+            )}
+          </section>
+          {!!(jc.styleGap as Record<string, unknown> | undefined) && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>스타일 차이와 조율법</Heading>
+              {!!(jc.styleGap as Record<string, unknown>).desc && <P>{(jc.styleGap as { desc: string }).desc}</P>}
+              {!!(jc.styleGap as Record<string, unknown>).tips && (
+                <div className="space-y-2 mt-3">
+                  {((jc.styleGap as { tips?: string[] }).tips ?? []).map((tip, i) => (
+                    <div key={i} className="flex gap-2 items-start">
+                      <span className="text-[12px] font-bold mt-0.5" style={{ color: ROSE }}>✦</span>
+                      <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
           <Quote>{`"스타일의 차이를 알았으니,\n이 관계의 빛과 그림자를\n살펴보겠소."`}</Quote>
           <ChapterNav cur="7" go={next} />
@@ -4813,17 +4980,38 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"모든 인연에는 빛도 있고 그림자도 있소.\n두 사람의 관계에서\n그 둘이 무엇인지 살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>관계의 강점과 과제</Heading>
-            {(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow?.lights ? (
-              <LightShadowCards lights={(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow!.lights!} shadows={(c as unknown as Record<string, {lights?: string[]; shadows?: string[]}>).kh_lightShadow!.shadows ?? []} />
-            ) : (
-              <LightShadowCards lights={["서로의 부족한 기운을 채워주는 관계이오", "함께 있을 때 편안함과 안정감을 느끼오"]} shadows={["때로는 서로의 방식이 달라 마찰이 생기오", "감정 표현 방식의 차이가 오해를 낳을 수 있소"]} />
-            )}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_lightShadow && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_lightShadow} />
-            )}
-          </section>
+          {!!(jc.strengths as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>이 관계의 빛 — 강점</Heading>
+              <div className="space-y-3">
+                {((jc.strengths as { items: Array<{ title: string; desc: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-4" style={{ background: `${GOLD}0a`, border: `1px solid ${GOLD}25` }}>
+                    <p className="text-[13px] font-bold mb-2" style={{ color: GOLD }}>✦ {item.title}</p>
+                    <P>{item.desc}</P>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.shadows as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>이 관계의 그림자 — 갈등</Heading>
+              <div className="space-y-3">
+                {((jc.shadows as { items: Array<{ title: string; desc: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}20` }}>
+                    <p className="text-[13px] font-bold mb-2" style={{ color: WARN }}>▲ {item.title}</p>
+                    <P>{item.desc}</P>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.balance as Record<string, unknown> | undefined)?.paragraphs && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>균형 잡는 법</Heading>
+              <ReportSec data={(jc.balance as { paragraphs?: string[] }) ?? null} />
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
           <Quote>{`"빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소."`}</Quote>
           <ChapterNav cur="8" go={next} />
@@ -4843,19 +5031,38 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>향후 5년 관계 흐름</Heading>
-            <P>두 사람의 사주 기운이 세운과 만나<br />관계에 어떤 파동을 만드는지 살펴보겠소.</P>
-            <div className="mt-4">
-              <RelationFlowChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
-            </div>
-          </section>
-          <section className="px-6 pt-4 pb-4">
-            <Heading>위기와 극복의 풀이</Heading>
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_crisis && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_crisis} />
-            )}
-          </section>
+          {!!(jc.crisisPoints as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>이 관계의 위기 요소</Heading>
+              <div className="space-y-3">
+                {((jc.crisisPoints as { items: Array<{ title: string; desc: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}20` }}>
+                    <p className="text-[13px] font-bold mb-2" style={{ color: WARN }}>▲ {item.title}</p>
+                    <P>{item.desc}</P>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.overcomeTips as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>위기 극복법</Heading>
+              <div className="space-y-3">
+                {((jc.overcomeTips as { items: Array<{ title: string; desc: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-3" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}20` }}>
+                    <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>✦ {item.title}</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.crisisFlow as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-4 pb-4">
+              <Heading>시기별 관계 흐름</Heading>
+              <RunFlowChart flow={((jc.crisisFlow as { items: ReportFlowItem[] }).items ?? [])} />
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
           <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 가장 궁금한 것,\n결혼 가능성을 보겠소."`}</Quote>
           <ChapterNav cur="9" go={next} />
@@ -4877,27 +5084,36 @@ function ReportPreviewInner() {
           <Quote>{`"많은 분들이 가장 궁금해하시오.\n이 사람과 결혼할 수 있을지,\n홍연이 솔직하게 말씀드리겠소."`}</Quote>
           <section className="px-6 pt-2 pb-4">
             <Heading>결혼 가능성 지수</Heading>
-            {(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage?.score !== undefined ? (
-              <MarriageGauge score={(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage!.score!} label={(c as unknown as Record<string, {score?: number; label?: string}>).kh_marriage!.label || ""} />
+            {(jc.marriagePossibility as { score?: number } | undefined)?.score !== undefined ? (
+              <MarriageGauge score={(jc.marriagePossibility as { score: number }).score} label={(jc.marriagePossibility as { label?: string }).label ?? ""} />
             ) : (
               <MarriageGauge score={78} label="결혼까지 충분히 이어질 수 있는 궁합이오" />
             )}
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_marriage && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_marriage} />
+            {!!(jc.marriagePossibility as Record<string, unknown> | undefined)?.paragraphs && (
+              <ReportSec data={(jc.marriagePossibility as { paragraphs?: string[] }) ?? null} />
             )}
           </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>최적 시기 타임라인</Heading>
-            {(c as unknown as Record<string, {items?: Array<{year: string; desc: string; highlight?: boolean}>}>).kh_goodTime?.items ? (
-              <GoodTimeTimeline items={(c as unknown as Record<string, {items?: Array<{year: string; desc: string; highlight?: boolean}>}>).kh_goodTime!.items!} />
-            ) : (
-              <GoodTimeTimeline items={[
-                { year: "올해 하반기", desc: "두 사람의 감정이 깊어지는 시기이오", highlight: false },
-                { year: "내년 상반기", desc: "관계의 전환점이 찾아올 수 있소", highlight: true },
-                { year: "내년 하반기", desc: "두 사람 사이에 중요한 결정의 순간이 오오", highlight: false },
-              ]} />
-            )}
-          </section>
+          {!!(jc.marriageConditions as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>결혼의 조건</Heading>
+              <div className="space-y-3">
+                {((jc.marriageConditions as { items: Array<{ title: string; desc: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="rounded-xl px-4 py-3" style={{ background: `${ROSE}08`, border: `1px solid ${ROSE}20` }}>
+                    <p className="text-[13px] font-bold mb-1" style={{ color: ROSE }}>{item.title}</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.marriageTiming as Record<string, unknown> | undefined)?.desc && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>결혼 시기</Heading>
+              <div className="rounded-xl px-4 py-3.5" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
+                <P>{(jc.marriageTiming as { desc: string }).desc}</P>
+              </div>
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
           <Quote>{`"결혼 가능성을 보았으니,\n이제 두 사람에게 찾아올\n좋은 시기를 알려드리겠소."`}</Quote>
           <ChapterNav cur="10" go={next} />
@@ -4917,19 +5133,38 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"두 사람에게 찾아올\n봄날 같은 시절이 있소.\n그때를 미리 알고 준비하시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>월별 궁합 에너지</Heading>
-            <P>이달부터 연말까지, 두 사람의 궁합 기운이<br />어느 달에 가장 빛나는지 살펴보겠소.</P>
-            <div className="mt-4">
-              <CompatEnergyBarChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
-            </div>
-          </section>
-          <section className="px-6 pt-4 pb-4">
-            <Heading>좋은 시기의 풀이</Heading>
-            {(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_goodTime && (
-              <ReportSec data={(c as unknown as Record<string, {intro?: string; callout?: string; paragraphs?: string[]}>).kh_goodTime} />
-            )}
-          </section>
+          {!!(jc.goodPeriods as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>함께하면 좋은 시기</Heading>
+              <div className="space-y-2">
+                {((jc.goodPeriods as { items: Array<{ label: string; text: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <span className="flex-shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full mt-0.5" style={{ background: `${GREEN}18`, color: GREEN, minWidth: 80, textAlign: "center" }}>{item.label}</span>
+                    <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.cautionPeriods as Record<string, unknown> | undefined)?.items && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>조심해야 할 시기</Heading>
+              <div className="space-y-2">
+                {((jc.cautionPeriods as { items: Array<{ label: string; text: string }> }).items ?? []).map((item, i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <span className="flex-shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full mt-0.5" style={{ background: `${WARN}18`, color: WARN, minWidth: 80, textAlign: "center" }}>{item.label}</span>
+                    <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {!!(jc.yearlyFlow as Record<string, unknown> | undefined)?.desc && (
+            <section className="px-6 pt-2 pb-4">
+              <Heading>연간 흐름 요약</Heading>
+              <P>{(jc.yearlyFlow as { desc: string }).desc}</P>
+            </section>
+          )}
           <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
           <Quote>{`"좋은 때를 알았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
           <ChapterNav cur="11" go={next} />
@@ -4951,7 +5186,7 @@ function ReportPreviewInner() {
           </div>
 
           <section className="px-7 pt-8 pb-2">
-            {(c as unknown as Record<string, {paragraphs?: string[]}>).letter?.paragraphs?.map((p, i) => (
+            {(jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs?.map((p, i) => (
               <P key={i}>{p}</P>
             ))}
             <div className="flex items-center justify-end gap-3 mt-8 mb-2">
