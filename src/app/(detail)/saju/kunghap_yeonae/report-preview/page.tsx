@@ -4364,6 +4364,179 @@ function ReportPreviewInner() {
             </div>
           </section>
 
+          {/* ─ 12지지 표 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>12지지의 의미와 계절</Heading>
+            <P>지지는 자축인묘… 순이 아닌,<br />계절 순서로 보는 것이 이해에 쉽소.<br />중간의 진·미·술·축은 간절기를 뜻하오.</P>
+            <div className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+              <div className="grid grid-cols-12">
+                {[
+                  { label: "봄", span: 3, color: "#4a8c5c", bg: "#eef7f1", borderL: false },
+                  { label: "여름", span: 3, color: "#c0392b", bg: "#fdf0ee", borderL: true },
+                  { label: "가을", span: 3, color: "#b07d2a", bg: "#fdf6ee", borderL: true },
+                  { label: "겨울", span: 3, color: "#2c5282", bg: "#eef3fb", borderL: true },
+                ].map((s) => (
+                  <div key={s.label} className="col-span-3 text-center py-2 text-[13px] font-black" style={{ background: s.bg, color: s.color, borderLeft: s.borderL ? `1px solid ${INK}18` : "none" }}>{s.label}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-12">
+                {([
+                  { hz: "寅", g: "인목", an: "🐯", nm: "호랑이", ec: "#3a7d44", bl: false },
+                  { hz: "卯", g: "묘목", an: "🐰", nm: "토끼",   ec: "#3a7d44", bl: false },
+                  { hz: "辰", g: "진토", an: "🐲", nm: "용",     ec: "#b07d2a", bl: false },
+                  { hz: "巳", g: "사화", an: "🐍", nm: "뱀",     ec: "#c0392b", bl: true  },
+                  { hz: "午", g: "오화", an: "🐴", nm: "말",     ec: "#c0392b", bl: false },
+                  { hz: "未", g: "미토", an: "🐏", nm: "양",     ec: "#b07d2a", bl: false },
+                  { hz: "申", g: "신금", an: "🐵", nm: "원숭이", ec: "#7a7a7a", bl: true  },
+                  { hz: "酉", g: "유금", an: "🐔", nm: "닭",     ec: "#7a7a7a", bl: false },
+                  { hz: "戌", g: "술토", an: "🐶", nm: "개",     ec: "#b07d2a", bl: false },
+                  { hz: "亥", g: "해수", an: "🐷", nm: "돼지",   ec: "#1a1a1a", bl: true  },
+                  { hz: "子", g: "자수", an: "🐭", nm: "쥐",     ec: "#1a1a1a", bl: false },
+                  { hz: "丑", g: "축토", an: "🐮", nm: "소",     ec: "#b07d2a", bl: false },
+                ] as const).map((r) => (
+                  <div key={r.hz} className="flex flex-col items-center gap-0.5 py-1" style={{ borderLeft: r.bl ? `1px solid ${INK}18` : "none" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={jiCharImage(r.hz)} alt={r.g} style={{ width: 22, height: 22, objectFit: "contain" }} />
+                    <span className="text-[11px] font-black" style={{ color: r.ec }}>{r.g}</span>
+                    <span className="text-[14px]">{r.an}</span>
+                    <span className="text-[9px] whitespace-nowrap" style={{ color: MUTE }}>{r.nm}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ─ 음양오행 ─ */}
+          <section className="px-6 pb-1">
+            <Heading>음양오행(陰陽五行)</Heading>
+            <P>음양은 고정된 것이 아니라 끊임없이 순환하오.<br />모든 자연에 작용하는 조화와 균형의 원리이오.</P>
+            <div className="rounded-2xl mb-5 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/total/total-0/total-0-2.jpg" alt="" className="w-full h-auto" />
+            </div>
+            <P>오행은 <Term>목·화·토·금·수</Term> 다섯 가지 기운이오.<br />삶의 움직임을 읽는 도구라 이해하면 되오.</P>
+            <P>이 다섯 기운은<br />서로 돕기도 하고, 억누르기도 하오.<br /><br />돕는 관계를 <Term>생(生)</Term>이라 하고,<br />억누르는 관계를 <Term>극(剋)</Term>이라 하오.</P>
+          </section>
+
+          {/* ─ 오행 상생상극도 ─ */}
+          <section className="px-6 pb-2">
+            {(() => {
+              const cx = 170, cy = 170, r = 118;
+              const nodes = [
+                { label: "목", hanja: "木", color: "#2d7a3a", glow: "#4caf50", angle: -90 },
+                { label: "화", hanja: "火", color: "#c0392b", glow: "#ff6b6b", angle: -90 + 72 },
+                { label: "토", hanja: "土", color: "#9a6a1a", glow: "#f0b429", angle: -90 + 144 },
+                { label: "금", hanja: "金", color: "#5a6370", glow: "#b0bec5", angle: -90 + 216 },
+                { label: "수", hanja: "水", color: "#1a1a1a", glow: "#555555", angle: -90 + 288 },
+              ];
+              const pos = nodes.map(n => ({ ...n, x: cx + r * Math.cos(n.angle * Math.PI / 180), y: cy + r * Math.sin(n.angle * Math.PI / 180) }));
+              const saeng = [[0,1],[1,2],[2,3],[3,4],[4,0]];
+              const geuk  = [[0,2],[2,4],[4,1],[1,3],[3,0]];
+              const drawLine = (a: typeof pos[0], b: typeof pos[0], color: string, glow: string, markerId: string, offset = 26) => {
+                const dx = b.x-a.x, dy = b.y-a.y, len = Math.sqrt(dx*dx+dy*dy);
+                const ux = dx/len, uy = dy/len;
+                return (
+                  <g key={`${a.label}-${b.label}`}>
+                    <line x1={a.x+ux*offset} y1={a.y+uy*offset} x2={b.x-ux*(offset+6)} y2={b.y-uy*(offset+6)} stroke={glow} strokeWidth="4" opacity="0.25" />
+                    <line x1={a.x+ux*offset} y1={a.y+uy*offset} x2={b.x-ux*(offset+6)} y2={b.y-uy*(offset+6)} stroke={color} strokeWidth="1.6" markerEnd={`url(#${markerId})`} opacity="0.9" />
+                  </g>
+                );
+              };
+              return (
+                <svg viewBox="0 0 340 340" style={{ width: "100%", maxWidth: 340, display: "block", margin: "0 auto 4px" }}>
+                  <defs>
+                    <radialGradient id="kh-bg-grad" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#f5ede4" /><stop offset="100%" stopColor="#fdf8f4" /></radialGradient>
+                    <filter id="kh-node-shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.18" /></filter>
+                    <marker id="kh-arr-s" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#3f63c4" /></marker>
+                    <marker id="kh-arr-g" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="#c9474f" /></marker>
+                    {pos.map(n => (<radialGradient key={`kh-grad-${n.label}`} id={`kh-grad-${n.label}`} cx="35%" cy="30%" r="70%"><stop offset="0%" stopColor={n.glow} stopOpacity="0.9" /><stop offset="100%" stopColor={n.color} stopOpacity="1" /></radialGradient>))}
+                  </defs>
+                  <circle cx={cx} cy={cy} r={148} fill="url(#kh-bg-grad)" stroke={`${INK}08`} strokeWidth="1" />
+                  <polygon points={pos.map(n=>`${n.x},${n.y}`).join(" ")} fill="none" stroke={`${INK}10`} strokeWidth="1" strokeDasharray="4 4" />
+                  {geuk.map(([i,j]) => drawLine(pos[i], pos[j], "#c9474f", "#ff6b6b", "kh-arr-g"))}
+                  {saeng.map(([i,j]) => {
+                    const a=pos[i], b=pos[j], mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+                    const dx=b.x-a.x, dy=b.y-a.y, len=Math.sqrt(dx*dx+dy*dy);
+                    const px=-dy/len*14, py=dx/len*14;
+                    const dot=px*(cx-mx)+py*(cy-my);
+                    const ox=dot>0?-px:px, oy=dot>0?-py:py;
+                    return (<g key={`kh-s-${i}-${j}`}>{drawLine(a,b,"#3f63c4","#7ba7f0","kh-arr-s")}<text x={mx+ox} y={my+oy+5} textAnchor="middle" fontSize="16" fontWeight="900" fill="#3f63c4" opacity="0.9" style={{ fontFamily: SERIF }}>생</text></g>);
+                  })}
+                  {pos.map((n) => (<g key={n.label} filter="url(#kh-node-shadow)"><circle cx={n.x} cy={n.y} r={26} fill="none" stroke={n.glow} strokeWidth="3" opacity="0.3" /><circle cx={n.x} cy={n.y} r={22} fill={`url(#kh-grad-${n.label})`} /><ellipse cx={n.x-5} cy={n.y-7} rx={8} ry={5} fill="white" opacity="0.25" /><text x={n.x} y={n.y-3} textAnchor="middle" fontSize="14" fontWeight="900" fill="white" style={{ fontFamily: SERIF }}>{n.label}</text><text x={n.x} y={n.y+12} textAnchor="middle" fontSize="10" fill="white" opacity="0.8" style={{ fontFamily: SERIF }}>{n.hanja}</text></g>))}
+                  <text x={cx} y={cy+5} textAnchor="middle" fontSize="16" fontWeight="900" fill="#c9474f" opacity="0.75" style={{ fontFamily: SERIF }}>극</text>
+                </svg>
+              );
+            })()}
+            <div style={{ marginTop: 16 }}>
+              <P>{"생과 극이 균형을 이룰 때 사주는 안정되고,\n한쪽으로 치우칠수록 삶의 굴곡이 깊어지오."}</P>
+            </div>
+          </section>
+
+          {/* ─ 생(生) ─ */}
+          <section className="px-6 pb-4">
+            <Heading>오행의 생(生) — 서로 돕는 관계</Heading>
+            <div className="space-y-2 mb-4">
+              {[
+                { rel: "목생화(木生火)", desc: "나무가 불의 땔감이 되어 연료가 되오" },
+                { rel: "화생토(火生土)", desc: "불이 꺼지면 재가 되어 흙이 되오" },
+                { rel: "토생금(土生金)", desc: "땅 속 깊은 곳에서 바위가 생성되오" },
+                { rel: "금생수(金生水)", desc: "바위 틈에서 샘물이 솟아나오" },
+                { rel: "수생목(水生木)", desc: "물이 나무를 길러내는 영양분이 되오" },
+              ].map((r) => (
+                <div key={r.rel} className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  <span className="text-[14px] font-black flex-shrink-0" style={{ color: BLUE, fontFamily: SERIF, width: 100 }}>{r.rel}</span>
+                  <span className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{r.desc}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ─ 극(剋) ─ */}
+          <section className="px-6 pb-6">
+            <Heading>오행의 극(剋) — 서로 억누르는 관계</Heading>
+            <div className="space-y-2 mb-4">
+              {[
+                { rel: "목극토(木剋土)", desc: "나무의 뿌리가 흙을 움직이지 못하게 잡소" },
+                { rel: "화극금(火剋金)", desc: "불이 금속에 열을 가해 그 성질을 잃게 하오" },
+                { rel: "토극수(土剋水)", desc: "흙이 물을 가둬 자유롭지 못하게 하오 (강줄기)" },
+                { rel: "금극목(金剋木)", desc: "금속이 나무를 잘라내거나 쪼개오 (톱·도끼)" },
+                { rel: "수극화(水剋火)", desc: "물이 불을 꺼버리오" },
+              ].map((r) => (
+                <div key={r.rel} className="flex items-start gap-3 px-4 py-3 rounded-xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  <span className="text-[14px] font-black flex-shrink-0" style={{ color: WARN, fontFamily: SERIF, width: 100 }}>{r.rel}</span>
+                  <span className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{r.desc}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ─ 십성 ─ */}
+          <section className="px-6 pb-6">
+            <Heading>십성(十星)이란 무엇인가</Heading>
+            <P>우리가 흔히 이르는<br />비겁·식상·재성·관성·인성<br />이 다섯 범주가 곧 십성의 큰 틀이오.</P>
+            <div className="space-y-2 mb-4">
+              {([
+                { name: "비겁", hanja: "比劫", color: "#3a7d44", icon: "⚔️", sub: "비견·겁재", desc: "일간과 같은 오행 — 자아·경쟁·형제" },
+                { name: "식상", hanja: "食傷", color: "#c0392b", icon: "🎨", sub: "식신·상관", desc: "일간이 생하는 오행 — 표현·창의·자식" },
+                { name: "재성", hanja: "財星", color: "#b07d2a", icon: "💰", sub: "편재·정재", desc: "일간이 극하는 오행 — 재물·여자·부친" },
+                { name: "관성", hanja: "官星", color: "#2c5282", icon: "🏛️", sub: "편관·정관", desc: "일간을 극하는 오행 — 권위·직업·남편" },
+                { name: "인성", hanja: "印星", color: "#7a3a8a", icon: "📚", sub: "편인·정인", desc: "일간을 생하는 오행 — 학문·모친·보호" },
+              ] as const).map((s) => (
+                <div key={s.name} className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: `${s.color}15` }}>{s.icon}</div>
+                  <div className="flex-shrink-0" style={{ width: 54 }}>
+                    <p className="text-[18px] font-black" style={{ color: INK, fontFamily: SERIF }}>{s.name}</p>
+                  </div>
+                  <div className="flex-1 min-w-0" style={{ borderLeft: `1px solid ${INK}10`, paddingLeft: 12 }}>
+                    <p className="text-[13px] font-bold mb-0.5" style={{ color: INK_SOFT }}>{s.sub}</p>
+                    <p className="text-[12px] leading-snug" style={{ color: INK_SOFT, fontFamily: SERIF }}>{s.desc.split(" — ")[0]}<br />{s.desc.split(" — ")[1]}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <P>이 열 가지 십성의 의미를 알면<br />풀이를 읽을 때 한결 수월할 것이오.</P>
+          </section>
+
           {/* 삽화 */}
           <Illust src="/media/report/kunghap/kh-intro-1.jpg" h={360} />
 
