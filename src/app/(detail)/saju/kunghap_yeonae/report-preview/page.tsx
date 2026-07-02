@@ -3358,17 +3358,24 @@ const SAMPLE_CONTENT = {
 // 상단 앱바 (챕터 타이틀 + 공유/목차 + 진행 게이지)
 function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasPartner }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void; onPartnerMyeongsik?: () => void; hasPartner?: boolean }) {
   const [label, subtitle] = title.includes("·") ? title.split(" · ") : [title, ""];
-  const ScrollBtn = ({ onClick, text }: { onClick: () => void; text: string }) => (
-    <button onClick={onClick} className="relative flex items-center w-full" style={{ background: "none", border: "none", padding: 0 }}>
-      <div className="flex items-center w-full">
-        <div style={{ width: 7, height: 26, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 3, boxShadow: "1px 0 3px rgba(0,0,0,0.4)" }} />
-        <div style={{ flex: 1, textAlign: "center", padding: "4px 9px", background: "linear-gradient(to bottom, #f9f0d8 0%, #edd9a3 40%, #e8d090 60%, #f0e0b0 100%)", borderTop: "1.5px solid #b8892a", borderBottom: "1.5px solid #b8892a", color: "#5a2e14", fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>
-          {text}
+  const ScrollBtn = ({ onClick, text, color }: { onClick: () => void; text: string; color: "blue" | "pink" }) => {
+    const themes = {
+      blue:  { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
+      pink:  { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
+    };
+    const t = themes[color];
+    return (
+      <button onClick={onClick} className="relative flex items-center w-full" style={{ background: "none", border: "none", padding: 0 }}>
+        <div className="flex items-center w-full">
+          <div style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `1px 0 3px ${t.shadow}` }} />
+          <div style={{ flex: 1, textAlign: "center", padding: "4px 9px", background: t.bg, borderTop: `1.5px solid ${t.border}`, borderBottom: `1.5px solid ${t.border}`, color: t.text, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>
+            {text}
+          </div>
+          <div style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `-1px 0 3px ${t.shadow}` }} />
         </div>
-        <div style={{ width: 7, height: 26, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 3, boxShadow: "-1px 0 3px rgba(0,0,0,0.4)" }} />
-      </div>
-    </button>
-  );
+      </button>
+    );
+  };
   return (
     <div
       className="sticky top-0 z-30"
@@ -3383,9 +3390,9 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
           <div className="flex flex-col gap-1.5" style={{ width: 96 }}>
-            <ScrollBtn onClick={onMyeongsik} text="나의 명식" />
+            <ScrollBtn onClick={onMyeongsik} text="나의 명식" color="blue" />
             {hasPartner && onPartnerMyeongsik && (
-              <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" />
+              <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" color="pink" />
             )}
           </div>
           {/* 목차 버튼 */}
