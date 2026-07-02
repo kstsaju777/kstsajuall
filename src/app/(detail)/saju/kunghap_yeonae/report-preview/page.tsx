@@ -3374,31 +3374,27 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
       className="sticky top-0 z-30"
       style={{ background: "rgba(253,248,244,0.92)", backdropFilter: "blur(6px)", borderBottom: `1px solid ${INK}10` }}
     >
-      {/* 1행: 제목 + 목차 버튼 */}
-      <div className="flex items-center justify-between px-4 pt-2.5 pb-1.5">
+      {/* 단일행: 제목(왼쪽) + [명식버튼 세로2개 + 목차버튼] (오른쪽) */}
+      <div className="flex items-center justify-between px-4 py-2.5">
         <div className="min-w-0 flex-1 mr-3">
-          <p className="text-[10px] font-bold" style={{ color: MUTE }}>{label}</p>
-          {subtitle && <p className="text-[13px] font-bold truncate" style={{ color: INK }}>{subtitle}</p>}
+          <p className="text-[10px] font-bold mt-1" style={{ color: MUTE }}>{label}</p>
+          {subtitle && <p className="text-[16px] font-bold truncate mt-1" style={{ color: INK }}>{subtitle}</p>}
         </div>
-        <button onClick={onMenu} className="flex flex-col items-center flex-shrink-0" style={{ color: INK_SOFT, lineHeight: 1 }}>
-          <span className="text-[14px]">☰</span>
-          <span className="text-[9px] mt-0.5">목차</span>
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* 명식 버튼 세로 배치 */}
+          <div className="flex flex-col gap-1.5">
+            <ScrollBtn onClick={onMyeongsik} text="나의 명식" />
+            {hasPartner && onPartnerMyeongsik && (
+              <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" />
+            )}
+          </div>
+          {/* 목차 버튼 */}
+          <button onClick={onMenu} className="flex flex-col items-center" style={{ color: INK_SOFT, lineHeight: 1 }}>
+            <span className="text-[14px]">☰</span>
+            <span className="text-[9px] mt-0.5">목차</span>
+          </button>
+        </div>
       </div>
-      {/* 2행: 명식 버튼들 */}
-      {(hasPartner) && (
-        <div className="flex items-center gap-2.5 px-4 pb-2">
-          <ScrollBtn onClick={onMyeongsik} text="나의 명식" />
-          {hasPartner && onPartnerMyeongsik && (
-            <ScrollBtn onClick={onPartnerMyeongsik} text="상대방 명식" />
-          )}
-        </div>
-      )}
-      {!hasPartner && (
-        <div className="flex items-center gap-2.5 px-4 pb-2">
-          <ScrollBtn onClick={onMyeongsik} text="나의 명식" />
-        </div>
-      )}
       {/* 진행 게이지 */}
       <div style={{ height: 3, background: `${INK}12` }}>
         <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(to right, ${ROSE}, ${MAROON})`, transition: "width 0.08s linear" }} />
