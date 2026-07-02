@@ -16,7 +16,7 @@ import {
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
-import { buildImshinKunghapChapterPrompt, isImshinKunghapChapterReady, _KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_imshin-report-content";
+import { buildImshinKunghapChapterPrompt, isImshinKunghapChapterReady, IMSHIN_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_imshin-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
