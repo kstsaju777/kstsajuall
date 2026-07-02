@@ -4358,7 +4358,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-1-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-6" style={{ background: CREAM }}>
@@ -4392,7 +4392,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-2-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-6" style={{ background: CREAM }}>
@@ -4438,7 +4438,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-3-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_3/saju_janyeo_3_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-6" style={{ background: CREAM }}>
@@ -4483,7 +4483,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-4-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_4/saju_janyeo_4_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-6" style={{ background: CREAM }}>
@@ -4534,7 +4534,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-5-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_5/saju_janyeo_5_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-6" style={{ background: CREAM }}>
@@ -4580,7 +4580,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-6-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_6/saju_janyeo_6_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-6" style={{ background: CREAM }}>
@@ -4626,7 +4626,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-7-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_7/saju_janyeo_7_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-6" style={{ background: CREAM }}>
@@ -4671,7 +4671,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           <div className="relative w-full" style={{ height: 220 }}>
-            <img src="/media/report/janyeo/janyeo-8-cover.jpg" alt="" className="w-full h-full object-cover" />
+            <img src="/media/report/saju_janyeo/saju_janyeo_8/saju_janyeo_8_cover.jpg" alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fdf8f4 100%)" }} />
           </div>
           <div className="px-5 py-8" style={{ background: CREAM }}>
