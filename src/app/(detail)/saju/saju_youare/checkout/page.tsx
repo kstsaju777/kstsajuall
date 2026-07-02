@@ -301,7 +301,7 @@ function TableOfContents() {
       transition: "opacity 0.6s ease, transform 0.6s ease",
     }}>
       <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#7a6030" }}>✦ 목차 ✦</p>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>총 14장 구성</h2>
+      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>총 8장 구성</h2>
       <div className="space-y-2">
         {CHAPTER_LIST.map(({ ch, title, emoji }, i) => (
           <div key={ch} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
@@ -359,7 +359,7 @@ function ReviewSection() {
 const FAQS = [
   { q: "결과지는 얼마나 걸리나요?", a: "결제 직후 약 1~2분 내에 자동 생성됩니다. 입력하신 이메일로도 링크를 보내드려, 언제든 다시 확인하실 수 있소." },
   { q: "아이 생년월일 시간을 모르면요?", a: "시주까지 입력할 수 있으나, 시간을 모르는 경우도 분석이 가능하오. 다만 시주 관련 항목의 정확도는 다소 낮을 수 있소." },
-  { q: "어떤 항목을 분석하나요?", a: "타고난 성품, 특별한 재능, 학습 방식, 성장 시기, 대운 흐름 등 총 14장에 걸쳐 상세히 풀이하오." },
+  { q: "어떤 항목을 분석하나요?", a: "타고난 기질, 건강, 양육 방식, 오행 균형, 이름·색·방향, 재능, 주의 시기 등 총 8장에 걸쳐 상세히 풀이하오." },
   { q: "환불이 가능한가요?", a: "AI가 생성한 콘텐츠 특성상, 결과지가 생성된 후에는 환불이 어렵습니다. 구매 전 신중히 결정해주시오." },
 ];
 
@@ -638,13 +638,16 @@ function StickyPayCTA({ onPay }: { onPay: () => void }) {
 
 // ─── 생성 로딩 화면 ───────────────────────────────────────────────────────────
 const CHAPTER_TITLES = [
-  "제1장 — 사주 원국", "제2장 — 타고난 성품", "제3장 — 특별한 재능",
-  "제4장 — 학습 방식", "제5장 — 감수성과 심리", "제6장 — 사회성",
-  "제7장 — 성장 주의 시기", "제8장 — 대운 흐름", "제9장 — 귀인과 도움",
-  "제10장 — 건강", "제11장 — 직업 방향", "제12장 — 노년까지 흐름",
-  "제13장 — 당부의 말", "제14장 — 개운법",
+  "제1장 — 이 아이는 어떤 기질로 태어났나",
+  "제2장 — 아이의 건강과 주의할 부분",
+  "제3장 — 잘 맞는 양육 환경과 방식",
+  "제4장 — 타고난 기운과 오행 균형",
+  "제5장 — 아이에게 맞는 이름·색·방향",
+  "제6장 — 성장하면서 두드러질 재능",
+  "제7장 — 부모가 조심해야 할 시기",
+  "마무리 — 홍연의 서신",
 ];
-const TOTAL = 14;
+const TOTAL = 8;
 
 function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; currentChapter: number }) {
   const pct = Math.round((doneCount / TOTAL) * 100);
@@ -739,7 +742,7 @@ function CheckoutContent() {
         return;
       }
 
-      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+      const chapters = [1,2,3,4,5,6,7,8];
       let done = 0;
       const allContent: Record<string, unknown> = {};
       await Promise.all(chapters.map(async (ch) => {

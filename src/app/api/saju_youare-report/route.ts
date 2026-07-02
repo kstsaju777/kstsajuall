@@ -16,7 +16,8 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
-import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData } from "@/lib/saju/report-content";
+import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
+import { buildYouareChapterPrompt, isYouareChapterReady, YOUARE_CHAPTER_SECTIONS } from "@/lib/saju/youare-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -41,7 +42,7 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
-  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, input);
+  const { system, user } = buildYouareChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
@@ -52,76 +53,15 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
         obj = parseContentJson(llm.text);
       } catch (parseErr) {
         console.error(`[saju_youare] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
-        // 16장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
-        if (chapter === 14) {
+        if (chapter === 8) {
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else {
           continue;
         }
       }
-      // 6장: 서버 계산된 tags + pillars를 LLM 결과에 덮어씌우기
-      if (Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
-        const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
-        if (compatTags) compatTags.forEach((tags, idx) => { if (cj[idx]) cj[idx].tags = tags; });
-        if (ch6Pillars) ch6Pillars.forEach((p, idx) => { if (cj[idx]) cj[idx].pillars = p; });
-      }
-      // 6장: desc를 각 순위별 별도 호출로 생성 (정확도 보장)
-      if (chapter === 6 && ch6RankData && ch6RankData.length > 0 && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
-        const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
-        const personLabel = input.gender === "male" ? "이 여자는" : "이 남자는";
-        const honor = input.name;
-        await Promise.all(ch6RankData.map(async (rankData: DescRankData, idx: number) => {
-          if (!cj[idx]) return;
-          const { system: ds, user: du } = buildCompatDescPrompt(idx, honor, personLabel, rankData, system);
-          for (let r = 0; r < 2; r++) {
-            try {
-              const descLlm = await generateInterpretation({ system: ds, user: du, json: false });
-              cj[idx].desc = descLlm.text.trim();
-              break;
-            } catch { /* 재시도 */ }
-          }
-        }));
-      }
-      // 2장: yongsinEl/heusinEl/gisinEl — 십성→오행 변환 포함
-      if (chapter === 2) {
-        const y = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
-        if (y) {
-          const OHAENG = ["금","목","화","토","수"] as const;
-          // 일간 오행 추출
-          const ilganEl = (input.pillars?.find(p => p.pos === "일주")?.ganEl) ?? "";
-          // 십성→오행 변환 테이블 (일간 오행 기준)
-          const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
-          const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
-          const CLASHED_BY: Record<string,string> = { 목:"금",화:"수",토:"목",금:"화",수:"토" }; // 나를 극하는
-          const GENERATED_BY: Record<string,string> = { 목:"수",화:"목",토:"화",금:"토",수:"금" }; // 나를 생하는
-          function sipToEl(sip: string): string {
-            if (["비견","겁재"].some(s => sip.includes(s))) return ilganEl;
-            if (["식신","상관"].some(s => sip.includes(s))) return GEN[ilganEl] ?? "";
-            if (["편재","정재","재성"].some(s => sip.includes(s))) return CTL[ilganEl] ?? "";
-            if (["편관","정관","관성"].some(s => sip.includes(s))) return CLASHED_BY[ilganEl] ?? "";
-            if (["편인","정인","인성"].some(s => sip.includes(s))) return GENERATED_BY[ilganEl] ?? "";
-            return "";
-          }
-          function resolveEl(fieldVal: unknown, keyword: string, allText: string): string {
-            const v = String(fieldVal ?? "").trim();
-            if ((OHAENG as readonly string[]).includes(v)) return v; // 이미 오행이면 그대로
-            // 텍스트에서 십성 키워드 + 오행 순으로 탐색
-            const sipMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*[''""]?([가-힣]{2,3})[''""]?`));
-            if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; const direct = sipMatch[1]; if ((OHAENG as readonly string[]).includes(direct)) return direct; }
-            // 오행 직접 언급
-            const elMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
-            if (elMatch) return elMatch[1];
-            return "";
-          }
-          const allText = [y.callout, y.intro, ...((y.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
-          y.yongsinEl = resolveEl(y.yongsinEl, "용신", allText);
-          y.heusinEl  = resolveEl(y.heusinEl,  "희신", allText);
-          y.gisinEl   = resolveEl(y.gisinEl,   "기신", allText);
-        }
-      }
-      if (isChapterReady(obj, chapter)) return { obj, ...meta };
-      console.error(`[saju_youare] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
+      if (isYouareChapterReady(obj, chapter)) return { obj, ...meta };
+      console.error(`[saju_youare] ${chapter}장 isYouareChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
     } catch (e) {
       console.error(`[saju_youare] ${chapter}장 예외 (시도${i+1}):`, e);
     }
@@ -294,10 +234,10 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isChapterReady(content, chapter)) {
+  if (!force && isYouareChapterReady(content, chapter)) {
     // 이미 저장돼 있으면 그 장 섹션만 반환
     const sections: Record<string, unknown> = {};
-    for (const k of CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
+    for (const k of YOUARE_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
     return NextResponse.json({ sections });
   }
 
