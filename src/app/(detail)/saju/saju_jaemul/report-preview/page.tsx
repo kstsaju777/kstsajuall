@@ -3672,11 +3672,9 @@ function P({ children }: { children: React.ReactNode }) {
 // 강조 콜아웃 박스 (사주 용어 하이라이트)
 function Callout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl px-4 py-3.5 mb-4" style={{ background: CALLOUT_BG }}>
-      <p className="text-[14px] leading-[1.85]" style={{ color: INK, fontFamily: SERIF }}>
-        {children}
-      </p>
-    </div>
+    <p className="text-[14px] leading-[1.85] mb-4 font-bold" style={{ color: INK, fontFamily: SERIF }}>
+      {children}
+    </p>
   );
 }
 
