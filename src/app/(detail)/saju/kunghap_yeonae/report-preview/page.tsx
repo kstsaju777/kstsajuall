@@ -45,6 +45,8 @@ const CH2_COLOR  = "#2d3a8c"; // 딥 네이비 — 2장 테마
 const CH2_PALE   = "#eef0fb";
 const CH3_COLOR  = "#c26a00"; // 앰버 황금 — 3장 테마 (끌림·불꽃)
 const CH3_PALE   = "#fff8ee";
+const CH4_COLOR  = "#3f7d6b"; // 딥 세이지 — 4장 테마 (나의 시각·성찰)
+const CH4_PALE   = "#eef6f3";
 
 // 오행 색상
 const OHAENG: { key: string; label: string; color: string }[] = [
@@ -3067,6 +3069,130 @@ function SipseongBadge({ label, color, desc }: { label: string; color: string; d
   );
 }
 
+// 십성 의미 카드 — 십성 뱃지 + 연애에서의 의미 풀이
+const SIPSEONG_COLOR_MAP: Record<string, string> = {
+  비견: "#2d3a8c", 겁재: "#9b2335", 식신: "#2d6a4f", 상관: "#c26080",
+  편재: "#b07d2a", 정재: "#7d6020", 편관: "#b05020", 정관: "#1a5c8a",
+  편인: "#7a3a8a", 정인: "#3a5a8a",
+};
+function SipseongMeaningCard({ sipseong, desc, color }: { sipseong: string; desc: string; color: string }) {
+  const SIPSEONG_EMOJI: Record<string, string> = {
+    비견: "🪞", 겁재: "⚔️", 식신: "🌱", 상관: "🎭",
+    편재: "💰", 정재: "🏦", 편관: "🔱", 정관: "👑",
+    편인: "🔮", 정인: "📖",
+  };
+  const emoji = SIPSEONG_EMOJI[sipseong] ?? "✦";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${color}20`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      {/* 상단 뱃지 띠 */}
+      <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${color}14 0%, ${color}06 100%)`, borderBottom: `1px solid ${color}15` }}>
+        <p className="text-[10px] font-bold tracking-widest mb-2" style={{ color }}>내 일간 기준 상대방의 십성</p>
+        <div className="flex items-center gap-3">
+          <span className="text-[28px]">{emoji}</span>
+          <div>
+            <p className="text-[22px] font-black leading-none" style={{ color, fontFamily: SERIF }}>{sipseong}</p>
+            <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>相對 天干의 十星</p>
+          </div>
+        </div>
+      </div>
+      {/* 풀이 */}
+      {desc && (
+        <div className="px-5 py-4">
+          <p className="text-[11px] font-bold mb-2" style={{ color }}>연애에서 이 십성이 의미하는 것</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 나의 시각 카드 — callout + 단락들 (테마 색상 지원)
+function MyViewCard({ data, color = CH4_COLOR, pale = CH4_PALE }: { data: Record<string, unknown> | null; color?: string; pale?: string }) {
+  if (!data) return null;
+  const callout = (data.callout as string | undefined) ?? "";
+  const intro = (data.intro as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mb-2">
+      {callout && (
+        <div className="mx-5 mb-4 px-5 py-4 rounded-2xl" style={{ background: `linear-gradient(135deg, ${color}14 0%, ${pale} 100%)`, border: `1.5px solid ${color}30` }}>
+          <span className="text-[11px] font-bold block mb-1.5" style={{ color }}>✦ 핵심 시각</span>
+          <p className="text-[14px] font-bold leading-relaxed" style={{ color: INK, fontFamily: SERIF }}>"{callout}"</p>
+        </div>
+      )}
+      {intro && (
+        <p className="px-6 text-[14px] leading-[1.85] mb-4 font-medium" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{intro}</p>
+      )}
+      <div className="px-6">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 기대 목록 카드 — icon + 제목 + 설명 + 상세 서술
+function ExpectationListCard({ items, color = CH4_COLOR }: { items: Array<{ label: string; icon?: string; desc: string; detailDesc?: string }>; color?: string }) {
+  if (!items.length) return null;
+  return (
+    <div className="mx-5 mb-5 space-y-3">
+      {items.map((item, i) => (
+        <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${color}18`, boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+          <div className="flex items-center gap-3 px-5 py-3.5" style={{ background: `${color}08`, borderBottom: item.detailDesc ? `1px solid ${color}10` : "none" }}>
+            {item.icon && <span className="text-[22px] flex-shrink-0">{item.icon}</span>}
+            <div className="flex-1">
+              <p className="text-[13px] font-black" style={{ color }}>{item.label}</p>
+              {item.desc && <p className="text-[12px] mt-0.5" style={{ color: INK_SOFT }}>{item.desc}</p>}
+            </div>
+          </div>
+          {item.detailDesc && (
+            <div className="px-5 py-3">
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.detailDesc}</p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// 관계 주의점 카드 — 핵심 경고 + 구체적 상황-대처 목록
+function RelationWarningCard({ data, color = CH4_COLOR }: { data: Record<string, unknown> | null; color?: string }) {
+  if (!data) return null;
+  const desc = (data.desc as string | undefined) ?? "";
+  const warningItems = (data.warningItems as Array<{ trigger: string; action: string }> | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {desc && (
+        <div className="mb-4 px-5 py-4 rounded-2xl" style={{ background: `${WARN}08`, borderLeft: `3px solid ${WARN}` }}>
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="text-[15px]">⚠️</span>
+            <p className="text-[11px] font-bold" style={{ color: WARN }}>관계에서 주의하시오</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+        </div>
+      )}
+      {warningItems.length > 0 && (
+        <div className="space-y-2.5">
+          {warningItems.map((wi, i) => (
+            <div key={i} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${INK}08` }}>
+              <div className="flex items-start gap-2 px-4 py-2.5" style={{ background: `${WARN}06`, borderBottom: `1px solid ${INK}06` }}>
+                <span className="text-[12px] font-black mt-0.5" style={{ color: WARN }}>상황</span>
+                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{wi.trigger}</p>
+              </div>
+              <div className="flex items-start gap-2 px-4 py-2.5" style={{ background: `${color}06` }}>
+                <span className="text-[12px] font-black mt-0.5" style={{ color }}>처방</span>
+                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{wi.action}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // 합충 요약 카드
 function HapChungSummary({ rels }: { rels: Array<{ type: string; desc: string; color: string }> }) {
   if (!rels.length) return <p className="px-6 text-[13px]" style={{ color: MUTE }}>특별한 합·충·형 관계가 없소.</p>;
@@ -5094,55 +5220,81 @@ function ReportPreviewInner() {
       })()}
 
       {/* ═══════════ 제4장 · 나는 이 사람을 어떻게 보는가 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 내 시각</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 이 사람을 어떻게 보는가</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_4/kunghap_yeonae_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"내 일간의 눈으로 상대방을 바라보면\n어떤 십성으로 보이는지,\n그 의미가 무엇인지 살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>내 눈에 상대방은 이런 사람이오</Heading>
-            {report?.view?.pillars?.[1] && report?.partnerView?.pillars?.[1] && (() => {
-              const myIlgan = report.view.pillars[1].gan;
-              const partnerIlgan = report.partnerView!.pillars[1].gan;
-              const sip = sipseongOfStem(myIlgan, partnerIlgan);
-              const COLOR_MAP: Record<string, string> = { 비견: NAVY, 겁재: MAROON, 식신: GREEN, 상관: ROSE, 편재: GOLD, 정재: "#9b7a2a", 편관: WARN, 정관: BLUE, 편인: "#7a3a8a", 정인: "#3a5a8a" };
-              return <div className="mb-4"><SipseongBadge label={sip} color={COLOR_MAP[sip] ?? MUTE} desc="내 일간 기준 상대방 천간의 십성" /></div>;
-            })()}
-            <ReportSec data={(jc.myView as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
-          </section>
-          {!!(jc.myExpectation as Record<string, unknown> | undefined)?.items && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>내가 상대에게 기대하는 것</Heading>
-              <div className="space-y-3">
-                {((jc.myExpectation as { items: Array<{ label: string; desc: string }> }).items ?? []).map((item, i) => (
-                  <div key={i} className="rounded-xl px-4 py-3" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}15` }}>
-                    <p className="text-[13px] font-bold mb-1" style={{ color: MAROON }}>{item.label}</p>
-                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-                  </div>
-                ))}
-              </div>
+      {ch === "4" && (() => {
+        const partnerName = report?.partnerName || "상대방";
+        const myView = (jc.myView as Record<string, unknown> | undefined) ?? null;
+        const myExpectation = (jc.myExpectation as { items?: Array<{ label: string; icon?: string; desc: string; detailDesc?: string }> } | undefined) ?? null;
+        const myWarning = (jc.myWarning as Record<string, unknown> | undefined) ?? null;
+        const mySipseong = (jc.mySipseong as { sipseong?: string; desc?: string } | undefined) ?? null;
+
+        // 십성 자동 계산 (mySipseong 섹션 없을 때 폴백)
+        let computedSipseong = "";
+        let sipseongColor = CH4_COLOR;
+        if (report?.view?.pillars?.[1] && report?.partnerView?.pillars?.[1]) {
+          computedSipseong = sipseongOfStem(report.view.pillars[1].gan, report.partnerView.pillars[1].gan);
+          sipseongColor = SIPSEONG_COLOR_MAP[computedSipseong] ?? CH4_COLOR;
+        }
+        const sipseongName = mySipseong?.sipseong ?? computedSipseong;
+        const sipseongDesc = mySipseong?.desc ?? "";
+
+        return (
+          <>
+            {/* 다크 헤더 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 내 시각</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 이 사람을 어떻게 보는가</h1>
+            </div>
+
+            {/* 커버 이미지 */}
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_4/kunghap_yeonae_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"내 일간의 눈으로 ${partnerName}을(를) 바라보면\n어떤 십성으로 보이는지,\n그 의미가 무엇인지 살펴보겠소."`}</Quote>
+
+            {/* 십성 의미 카드 */}
+            {sipseongName && (
+              <section className="pb-2">
+                <div className="px-6"><Heading>내 눈에 {partnerName}은(는)</Heading></div>
+                <SipseongMeaningCard sipseong={sipseongName} desc={sipseongDesc} color={sipseongColor} />
+              </section>
+            )}
+
+            {/* 내가 보는 상대 풀이 */}
+            <section className="pb-4">
+              <div className="px-6"><Heading>내 사주로 보는 {partnerName}</Heading></div>
+              <MyViewCard data={myView} color={CH4_COLOR} pale={CH4_PALE} />
             </section>
-          )}
-          {!!(jc.myWarning as Record<string, unknown> | undefined)?.desc && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>내가 주의할 점</Heading>
-              <div className="rounded-xl px-4 py-3.5" style={{ background: `${WARN}08`, borderLeft: `3px solid ${WARN}` }}>
-                <P>{(jc.myWarning as { desc: string }).desc}</P>
-              </div>
-            </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"반대로, 상대방의 눈에는\n내가 어떻게 보이는지\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
+
+            {/* 내가 상대에게 기대하는 것 */}
+            {myExpectation?.items && myExpectation.items.length > 0 && (
+              <section className="pb-4">
+                <div className="px-6"><Heading>내가 {partnerName}에게 기대하는 것</Heading></div>
+                <ExpectationListCard items={myExpectation.items} color={CH4_COLOR} />
+              </section>
+            )}
+
+            {/* 주의점 카드 */}
+            {myWarning && (
+              <section className="pb-4">
+                <div className="px-6"><Heading>내가 주의할 점</Heading></div>
+                <RelationWarningCard data={myWarning} color={CH4_COLOR} />
+              </section>
+            )}
+
+            {/* 홍연 마무리 인용구 */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${CH4_COLOR}12 0%, ${CH4_PALE} 100%)`, border: `1px solid ${CH4_COLOR}20` }}>
+              <p className="text-[13px] leading-[1.8]" style={{ color: CH4_COLOR, fontFamily: SERIF }}>
+                {`"반대로, ${partnerName}의 눈에는\n내가 어떻게 보이는지\n살펴보겠소."`}
+              </p>
+            </div>
+
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제5장 · 상대는 나를 어떻게 보는가 ═══════════ */}
       {ch === "5" && (

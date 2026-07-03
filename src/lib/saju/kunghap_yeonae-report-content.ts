@@ -11,8 +11,8 @@ export const YEONAE_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   1:  ["myWonguk", "myNature", "myLovePattern"],
   2:  ["partnerWonguk", "partnerNature", "partnerLovePattern"],
   3:  ["attractionReason", "firstImpression", "chemistryScore"],
-  4:  ["myView", "myExpectation", "myWarning"],
-  5:  ["partnerView", "partnerExpectation", "partnerWarning"],
+  4:  ["mySipseong", "myView", "myExpectation", "myWarning"],
+  5:  ["partnerSipseong", "partnerView", "partnerExpectation", "partnerWarning"],
   6:  ["hapList", "chungList", "overallScore"],
   7:  ["myStyle", "partnerStyle", "styleGap"],
   8:  ["strengths", "shadows", "balance"],
@@ -120,29 +120,40 @@ const CH_GUIDE: Record<number, string> = {
 - partnerEmotion: 상대가 나를 처음 봤을 때 느끼는 감정 이모지 1개.
 - partnerDesc: 상대가 나를 처음 만났을 때 느끼는 감정, 분위기, 눈길이 머무는 곳을 3~5문장으로 생생하게. 상대 사주 기준으로 내가 어떻게 감지되는지. 홍연 말투.`,
 
-  4: `[myView 섹션 — 내가 보는 상대]
-- intro: 내 사주 기준으로 상대가 어떻게 보이는지 핵심 한 줄.
-- callout: 내 사주에서 상대가 어떤 십성·오행으로 작용하는지 한 문장.
-- paragraphs 2개: ①내 눈에 비친 상대의 이미지와 매력 포인트 ②내가 상대에게 기대하는 것과 갈등이 생길 수 있는 지점. 각 단락 3~4문장.
+  4: `[mySipseong 섹션 — 내 일간 기준 상대방 십성]
+- sipseong: 내 일간을 기준으로 상대방 일간 천간이 어떤 십성인지 (예: "정관", "편재", "식신"). 사주 명식에서 직접 계산하여 정확히 기재.
+- desc: 이 십성이 내 연애에서 어떤 의미를 갖는지, 상대가 내게 어떤 존재감으로 다가오는지 3~5문장으로. 이 십성을 가진 상대를 만나면 내 감정이 어떻게 반응하는지, 어떤 끌림이나 갈등이 생기는지 구체적으로. 홍연 말투.
+
+[myView 섹션 — 내가 보는 상대]
+- intro: 내 사주 기준 상대의 이미지 핵심 한 줄.
+- callout: 상대가 내 사주에서 어떤 오행·십성 기운으로 작용하는지 핵심 한 문장.
+- paragraphs 4개: ①내 일간 오행 기준으로 상대가 어떻게 감지되는지 — 내 눈에 비친 상대의 전체 이미지와 분위기(5~7문장, 220자+) ②상대가 내 감정에 주는 영향 — 함께 있을 때 내 기운이 어떻게 달라지는지, 어떤 감정을 자주 느끼는지(5~7문장, 220자+) ③내 일간 기준 상대와의 관계 역학 — 내가 주도하는지 이끌리는지, 서로 어떤 역할을 하게 되는지(5~7문장, 220자+) ④이 시각이 만드는 행동 패턴 — 내가 이 사람에게 무의식적으로 어떻게 행동하게 되는지, 어떤 점을 조심해야 하는지(4~6문장, 180자+). 홍연 말투.
 
 [myExpectation 섹션 — 나의 기대]
-items: 내가 상대에게 기대하는 것 2~3개.
-각 item: label(기대 제목), desc(구체적 설명 한 줄).
+- items 3~4개: 내가 이 사람에게 무의식적으로 기대하는 것.
+  각 item: label(기대 제목, 5자 이내), icon(이모지 1개), desc(한 줄 핵심 설명), detailDesc(이 기대가 생기는 사주적 이유와 기대가 충족/미충족될 때 어떤 감정이 드는지 2~3문장).
 
 [myWarning 섹션 — 나의 주의점]
-- desc: 내가 이 관계에서 주의해야 할 점 2~3문장.`,
+- desc: 내가 이 관계에서 반드시 알아야 할 핵심 주의 메시지 3~4문장. 내 사주의 어떤 기운 때문에 이 패턴이 반복되는지 설명. 홍연 말투.
+- warningItems 2~3개: 구체적인 주의 상황과 처방.
+  각 item: trigger(주의가 필요한 구체적 상황), action(이 상황에서 이렇게 하면 좋겠소 — 처방 한 줄).`,
 
-  5: `[partnerView 섹션 — 상대가 보는 나]
+  5: `[partnerSipseong 섹션 — 상대 일간 기준 나의 십성]
+- sipseong: 상대 일간을 기준으로 내 일간 천간이 어떤 십성인지. 사주 명식에서 직접 계산하여 정확히 기재.
+- desc: 이 십성이 상대의 연애에서 어떤 의미를 갖는지, 내가 상대에게 어떤 존재감으로 다가가는지 3~5문장. 홍연 말투.
+
+[partnerView 섹션 — 상대가 보는 나]
 - intro: 상대 사주 기준으로 내가 어떻게 보이는지 핵심 한 줄.
-- callout: 상대 사주에서 내가 어떤 십성·오행으로 작용하는지 한 문장.
-- paragraphs 2개: ①상대 눈에 비친 나의 이미지와 매력 포인트 ②상대가 나에게 기대하는 것과 갈등이 생길 수 있는 지점. 각 단락 3~4문장.
+- callout: 내가 상대 사주에서 어떤 오행·십성 기운으로 작용하는지 핵심 한 문장.
+- paragraphs 4개: ①상대 일간 기준 내가 어떻게 감지되는지 — 상대 눈에 비친 나의 이미지(5~7문장, 220자+) ②내가 상대의 감정에 주는 영향(5~7문장, 220자+) ③상대 시각에서 본 관계 역학(5~7문장, 220자+) ④이 시각이 만드는 상대의 행동 패턴(4~6문장, 180자+). 홍연 말투.
 
 [partnerExpectation 섹션 — 상대의 기대]
-items: 상대가 나에게 기대하는 것 2~3개.
-각 item: label(기대 제목), desc(구체적 설명 한 줄).
+- items 3~4개: 상대가 나에게 무의식적으로 기대하는 것.
+  각 item: label(기대 제목, 5자 이내), icon(이모지 1개), desc(한 줄 핵심 설명), detailDesc(사주적 이유와 감정 2~3문장).
 
 [partnerWarning 섹션 — 상대의 주의점]
-- desc: 상대가 이 관계에서 주의해야 할 점 2~3문장.`,
+- desc: 상대가 이 관계에서 주의해야 할 핵심 메시지 3~4문장. 홍연 말투.
+- warningItems 2~3개: { trigger: "주의 상황", action: "처방 한 줄" }.`,
 
   6: `[hapList 섹션 — 합 목록]
 items: 두 사람 사주에서 발견되는 합(合) 2~4개.
@@ -243,14 +254,16 @@ const CH_SCHEMA: Record<number, string> = {
   "firstImpression": { "mine": "내가 상대에게 받는 첫인상 핵심 한 줄", "mineEmotion": "😍", "mineDesc": "내 시각으로 본 상대 첫인상 3~5문장", "partner": "상대가 나에게 받는 첫인상 핵심 한 줄", "partnerEmotion": "🌹", "partnerDesc": "상대 시각으로 본 나의 첫인상 3~5문장" }
 }`,
   4: `{
-  "myView": { "intro": "한 줄", "callout": "핵심 한 문장", "paragraphs": ["단락1(3~4문장)", "단락2"] },
-  "myExpectation": { "items": [{ "label": "기대 제목", "desc": "설명 한 줄" }] },
-  "myWarning": { "desc": "주의점 2~3문장" }
+  "mySipseong": { "sipseong": "정관", "desc": "이 십성의 연애 의미 3~5문장" },
+  "myView": { "intro": "핵심 한 줄", "callout": "오행·십성 기운 핵심 한 문장", "paragraphs": ["단락1 이미지(5~7문장 220자+)", "단락2 감정 영향(5~7문장 220자+)", "단락3 관계 역학(5~7문장 220자+)", "단락4 행동 패턴(4~6문장 180자+)"] },
+  "myExpectation": { "items": [{ "label": "기대 제목", "icon": "💫", "desc": "핵심 한 줄", "detailDesc": "사주적 이유와 감정 2~3문장" }, { "label": "기대 제목2", "icon": "🌱", "desc": "핵심 한 줄", "detailDesc": "2~3문장" }, { "label": "기대 제목3", "icon": "🔥", "desc": "핵심 한 줄", "detailDesc": "2~3문장" }] },
+  "myWarning": { "desc": "핵심 주의 메시지 3~4문장", "warningItems": [{ "trigger": "주의 필요 상황", "action": "처방 한 줄" }, { "trigger": "주의 필요 상황2", "action": "처방2 한 줄" }] }
 }`,
   5: `{
-  "partnerView": { "intro": "한 줄", "callout": "핵심 한 문장", "paragraphs": ["단락1(3~4문장)", "단락2"] },
-  "partnerExpectation": { "items": [{ "label": "기대 제목", "desc": "설명 한 줄" }] },
-  "partnerWarning": { "desc": "주의점 2~3문장" }
+  "partnerSipseong": { "sipseong": "정재", "desc": "상대 기준 이 십성의 연애 의미 3~5문장" },
+  "partnerView": { "intro": "핵심 한 줄", "callout": "오행·십성 기운 핵심 한 문장", "paragraphs": ["단락1(5~7문장 220자+)", "단락2(5~7문장 220자+)", "단락3(5~7문장 220자+)", "단락4(4~6문장 180자+)"] },
+  "partnerExpectation": { "items": [{ "label": "기대 제목", "icon": "💫", "desc": "핵심 한 줄", "detailDesc": "2~3문장" }, { "label": "기대 제목2", "icon": "🌱", "desc": "핵심 한 줄", "detailDesc": "2~3문장" }] },
+  "partnerWarning": { "desc": "핵심 주의 메시지 3~4문장", "warningItems": [{ "trigger": "주의 필요 상황", "action": "처방 한 줄" }, { "trigger": "주의 필요 상황2", "action": "처방2 한 줄" }] }
 }`,
   6: `{
   "hapList": { "items": [{ "type": "천간합", "desc": "영향 한 줄", "strength": "강함" }] },
