@@ -53,6 +53,8 @@ const CH6_COLOR  = "#1a5c8a"; // 딥 인디고 블루 — 6장 테마 (합·충,
 const CH6_PALE   = "#eef4f9";
 const HAP_COLOR  = "#2d6a4f"; // 합(合) — 초록 계열
 const CHUNG_COLOR = "#b05020"; // 충(沖) — 오렌지-레드 계열
+const CH7_COLOR  = "#8b5e3c"; // 딥 테라코타 — 7장 테마 (스타일·개성·조율)
+const CH7_PALE   = "#faf5f0";
 
 // 오행 색상
 const OHAENG: { key: string; label: string; color: string }[] = [
@@ -3357,6 +3359,155 @@ function HapChungScoreCard({ data, hapCount, chungCount }: { data: Record<string
   );
 }
 
+// 연애 스타일 카드 — 유형명 + 아이콘 + 키워드 + 스타일 설명 + 강점/약점
+function LoveStyleCard({
+  data, color, pale, label: sectionLabel,
+}: {
+  data: Record<string, unknown> | null;
+  color: string;
+  pale: string;
+  label: string;
+}) {
+  if (!data) return null;
+  const label = (data.label as string | undefined) ?? "";
+  const icon = (data.icon as string | undefined) ?? "💞";
+  const keywords = (data.keywords as string[] | undefined) ?? [];
+  const styleDesc = (data.styleDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const strengthStyle = (data.strengthStyle as string | undefined) ?? "";
+  const shadowStyle = (data.shadowStyle as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${color}20`, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+      {/* 유형 헤더 */}
+      <div className="px-5 pt-5 pb-4" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, borderBottom: `1px solid ${color}15` }}>
+        <p className="text-[10px] font-bold tracking-widest mb-2" style={{ color }}>{sectionLabel}</p>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-[30px]">{icon}</span>
+          <div>
+            <p className="text-[18px] font-black leading-tight" style={{ color }}>{label}</p>
+            <p className="text-[10px] mt-0.5" style={{ color: MUTE }}>연애 스타일 유형</p>
+          </div>
+        </div>
+        {/* 키워드 태그 */}
+        {keywords.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {keywords.map((kw, i) => (
+              <span key={i} className="px-3 py-1 rounded-full text-[11px] font-bold" style={{ background: `${color}16`, color }}>
+                {kw}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* 스타일 설명 */}
+      {styleDesc && (
+        <div className="px-5 py-4" style={{ borderBottom: (strengthStyle || shadowStyle) ? `1px solid ${INK}08` : "none" }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{styleDesc}</p>
+        </div>
+      )}
+      {/* 강점 */}
+      {strengthStyle && (
+        <div className="px-5 pt-3 pb-3" style={{ background: `${HAP_COLOR}04`, borderBottom: shadowStyle ? `1px solid ${INK}06` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[13px]">✨</span>
+            <p className="text-[11px] font-black" style={{ color: HAP_COLOR }}>연애에서 빛나는 점</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthStyle}</p>
+        </div>
+      )}
+      {/* 약점·주의 */}
+      {shadowStyle && (
+        <div className="px-5 pt-3 pb-4" style={{ background: `${WARN}04` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[13px]">⚠️</span>
+            <p className="text-[11px] font-black" style={{ color: WARN }}>주의해야 할 스타일 패턴</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowStyle}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 스타일 상성 비교 배너 — 두 유형 나란히 + 상성 평가
+function StyleCompareBar({
+  myLabel, myIcon, myColor,
+  partnerLabel, partnerIcon, partnerColor,
+  compatRating, compatIcon,
+}: {
+  myLabel: string; myIcon: string; myColor: string;
+  partnerLabel: string; partnerIcon: string; partnerColor: string;
+  compatRating: string; compatIcon: string;
+}) {
+  const COMPAT_COLOR = compatRating === "매우 잘 맞음" ? HAP_COLOR
+    : compatRating === "잘 맞음" ? CH6_COLOR
+    : compatRating === "보통" ? CH7_COLOR
+    : CHUNG_COLOR;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}10`, boxShadow: "0 1px 10px rgba(0,0,0,0.04)" }}>
+      <div className="flex items-stretch">
+        {/* 나 */}
+        <div className="flex-1 flex flex-col items-center justify-center px-3 py-4" style={{ background: `${myColor}08` }}>
+          <span className="text-[24px] mb-1">{myIcon}</span>
+          <p className="text-[12px] font-black text-center leading-tight" style={{ color: myColor }}>{myLabel}</p>
+          <p className="text-[10px] mt-0.5" style={{ color: MUTE }}>나의 스타일</p>
+        </div>
+        {/* 상성 중앙 */}
+        <div className="flex flex-col items-center justify-center px-3 py-4" style={{ background: WHITE, borderLeft: `1px solid ${INK}06`, borderRight: `1px solid ${INK}06`, minWidth: 72 }}>
+          <span className="text-[22px] mb-1">{compatIcon}</span>
+          <p className="text-[10px] font-black text-center leading-snug" style={{ color: COMPAT_COLOR }}>{compatRating}</p>
+        </div>
+        {/* 상대방 */}
+        <div className="flex-1 flex flex-col items-center justify-center px-3 py-4" style={{ background: `${partnerColor}08` }}>
+          <span className="text-[24px] mb-1">{partnerIcon}</span>
+          <p className="text-[12px] font-black text-center leading-tight" style={{ color: partnerColor }}>{partnerLabel}</p>
+          <p className="text-[10px] mt-0.5" style={{ color: MUTE }}>상대 스타일</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 스타일 차이 분석 + 조율 팁 카드
+function StyleGapCard({ data, color = CH7_COLOR, pale = CH7_PALE }: { data: Record<string, unknown> | null; color?: string; pale?: string }) {
+  if (!data) return null;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const tips = (data.tips as string[] | undefined) ?? [];
+  const synergy = (data.synergy as string | undefined) ?? "";
+  return (
+    <div className="mb-2">
+      {/* 차이 분석 단락들 */}
+      <div className="px-6">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        ))}
+      </div>
+      {/* 조율 팁 목록 */}
+      {tips.length > 0 && (
+        <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${color}18`, boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+          <div className="px-5 py-3" style={{ background: `${color}08`, borderBottom: `1px solid ${color}12` }}>
+            <p className="text-[12px] font-black" style={{ color }}>✦ 두 사람이 조화를 이루는 법</p>
+          </div>
+          <div className="px-5 py-3 space-y-3">
+            {tips.map((tip, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <span className="text-[13px] font-black flex-shrink-0 mt-0.5" style={{ color }}>{i + 1}</span>
+                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* 시너지 코멘트 */}
+      {synergy && (
+        <div className="mx-5 mb-4 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, border: `1px solid ${color}20` }}>
+          <p className="text-[12px] font-bold mb-1" style={{ color }}>두 스타일이 최고로 맞을 때</p>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: INK, fontFamily: SERIF }}>"{synergy}"</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // 합충 요약 카드
 function HapChungSummary({ rels }: { rels: Array<{ type: string; desc: string; color: string }> }) {
   if (!rels.length) return <p className="px-6 text-[13px]" style={{ color: MUTE }}>특별한 합·충·형 관계가 없소.</p>;
@@ -5688,75 +5839,76 @@ function ReportPreviewInner() {
       })()}
 
       {/* ═══════════ 제7장 · 연애 스타일의 차이 ═══════════ */}
-      {ch === "7" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 스타일</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>연애 스타일의 차이</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_7/kunghap_yeonae_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"사람마다 연애하는 방식이 다르오.\n두 사람이 어디서 맞고,\n어디서 다른지 보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나의 연애 스타일</Heading>
-            {!!(jc.myStyle as Record<string, unknown> | undefined) && (
-              <>
-                {!!(jc.myStyle as Record<string, unknown>).label && (
-                  <div className="mb-3 inline-block px-4 py-1.5 rounded-full text-[13px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{(jc.myStyle as { label: string }).label}</div>
-                )}
-                {!!(jc.myStyle as Record<string, unknown>).keywords && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {((jc.myStyle as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
-                      <span key={i} className="px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background: `${MAROON}10`, color: MAROON }}>{kw}</span>
-                    ))}
-                  </div>
-                )}
-                {!!(jc.myStyle as Record<string, unknown>).desc && <P>{(jc.myStyle as { desc: string }).desc}</P>}
-              </>
-            )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>{report?.partnerName || "상대방"}의 연애 스타일</Heading>
-            {!!(jc.partnerStyle as Record<string, unknown> | undefined) && (
-              <>
-                {!!(jc.partnerStyle as Record<string, unknown>).label && (
-                  <div className="mb-3 inline-block px-4 py-1.5 rounded-full text-[13px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{(jc.partnerStyle as { label: string }).label}</div>
-                )}
-                {!!(jc.partnerStyle as Record<string, unknown>).keywords && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {((jc.partnerStyle as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
-                      <span key={i} className="px-2.5 py-1 rounded-full text-[11px] font-bold" style={{ background: `${NAVY}10`, color: NAVY }}>{kw}</span>
-                    ))}
-                  </div>
-                )}
-                {!!(jc.partnerStyle as Record<string, unknown>).desc && <P>{(jc.partnerStyle as { desc: string }).desc}</P>}
-              </>
-            )}
-          </section>
-          {!!(jc.styleGap as Record<string, unknown> | undefined) && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>스타일 차이와 조율법</Heading>
-              {!!(jc.styleGap as Record<string, unknown>).desc && <P>{(jc.styleGap as { desc: string }).desc}</P>}
-              {!!(jc.styleGap as Record<string, unknown>).tips && (
-                <div className="space-y-2 mt-3">
-                  {((jc.styleGap as { tips?: string[] }).tips ?? []).map((tip, i) => (
-                    <div key={i} className="flex gap-2 items-start">
-                      <span className="text-[12px] font-bold mt-0.5" style={{ color: ROSE }}>✦</span>
-                      <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+      {ch === "7" && (() => {
+        const myName = report?.name || "나";
+        const partnerName = report?.partnerName || "상대방";
+        const myStyle = (jc.myStyle as Record<string, unknown> | undefined) ?? null;
+        const partnerStyle = (jc.partnerStyle as Record<string, unknown> | undefined) ?? null;
+        const styleGap = (jc.styleGap as Record<string, unknown> | undefined) ?? null;
+        const compatRating = (styleGap?.compatRating as string | undefined) ?? "보통";
+        const compatIcon = (styleGap?.compatIcon as string | undefined) ?? "💞";
+        const myLabel = (myStyle?.label as string | undefined) ?? "나의 스타일";
+        const myIcon = (myStyle?.icon as string | undefined) ?? "💫";
+        const partnerLabel = (partnerStyle?.label as string | undefined) ?? "상대 스타일";
+        const partnerIcon = (partnerStyle?.icon as string | undefined) ?? "🌸";
+        return (
+          <>
+            {/* 다크 헤더 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 스타일</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>연애 스타일의 차이</h1>
+            </div>
+
+            {/* 커버 이미지 */}
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_7/kunghap_yeonae_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"사람마다 연애하는 방식이 다르오.\n두 사람이 어디서 맞고,\n어디서 다른지 살펴보겠소."`}</Quote>
+
+            {/* 스타일 상성 비교 배너 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>두 스타일 상성</Heading></div>
+              <StyleCompareBar
+                myLabel={myLabel} myIcon={myIcon} myColor={CH1_COLOR}
+                partnerLabel={partnerLabel} partnerIcon={partnerIcon} partnerColor={CH2_COLOR}
+                compatRating={compatRating} compatIcon={compatIcon}
+              />
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-          <Quote>{`"스타일의 차이를 알았으니,\n이 관계의 빛과 그림자를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="7" go={next} />
-        </>
-      )}
+
+            {/* 나의 연애 스타일 카드 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>{myName}의 연애 스타일</Heading></div>
+              <LoveStyleCard data={myStyle} color={CH1_COLOR} pale={CH1_PALE} label={`${myName}의 연애 스타일 유형`} />
+            </section>
+
+            {/* 상대방 연애 스타일 카드 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>{partnerName}의 연애 스타일</Heading></div>
+              <LoveStyleCard data={partnerStyle} color={CH2_COLOR} pale={CH2_PALE} label={`${partnerName}의 연애 스타일 유형`} />
+            </section>
+
+            {/* 스타일 차이 분석 + 조율법 */}
+            {styleGap && (
+              <section className="pb-4">
+                <div className="px-6"><Heading>스타일 차이와 조율법</Heading></div>
+                <StyleGapCard data={styleGap} color={CH7_COLOR} pale={CH7_PALE} />
+              </section>
+            )}
+
+            {/* 홍연 마무리 인용구 */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${CH7_COLOR}12 0%, ${CH7_PALE} 100%)`, border: `1px solid ${CH7_COLOR}20` }}>
+              <p className="text-[13px] leading-[1.8]" style={{ color: CH7_COLOR, fontFamily: SERIF }}>
+                {"스타일의 차이를 알았으니,\n이 관계의 빛과 그림자를\n살펴보겠소."}
+              </p>
+            </div>
+
+            <ChapterNav cur="7" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제8장 · 이 관계의 빛과 그림자 ═══════════ */}
       {ch === "8" && (
