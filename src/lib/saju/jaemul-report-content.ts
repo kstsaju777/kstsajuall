@@ -8,7 +8,7 @@ import { SYSTEM } from "./report-prompts";
 
 // ── 장별 필수 섹션 키 ──
 export const JAEMUL_CHAPTER_SECTIONS: Record<number, string[]> = {
-  1: ["wonguk"],
+  1: ["wonguk", "geokguk", "jaeseong"],
   2: ["wealthStyle"],
   3: ["wealthPresence", "jobFit", "investStyle", "splitType"],
   4: ["careerWealth", "wealthPeak"],
@@ -34,6 +34,7 @@ export function isJaemulChapterReady(
     if ("items" in v) return Array.isArray(v.items) && (v.items as unknown[]).length > 0;
     if ("tips" in v) return Array.isArray(v.tips) && (v.tips as unknown[]).length > 0;
     if ("leftLabel" in v) return typeof v.left === "number" && typeof v.right === "number";
+    if ("name" in v) return typeof v.name === "string" && (v.name as string).length > 0;
     if ("when" in v) return typeof v.title === "string" && (v.title as string).length > 0;
     if ("element" in v) return typeof v.element === "string" && (v.element as string).length > 0;
     return false;
@@ -53,10 +54,23 @@ const JAEMUL_CH_THEME: Record<number, string> = {
 
 // ── 장별 추가 지시 ──
 const JAEMUL_CH_GUIDE: Record<number, string> = {
-  1: `[wonguk 섹션 — 타고난 그릇]
+  1: `[wonguk 섹션 — 타고난 그릇 분석]
 - intro: "~한 사주로, 한 문장 요약" 형식으로 시작. (1문장)
 - callout: 일간 오행과 신강·신약 핵심을 한 문장으로.
-- paragraphs 3개: ①일간 오행과 타고난 기운 ②오행 균형의 특징과 재물에 미치는 영향 ③신강·신약 판단과 돈을 다루는 그릇의 크기. 각 단락 3~4문장.`,
+- paragraphs 3개: ①일간 오행과 타고난 기운 ②오행 균형의 특징과 재물에 미치는 영향 ③신강·신약 판단과 돈을 다루는 그릇의 크기. 각 단락 3~4문장.
+
+[geokguk 섹션 — 격국]
+이 사람의 격국(格局)을 판단하여 아래 형식으로 출력하오.
+- name: 격국 이름 (예: "편인격", "정관격", "식신격", "재격" 등). 반드시 월지 기준으로 판단.
+- keyword: 이 격이 가진 핵심 특성 키워드 2~3개를 "·"로 구분 (예: "직관·창의·독립").
+- desc: 이 격국이 재물과 어떻게 연결되는지 2~3문장으로 설명. 홍연 화자로.
+
+[jaeseong 섹션 — 재물성(재성) 체크]
+이 사람의 사주 원국에서 재물성(재성)의 상태를 항목별로 점검하오.
+items: 반드시 4개 항목. 각 항목:
+- label: 체크 항목명 (예: "재성 존재", "재성 힘", "식상→재 흐름", "관성 보호")
+- exists: true(있음/좋음) 또는 false(없음/약함)
+- desc: 해당 항목의 상태를 한 줄로 설명 (구체적인 천간·지지·십성 언급).`,
 
   2: `[wealthStyle 섹션 — 재물 기질]
 - intro: 돈을 대하는 나만의 방식을 핵심 한 줄로. (1문장)
@@ -125,6 +139,19 @@ const JAEMUL_CH_SCHEMA: Record<number, string> = {
     "intro": "~한 사주로, 한 줄 요약 (1문장)",
     "callout": "핵심 사주 용어 포함 강조 한 문장",
     "paragraphs": ["단락1 (3~4문장)", "단락2 (3~4문장)", "단락3 (3~4문장)"]
+  },
+  "geokguk": {
+    "name": "격국명 (예: 편인격)",
+    "keyword": "특성1·특성2·특성3",
+    "desc": "이 격국과 재물의 연결 2~3문장"
+  },
+  "jaeseong": {
+    "items": [
+      { "label": "재성 존재", "exists": true, "desc": "구체적인 천간·지지 언급 한 줄" },
+      { "label": "재성 힘", "exists": true, "desc": "재성 강약 상태 한 줄" },
+      { "label": "식상→재 흐름", "exists": false, "desc": "식상 → 재성 연결 상태 한 줄" },
+      { "label": "관성 보호", "exists": true, "desc": "관성의 재성 보호 여부 한 줄" }
+    ]
   }
 }`,
   2: `{
