@@ -28,6 +28,8 @@ export function isJaemulChapterReady(
     const val = content[k];
     if (!val || typeof val !== "object") return false;
     const v = val as Record<string, unknown>;
+    if ("modes" in v) return Array.isArray(v.modes) && (v.modes as unknown[]).length > 0;
+    if ("score" in v && "reDesc" in v) return typeof v.score === "number" && typeof v.reDesc === "string" && (v.reDesc as string).length > 0;
     if ("paragraphs" in v) return Array.isArray(v.paragraphs) && (v.paragraphs as unknown[]).length > 0;
     if ("sinDesc" in v) return typeof v.sinDesc === "string" && (v.sinDesc as string).length > 0;
     if ("clusters" in v) return Array.isArray(v.clusters) && (v.clusters as unknown[]).length > 0;
@@ -72,32 +74,42 @@ const JAEMUL_CH_GUIDE: Record<number, string> = {
 items: 반드시 4개 항목. 각 항목:
 - label: 체크 항목명 (예: "재성 존재", "재성 힘", "식상→재 흐름", "관성 보호")
 - exists: true(있음/좋음) 또는 false(없음/약함)
-- desc: 해당 항목의 상태를 한 줄로 설명 (구체적인 천간·지지·십성 언급).`,
+- desc: 해당 항목의 상태를 한 줄로 설명 (구체적인 천간·지지·십성 언급).
+summary: 위 4가지 점검 결과를 종합한 재물성 풀이. 3~4문장. 이 사람의 재물 구조의 강점·약점·종합 방향을 홍연 화자(~했소/~이오)로 풍부하게 서술. 단순 요약이 아니라 인물 중심 이야기처럼.`,
 
   2: `[wealthStyle 섹션 — 재물 기질]
-- intro: 돈을 대하는 나만의 방식을 핵심 한 줄로. (1문장)
-- callout: 재성·관성·식상 중 강한 십성과 재물 기질의 연결고리 한 문장.
-- paragraphs 3개: ①돈을 버는 방식(적극적/소극적) ②소비·저축·투자 습관 패턴 ③재물에 대한 심리와 집착·여유의 균형. 각 단락 3~4문장.`,
+- intro: 이 사람의 재물 기질을 대표하는 핵심 한 줄. (1문장, 홍연 화자)
+- keywords: 재물 기질을 압축하는 키워드 3개. 각 2~4글자. 예: ["적극 추진형", "선계획 후실행", "안전 우선"]
+- modes: 3개 항목. 각 항목:
+  - icon: 성격에 맞는 이모지 1개 (💰 벌기, 💳 소비·저축, 🧠 재물심리 등 구분)
+  - title: 짧은 소제목 (예: "돈을 버는 방식", "소비와 저축 습관", "재물에 대한 심리")
+  - desc: 해당 기질 설명 3~4문장. 구체적인 십성·오행 근거 포함. 홍연 화자.
+- traits: 4개 돈 성향 점수. 각 항목 { label, score(0~100 정수) }
+  반드시 이 4개: "적극성" "절약성" "위험선호" "장기계획"
+  사주 명식에 근거해 점수 산출.
+- summary: 재물 기질 종합 풀이 3~4문장. 이 사람이 돈과 어떻게 살아가야 하는지 방향 제시. 홍연 화자.`,
 
-  3: `[wealthPresence 섹션 — 재물 존재 여부]
-- intro: 사주에 재물(재성)이 얼마나 드러나는지 한 줄 요약. (1문장)
-- callout: 재성 강약, 합·충 영향 핵심 한 문장.
-- paragraphs 2개: ①재성의 유무·강약과 그 의미 ②재물을 얻기 쉬운 조건과 조심할 조건. 각 단락 3~4문장.
+  3: `[wealthPresence 섹션 — 재성 강도 & 조건 분석]
+- score: 이 명식의 재성(財星) 종합 강도 0~100 정수. 재성의 유무·위치·힘·생조 여부 종합 판단.
+- reDesc: 재성의 유무·강약과 그 의미를 깊이 풀어쓴 풀이. 4~5문장. ①어느 주(柱)에 어떤 재성이 있는지 ②그 재성의 힘이 어떤 이유로 강하거나 약한지 ③재성이 일간과 어떻게 작용하는지 ④이 구조가 삶의 재물 흐름에 어떤 의미를 갖는지 순서로 서술. 구체적 천간·지지·십성·합충 언급 필수. 홍연 화자. 호칭 사용.
+- conditions: 4개 항목. 재물과 관련한 유리한 조건 2개(type:"good") + 조심할 조건 2개(type:"warn"). 각 { type, text: 구체적 한 줄 }.
+- condDesc: 위 조건들을 종합한 풀이. 2~3문장. 어떤 환경·시기·방식에서 재물이 잘 흐르는지. 홍연 화자. 호칭 사용.
 
 [jobFit 섹션 — 어울리는 직군]
 clusters: 2~3개 직군 그룹.
-각 cluster: category(직군 대분류명), keywords(해당 직군 특성 키워드 2~3개), jobs(구체적인 직업 3~5개).
-반드시 명식에 근거해 가장 잘 맞는 분야 위주로.
+각 cluster: category(직군 대분류명), keywords(해당 직군 특성 키워드 2~3개), jobs(구체적인 직업 3~5개), desc(이 직군이 왜 이 명식에 맞는지 한 줄. 홍연 화자. 호칭 사용).
 
 [investStyle 섹션 — 투자 스타일]
 types: 2~3개 투자 유형.
-각 type: category(투자 유형명), icon(관련 이모지 1개), score(적합도 0~100 정수), products(구체적 투자상품 2~3개), tip(이 사람에게 맞는 투자 팁 한 줄).
+각 type: category(투자 유형명), icon(관련 이모지 1개), score(적합도 0~100 정수), products(구체적 투자상품 2~3개), tip(이 명식에 맞는 투자 조언 한 줄. 호칭 사용).
 
 [splitType 섹션 — 직장인 vs 사업가]
 leftLabel: "직장인형", left: (비율 정수 0~100),
 rightLabel: "사업가형", right: (100-left 계산),
-leftDesc: 직장인으로서의 강점 한 줄,
-rightDesc: 사업가로서의 강점 한 줄.`,
+leftDesc: 직장인으로서의 핵심 강점 한 줄,
+rightDesc: 사업가로서의 핵심 강점 한 줄,
+leftTips: 직장인형 구체적 강점 2~3개 (각각 짧은 한 줄),
+rightTips: 사업가형 구체적 강점 2~3개 (각각 짧은 한 줄).`,
 
   4: `[careerWealth 섹션 — 천직과 재물]
 - intro: 이 사람에게 돈이 따르는 일의 핵심 방향 한 줄. (1문장)
@@ -154,30 +166,48 @@ const JAEMUL_CH_SCHEMA: Record<number, string> = {
       { "label": "재성 힘", "exists": true, "desc": "재성 강약 상태 한 줄" },
       { "label": "식상→재 흐름", "exists": false, "desc": "식상 → 재성 연결 상태 한 줄" },
       { "label": "관성 보호", "exists": true, "desc": "관성의 재성 보호 여부 한 줄" }
-    ]
+    ],
+    "summary": "4가지 점검 결과를 종합한 재물성 풀이 3~4문장"
   }
 }`,
   2: `{
   "wealthStyle": {
     "intro": "재물 기질 핵심 한 줄 (1문장)",
-    "callout": "십성과 재물 연결 핵심 한 문장",
-    "paragraphs": ["단락1 (3~4문장)", "단락2 (3~4문장)", "단락3 (3~4문장)"]
+    "keywords": ["키워드1", "키워드2", "키워드3"],
+    "modes": [
+      { "icon": "💰", "title": "돈을 버는 방식", "desc": "버는 방식 설명 3~4문장" },
+      { "icon": "💳", "title": "소비와 저축 습관", "desc": "소비·저축·투자 패턴 3~4문장" },
+      { "icon": "🧠", "title": "재물에 대한 심리", "desc": "재물 집착·여유·심리 균형 3~4문장" }
+    ],
+    "traits": [
+      { "label": "적극성", "score": 75 },
+      { "label": "절약성", "score": 60 },
+      { "label": "위험선호", "score": 40 },
+      { "label": "장기계획", "score": 80 }
+    ],
+    "summary": "재물 기질 종합 풀이 3~4문장"
   }
 }`,
   3: `{
   "wealthPresence": {
-    "intro": "재성 존재 여부 한 줄 요약 (1문장)",
-    "callout": "재성 강약 핵심 한 문장",
-    "paragraphs": ["단락1 (3~4문장)", "단락2 (3~4문장)"]
+    "score": 65,
+    "reDesc": "재성 위치·힘·일간 작용·재물 흐름 의미를 순서대로 풀어쓴 4~5문장",
+    "conditions": [
+      { "type": "good", "text": "유리한 조건 한 줄" },
+      { "type": "good", "text": "유리한 조건 한 줄" },
+      { "type": "warn", "text": "조심할 조건 한 줄" },
+      { "type": "warn", "text": "조심할 조건 한 줄" }
+    ],
+    "condDesc": "조건 종합 풀이 2~3문장"
   },
   "jobFit": {
     "clusters": [
-      { "category": "직군 대분류명", "keywords": ["특성1", "특성2"], "jobs": ["직업1", "직업2", "직업3"] }
+      { "category": "직군 대분류명", "keywords": ["특성1", "특성2"], "jobs": ["직업1", "직업2", "직업3"], "desc": "이 직군이 왜 맞는지 한 줄" }
     ]
   },
   "investStyle": {
     "types": [
-      { "category": "투자 유형명", "icon": "이모지", "score": 85, "products": ["상품1", "상품2"], "tip": "이 사람에게 맞는 팁 한 줄" }
+      { "category": "투자 유형명", "icon": "이모지", "score": 85, "products": ["상품1", "상품2"], "tip": "호칭 포함 투자 조언 한 줄" }
     ]
   },
   "splitType": {
@@ -185,8 +215,10 @@ const JAEMUL_CH_SCHEMA: Record<number, string> = {
     "left": 40,
     "rightLabel": "사업가형",
     "right": 60,
-    "leftDesc": "직장인으로서 강점 한 줄",
-    "rightDesc": "사업가로서 강점 한 줄"
+    "leftDesc": "직장인으로서 핵심 강점 한 줄",
+    "rightDesc": "사업가로서 핵심 강점 한 줄",
+    "leftTips": ["직장인 강점1 한 줄", "직장인 강점2 한 줄"],
+    "rightTips": ["사업가 강점1 한 줄", "사업가 강점2 한 줄"]
   }
 }`,
   4: `{
@@ -262,6 +294,7 @@ ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${cur
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 이번 장의 주제: ${theme}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[호칭 규칙] 풀이 텍스트(desc, summary, intro 등)에서 이 사람을 지칭할 때 반드시 "${honor}"을 사용하시오. "그대", "이 사람", "당신" 같은 익명 표현 대신 "${honor}"을 자연스럽게 섞어 쓰시오.
 ${guide ? `\n작성 지침:\n${guide}\n` : ""}
 위 명식을 꼼꼼히 분석하여, 아래 JSON 스키마를 정확히 채워주시오.
 반드시 유효한 JSON만 출력하시오. 코드펜스(\`\`\`)나 설명 문장은 절대 쓰지 마시오.

@@ -4389,6 +4389,9 @@ function ReportPreviewInner() {
             <Heading>나의 사주 명식</Heading>
           </section>
           <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
+          <div className="px-5">
+            <SinStrengthGauge view={report?.view ?? null} />
+          </div>
           {(() => {
             const w = (jc.wonguk as { intro?: string; sinDesc?: string; ohaengDesc?: string; ilganDesc?: string; paragraphs?: string[] } | undefined) ?? {};
             const sinText = w.sinDesc ?? w.paragraphs?.[2];
@@ -4474,8 +4477,9 @@ function ReportPreviewInner() {
 
           {/* ⑤ 재물성 체크리스트 */}
           {(() => {
-            const js = (jc.jaeseong as { items?: { label: string; exists: boolean; desc: string }[] } | undefined) ?? {};
+            const js = (jc.jaeseong as { items?: { label: string; exists: boolean; desc: string }[]; summary?: string } | undefined) ?? {};
             const w = (jc.wonguk as { intro?: string } | undefined) ?? {};
+            const jsSummary = js.summary ?? w.intro;
             return js.items?.length ? (
               <section className="px-6 pt-6 pb-2">
                 <Heading>재물성(財星) 점검</Heading>
@@ -4490,7 +4494,11 @@ function ReportPreviewInner() {
                     </div>
                   ))}
                 </div>
-                {w.intro && <P>{w.intro}</P>}
+                {jsSummary && (
+                  <div className="mt-2 pt-4" style={{ borderTop: `1px solid ${INK}10` }}>
+                    <P>{jsSummary}</P>
+                  </div>
+                )}
               </section>
             ) : null;
           })()}
@@ -4513,15 +4521,101 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`돈을 대하는 방식은\n사람마다 다르오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의\n재물 기질을 살펴보겠소.`}</Quote>
+
           {(() => {
-            const ws = (jc.wealthStyle as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
+            const ws = (jc.wealthStyle as {
+              intro?: string;
+              keywords?: string[];
+              modes?: { icon: string; title: string; desc: string }[];
+              traits?: { label: string; score: number }[];
+              summary?: string;
+              // 구 필드 폴백
+              callout?: string;
+              paragraphs?: string[];
+            } | undefined) ?? {};
+
+            const KEYWORD_COLORS = [
+              { bg: "#f0e6f6", border: "#c49ed8", text: "#7b3fa0" },
+              { bg: "#e6f0f6", border: "#9ec4d8", text: "#2a6080" },
+              { bg: "#f6f0e6", border: "#d8c49e", text: "#80601a" },
+            ];
+
+            const TRAIT_COLOR = "#9b6c3a";
+
             return (
-              <section className="px-6 pt-2 pb-6">
-                <Heading>나의 재물 기질</Heading>
-                {ws.intro && <P>{ws.intro}</P>}
-                {ws.callout && <Callout>{ws.callout}</Callout>}
-                {ws.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-              </section>
+              <>
+                {/* ① 기질 키워드 배지 */}
+                {(ws.keywords?.length ?? 0) > 0 ? (
+                  <section className="px-6 pt-6 pb-2">
+                    <Heading>재물 기질 키워드</Heading>
+                    {ws.intro && <P>{ws.intro}</P>}
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {ws.keywords!.map((kw, i) => {
+                        const c = KEYWORD_COLORS[i % KEYWORD_COLORS.length];
+                        return (
+                          <span key={i} className="px-4 py-2 rounded-full text-[14px] font-bold" style={{ background: c.bg, border: `1.5px solid ${c.border}`, color: c.text, fontFamily: SERIF }}>
+                            {kw}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ) : ws.intro ? (
+                  <section className="px-6 pt-6 pb-2">
+                    <Heading>나의 재물 기질</Heading>
+                    <P>{ws.intro}</P>
+                    {ws.callout && <Callout>{ws.callout}</Callout>}
+                  </section>
+                ) : null}
+
+                {/* ② 기질 3패널 카드 (버는법 / 쓰는법 / 재물 심리) */}
+                {(ws.modes?.length ?? 0) > 0 ? (
+                  <section className="px-6 pt-6 pb-2">
+                    <div className="space-y-3">
+                      {ws.modes!.map((m, i) => (
+                        <div key={i} className="rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[22px]">{m.icon}</span>
+                            <p className="text-[14px] font-bold" style={{ color: INK, fontFamily: SERIF }}>{m.title}</p>
+                          </div>
+                          <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT }}>{m.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ) : ws.paragraphs ? (
+                  <section className="px-6 pt-4 pb-2">
+                    {ws.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+                  </section>
+                ) : null}
+
+                {/* ③ 돈 성향 게이지 */}
+                {(ws.traits?.length ?? 0) > 0 && (
+                  <section className="px-6 pt-6 pb-2">
+                    <Heading>돈 성향 지수</Heading>
+                    <div className="rounded-2xl px-5 py-4 mt-2 space-y-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                      {ws.traits!.map((t, i) => (
+                        <div key={i}>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-[13px] font-bold" style={{ color: INK }}>{t.label}</span>
+                            <span className="text-[12px] font-bold" style={{ color: TRAIT_COLOR }}>{t.score}</span>
+                          </div>
+                          <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "#ebe5de" }}>
+                            <div className="absolute left-0 top-0 bottom-0 rounded-full" style={{ width: `${Math.max(0, Math.min(100, t.score))}%`, background: `linear-gradient(to right, ${TRAIT_COLOR}88, ${TRAIT_COLOR})` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* ④ 종합 풀이 */}
+                {ws.summary && (
+                  <section className="px-6 pt-6 pb-2">
+                    <P>{ws.summary}</P>
+                  </section>
+                )}
+              </>
             );
           })()}
           <ChapterNav cur="2" go={next} />
@@ -4544,30 +4638,101 @@ function ReportPreviewInner() {
           </div>
           <Quote>{`사주 안에 재물성이\n어디에 얼마나 있는가.\n\n그 구조가 삶의\n재물 흐름을 결정하오.`}</Quote>
           {(() => {
-            const wp = (jc.wealthPresence as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            const jf = (jc.jobFit as { clusters?: {category:string;keywords:string[];jobs:string[]}[] } | undefined) ?? {};
-            const inv = (jc.investStyle as { types?: {category:string;icon:string;score:number;products:string[];tip:string}[] } | undefined) ?? {};
-            const sp = (jc.splitType as { leftLabel?: string; left?: number; rightLabel?: string; right?: number; leftDesc?: string; rightDesc?: string } | undefined) ?? {};
+            const wp = (jc.wealthPresence as {
+              intro?: string; callout?: string; paragraphs?: string[];
+              score?: number; reDesc?: string;
+              conditions?: { type: "good" | "warn"; text: string }[];
+              condDesc?: string;
+            } | undefined) ?? {};
+            const jf = (jc.jobFit as { clusters?: { category: string; keywords: string[]; jobs: string[]; desc?: string }[] } | undefined) ?? {};
+            const inv = (jc.investStyle as { types?: { category: string; icon: string; score: number; products: string[]; tip: string }[] } | undefined) ?? {};
+            const sp = (jc.splitType as { leftLabel?: string; left?: number; rightLabel?: string; right?: number; leftDesc?: string; rightDesc?: string; leftTips?: string[]; rightTips?: string[] } | undefined) ?? {};
+
+            // 재성 강도 게이지 설정
+            const WP_SEGMENTS = [
+              { from: 0,  to: 20,  color: "#9b2335", label: "없음" },
+              { from: 20, to: 40,  color: "#c9474f", label: "약함" },
+              { from: 40, to: 60,  color: "#c2a23c", label: "보통" },
+              { from: 60, to: 80,  color: "#3f7d6b", label: "강함" },
+              { from: 80, to: 101, color: "#1a6b4a", label: "매우강" },
+            ];
+            const wpScore = Math.max(0, Math.min(100, wp.score ?? -1));
+            const wpHasScore = wp.score !== undefined;
+            const wpActive = WP_SEGMENTS.find(s => wpScore >= s.from && wpScore < s.to) ?? WP_SEGMENTS[2];
+
             return (
               <>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>재물성 분석</Heading>
-                  {wp.intro && <P>{wp.intro}</P>}
-                  {wp.callout && <Callout>{wp.callout}</Callout>}
-                  {wp.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+                {/* ① 재성 강도 게이지 + 풀이 */}
+                <section className="px-6 pt-6 pb-2">
+                  <Heading>재성(財星) 강도</Heading>
+                  {wpHasScore && (
+                    <div className="rounded-2xl p-5 mt-2" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-[17px] font-black" style={{ color: INK }}>재물 에너지</h3>
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: `${wpActive.color}18`, border: `1.5px solid ${wpActive.color}60` }}>
+                          <span className="text-[14px] font-black" style={{ color: wpActive.color }}>{wpActive.label}</span>
+                          <span className="text-[14px] font-black" style={{ color: wpActive.color }}>{wpScore}점</span>
+                        </div>
+                      </div>
+                      <div className="relative mb-0" style={{ height: 28 }}>
+                        <div className="absolute -translate-x-1/2" style={{ left: `${wpScore}%`, bottom: 0, fontSize: 20, lineHeight: 1 }}>💰</div>
+                      </div>
+                      <div className="relative h-4 rounded-full overflow-hidden mb-3">
+                        <div className="absolute inset-0" style={{ background: "#d8d0c8" }} />
+                        <div className="absolute left-0 top-0 bottom-0 rounded-full" style={{ width: `${wpScore}%`, background: `linear-gradient(to right, #9b2335, #c9474f 25%, #c2a23c 50%, #3f7d6b 75%, #1a6b4a)`, backgroundSize: `${100 / (wpScore / 100 || 1)}% 100%` }} />
+                      </div>
+                      <div className="relative" style={{ height: 26 }}>
+                        {WP_SEGMENTS.map(s => {
+                          const mid = (s.from + Math.min(s.to, 100)) / 2;
+                          return (
+                            <div key={s.label} className="absolute -translate-x-1/2 flex items-center justify-center" style={{ left: `${mid}%`, width: 42, height: 22, borderRadius: 999, background: `${s.color}22`, border: `1.5px solid ${s.color}` }}>
+                              <span style={{ color: s.color, fontWeight: 700, fontSize: 10, textAlign: "center" }}>{s.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {(wp.reDesc ?? wp.intro) && (
+                    <div className="mt-4">
+                      <P>{wp.reDesc ?? wp.intro}</P>
+                    </div>
+                  )}
+                  {!wpHasScore && wp.callout && <Callout>{wp.callout}</Callout>}
+                  {!wpHasScore && wp.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
                 </section>
+
+                {/* ② 재물 조건 체크 + 풀이 */}
+                {(wp.conditions?.length ?? 0) > 0 && (
+                  <section className="px-6 pt-6 pb-2">
+                    <Heading>재물 조건 분석</Heading>
+                    <div className="space-y-2 mt-2">
+                      {wp.conditions!.map((c, i) => (
+                        <div key={i} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: WHITE, border: `1px solid ${c.type === "good" ? "#c0dbc8" : "#f8d7da"}` }}>
+                          <span className="text-[15px] flex-shrink-0 mt-0.5">{c.type === "good" ? "✅" : "⚠️"}</span>
+                          <p className="text-[13px] leading-[1.7]" style={{ color: INK_SOFT }}>{c.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {wp.condDesc && <div className="mt-4"><P>{wp.condDesc}</P></div>}
+                    {!wp.condDesc && wp.paragraphs?.[1] && <div className="mt-4"><P>{wp.paragraphs[1]}</P></div>}
+                  </section>
+                )}
+
+                {/* ③ 어울리는 직군 */}
                 {jf.clusters && jf.clusters.length > 0 && (
-                  <section className="px-6 pt-2 pb-4">
+                  <section className="px-6 pt-6 pb-2">
                     <Heading>어울리는 직군</Heading>
-                    <div className="space-y-3">
+                    <div className="space-y-3 mt-2">
                       {jf.clusters.map((cl, i) => (
                         <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[13px] font-bold" style={{ color: INK }}>{cl.category}</span>
+                            <span className="text-[14px] font-bold" style={{ color: INK, fontFamily: SERIF }}>{cl.category}</span>
                             {cl.keywords.map((kw, j) => (
                               <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: CALLOUT_BG, color: MAROON }}>{kw}</span>
                             ))}
                           </div>
+                          {cl.desc && <p className="text-[12px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{cl.desc}</p>}
                           <div className="flex flex-wrap gap-1.5">
                             {cl.jobs.map((job, j) => (
                               <span key={j} className="text-[11px] px-2 py-1 rounded-lg" style={{ background: "#f3f0eb", color: INK_SOFT }}>{job}</span>
@@ -4578,10 +4743,12 @@ function ReportPreviewInner() {
                     </div>
                   </section>
                 )}
+
+                {/* ④ 투자 스타일 */}
                 {inv.types && inv.types.length > 0 && (
-                  <section className="px-6 pt-2 pb-4">
+                  <section className="px-6 pt-6 pb-2">
                     <Heading>투자 스타일</Heading>
-                    <div className="space-y-3">
+                    <div className="space-y-3 mt-2">
                       {inv.types.map((t, i) => (
                         <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
                           <div className="flex items-center justify-between mb-2">
@@ -4591,7 +4758,7 @@ function ReportPreviewInner() {
                             </div>
                             <span className="text-[12px] font-bold" style={{ color: GOLD }}>적합도 {t.score}%</span>
                           </div>
-                          <div className="w-full rounded-full h-1.5 mb-2" style={{ background: "#e8ddd8" }}>
+                          <div className="w-full rounded-full h-1.5 mb-3" style={{ background: "#e8ddd8" }}>
                             <div className="h-1.5 rounded-full" style={{ width: `${t.score}%`, background: GOLD }} />
                           </div>
                           <div className="flex flex-wrap gap-1.5 mb-2">
@@ -4599,29 +4766,41 @@ function ReportPreviewInner() {
                               <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "#fff8e6", color: "#8a6a00" }}>{pr}</span>
                             ))}
                           </div>
-                          <p className="text-[12px]" style={{ color: INK_SOFT }}>{t.tip}</p>
+                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.tip}</p>
                         </div>
                       ))}
                     </div>
                   </section>
                 )}
+
+                {/* ⑤ 직장인형 vs 사업가형 */}
                 {sp.leftLabel && (
-                  <section className="px-6 pt-2 pb-6">
+                  <section className="px-6 pt-6 pb-6">
                     <Heading>직장인형 vs 사업가형</Heading>
-                    <div className="flex gap-3 mb-3">
+                    <div className="flex gap-3 mb-3 mt-2">
                       {[
-                        { label: sp.leftLabel!, pct: sp.left ?? 0, desc: sp.leftDesc ?? "", color: BLUE },
-                        { label: sp.rightLabel!, pct: sp.right ?? 0, desc: sp.rightDesc ?? "", color: GOLD },
+                        { label: sp.leftLabel!, pct: sp.left ?? 0, desc: sp.leftDesc ?? "", tips: sp.leftTips ?? [], color: "#2a6080" },
+                        { label: sp.rightLabel!, pct: sp.right ?? 0, desc: sp.rightDesc ?? "", tips: sp.rightTips ?? [], color: GOLD },
                       ].map((side, i) => (
-                        <div key={i} className="flex-1 rounded-2xl p-3 text-center" style={{ background: CREAM, border: `1px solid ${INK}08` }}>
+                        <div key={i} className="flex-1 rounded-2xl p-4" style={{ background: WHITE, border: `1.5px solid ${side.color}30` }}>
                           <p className="text-[12px] font-bold mb-1" style={{ color: side.color }}>{side.label}</p>
-                          <p className="text-[22px] font-black mb-1" style={{ color: side.color }}>{side.pct}%</p>
-                          <p className="text-[10px]" style={{ color: MUTE }}>{side.desc}</p>
+                          <p className="text-[26px] font-black mb-1" style={{ color: side.color }}>{side.pct}%</p>
+                          <p className="text-[11px] mb-2" style={{ color: MUTE }}>{side.desc}</p>
+                          {side.tips.length > 0 && (
+                            <ul className="space-y-1">
+                              {side.tips.map((tip, j) => (
+                                <li key={j} className="flex items-start gap-1.5">
+                                  <span className="text-[11px] mt-0.5" style={{ color: side.color }}>•</span>
+                                  <span className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
                       ))}
                     </div>
                     <div className="flex rounded-full overflow-hidden h-3">
-                      <div style={{ width: `${sp.left ?? 0}%`, background: BLUE }} />
+                      <div style={{ width: `${sp.left ?? 0}%`, background: "#2a6080" }} />
                       <div style={{ flex: 1, background: GOLD }} />
                     </div>
                   </section>
