@@ -29,6 +29,7 @@ export function isJaemulChapterReady(
     if (!val || typeof val !== "object") return false;
     const v = val as Record<string, unknown>;
     if ("paragraphs" in v) return Array.isArray(v.paragraphs) && (v.paragraphs as unknown[]).length > 0;
+    if ("sinDesc" in v) return typeof v.sinDesc === "string" && (v.sinDesc as string).length > 0;
     if ("clusters" in v) return Array.isArray(v.clusters) && (v.clusters as unknown[]).length > 0;
     if ("types" in v) return Array.isArray(v.types) && (v.types as unknown[]).length > 0;
     if ("items" in v) return Array.isArray(v.items) && (v.items as unknown[]).length > 0;
@@ -56,8 +57,9 @@ const JAEMUL_CH_THEME: Record<number, string> = {
 const JAEMUL_CH_GUIDE: Record<number, string> = {
   1: `[wonguk 섹션 — 타고난 그릇 분석]
 - intro: "~한 사주로, 한 문장 요약" 형식으로 시작. (1문장)
-- callout: 일간 오행과 신강·신약 핵심을 한 문장으로.
-- paragraphs 3개: ①일간 오행과 타고난 기운 ②오행 균형의 특징과 재물에 미치는 영향 ③신강·신약 판단과 돈을 다루는 그릇의 크기. 각 단락 3~4문장.
+- sinDesc: 신강·신약 판단과 돈을 다루는 그릇의 크기. 3~4문장. (명식표 아래 표시됨)
+- ohaengDesc: 오행 균형의 특징과 재물에 미치는 영향. 3~4문장. (오행 도넛 아래 표시됨)
+- ilganDesc: 일간 오행과 타고난 기운이 재물에 미치는 의미. 3~4문장. (일간 카드 아래 표시됨)
 
 [geokguk 섹션 — 격국]
 이 사람의 격국(格局)을 판단하여 아래 형식으로 출력하오.
@@ -137,8 +139,9 @@ const JAEMUL_CH_SCHEMA: Record<number, string> = {
   1: `{
   "wonguk": {
     "intro": "~한 사주로, 한 줄 요약 (1문장)",
-    "callout": "핵심 사주 용어 포함 강조 한 문장",
-    "paragraphs": ["단락1 (3~4문장)", "단락2 (3~4문장)", "단락3 (3~4문장)"]
+    "sinDesc": "신강신약 판단과 그릇의 크기 (3~4문장)",
+    "ohaengDesc": "오행 균형과 재물의 관계 (3~4문장)",
+    "ilganDesc": "일간 오행과 재물 기운 (3~4문장)"
   },
   "geokguk": {
     "name": "격국명 (예: 편인격)",

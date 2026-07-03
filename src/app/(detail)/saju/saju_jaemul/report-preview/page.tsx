@@ -4384,19 +4384,37 @@ function ReportPreviewInner() {
           </div>
           <Quote>{`재물을 담는 그릇도\n타고난 것이오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의\n사주 원국을 살펴보겠소.`}</Quote>
 
-          {/* ① 명식표 */}
+          {/* ① 명식표 + 신강신약 풀이 */}
           <section className="px-6 pt-2 pb-2">
             <Heading>나의 사주 명식</Heading>
           </section>
           <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
+          {(() => {
+            const w = (jc.wonguk as { intro?: string; sinDesc?: string; ohaengDesc?: string; ilganDesc?: string; paragraphs?: string[] } | undefined) ?? {};
+            const sinText = w.sinDesc ?? w.paragraphs?.[2];
+            return sinText ? (
+              <section className="px-6 pt-4 pb-2">
+                <P>{sinText}</P>
+              </section>
+            ) : null;
+          })()}
 
-          {/* ② 오행 도넛 */}
+          {/* ② 오행 도넛 + 오행 풀이 */}
           <section className="px-6 pt-6 pb-2">
             <Heading>오행 균형</Heading>
           </section>
           <OhaengDonut view={report?.view ?? null} />
+          {(() => {
+            const w = (jc.wonguk as { ohaengDesc?: string; paragraphs?: string[] } | undefined) ?? {};
+            const oText = w.ohaengDesc ?? w.paragraphs?.[1];
+            return oText ? (
+              <section className="px-6 pt-4 pb-2">
+                <P>{oText}</P>
+              </section>
+            ) : null;
+          })()}
 
-          {/* ③ 일간 카드 */}
+          {/* ③ 일간 카드 + 일간 풀이 */}
           {(() => {
             const ilganFull = report?.view?.ilgan ?? "";
             const ilganHanja = ilganFull[0] ?? "";
@@ -4411,13 +4429,15 @@ function ReportPreviewInner() {
               庚: { oh: "금(金)", color: "#7a7a7a", wealth: "바위처럼 원칙 있게, 결단력으로 재물 기회를 잡소." },
               辛: { oh: "금(金)", color: "#7a7a7a", wealth: "보석처럼 정제된 능력으로 고부가가치 재물을 만드오." },
               壬: { oh: "수(水)", color: "#1a5fa8", wealth: "바다처럼 넓게 흐르며 유연한 방식으로 재물을 끌어오." },
-              癸: { oh: "수(水)", color: "#1a5fa8", wealth: "샘물처럼 직관과 예리함으로 재물의 흐름을 감지하오." },
+              癸: { oh: "수(Water)", color: "#1a5fa8", wealth: "샘물처럼 직관과 예리함으로 재물의 흐름을 감지하오." },
             };
             const meta = ILGAN_META[ilganHanja] ?? { oh: "", color: MAROON, wealth: "" };
+            const w = (jc.wonguk as { ilganDesc?: string; paragraphs?: string[] } | undefined) ?? {};
+            const ilText = w.ilganDesc ?? w.paragraphs?.[0];
             return ilganHanja ? (
               <section className="px-6 pt-6 pb-2">
                 <Heading>나의 일간 — 재물 그릇의 재질</Heading>
-                <div className="rounded-2xl p-5 flex gap-4 items-center" style={{ background: WHITE, border: `1.5px solid ${meta.color}30` }}>
+                <div className="rounded-2xl p-5 flex gap-4 items-center mb-4" style={{ background: WHITE, border: `1.5px solid ${meta.color}30` }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={ganCharImage(ilganHanja)} alt={ilganLabel}
                     style={{ width: 64, height: 64, objectFit: "contain", flexShrink: 0 }} />
@@ -4430,11 +4450,12 @@ function ReportPreviewInner() {
                     <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{meta.wealth}</p>
                   </div>
                 </div>
+                {ilText && <P>{ilText}</P>}
               </section>
             ) : null;
           })()}
 
-          {/* ④ 격국 배지 */}
+          {/* ④ 격국 배지 + 격국 풀이 */}
           {(() => {
             const gg = (jc.geokguk as { name?: string; keyword?: string; desc?: string } | undefined) ?? {};
             return gg.name ? (
@@ -4454,10 +4475,11 @@ function ReportPreviewInner() {
           {/* ⑤ 재물성 체크리스트 */}
           {(() => {
             const js = (jc.jaeseong as { items?: { label: string; exists: boolean; desc: string }[] } | undefined) ?? {};
+            const w = (jc.wonguk as { intro?: string } | undefined) ?? {};
             return js.items?.length ? (
               <section className="px-6 pt-6 pb-2">
                 <Heading>재물성(財星) 점검</Heading>
-                <div className="space-y-2">
+                <div className="space-y-2 mb-4">
                   {js.items.map((item, i) => (
                     <div key={i} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: WHITE, border: `1px solid ${item.exists ? "#c0dbc8" : "#f8d7da"}` }}>
                       <span className="text-[16px] flex-shrink-0 mt-0.5">{item.exists ? "✅" : "⚠️"}</span>
@@ -4468,21 +4490,9 @@ function ReportPreviewInner() {
                     </div>
                   ))}
                 </div>
+                {w.intro && <P>{w.intro}</P>}
               </section>
             ) : null;
-          })()}
-
-          {/* ⑥ 원국 분석 텍스트 */}
-          {(() => {
-            const w = (jc.wonguk as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            return (
-              <section className="px-6 pt-6 pb-6">
-                <Heading>원국 풀이</Heading>
-                {w.intro && <P>{w.intro}</P>}
-                {w.callout && <Callout>{w.callout}</Callout>}
-                {w.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-              </section>
-            );
           })()}
           <ChapterNav cur="1" go={next} />
         </>
