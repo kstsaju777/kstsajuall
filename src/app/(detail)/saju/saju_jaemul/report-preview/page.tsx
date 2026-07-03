@@ -95,7 +95,6 @@ function OhaengDonut({ view }: { view: MyeongsikView | null }) {
           </div>
         ))}
       </div>
-      <p className="text-[10.5px] mt-3 text-center" style={{ color: MUTE }}>기운을 눌러 자세히 보세요</p>
     </div>
   );
 }
