@@ -9,8 +9,10 @@
 // ⚠️ 이미지는 전부 임시(placeholder)다. 레퍼런스의 한복 일러스트 대신
 //    기존 hero 이미지를 끼워둠 — 추후 전용 일러스트로 교체.
 
+import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
@@ -46,7 +48,388 @@ const OHAENG: { key: string; label: string; color: string }[] = [
   { key: "수", label: "수", color: "#8fb3e0" },
 ];
 
-// 오행 균형 도넛 차트 (명식 천간·지지 오행 비율)
+// ─── 마무리 장 컴포넌트 ────────────────────────────────────────────
+
+function ReviewBox() {
+  const faces = [
+    { v: 1, e: "😞", l: "매우불만" }, { v: 2, e: "😕", l: "불만" }, { v: 3, e: "😐", l: "보통" }, { v: 4, e: "🙂", l: "만족" }, { v: 5, e: "😍", l: "매우만족" },
+  ];
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState("");
+  const [done, setDone] = useState(false);
+  if (done) {
+    return (
+      <div className="rounded-2xl p-6 mx-6 mb-8 text-center" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
+        <p className="text-[28px] mb-1">🙏</p>
+        <p className="text-[15px] font-black" style={{ color: INK }}>소중한 의견 고맙습니다</p>
+        <p className="text-[12.5px] mt-1" style={{ color: MUTE }}>남겨주신 마음, 더 좋은 풀이로 보답할게요.</p>
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <p className="text-center text-[11px] font-bold" style={{ color: MAROON }}>좋은 길잡이 홍연</p>
+      <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>풀이는 마음에 드셨나요?</h3>
+      <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>리뷰 작성자 중 매월 10분을 추첨해 환급해 드려요.</p>
+      <div className="flex justify-between mb-4">
+        {faces.map((f) => {
+          const on = rating === f.v;
+          return (
+            <button key={f.v} onClick={() => setRating(f.v)} className="flex flex-col items-center gap-1 active:scale-95 transition-all" style={{ opacity: rating && !on ? 0.45 : 1 }}>
+              <span style={{ fontSize: 30, transform: on ? "scale(1.18)" : "none", transition: "transform .15s" }}>{f.e}</span>
+              <span className="text-[11px]" style={{ color: on ? MAROON : MUTE, fontWeight: on ? 800 : 600 }}>{f.l}</span>
+            </button>
+          );
+        })}
+      </div>
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="풀이에 대한 솔직한 의견을 남겨주세요. 남겨주신 의견은 서비스 개선에 꼭 참고할게요." className="w-full rounded-xl p-3 text-[13px] outline-none resize-none" style={{ background: "#faf6f2", border: `1px solid ${INK}14`, color: INK }} />
+      <button onClick={() => rating && setDone(true)} disabled={!rating} className="w-full mt-3 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all active:scale-[0.99]" style={{ background: rating ? MAROON : `${INK}33` }}>제출하기</button>
+    </div>
+  );
+}
+
+function EventBox() {
+  const steps: [string, string][] = [
+    ["1", "이미지를 포함해서 리뷰를 작성해주세요."],
+    ["2", "링크를 알려주세요."],
+    ["3", "쿠폰을 드립니다."],
+  ];
+  return (
+    <div className="mx-6 mb-8 rounded-2xl p-6 text-center" style={{ background: PINK_PALE, border: `1px solid ${INK}10` }}>
+      <p className="text-[12px] font-bold" style={{ color: MAROON }}>리포트 후기 이벤트</p>
+      <h3 className="text-[19px] font-black leading-snug mt-1" style={{ color: INK }}>네이버 카페, 다음 카페,<br />익명 커뮤니티에<br />후기를 남겨주세요!</h3>
+      <span className="inline-block mt-3 text-[13px] font-bold text-white px-4 py-2 rounded-xl" style={{ background: MAROON }}>전 제품 무료쿠폰 1장</span>
+      <div className="rounded-xl p-4 mt-4 text-left" style={{ background: WHITE, border: `1px solid ${MAROON}22` }}>
+        {steps.map(([n, t]) => (
+          <div key={n} className="flex items-center gap-2.5 py-1">
+            <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[11px] font-black" style={{ width: 20, height: 20, background: MAROON }}>{n}</span>
+            <span className="text-[13px]" style={{ color: INK_SOFT }}>{t}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center gap-4 mt-4 text-[12.5px] font-bold" style={{ color: MUTE }}>
+        <span>네이버 카페</span><span>다음 카페</span><span>익명 커뮤니티</span>
+      </div>
+      <button className="w-full mt-4 py-3.5 rounded-xl text-[14px] font-bold text-white" style={{ background: INK }}>후기 이벤트 참여하기</button>
+    </div>
+  );
+}
+
+function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
+  const [slide, setSlide] = useState(0);
+  const [hide, setHide] = useState(false);
+  const [link, setLink] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const sns = [
+    { label: "네이버 블로그", color: "#03c75a", t: "b" },
+    { label: "인스타그램", color: "#e1306c", t: "✦" },
+    { label: "카카오스토리", color: "#f9e000", t: "K", tc: "#3c1e1e" },
+  ];
+  const steps = [
+    { icon: "📸", title: "풀이 화면 캡쳐", desc: "인상 깊었던 장면을 1장 이상 사진으로 담아주시오." },
+    { icon: "✍️", title: "솔직한 후기 작성", desc: "소름 돋았던 부분, 맞아떨어진 부분을 진솔하게 써주시오." },
+    { icon: "🔖", title: "'홍연사주' 태그 포함", desc: "후기에 #홍연사주 #건강사주 태그를 반드시 넣어주시오." },
+  ];
+  const numBadge = (n: string) => (
+    <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[12px] font-black" style={{ width: 22, height: 22, background: "#5a8a4a" }}>{n}</span>
+  );
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5" style={{ pointerEvents: "auto" }}>
+      <div onClick={() => onClose(hide)} className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
+      <div className="relative w-full overflow-hidden rounded-3xl" style={{ maxWidth: 360, background: "#faf6ef", boxShadow: "0 16px 50px rgba(0,0,0,0.35)" }}>
+        {slide === 0 ? (
+          <>
+            <button onClick={() => onClose(hide)} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "rgba(0,0,0,0.25)", color: "#fff", fontSize: 15, lineHeight: 1 }} aria-label="닫기">✕</button>
+            <div className="relative" style={{ height: 210 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/total/total-1/total-1-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.3) 60%, #faf6ef 100%)" }} />
+            </div>
+            <div className="px-6 pb-6 mt-2 text-center">
+              <h3 className="text-[20px] font-black" style={{ color: "#2a2320" }}>SNS 리뷰 이벤트</h3>
+              <p className="text-[13px] mt-1.5" style={{ color: "#7a6a5a" }}>후기 남기면 전 제품 무료쿠폰을 드려요!</p>
+              <span className="inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full" style={{ background: "#e8f5e9", color: "#3a7d44" }}>이벤트 마감 일시: 2999. 12. 31.</span>
+              <div className="rounded-2xl px-5 py-5 mt-4" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8" }}>
+                <span className="text-[11px] font-black px-2.5 py-1 rounded-full" style={{ background: "#5a8a4a", color: "#fff" }}>BENEFIT</span>
+                <p className="text-[20px] font-black mt-2.5" style={{ color: "#2a2320" }}>무료쿠폰 1장 제공</p>
+              </div>
+              <button onClick={() => setSlide(1)} className="w-full mt-4 py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: "#5a8a4a" }}>참여하고 무료쿠폰 받기 ›</button>
+              <p className="text-[11.5px] mt-2.5" style={{ color: "#a09080" }}>참여 방법은 오른쪽으로 스와이프 하기 →</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #e0d5c0" }}>
+              <button onClick={() => setSlide(0)} style={{ fontSize: 18, color: "#7a6a5a", background: "none", border: "none", cursor: "pointer" }}>←</button>
+              <p className="text-[13px] font-black" style={{ color: "#2a2320" }}>참여 방법</p>
+              <button onClick={() => onClose(hide)} style={{ fontSize: 18, color: "#7a6a5a", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+            </div>
+            <div className="px-6 py-5">
+              <div className="flex gap-2 mb-5">
+                {sns.map((s) => (
+                  <div key={s.label} className="flex-1 rounded-xl py-2.5 text-center" style={{ background: s.color }}>
+                    <p className="text-[11px] font-black" style={{ color: (s as {tc?: string}).tc ?? "#fff" }}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
+              {steps.map((st, i) => (
+                <div key={i} className="flex gap-3 mb-4">
+                  {numBadge(String(i + 1))}
+                  <div>
+                    <p className="text-[13px] font-black" style={{ color: "#2a2320" }}>{st.icon} {st.title}</p>
+                    <p className="text-[12px] mt-0.5" style={{ color: "#7a6a5a" }}>{st.desc}</p>
+                  </div>
+                </div>
+              ))}
+              <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="후기 링크를 여기에 붙여넣으세요" className="w-full rounded-xl px-4 py-3 text-[13px] outline-none mt-1" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8", color: "#2a2320" }} />
+              {submitted ? (
+                <div className="mt-4 py-3 rounded-xl text-center" style={{ background: "#e8f5e9" }}>
+                  <p className="text-[14px] font-black" style={{ color: "#3a7d44" }}>✓ 제출 완료!</p>
+                  <p className="text-[12px] mt-0.5" style={{ color: "#7a6a5a" }}>확인 후 쿠폰을 보내드릴게요.</p>
+                </div>
+              ) : (
+                <button onClick={() => link && setSubmitted(true)} disabled={!link} className="w-full mt-4 py-3.5 rounded-xl text-[14px] font-bold text-white" style={{ background: link ? "#5a8a4a" : "#ccc" }}>후기 링크 제출하기</button>
+              )}
+              <label className="flex items-center gap-2 mt-3 cursor-pointer">
+                <input type="checkbox" checked={hide} onChange={(e) => setHide(e.target.checked)} className="w-4 h-4" />
+                <span className="text-[12px]" style={{ color: "#a09080" }}>다시 보지 않기</span>
+              </label>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const RECO_BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
+  "재물": "#eac660", "건강": "#2e7d32", "결혼": "#c2185b", "임신": "#6a1b9a",
+  "연애": "#e1337d", "자녀": "#0077b6", "유아": "#dddbd1", "재회": "#7b2fff",
+  "이혼": "#444", "비즈니스": "#1d6fce",
+};
+const RECO_TAG_COLORS: Record<string, string> = {
+  "사주": "#111111", "HOT": "#ff4500", "궁합": "#e1337d", "비즈니스": "#1d6fce",
+  "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b", "NEW": "#4fd5e8",
+  "BEST": "#b47221", "FREE": "#555",
+};
+
+function RecoProductCard({ card }: { card: CategoryCard }) {
+  const isVideo = !!card.videoUrl || card.type === "video";
+  const mediaSrc = card.videoUrl ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !isVideo) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isVideo]);
+  return (
+    <Link ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
+      {isVideo ? (
+        visible
+          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
+      ) : imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : card.tag === "NEW" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#4fd5e8", color: "#000", display: "inline-block", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>
+            ) : card.tag === "추천" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
+const RECO_EXCLUDE_H = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주"]);
+const RECO_SAJU_ORDER = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "재물운 재물사주"];
+const RECO_KUNGHAP_ORDER = ["찰떡콩떡 연애궁합", "말좀듣자 자녀궁합", "평생내짝 결혼궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
+function sortByH(cards: CategoryCard[], order: string[]) {
+  return order.flatMap((name) => cards.filter((c) => c.name === name));
+}
+
+function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("saju_health") && !RECO_EXCLUDE_H.has(c.name));
+  const sajuCards = sortByH(all.filter((c) => !c.href.includes("kunghap")), RECO_SAJU_ORDER);
+  const kunghapCards = sortByH(all.filter((c) => c.href.includes("kunghap")), RECO_KUNGHAP_ORDER);
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+      </div>
+    </div>
+  );
+  return (
+    <div className="pb-4">
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes newBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} 60%{transform:translateY(-2px)} }
+        @keyframes chukNeon { 0%,100%{box-shadow:0 0 3px 1px rgba(0,255,115,0.5)} 50%{box-shadow:0 0 7px 2px rgba(0,255,115,0.9)} }
+      `}</style>
+      {sajuCards.length > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
+    </div>
+  );
+}
+
+// 대운 기반 건강 흐름 꺾은선 그래프
+function HealthFlowChart({ view }: { view: MyeongsikView | null }) {
+  const STEM_EL_C: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+  const BRANCH_EL_C: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+  const GEN_C: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+  const CTL_C: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+  const HEALTH_SCORE: Record<string,number> = {
+    인성:82, 정인:85, 편인:76,
+    비겁:72, 비견:74, 겁재:65,
+    식상:50, 식신:54, 상관:44,
+    재성:28, 정재:32, 편재:24,
+    관성:18, 정관:22, 편관:14,
+  };
+  function toSip(ilEl: string, tEl: string) {
+    if (ilEl === tEl) return "비겁";
+    if (GEN_C[ilEl] === tEl) return "식상";
+    if (CTL_C[ilEl] === tEl) return "재성";
+    if (CTL_C[tEl] === ilEl) return "관성";
+    if (GEN_C[tEl] === ilEl) return "인성";
+    return "비겁";
+  }
+  const daeun = view?.daeun ?? [];
+  if (!daeun.length) return null;
+  const ilEl = STEM_EL_C[(view?.ilgan ?? "")[0]] ?? "목";
+
+  const scored = daeun.map(d => {
+    const sEl = STEM_EL_C[d.gz?.[0] ?? ""];
+    const bEl = BRANCH_EL_C[d.gz?.[1] ?? ""];
+    const sS = sEl ? (HEALTH_SCORE[toSip(ilEl, sEl)] ?? 50) : 50;
+    const bS = bEl ? (HEALTH_SCORE[toSip(ilEl, bEl)] ?? 50) : 50;
+    return { label: d.label, gz: d.gz, active: d.active, score: Math.round(sS * 0.6 + bS * 0.4) };
+  });
+
+  const scores = scored.map(s => s.score);
+  const mid = (Math.max(...scores) + Math.min(...scores)) / 2;
+  const amp = (Math.max(...scores) - Math.min(...scores)) / 2 || 1;
+  const normalized = scores.map(v => (v - mid) / amp);
+
+  const W = 320, H = 190, padX = 32, padTop = 24, padBot = 36;
+  const innerH = H - padTop - padBot;
+  const zeroY = padTop + innerH / 2;
+  const n = scored.length;
+  const cx = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
+  const cy = (v: number) => zeroY - v * (innerH / 2 - 4);
+  const coords = normalized.map((v, i) => ({ x: cx(i), y: cy(v) }));
+
+  let path = `M ${coords[0].x} ${coords[0].y}`;
+  for (let i = 1; i < coords.length; i++) {
+    const prev = coords[i - 1], cur = coords[i];
+    const cpx = (prev.x + cur.x) / 2;
+    path += ` C ${cpx} ${prev.y} ${cpx} ${cur.y} ${cur.x} ${cur.y}`;
+  }
+  const areaClose = ` L ${coords[n-1].x} ${zeroY} L ${coords[0].x} ${zeroY} Z`;
+  const worstI = normalized.reduce((m, v, i) => v < normalized[m] ? i : m, 0);
+  const bestI  = normalized.reduce((m, v, i) => v > normalized[m] ? i : m, 0);
+  const GOOD_C = "#2d6a4f"; const WARN_C = "#9b3535";
+
+  return (
+    <div className="rounded-2xl p-4 mt-2 mb-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: GOOD_C }} />
+          <span style={{ fontSize: 10, color: GOOD_C, fontWeight: 600 }}>건강 안정</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: WARN_C }} />
+          <span style={{ fontSize: 10, color: WARN_C, fontWeight: 600 }}>건강 주의</span>
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
+        <defs>
+          <clipPath id="hClipTop">
+            <rect x={padX} y={padTop} width={W - padX * 2} height={innerH / 2} />
+          </clipPath>
+          <clipPath id="hClipBot">
+            <rect x={padX} y={zeroY} width={W - padX * 2} height={innerH / 2} />
+          </clipPath>
+          <linearGradient id="hGradTop" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GOOD_C} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={GOOD_C} stopOpacity="0.03" />
+          </linearGradient>
+          <linearGradient id="hGradBot" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={WARN_C} stopOpacity="0.03" />
+            <stop offset="100%" stopColor={WARN_C} stopOpacity="0.25" />
+          </linearGradient>
+        </defs>
+        <line x1={padX} x2={W-padX} y1={padTop} y2={padTop} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
+        <line x1={padX} x2={W-padX} y1={H-padBot} y2={H-padBot} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
+        <line x1={padX} x2={W-padX} y1={zeroY} y2={zeroY} stroke={`${INK}30`} strokeWidth="1.5"/>
+        <text x={padX - 4} y={zeroY + 4} fontSize="8" fill={MUTE} textAnchor="end">0</text>
+        <text x={padX - 4} y={padTop + 4} fontSize="8" fill={GOOD_C} textAnchor="end">+</text>
+        <text x={padX - 4} y={H - padBot + 4} fontSize="8" fill={WARN_C} textAnchor="end">−</text>
+        <path d={path + areaClose} fill="url(#hGradTop)" clipPath="url(#hClipTop)" />
+        <path d={path + areaClose} fill="url(#hGradBot)" clipPath="url(#hClipBot)" />
+        <path d={path} fill="none" stroke={GOOD_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#hClipTop)" />
+        <path d={path} fill="none" stroke={WARN_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#hClipBot)" />
+        {coords.map((c, i) => {
+          const isWorst = i === worstI, isBest = i === bestI;
+          const isActive = scored[i].active;
+          const dotColor = normalized[i] >= 0 ? GOOD_C : WARN_C;
+          return (
+            <g key={i}>
+              {isActive && (
+                <circle cx={c.x} cy={c.y} r={8} fill="none" stroke="#2d4a7a" strokeWidth="1.5" strokeDasharray="3 2" />
+              )}
+              {(isWorst || isBest) && (
+                <circle cx={c.x} cy={c.y} r={5} fill={isWorst ? WARN_C : GOOD_C} stroke={isWorst ? WARN_C : GOOD_C} strokeWidth="2" />
+              )}
+              {!isWorst && !isBest && (
+                <circle cx={c.x} cy={c.y} r={isActive ? 4 : 2.5} fill={isActive ? "#2d4a7a" : WHITE} stroke={isActive ? "#2d4a7a" : dotColor} strokeWidth="1.5" />
+              )}
+              {isWorst && <text x={c.x} y={c.y + 14} fontSize="8" fill={WARN_C} textAnchor="middle" fontWeight="700">주의</text>}
+              {isBest  && <text x={c.x} y={c.y - 8}  fontSize="8" fill={GOOD_C} textAnchor="middle" fontWeight="700">안정</text>}
+              <text x={c.x} y={H - 6} fontSize="11" fill={isActive ? "#2d4a7a" : INK_SOFT} textAnchor="middle" fontWeight={isActive ? "700" : "400"}>{scored[i].label}세</text>
+              <line x1={c.x} y1={H - padBot + 2} x2={c.x} y2={H - padBot + 6} stroke={`${INK}30`} strokeWidth="1" />
+            </g>
+          );
+        })}
+      </svg>
+      <p className="text-[10px] text-center mt-1" style={{ color: MUTE }}>대운별 건강 흐름 · 파란 원이 현재 대운</p>
+    </div>
+  );
+}
+
+// 오행 균형 도넛 차트 (자녀사주 스타일 — 도넛 + 세로 바 차트)
 function OhaengDonut({ view }: { view: MyeongsikView | null }) {
   const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
   if (view) {
@@ -58,44 +441,67 @@ function OhaengDonut({ view }: { view: MyeongsikView | null }) {
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
   const pct = (n: number) => Math.round((n / total) * 100);
   const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
 
-  // 도넛 (stroke-dasharray)
-  const R = 52, C = 2 * Math.PI * R;
+  const R = 54, C = 2 * Math.PI * R;
   let acc = 0;
   return (
-    <div className="mx-5 my-2 rounded-2xl p-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <h3 className="text-[16px] font-black flex items-center gap-1.5 mb-1" style={{ color: INK }}>
-        <span style={{ color: ROSE }}>◎</span> 오행 균형
-      </h3>
-      <p className="text-[12px] mb-4" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 비율이에요.</p>
-      <div className="flex justify-center">
-        <svg viewBox="0 0 140 140" style={{ width: 150, height: 150 }}>
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      {/* 헤더 */}
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 도넛 + 바 차트 */}
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
           <g transform="rotate(-90 70 70)">
             {OHAENG.map((e) => {
               const frac = counts[e.key] / total;
               const len = frac * C;
               const el = (
-                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="16"
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
                   strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
               );
               acc += len;
               return el;
             })}
           </g>
-          <text x="70" y="64" textAnchor="middle" fontSize="9" fill={MUTE}>가장 강한 기운</text>
-          <text x="70" y="80" textAnchor="middle" fontSize="20" fontWeight="900" fill={dom.color}>{dom.label}</text>
-          <text x="70" y="95" textAnchor="middle" fontSize="11" fontWeight="700" fill={INK_SOFT}>{pct(counts[dom.key])}%</text>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
         </svg>
+
+        {/* 세로 바 차트 */}
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="flex gap-1.5 mt-3">
-        {OHAENG.map((e) => (
-          <div key={e.key} className="flex-1 text-center rounded-lg py-1.5" style={{ background: `${e.color}22` }}>
-            <div className="text-[12px] font-black" style={{ color: INK }}>{e.label}</div>
-            <div className="text-[11px] font-bold" style={{ color: INK_SOFT }}>{pct(counts[e.key])}%</div>
-          </div>
-        ))}
-      </div>
-      <p className="text-[10.5px] mt-3 text-center" style={{ color: MUTE }}>기운을 눌러 자세히 보세요</p>
     </div>
   );
 }
@@ -934,238 +1340,6 @@ function LoveLineChart({ view, gender }: { view: MyeongsikView | null; gender?: 
           </g>
         ))}
       </svg>
-    </div>
-  );
-}
-
-// 후기 이벤트 박스 (마무리)
-function EventBox() {
-  const steps: [string, string][] = [
-    ["1", "이미지를 포함해서 리뷰를 작성해주세요."],
-    ["2", "링크를 알려주세요."],
-    ["3", "쿠폰을 드립니다."],
-  ];
-  return (
-    <div className="mx-6 mb-8 rounded-2xl p-6 text-center" style={{ background: PINK_PALE, border: `1px solid ${INK}10` }}>
-      <p className="text-[12px] font-bold" style={{ color: MAROON }}>리포트 후기 이벤트</p>
-      <h3 className="text-[19px] font-black leading-snug mt-1" style={{ color: INK }}>네이버 카페, 다음 카페,<br />익명 커뮤니티에<br />후기를 남겨주세요!</h3>
-      <span className="inline-block mt-3 text-[13px] font-bold text-white px-4 py-2 rounded-xl" style={{ background: MAROON }}>전 제품 무료쿠폰 1장</span>
-      <div className="rounded-xl p-4 mt-4 text-left" style={{ background: WHITE, border: `1px solid ${MAROON}22` }}>
-        {steps.map(([n, t]) => (
-          <div key={n} className="flex items-center gap-2.5 py-1">
-            <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[11px] font-black" style={{ width: 20, height: 20, background: MAROON }}>{n}</span>
-            <span className="text-[13px]" style={{ color: INK_SOFT }}>{t}</span>
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-center gap-4 mt-4 text-[12.5px] font-bold" style={{ color: MUTE }}>
-        <span>네이버 카페</span><span>다음 카페</span><span>익명 커뮤니티</span>
-      </div>
-      <button className="w-full mt-4 py-3.5 rounded-xl text-[14px] font-bold text-white" style={{ background: INK }}>후기 이벤트 참여하기</button>
-    </div>
-  );
-}
-
-// 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
-function RecoGrid() {
-  return (
-    <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// SNS 리뷰 이벤트 팝업 (마무리 장 진입 시)
-function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
-  const [slide, setSlide] = useState(0);
-  const [hide, setHide] = useState(false);
-  const [link, setLink] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const sns = [
-    { label: "네이버 블로그", color: "#03c75a", t: "b" },
-    { label: "인스타그램", color: "#e1306c", t: "✦" },
-    { label: "카카오스토리", color: "#f9e000", t: "K", tc: "#3c1e1e" },
-  ];
-  const steps = [
-    { icon: "📸", title: "풀이 화면 캡쳐", desc: "인상 깊었던 장면을 1장 이상 사진으로 담아주시오." },
-    { icon: "✍️", title: "솔직한 후기 작성", desc: "소름 돋았던 부분, 맞아떨어진 부분을 진솔하게 써주시오." },
-    { icon: "🔖", title: "'홍연사주' 태그 포함", desc: "후기에 #홍연사주 #사주 태그를 반드시 넣어주시오." },
-  ];
-  const numBadge = (n: string) => (
-    <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[12px] font-black" style={{ width: 22, height: 22, background: "#5a8a4a" }}>{n}</span>
-  );
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5" style={{ pointerEvents: "auto" }}>
-      <div onClick={() => onClose(hide)} className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
-      <div className="relative w-full overflow-hidden rounded-3xl" style={{ maxWidth: 360, background: "#faf6ef", boxShadow: "0 16px 50px rgba(0,0,0,0.35)" }}>
-        {slide === 0 ? (
-          <>
-            <button onClick={() => onClose(hide)} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "rgba(0,0,0,0.25)", color: "#fff", fontSize: 15, lineHeight: 1 }} aria-label="닫기">✕</button>
-            {/* 표지 이미지 */}
-            <div className="relative" style={{ height: 210 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/total/total-1/total-1-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.3) 60%, #faf6ef 100%)" }} />
-            </div>
-            <div className="px-6 pb-2 mt-2 text-center">
-              <h3 className="text-[20px] font-black" style={{ color: "#2a2320" }}>SNS 리뷰 이벤트</h3>
-              <p className="text-[13px] mt-1.5" style={{ color: "#7a6a5a" }}>후기 남기면 전 제품 무료쿠폰을 드려요!</p>
-              <span className="inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full" style={{ background: "#e8f5e9", color: "#3a7d44" }}>이벤트 마감 일시: 2999. 12. 31.</span>
-              <div className="rounded-2xl px-5 py-5 mt-4" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8" }}>
-                <span className="text-[11px] font-black px-2.5 py-1 rounded-full" style={{ background: "#5a8a4a", color: "#fff" }}>BENEFIT</span>
-                <p className="text-[20px] font-black mt-2.5" style={{ color: "#2a2320" }}>무료쿠폰 1장 제공</p>
-              </div>
-              <button onClick={() => setSlide(1)} className="w-full mt-4 py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: "#5a8a4a" }}>참여하고 무료쿠폰 받기 ›</button>
-              <p className="text-[11.5px] mt-2.5" style={{ color: "#a09080" }}>참여 방법은 오른쪽으로 스와이프 하기 →</p>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* 헤더바 */}
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #e0d5c0" }}>
-              <button onClick={() => setSlide(0)} className="text-[13px] font-bold flex items-center gap-1" style={{ color: "#7a6a5a" }}>‹ 안내로</button>
-              <span className="text-[15px] font-black" style={{ color: "#2a2320", fontFamily: SERIF }}>참여 방법</span>
-              <button onClick={() => onClose(hide)} className="flex items-center justify-center rounded-full" style={{ width: 26, height: 26, background: "#e8dfc8", color: "#5a4a3a", fontSize: 13, lineHeight: 1 }} aria-label="닫기">✕</button>
-            </div>
-            <div className="px-5 py-4">
-              {/* 홍연 도입 멘트 */}
-              <div className="rounded-2xl px-4 py-3 mb-3 text-center" style={{ background: "#f5efe3", border: "1px solid #d8c9a8" }}>
-                <p className="text-[12.5px] leading-relaxed" style={{ color: "#5a4030", fontFamily: SERIF }}>
-                  "그대의 진심 어린 한마디가<br />귀인을 불러오는 법이오.<br />후기를 남기고 쿠폰을 받아가시오."
-                </p>
-                <p className="text-[11px] mt-1.5 font-bold" style={{ color: "#a09080" }}>— 홍연</p>
-              </div>
-
-              {/* SNS 채널 */}
-              <div className="flex justify-around mb-3 px-2">
-                {sns.map((s, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5">
-                    <span className="flex items-center justify-center rounded-2xl font-black text-[18px]" style={{ width: 52, height: 52, background: s.color, color: (s as {tc?: string}).tc ?? "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>{s.t}</span>
-                    <span className="text-[11px] font-bold" style={{ color: "#5a4a3a" }}>{s.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* 단계별 안내 */}
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #d8c9a8" }}>
-                {steps.map((s, i) => (
-                  <div key={i} className="flex items-start gap-3 px-4 py-3" style={{ background: i % 2 === 0 ? "#f5efe3" : "#f0ebe0", borderTop: i > 0 ? "1px solid #e0d0b0" : "none" }}>
-                    <span className="text-[20px] flex-shrink-0 mt-0.5">{s.icon}</span>
-                    <div>
-                      <p className="text-[12.5px] font-black mb-0.5" style={{ color: "#2a2320" }}>{s.title}</p>
-                      <p className="text-[11.5px] leading-relaxed" style={{ color: "#7a6a5a" }}>{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 링크 제출 */}
-              <div className="mt-3">
-                {submitted ? (
-                  <div className="rounded-2xl py-5 text-center" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8" }}>
-                    <p className="text-[26px] mb-1">🎁</p>
-                    <p className="text-[14px] font-black" style={{ color: "#9b2335", fontFamily: SERIF }}>제출이 완료되었소!</p>
-                    <p className="text-[11.5px] mt-1" style={{ color: "#a09080" }}>확인 후 쿠폰을 전해드리겠소.</p>
-                  </div>
-                ) : (
-                  <>
-                    <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="후기 링크를 붙여넣으시오" className="w-full rounded-xl px-3.5 py-3 text-[13px] outline-none mb-2" style={{ background: "#f5efe3", border: "1px solid #d0c0a0", color: "#2a2320" }} />
-                    <button onClick={() => link.trim() && setSubmitted(true)} className="w-full py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: link.trim() ? "#9b2335" : "#c8bca8", fontFamily: SERIF }}>쿠폰 받기 ›</button>
-                  </>
-                )}
-              </div>
-              <p className="text-[10px] leading-relaxed text-center mt-3" style={{ color: "#b0a090" }}>1인 1회 참여 가능하며, AI 작성 후기는 제외됩니다.</p>
-            </div>
-          </>
-        )}
-        {/* 슬라이드 도트 */}
-        <div className="flex justify-center gap-1.5 pb-1">
-          {[0, 1].map((i) => (
-            <button key={i} onClick={() => setSlide(i)} className="rounded-full transition-all" style={{ width: slide === i ? 18 : 7, height: 7, background: slide === i ? "#5a8a4a" : "#d0c0a0" }} />
-          ))}
-        </div>
-        {/* 다시 보지 않기 */}
-        <button onClick={() => setHide((v) => !v)} className="w-full flex items-center gap-2 px-6 py-3.5 mt-1" style={{ borderTop: "1px solid #e0d5c0" }}>
-          <span className="flex items-center justify-center rounded" style={{ width: 17, height: 17, border: `1.5px solid ${hide ? "#5a8a4a" : "#c0b090"}`, background: hide ? "#5a8a4a" : "transparent", color: "#fff", fontSize: 11, lineHeight: 1 }}>{hide ? "✓" : ""}</span>
-          <span className="text-[12.5px]" style={{ color: "#9a8a7a" }}>다시 보지 않기</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// 홍연 낙관(도장) — 붉은 사각 전각
-function SealStamp() {
-  return (
-    <div className="flex items-center justify-center" style={{ width: 56, height: 56, borderRadius: 8, border: `2px solid ${MAROON}`, color: MAROON, background: `${MAROON}08` }}>
-      <div className="grid grid-cols-2 gap-0.5 text-[15px] font-black leading-none" style={{ fontFamily: SERIF }}>
-        <span>四</span><span>柱</span><span>紅</span><span>緣</span>
-      </div>
-    </div>
-  );
-}
-
-// 결과지 만족도 리뷰 위젯 (마무리) — 게스트 백엔드 연결 전이라 로컬 완료 처리
-function ReviewBox() {
-  const faces = [
-    { v: 1, e: "😞", l: "매우불만" }, { v: 2, e: "😕", l: "불만" }, { v: 3, e: "😐", l: "보통" }, { v: 4, e: "🙂", l: "만족" }, { v: 5, e: "😍", l: "매우만족" },
-  ];
-  const [rating, setRating] = useState(0);
-  const [text, setText] = useState("");
-  const [done, setDone] = useState(false);
-  if (done) {
-    return (
-      <div className="rounded-2xl p-6 mx-6 mb-8 text-center" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
-        <p className="text-[28px] mb-1">🙏</p>
-        <p className="text-[15px] font-black" style={{ color: INK }}>소중한 의견 고맙습니다</p>
-        <p className="text-[12.5px] mt-1" style={{ color: MUTE }}>남겨주신 마음, 더 좋은 풀이로 보답할게요.</p>
-      </div>
-    );
-  }
-  return (
-    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <p className="text-center text-[11px] font-bold" style={{ color: MAROON }}>좋은 길잡이 홍연</p>
-      <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>풀이는 마음에 드셨나요?</h3>
-      <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>리뷰 작성자 중 매월 10분을 추첨해 환급해 드려요.</p>
-      <div className="flex justify-between mb-4">
-        {faces.map((f) => {
-          const on = rating === f.v;
-          return (
-            <button key={f.v} onClick={() => setRating(f.v)} className="flex flex-col items-center gap-1 active:scale-95 transition-all" style={{ opacity: rating && !on ? 0.45 : 1 }}>
-              <span style={{ fontSize: 30, transform: on ? "scale(1.18)" : "none", transition: "transform .15s" }}>{f.e}</span>
-              <span className="text-[11px]" style={{ color: on ? MAROON : MUTE, fontWeight: on ? 800 : 600 }}>{f.l}</span>
-            </button>
-          );
-        })}
-      </div>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="풀이에 대한 솔직한 의견을 남겨주세요. 남겨주신 의견은 서비스 개선에 꼭 참고할게요." className="w-full rounded-xl p-3 text-[13px] outline-none resize-none" style={{ background: "#faf6f2", border: `1px solid ${INK}14`, color: INK }} />
-      <button onClick={() => rating && setDone(true)} disabled={!rating} className="w-full mt-3 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all active:scale-[0.99]" style={{ background: rating ? MAROON : `${INK}33` }}>제출하기</button>
     </div>
   );
 }
@@ -3808,6 +3982,10 @@ function ReportPreviewInner() {
     fetch("/api/admin/check").then(r => r.json()).then(d => setIsAdmin(d.isAdmin)).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (ch === "7" && !localStorage.getItem("hy_health_event_hide")) setEventOpen(true);
+  }, [ch]);
+
   // id 있으면 저장된 결과 조회(재생성 X), 입력만 있으면 생성+저장 후 id 주소로 교체
   useEffect(() => {
     if (startedRef.current) return;
@@ -4346,297 +4524,903 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제1장 — 체질 ═══════════ */}
-      {ch === "1" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 체질</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name}님은<br />어떤 체질로 태어났나
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_health/saju_health_1/saju_health_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`몸의 씩씩함도\n사주에 새겨져 있소.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의\n타고난 체질을 살펴보겠소.`}</Quote>
-          {(() => {
-            const con = (jc.constitution as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            return (
-              <section className="px-6 pt-2 pb-6">
-                <Heading>타고난 체질과 기운</Heading>
-                {con.intro && <P>{con.intro}</P>}
-                {con.callout && <Callout>{con.callout}</Callout>}
-                {con.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+      {ch === "1" && (() => {
+        const TEAL = "#2a7c6f";
+        const TEAL_LIGHT = "#e8f5f2";
+        const TEAL_WARN = "#7a4a2a";
+        const con = (jc.constitution as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          constitutionType?: { icon?: string; name?: string; badge?: string; desc?: string };
+          constitutionTraits?: { icon?: string; label?: string; desc?: string }[];
+          constitutionCautions?: { num?: number; title?: string; desc?: string }[];
+        } | undefined) ?? {};
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 체질</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                나는 어떤 체질로<br />태어났나
+              </h1>
+            </div>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_1/saju_health_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`몸의 씩씩함도\n사주에 새겨져 있소.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의\n타고난 체질을 살펴보겠소.`}</Quote>
+
+            {/* ── ① 인트로 + 콜아웃 ── */}
+            <section className="px-6 pt-2 pb-4">
+              <Heading>타고난 체질과 기운</Heading>
+              {con.intro && <P>{con.intro}</P>}
+              {con.callout && <Callout>{con.callout}</Callout>}
+            </section>
+
+            {/* ── ② 오행 도넛 ── */}
+            <OhaengDonut view={report?.view ?? null} />
+
+            {/* ── ③ 단락 1 ── */}
+            {con.paragraphs?.[0] && <section className="px-6 pb-4"><P>{con.paragraphs[0]}</P></section>}
+
+            {/* ── ④ 신강·신약 게이지 ── */}
+            <SinStrengthGauge view={report?.view ?? null} />
+
+            {/* ── ⑤ 단락 2 ── */}
+            {con.paragraphs?.[1] && <section className="px-6 pb-4"><P>{con.paragraphs[1]}</P></section>}
+
+            {/* ── ⑥ 체질 유형 카드 ── */}
+            {con.constitutionType && (
+              <section className="px-6 pb-6">
+                <Heading>타고난 체질 유형</Heading>
+                <div className="rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${TEAL} 0%, #1a5c51 100%)` }}>
+                  <div className="flex items-start gap-4 px-5 pt-5 pb-4">
+                    <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-3xl" style={{ background: "rgba(255,255,255,0.18)" }}>
+                      {con.constitutionType.icon ?? "🌿"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[18px] font-black" style={{ color: "#fff", fontFamily: SERIF }}>{con.constitutionType.name}</span>
+                        {con.constitutionType.badge && (
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.22)", color: "#fff" }}>
+                            {con.constitutionType.badge}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {con.constitutionType.desc && (
+                    <div className="px-5 pb-5">
+                      <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>{con.constitutionType.desc}</p>
+                    </div>
+                  )}
+                </div>
               </section>
-            );
-          })()}
-          <OhaengDonut view={report?.view ?? null} />
-          <ChapterNav cur="1" go={next} />
-        </>
-      )}
+            )}
+
+            {/* ── ⑦ 단락 3 ── */}
+            {con.paragraphs?.[2] && <section className="px-6 pb-4"><P>{con.paragraphs[2]}</P></section>}
+
+            {/* ── ⑧ 체질 특성 2-col 카드 ── */}
+            {con.constitutionTraits && con.constitutionTraits.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>이 체질의 타고난 특성</Heading>
+                <div className="grid grid-cols-2 gap-3">
+                  {con.constitutionTraits.map((tr, i) => (
+                    <div key={i} className="rounded-xl px-4 py-4 flex flex-col gap-1" style={{ background: TEAL_LIGHT }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[22px]">{tr.icon}</span>
+                        <span className="text-[13px] font-bold" style={{ color: TEAL, fontFamily: SERIF }}>{tr.label}</span>
+                      </div>
+                      <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{tr.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑨ 체질 주의 포인트 divider 테이블 ── */}
+            {con.constitutionCautions && con.constitutionCautions.length > 0 && (
+              <section className="px-6 pb-8">
+                <Heading>체질별 건강 주의 포인트</Heading>
+                <div className="flex flex-col gap-0">
+                  {con.constitutionCautions.map((c, i) => (
+                    <div key={i}>
+                      {i > 0 && <div style={{ height: 1, background: "#e8e0d8", margin: "0 4px" }} />}
+                      <div className="flex gap-4 py-4">
+                        <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-black" style={{ background: TEAL, color: "#fff" }}>
+                          {c.num ?? i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold mb-1" style={{ color: TEAL_WARN, fontFamily: SERIF }}>{c.title}</p>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{c.desc}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <ChapterNav cur="1" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제2장 — 약한 부위 ═══════════ */}
-      {ch === "2" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 약점</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name}님 사주에서<br />약한 신체 부위
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_health/saju_health_2/saju_health_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`오행의 균형이\n신체 건강과 이어지오.\n\n약한 곳을 알면\n미리 지킬 수 있소.`}</Quote>
-          {(() => {
-            const wp = (jc.weakParts as { intro?: string; callout?: string; paragraphs?: string[]; parts?: {icon:string;name:string;ohaeng:string;desc:string}[] } | undefined) ?? {};
-            return (
-              <>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>약한 신체 부위</Heading>
-                  {wp.intro && <P>{wp.intro}</P>}
-                  {wp.callout && <Callout>{wp.callout}</Callout>}
-                  {wp.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                {wp.parts && wp.parts.length > 0 && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>부위별 특징</Heading>
-                    <div className="space-y-2">
-                      {wp.parts.map((part, i) => (
-                        <div key={i} className="flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: WHITE, border: "1px solid #f0d8d8" }}>
-                          <span className="text-2xl flex-shrink-0">{part.icon}</span>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-[13px] font-bold" style={{ color: INK }}>{part.name}</span>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: CALLOUT_BG, color: MAROON }}>{part.ohaeng} 오행</span>
-                            </div>
-                            <p className="text-[11px]" style={{ color: INK_SOFT }}>{part.desc}</p>
-                          </div>
+      {ch === "2" && (() => {
+        const BURG = "#7a3030";
+        const BURG_LIGHT = "#fdf3f3";
+        const BURG_MID = "#c97070";
+        // 오행-신체 연결 정적 데이터
+        const OHAENG_BODY: { key: string; hanja: string; color: string; organs: string[] }[] = [
+          { key: "목", hanja: "木", color: "#7cc47f", organs: ["간", "담낭", "눈", "근육", "손발톱"] },
+          { key: "화", hanja: "火", color: "#e88aa0", organs: ["심장", "소장", "혀", "혈관", "뇌"] },
+          { key: "토", hanja: "土", color: "#e8c97a", organs: ["비장", "위장", "입", "근육", "살"] },
+          { key: "금", hanja: "金", color: "#b8c0c4", organs: ["폐", "대장", "코", "피부", "기관지"] },
+          { key: "수", hanja: "水", color: "#8fb3e0", organs: ["신장", "방광", "귀", "뼈", "생식기"] },
+        ];
+        const wp = (jc.weakParts as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          parts?: { icon?: string; name?: string; ohaeng?: string; desc?: string }[];
+          bodySignals?: { icon?: string; title?: string; desc?: string }[];
+          weakAdvice?: string;
+        } | undefined) ?? {};
+        // 취약 오행 집합 (parts[].ohaeng 기준)
+        const weakSet = new Set((wp.parts ?? []).map(p => p.ohaeng?.trim().slice(0, 1) ?? ""));
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 약점</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                내 사주에 약한<br />부위는 어디인가
+              </h1>
+            </div>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_2/saju_health_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`오행의 균형이\n신체 건강과 이어지오.\n\n약한 곳을 알면\n미리 지킬 수 있소.`}</Quote>
+
+            {/* ── ① 인트로 + 콜아웃 ── */}
+            <section className="px-6 pt-2 pb-4">
+              <Heading>약한 신체 부위</Heading>
+              {wp.intro && <P>{wp.intro}</P>}
+              {wp.callout && <Callout>{wp.callout}</Callout>}
+            </section>
+
+            {/* ── ② 오행-신체 연결 맵 ── */}
+            <section className="px-6 pb-6">
+              <Heading>오행과 신체 연결</Heading>
+              <p className="text-[12px] mb-3" style={{ color: MUTE }}>오행마다 관장하는 신체 기관이 있소. 취약한 기운이 곧 약한 부위와 이어지오.</p>
+              <div className="flex flex-col gap-2">
+                {OHAENG_BODY.map((ob) => {
+                  const isWeak = weakSet.has(ob.key);
+                  return (
+                    <div key={ob.key} className="flex items-center gap-3 rounded-xl px-4 py-3 transition-all"
+                      style={{ background: isWeak ? `${ob.color}18` : `${ob.color}08`, border: `1.5px solid ${isWeak ? ob.color : ob.color + "40"}` }}>
+                      <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black"
+                        style={{ background: isWeak ? ob.color : `${ob.color}30`, color: isWeak ? "#fff" : ob.color, fontFamily: SERIF }}>
+                        {ob.hanja}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-[13px] font-black" style={{ color: isWeak ? INK : INK_SOFT }}>{ob.key}</span>
+                          {isWeak && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: BURG, color: "#fff" }}>취약</span>
+                          )}
                         </div>
-                      ))}
+                        <div className="flex flex-wrap gap-1">
+                          {ob.organs.map((org) => (
+                            <span key={org} className="text-[11px] px-2 py-0.5 rounded-full"
+                              style={{ background: isWeak ? `${ob.color}30` : `${ob.color}14`, color: isWeak ? INK : MUTE, fontWeight: isWeak ? 700 : 400 }}>
+                              {org}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </section>
-                )}
-              </>
-            );
-          })()}
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* ── ③ 단락 1 ── */}
+            {wp.paragraphs?.[0] && <section className="px-6 pb-4"><P>{wp.paragraphs[0]}</P></section>}
+
+            {/* ── ④ 취약 부위 상세 카드 ── */}
+            {wp.parts && wp.parts.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>주요 취약 부위</Heading>
+                <div className="flex flex-col gap-3">
+                  {wp.parts.map((part, i) => {
+                    const matched = OHAENG_BODY.find(ob => ob.key === part.ohaeng?.trim().slice(0, 1));
+                    const accentColor = matched?.color ?? BURG_MID;
+                    return (
+                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${accentColor}40` }}>
+                        {/* 카드 헤더 */}
+                        <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${accentColor}14` }}>
+                          <span className="text-[28px] flex-shrink-0">{part.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[16px] font-black" style={{ color: INK, fontFamily: SERIF }}>{part.name}</span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: accentColor, color: "#fff" }}>{part.ohaeng} 오행</span>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black"
+                            style={{ background: BURG, color: "#fff" }}>{i + 1}</div>
+                        </div>
+                        {/* 카드 본문 */}
+                        <div className="px-4 py-3" style={{ background: WHITE }}>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{part.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑤ 단락 2 ── */}
+            {wp.paragraphs?.[1] && <section className="px-6 pb-4"><P>{wp.paragraphs[1]}</P></section>}
+
+            {/* ── ⑥ 신체 신호 divider 리스트 ── */}
+            {wp.bodySignals && wp.bodySignals.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>몸이 보내는 초기 신호</Heading>
+                <p className="text-[12px] mb-3" style={{ color: MUTE }}>이 체질은 약해질 때 아래와 같은 신호를 먼저 보내오. 신호를 알아채면 더 빨리 지킬 수 있소.</p>
+                <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${BURG}20`, background: BURG_LIGHT }}>
+                  {wp.bodySignals.map((sig, i) => (
+                    <div key={i}>
+                      {i > 0 && <div style={{ height: 1, background: `${BURG}18`, margin: "0 16px" }} />}
+                      <div className="flex gap-4 px-4 py-4">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]"
+                          style={{ background: WHITE }}>
+                          {sig.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold mb-1" style={{ color: BURG, fontFamily: SERIF }}>{sig.title}</p>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{sig.desc}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑦ 단락 3 ── */}
+            {wp.paragraphs?.[2] && <section className="px-6 pb-4"><P>{wp.paragraphs[2]}</P></section>}
+
+            {/* ── ⑧ 조언 gradient box ── */}
+            {wp.weakAdvice && (
+              <section className="px-6 pb-8">
+                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${BURG} 0%, #4a1a1a 100%)` }}>
+                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{wp.weakAdvice}</p>
+                </div>
+              </section>
+            )}
+
+            <ChapterNav cur="2" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제3장 — 질병·증상 ═══════════ */}
-      {ch === "3" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 질병</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              특히 조심해야 할<br />질병과 증상
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_health/saju_health_3/saju_health_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`사주는 질병을\n미리 알려주는 지도이오.\n\n조심할 때를 알면\n건강을 지킬 수 있소.`}</Quote>
-          {(() => {
-            const dis = (jc.diseases as { intro?: string; callout?: string; paragraphs?: string[]; symptoms?: {name:string;level:string;desc:string}[] } | undefined) ?? {};
-            return (
-              <>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>질환 경향 분석</Heading>
-                  {dis.intro && <P>{dis.intro}</P>}
-                  {dis.callout && <Callout>{dis.callout}</Callout>}
-                  {dis.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                {dis.symptoms && dis.symptoms.length > 0 && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>주의 증상</Heading>
-                    <div className="space-y-2">
-                      {dis.symptoms.map((sym, i) => (
-                        <div key={i} className="rounded-xl px-4 py-3" style={{ background: sym.level === "주의" ? "#fff0f0" : "#fffbf0", borderLeft: `3px solid ${sym.level === "주의" ? WARN : GOLD}` }}>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[13px] font-bold" style={{ color: INK }}>{sym.name}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: sym.level === "주의" ? "#fee2e2" : "#fef9c3", color: sym.level === "주의" ? WARN : "#92400e" }}>{sym.level}</span>
+      {ch === "3" && (() => {
+        const RUST = "#b54a2a";
+        const RUST_LIGHT = "#fdf4f1";
+        const RUST_WARN = "#c0622a";
+        const AMBER = "#b07d2a";
+        const AMBER_LIGHT = "#fdf8ee";
+        const dis = (jc.diseases as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          symptoms?: { icon?: string; name?: string; level?: string; desc?: string }[];
+          symptomTriggers?: { icon?: string; trigger?: string; desc?: string }[];
+          preventionTips?: { num?: number; title?: string; desc?: string }[];
+          diseaseAdvice?: string;
+        } | undefined) ?? {};
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 질병</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                조심해야 할<br />질병과 증상
+              </h1>
+            </div>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_3/saju_health_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`사주는 질병을\n미리 알려주는 지도이오.\n\n조심할 때를 알면\n건강을 지킬 수 있소.`}</Quote>
+
+            {/* ── ① 인트로 + 콜아웃 ── */}
+            <section className="px-6 pt-2 pb-4">
+              <Heading>질환 경향 분석</Heading>
+              {dis.intro && <P>{dis.intro}</P>}
+              {dis.callout && <Callout>{dis.callout}</Callout>}
+            </section>
+
+            {/* ── ② 단락 1 ── */}
+            {dis.paragraphs?.[0] && <section className="px-6 pb-4"><P>{dis.paragraphs[0]}</P></section>}
+
+            {/* ── ③ 증상·질환 상세 카드 ── */}
+            {dis.symptoms && dis.symptoms.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>주의해야 할 질환</Heading>
+                <div className="flex flex-col gap-3">
+                  {dis.symptoms.map((sym, i) => {
+                    const isWarn = sym.level === "주의";
+                    const headerBg = isWarn ? RUST : AMBER;
+                    const bodyBg = isWarn ? RUST_LIGHT : AMBER_LIGHT;
+                    const levelBg = isWarn ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.28)";
+                    return (
+                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${headerBg}30` }}>
+                        {/* 카드 헤더 */}
+                        <div className="flex items-center gap-3 px-4 py-3" style={{ background: headerBg }}>
+                          <span className="text-[26px] flex-shrink-0">{sym.icon ?? "🩺"}</span>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[16px] font-black" style={{ color: "#fff", fontFamily: SERIF }}>{sym.name}</span>
                           </div>
-                          <p className="text-[12px]" style={{ color: INK_SOFT }}>{sym.desc}</p>
+                          <span className="flex-shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full"
+                            style={{ background: levelBg, color: "#fff" }}>{sym.level ?? "관찰"}</span>
                         </div>
-                      ))}
+                        {/* 카드 본문 */}
+                        <div className="px-4 py-4" style={{ background: bodyBg }}>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{sym.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ── ④ 단락 2 ── */}
+            {dis.paragraphs?.[1] && <section className="px-6 pb-4"><P>{dis.paragraphs[1]}</P></section>}
+
+            {/* ── ⑤ 증상 악화 트리거 ── */}
+            {dis.symptomTriggers && dis.symptomTriggers.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>증상이 심해지는 상황</Heading>
+                <p className="text-[12px] mb-3" style={{ color: MUTE }}>이 체질은 아래 상황에서 특히 몸이 반응하오. 미리 알고 피하는 것이 최선이오.</p>
+                <div className="flex flex-col gap-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${RUST}20` }}>
+                  {dis.symptomTriggers.map((tr, i) => (
+                    <div key={i}>
+                      {i > 0 && <div style={{ height: 1, background: `${RUST}15` }} />}
+                      <div className="flex gap-4 px-4 py-4" style={{ background: i % 2 === 0 ? RUST_LIGHT : WHITE }}>
+                        <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]"
+                          style={{ background: `${RUST}12` }}>
+                          {tr.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold mb-1.5" style={{ color: RUST_WARN, fontFamily: SERIF }}>{tr.trigger}</p>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tr.desc}</p>
+                        </div>
+                      </div>
                     </div>
-                  </section>
-                )}
-              </>
-            );
-          })()}
-          <ChapterNav cur="3" go={next} />
-        </>
-      )}
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑥ 단락 3 ── */}
+            {dis.paragraphs?.[2] && <section className="px-6 pb-4"><P>{dis.paragraphs[2]}</P></section>}
+
+            {/* ── ⑦ 예방 수칙 divider ── */}
+            {dis.preventionTips && dis.preventionTips.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>예방 수칙</Heading>
+                <div className="flex flex-col gap-0">
+                  {dis.preventionTips.map((tip, i) => (
+                    <div key={i}>
+                      {i > 0 && <div style={{ height: 1, background: "#e8e0d8", margin: "0 4px" }} />}
+                      <div className="flex gap-4 py-4">
+                        <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-black"
+                          style={{ background: RUST, color: "#fff" }}>
+                          {tip.num ?? i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold mb-1.5" style={{ color: INK, fontFamily: SERIF }}>{tip.title}</p>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑧ 홍연의 당부 gradient box ── */}
+            {dis.diseaseAdvice && (
+              <section className="px-6 pb-8">
+                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${RUST} 0%, #7a2a10 100%)` }}>
+                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{dis.diseaseAdvice}</p>
+                </div>
+              </section>
+            )}
+
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제4장 — 식습관·생활 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 식습관</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name}님에게 맞는<br />식습관과 생활 방식
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_health/saju_health_4/saju_health_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`몸에 맞는 음식과\n생활 방식이 따로 있소.\n\n사주가 알려주는\n최적의 루틴을 찾겠소.`}</Quote>
-          {(() => {
-            const lif = (jc.lifestyle as { intro?: string; callout?: string; paragraphs?: string[]; tips?: string[] } | undefined) ?? {};
-            return (
-              <>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>나에게 맞는 생활 방식</Heading>
-                  {lif.intro && <P>{lif.intro}</P>}
-                  {lif.callout && <Callout>{lif.callout}</Callout>}
-                  {lif.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                {lif.tips && lif.tips.length > 0 && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>생활 실천 팁</Heading>
-                    <div className="space-y-2">
-                      {lif.tips.map((tip, i) => (
-                        <div key={i} className="flex items-start gap-2 py-1">
-                          <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GREEN, color: "#fff" }}>{i + 1}</span>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+      {ch === "4" && (() => {
+        const FOREST = "#2d6a4f";
+        const FOREST_LIGHT = "#eef7f2";
+        const FOREST_MID = "#52a17a";
+        const AREA_COLOR: Record<string, string> = { 운동: "#3f7d6b", 수면: "#3d4f7c", 환경: "#6b5e3f" };
+        const AREA_BG: Record<string, string> = { 운동: "#eef7f4", 수면: "#eef0f9", 환경: "#f7f4ee" };
+        const OHAENG_COLOR: Record<string, string> = { 목: "#7cc47f", 화: "#e88aa0", 토: "#e8c97a", 금: "#b8c0c4", 수: "#8fb3e0" };
+        const lif = (jc.lifestyle as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          foodRecs?: { icon?: string; name?: string; ohaeng?: string; category?: string; benefit?: string }[];
+          lifestyleCards?: { icon?: string; area?: string; title?: string; desc?: string }[];
+          tips?: ({ icon?: string; title?: string; desc?: string } | string)[];
+          lifestyleAdvice?: string;
+        } | undefined) ?? {};
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 식습관</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                맞는 식습관과<br />생활 방식
+              </h1>
+            </div>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_4/saju_health_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`몸에 맞는 음식과\n생활 방식이 따로 있소.\n\n사주가 알려주는\n최적의 루틴을 찾겠소.`}</Quote>
+
+            {/* ── ① 인트로 + 콜아웃 ── */}
+            <section className="px-6 pt-2 pb-4">
+              <Heading>나에게 맞는 생활 방식</Heading>
+              {lif.intro && <P>{lif.intro}</P>}
+              {lif.callout && <Callout>{lif.callout}</Callout>}
+            </section>
+
+            {/* ── ② 단락 1 ── */}
+            {lif.paragraphs?.[0] && <section className="px-6 pb-4"><P>{lif.paragraphs[0]}</P></section>}
+
+            {/* ── ③ 권장 식품 2-col 카드 ── */}
+            {lif.foodRecs && lif.foodRecs.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>이 체질에 맞는 식품</Heading>
+                <p className="text-[12px] mb-3" style={{ color: MUTE }}>용신 오행을 보완하는 식재료이오. 일상에서 자주 챙겨 드시오.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {lif.foodRecs.map((food, i) => {
+                    const oCol = OHAENG_COLOR[food.ohaeng ?? ""] ?? FOREST_MID;
+                    return (
+                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${oCol}30` }}>
+                        {/* 카드 헤더 */}
+                        <div className="flex items-center gap-2 px-3 py-2.5" style={{ background: `${oCol}18` }}>
+                          <span className="text-[24px]">{food.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[14px] font-black leading-tight" style={{ color: INK, fontFamily: SERIF }}>{food.name}</p>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: oCol, color: "#fff" }}>{food.ohaeng}</span>
+                              <span className="text-[10px]" style={{ color: MUTE }}>{food.category}</span>
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </>
-            );
-          })()}
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
+                        {/* 카드 본문 */}
+                        <div className="px-3 py-3" style={{ background: WHITE }}>
+                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{food.benefit}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ── ④ 단락 2 ── */}
+            {lif.paragraphs?.[1] && <section className="px-6 pb-4"><P>{lif.paragraphs[1]}</P></section>}
+
+            {/* ── ⑤ 생활 루틴 카드 (운동·수면·환경) ── */}
+            {lif.lifestyleCards && lif.lifestyleCards.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>생활 루틴 제안</Heading>
+                <div className="flex flex-col gap-3">
+                  {lif.lifestyleCards.map((card, i) => {
+                    const aColor = AREA_COLOR[card.area ?? "운동"] ?? FOREST;
+                    const aBg = AREA_BG[card.area ?? "운동"] ?? FOREST_LIGHT;
+                    return (
+                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${aColor}25` }}>
+                        {/* 루틴 헤더 */}
+                        <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${aColor}14` }}>
+                          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]"
+                            style={{ background: `${aColor}18` }}>
+                            {card.icon}
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold mb-0.5" style={{ color: aColor }}>{card.area}</p>
+                            <p className="text-[14px] font-black" style={{ color: INK, fontFamily: SERIF }}>{card.title}</p>
+                          </div>
+                        </div>
+                        {/* 루틴 본문 */}
+                        <div className="px-4 py-3" style={{ background: aBg }}>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑥ 단락 3 ── */}
+            {lif.paragraphs?.[2] && <section className="px-6 pb-4"><P>{lif.paragraphs[2]}</P></section>}
+
+            {/* ── ⑦ 실천 팁 divider ── */}
+            {lif.tips && lif.tips.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>오늘부터 실천하는 습관</Heading>
+                <div className="flex flex-col gap-0">
+                  {lif.tips.map((tip, i) => {
+                    const isObj = typeof tip === "object" && tip !== null;
+                    const tipIcon = isObj ? (tip as {icon?:string}).icon : "✅";
+                    const tipTitle = isObj ? (tip as {title?:string}).title : undefined;
+                    const tipDesc = isObj ? (tip as {desc?:string}).desc : (tip as string);
+                    return (
+                      <div key={i}>
+                        {i > 0 && <div style={{ height: 1, background: "#e8e0d8", margin: "0 4px" }} />}
+                        <div className="flex gap-4 py-4">
+                          <div className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-[20px]"
+                            style={{ background: FOREST_LIGHT }}>
+                            {tipIcon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            {tipTitle && <p className="text-[13px] font-bold mb-1" style={{ color: FOREST, fontFamily: SERIF }}>{tipTitle}</p>}
+                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tipDesc}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑧ 홍연의 당부 gradient box ── */}
+            {lif.lifestyleAdvice && (
+              <section className="px-6 pb-8">
+                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${FOREST} 0%, #1a3d2d 100%)` }}>
+                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{lif.lifestyleAdvice}</p>
+                </div>
+              </section>
+            )}
+
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제5장 — 건강 흐름·시기 ═══════════ */}
-      {ch === "5" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 흐름</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              건강 흐름과<br />조심해야 할 시기
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_health/saju_health_5/saju_health_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`건강의 물결도\n대운을 따라 흐르오.\n\n조심해야 할 시기를\n미리 알고 대비하시오.`}</Quote>
-          {(() => {
-            const hf = (jc.healthFlow as { intro?: string; callout?: string; paragraphs?: string[]; periods?: {label:string;tone:string;text:string}[] } | undefined) ?? {};
-            return (
-              <>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>건강 흐름 분석</Heading>
-                  {hf.intro && <P>{hf.intro}</P>}
-                  {hf.callout && <Callout>{hf.callout}</Callout>}
-                  {hf.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                {hf.periods && hf.periods.length > 0 && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>시기별 건강 포인트</Heading>
-                    <div className="space-y-2">
-                      {hf.periods.map((period, i) => (
-                        <div key={i} className="rounded-xl px-4 py-3" style={{ background: period.tone === "warn" ? "#fff0f0" : "#eef6f0", borderLeft: `3px solid ${period.tone === "warn" ? WARN : GREEN}` }}>
-                          <p className="text-[12px] font-bold mb-1" style={{ color: period.tone === "warn" ? WARN : GREEN }}>{period.label}</p>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{period.text}</p>
+      {ch === "5" && (() => {
+        const DBLUE = "#2d4a7a";
+        const DBLUE_LIGHT = "#eef2fa";
+        const WARN_C = "#9b3535";
+        const WARN_BG = "#fdf3f3";
+        const GOOD_C = "#2d6a4f";
+        const GOOD_BG = "#eef7f2";
+        const hf = (jc.healthFlow as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          periods?: { label?: string; tone?: string; text?: string; advice?: string }[];
+          periodTips?: { icon?: string; title?: string; desc?: string }[];
+          flowAdvice?: string;
+        } | undefined) ?? {};
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 흐름</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                건강 흐름과<br />조심해야 할 시기
+              </h1>
+            </div>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_5/saju_health_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`건강의 물결도\n대운을 따라 흐르오.\n\n조심해야 할 시기를\n미리 알고 대비하시오.`}</Quote>
+
+            {/* ── ① 인트로 + 콜아웃 ── */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>건강 흐름 분석</Heading>
+              {hf.intro && <P>{hf.intro}</P>}
+              {hf.callout && <Callout>{hf.callout}</Callout>}
+            </section>
+
+            {/* ── ② 건강 흐름 꺾은선 그래프 ── */}
+            <section className="px-6 pb-2">
+              <HealthFlowChart view={report?.view ?? null} />
+            </section>
+
+            {/* ── ④ 단락 1 ── */}
+            {hf.paragraphs?.[0] && <section className="px-6 pb-4"><P>{hf.paragraphs[0]}</P></section>}
+
+            {/* ── ⑤ 건강 흐름 세로 타임라인 ── */}
+            {hf.periods && hf.periods.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>시기별 건강 흐름</Heading>
+                <div className="relative pl-10">
+                  {/* 세로 연결선 */}
+                  <div className="absolute left-4 top-2 bottom-2 w-0.5" style={{ background: `${DBLUE}20` }} />
+                  <div className="flex flex-col gap-4">
+                    {hf.periods.map((period, i) => {
+                      const isWarn = period.tone === "warn";
+                      const dotColor = isWarn ? WARN_C : GOOD_C;
+                      const cardBg = isWarn ? WARN_BG : GOOD_BG;
+                      const borderColor = isWarn ? `${WARN_C}30` : `${GOOD_C}30`;
+                      return (
+                        <div key={i} className="relative">
+                          {/* 타임라인 점 */}
+                          <div className="absolute -left-10 top-4 w-4 h-4 rounded-full border-2 flex items-center justify-center"
+                            style={{ background: dotColor, borderColor: dotColor, transform: "translateX(2px)" }}>
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#fff" }} />
+                          </div>
+                          {/* 카드 */}
+                          <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${borderColor}` }}>
+                            {/* 카드 헤더 */}
+                            <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${dotColor}12` }}>
+                              <span className="text-[14px] font-black" style={{ color: dotColor, fontFamily: SERIF }}>{period.label}</span>
+                              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full"
+                                style={{ background: dotColor, color: "#fff" }}>
+                                {isWarn ? "⚠ 주의" : "✓ 안정"}
+                              </span>
+                            </div>
+                            {/* 카드 본문 */}
+                            <div className="px-4 py-3" style={{ background: cardBg }}>
+                              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{period.text}</p>
+                              {period.advice && (
+                                <div className="flex items-start gap-2 pt-2" style={{ borderTop: `1px dashed ${dotColor}30` }}>
+                                  <span className="text-[11px] font-black flex-shrink-0 mt-0.5" style={{ color: dotColor }}>→</span>
+                                  <p className="text-[12px] font-bold leading-relaxed" style={{ color: dotColor }}>{period.advice}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      ))}
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑤ 단락 2 ── */}
+            {hf.paragraphs?.[1] && <section className="px-6 pb-4"><P>{hf.paragraphs[1]}</P></section>}
+
+            {/* ── ⑥ 시기별 대비 수칙 divider ── */}
+            {hf.periodTips && hf.periodTips.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>건강 고비를 대비하는 수칙</Heading>
+                <p className="text-[12px] mb-3" style={{ color: MUTE }}>어느 시기가 오더라도 준비된 자는 두렵지 않소. 아래 수칙을 몸에 익히시오.</p>
+                <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${DBLUE}20`, background: DBLUE_LIGHT }}>
+                  {hf.periodTips.map((tip, i) => (
+                    <div key={i}>
+                      {i > 0 && <div style={{ height: 1, background: `${DBLUE}15` }} />}
+                      <div className="flex gap-4 px-4 py-4">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]"
+                          style={{ background: WHITE }}>
+                          {tip.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold mb-1.5" style={{ color: DBLUE, fontFamily: SERIF }}>{tip.title}</p>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+                        </div>
+                      </div>
                     </div>
-                  </section>
-                )}
-              </>
-            );
-          })()}
-          <ChapterNav cur="5" go={next} />
-        </>
-      )}
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑦ 단락 3 ── */}
+            {hf.paragraphs?.[2] && <section className="px-6 pb-4"><P>{hf.paragraphs[2]}</P></section>}
+
+            {/* ── ⑧ 홍연의 당부 gradient box ── */}
+            {hf.flowAdvice && (
+              <section className="px-6 pb-8">
+                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${DBLUE} 0%, #1a2d50 100%)` }}>
+                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{hf.flowAdvice}</p>
+                </div>
+              </section>
+            )}
+
+            <ChapterNav cur="5" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제6장 — 개운법 ═══════════ */}
-      {ch === "6" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 개운법</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name}님의 건강을<br />살릴 개운법
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_health/saju_health_6/saju_health_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`부족한 기운을 채우면\n건강의 흐름이 달라지오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}에게\n맞는 개운법이오.`}</Quote>
-          {(() => {
-            const rem = (jc.remedy as { intro?: string; callout?: string; paragraphs?: string[]; remedies?: {icon:string;title:string;desc:string}[] } | undefined) ?? {};
-            return (
-              <>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>개운법 방향</Heading>
-                  {rem.intro && <P>{rem.intro}</P>}
-                  {rem.callout && <Callout>{rem.callout}</Callout>}
-                  {rem.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                {rem.remedies && rem.remedies.length > 0 && (
-                  <section className="px-6 pt-2 pb-6">
-                    <Heading>실천 개운법</Heading>
-                    <div className="grid grid-cols-2 gap-3">
-                      {rem.remedies.map((r, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
-                          <div className="text-2xl mb-2">{r.icon}</div>
-                          <p className="text-[13px] font-bold mb-1" style={{ color: INK }}>{r.title}</p>
-                          <p className="text-[12px]" style={{ color: INK_SOFT }}>{r.desc}</p>
+      {ch === "6" && (() => {
+        const PURP = "#5a3d7a";
+        const PURP_LIGHT = "#f5f0fa";
+        const PURP_MID = "#8a6aaa";
+        const CAT_COLOR: Record<string, string> = {
+          "생활습관": "#2d6a4f", "환경·공간": "#3d4f7c", "마음·명상": "#7a3d6a",
+          "음식·약재": "#6a5a2d", "색상·방향": "#5a3d7a",
+        };
+        const CAT_BG: Record<string, string> = {
+          "생활습관": "#eef7f2", "환경·공간": "#eef0f9", "마음·명상": "#f9eef6",
+          "음식·약재": "#f7f4ee", "색상·방향": "#f5f0fa",
+        };
+        const rem = (jc.remedy as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          remedies?: { icon?: string; category?: string; title?: string; desc?: string }[];
+          remedyCats?: { icon?: string; category?: string; items?: string[] }[];
+          remedyAdvice?: string;
+        } | undefined) ?? {};
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 개운법</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                내 건강을<br />살릴 개운법
+              </h1>
+            </div>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_6/saju_health_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`부족한 기운을 채우면\n건강의 흐름이 달라지오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}에게\n맞는 개운법이오.`}</Quote>
+
+            {/* ── ① 인트로 + 콜아웃 ── */}
+            <section className="px-6 pt-2 pb-4">
+              <Heading>개운법 방향</Heading>
+              {rem.intro && <P>{rem.intro}</P>}
+              {rem.callout && <Callout>{rem.callout}</Callout>}
+            </section>
+
+            {/* ── ② 단락 1 ── */}
+            {rem.paragraphs?.[0] && <section className="px-6 pb-4"><P>{rem.paragraphs[0]}</P></section>}
+
+            {/* ── ③ 개운법 상세 카드 ── */}
+            {rem.remedies && rem.remedies.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>나에게 맞는 개운법</Heading>
+                <div className="flex flex-col gap-3">
+                  {rem.remedies.map((r, i) => {
+                    const cat = r.category ?? "생활습관";
+                    const cColor = CAT_COLOR[cat] ?? PURP;
+                    const cBg = CAT_BG[cat] ?? PURP_LIGHT;
+                    return (
+                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${cColor}25` }}>
+                        {/* 카드 헤더 */}
+                        <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${cColor}12` }}>
+                          <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-[24px]"
+                            style={{ background: `${cColor}18` }}>
+                            {r.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 inline-block"
+                              style={{ background: cColor, color: "#fff" }}>{cat}</span>
+                            <p className="text-[15px] font-black leading-tight" style={{ color: INK, fontFamily: SERIF }}>{r.title}</p>
+                          </div>
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black"
+                            style={{ background: PURP, color: "#fff" }}>{i + 1}</div>
                         </div>
-                      ))}
+                        {/* 카드 본문 */}
+                        <div className="px-4 py-3" style={{ background: cBg }}>
+                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{r.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ── ④ 단락 2 ── */}
+            {rem.paragraphs?.[1] && <section className="px-6 pb-4"><P>{rem.paragraphs[1]}</P></section>}
+
+            {/* ── ⑤ 분야별 실천 체크리스트 ── */}
+            {rem.remedyCats && rem.remedyCats.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>분야별 실천 체크리스트</Heading>
+                <p className="text-[12px] mb-3" style={{ color: MUTE }}>매일 조금씩 실천하는 것이 개운의 시작이오. 작은 것부터 몸에 익히시오.</p>
+                <div className="flex flex-col gap-3">
+                  {rem.remedyCats.map((cat, i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${PURP}20` }}>
+                      {/* 카테고리 헤더 */}
+                      <div className="flex items-center gap-2 px-4 py-3" style={{ background: PURP_LIGHT }}>
+                        <span className="text-[20px]">{cat.icon}</span>
+                        <span className="text-[14px] font-black" style={{ color: PURP, fontFamily: SERIF }}>{cat.category} 개운</span>
+                      </div>
+                      {/* 체크 항목 */}
+                      <div className="px-4 py-3" style={{ background: WHITE }}>
+                        {(cat.items ?? []).map((item, j) => (
+                          <div key={j} className="flex items-start gap-3 py-2">
+                            {j > 0 && <div className="absolute" style={{ top: 0, height: 1, background: `${PURP}10` }} />}
+                            <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center"
+                              style={{ borderColor: `${PURP}40` }}>
+                              <div className="w-2 h-2 rounded-sm" style={{ background: `${PURP}30` }} />
+                            </div>
+                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </section>
-                )}
-              </>
-            );
-          })()}
-          <ChapterNav cur="6" go={next} />
-        </>
-      )}
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── ⑥ 단락 3 ── */}
+            {rem.paragraphs?.[2] && <section className="px-6 pb-4"><P>{rem.paragraphs[2]}</P></section>}
+
+            {/* ── ⑦ 홍연의 당부 gradient box ── */}
+            {rem.remedyAdvice && (
+              <section className="px-6 pb-8">
+                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${PURP} 0%, #2d1a40 100%)` }}>
+                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
+                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{rem.remedyAdvice}</p>
+                </div>
+              </section>
+            )}
+
+            <ChapterNav cur="6" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "7" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name}님께<br />홍연의 서신
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_health/saju_health_7/saju_health_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <section className="px-6 pt-10 pb-8">
-            <div className="text-center mb-8">
-              <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
-                <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
-              </div>
+          <div style={{ filter: eventOpen ? "blur(5px)" : "none", pointerEvents: eventOpen ? "none" : "auto", transition: "filter 0.2s" }}>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                그대에게 남기는<br />홍연의 서신
+              </h1>
             </div>
-            {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
-              <P key={i}>{p}</P>
-            ))}
-            <p className="text-right mt-6 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
-          </section>
-          <ChapterNav cur="7" go={next} />
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_7/saju_health_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <section className="px-6 pt-10 pb-8">
+              <div className="text-center mb-8">
+                <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
+                  <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
+                </div>
+              </div>
+              {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
+                <P key={i}>{p}</P>
+              ))}
+              <p className="text-right mt-6 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/dojang.png" alt="홍연 도장" className="block mx-auto mt-4" style={{ width: 56, opacity: 0.85 }} />
+            </section>
+            <ReviewBox />
+            <EventBox />
+            <RecoGrid />
+            <ChapterNav cur="7" go={next} />
+          </div>
+          {eventOpen && <EventPopup onClose={(hide) => { if (hide) localStorage.setItem("hy_health_event_hide", "1"); setEventOpen(false); }} />}
         </>
       )}
       </>
