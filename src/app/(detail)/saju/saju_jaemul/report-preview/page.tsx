@@ -86,7 +86,7 @@ function OhaengDonut({ view }: { view: MyeongsikView | null }) {
       {/* 도넛 + 바 차트 */}
       <div className="flex items-end gap-3 px-5 pb-5">
         {/* 도넛 */}
-        <svg viewBox="0 0 140 140" style={{ width: 140, height: 140, flexShrink: 0 }}>
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
           <g transform="rotate(-90 70 70)">
             {OHAENG.map((e) => {
               const frac = counts[e.key] / total;
@@ -105,7 +105,7 @@ function OhaengDonut({ view }: { view: MyeongsikView | null }) {
         </svg>
 
         {/* 세로 바 차트 */}
-        <div className="flex-1 flex items-end gap-2" style={{ height: 110 }}>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
           {OHAENG.map((e) => {
             const p = pct(counts[e.key]);
             const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
