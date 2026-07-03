@@ -43,6 +43,8 @@ const CH1_PALE   = "#f9eef3";
 const CH1_ACCENT = "#c26080";
 const CH2_COLOR  = "#2d3a8c"; // 딥 네이비 — 2장 테마
 const CH2_PALE   = "#eef0fb";
+const CH3_COLOR  = "#c26a00"; // 앰버 황금 — 3장 테마 (끌림·불꽃)
+const CH3_PALE   = "#fff8ee";
 
 // 오행 색상
 const OHAENG: { key: string; label: string; color: string }[] = [
@@ -2968,6 +2970,93 @@ function AttractionGauge({ score, label }: { score: number; label: string }) {
   );
 }
 
+// 끌림 키워드 뱃지 띠 (이모지+텍스트)
+function AttractionKeywordStrip({ keywords }: { keywords: string[] }) {
+  if (!keywords.length) return null;
+  const BG_COLORS = [`${CH3_COLOR}18`, `${CH1_COLOR}14`, `${CH2_COLOR}12`, `${CH3_COLOR}10`];
+  const TEXT_COLORS = [CH3_COLOR, CH1_COLOR, CH2_COLOR, CH3_COLOR];
+  return (
+    <div className="mx-5 mb-5 flex flex-wrap gap-2">
+      {keywords.map((kw, i) => (
+        <span key={i} className="px-4 py-2 rounded-full text-[13px] font-black" style={{ background: BG_COLORS[i % BG_COLORS.length], color: TEXT_COLORS[i % TEXT_COLORS.length] }}>
+          {kw}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// 끌림의 이유 카드 — callout + 단락들
+function AttractionReasonCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout = (data.callout as string | undefined) ?? "";
+  const intro = (data.intro as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const keywords = (data.attractionKeywords as string[] | undefined) ?? [];
+  return (
+    <div className="mb-2">
+      {callout && (
+        <div className="mx-5 mb-4 px-5 py-4 rounded-2xl" style={{ background: `linear-gradient(135deg, ${CH3_COLOR}14 0%, ${CH3_PALE} 100%)`, border: `1.5px solid ${CH3_COLOR}30` }}>
+          <span className="text-[11px] font-bold block mb-1.5" style={{ color: CH3_COLOR }}>✦ 끌림의 핵심</span>
+          <p className="text-[14px] font-bold leading-relaxed" style={{ color: INK, fontFamily: SERIF }}>"{callout}"</p>
+        </div>
+      )}
+      {keywords.length > 0 && <AttractionKeywordStrip keywords={keywords} />}
+      {intro && (
+        <p className="px-6 text-[14px] leading-[1.85] mb-4 font-medium" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{intro}</p>
+      )}
+      <div className="px-6">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 두 사람 첫인상 대결 카드
+function FirstImpressionDuelCard({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const mine = (data.mine as string | undefined) ?? "";
+  const mineEmotion = (data.mineEmotion as string | undefined) ?? "💫";
+  const mineDesc = (data.mineDesc as string | undefined) ?? "";
+  const partner = (data.partner as string | undefined) ?? "";
+  const partnerEmotion = (data.partnerEmotion as string | undefined) ?? "🌹";
+  const partnerDesc = (data.partnerDesc as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+      {/* 나 패널 */}
+      <div className="px-5 pt-5 pb-4" style={{ background: `${CH1_COLOR}08`, borderBottom: `1px solid ${INK}08` }}>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[20px]">{mineEmotion}</span>
+          <div>
+            <p className="text-[10px] font-bold" style={{ color: CH1_COLOR }}>{myName}이(가) 받은 첫인상</p>
+            {mine && <p className="text-[13px] font-black leading-tight mt-0.5" style={{ color: INK }}>{mine}</p>}
+          </div>
+        </div>
+        {mineDesc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{mineDesc}</p>}
+      </div>
+      {/* 중앙 화살표 구분선 */}
+      <div className="flex items-center justify-center py-2" style={{ background: WHITE }}>
+        <div className="flex-1 h-px" style={{ background: `${INK}08` }} />
+        <span className="px-3 text-[16px]">⇅</span>
+        <div className="flex-1 h-px" style={{ background: `${INK}08` }} />
+      </div>
+      {/* 상대 패널 */}
+      <div className="px-5 pt-4 pb-5" style={{ background: `${CH2_COLOR}08` }}>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[20px]">{partnerEmotion}</span>
+          <div>
+            <p className="text-[10px] font-bold" style={{ color: CH2_COLOR }}>{partnerName}이(가) 받은 첫인상</p>
+            {partner && <p className="text-[13px] font-black leading-tight mt-0.5" style={{ color: INK }}>{partner}</p>}
+          </div>
+        </div>
+        {partnerDesc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{partnerDesc}</p>}
+      </div>
+    </div>
+  );
+}
+
 // 십성 뱃지
 function SipseongBadge({ label, color, desc }: { label: string; color: string; desc?: string }) {
   return (
@@ -4942,53 +5031,67 @@ function ReportPreviewInner() {
       })()}
 
       {/* ═══════════ 제3장 · 첫인상과 끌림의 비밀 ═══════════ */}
-      {ch === "3" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 끌림</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>첫인상과 끌림의 비밀</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_3/kunghap_yeonae_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"사주에는 이성을 끌어당기는 기운이\n숨겨져 있소.\n두 사람이 왜 서로에게 끌렸는지\n사주로 풀어보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>케미 점수</Heading>
-            {(jc.chemistryScore as { score?: number } | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.chemistryScore as { score: number }).score} label={(jc.chemistryScore as { label?: string }).label ?? ""} />
-            ) : (
-              <AttractionGauge score={72} label="서로를 강하게 끌어당기는 궁합이오" />
-            )}
-            {!!(jc.chemistryScore as Record<string, unknown> | undefined)?.desc && (
-              <P>{(jc.chemistryScore as { desc: string }).desc}</P>
-            )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>끌림의 이유</Heading>
-            <ReportSec data={(jc.attractionReason as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
-          </section>
-          {!!(jc.firstImpression as Record<string, unknown> | undefined) && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>첫인상</Heading>
-              <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}10` }}>
-                <div className="px-5 py-4" style={{ background: `${MAROON}08`, borderBottom: `1px solid ${INK}08` }}>
-                  <p className="text-[11px] font-bold mb-1" style={{ color: MAROON }}>내가 상대에게서 받은 첫인상</p>
-                  <p className="text-[14px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{(jc.firstImpression as { mine?: string }).mine}</p>
+      {ch === "3" && (() => {
+        const myName = report?.name || "나";
+        const partnerName = report?.partnerName || "상대방";
+        const chemistryScore = (jc.chemistryScore as Record<string, unknown> | undefined) ?? {};
+        const attractionReason = (jc.attractionReason as Record<string, unknown> | undefined) ?? null;
+        const firstImpression = (jc.firstImpression as Record<string, unknown> | undefined) ?? null;
+        const hasScore = chemistryScore.score !== undefined;
+        return (
+          <>
+            {/* 다크 헤더 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 끌림</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>첫인상과 끌림의 비밀</h1>
+            </div>
+
+            {/* 커버 이미지 */}
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_3/kunghap_yeonae_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"사주에는 이성을 끌어당기는 기운이\n숨겨져 있소.\n두 사람이 왜 서로에게 끌렸는지\n사주로 풀어보겠소."`}</Quote>
+
+            {/* 케미 점수 */}
+            <section className="pb-4">
+              <div className="px-6"><Heading>케미 점수</Heading></div>
+              <AttractionGauge
+                score={hasScore ? (chemistryScore.score as number) : 72}
+                label={hasScore ? ((chemistryScore.label as string) ?? "") : "서로를 강하게 끌어당기는 궁합이오"}
+              />
+              {(chemistryScore.desc as string | undefined) && (
+                <div className="mx-5 mt-3 px-5 py-4 rounded-2xl" style={{ background: `${CH3_COLOR}08`, border: `1px solid ${CH3_COLOR}20` }}>
+                  <p className="text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{chemistryScore.desc as string}</p>
                 </div>
-                <div className="px-5 py-4" style={{ background: `${NAVY}08` }}>
-                  <p className="text-[11px] font-bold mb-1" style={{ color: NAVY }}>상대가 나에게서 받은 첫인상</p>
-                  <p className="text-[14px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{(jc.firstImpression as { partner?: string }).partner}</p>
-                </div>
-              </div>
+              )}
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-          <Quote>{`"끌림의 이유를 알았으니,\n내 눈에 상대방이 어떻게 보이는지\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="3" go={next} />
-        </>
-      )}
+
+            {/* 끌림의 이유 */}
+            <section className="pb-4">
+              <div className="px-6"><Heading>끌림의 이유</Heading></div>
+              <AttractionReasonCard data={attractionReason} />
+            </section>
+
+            {/* 두 사람의 첫인상 */}
+            <section className="pb-4">
+              <div className="px-6"><Heading>두 사람의 첫인상</Heading></div>
+              <FirstImpressionDuelCard data={firstImpression} myName={myName} partnerName={partnerName} />
+            </section>
+
+            {/* 홍연 마무리 인용구 */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${CH3_COLOR}12 0%, ${CH3_PALE} 100%)`, border: `1px solid ${CH3_COLOR}20` }}>
+              <p className="text-[13px] leading-[1.8]" style={{ color: CH3_COLOR, fontFamily: SERIF }}>
+                {`"끌림의 이유를 알았으니,\n이제 내 눈에 ${partnerName}이(가) 어떻게 보이는지\n살펴보겠소."`}
+              </p>
+            </div>
+
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제4장 · 나는 이 사람을 어떻게 보는가 ═══════════ */}
       {ch === "4" && (
