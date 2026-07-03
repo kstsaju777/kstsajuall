@@ -37,6 +37,13 @@ const GREEN = "#3f7d6b";
 const TAG_COLORS = ["#2d3a8c", "#b5891c", "#c9474f", "#3f8a52"];
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
+// 장별 테마 색상
+const CH1_COLOR  = "#8b3a5c"; // 딥 로즈 — 1장 테마
+const CH1_PALE   = "#f9eef3";
+const CH1_ACCENT = "#c26080";
+const CH2_COLOR  = "#2d3a8c"; // 딥 네이비 — 2장 테마
+const CH2_PALE   = "#eef0fb";
+
 // 오행 색상
 const OHAENG: { key: string; label: string; color: string }[] = [
   { key: "목", label: "목", color: "#7cc47f" },
@@ -135,6 +142,218 @@ function OhaengRadar({ view, color }: { view: MyeongsikView | null; color: strin
         </g>
       ))}
     </svg>
+  );
+}
+
+// ─── 제1장 전용 컴포넌트 ──────────────────────────────────────────
+
+// 오행 도넛 + 세로 바차트 (자녀사주 스타일)
+function OhaengDonutCh1({ view }: { view: MyeongsikView | null }) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const pct = (n: number) => Math.round((n / total) * 100);
+  const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
+          <g transform="rotate(-90 70 70)">
+            {OHAENG.map((e) => {
+              const frac = counts[e.key] / total;
+              const len = frac * C;
+              const el = (
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
+                  strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
+              );
+              acc += len;
+              return el;
+            })}
+          </g>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
+        </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 오행 도넛 + 세로 바차트 — 상대방용 (CH2_COLOR 팔레트)
+function OhaengDonutCh2({ view }: { view: MyeongsikView | null }) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const pct = (n: number) => Math.round((n / total) * 100);
+  const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
+          <g transform="rotate(-90 70 70)">
+            {OHAENG.map((e) => {
+              const frac = counts[e.key] / total;
+              const len = frac * C;
+              const el = (
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
+                  strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
+              );
+              acc += len;
+              return el;
+            })}
+          </g>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
+        </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 기질 카드 — 키워드 태그 + 강점/그림자 분리 표시 (color 테마 지원)
+function NatureCard({ data, color = CH1_COLOR, label = "나를 대표하는 기질" }: { data: Record<string, unknown> | null; color?: string; label?: string }) {
+  if (!data) return null;
+  const keywords = (data.keywords as string[] | undefined) ?? [];
+  const strengthDesc = (data.strengthDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const shadowDesc = (data.shadowDesc as string | undefined) ?? "";
+  const KW_COLORS = [color, "#3f7d6b", "#b07d2a", "#c9474f", "#3f63c4"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${INK}08` }}>
+        <p className="text-[11px] font-bold mb-2.5" style={{ color }}>{label}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${KW_COLORS[i % KW_COLORS.length]}14`, color: KW_COLORS[i % KW_COLORS.length] }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+      {strengthDesc && (
+        <div className="px-4 pt-3 pb-3" style={{ borderBottom: shadowDesc ? `1px solid ${INK}08` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">✨</span>
+            <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+        </div>
+      )}
+      {shadowDesc && (
+        <div className="px-4 pt-3 pb-4" style={{ background: "#fffaf9" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">🌙</span>
+            <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 연애 패턴 유형 카드 + 단락 (color/pale 테마 지원)
+function LovePatternCard({ data, color = CH1_COLOR, pale = CH1_PALE }: { data: Record<string, unknown> | null; color?: string; pale?: string }) {
+  if (!data) return null;
+  const intro = (data.intro as string | undefined) ?? "";
+  const patternType = (data.patternType as string | undefined) ?? "";
+  const patternIcon = (data.patternIcon as string | undefined) ?? "💞";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {(patternType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, border: `1px solid ${color}20` }}>
+          {patternType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]">{patternIcon}</span>
+              <span className="text-[15px] font-black" style={{ color }}>{patternType}</span>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
   );
 }
 
@@ -4558,126 +4777,169 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
-      {ch === "1" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_1/kunghap_yeonae_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
+      {ch === "1" && (() => {
+        const wonguk = (jc.myWonguk as Record<string,unknown> | undefined) ?? {};
+        const nature = (jc.myNature as Record<string,unknown> | undefined) ?? null;
+        const lovePattern = (jc.myLovePattern as Record<string,unknown> | undefined) ?? null;
+        const singang = (wonguk.singang as string | undefined);
+        const dominantEl = (wonguk.dominantEl as string | undefined);
+        const wongukParas = (wonguk.paragraphs as string[] | undefined) ?? [];
+        const callout = (wonguk.callout as string | undefined) ?? "";
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
+            </div>
 
-          <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_1/kunghap_yeonae_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          <section className="pb-2">
-            <div className="px-6"><Heading>나의 명식</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          </section>
+            <Quote>{`"궁합을 풀기 전,\n먼저 그대 자신의 사주팔자를\n살펴보겠소."`}</Quote>
 
-          <section className="px-6 pt-4 pb-4">
-            <Heading>나의 원국 풀이</Heading>
-            <ReportSec data={(jc.myWonguk as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
-          </section>
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <div className="px-5 mb-2">
+                <p className="text-[11px] font-bold" style={{ color: CH1_COLOR }}>나의 명식</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>사주 원국 기둥</h2>
+              </div>
+              <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
+            </section>
 
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나의 기질</Heading>
-            {!!(jc.myNature as Record<string, unknown> | undefined)?.keywords && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {((jc.myNature as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
-                  <span key={i} className="px-3 py-1.5 rounded-full text-[12px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{kw}</span>
+            {/* ── 일간 에너지 카드 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: CH1_COLOR }}>일간과 오행</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+              </div>
+              <OhaengDonutCh1 view={report?.view ?? null} />
+              {/* 원국 callout */}
+              {callout && (
+                <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: CH1_PALE, borderLeft: `3px solid ${CH1_COLOR}` }}>
+                  <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: CH1_COLOR }}>{callout}</p>
+                </div>
+              )}
+              {/* 원국 풀이 단락 */}
+              <div className="px-5">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
                 ))}
               </div>
-            )}
-            {!!(jc.myNature as Record<string, unknown> | undefined)?.desc && (
-              <P>{(jc.myNature as { desc: string }).desc}</P>
-            )}
-          </section>
+            </section>
 
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나의 연애 패턴</Heading>
-            <ReportSec data={(jc.myLovePattern as { intro?: string; paragraphs?: string[] }) ?? null} />
-          </section>
+            {/* ── 기질 카드 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: CH1_COLOR }}>나의 기질</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <NatureCard data={nature} />
+            </section>
 
-          <section className="px-6 pt-4 pb-6">
-            <Heading>나의 오행 분포</Heading>
-            <div className="flex justify-center mt-4">
-              <OhaengRadar view={report?.view ?? null} color={MAROON} />
+            {/* ── 연애 패턴 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: CH1_COLOR }}>나의 연애 패턴</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>사랑할 때 나는 어떤 사람인가</h2>
+              </div>
+              <LovePatternCard data={lovePattern} />
+            </section>
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${CH1_COLOR}10, ${CH1_PALE})`, border: `1px solid ${CH1_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: CH1_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                "나의 기운을 살펴보았으니,<br />이제 상대방의 사주를 펼쳐보겠소."
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
-          </section>
 
-          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
-          <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
-          <ChapterNav cur="1" go={next} />
-        </>
-      )}
+            <ChapterNav cur="1" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
-      {ch === "2" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_yeonae/kunghap_yeonae_2/kunghap_yeonae_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
+      {ch === "2" && (() => {
+        const partnerName = report?.partnerName || "상대방";
+        const partnerWonguk = (jc.partnerWonguk as Record<string, unknown> | undefined) ?? {};
+        const partnerNature = (jc.partnerNature as Record<string, unknown> | undefined) ?? null;
+        const partnerLovePattern = (jc.partnerLovePattern as Record<string, unknown> | undefined) ?? null;
+        const partnerWongukParas = (partnerWonguk.paragraphs as string[] | undefined) ?? [];
+        const partnerCallout = (partnerWonguk.callout as string | undefined) ?? "";
+        return (
+          <>
+            {/* 다크 헤더 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
+            </div>
 
-          <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
+            {/* 커버 이미지 */}
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_2/kunghap_yeonae_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          {report?.partnerView ? (
-            <>
-              <section className="pb-2">
-                <div className="px-6"><Heading>{report.partnerName || "상대방"}의 명식</Heading></div>
-                <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
-              </section>
+            <Quote>{`"이번엔 ${partnerName}의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
 
-              <section className="px-6 pt-4 pb-4">
-                <Heading>{report.partnerName || "상대방"}의 원국 풀이</Heading>
-                <ReportSec data={(jc.partnerWonguk as { intro?: string; callout?: string; paragraphs?: string[] }) ?? null} />
-              </section>
-
-              <section className="px-6 pt-2 pb-4">
-                <Heading>{report.partnerName || "상대방"}의 기질</Heading>
-                {!!(jc.partnerNature as Record<string, unknown> | undefined)?.keywords && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {((jc.partnerNature as { keywords?: string[] }).keywords ?? []).map((kw, i) => (
-                      <span key={i} className="px-3 py-1.5 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
-                    ))}
-                  </div>
-                )}
-                {!!(jc.partnerNature as Record<string, unknown> | undefined)?.desc && (
-                  <P>{(jc.partnerNature as { desc: string }).desc}</P>
-                )}
-              </section>
-
-              <section className="px-6 pt-2 pb-4">
-                <Heading>{report.partnerName || "상대방"}의 연애 패턴</Heading>
-                <ReportSec data={(jc.partnerLovePattern as { intro?: string; paragraphs?: string[] }) ?? null} />
-              </section>
-
-              <section className="px-6 pt-4 pb-6">
-                <Heading>{report.partnerName || "상대방"}의 오행 분포</Heading>
-                <div className="flex justify-center mt-4">
-                  <OhaengRadar view={report.partnerView} color={NAVY} />
-                </div>
-              </section>
-            </>
-          ) : (
-            <section className="px-6 pt-6 pb-6">
-              <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
+            {/* 명식 테이블 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>{partnerName}의 명식</Heading></div>
+              {report?.partnerView ? (
+                <MyeongsikTable view={report.partnerView} name={partnerName} birth={report.partnerBirth ?? null} />
+              ) : (
+                <p className="px-6 text-[14px]" style={{ color: MUTE }}>상대방 명식 정보가 준비 중이오.</p>
+              )}
             </section>
-          )}
 
-          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
-          <Quote>{`"두 사람의 원국을 보았으니,\n이제 처음 만났을 때의 끌림을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
+            {/* 오행 도넛 + 원국 풀이 */}
+            <section className="pb-4">
+              <div className="px-6"><Heading>{partnerName}의 오행과 원국</Heading></div>
+              <OhaengDonutCh2 view={report?.partnerView ?? null} />
+              {partnerCallout && (
+                <div className="mx-5 my-3 px-5 py-3 rounded-xl" style={{ background: `${CH2_COLOR}10`, borderLeft: `3px solid ${CH2_COLOR}` }}>
+                  <p className="text-[14px] font-bold leading-relaxed" style={{ color: CH2_COLOR, fontFamily: SERIF }}>"{partnerCallout}"</p>
+                </div>
+              )}
+              {(partnerWonguk.intro as string | undefined) && (
+                <p className="px-6 text-[14px] leading-[1.85] mb-3" style={{ color: INK, wordBreak: "keep-all" }}>{partnerWonguk.intro as string}</p>
+              )}
+              <div className="px-6">
+                {partnerWongukParas.map((p, i) => (
+                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+                ))}
+              </div>
+            </section>
+
+            {/* 기질 카드 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>{partnerName}의 기질</Heading></div>
+              <NatureCard data={partnerNature} color={CH2_COLOR} label={`${partnerName}을(를) 대표하는 기질`} />
+            </section>
+
+            {/* 연애 패턴 카드 */}
+            <section className="pb-4">
+              <div className="px-6"><Heading>{partnerName}의 연애 패턴</Heading></div>
+              <LovePatternCard data={partnerLovePattern} color={CH2_COLOR} pale={CH2_PALE} />
+            </section>
+
+            {/* 홍연 마무리 인용구 */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${CH2_COLOR}12 0%, ${CH2_PALE} 100%)`, border: `1px solid ${CH2_COLOR}20` }}>
+              <p className="text-[13px] leading-[1.8]" style={{ color: CH2_COLOR, fontFamily: SERIF }}>
+                {`"${partnerName}의 사주를 살펴보았소.\n이제 두 사람 사이에 흐르는\n끌림의 기운을 들여다보겠소."`}
+              </p>
+            </div>
+
+            <ChapterNav cur="2" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제3장 · 첫인상과 끌림의 비밀 ═══════════ */}
       {ch === "3" && (
