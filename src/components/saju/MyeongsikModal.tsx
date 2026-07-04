@@ -386,12 +386,13 @@ const ILJU_IMG: Record<string, string> = {
 };
 
 // 명식 테이블만 인라인 표시 (모달 없이 페이지에 직접 삽입용)
-export function MyeongsikTable({ view, name, birth, rows, hideLabel }: {
+export function MyeongsikTable({ view, name, birth, rows, hideLabel, header }: {
   view: MyeongsikView | null;
   name: string;
   birth: { date: string; calendar: string; time: string } | null;
   rows?: ("sipTop" | "gan" | "ji" | "sipBot" | "jijang" | "unseong" | "sinsal")[];
   hideLabel?: boolean;
+  header?: React.ReactNode;
 }) {
   const v = view ?? SAMPLE_VIEW;
   const ps = applyLocalSinsal(v.pillars);
@@ -400,6 +401,7 @@ export function MyeongsikTable({ view, name, birth, rows, hideLabel }: {
   const gc = hideLabel ? "repeat(4, 1fr)" : GRID_COLS;
   return (
     <div className="mx-5 my-2 rounded-2xl p-5" style={{ background: "linear-gradient(#faf3e4, #f1e3cc)", border: "1px solid #d8c4a0", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" }}>
+      {header && <div className="mb-3">{header}</div>}
       <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${INK}14` }}>
         <div className="grid" style={{ gridTemplateColumns: gc }}>
           {!hideLabel && <MsRowLabel>구분</MsRowLabel>}

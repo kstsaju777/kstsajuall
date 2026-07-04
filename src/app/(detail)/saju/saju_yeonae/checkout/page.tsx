@@ -3,7 +3,8 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect, useRef } from "react";
 import { calcSaju, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
-import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
+import { MyeongsikTable } from "@/components/saju/MyeongsikModal";
+import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
@@ -19,7 +20,46 @@ const GRAY3    = "#888888";
 const GRAY4    = "#dddddd";
 const CARD_BG  = "#ffffff";
 
-const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
+// ─── LocalSajuResult → MyeongsikView 변환 ─────────────────────────────────
+const CLASS_TO_EL: Record<string, string> = { wood: "목", fire: "화", earth: "토", metal: "금", water: "수" };
+const JIJANG_LOCAL: Record<string, string> = {
+  자: "壬·癸", 축: "癸·辛·己", 인: "戊·丙·甲", 묘: "甲·乙",
+  진: "乙·癸·戊", 사: "戊·庚·丙", 오: "丙·己·丁", 미: "丁·乙·己",
+  신: "戊·壬·庚", 유: "庚·辛", 술: "辛·丁·戊", 해: "戊·甲·壬",
+};
+function localSajuToMsView(saju: LocalSajuResult): MyeongsikView {
+  const order = [
+    { key: "time" as const, pos: "시주" },
+    { key: "day" as const, pos: "일주" },
+    { key: "month" as const, pos: "월주" },
+    { key: "year" as const, pos: "년주" },
+  ];
+  const pillars = order.map(({ key, pos }, idx) => {
+    const p = saju.pillars[key];
+    return {
+      pos,
+      sipTop: idx === 1 ? "일원" : (p.stemSs || "—"),
+      gan: p.stem,
+      ganEl: CLASS_TO_EL[p.stemClass] ?? "",
+      ji: p.branch,
+      jiEl: CLASS_TO_EL[p.branchClass] ?? "",
+      sipBot: p.branchSs || "—",
+      jijang: JIJANG_LOCAL[p.branchHg] ?? "",
+      unseong: "",
+      sinsal: "",
+    };
+  });
+  const now = new Date();
+  return {
+    ilgan: saju.dayStem,
+    pillars,
+    daeun: [],
+    seun: [],
+    weolun: [],
+    currentYear: now.getFullYear(),
+    currentMonth: now.getMonth() + 1,
+  };
+}
 
 // ─── 스크롤 슬라이드 인 훅 (아래에서 위로) ────────────────────────────────────
 function useSlideInUp() {
@@ -46,310 +86,43 @@ function useSlideInUp() {
   return { ref, style };
 }
 
-// ─── 명식 카드 ────────────────────────────────────────────────────────────────
-function MyeongsikCard({
-  saju, label,
-}: {
-  saju: LocalSajuResult | null;
-  label: string;
-}) {
-  const pillars = saju
-    ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year]
-    : null;
-
-  return (
-    <div className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
-      <div className="py-2.5 text-center" style={{ backgroundColor: RED_PALE, borderBottom: `1px solid ${ROSE}` }}>
-        <p className="text-[15px] font-bold" style={{ color: "#b07060" }}>{label}</p>
-      </div>
-      <div className="p-3">
-        <div className="grid grid-cols-4 gap-1.5">
-          {(pillars ?? Array(4).fill(null)).map((p, i) => (
-            <div key={i} className="flex flex-col items-center gap-0">
-              <p className="text-[13px] font-medium tracking-wider" style={{ color: GRAY3, marginBottom: 1 }}>{PILLAR_LABELS[i]}</p>
-              <span style={{ fontSize: 13, color: "#b07060", lineHeight: 1, marginBottom: 6 }}>{p?.stemSs || " "}</span>
-              <div className="w-full aspect-square flex items-center justify-center">
-                {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                  : <div className="w-full h-full animate-pulse rounded" style={{ backgroundColor: "#eee" }} />}
-              </div>
-              <div className="w-full aspect-square flex items-center justify-center">
-                {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                  : <div className="w-full h-full animate-pulse rounded" style={{ backgroundColor: "#eee" }} />}
-              </div>
-              <span style={{ fontSize: 13, color: "#b07060", lineHeight: 1, marginTop: 6 }}>{p?.branchSs || " "}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── 히어로 섹션 ──────────────────────────────────────────────────────────────
-function HeroSection({ name }: { name: string }) {
-  return (
-    <div style={{ backgroundColor: WHITE }}>
-      {/* 카피 텍스트 */}
-      <div className="px-6 pt-10 pb-5 text-center">
-        <p className="text-[11px] tracking-[0.2em] mb-3 font-medium" style={{ color: "#b07060" }}>연애사주 · 정밀 리포트</p>
-        <h1 className="text-[26px] font-black leading-snug" style={{ color: GRAY1 }}>
-          {name}님의 연애운,<br />
-          사주가 <span style={{ color: "#b07060" }}>모두</span> 알고 있소
-        </h1>
-        <p className="text-[13px] mt-3 leading-relaxed" style={{ color: GRAY2 }}>
-          타고난 연애 기질과 인연의 흐름을<br />
-          낱낱이 풀었소. 지금 확인하시오.
-        </p>
-      </div>
-
-      {/* 영상 */}
-      <div className="relative overflow-hidden w-full" style={{ aspectRatio: "9/16" }}>
-        <div className="absolute top-0 left-0 right-0 h-20 pointer-events-none z-10"
-          style={{ background: `linear-gradient(to bottom, ${WHITE}, transparent)` }} />
-        <video
-          src="/media/cards/saju_yeonae/saju_yeonae-big-0.mp4"
-          autoPlay muted loop playsInline
-          className="absolute inset-0 w-full h-full object-cover object-top"
-        />
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(255,255,255,0.55)" }} />
-        <div className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none z-10"
-          style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
-      </div>
-    </div>
-  );
-}
-
-// ─── 명식 섹션 (단일 명식, 가운데 정렬) ──────────────────────────────────────
+// ─── 명식 섹션 ───────────────────────────────────────────────────────────────
 function MyeongsikSection({
-  saju, name,
+  saju, name, date, calendar, gender,
 }: {
   saju: LocalSajuResult | null;
   name: string;
+  date: string;
+  calendar: string;
+  gender: string;
 }) {
   const { ref, style } = useSlideInUp();
+  const msView = useMemo(() => saju ? localSajuToMsView(saju) : null, [saju]);
+
+  const calLabel = calendar === "음력" ? "음력" : calendar === "윤달" ? "음력(윤달)" : "양력";
+  const dateFormatted = date ? date.replace(/\./g, "년 ").replace(/\.$/, "").split("년 ").map((v, i) => i === 0 ? v + "년" : i === 1 ? v + "월" : v + "일").join(" ") : "";
+  const genderLabel = gender === "female" || gender === "여자" ? "여성" : gender === "male" || gender === "남자" ? "남성" : gender;
+  const dateLabel = dateFormatted ? `${calLabel} ${dateFormatted}${genderLabel ? ` (${genderLabel})` : ""}` : "";
 
   return (
     <div style={{ backgroundColor: WHITE }}>
-      <div className="px-5 pb-2 pt-6">
-        <p className="text-center text-[13px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#b07060" }}>✦ 사주 명식 ✦</p>
-        <p className="text-center text-[17px] font-bold mb-4" style={{ color: GRAY1 }}>{name}님의 팔자가 품은 이야기</p>
-        <div ref={ref} style={{ ...style, display: "flex", justifyContent: "center" }}>
-          <div style={{ width: "100%", maxWidth: 280 }}>
-            <MyeongsikCard saju={saju} label={`${name}님`} />
-          </div>
+      <div className="pt-6 pb-2">
+        <div ref={ref} style={style}>
+          <MyeongsikTable
+            view={msView}
+            name={name}
+            birth={null}
+            rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
+            header={
+              <div className="text-center">
+                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}님의 사주팔자</p>
+                {dateLabel && <p className="text-[13px]" style={{ color: "#5b504a" }}>{dateLabel}</p>}
+              </div>
+            }
+          />
         </div>
       </div>
-      <div className="h-6" />
-    </div>
-  );
-}
-
-// ─── 분석 미리보기 섹션 ───────────────────────────────────────────────────────
-const PREVIEW_SECTIONS = [
-  {
-    icon: "🔮", title: "나의 타고난 연애 기질", free: true,
-    content: "일간과 오행 구성을 바탕으로 타고난 연애 성향과 기질을 분석합니다. 감성적인 편인지, 이성적인 편인지, 사랑에 빠지는 방식과 표현 방식까지 사주 속에 고스란히 담겨 있습니다.\n\n처음 끌리는 유형, 좋아하면 어떻게 행동하는지, 연애에서 반복되는 패턴까지 사주는 조용히 기록하고 있습니다.",
-    blurLines: [],
-  },
-  {
-    icon: "💕", title: "인연이 오는 시기", free: false,
-    content: "",
-    blurLines: [
-      "████년 ████월, 인연의 기운이 가장 강하게 들어옵니다.",
-      "이 시기 만나는 사람은 사주상 ████한 영향을 줍니다.",
-      "다음 인연의 파동은 ████년 이후로 이어집니다.",
-    ],
-  },
-  {
-    icon: "❤️", title: "지금 내 연애운", free: false,
-    content: "",
-    blurLines: [
-      "현재 당신의 연애운은 ████ 상태입니다.",
-      "지금 만나는 사람과의 관계는 ████한 기운 아래 있습니다.",
-      "████한 접근이 연애운을 더 활성화시킵니다.",
-    ],
-  },
-  {
-    icon: "📅", title: "연애 시기와 대운 흐름", free: false,
-    content: "",
-    blurLines: [
-      "현재 대운은 ████으로 연애에 ████한 기운이 작용합니다.",
-      "████년 ████월은 인연이 깊어지는 특별한 시기입니다.",
-      "이 시기를 놓치면 다음 기회는 ████년 이후로 밀립니다.",
-    ],
-  },
-  {
-    icon: "⚡", title: "연애를 방해하는 요인", free: false,
-    content: "",
-    blurLines: [
-      "당신의 사주에서 ████살이 연애를 방해하고 있습니다.",
-      "████ 방향의 접근과 ████한 행동은 반드시 피하세요.",
-      "████년 ████월은 특별히 주의가 필요한 시기입니다.",
-    ],
-  },
-];
-
-function PreviewCard({ s }: { s: typeof PREVIEW_SECTIONS[number] }) {
-  return (
-    <div className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ backgroundColor: CARD_BG, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}>
-      <div className="flex items-center gap-2.5 px-4 py-3.5"
-        style={{ borderBottom: `1px solid ${GRAY4}`, backgroundColor: s.free ? RED_PALE : WHITE }}>
-        <span className="text-[18px]">{s.icon}</span>
-        <span className="text-[15px] font-bold" style={{ color: GRAY1 }}>{s.title}</span>
-        <span className="ml-auto text-[10px] px-2.5 py-0.5 rounded-full font-medium"
-          style={{ backgroundColor: s.free ? `${RED}30` : "#f5f5f5", color: s.free ? "#b07060" : GRAY3, border: `1px solid ${s.free ? RED : GRAY4}` }}>
-          {s.free ? "✓ 공개" : "🔒 잠김"}
-        </span>
-      </div>
-      <div className="px-4 py-4">
-        {s.free ? (
-          <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: GRAY2 }}>{s.content}</p>
-        ) : (
-          <div className="relative py-1">
-            <div className="space-y-2 select-none">
-              {s.blurLines.map((line, i) => (
-                <p key={i} className="text-[13px] leading-relaxed"
-                  style={{ color: GRAY2, filter: "blur(5.5px)", userSelect: "none" }}>
-                  {line || "█████████████████████████████"}
-                </p>
-              ))}
-            </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: RED_PALE, border: `1px solid ${ROSE}` }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b07060" strokeWidth="2.5">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-              </div>
-              <span className="text-[11px] font-semibold" style={{ color: "#b07060" }}>결제 후 열람 가능</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PreviewSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.1 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} style={{
-      backgroundColor: CREAM,
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(30px)",
-      transition: "opacity 0.6s ease, transform 0.6s ease",
-    }}>
-      <div className="pt-7 pb-2 text-center px-5">
-        <p className="text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#b07060" }}>✦ AI 정밀 분석 · 14장 ✦</p>
-        <h2 className="text-[20px] font-black mb-1.5" style={{ color: GRAY1 }}>나의 연애운, 이제 확인하오</h2>
-        <p className="text-[12px]" style={{ color: GRAY3 }}>일부 내용은 결제 후 열람할 수 있소</p>
-      </div>
-      <div className="pt-4 pb-5">
-        {PREVIEW_SECTIONS.map((s, i) => <PreviewCard key={i} s={s} />)}
-      </div>
-    </div>
-  );
-}
-
-// ─── 목차 섹션 ───────────────────────────────────────────────────────────────
-const CHAPTER_LIST = [
-  { ch: 1,  title: "사주 원국",         emoji: "🏛️" },
-  { ch: 2,  title: "운명의 구조",        emoji: "🔮" },
-  { ch: 3,  title: "인간관계",           emoji: "🤝" },
-  { ch: 4,  title: "숨겨진 특징",        emoji: "🌙" },
-  { ch: 5,  title: "재물과 직업",        emoji: "💰" },
-  { ch: 6,  title: "사랑과 결혼",        emoji: "💑" },
-  { ch: 7,  title: "건강",              emoji: "🌿" },
-  { ch: 8,  title: "귀인",              emoji: "✨" },
-  { ch: 9,  title: "주의할 사람",        emoji: "⚠️" },
-  { ch: 10, title: "굴곡과 위기",        emoji: "⚡" },
-  { ch: 11, title: "대운 흐름",          emoji: "🌊" },
-  { ch: 12, title: "주의 시기",          emoji: "📅" },
-  { ch: 13, title: "당부의 말",          emoji: "📝" },
-  { ch: 14, title: "개운법",            emoji: "🌸" },
-];
-
-function TableOfContents() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.1 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} className="px-5 py-7" style={{
-      backgroundColor: WHITE,
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(30px)",
-      transition: "opacity 0.6s ease, transform 0.6s ease",
-    }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#b07060" }}>✦ 목차 ✦</p>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>총 8장 구성</h2>
-      <div className="space-y-2">
-        {CHAPTER_LIST.map(({ ch, title, emoji }, i) => (
-          <div key={ch} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-            style={{
-              backgroundColor: CREAM,
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateX(0)" : "translateX(-20px)",
-              transition: `opacity 0.4s ease ${i * 0.04}s, transform 0.4s ease ${i * 0.04}s`,
-            }}>
-            <span className="text-[13px] w-5 text-center flex-shrink-0">{emoji}</span>
-            <span className="text-[12px] font-medium flex-shrink-0" style={{ color: "#b07060", minWidth: 32 }}>제{ch}장</span>
-            <span className="text-[13px] font-bold" style={{ color: GRAY1 }}>{title}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── 후기 섹션 ───────────────────────────────────────────────────────────────
-const REVIEWS = [
-  { star: 5, text: "제 연애 패턴이 이렇게 정확하게 나올 줄 몰랐어요. 타고난 기질 분석이 소름돋을 정도로 맞았습니다.", name: "30대 직장인 김○○", date: "2025.05.12" },
-  { star: 5, text: "인연이 오는 시기가 딱 맞았어요. 홍연이 알려준 대로 기다렸더니 정말 좋은 사람이 나타났습니다.", name: "20대 대학생 이○○", date: "2025.04.28" },
-  { star: 5, text: "연애를 방해하는 요인 분석이 정말 좋았어요. 왜 반복되는지 이제야 이해가 됐습니다.", name: "30대 자영업자 박○○", date: "2025.05.03" },
-  { star: 5, text: "막연하게 불안했는데, 내 연애운이 어떤지 딱 짚어줘서 앞으로 어떻게 해야 할지 결심이 서더라구요.", name: "20대 대학원생 최○○", date: "2025.06.01" },
-];
-
-function ReviewSection() {
-  return (
-    <div className="px-5 py-7" style={{ backgroundColor: CREAM }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#b07060" }}>✦ 실제 후기 ✦</p>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>이미 수천 명이 확인했소</h2>
-      <div className="space-y-3">
-        {REVIEWS.map((r, i) => (
-          <div key={i} className="rounded-2xl px-4 py-4"
-            style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <span key={j} className="text-[13px]" style={{ color: j < r.star ? "#f5a623" : GRAY4 }}>★</span>
-                ))}
-              </div>
-              <span className="text-[11px]" style={{ color: GRAY3 }}>{r.date}</span>
-            </div>
-            <p className="text-[13px] leading-relaxed mb-1.5" style={{ color: GRAY2 }}>"{r.text}"</p>
-            <p className="text-[11px]" style={{ color: GRAY3 }}>— {r.name}</p>
-          </div>
-        ))}
-      </div>
+      <div className="h-4" />
     </div>
   );
 }
@@ -367,7 +140,6 @@ function FAQSection() {
 
   return (
     <div className="px-5 py-7" style={{ backgroundColor: WHITE }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#b07060" }}>✦ FAQ ✦</p>
       <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>자주 묻는 질문</h2>
       <div className="space-y-2">
         {FAQS.map((faq, i) => (
@@ -777,31 +549,23 @@ function CheckoutContent() {
       <div className="w-full h-full overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 80 }}>
         <style>{`div::-webkit-scrollbar{display:none}`}</style>
 
-        {/* ① 히어로 */}
-        <HeroSection name={name} />
+        {/* ① 상단 이미지 */}
+        <div className="relative">
+          <img src="/media/checkout/saju_yeonae/s1.jpg" alt="" className="w-full block" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+        </div>
 
         {/* ② 명식 */}
-        <MyeongsikSection saju={saju} name={name} />
+        <MyeongsikSection saju={saju} name={name} date={date} calendar={calendar} gender={gender} />
 
-        {/* s1 */}
-        <img src="/media/checkout/saju_yeonae/s1.jpg" alt="" className="w-full block" />
+        {/* ③ 하단 이미지 */}
+        <div className="relative">
+          <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
+          <img src="/media/checkout/saju_yeonae/s2.jpg" alt="" className="w-full block" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+        </div>
 
-        {/* ③ 미리보기 티저 */}
-        <PreviewSection />
-
-        {/* s2 */}
-        <img src="/media/checkout/saju_yeonae/s2.jpg" alt="" className="w-full block" />
-
-        {/* ④ 목차 */}
-        <TableOfContents />
-
-        {/* ⑤ 후기 */}
-        <ReviewSection />
-
-        {/* s3 */}
-        <img src="/media/checkout/saju_yeonae/s3.jpg" alt="" className="w-full block" />
-
-        {/* ⑥ FAQ */}
+        {/* ④ FAQ */}
         <FAQSection />
 
         <div className="h-4" />

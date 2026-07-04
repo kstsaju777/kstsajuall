@@ -4,6 +4,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect, useRef } from "react";
 import { calcSaju, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
+import { MyeongsikTable } from "@/components/saju/MyeongsikModal";
+import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
@@ -20,6 +22,47 @@ const GRAY4    = "#dddddd";
 const CARD_BG  = "#ffffff";
 
 const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
+
+// ─── LocalSajuResult → MyeongsikView 변환 ────────────────────────────────────
+const CLASS_TO_EL: Record<string, string> = { wood: "목", fire: "화", earth: "토", metal: "금", water: "수" };
+const JIJANG_LOCAL: Record<string, string> = {
+  자: "壬·癸", 축: "癸·辛·己", 인: "戊·丙·甲", 묘: "甲·乙",
+  진: "乙·癸·戊", 사: "戊·庚·丙", 오: "丙·己·丁", 미: "丁·乙·己",
+  신: "戊·壬·庚", 유: "庚·辛", 술: "辛·丁·戊", 해: "戊·甲·壬",
+};
+function localSajuToMsView(saju: LocalSajuResult): MyeongsikView {
+  const order = [
+    { key: "time" as const, pos: "시주" },
+    { key: "day" as const, pos: "일주" },
+    { key: "month" as const, pos: "월주" },
+    { key: "year" as const, pos: "년주" },
+  ];
+  const pillars = order.map(({ key, pos }, idx) => {
+    const p = saju.pillars[key];
+    return {
+      pos,
+      sipTop: idx === 1 ? "일원" : (p.stemSs || "—"),
+      gan: p.stem,
+      ganEl: CLASS_TO_EL[p.stemClass] ?? "",
+      ji: p.branch,
+      jiEl: CLASS_TO_EL[p.branchClass] ?? "",
+      sipBot: p.branchSs || "—",
+      jijang: JIJANG_LOCAL[p.branchHg] ?? "",
+      unseong: "",
+      sinsal: "",
+    };
+  });
+  const now = new Date();
+  return {
+    ilgan: saju.dayStem,
+    pillars,
+    daeun: [],
+    seun: [],
+    weolun: [],
+    currentYear: now.getFullYear(),
+    currentMonth: now.getMonth() + 1,
+  };
+}
 
 // ─── 스크롤 슬라이드 인 훅 (아래에서 위로) ────────────────────────────────────
 function useSlideInUp() {
@@ -120,202 +163,462 @@ function HeroSection({ name }: { name: string }) {
   );
 }
 
-// ─── 명식 섹션 (단일 명식, 가운데 정렬) ──────────────────────────────────────
+// ─── 명식 섹션 ───────────────────────────────────────────────────────────────
 function MyeongsikSection({
-  saju, name,
+  saju, name, date, calendar, gender,
 }: {
   saju: LocalSajuResult | null;
   name: string;
+  date: string;
+  calendar: string;
+  gender: string;
 }) {
   const { ref, style } = useSlideInUp();
+  const msView = useMemo(() => saju ? localSajuToMsView(saju) : null, [saju]);
+
+  const calLabel = calendar === "음력" ? "음력" : calendar === "윤달" ? "음력(윤달)" : "양력";
+  const dateFormatted = date ? date.replace(/\./g, "년 ").replace(/\.$/, "").split("년 ").map((v, i) => i === 0 ? v + "년" : i === 1 ? v + "월" : v + "일").join(" ") : "";
+  const genderLabel = gender === "female" || gender === "여자" ? "여성" : gender === "male" || gender === "남자" ? "남성" : gender;
+  const dateLabel = dateFormatted ? `${calLabel} ${dateFormatted}${genderLabel ? ` (${genderLabel})` : ""}` : "";
 
   return (
     <div style={{ backgroundColor: WHITE }}>
-      <div className="px-5 pb-2 pt-6">
-        <p className="text-center text-[13px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#7a1020" }}>✦ 사주 명식 ✦</p>
-        <p className="text-center text-[17px] font-bold mb-4" style={{ color: GRAY1 }}>{name}님의 팔자가 품은 이야기</p>
-        <div ref={ref} style={{ ...style, display: "flex", justifyContent: "center" }}>
-          <div style={{ width: "100%", maxWidth: 280 }}>
-            <MyeongsikCard saju={saju} label={`${name}님`} />
+      <div className="pt-6 pb-2">
+        <div ref={ref} style={style}>
+          <MyeongsikTable
+            view={msView}
+            name={name}
+            birth={null}
+            rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
+            header={
+              <div className="text-center">
+                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}{(gender === "female" || gender === "여자") ? "양" : "군"}의 사주팔자</p>
+                {dateLabel && <p className="text-[13px]" style={{ color: "#5b504a" }}>{dateLabel}</p>}
+              </div>
+            }
+          />
+        </div>
+      </div>
+      <div className="h-4" />
+    </div>
+  );
+}
+
+// ─── 14장 티저 섹션 ──────────────────────────────────────────────────────────
+const CHAPTER_TEASERS = [
+  {
+    ch: 1,
+    title: "나는 어떤 그릇으로 태어났나",
+    teaser: "태어난 순간 하늘이 새긴 나의 원국. 어떤 기운을 타고났는지, 오행의 균형은 어떠한지 — 이 한 장이 나머지 13장의 뿌리가 되오.",
+    visual: (
+      <div className="flex gap-1.5 justify-center">
+        {[
+          { label: "시", gan: "甲", ji: "子", color: "#2563eb" },
+          { label: "일", gan: "丙", ji: "午", color: "#dc2626" },
+          { label: "월", gan: "庚", ji: "申", color: "#6b7280" },
+          { label: "년", gan: "壬", ji: "辰", color: "#059669" },
+        ].map((p) => (
+          <div key={p.label} className="flex flex-col items-center gap-0.5">
+            <span className="text-[9px]" style={{ color: GRAY3 }}>{p.label}</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center font-black text-[16px]"
+              style={{ backgroundColor: `${p.color}18`, color: p.color, border: `1.5px solid ${p.color}40` }}>
+              {p.gan}
+            </div>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center font-black text-[16px]"
+              style={{ backgroundColor: "#f5f5f5", color: GRAY2, border: `1.5px solid ${GRAY4}` }}>
+              {p.ji}
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["일간 ██의 핵심 성질과 삶의 방향", "오행 분포 — 과잉과 결핍이 만드는 운명", "내 사주의 용신(用神)은 ██이오"],
+  },
+  {
+    ch: 2,
+    title: "나의 진짜 모습은 무엇일까",
+    teaser: "남들에게 보이는 나와, 내면에 숨겨진 나는 다르오. 사주는 그 간격까지 기록해두었소. 지금껏 아무도 말해주지 않았던 진짜 자신을 마주하게 될 것이오.",
+    visual: (
+      <div className="flex gap-3 justify-center">
+        {[
+          { label: "겉모습", value: "외향적·활동적", icon: "🌞", color: "#f59e0b" },
+          { label: "내면", value: "██·██", icon: "🌙", blur: true, color: "#7c3aed" },
+        ].map((item) => (
+          <div key={item.label} className="flex-1 rounded-xl p-3 text-center"
+            style={{ backgroundColor: `${item.color}12`, border: `1px solid ${item.color}30` }}>
+            <div className="text-[18px] mb-1">{item.icon}</div>
+            <div className="text-[10px] font-medium mb-1" style={{ color: item.color }}>{item.label}</div>
+            <div className="text-[12px] font-bold" style={{ color: GRAY1, filter: item.blur ? "blur(5px)" : "none" }}>{item.value}</div>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["타인이 보는 나 vs 내가 아는 나", "무의식에 새겨진 두려움과 욕망", "내 성격의 가장 큰 함정은 ██이오"],
+  },
+  {
+    ch: 3,
+    title: "나는 세상을 어떻게 대하는가",
+    teaser: "왜 저 사람과는 자꾸 부딪히고, 왜 이 사람과는 자연스럽게 가까워지는가. 사주에는 그 이유가 적혀 있소. 인간관계의 패턴, 이제 알고 나면 달라질 것이오.",
+    visual: (
+      <div className="flex items-center justify-center gap-2">
+        {[
+          { label: "리더형", pct: 72, color: "#dc2626" },
+          { label: "협력형", pct: 55, color: "#2563eb" },
+          { label: "독립형", pct: 88, color: "#7c3aed" },
+        ].map((item) => (
+          <div key={item.label} className="flex flex-col items-center gap-1">
+            <div className="text-[9px]" style={{ color: GRAY3 }}>{item.label}</div>
+            <div className="w-8 rounded-full overflow-hidden" style={{ height: 50, backgroundColor: GRAY4 }}>
+              <div className="w-full rounded-full" style={{ height: `${item.pct}%`, backgroundColor: item.color, marginTop: `${100 - item.pct}%`, filter: "blur(2px)" }} />
+            </div>
+            <div className="text-[10px] font-bold" style={{ color: item.color, filter: "blur(4px)" }}>{item.pct}%</div>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["나의 인간관계 유형과 핵심 성향", "반복되는 갈등 패턴의 뿌리", "내가 끌리는 사람과 피해야 할 사람"],
+  },
+  {
+    ch: 4,
+    title: "내 사주에 나타나는 특이점",
+    teaser: "평범한 사주는 없소. 누군가의 사주엔 천재성이, 누군가의 사주엔 큰 굴곡이 새겨져 있소. 그대의 원국엔 무엇이 숨어있는지 — 직접 확인하시오.",
+    visual: (
+      <div className="flex flex-wrap gap-1.5 justify-center">
+        {["신살 분석", "형충파해", "공망", "십이운성", "귀문관살"].map((tag, i) => (
+          <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full font-medium"
+            style={{
+              backgroundColor: i === 0 ? "#fdf0f0" : "#f5f5f5",
+              color: i === 0 ? "#9b2335" : GRAY3,
+              border: `1px solid ${i === 0 ? ROSE : GRAY4}`,
+              filter: i > 1 ? "blur(3px)" : "none",
+            }}>
+            {tag}
+          </span>
+        ))}
+      </div>
+    ),
+    blurItems: ["내 사주에 숨은 특수 신살의 의미", "형충파해가 내 삶에 주는 영향", "결정적 순간을 예고하는 특이점"],
+  },
+  {
+    ch: 5,
+    title: "내 재물과 천직은 어떠한가",
+    teaser: "재물이 많이 들어오는 사주가 있고, 아무리 벌어도 손가락 사이로 빠져나가는 사주가 있소. 그대의 재물그릇 크기, 그리고 가장 빛나는 직업의 방향을 알려드리겠소.",
+    visual: (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] w-12 text-right flex-shrink-0" style={{ color: GRAY3 }}>재물력</span>
+          <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ backgroundColor: GRAY4 }}>
+            <div className="h-full rounded-full" style={{ width: "72%", background: "linear-gradient(90deg,#f59e0b,#dc2626)", filter: "blur(2px)" }} />
+          </div>
+          <span className="text-[11px] font-bold" style={{ color: "#dc2626", filter: "blur(4px)" }}>상위 ██%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] w-12 text-right flex-shrink-0" style={{ color: GRAY3 }}>직업력</span>
+          <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ backgroundColor: GRAY4 }}>
+            <div className="h-full rounded-full" style={{ width: "58%", background: "linear-gradient(90deg,#2563eb,#7c3aed)", filter: "blur(2px)" }} />
+          </div>
+          <span className="text-[11px] font-bold" style={{ color: "#7c3aed", filter: "blur(4px)" }}>██ 계열</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] w-12 text-right flex-shrink-0" style={{ color: GRAY3 }}>사업력</span>
+          <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ backgroundColor: GRAY4 }}>
+            <div className="h-full rounded-full" style={{ width: "85%", background: "linear-gradient(90deg,#059669,#2563eb)", filter: "blur(2px)" }} />
+          </div>
+          <span className="text-[11px] font-bold" style={{ color: "#059669", filter: "blur(4px)" }}>매우 강함</span>
+        </div>
+      </div>
+    ),
+    blurItems: ["재물이 들어오는 시기와 방식", "천직 — 가장 빛나는 직업 분야", "사업과 직장, 어느 쪽이 그대에게 맞는가"],
+  },
+  {
+    ch: 6,
+    title: "내 인연과 혼인의 때는 언제인가",
+    teaser: "인연은 사주에 이미 새겨져 있소. 어떤 사람을 만나야 하는지, 언제 깊은 인연이 오는지 — 이 장을 보면 왜 지금까지 그 사람을 만났는지도 이해가 될 것이오.",
+    visual: (
+      <div className="flex justify-center">
+        <div className="relative w-32 h-16">
+          <div className="absolute left-2 top-0 w-12 h-12 rounded-full flex items-center justify-center text-[20px]"
+            style={{ backgroundColor: "#fdf0f0", border: `2px solid ${ROSE}` }}>나</div>
+          <div className="absolute right-2 top-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-[13px]"
+            style={{ backgroundColor: "#f5f5f5", border: `2px solid ${GRAY4}`, filter: "blur(5px)", color: GRAY2 }}>██</div>
+          <div className="absolute left-0 right-0 top-5 flex items-center justify-center">
+            <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg,${ROSE},transparent)` }} />
+            <span className="text-[16px] mx-1">💕</span>
+            <div className="flex-1 h-px" style={{ background: `linear-gradient(270deg,${ROSE},transparent)` }} />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 text-center text-[10px]" style={{ color: GRAY3, filter: "blur(4px)" }}>████년 ██월이 인연의 때</div>
+        </div>
+      </div>
+    ),
+    blurItems: ["내 배우자궁의 상태와 인연의 성격", "인연이 깊어지는 결정적 시기", "피해야 할 궁합 유형과 이유"],
+  },
+  {
+    ch: 7,
+    title: "내 건강과 약한 곳은 어디인가",
+    teaser: "오행의 과잉과 결핍은 몸으로도 나타나오. 사주가 경고하는 취약 부위를 미리 알면 — 몸이 보내는 신호를 더 일찍 알아차릴 수 있소.",
+    visual: (
+      <div className="flex gap-1.5 justify-center flex-wrap">
+        {[
+          { organ: "간·담", ohaeng: "목(木)", color: "#059669", level: "주의" },
+          { organ: "심장·소장", ohaeng: "화(火)", color: "#dc2626", level: "██" },
+          { organ: "신장·방광", ohaeng: "수(水)", color: "#2563eb", level: "██" },
+        ].map((item) => (
+          <div key={item.organ} className="text-center px-2.5 py-2 rounded-xl"
+            style={{ backgroundColor: `${item.color}10`, border: `1px solid ${item.color}30` }}>
+            <div className="text-[10px] font-bold" style={{ color: item.color }}>{item.organ}</div>
+            <div className="text-[9px] mt-0.5" style={{ color: GRAY3 }}>{item.ohaeng}</div>
+            <div className="text-[11px] font-black mt-1" style={{ color: item.color, filter: item.level === "주의" ? "none" : "blur(4px)" }}>{item.level}</div>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["오행 불균형이 만드는 건강 취약 부위", "이 시기에 특히 몸을 조심하시오", "그대의 건강을 지키는 습관과 방향"],
+  },
+  {
+    ch: 8,
+    title: "나를 살릴 귀인은 누구인가",
+    teaser: "살면서 결정적 순간에 손을 내밀어준 사람이 있었을 것이오. 그것이 우연이 아니었소. 사주에는 귀인의 특성과 만남의 조건이 적혀 있소.",
+    visual: (
+      <div className="flex justify-center gap-2">
+        {[
+          { label: "천을귀인", desc: "위기에 나타나는 구원자", color: "#f59e0b", show: true },
+          { label: "██귀인", desc: "██한 인연에서 온다", color: "#7c3aed", show: false },
+          { label: "문창귀인", desc: "██의 형태로 도움을 준다", color: "#059669", show: false },
+        ].map((item) => (
+          <div key={item.label} className="flex-1 text-center p-2.5 rounded-xl"
+            style={{ backgroundColor: `${item.color}12`, border: `1px solid ${item.color}30` }}>
+            <div className="text-[11px] font-bold mb-0.5" style={{ color: item.color, filter: item.show ? "none" : "blur(5px)" }}>{item.label}</div>
+            <div className="text-[9px]" style={{ color: GRAY3, filter: item.show ? "none" : "blur(4px)" }}>{item.desc}</div>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["내 사주의 귀인 신살과 그 의미", "귀인이 나타나는 시기와 방향", "귀인을 만나는 구체적인 행동 방법"],
+  },
+  {
+    ch: 9,
+    title: "나는 왜 그 시간을 견뎌야 했나",
+    teaser: "아무 이유 없이 찾아온 것 같았던 고통. 하지만 사주의 눈으로 보면, 그것은 예고되어 있었소. 그 이유를 알면 — 같은 실수를 반복하지 않을 수 있소.",
+    visual: (
+      <div className="space-y-1.5">
+        {[
+          { year: "20██", event: "관계의 큰 상처", intensity: 85, color: "#dc2626" },
+          { year: "20██", event: "경제적 위기", intensity: 60, color: "#f59e0b" },
+          { year: "20██", event: "██한 변화", intensity: 92, color: "#7c3aed" },
+        ].map((item) => (
+          <div key={item.year} className="flex items-center gap-2">
+            <span className="text-[10px] w-10 flex-shrink-0" style={{ color: "#dc2626", filter: "blur(3px)" }}>{item.year}</span>
+            <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: GRAY4 }}>
+              <div className="h-full rounded-full" style={{ width: `${item.intensity}%`, backgroundColor: item.color, filter: "blur(1px)" }} />
+            </div>
+            <span className="text-[9px] w-16 flex-shrink-0" style={{ color: item.color, filter: "blur(4px)" }}>{item.event}</span>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["사주가 예고한 굴곡과 그 시기의 이유", "반복되는 패턴을 끊는 방법", "그 시간이 내게 남긴 것의 의미"],
+  },
+  {
+    ch: 10,
+    title: "내 대운은 앞으로 어디로 흐르나",
+    teaser: "10년 단위로 바뀌는 대운의 흐름. 지금 그대가 어떤 대운 위에 서 있는지, 다음 대운은 언제 어떻게 바뀌는지 — 미래의 지도가 여기 있소.",
+    visual: (
+      <div className="flex items-end justify-center gap-1">
+        {[
+          { period: "20~30", label: "상승", height: 55, color: "#059669", active: false },
+          { period: "30~40", label: "시련", height: 35, color: "#f59e0b", active: false },
+          { period: "40~50", label: "지금", height: 80, color: "#dc2626", active: true },
+          { period: "50~60", label: "██", height: 65, color: "#7c3aed", active: false, blur: true },
+          { period: "60~70", label: "██", height: 90, color: "#2563eb", active: false, blur: true },
+        ].map((item) => (
+          <div key={item.period} className="flex flex-col items-center gap-1">
+            <div className="text-[9px] font-bold" style={{ color: item.color, filter: item.blur ? "blur(4px)" : "none" }}>{item.label}</div>
+            <div className="w-9 rounded-t-lg" style={{ height: item.height * 0.7, backgroundColor: `${item.color}${item.active ? "cc" : "55"}`, border: item.active ? `2px solid ${item.color}` : "none", filter: item.blur ? "blur(3px)" : "none" }} />
+            <div className="text-[8px]" style={{ color: GRAY3, filter: item.blur ? "blur(4px)" : "none" }}>{item.period}</div>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["현재 대운의 기운과 앞으로의 방향", "다음 대운 전환점은 ██년이오", "대운을 최대한 활용하는 전략"],
+  },
+  {
+    ch: 11,
+    title: "내가 조심해야 할 때는 언제인가",
+    teaser: "위기가 예고 없이 오는 것이 아니오. 사주에는 그대가 특히 조심해야 할 해와 달이 기록되어 있소. 미리 알고 대비하면 — 피할 수 있는 재앙이 있소.",
+    visual: (
+      <div className="grid grid-cols-4 gap-1">
+        {["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"].map((month, i) => {
+          const danger = [2, 5, 8, 11].includes(i);
+          return (
+            <div key={month} className="text-center py-1.5 rounded-lg text-[9px] font-medium"
+              style={{
+                backgroundColor: danger ? "#fdf0f0" : "#f5f5f5",
+                color: danger ? "#9b2335" : GRAY4,
+                border: danger ? `1px solid ${ROSE}` : `1px solid ${GRAY4}`,
+                filter: danger ? "blur(3px)" : "none",
+              }}>
+              {month}
+            </div>
+          );
+        })}
+      </div>
+    ),
+    blurItems: ["그대가 가장 조심해야 할 해와 달", "이 시기에 피해야 할 결정과 행동", "위기를 기회로 바꾸는 대처법"],
+  },
+  {
+    ch: 12,
+    title: "내가 꼭 기억할 세 가지는 무엇인가",
+    teaser: "긴 풀이 끝에 홍연이 그대에게 꼭 전하고 싶은 세 가지. 삶의 방향을 잃을 때마다 이 세 가지를 꺼내보면 — 다시 길이 보일 것이오.",
+    visual: (
+      <div className="space-y-1.5">
+        {[
+          { num: "첫째", text: "그대의 가장 큰 자산은 ██이오", blur: true },
+          { num: "둘째", text: "절대 포기하지 마시오, ██이 그대를 기다리오", blur: true },
+          { num: "셋째", text: "이것만큼은 반드시 지키시오 — ██", blur: true },
+        ].map((item) => (
+          <div key={item.num} className="flex items-start gap-2 px-2.5 py-2 rounded-xl" style={{ backgroundColor: RED_PALE, border: `1px solid ${ROSE}` }}>
+            <span className="text-[10px] font-black flex-shrink-0 pt-0.5" style={{ color: "#9b2335" }}>{item.num}</span>
+            <span className="text-[11px]" style={{ color: GRAY2, filter: "blur(5px)" }}>{item.text}</span>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["홍연이 꼭 전하는 삶의 세 가지 핵심", "그대만의 인생 원칙과 방향", "이 세 가지를 기억하면 길을 잃지 않소"],
+  },
+  {
+    ch: 13,
+    title: "나는 어떻게 운을 바꿀 수 있나",
+    teaser: "사주는 운명이되, 운명은 바꿀 수 있소. 그것이 개운(開運)이오. 그대의 사주에 맞는 방향과 색, 방위, 행동 — 작은 변화가 큰 흐름을 바꾸오.",
+    visual: (
+      <div className="flex gap-2 justify-center flex-wrap">
+        {[
+          { label: "행운의 방위", value: "██방", color: "#2563eb" },
+          { label: "행운의 색", value: "██색", color: "#dc2626" },
+          { label: "행운의 숫자", value: "██", color: "#059669" },
+          { label: "개운 행동", value: "██하기", color: "#7c3aed" },
+        ].map((item) => (
+          <div key={item.label} className="text-center px-3 py-2 rounded-xl"
+            style={{ backgroundColor: `${item.color}10`, border: `1px solid ${item.color}30` }}>
+            <div className="text-[9px]" style={{ color: GRAY3 }}>{item.label}</div>
+            <div className="text-[13px] font-black mt-0.5" style={{ color: item.color, filter: "blur(5px)" }}>{item.value}</div>
+          </div>
+        ))}
+      </div>
+    ),
+    blurItems: ["그대에게 맞는 개운법과 행동 지침", "피해야 할 방향과 색, 음식", "지금 당장 시작할 수 있는 가장 쉬운 개운법"],
+  },
+  {
+    ch: 14,
+    title: "마무리 · 그대에게 남기는 홍연의 서신",
+    teaser: "모든 풀이를 마치며 홍연이 그대에게 직접 쓰는 손편지. 이 한 장을 읽고 나면 — 살아온 날들이 다르게 보이고, 살아갈 날들이 조금 더 단단해질 것이오.",
+    visual: (
+      <div className="px-3 py-3 rounded-xl" style={{ backgroundColor: RED_PALE, border: `1px solid ${ROSE}` }}>
+        <div className="text-[10px] mb-2 font-medium" style={{ color: "#9b2335" }}>홍연의 서신 中</div>
+        <p className="text-[11px] leading-relaxed" style={{ color: GRAY2, filter: "blur(5px)" }}>
+          그대가 살아온 모든 날에는 이유가 있었소. 스스로도 몰랐던 그 이유를, 이제는 알게 되었으리라 믿소. 앞으로의 길이 순탄하지 않더라도 — 그대는 이미 충분히 단단한 사람이오.
+        </p>
+        <div className="text-right mt-2 text-[10px] font-medium" style={{ color: "#9b2335" }}>— 홍연 드림</div>
+      </div>
+    ),
+    blurItems: ["홍연이 그대에게 전하는 진심 어린 이야기", "이 풀이를 통해 발견한 그대의 특별함", "앞으로의 인생을 향한 따뜻한 당부"],
+  },
+];
+
+function ChapterTeaserCard({ data, index }: { data: typeof CHAPTER_TEASERS[number]; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.08 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const isLast = data.ch === 14;
+
+  return (
+    <div ref={ref} className="mx-4 mb-4 rounded-2xl overflow-hidden"
+      style={{
+        backgroundColor: WHITE,
+        border: isLast ? `1.5px solid ${ROSE}` : `1px solid ${GRAY4}`,
+        boxShadow: isLast ? `0 2px 12px rgba(155,35,53,0.12)` : "0 1px 6px rgba(0,0,0,0.05)",
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(32px)",
+        transition: `opacity 0.5s ease ${index * 0.04}s, transform 0.5s cubic-bezier(0.22,1,0.36,1) ${index * 0.04}s`,
+      }}>
+      {/* 헤더 */}
+      <div className="flex items-center gap-2.5 px-4 py-3"
+        style={{ borderBottom: `1px solid ${isLast ? ROSE : GRAY4}`, backgroundColor: isLast ? RED_PALE : CREAM }}>
+        <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: isLast ? RED : GRAY2 }}>
+          <span className="text-[10px] font-black text-white">{data.ch}</span>
+        </div>
+        <span className="text-[14px] font-black" style={{ color: isLast ? "#7a1020" : GRAY1 }}>{data.title}</span>
+      </div>
+
+      {/* 바디 */}
+      <div className="px-4 pt-3.5 pb-2">
+        {/* 설득 카피 */}
+        <p className="text-[12px] leading-relaxed mb-3.5" style={{ color: GRAY2 }}>{data.teaser}</p>
+
+        {/* 미니 비주얼 */}
+        <div className="py-3 px-2 rounded-xl mb-3.5" style={{ backgroundColor: CREAM }}>
+          {data.visual}
+        </div>
+
+        {/* 블러 리스트 */}
+        <div className="space-y-1.5 relative">
+          <div className="space-y-1.5 select-none">
+            {data.blurItems.map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ backgroundColor: RED_SOFT }} />
+                <span className="text-[12px]" style={{ color: GRAY2, filter: "blur(5.5px)", userSelect: "none" }}>{item}</span>
+              </div>
+            ))}
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center gap-1.5">
+            <svg width="11" height="13" viewBox="0 0 24 24" fill="none" stroke="#9b2335" strokeWidth="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span className="text-[11px] font-semibold" style={{ color: "#9b2335" }}>결제 후 열람 가능</span>
           </div>
         </div>
       </div>
-      <div className="h-6" />
     </div>
   );
 }
 
-// ─── 분석 미리보기 섹션 ───────────────────────────────────────────────────────
-const PREVIEW_SECTIONS = [
-  {
-    icon: "🔮", title: "나의 타고난 운명 구조", free: true,
-    content: "일간과 오행 구성을 바탕으로 타고난 운명 구조를 분석합니다. 이 사람이 어떤 삶을 살도록 태어났는지, 어떤 기질과 성향을 지녔는지, 인생의 큰 줄기가 사주 속에 고스란히 담겨 있습니다.\n\n반복되는 인생 패턴과 타고난 운명의 설계도까지 사주는 조용히 기록하고 있습니다.",
-    blurLines: [],
-  },
-  {
-    icon: "🌊", title: "인생의 대운 흐름", free: false,
-    content: "",
-    blurLines: [
-      "████년부터 ████년까지 인생의 중요한 대운이 펼쳐집니다.",
-      "이 시기에 ████한 선택이 인생을 바꿉니다.",
-      "다음 대운 전환점은 ████년에 찾아옵니다.",
-    ],
-  },
-  {
-    icon: "💰", title: "재물과 직업운", free: false,
-    content: "",
-    blurLines: [
-      "현재 당신의 재물운은 ████ 상태입니다.",
-      "████한 직업 분야에서 빛을 발합니다.",
-      "████년 ████월에 큰 기회가 찾아옵니다.",
-    ],
-  },
-  {
-    icon: "💑", title: "사랑과 결혼운", free: false,
-    content: "",
-    blurLines: [
-      "현재 대운은 ████으로 인연에 ████한 기운이 작용합니다.",
-      "████년 ████월은 인연이 깊어지는 특별한 시기입니다.",
-      "결혼은 ████년 이후가 가장 좋은 시기입니다.",
-    ],
-  },
-  {
-    icon: "⚡", title: "주의해야 할 시기", free: false,
-    content: "",
-    blurLines: [
-      "당신의 사주에서 ████살이 삶에 도전을 줍니다.",
-      "████ 방향의 선택과 ████한 행동은 주의가 필요합니다.",
-      "████년 ████월은 특별히 신중해야 할 시기입니다.",
-    ],
-  },
-];
-
-function PreviewCard({ s }: { s: typeof PREVIEW_SECTIONS[number] }) {
-  return (
-    <div className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ backgroundColor: CARD_BG, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}>
-      <div className="flex items-center gap-2.5 px-4 py-3.5"
-        style={{ borderBottom: `1px solid ${GRAY4}`, backgroundColor: s.free ? RED_PALE : WHITE }}>
-        <span className="text-[18px]">{s.icon}</span>
-        <span className="text-[15px] font-bold" style={{ color: GRAY1 }}>{s.title}</span>
-        <span className="ml-auto text-[10px] px-2.5 py-0.5 rounded-full font-medium"
-          style={{ backgroundColor: s.free ? `${RED}30` : "#f5f5f5", color: s.free ? "#7a1020" : GRAY3, border: `1px solid ${s.free ? RED : GRAY4}` }}>
-          {s.free ? "✓ 공개" : "🔒 잠김"}
-        </span>
-      </div>
-      <div className="px-4 py-4">
-        {s.free ? (
-          <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: GRAY2 }}>{s.content}</p>
-        ) : (
-          <div className="relative py-1">
-            <div className="space-y-2 select-none">
-              {s.blurLines.map((line, i) => (
-                <p key={i} className="text-[13px] leading-relaxed"
-                  style={{ color: GRAY2, filter: "blur(5.5px)", userSelect: "none" }}>
-                  {line || "█████████████████████████████"}
-                </p>
-              ))}
-            </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: RED_PALE, border: `1px solid ${ROSE}` }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7a1020" strokeWidth="2.5">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-              </div>
-              <span className="text-[11px] font-semibold" style={{ color: "#7a1020" }}>결제 후 열람 가능</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PreviewSection() {
+function ChapterTeaserSection() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.05 });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div ref={ref} style={{
-      backgroundColor: CREAM,
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(30px)",
-      transition: "opacity 0.6s ease, transform 0.6s ease",
-    }}>
-      <div className="pt-7 pb-2 text-center px-5">
-        <p className="text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#7a1020" }}>✦ AI 정밀 분석 · 16장 ✦</p>
-        <h2 className="text-[20px] font-black mb-1.5" style={{ color: GRAY1 }}>나의 운명, 이제 확인하오</h2>
-        <p className="text-[12px]" style={{ color: GRAY3 }}>일부 내용은 결제 후 열람할 수 있소</p>
+    <div ref={ref} style={{ backgroundColor: CREAM }}>
+      <div className="pt-8 pb-3 text-center px-5"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(24px)",
+          transition: "opacity 0.5s ease, transform 0.5s ease",
+        }}>
+        <p className="text-[11px] tracking-[0.2em] mb-1.5 font-medium" style={{ color: "#9b2335" }}>✦ 정통종합사주 · 전체 14장 ✦</p>
+        <h2 className="text-[21px] font-black mb-2" style={{ color: GRAY1 }}>이런 것들을 알게 될 것이오</h2>
+        <p className="text-[12px] leading-relaxed" style={{ color: GRAY3 }}>각 장을 미리 살펴보시오. 결제 후엔 그대만의 이야기가 가득 담길 것이오.</p>
       </div>
-      <div className="pt-4 pb-5">
-        {PREVIEW_SECTIONS.map((s, i) => <PreviewCard key={i} s={s} />)}
-      </div>
-    </div>
-  );
-}
-
-// ─── 목차 섹션 ───────────────────────────────────────────────────────────────
-const CHAPTER_LIST = [
-  { ch: 1,  title: "사주 원국",   emoji: "🏛️" },
-  { ch: 2,  title: "운명의 구조", emoji: "🔮" },
-  { ch: 3,  title: "인간관계",    emoji: "🤝" },
-  { ch: 4,  title: "숨겨진 특징", emoji: "🌙" },
-  { ch: 5,  title: "재물과 직업", emoji: "💰" },
-  { ch: 6,  title: "사랑과 결혼", emoji: "💑" },
-  { ch: 7,  title: "건강",        emoji: "🌿" },
-  { ch: 8,  title: "귀인",        emoji: "✨" },
-  { ch: 9,  title: "주의할 사람", emoji: "⚠️" },
-  { ch: 10, title: "굴곡과 위기", emoji: "⚡" },
-  { ch: 11, title: "대운 흐름",   emoji: "🌊" },
-  { ch: 12, title: "주의 시기",   emoji: "📅" },
-  { ch: 13, title: "당부의 말",   emoji: "📝" },
-  { ch: 14, title: "개운법",      emoji: "🌸" },
-  { ch: 15, title: "중심 잡기",   emoji: "⚖️" },
-  { ch: 16, title: "마무리",      emoji: "🎯" },
-];
-
-function TableOfContents() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.1 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} className="px-5 py-7" style={{
-      backgroundColor: WHITE,
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(30px)",
-      transition: "opacity 0.6s ease, transform 0.6s ease",
-    }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#7a1020" }}>✦ 목차 ✦</p>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>총 16장 구성</h2>
-      <div className="space-y-2">
-        {CHAPTER_LIST.map(({ ch, title, emoji }, i) => (
-          <div key={ch} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-            style={{
-              backgroundColor: CREAM,
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateX(0)" : "translateX(-20px)",
-              transition: `opacity 0.4s ease ${i * 0.04}s, transform 0.4s ease ${i * 0.04}s`,
-            }}>
-            <span className="text-[13px] w-5 text-center flex-shrink-0">{emoji}</span>
-            <span className="text-[12px] font-medium flex-shrink-0" style={{ color: "#7a1020", minWidth: 32 }}>제{ch}장</span>
-            <span className="text-[13px] font-bold" style={{ color: GRAY1 }}>{title}</span>
-          </div>
+      <div className="pt-2 pb-6">
+        {CHAPTER_TEASERS.map((data, i) => (
+          <ChapterTeaserCard key={data.ch} data={data} index={i} />
         ))}
       </div>
     </div>
@@ -369,7 +672,6 @@ function FAQSection() {
 
   return (
     <div className="px-5 py-7" style={{ backgroundColor: WHITE }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: "#7a1020" }}>✦ FAQ ✦</p>
       <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>자주 묻는 질문</h2>
       <div className="space-y-2">
         {FAQS.map((faq, i) => (
@@ -776,31 +1078,50 @@ function CheckoutContent() {
       <div className="w-full h-full overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 80 }}>
         <style>{`div::-webkit-scrollbar{display:none}`}</style>
 
-        {/* ① 히어로 */}
-        <HeroSection name={name} />
+        {/* ① 상단 이미지 */}
+        <div className="relative w-full" style={{ aspectRatio: "1000/7000" }}>
+          <img src="/media/checkout/saju_total/s1-3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "28.2%", left: "33%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>
+              {(gender === "female" || gender === "여자") ? `${name}양` : `${name}군`}
+            </p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>
+              만나서 반갑소.
+            </p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "94.5%", left: "37%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>자, 한번 보시오.</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{(gender === "female" || gender === "여자") ? `${name}양` : `${name}군`} 사주팔자요.</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "36%", left: "68%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>소인은,</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>조선의 명리대가</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>홍연이라고 하오.</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "64%", left: "72%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>
+              어디보자...
+            </p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "59.2%", left: "43%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>풀이에 앞서,</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{(gender === "female" || gender === "여자") ? `${name}양` : `${name}군`}의 사주팔자가</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>어떻게 생겼는지 봐야하오.</p>
+          </div>
+        </div>
 
         {/* ② 명식 */}
-        <MyeongsikSection saju={saju} name={name} />
+        <MyeongsikSection saju={saju} name={name} date={date} calendar={calendar} gender={gender} />
 
-        {/* s1 */}
-        <img src="/media/checkout/saju_total/s1.jpg" alt="" className="w-full block" />
+        {/* ③ 하단 이미지 */}
+        <div className="relative">
+          <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
+          <img src="/media/checkout/saju_total/s2.jpg" alt="" className="w-full block" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+        </div>
 
-        {/* ③ 미리보기 티저 */}
-        <PreviewSection />
-
-        {/* s2 */}
-        <img src="/media/checkout/saju_total/s2.jpg" alt="" className="w-full block" />
-
-        {/* ④ 목차 */}
-        <TableOfContents />
-
-        {/* ⑤ 후기 */}
-        <ReviewSection />
-
-        {/* s3 */}
-        <img src="/media/checkout/saju_total/s3.jpg" alt="" className="w-full block" />
-
-        {/* ⑥ FAQ */}
+        {/* ④ FAQ */}
         <FAQSection />
 
         <div className="h-4" />
