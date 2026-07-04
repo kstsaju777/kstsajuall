@@ -212,7 +212,7 @@ function timeToSi(hhmm: string): string {
 const GAN_KR: Record<string, string> = { 甲:"갑", 乙:"을", 丙:"병", 丁:"정", 戊:"무", 己:"기", 庚:"경", 辛:"신", 壬:"임", 癸:"계" };
 const JI_KR: Record<string, string> = { 子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
 
-export function MyeongsikModalView({ open, onClose, view, loading, meta }: { open: boolean; onClose: () => void; view: MyeongsikView | null; loading: boolean; meta?: MyeongsikMeta }) {
+export function MyeongsikModalView({ open, onClose, view, loading, meta, titleOverride, genderOverride }: { open: boolean; onClose: () => void; view: MyeongsikView | null; loading: boolean; meta?: MyeongsikMeta; titleOverride?: string; genderOverride?: (gender: string) => string }) {
   const v = view ?? SAMPLE_VIEW;
   const ps: MsPillar[] = applyLocalSinsal(v.pillars);
 
@@ -286,7 +286,7 @@ export function MyeongsikModalView({ open, onClose, view, loading, meta }: { ope
         >
           {/* 1행: 제목 + 닫기 */}
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-[18px] font-black" style={{ color: INK }}>{meta?.name ? `${meta.name}님 명식` : "나의 명식"}</h2>
+            <h2 className="text-[18px] font-black" style={{ color: INK }}>{titleOverride ?? (meta?.name ? `${meta.name}님 명식` : "나의 명식")}</h2>
             <button
               onClick={onClose}
               className="flex items-center justify-center rounded-full"
@@ -300,7 +300,8 @@ export function MyeongsikModalView({ open, onClose, view, loading, meta }: { ope
           {meta && (() => {
             const iljuP = v.pillars[1];
             const iljuStr = iljuP ? `${GAN_KR[iljuP.gan] ?? iljuP.gan}${JI_KR[iljuP.ji] ?? iljuP.ji}일주` : "";
-            const genderLabel = meta.gender === "female" || meta.gender === "여자" ? "여성" : meta.gender === "male" || meta.gender === "남자" ? "남성" : meta.gender;
+            const rawGender = meta.gender === "female" || meta.gender === "여자" ? "여성" : meta.gender === "male" || meta.gender === "남자" ? "남성" : meta.gender;
+            const genderLabel = genderOverride ? genderOverride(rawGender) : rawGender;
             const siStr = meta.time && meta.time !== "시간 모름" ? timeToSi(meta.time) : "시간 모름";
             const tags = [
               `${meta.name} (${genderLabel})`,

@@ -11,6 +11,8 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
@@ -1082,37 +1084,107 @@ function EventBox() {
   );
 }
 
-// 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
+// 추천 상품(크로스셀) 그리드 (마무리) — 결혼궁합과 동일 구조
+const RECO_BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
+  "재물": "#eac660", "건강": "#2e7d32", "결혼": "#c2185b", "임신": "#6a1b9a",
+  "연애": "#e1337d", "자녀": "#0077b6", "유아": "#dddbd1", "재회": "#7b2fff",
+  "이혼": "#444", "비즈니스": "#1d6fce",
+};
+const RECO_TAG_COLORS: Record<string, string> = {
+  "사주": "#111111", "HOT": "#ff4500", "궁합": "#e1337d", "비즈니스": "#1d6fce",
+  "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b", "NEW": "#4fd5e8",
+};
+const RECO_EXCLUDE = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주"]);
+const SAJU_ORDER_IM = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주", "팔자도둑 재물사주"];
+const KUNGHAP_ORDER_IM = ["말좀듣자 자녀궁합", "평생내짝 결혼궁합", "찰떡콩떡 연애궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "보고싶어 재회궁합"];
+
+function sortByIm(cards: CategoryCard[], order: string[]) {
+  return order.flatMap((name) => cards.filter((c) => c.name === name));
+}
+
+function RecoProductCard({ card }: { card: CategoryCard }) {
+  const isVideo = !!card.videoUrl || card.type === "video";
+  const mediaSrc = card.videoUrl ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !isVideo) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isVideo]);
+  return (
+    <Link ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
+      {isVideo ? (
+        visible
+          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
+      ) : imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : card.tag === "NEW" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#4fd5e8", color: "#000", display: "inline-block", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>
+            ) : card.tag === "추천" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
 function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("kunghap_imshin") && !RECO_EXCLUDE.has(c.name));
+  const sajuCards    = sortByIm(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER_IM);
+  const kunghapCards = sortByIm(all.filter((c) => c.href.includes("kunghap")), KUNGHAP_ORDER_IM);
+
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes newBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} 60%{transform:translateY(-2px)} }
+        @keyframes chukNeon { 0%,100%{box-shadow:0 0 3px 1px rgba(0,255,115,0.5)} 50%{box-shadow:0 0 7px 2px rgba(0,255,115,0.9)} }
+      `}</style>
+      {sajuCards.length > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
     </div>
   );
 }
@@ -2314,6 +2386,1207 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
     <div className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 mb-2" style={{ background: `${color}12`, borderLeft: `3px solid ${color}` }}>
       <span className="text-[15px] font-black" style={{ color }}>{label}</span>
       {sub && <span className="text-[12.5px]" style={{ color: INK_SOFT }}>{sub}</span>}
+    </div>
+  );
+}
+
+// ── Ch1·2·3 색상 토큰 ────────────────────────────────────────────
+const IM1_COLOR = "#9b3558"; const IM1_PALE  = "#f8edf2"; // 1장 — 딥 로즈 (나의 원국)
+const IM2_COLOR = "#2d3a8c"; const IM2_PALE  = "#eef0fb"; // 2장 — 딥 네이비 (상대 원국)
+const IM3_COLOR = "#6a3a8a"; const IM3_PALE  = "#f3eeff"; // 3장 — 보라 (자녀운·궁합 점수)
+const IM3_DEEP  = "#4a1a6a";                               // 3장 강조용 딥 보라
+const IM4_COLOR = "#8a5a00"; const IM4_PALE  = "#fdf6e0"; // 4장 — 앰버 (태어날 자녀 기운)
+const IM4_GREEN = "#2a6a4a"; const IM4_GREEN_P = "#edf7f2"; // 4장 — 초록 (성장·양육)
+const IM5_COLOR = "#2a7a6a"; const IM5_PALE  = "#edf8f5"; // 5장 — 틸 (임신 시기·자연 흐름)
+const IM5_GOLD  = "#8a6200"; const IM5_GOLD_P = "#fdf8e0"; // 5장 — 골드 (최적 시기 강조)
+const IM6_HAP   = "#2a6a3a"; const IM6_HAP_P  = "#edf7f0"; // 6장 — 초록 (합·조화)
+const IM6_CHUNG = "#8a2a2a"; const IM6_CHUNG_P= "#fdf0f0"; // 6장 — 적색 (충·긴장)
+const IM7_MY    = "#8a3a6a"; const IM7_MY_P   = "#fdf0f6"; // 7장 — 로즈 (본인 건강)
+const IM7_PT    = "#2a507a"; const IM7_PT_P   = "#eef3f9"; // 7장 — 딥블루 (배우자 건강)
+const IM7_TIP   = "#2a7a3a"; const IM7_TIP_P  = "#edf8f0"; // 7장 — 초록 (건강 관리 팁)
+const IM8_BOND  = "#8a3a5a"; const IM8_BOND_P = "#fdf0f4"; // 8장 — 딥로즈 (감정 유대)
+const IM8_SUP   = "#5a3a8a"; const IM8_SUP_P  = "#f5eeff"; // 8장 — 보라 (상호 지지)
+const IM9_DARK  = "#5a3a1a"; const IM9_DARK_P = "#fdf5ec"; // 9장 — 다크브라운 (어려움·도전)
+const IM9_GOLD  = "#8a6200"; const IM9_GOLD_P = "#fdf8e0"; // 9장 — 골드 (극복·희망)
+const IM10_STAR = "#b07200"; const IM10_STAR_P= "#fdf6da"; // 10장 — 브라이트골드 (최고 시기·황금창)
+const IM10_TEAL = "#1a6a7a"; const IM10_TEAL_P= "#edf6f8"; // 10장 — 틸블루 (사주 근거·깊이)
+
+/**
+ * OhaengDonutRich — 오행 균형 도넛 + 세로 바차트 조합 카드
+ *
+ * 사주 원국의 천간·지지를 분석해 목·화·토·금·수 다섯 기운의 비율을
+ * 도넛 차트와 세로 바차트로 동시에 보여줍니다. 왼쪽 도넛은 가장 강한
+ * 오행을 한자로 강조해 직관적으로 전달하고, 오른쪽 바차트는 각 기운의
+ * 상대적 크기를 높이로 비교합니다. 임신·출산 맥락에서 부모의 오행 분포는
+ * 자녀와의 기운 조화나 임신 시기 선택에 중요한 배경이 됩니다.
+ */
+function OhaengDonutRich({ view, accentColor }: { view: MyeongsikView | null; accentColor: string }) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const pct = (n: number) => Math.round((n / total) * 100);
+  const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
+          <g transform="rotate(-90 70 70)">
+            {OHAENG.map((e) => {
+              const frac = counts[e.key] / total;
+              const len = frac * C;
+              const el = (
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
+                  strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
+              );
+              acc += len;
+              return el;
+            })}
+          </g>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
+        </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="px-5 pb-4 text-right">
+        <p className="text-[10px]" style={{ color: MUTE, fontStyle: "italic" }}>accentColor 미사용 시 lint 경고 방지</p>
+      </div>
+      {accentColor && false && <span style={{ color: accentColor }} />}
+    </div>
+  );
+}
+
+/**
+ * INatureCard — 나의 기질 카드 (임신궁합 맥락)
+ *
+ * 사주 원국에서 읽히는 본연의 기질을 키워드와 함께 풀어냅니다.
+ * '기질의 빛' 섹션은 임신·출산·양육 과정에서 이 기질이 발휘하는 긍정적인 힘을,
+ * '주의해야 할 그림자' 섹션은 임신 과정이나 배우자와의 관계에서 이 기질이
+ * 드러낼 수 있는 어려운 면을 솔직하게 짚습니다. 키워드는 색상 뱃지로 표시되어
+ * 한눈에 이 사람의 기운을 파악할 수 있습니다. 임신 준비 중인 부모가 자신의
+ * 본바탕을 이해하는 것은 배우자와의 소통과 태교 준비에도 중요한 출발점입니다.
+ */
+function INatureCard({ data, color, label }: {
+  data: Record<string, unknown> | null; color: string; label: string;
+}) {
+  if (!data) return null;
+  const keywords     = (data.keywords     as string[] | undefined) ?? [];
+  const strengthDesc = (data.strengthDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const shadowDesc   = (data.shadowDesc   as string | undefined) ?? "";
+  const KW_COLORS    = [color, "#3f7d6b", "#b07d2a", "#c9474f", "#3f63c4"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${INK}08` }}>
+        <p className="text-[11px] font-bold mb-2.5" style={{ color }}>{label}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${KW_COLORS[i % KW_COLORS.length]}14`, color: KW_COLORS[i % KW_COLORS.length] }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+      {strengthDesc && (
+        <div className="px-4 pt-3 pb-3" style={{ borderBottom: shadowDesc ? `1px solid ${INK}08` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">✨</span>
+            <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+        </div>
+      )}
+      {shadowDesc && (
+        <div className="px-4 pt-3 pb-4" style={{ background: "#fffaf9" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">🌙</span>
+            <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * ParentStyleCard — 나의 부모 성향 유형 카드 (임신궁합 맥락)
+ *
+ * 사주 원국을 통해 이 사람이 어떤 방식으로 임신·출산·육아를 맞이할 것인지,
+ * 타고난 부모 성향 유형을 보여줍니다. 유형명(patternType)과 아이콘으로 직관적인
+ * 인상을 먼저 전달하고, 한 줄 요약 인트로와 핵심 callout 문장으로 이 성향의
+ * 본질을 짚습니다. 이어지는 단락들에서는 이 부모 성향이 배우자와의 관계,
+ * 임신 준비 과정, 태교 방식, 출산 이후 양육 스타일에 어떻게 나타나는지를
+ * 사주 원리와 연결해 구체적으로 풀어냅니다. 결혼궁합의 MarriagePatternCard와
+ * 동일한 레이아웃 구조를 사용하되, 맥락은 임신·출산·부모됨으로 전환됩니다.
+ */
+function ParentStyleCard({ data, color, pale }: {
+  data: Record<string, unknown> | null; color: string; pale: string;
+}) {
+  if (!data) return null;
+  const intro       = (data.intro       as string | undefined) ?? "";
+  const callout     = (data.callout     as string | undefined) ?? "";
+  const patternType = (data.patternType as string | undefined) ?? "";
+  const patternIcon = (data.patternIcon as string | undefined) ?? "🤰";
+  const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {(patternType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, border: `1px solid ${color}20` }}>
+          {patternType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]">{patternIcon}</span>
+              <span className="text-[15px] font-black" style={{ color }}>{patternType}</span>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>&#8220;{intro}&#8221;</p>}
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${color}0c`, borderLeft: `3px solid ${color}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * PregnancyScoreCard — 임신·출산 궁합 점수 카드
+ *
+ * 두 사람의 사주가 얼마나 임신·출산의 기운을 잘 품고 있는지를 0~100점 점수와
+ * 등급(S~D)으로 한눈에 보여줍니다. 반원형 게이지는 점수를 시각적으로 전달하고,
+ * 점수 아래에 등급 뱃지와 대표 한마디(label)가 붙어 이 숫자가 어떤 의미인지
+ * 즉각 이해할 수 있게 합니다. 점수 구간별로 게이지 색상이 달라지고(보라→로즈→골드→
+ * 회색), 이어지는 단락들에서 이 점수가 나오게 된 사주 구조적 근거를 풀어냅니다.
+ * 임신궁합의 핵심 지표이므로 이 카드는 이 장 전체의 무게 중심입니다.
+ */
+function PregnancyScoreCard({ score, tier, label, paragraphs }: {
+  score: number; tier: string; label: string; paragraphs: string[];
+}) {
+  const s = Math.min(100, Math.max(0, score));
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 110, cy = 105, r = 78;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const arcColor = s >= 80 ? IM3_COLOR : s >= 60 ? ROSE : s >= 40 ? GOLD : MUTE;
+  const TIER_STYLE: Record<string, { bg: string; text: string; label: string }> = {
+    "S": { bg: IM3_COLOR, text: "#fff",     label: "천생연분" },
+    "A": { bg: ROSE,      text: "#fff",     label: "매우 좋음" },
+    "B": { bg: GOLD,      text: "#fff",     label: "좋음" },
+    "C": { bg: "#7a6a5a", text: "#fff",     label: "보통" },
+    "D": { bg: MUTE,      text: "#fff",     label: "주의 필요" },
+  };
+  const ts = TIER_STYLE[tier] ?? TIER_STYLE["B"];
+  return (
+    <div className="mx-5 mb-5 rounded-3xl overflow-hidden" style={{ background: `linear-gradient(160deg, ${IM3_COLOR}10 0%, ${IM3_PALE} 100%)`, border: `1.5px solid ${IM3_COLOR}30` }}>
+      <div className="px-5 pt-5 pb-1 flex items-center justify-between">
+        <p className="text-[11px] font-bold tracking-widest" style={{ color: IM3_COLOR }}>👶 임신·출산 궁합 점수</p>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full" style={{ background: ts.bg, color: ts.text }}>{tier}등급</span>
+          <span className="text-[11px] font-bold" style={{ color: IM3_COLOR }}>{ts.label}</span>
+        </div>
+      </div>
+      <svg viewBox="0 0 220 115" style={{ width: "100%", maxHeight: 120 }}>
+        <defs>
+          <linearGradient id="pgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor={MUTE} />
+            <stop offset="40%"  stopColor={GOLD} />
+            <stop offset="75%"  stopColor={ROSE} />
+            <stop offset="100%" stopColor={IM3_COLOR} />
+          </linearGradient>
+        </defs>
+        {/* 배경 트랙 */}
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#e8e0f0" strokeWidth="18" strokeLinecap="round" />
+        {/* 채워진 게이지 */}
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#pgGrad)" strokeWidth="18" strokeLinecap="round"
+          strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+        {/* 바늘 */}
+        <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={IM3_DEEP} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="5" fill={IM3_DEEP} />
+        {/* 점수 */}
+        <text x={cx} y={cy - 16} textAnchor="middle" fontSize="28" fontWeight="900" fill={arcColor}>{s}</text>
+        <text x={cx} y={cy}      textAnchor="middle" fontSize="10"  fill={MUTE}>점</text>
+      </svg>
+      <p className="text-center text-[14px] font-black pb-2" style={{ color: arcColor, fontFamily: SERIF }}>{label}</p>
+      <div className="px-5 pb-5 pt-2" style={{ borderTop: `1px solid ${IM3_COLOR}15` }}>
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[13.5px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PregnancyReasonCard — 임신 궁합 사주 근거 카드
+ *
+ * 두 사람의 점수가 도출된 사주 원리상의 근거를 구체적으로 풀어냅니다.
+ * 단순히 "합이 있다 / 충이 있다" 수준이 아니라, 어떤 오행·합충·식상 구조가
+ * 두 사람의 임신·출산 기운에 어떻게 작용하는지를 아이콘·제목·설명 형태의
+ * 항목(reasons)으로 명확하게 제시합니다. 각 근거 항목은 임신궁합 전문 용어
+ * (식상, 관성, 생지, 월령 등)를 쉬운 언어로 풀어 담아, 사주를 잘 모르는 독자도
+ * 이해할 수 있도록 구성됩니다. 상단 callout으로 핵심을 먼저 제시하고,
+ * 하단 마무리 단락으로 근거 전체를 종합하는 흐름을 취합니다.
+ */
+function PregnancyReasonCard({ intro, callout, reasons, paragraphs }: {
+  intro: string;
+  callout: string;
+  reasons: Array<{ icon: string; title: string; desc: string }>;
+  paragraphs: string[];
+}) {
+  return (
+    <div className="mx-5 mb-5">
+      {intro && (
+        <p className="mb-4 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>&#8220;{intro}&#8221;</p>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${IM3_COLOR}0c`, borderLeft: `3px solid ${IM3_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: IM3_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {reasons.length > 0 && (
+        <div className="flex flex-col gap-3 mb-4">
+          {reasons.map((r, i) => (
+            <div key={i} className="flex gap-3 p-3.5 rounded-2xl" style={{ background: "#fff", border: `1px solid ${IM3_COLOR}22` }}>
+              <div className="text-[22px] flex-shrink-0 mt-0.5">{r.icon}</div>
+              <div>
+                <p className="text-[13px] font-bold mb-1" style={{ color: IM3_DEEP }}>{r.title}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{r.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * ChildEnergyCard — 태어날 자녀의 기운 유형 카드
+ *
+ * 두 사람의 사주가 만나 빚어낼 자녀의 오행적 기운을 한눈에 담아내는 카드이오.
+ * 상단에는 energyType(기운 유형명)과 energyIcon(대표 이모지)을 크게 배치하여
+ * 아이가 지닐 기질의 핵심을 직관적으로 전하고, 그 아래에 keywords를 앰버 배지로
+ * 나열하여 기운의 세부 결을 살피오. 배지는 진하기를 교차하여 첫 번째 키워드가
+ * 가장 강하게 눈에 들어오도록 하였소. 하단의 desc 단락은 자녀 기운의 본질적 의미와
+ * 이 기운이 삶에서 어떻게 발현될지를 풍성하게 풀어내오.
+ */
+function ChildEnergyCard({ energyType, energyIcon, keywords, desc, color, pale }: {
+  energyType: string; energyIcon: string; keywords: string[]; desc: string;
+  color: string; pale: string;
+}) {
+  const accents = [color, `${color}cc`, `${color}99`];
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}30` }}>
+      {/* 기운 유형 헤더 */}
+      <div className="px-5 pt-5 pb-3 flex items-center gap-3" style={{ borderBottom: `1px solid ${color}20` }}>
+        <span className="text-[2.2rem] leading-none">{energyIcon}</span>
+        <div>
+          <p className="text-[10px] tracking-[0.2em] mb-0.5" style={{ color: `${color}99`, fontFamily: SERIF }}>자녀 기운 유형</p>
+          <p className="text-[17px] font-black leading-tight" style={{ color, fontFamily: SERIF }}>{energyType}</p>
+        </div>
+      </div>
+      {/* 키워드 배지 */}
+      <div className="px-5 py-3 flex flex-wrap gap-2" style={{ borderBottom: `1px solid ${color}15` }}>
+        {keywords.map((kw, i) => (
+          <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold"
+            style={{ background: `${accents[i] ?? color}22`, color: accents[i] ?? color, border: `1px solid ${accents[i] ?? color}44` }}>
+            {kw}
+          </span>
+        ))}
+      </div>
+      {/* 기운 설명 */}
+      <p className="px-5 py-4 text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{desc}</p>
+    </div>
+  );
+}
+
+/**
+ * ChildDescCard — 태어날 자녀 상세 풀이 카드
+ *
+ * 자녀의 성격·재능·인간관계 성향을 깊이 있게 서술하는 본문 카드이오.
+ * 상단 intro는 이탤릭체로 아이의 본질을 한 문장으로 포착하여 독자의 마음을 먼저
+ * 열고, callout 패널은 앰버 좌측 테두리와 함께 핵심 특성을 한눈에 잡아주오.
+ * paragraphs는 각각 충분한 줄간격으로 배치되어 자녀의 다면적 면모를
+ * 자연스러운 호흡으로 읽어내려갈 수 있게 하였소. 마지막 단락에는
+ * 부드러운 앰버 그라데이션 배경을 깔아 여운을 남기오.
+ */
+function ChildDescCard({ intro, callout, paragraphs, color, pale }: {
+  intro: string; callout: string; paragraphs: string[];
+  color: string; pale: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}25` }}>
+      {/* 인트로 */}
+      <div className="px-5 pt-5 pb-3" style={{ borderBottom: `1px solid ${color}18` }}>
+        <p className="text-[14px] leading-[1.8] italic" style={{ color, fontFamily: SERIF }}>
+          &ldquo;{intro}&rdquo;
+        </p>
+      </div>
+      {/* 콜아웃 */}
+      <div className="mx-5 my-4 pl-4 py-3 rounded-xl" style={{ background: `${color}12`, borderLeft: `3px solid ${color}` }}>
+        <p className="text-[12px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
+      </div>
+      {/* 단락들 */}
+      <div className="px-5 pb-5 space-y-3">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[13px] leading-[1.9]"
+            style={{
+              color: INK_SOFT,
+              ...(i === paragraphs.length - 1 ? { padding: "10px 12px", borderRadius: 12, background: `${color}0c` } : {}),
+            }}>
+            {p}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ParenthoodTipsCard — 양육 방향 조언 카드
+ *
+ * 자녀의 기운에 맞춘 실질적 양육 지침을 아이콘 카드 형식으로 담아내오.
+ * 각 tips 항목은 icon(이모지)·title(조언 제목)·desc(상세 설명)으로 구성되어
+ * 단순 나열에서 벗어나 제목이 강조된 구조적 읽기를 가능하게 하오.
+ * 상단의 녹색 헤더 배너는 "양육의 길"이라는 장의 맥락을 알리고,
+ * 각 카드는 번호 배지를 초록 계열로 칠하여 성장·자연·생명이라는
+ * 새 생명 주제의 색채를 일관되게 유지하오.
+ */
+function ParenthoodTipsCard({ tips, greenColor, greenPale }: {
+  tips: Array<{ icon: string; title: string; desc: string }>;
+  greenColor: string; greenPale: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: greenPale, border: `1.5px solid ${greenColor}25` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${greenColor}18`, borderBottom: `1px solid ${greenColor}20` }}>
+        <span className="text-[16px]">🌱</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: greenColor }}>양육의 방향 · 홍연이 전하는 지혜</p>
+      </div>
+      {/* 팁 카드 목록 */}
+      <div className="px-4 py-4 space-y-3">
+        {tips.map((tip, i) => (
+          <div key={i} className="flex gap-3 p-3 rounded-2xl" style={{ background: "#fff", border: `1px solid ${greenColor}20` }}>
+            {/* 번호 배지 + 아이콘 */}
+            <div className="shrink-0 flex flex-col items-center gap-1">
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black" style={{ background: greenColor, color: "#fff" }}>{i + 1}</span>
+              <span className="text-[18px] leading-none">{tip.icon}</span>
+            </div>
+            {/* 텍스트 */}
+            <div className="flex-1">
+              <p className="text-[13px] font-bold mb-1" style={{ color: greenColor }}>{tip.title}</p>
+              <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * TimingFlowCard — 임신 시기 흐름 타임라인 카드
+ *
+ * 두 사람의 사주 운기 흐름에서 임신·출산에 유리한 시기를 순서대로 배치한
+ * 세로 타임라인 카드이오. 좌측의 수직선과 원형 번호 마커가 각 시기를
+ * 시간 순서로 연결하며, highlight가 true인 항목은 금색 마커와 금색 배경으로
+ * "지금 가장 좋은 시기"임을 직관적으로 알려주오. 각 항목에는 icon(계절·운기 이모지)·
+ * label(시기명)·desc(사주 원리 기반 설명)이 담기오. desc는 단순 나열이 아닌
+ * 왜 이 시기가 임신 기운과 잘 맞는지 사주 원리를 녹여 충분히 서술하오.
+ */
+function TimingFlowCard({ items, color, pale, goldColor, goldPale }: {
+  items: Array<{ icon?: string; label: string; desc: string; highlight?: boolean }>;
+  color: string; pale: string; goldColor: string; goldPale: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}25` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${color}15`, borderBottom: `1px solid ${color}20` }}>
+        <span className="text-[16px]">🗓️</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color }}>임신 기운의 흐름 · 시기별 운세</p>
+      </div>
+      {/* 타임라인 */}
+      <div className="px-5 py-4">
+        {items.map((item, i) => {
+          const isLast = i === items.length - 1;
+          const markerColor = item.highlight ? goldColor : color;
+          const bg = item.highlight ? goldPale : "#fff";
+          const border = item.highlight ? `${goldColor}40` : `${color}20`;
+          return (
+            <div key={i} className="flex gap-3">
+              {/* 마커 + 수직선 */}
+              <div className="flex flex-col items-center" style={{ minWidth: 28 }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black shrink-0"
+                  style={{ background: markerColor, color: "#fff", boxShadow: item.highlight ? `0 0 0 3px ${goldColor}30` : "none" }}>
+                  {i + 1}
+                </div>
+                {!isLast && <div className="flex-1 w-[2px] my-1" style={{ background: `${color}25`, minHeight: 12 }} />}
+              </div>
+              {/* 내용 */}
+              <div className="flex-1 mb-3 p-3 rounded-2xl" style={{ background: bg, border: `1px solid ${border}` }}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  {item.icon && <span className="text-[14px]">{item.icon}</span>}
+                  <p className="text-[13px] font-bold" style={{ color: markerColor }}>{item.label}</p>
+                  {item.highlight && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${goldColor}20`, color: goldColor }}>✨ 최적</span>
+                  )}
+                </div>
+                <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * BestMonthsCard — 임신에 좋은 달 카드
+ *
+ * 한 해 중 임신·출산 기운이 특히 모이는 달을 카드 형식으로 펼쳐 보이오.
+ * 각 항목은 season(계절·월령 이모지)·title(달 이름 또는 기간)·desc(사주 기반 이유)로
+ * 구성되며, 두 열 그리드로 나란히 배치하여 시각적 비교가 쉽도록 하였소.
+ * 상단 틸 헤더 배너가 "언제 임신하면 좋은가"라는 질문에 명확히 답하는 섹션임을
+ * 알리고, 각 카드 안에서 계절 이모지가 시각적 리듬을 만들어 읽는 재미를 더하오.
+ * desc는 단순 월 지칭에 그치지 않고 그 달의 오행·지지 기운이 임신 기운과 어떻게
+ * 공명하는지를 충분한 문장으로 설명하오.
+ */
+function BestMonthsCard({ items, color, pale }: {
+  items: Array<{ season?: string; title: string; desc: string }>;
+  color: string; pale: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}25` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${color}15`, borderBottom: `1px solid ${color}20` }}>
+        <span className="text-[16px]">🌙</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color }}>좋은 달 · 임신 기운이 모이는 시간</p>
+      </div>
+      {/* 카드 그리드 */}
+      <div className="px-4 py-4 grid grid-cols-2 gap-3">
+        {items.map((item, i) => (
+          <div key={i} className="p-3 rounded-2xl" style={{ background: "#fff", border: `1px solid ${color}20` }}>
+            {item.season && <div className="text-[22px] mb-1.5 text-center">{item.season}</div>}
+            <p className="text-[12px] font-bold text-center mb-2" style={{ color }}>{item.title}</p>
+            <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * TimingAdviceCard — 홍연의 시기 조언 카드
+ *
+ * 임신 시기에 관한 홍연의 종합 조언을 담은 마무리 카드이오.
+ * 이전 TimingFlowCard·BestMonthsCard가 "언제"를 구체적으로 제시했다면,
+ * 이 카드는 그 시기들을 어떤 마음가짐과 태도로 맞이해야 하는지
+ * 홍연의 따뜻한 목소리로 전하오. headline(조언 제목)은 골드 색으로 크게 배치하여
+ * 시선을 집중시키고, callout 패널이 핵심 메시지를 한 눈에 전달하며,
+ * paragraphs는 사주 원리와 삶의 지혜를 엮어 충분한 분량으로 풀어내오.
+ * 배경은 금빛 그라데이션으로 처리하여 "소중한 시기"라는 감성을 시각적으로 전하오.
+ */
+function TimingAdviceCard({ headline, callout, paragraphs, goldColor, goldPale }: {
+  headline: string; callout: string; paragraphs: string[];
+  goldColor: string; goldPale: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden"
+      style={{ background: `linear-gradient(160deg, ${goldPale} 0%, #fff 100%)`, border: `1.5px solid ${goldColor}30` }}>
+      {/* 헤더 */}
+      <div className="px-5 pt-5 pb-3" style={{ borderBottom: `1px solid ${goldColor}20` }}>
+        <p className="text-[10px] tracking-[0.2em] mb-1" style={{ color: `${goldColor}99`, fontFamily: SERIF }}>홍연의 조언</p>
+        <p className="text-[16px] font-black leading-snug" style={{ color: goldColor, fontFamily: SERIF }}>{headline}</p>
+      </div>
+      {/* 콜아웃 */}
+      <div className="mx-5 my-4 pl-4 py-3 rounded-xl" style={{ background: `${goldColor}10`, borderLeft: `3px solid ${goldColor}` }}>
+        <p className="text-[12px] font-bold leading-relaxed" style={{ color: goldColor }}>{callout}</p>
+      </div>
+      {/* 단락 */}
+      <div className="px-5 pb-5 space-y-3">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * IHapCard — 합(合) 아이템 카드
+ *
+ * 두 사주 사이에서 발견된 합(合) 하나를 상세히 풀어내는 카드이오.
+ * 합이란 두 사주 글자가 서로 끌어당겨 새로운 오행 기운을 만들어내는 현상으로,
+ * 임신·출산 맥락에서는 두 사람의 기운이 자녀를 향해 수렴한다는 뜻이기도 하오.
+ * 상단 헤더에는 icon(합의 상징 이모지)·type(합의 유형명)·strength(강도 배지)를 나란히 배치하여
+ * 어떤 합인지 단번에 알 수 있게 하였소. hapEffect 패널은 초록 테두리 콜아웃으로
+ * "임신·출산 기운에 어떤 긍정적 영향을 주는지"를 집약하고, desc는 사주 원리 풀이와
+ * 두 사람의 실제 삶에서 어떻게 나타나는지를 충분히 서술하오.
+ */
+function IHapCard({ item }: {
+  item: { icon?: string; type: string; strength?: string; hapEffect?: string; desc: string };
+}) {
+  return (
+    <div className="mb-3 rounded-2xl overflow-hidden" style={{ background: IM6_HAP_P, border: `1.5px solid ${IM6_HAP}30` }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${IM6_HAP}15`, borderBottom: `1px solid ${IM6_HAP}20` }}>
+        {item.icon && <span className="text-[18px]">{item.icon}</span>}
+        <p className="text-[14px] font-black flex-1" style={{ color: IM6_HAP }}>{item.type}</p>
+        {item.strength && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${IM6_HAP}22`, color: IM6_HAP }}>{item.strength}</span>
+        )}
+      </div>
+      {/* hapEffect 콜아웃 */}
+      {item.hapEffect && (
+        <div className="mx-4 mt-3 pl-3 py-2 rounded-lg" style={{ background: "#fff", borderLeft: `3px solid ${IM6_HAP}` }}>
+          <p className="text-[11px] font-bold leading-relaxed" style={{ color: IM6_HAP }}>✦ {item.hapEffect}</p>
+        </div>
+      )}
+      {/* 풀이 */}
+      <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+    </div>
+  );
+}
+
+/**
+ * IChungCard — 충(沖) 아이템 카드
+ *
+ * 두 사주 사이의 충(沖) — 서로 부딪히고 밀어내는 글자 관계 — 을 풀어내는 카드이오.
+ * 충은 두려워할 것이 아니라 제대로 알고 다스려야 할 기운이오. 임신·출산 맥락에서
+ * 충은 두 사람의 기운이 충돌하는 지점, 즉 서로 조율이 필요한 영역을 알려주오.
+ * 상단 헤더는 적색 계열로 충의 긴장감을 색으로 전하고, chungEffect 콜아웃은
+ * "이 충이 임신·출산 과정에서 어떤 긴장을 만드는지"를 집약하오.
+ * resolve 패널은 "어떻게 하면 이 충을 다스릴 수 있는지"를 초록 포인트로 따뜻하게
+ * 제시하여 독자가 충을 보고 낙심하지 않도록 균형을 잡아주오.
+ */
+function IChungCard({ item }: {
+  item: { icon?: string; type: string; strength?: string; chungEffect?: string; resolve?: string; desc: string };
+}) {
+  return (
+    <div className="mb-3 rounded-2xl overflow-hidden" style={{ background: IM6_CHUNG_P, border: `1.5px solid ${IM6_CHUNG}25` }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${IM6_CHUNG}12`, borderBottom: `1px solid ${IM6_CHUNG}18` }}>
+        {item.icon && <span className="text-[18px]">{item.icon}</span>}
+        <p className="text-[14px] font-black flex-1" style={{ color: IM6_CHUNG }}>{item.type}</p>
+        {item.strength && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${IM6_CHUNG}18`, color: IM6_CHUNG }}>{item.strength}</span>
+        )}
+      </div>
+      {/* chungEffect 콜아웃 */}
+      {item.chungEffect && (
+        <div className="mx-4 mt-3 pl-3 py-2 rounded-lg" style={{ background: "#fff", borderLeft: `3px solid ${IM6_CHUNG}` }}>
+          <p className="text-[11px] font-bold leading-relaxed" style={{ color: IM6_CHUNG }}>⚡ {item.chungEffect}</p>
+        </div>
+      )}
+      {/* 풀이 */}
+      <p className="px-4 pt-3 pb-2 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+      {/* resolve — 다스리는 법 */}
+      {item.resolve && (
+        <div className="mx-4 mb-3 pl-3 py-2 rounded-lg" style={{ background: `${IM6_HAP}10`, borderLeft: `3px solid ${IM6_HAP}` }}>
+          <p className="text-[11px] font-bold mb-0.5" style={{ color: IM6_HAP }}>🌿 다스리는 법</p>
+          <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>{item.resolve}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * HapChungSummaryCard — 합·충 종합 평가 카드
+ *
+ * 이 장의 결론 카드이오. 합 개수와 충 개수를 시각적 바로 대비시켜 두 사람의
+ * 사주 관계가 전체적으로 조화로운지 긴장이 많은지를 직관적으로 전하오.
+ * 상단의 score는 반원 게이지 없이 큰 숫자와 tier 배지로 단순하게 표현하되
+ * label이 그 점수의 의미를 홍연 말투로 한 줄 요약하오. 합/충 카운터 바는
+ * 초록(합)과 적색(충) 두 색의 너비 비율로 전체 균형을 시각화하오.
+ * paragraphs는 이 합·충 구도가 임신·출산 과정 전체에 어떤 의미를 갖는지
+ * 종합적 시각으로 3단락에 걸쳐 충분히 서술하오.
+ */
+function HapChungSummaryCard({ score, tier, label, hapCount, chungCount, paragraphs }: {
+  score: number; tier: string; label: string;
+  hapCount: number; chungCount: number;
+  paragraphs: string[];
+}) {
+  const total = hapCount + chungCount || 1;
+  const hapPct = Math.round((hapCount / total) * 100);
+  const tierColor: Record<string, string> = { S: "#c0932a", A: "#2a6a3a", B: "#2a5a8a", C: "#6a3a8a", D: "#8a2a2a" };
+  const tc = tierColor[tier] ?? "#555";
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: "#fff", border: "1.5px solid #e5e0d8" }}>
+      {/* 점수 헤더 */}
+      <div className="px-5 pt-5 pb-4 flex items-center gap-4" style={{ borderBottom: "1px solid #f0ece4" }}>
+        <div className="text-center" style={{ minWidth: 64 }}>
+          <p className="text-[36px] font-black leading-none" style={{ color: tc }}>{score}</p>
+          <span className="text-[11px] px-2 py-0.5 rounded-full font-bold mt-1 inline-block" style={{ background: `${tc}18`, color: tc }}>{tier}급</span>
+        </div>
+        <div className="flex-1">
+          <p className="text-[10px] tracking-[0.15em] mb-1" style={{ color: MUTE, fontFamily: SERIF }}>합·충 종합 궁합</p>
+          <p className="text-[14px] font-bold leading-snug" style={{ color: "#2a2a2a", fontFamily: SERIF }}>{label}</p>
+        </div>
+      </div>
+      {/* 합 vs 충 바 */}
+      <div className="px-5 py-4" style={{ borderBottom: "1px solid #f0ece4" }}>
+        <div className="flex justify-between text-[11px] font-bold mb-1.5">
+          <span style={{ color: IM6_HAP }}>합(合) {hapCount}개</span>
+          <span style={{ color: IM6_CHUNG }}>충(沖) {chungCount}개</span>
+        </div>
+        <div className="h-2.5 rounded-full overflow-hidden" style={{ background: `${IM6_CHUNG}30` }}>
+          <div className="h-full rounded-full" style={{ width: `${hapPct}%`, background: `linear-gradient(to right, ${IM6_HAP}, ${IM6_HAP}aa)` }} />
+        </div>
+        <p className="text-[11px] mt-1.5 text-center" style={{ color: MUTE }}>
+          {hapPct >= 60 ? "조화가 긴장보다 우세하오" : hapPct >= 40 ? "조화와 긴장이 균형을 이루오" : "긴장이 조화보다 우세하오"}
+        </p>
+      </div>
+      {/* 종합 단락 */}
+      <div className="px-5 py-4 space-y-3">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * HealthPersonCard — 개인별 건강 주의 카드
+ *
+ * 임신·출산 시기에 본인 또는 배우자가 사주 기운상 특히 주의해야 할
+ * 건강 항목들을 인물 카드 형식으로 담아내오. 상단 헤더에는 이름·역할·
+ * 오행 체질 유형(constitution)을 표시하여 "어떤 기운의 몸인가"를 먼저
+ * 알게 하오. 각 items 항목은 icon(신체 이모지)·title(주의 제목)·
+ * bodyPart(연관 신체 부위)·caution(핵심 경고 한 줄)·desc(사주 원리 풀이)로
+ * 구성되오. caution은 색깔 있는 콜아웃 박스로 강조하여 독자가 바로
+ * 위험 신호를 인지할 수 있게 하고, desc는 왜 이 기운이 이 신체 부위에
+ * 영향을 미치는지 사주 오행 원리와 함께 충분히 설명하오.
+ */
+function HealthPersonCard({ name, role, constitution, items, color, pale }: {
+  name: string; role: string; constitution?: string;
+  items: Array<{ icon?: string; title: string; bodyPart?: string; caution?: string; desc: string }>;
+  color: string; pale: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}25` }}>
+      {/* 인물 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-3" style={{ background: `${color}15`, borderBottom: `1px solid ${color}20` }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black shrink-0"
+          style={{ background: color, color: "#fff" }}>
+          {name.charAt(0)}
+        </div>
+        <div className="flex-1">
+          <p className="text-[13px] font-black" style={{ color }}>{name}</p>
+          <p className="text-[10px]" style={{ color: `${color}aa` }}>{role}{constitution ? ` · ${constitution}` : ""}</p>
+        </div>
+        <span className="text-[12px]">🩺</span>
+      </div>
+      {/* 건강 항목 목록 */}
+      <div className="px-4 py-4 space-y-3">
+        {items.map((item, i) => (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1px solid ${color}18` }}>
+            {/* 항목 헤더 */}
+            <div className="px-4 py-2.5 flex items-center gap-2" style={{ borderBottom: `1px solid ${color}12` }}>
+              {item.icon && <span className="text-[16px]">{item.icon}</span>}
+              <p className="text-[13px] font-bold flex-1" style={{ color }}>{item.title}</p>
+              {item.bodyPart && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>{item.bodyPart}</span>
+              )}
+            </div>
+            {/* 경고 콜아웃 */}
+            {item.caution && (
+              <div className="mx-3 mt-2.5 pl-3 py-1.5 rounded-lg" style={{ background: `${color}0c`, borderLeft: `2.5px solid ${color}` }}>
+                <p className="text-[11px] font-bold leading-relaxed" style={{ color }}>⚠ {item.caution}</p>
+              </div>
+            )}
+            {/* 풀이 */}
+            <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * HealthTipsCard — 건강 관리 조언 카드
+ *
+ * 두 사람이 임신·출산 시기에 함께 실천할 수 있는 건강 관리 지침을
+ * 아이콘 카드 형태로 담아내오. 이 카드가 HealthPersonCard와 다른 점은
+ * "개인별 주의"가 아닌 "함께 만들어가는 건강 루틴"이라는 점이오.
+ * 각 팁은 icon(행동 이모지)·title(조언 제목)·desc(구체적 방법과 사주 근거)로
+ * 구성되며, 번호 배지 대신 아이콘 + 초록 제목으로 생동감 있게 배열하오.
+ * 상단 초록 헤더 배너는 "두 사람이 함께"라는 협력의 메시지를 담고,
+ * 각 팁 카드는 흰 배경 위에 초록 포인트 색을 써서 건강·생명·성장의
+ * 에너지를 일관되게 전하오.
+ */
+function HealthTipsCard({ tips, color, pale }: {
+  tips: Array<{ icon: string; title: string; desc: string }>;
+  color: string; pale: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}25` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${color}18`, borderBottom: `1px solid ${color}20` }}>
+        <span className="text-[16px]">🌿</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color }}>두 사람이 함께 · 건강 관리 지혜</p>
+      </div>
+      {/* 팁 목록 */}
+      <div className="px-4 py-4 space-y-3">
+        {tips.map((tip, i) => (
+          <div key={i} className="flex gap-3 p-3 rounded-2xl" style={{ background: "#fff", border: `1px solid ${color}18` }}>
+            <span className="text-[22px] leading-none shrink-0 mt-0.5">{tip.icon}</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-bold mb-1" style={{ color }}>{tip.title}</p>
+              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * EmotionalBondCard — 감정 유대 분석 카드
+ *
+ * 두 사람의 사주 기운이 만들어내는 감정적 연결의 본질을 심층 분석하는 카드이오.
+ * 임신·출산은 단순히 몸의 일이 아니라 두 사람의 마음이 얼마나 깊이 연결되어
+ * 있는가가 결정적으로 중요하오. 이 카드는 그 감정 유대의 성격을 bondType(유대 유형명)과
+ * bondIcon(상징 이모지)으로 먼저 직관적으로 제시하고, intro 인용구가 두 사람의
+ * 연결 방식의 본질을 한 문장으로 포착하오. callout 패널은 딥로즈 좌테두리와 함께
+ * 이 유대의 핵심 특성을 압축하며, paragraphs는 사주 오행이 어떻게 두 사람의
+ * 감정적 공명을 만들어내는지 — 기쁠 때, 힘들 때, 위기의 순간에 — 를
+ * 충분한 분량으로 서술하오. 독자가 "우리가 이렇게 연결되어 있구나"를
+ * 깨닫게 하는 것이 이 카드의 목적이오.
+ */
+function EmotionalBondCard({ bondType, bondIcon, intro, callout, paragraphs }: {
+  bondType: string; bondIcon: string; intro: string; callout: string; paragraphs: string[];
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: IM8_BOND_P, border: `1.5px solid ${IM8_BOND}25` }}>
+      {/* 유대 유형 헤더 */}
+      <div className="px-5 pt-5 pb-3 flex items-center gap-3" style={{ borderBottom: `1px solid ${IM8_BOND}18` }}>
+        <span className="text-[2.2rem] leading-none">{bondIcon}</span>
+        <div>
+          <p className="text-[10px] tracking-[0.2em] mb-0.5" style={{ color: `${IM8_BOND}99`, fontFamily: SERIF }}>감정 유대 유형</p>
+          <p className="text-[17px] font-black leading-tight" style={{ color: IM8_BOND, fontFamily: SERIF }}>{bondType}</p>
+        </div>
+      </div>
+      {/* 인트로 인용구 */}
+      <div className="px-5 py-4" style={{ borderBottom: `1px solid ${IM8_BOND}12` }}>
+        <p className="text-[14px] leading-[1.8] italic" style={{ color: IM8_BOND, fontFamily: SERIF }}>
+          &ldquo;{intro}&rdquo;
+        </p>
+      </div>
+      {/* 콜아웃 */}
+      <div className="mx-5 my-4 pl-4 py-3 rounded-xl" style={{ background: `${IM8_BOND}0f`, borderLeft: `3px solid ${IM8_BOND}` }}>
+        <p className="text-[12px] font-bold leading-relaxed" style={{ color: IM8_BOND }}>{callout}</p>
+      </div>
+      {/* 단락들 */}
+      <div className="px-5 pb-5 space-y-3">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[13px] leading-[1.9]" style={{
+            color: INK_SOFT,
+            ...(i === paragraphs.length - 1 ? { padding: "10px 12px", borderRadius: 12, background: `${IM8_BOND}08` } : {}),
+          }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * SupportStyleCard — 상호 지지 방식 카드
+ *
+ * 임신·출산 과정에서 두 사람이 서로를 어떻게 지지하는지,
+ * 각자의 사주 기운에서 우러나오는 자연스러운 지지 방식을 대비하여 보여주오.
+ * 사람마다 위로하는 방식이 다르고 받고 싶은 지지의 형태가 다르오.
+ * 이 카드는 좌우 두 패널로 나뉘어 — 나의 지지 방식(로즈)과 배우자의 지지 방식(보라) —
+ * 각자의 style(지지 유형명)·icon·desc를 나란히 보여주오. 독자는 이를 통해
+ * "배우자는 이런 방식으로 나를 돕고 싶어 하는구나"를 이해하고,
+ * 서로 다른 지지 방식을 오해 없이 받아들이는 법을 배우게 되오.
+ * 하단 bridgeDesc는 두 가지 지지 방식이 어떻게 서로를 보완하는지 연결해주오.
+ */
+function SupportStyleCard({ myName, partnerName, myStyle, partnerStyle, bridgeDesc }: {
+  myName: string; partnerName: string;
+  myStyle: { style: string; icon: string; desc: string };
+  partnerStyle: { style: string; icon: string; desc: string };
+  bridgeDesc?: string;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: "#fff", border: "1.5px solid #e8e0f0" }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM8_SUP}10`, borderBottom: `1px solid ${IM8_SUP}18` }}>
+        <span className="text-[15px]">🤝</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM8_SUP }}>서로를 지지하는 방식</p>
+      </div>
+      {/* 두 패널 */}
+      <div className="p-4 grid grid-cols-2 gap-3">
+        {/* 나 */}
+        <div className="rounded-2xl p-3" style={{ background: IM8_BOND_P, border: `1px solid ${IM8_BOND}20` }}>
+          <div className="text-center mb-2">
+            <span className="text-[22px]">{myStyle.icon}</span>
+            <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_BOND}99` }}>{myName}</p>
+            <p className="text-[12px] font-black" style={{ color: IM8_BOND }}>{myStyle.style}</p>
+          </div>
+          <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{myStyle.desc}</p>
+        </div>
+        {/* 배우자 */}
+        <div className="rounded-2xl p-3" style={{ background: IM8_SUP_P, border: `1px solid ${IM8_SUP}20` }}>
+          <div className="text-center mb-2">
+            <span className="text-[22px]">{partnerStyle.icon}</span>
+            <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_SUP}99` }}>{partnerName}</p>
+            <p className="text-[12px] font-black" style={{ color: IM8_SUP }}>{partnerStyle.style}</p>
+          </div>
+          <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{partnerStyle.desc}</p>
+        </div>
+      </div>
+      {/* 연결 메시지 */}
+      {bridgeDesc && (
+        <div className="mx-4 mb-4 px-4 py-3 rounded-2xl" style={{ background: `${IM8_SUP}08`, border: `1px solid ${IM8_SUP}18` }}>
+          <p className="text-[12px] leading-[1.8] text-center italic" style={{ color: IM8_SUP }}>🌸 {bridgeDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * CoupleTipsCard — 부부 관계 조언 카드
+ *
+ * 임신·출산 시기에 두 사람의 감정적 유대를 더욱 단단히 하기 위한
+ * 실질적 부부 관계 지침을 담아내오. 앞의 EmotionalBondCard와 SupportStyleCard가
+ * "두 사람이 어떻게 연결되어 있는가"를 분석했다면, 이 카드는 "어떻게 하면
+ * 그 연결을 더 잘 가꾸어 나갈 수 있는가"를 실천 지침으로 제시하오.
+ * 각 팁은 icon·title·desc 구조로 이루어지며, 보라 테마 아래 서로 돕고
+ * 이해하고 소통하는 방법을 따뜻하게 일러주오. 임신이라는 생의 특별한 시간을
+ * 함께 만들어가는 두 사람에게 홍연이 건네는 마음 깊은 당부이오.
+ */
+function CoupleTipsCard({ tips }: {
+  tips: Array<{ icon: string; title: string; desc: string }>;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: IM8_SUP_P, border: `1.5px solid ${IM8_SUP}25` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM8_SUP}18`, borderBottom: `1px solid ${IM8_SUP}20` }}>
+        <span className="text-[16px]">💜</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM8_SUP }}>부부로서 · 감정을 가꾸는 방법</p>
+      </div>
+      {/* 팁 목록 */}
+      <div className="px-4 py-4 space-y-3">
+        {tips.map((tip, i) => (
+          <div key={i} className="flex gap-3 p-3 rounded-2xl" style={{ background: "#fff", border: `1px solid ${IM8_SUP}18` }}>
+            <span className="text-[22px] leading-none shrink-0 mt-0.5">{tip.icon}</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-bold mb-1" style={{ color: IM8_SUP }}>{tip.title}</p>
+              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ChallengeItemCard — 어려움 아이템 카드
+ *
+ * 임신·출산 과정에서 이 부부의 사주 기운상 찾아올 수 있는 어려움 하나하나를
+ * 구체적으로 풀어내는 카드이오. 어려움을 미리 안다는 것은 두려움이 아니라
+ * 준비의 시작이오. 상단 헤더에는 icon(어려움의 상징 이모지)·title(어려움 제목)·
+ * phase(어려움이 주로 나타나는 임신 단계 — 예: "임신 초기", "출산 직전")를 배치하여
+ * "언제 어떤 어려움이 오는가"를 한눈에 파악하게 하오. caution 콜아웃은 다크브라운
+ * 좌테두리로 핵심 경고를 강조하고, desc는 이 어려움의 사주 원리적 근거와
+ * 실제 경험될 수 있는 구체적 양상을 충분히 서술하오.
+ */
+function ChallengeItemCard({ item }: {
+  item: { icon?: string; title: string; phase?: string; caution?: string; desc: string };
+}) {
+  return (
+    <div className="mb-3 rounded-2xl overflow-hidden" style={{ background: IM9_DARK_P, border: `1.5px solid ${IM9_DARK}25` }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${IM9_DARK}12`, borderBottom: `1px solid ${IM9_DARK}18` }}>
+        {item.icon && <span className="text-[18px]">{item.icon}</span>}
+        <p className="text-[13px] font-black flex-1" style={{ color: IM9_DARK }}>{item.title}</p>
+        {item.phase && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0" style={{ background: `${IM9_DARK}18`, color: IM9_DARK }}>{item.phase}</span>
+        )}
+      </div>
+      {/* 경고 콜아웃 */}
+      {item.caution && (
+        <div className="mx-4 mt-3 pl-3 py-2 rounded-lg" style={{ background: "#fff", borderLeft: `3px solid ${IM9_DARK}` }}>
+          <p className="text-[11px] font-bold leading-relaxed" style={{ color: IM9_DARK }}>⚠ {item.caution}</p>
+        </div>
+      )}
+      {/* 풀이 */}
+      <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+    </div>
+  );
+}
+
+/**
+ * ChallengeReasonCard — 어려움의 사주 원리 카드
+ *
+ * "왜 이런 어려움들이 오는가?"라는 질문에 사주 원리로 답하는 카드이오.
+ * ChallengeItemCard가 어려움의 현상을 하나씩 보여줬다면, 이 카드는 그 어려움들의
+ * 공통된 뿌리 — 두 사람의 사주 구조 어디서 이 어려움들이 비롯되는지 — 를
+ * 짚어주오. intro 인용구는 어려움에 대한 홍연의 철학적 시각을 담고,
+ * callout은 이 부부 사주 구조에서 어려움을 만드는 핵심 지점을 한 줄로 압축하오.
+ * paragraphs는 오행·충·대운 흐름 등 구체적 사주 원리를 들어 어려움의 배경을
+ * 충분히 설명하되, 독자가 "이 어려움은 우리 탓이 아니라 기운의 흐름"임을
+ * 이해하게끔 따뜻한 관점을 잃지 않도록 하오.
+ */
+function ChallengeReasonCard({ intro, callout, paragraphs }: {
+  intro: string; callout: string; paragraphs: string[];
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: IM9_DARK_P, border: `1.5px solid ${IM9_DARK}20` }}>
+      {/* 헤더 배너 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM9_DARK}12`, borderBottom: `1px solid ${IM9_DARK}18` }}>
+        <span className="text-[15px]">🔍</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM9_DARK }}>어려움의 사주 원리 · 뿌리를 알면 두렵지 않소</p>
+      </div>
+      {/* 인트로 인용구 */}
+      <div className="px-5 py-4" style={{ borderBottom: `1px solid ${IM9_DARK}12` }}>
+        <p className="text-[14px] leading-[1.8] italic" style={{ color: IM9_DARK, fontFamily: SERIF }}>
+          &ldquo;{intro}&rdquo;
+        </p>
+      </div>
+      {/* 콜아웃 */}
+      <div className="mx-5 my-4 pl-4 py-3 rounded-xl" style={{ background: "#fff", borderLeft: `3px solid ${IM9_DARK}` }}>
+        <p className="text-[12px] font-bold leading-relaxed" style={{ color: IM9_DARK }}>{callout}</p>
+      </div>
+      {/* 단락들 */}
+      <div className="px-5 pb-5 space-y-3">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * OvercomeTipsCard — 극복 조언 카드
+ *
+ * 어려움을 알았으니 이제 어떻게 넘어설 것인가 — 홍연이 전하는 극복의 지혜이오.
+ * 이 카드는 앞 두 카드의 어두운 색조와 대비하여 골드(금) 테마를 사용하오.
+ * 사주에서 금(金)은 단련을 통해 빛을 발하는 기운이고, 어려움을 넘어선 뒤의
+ * 강인함을 상징하오. 상단 헤더 배너에 "어둠을 넘어 빛으로"라는 방향성을 제시하고,
+ * 각 tips 항목은 icon·title·desc 구조로 어려움을 구체적으로 다스리는 방법을
+ * 안내하오. 마지막 팁은 두 사람이 함께 이 시간을 어떤 마음으로 통과할지
+ * 홍연의 따뜻한 위로로 마무리하오.
+ */
+function OvercomeTipsCard({ tips }: {
+  tips: Array<{ icon: string; title: string; desc: string }>;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: IM9_GOLD_P, border: `1.5px solid ${IM9_GOLD}30` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM9_GOLD}18`, borderBottom: `1px solid ${IM9_GOLD}22` }}>
+        <span className="text-[16px]">✨</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM9_GOLD }}>어둠을 넘어 빛으로 · 극복의 지혜</p>
+      </div>
+      {/* 팁 목록 */}
+      <div className="px-4 py-4 space-y-3">
+        {tips.map((tip, i) => (
+          <div key={i} className="flex gap-3 p-3 rounded-2xl"
+            style={{ background: "#fff", border: `1px solid ${IM9_GOLD}22`,
+              ...(i === tips.length - 1 ? { background: `${IM9_GOLD}10` } : {}) }}>
+            <span className="text-[22px] leading-none shrink-0 mt-0.5">{tip.icon}</span>
+            <div className="flex-1">
+              <p className="text-[13px] font-bold mb-1" style={{ color: IM9_GOLD }}>{tip.title}</p>
+              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * GoodTimeFlowCard — 빛나는 시기 타임라인 카드
+ *
+ * 두 사람에게 가장 임신·출산 기운이 집중되는 "황금 창(Golden Window)"을
+ * 시간 순서로 펼쳐 보이는 카드이오. ch5의 TimingFlowCard가 일반적 시기 흐름을
+ * 보여줬다면, 이 카드는 특히 "가장 강한 임신 기운이 모이는 최고의 시기"에
+ * 초점을 맞추오. highlight 항목은 황금 링 후광(box-shadow)과 "🌟 황금 창"
+ * 배지로 페이지에서 가장 빛나는 카드가 되게 하오. 각 시기마다 icon으로
+ * 계절·오행 기운을 시각화하고, desc는 왜 이 시기에 임신 기운이 절정에
+ * 이르는지 대운·세운·월운의 교차 관점에서 충분히 서술하오.
+ */
+function GoodTimeFlowCard({ items }: {
+  items: Array<{ icon?: string; label: string; desc: string; highlight?: boolean }>;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: IM10_STAR_P, border: `1.5px solid ${IM10_STAR}30` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM10_STAR}18`, borderBottom: `1px solid ${IM10_STAR}22` }}>
+        <span className="text-[16px]">⭐</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM10_STAR }}>임신 기운이 절정에 이르는 시기</p>
+      </div>
+      {/* 타임라인 */}
+      <div className="px-5 py-4">
+        {items.map((item, i) => {
+          const isLast = i === items.length - 1;
+          const markerColor = item.highlight ? IM10_STAR : IM10_TEAL;
+          const bg  = item.highlight ? "#fff" : "#fff";
+          const border = item.highlight ? `${IM10_STAR}55` : `${IM10_TEAL}20`;
+          const shadow = item.highlight ? `0 0 0 3px ${IM10_STAR}30, 0 2px 8px ${IM10_STAR}25` : "none";
+          return (
+            <div key={i} className="flex gap-3">
+              {/* 마커 + 수직선 */}
+              <div className="flex flex-col items-center" style={{ minWidth: 28 }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black shrink-0"
+                  style={{ background: markerColor, color: "#fff", boxShadow: shadow }}>
+                  {item.highlight ? "★" : i + 1}
+                </div>
+                {!isLast && <div className="flex-1 w-[2px] my-1" style={{ background: `${IM10_TEAL}25`, minHeight: 12 }} />}
+              </div>
+              {/* 내용 */}
+              <div className="flex-1 mb-3 p-3 rounded-2xl" style={{ background: bg, border: `1px solid ${border}`, boxShadow: item.highlight ? `0 1px 6px ${IM10_STAR}18` : "none" }}>
+                <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                  {item.icon && <span className="text-[14px]">{item.icon}</span>}
+                  <p className="text-[13px] font-bold" style={{ color: markerColor }}>{item.label}</p>
+                  {item.highlight && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${IM10_STAR}20`, color: IM10_STAR }}>🌟 황금 창</span>
+                  )}
+                </div>
+                <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * GoodTimeReasonCard — 좋은 시기의 사주 근거 카드
+ *
+ * "왜 이 시기가 가장 좋은가?"를 사주 원리로 하나씩 논증하는 카드이오.
+ * 단순히 "이 달이 좋소"라고 선언하는 것이 아니라, 두 사람의 사주 원국에서
+ * 어떤 글자·오행·대운이 맞물려 이 시기에 임신 기운이 절정에 이르는지를
+ * 각각의 근거 카드로 명확히 제시하오. 틸블루(IM10_TEAL) 헤더 배너가
+ * "사주 원리의 논리적 영역"임을 색으로 알리고, 각 items는 icon·title·desc로
+ * 구성된 미니 카드로 나열되어 독자가 "이래서 지금이 좋은 시기구나"를
+ * 오행 원리와 함께 이해하게 하오. desc는 실제 두 사람의 사주 글자를
+ * 언급하며 3~4문장으로 충분히 설명하오.
+ */
+function GoodTimeReasonCard({ items }: {
+  items: Array<{ icon?: string; title: string; desc: string }>;
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: IM10_TEAL_P, border: `1.5px solid ${IM10_TEAL}25` }}>
+      {/* 헤더 */}
+      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM10_TEAL}15`, borderBottom: `1px solid ${IM10_TEAL}20` }}>
+        <span className="text-[15px]">🔭</span>
+        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM10_TEAL }}>이 시기가 빛나는 사주 근거</p>
+      </div>
+      {/* 근거 카드 목록 */}
+      <div className="px-4 py-4 space-y-3">
+        {items.map((item, i) => (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1px solid ${IM10_TEAL}20` }}>
+            <div className="px-4 py-2.5 flex items-center gap-2" style={{ borderBottom: `1px solid ${IM10_TEAL}12` }}>
+              {item.icon && <span className="text-[16px]">{item.icon}</span>}
+              <p className="text-[13px] font-bold" style={{ color: IM10_TEAL }}>{item.title}</p>
+            </div>
+            <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PeakTimingCard — 황금 창을 맞이하는 종합 조언 카드
+ *
+ * 이 장의 결론 카드이오. 최고의 시기와 그 근거를 모두 살핀 뒤,
+ * "이 황금의 시간을 어떻게 맞이해야 하는가"를 홍연이 종합하여 전하오.
+ * 이 카드는 ch5의 TimingAdviceCard와 달리 황금 그라데이션에서 더 밝고
+ * 빛나는 분위기를 연출하오. headline은 이 시기의 특별함을 선언하는 제목,
+ * callout은 두 사람이 이 시기에 반드시 기억해야 할 핵심 한 줄,
+ * paragraphs는 몸·마음·관계 세 측면에서 이 최고의 시기를 어떻게
+ * 준비하고 활용할지 충분히 안내하오. 독자가 이 카드를 읽고
+ * "우리에게 빛나는 시간이 오고 있구나"를 가슴 깊이 느끼게 하는 것이
+ * 이 카드의 목적이오.
+ */
+function PeakTimingCard({ headline, callout, paragraphs }: {
+  headline: string; callout: string; paragraphs: string[];
+}) {
+  return (
+    <div className="mx-4 mb-4 rounded-3xl overflow-hidden"
+      style={{ background: `linear-gradient(150deg, ${IM10_STAR_P} 0%, #fff 60%)`, border: `1.5px solid ${IM10_STAR}35` }}>
+      {/* 헤더 */}
+      <div className="px-5 pt-5 pb-3" style={{ borderBottom: `1px solid ${IM10_STAR}20` }}>
+        <p className="text-[10px] tracking-[0.2em] mb-1" style={{ color: `${IM10_STAR}88`, fontFamily: SERIF }}>홍연의 종합 당부</p>
+        <p className="text-[17px] font-black leading-snug" style={{ color: IM10_STAR, fontFamily: SERIF }}>{headline}</p>
+      </div>
+      {/* 콜아웃 */}
+      <div className="mx-5 my-4 pl-4 py-3 rounded-xl" style={{ background: `${IM10_STAR}10`, borderLeft: `3px solid ${IM10_STAR}` }}>
+        <p className="text-[12px] font-bold leading-relaxed" style={{ color: IM10_STAR }}>⭐ {callout}</p>
+      </div>
+      {/* 단락 */}
+      <div className="px-5 pb-5 space-y-3">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[13px] leading-[1.9]"
+            style={{
+              color: INK_SOFT,
+              ...(i === paragraphs.length - 1 ? { padding: "10px 12px", borderRadius: 12, background: `${IM10_STAR}0a` } : {}),
+            }}>
+            {p}
+          </p>
+        ))}
+      </div>
     </div>
   );
 }
@@ -4109,7 +5382,7 @@ function ReportPreviewInner() {
 
   // 마무리 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
   useEffect(() => {
-    if (ch !== "12") { setEventOpen(false); return; }
+    if (ch !== "11") { setEventOpen(false); return; }
     if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
     setEventOpen(true);
   }, [ch]);
@@ -4555,516 +5828,778 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
-      {ch === "1" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_1/kunghap_imshin_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
-
-          <section className="pb-2">
-            <div className="px-6"><Heading>나의 명식</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          </section>
-
-          <section className="px-6 pt-6 pb-6">
-            <Heading>나의 오행 분포</Heading>
-            <P>목·화·토·금·수 다섯 기운이<br />내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-            <div className="flex justify-center mt-4">
-              <OhaengRadar view={report?.view ?? null} color={MAROON} />
+      {ch === "1" && (() => {
+        const myWonguk      = (jc.myWonguk      as Record<string, unknown> | undefined) ?? null;
+        const myNature      = (jc.myNature      as Record<string, unknown> | undefined) ?? null;
+        const myParentStyle = (jc.myParentStyle as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
             </div>
-          </section>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_1/kunghap_imshin_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          {jc.myWonguk && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>원국 풀이</Heading>
-              <ReportSec data={jc.myWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+            <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
+
+            {/* ── 명식 표 ── */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>나의 명식</Heading></div>
+              <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
             </section>
-          )}
-          {(jc.myNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>기질 키워드</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.myNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{kw}</span>
-                ))}
+
+            {/* ── 오행 분포 (리치 도넛 + 바차트) ── */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>나의 오행 분포</Heading>
+              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>목·화·토·금·수 다섯 기운이 내 사주 안에서 어떻게 분포되어 있는지 보겠소. 임신과 출산을 앞둔 시기에 내 안에 흐르는 기운의 중심이 어디에 있는지를 먼저 파악하는 것이 중요하오.</p>
+            </section>
+            <OhaengDonutRich view={report?.view ?? null} accentColor={IM1_COLOR} />
+
+            {/* ── 사주 원국 풀이 ── */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>나의 사주 풀이</Heading>
+            </section>
+            {myWonguk?.callout && (
+              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${IM1_COLOR}0c`, borderLeft: `3px solid ${IM1_COLOR}` }}>
+                <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: IM1_COLOR }}>{myWonguk.callout as string}</p>
               </div>
-              {(jc.myNature as {desc?: string}).desc && <P>{(jc.myNature as {desc: string}).desc}</P>}
+            )}
+            {myWonguk?.intro && (
+              <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>&#8220;{myWonguk.intro as string}&#8221;</p>
+            )}
+            {((myWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
+              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            ))}
+
+            {/* ── 기질 카드 ── */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>나의 기질</Heading>
+              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>사주 원국에 깃든 본연의 성품과 기질이오. 강점과 함께 임신·출산 과정에서 주의해야 할 그림자도 솔직하게 살펴보시오.</p>
             </section>
-          )}
-          {jc.myParentStyle && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>부모 성향</Heading>
-              <ReportSec data={jc.myParentStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+            <INatureCard data={myNature} color={IM1_COLOR} label="나를 대표하는 기질" />
+
+            {/* ── 부모 성향 카드 ── */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>나의 부모 성향</Heading>
+              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>내 사주가 품은 부모로서의 타고난 성향이오. 임신을 준비하고 아이를 맞이하는 과정에서 어떤 방식으로 부모됨을 경험할지 사주가 보여주고 있소.</p>
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
-          <Quote>{`"나의 기운을 살펴보았으니,\n이제 배우자의 사주를\n펼쳐보겠소."`}</Quote>
-          <ChapterNav cur="1" go={next} />
-        </>
-      )}
+            <ParentStyleCard data={myParentStyle} color={IM1_COLOR} pale={IM1_PALE} />
+
+            <Illust src="/media/report/kunghap_imshin/kunghap_imshin_1/kunghap_imshin_1_cover.jpg" h={240} />
+            <Quote>{`"나의 기운을 살펴보았으니,\n이제 배우자의 사주를\n펼쳐보겠소."`}</Quote>
+            <ChapterNav cur="1" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
-      {ch === "2" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_2/kunghap_imshin_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
+      {ch === "2" && (() => {
+        const partnerName        = report?.partnerName || "배우자";
+        const partnerWonguk      = (jc.partnerWonguk      as Record<string, unknown> | undefined) ?? null;
+        const partnerNature      = (jc.partnerNature      as Record<string, unknown> | undefined) ?? null;
+        const partnerParentStyle = (jc.partnerParentStyle as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 배우자 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>배우자의 사주 원국</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_2/kunghap_imshin_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
+            <Quote>{`"이번엔 배우자의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
 
-          {report?.partnerView ? (
-            <>
-              <section className="pb-2">
-                <div className="px-6"><Heading>{report.partnerName || "상대방"}의 명식</Heading></div>
-                <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
-              </section>
-
-              <section className="px-6 pt-6 pb-6">
-                <Heading>상대방의 오행 분포</Heading>
-                <P>목·화·토·금·수 다섯 기운이<br />상대방 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-                <div className="flex justify-center mt-4">
-                  <OhaengRadar view={report.partnerView} color={NAVY} />
-                </div>
-              </section>
-            </>
-          ) : (
-            <section className="px-6 pt-6 pb-6">
-              <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
+            {/* ── 배우자 명식 표 ── */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>{partnerName}의 명식</Heading></div>
+              {report?.partnerView ? (
+                <MyeongsikTable view={report.partnerView} name={partnerName} birth={report.partnerBirth ?? null} />
+              ) : (
+                <p className="mx-6 text-[14px] leading-relaxed" style={{ color: MUTE }}>배우자 명식 정보가 아직 준비 중이오.</p>
+              )}
             </section>
-          )}
 
-          {jc.partnerWonguk && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>원국 풀이</Heading>
-              <ReportSec data={jc.partnerWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+            {/* ── 배우자 오행 분포 (리치 도넛 + 바차트) ── */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>{partnerName}의 오행 분포</Heading>
+              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>목·화·토·금·수 다섯 기운이 {partnerName}의 사주 안에서 어떻게 분포되어 있는지 보겠소. 배우자의 기운 중심을 파악하면 두 사람의 기운이 어떻게 어우러지는지 이해하는 데 도움이 되오.</p>
             </section>
-          )}
-          {(jc.partnerNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>기질 키워드</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.partnerNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
-                ))}
+            <OhaengDonutRich view={report?.partnerView ?? null} accentColor={IM2_COLOR} />
+
+            {/* ── 배우자 사주 원국 풀이 ── */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>{partnerName}의 사주 풀이</Heading>
+            </section>
+            {partnerWonguk?.callout && (
+              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${IM2_COLOR}0c`, borderLeft: `3px solid ${IM2_COLOR}` }}>
+                <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: IM2_COLOR }}>{partnerWonguk.callout as string}</p>
               </div>
-              {(jc.partnerNature as {desc?: string}).desc && <P>{(jc.partnerNature as {desc: string}).desc}</P>}
-            </section>
-          )}
-          {jc.partnerParentStyle && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>부모 성향</Heading>
-              <ReportSec data={jc.partnerParentStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-            </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
-          <Quote>{`"두 사람의 원국을 보았으니,\n임신 궁합 점수를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제3장 · 임신 궁합 점수 ═══════════ */}
-      {ch === "3" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 임신 궁합</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신·출산 궁합 점수</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람의 사주에\n임신·출산의 기운이 담겨 있소.\n홍연이 솔직하게 풀어드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>임신 궁합 점수</Heading>
-            {(jc.pregnancyScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.pregnancyScore as {score: number}).score} label={(jc.pregnancyScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={72} label="자녀 인연이 깊은 부부이오" />
             )}
-            {(jc.pregnancyScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>임신 궁합의 근거</Heading>
-            <ReportSec data={jc.pregnancyReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-          <Quote>{`"임신 궁합을 알았으니,\n태어날 자녀의 기운을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="3" go={next} />
-        </>
-      )}
+            {partnerWonguk?.intro && (
+              <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>&#8220;{partnerWonguk.intro as string}&#8221;</p>
+            )}
+            {((partnerWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
+              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            ))}
+
+            {/* ── 배우자 기질 카드 ── */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>{partnerName}의 기질</Heading>
+              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{partnerName}의 사주 원국에 깃든 본연의 성품과 기질이오. 강점과 함께 임신·출산 과정에서 주의해야 할 그림자도 살펴보시오.</p>
+            </section>
+            <INatureCard data={partnerNature} color={IM2_COLOR} label={`${partnerName}을 대표하는 기질`} />
+
+            {/* ── 배우자 부모 성향 카드 ── */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>{partnerName}의 부모 성향</Heading>
+              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{partnerName}의 사주가 품은 부모로서의 타고난 성향이오. 배우자가 임신을 준비하고 아이를 맞이하는 과정에서 어떤 방식으로 부모됨을 경험할지 사주가 보여주고 있소.</p>
+            </section>
+            <ParentStyleCard data={partnerParentStyle} color={IM2_COLOR} pale={IM2_PALE} />
+
+            <Illust src="/media/report/kunghap_imshin/kunghap_imshin_2/kunghap_imshin_2_cover.jpg" h={240} />
+            <Quote>{`"두 사람의 원국을 보았으니,\n임신 궁합 점수를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="2" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제3장 · 두 사람의 자녀운 ═══════════ */}
+      {ch === "3" && (() => {
+        const ps   = (jc.pregnancyScore  as Record<string, unknown> | undefined) ?? null;
+        const pr   = (jc.pregnancyReason as Record<string, unknown> | undefined) ?? null;
+
+        const score      = typeof ps?.score === "number" ? ps.score : 72;
+        const tier       = typeof ps?.tier  === "string" ? ps.tier  : "B";
+        const label      = typeof ps?.label === "string" ? ps.label : "자녀 인연이 있는 부부이오";
+        const scoreParas = Array.isArray(ps?.paragraphs) ? (ps.paragraphs as string[]) : [];
+
+        const intro    = typeof pr?.intro   === "string" ? pr.intro   : "";
+        const callout  = typeof pr?.callout === "string" ? pr.callout : "";
+        const reasons  = Array.isArray(pr?.reasons) ? (pr.reasons as Array<{ icon: string; title: string; desc: string }>) : [];
+        const reasonPs = Array.isArray(pr?.paragraphs) ? (pr.paragraphs as string[]) : [];
+
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 자녀운</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 자녀운</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"두 사람의 사주에\n임신·출산의 기운이 담겨 있소.\n홍연이 솔직하게 풀어드리겠소."`}</Quote>
+
+            {/* ── 임신·출산 궁합 점수 카드 ── */}
+            <section className="pt-2 pb-2">
+              <Heading>임신·출산 궁합 점수</Heading>
+              <p className="px-6 text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
+                두 사람의 사주가 임신·출산의 기운을 얼마나 풍성하게 품고 있는지를 점수로 나타낸 것이오. 단순한 숫자가 아니라 식상의 기운, 자녀성의 배치, 오행의 조화 등 여러 사주 요소를 종합하여 산출한 수치이오.
+              </p>
+              <PregnancyScoreCard score={score} tier={tier} label={label} paragraphs={scoreParas} />
+            </section>
+
+            {/* ── 임신 궁합 사주 근거 ── */}
+            <section className="pt-4 pb-2">
+              <Heading>이 점수의 사주 근거</Heading>
+              <p className="px-6 text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
+                이 점수가 나오게 된 사주 원리상의 이유를 구체적으로 살펴보겠소. 두 사람의 원국에서 읽히는 임신·출산 기운의 구조를 홍연이 풀어드리겠소.
+              </p>
+              <PregnancyReasonCard intro={intro} callout={callout} reasons={reasons} paragraphs={reasonPs} />
+            </section>
+
+            <Illust src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" h={300} />
+            <Quote>{`"자녀운을 살펴보았으니,\n태어날 아이의 기운을\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제4장 · 태어날 자녀 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 자녀 기운</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>태어날 자녀의 기운</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람 사이에 태어날 자녀는\n어떤 기운을 타고 날지\n미리 살펴보겠소."`}</Quote>
-          {(jc.childEnergy as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>자녀 기운 키워드</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.childEnergy as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
-                ))}
-              </div>
-              {(jc.childEnergy as {desc?: string}).desc && <P>{(jc.childEnergy as {desc: string}).desc}</P>}
-            </section>
-          )}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>자녀 특성 상세</Heading>
-            <ReportSec data={jc.childDesc as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>양육 조언</Heading>
-            {(jc.parenthoodTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"자녀 기운을 알았으니,\n임신에 좋은 시기를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
+      {ch === "4" && (() => {
+        const ce  = (jc.childEnergy    as Record<string, unknown> | undefined) ?? null;
+        const cd  = (jc.childDesc      as Record<string, unknown> | undefined) ?? null;
+        const pt  = (jc.parenthoodTips as Record<string, unknown> | undefined) ?? null;
+
+        const energyType = typeof ce?.energyType === "string" ? ce.energyType : "생명의 기운";
+        const energyIcon = typeof ce?.energyIcon === "string" ? ce.energyIcon : "🌟";
+        const keywords   = Array.isArray(ce?.keywords) ? (ce.keywords as string[]) : ["활기", "창조", "온화"];
+        const energyDesc = typeof ce?.desc === "string" ? ce.desc : "태어날 아이의 기운을 살피는 중이오.";
+
+        const cdIntro    = typeof cd?.intro    === "string" ? cd.intro    : "";
+        const cdCallout  = typeof cd?.callout  === "string" ? cd.callout  : "";
+        const cdParas    = Array.isArray(cd?.paragraphs) ? (cd.paragraphs as string[]) : [];
+
+        const tips = Array.isArray(pt?.tips)
+          ? (pt.tips as Array<{ icon: string; title: string; desc: string }>)
+          : [];
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 자녀 기운</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>태어날 자녀의 기운</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"두 사람 사이에 태어날 자녀는\n어떤 기운을 타고 날지\n미리 살펴보겠소."`}</Quote>
+
+            {/* 자녀 기운 유형 카드 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 기운 · 타고난 빛</p>
+            </div>
+            <ChildEnergyCard
+              energyType={energyType}
+              energyIcon={energyIcon}
+              keywords={keywords}
+              desc={energyDesc}
+              color={IM4_COLOR}
+              pale={IM4_PALE}
+            />
+
+            {/* 자녀 특성 상세 카드 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 풀이 · 성품과 재능</p>
+            </div>
+            {(cdIntro || cdCallout || cdParas.length > 0) && (
+              <ChildDescCard
+                intro={cdIntro || "이 아이는 특별한 기운을 품고 태어날 것이오."}
+                callout={cdCallout || ""}
+                paragraphs={cdParas}
+                color={IM4_COLOR}
+                pale={IM4_PALE}
+              />
+            )}
+
+            {/* 양육 조언 카드 */}
+            {tips.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_GREEN }}>✦ 양육의 길 · 부모가 걸어야 할 방향</p>
+                </div>
+                <ParenthoodTipsCard tips={tips} greenColor={IM4_GREEN} greenPale={IM4_GREEN_P} />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
+            <Quote>{`"자녀 기운을 알았으니,\n임신에 좋은 시기를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제5장 · 임신 좋은 시기 ═══════════ */}
-      {ch === "5" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 임신 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신에 좋은 시기</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"임신·출산에 좋은 시기가 있소.\n그 시기를 미리 알고 준비하시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>임신 시기 흐름</Heading>
-            {(jc.timingFlow as {items?: Array<{label: string; desc: string; highlight?: boolean}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: item.highlight ? `${GOLD}18` : `${NAVY}08`, border: `1px solid ${item.highlight ? GOLD : NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: item.highlight ? GOLD : NAVY }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 달</Heading>
-            {(jc.bestMonths as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.timingAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.timingAdvice as {desc: string}).desc}</p>
-              </div>
+      {ch === "5" && (() => {
+        const tf  = (jc.timingFlow   as Record<string, unknown> | undefined) ?? null;
+        const bm  = (jc.bestMonths   as Record<string, unknown> | undefined) ?? null;
+        const ta  = (jc.timingAdvice as Record<string, unknown> | undefined) ?? null;
+
+        const timingItems = Array.isArray(tf?.items)
+          ? (tf.items as Array<{ icon?: string; label: string; desc: string; highlight?: boolean }>)
+          : [];
+        const bestItems = Array.isArray(bm?.items)
+          ? (bm.items as Array<{ season?: string; title: string; desc: string }>)
+          : [];
+
+        const taHeadline  = typeof ta?.headline  === "string" ? ta.headline  : "시기를 알았으니, 마음을 준비하시오";
+        const taCallout   = typeof ta?.callout   === "string" ? ta.callout   : "";
+        const taParas     = Array.isArray(ta?.paragraphs) ? (ta.paragraphs as string[]) : (typeof ta?.desc === "string" ? [ta.desc] : []);
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 임신 시기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신에 좋은 시기</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"임신·출산에 좋은 시기가 있소.\n그 시기를 미리 알고 준비하시오."`}</Quote>
+
+            {/* 임신 시기 흐름 타임라인 */}
+            {timingItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 시기 흐름 · 운기의 파도를 읽다</p>
+                </div>
+                <TimingFlowCard
+                  items={timingItems}
+                  color={IM5_COLOR}
+                  pale={IM5_PALE}
+                  goldColor={IM5_GOLD}
+                  goldPale={IM5_GOLD_P}
+                />
+              </>
             )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-          <Quote>{`"시기를 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
-          <ChapterNav cur="5" go={next} />
-        </>
-      )}
+
+            {/* 좋은 달 카드 */}
+            {bestItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 좋은 달 · 임신 기운이 모이는 시간</p>
+                </div>
+                <BestMonthsCard items={bestItems} color={IM5_COLOR} pale={IM5_PALE} />
+              </>
+            )}
+
+            {/* 홍연의 시기 조언 카드 */}
+            {(taHeadline || taCallout || taParas.length > 0) && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_GOLD }}>✦ 홍연의 조언 · 시기를 맞이하는 마음</p>
+                </div>
+                <TimingAdviceCard
+                  headline={taHeadline}
+                  callout={taCallout || "사주의 흐름을 알았으니, 그 흐름에 몸과 마음을 맡기시오."}
+                  paragraphs={taParas}
+                  goldColor={IM5_GOLD}
+                  goldPale={IM5_GOLD_P}
+                />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
+            <Quote>{`"시기를 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
+            <ChapterNav cur="5" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제6장 · 합과 충 ═══════════ */}
-      {ch === "6" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주의 합과 충</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 명식을 합쳐서 보면</Heading>
-            <GanjiRelation view={report?.view ?? null} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>합(合) 목록</Heading>
-            {(jc.hapList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-[13px] font-bold" style={{ color: GREEN }}>{item.type}</p>
-                  <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${GREEN}22`, color: GREEN }}>{item.strength}</span>
-                </div>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+      {ch === "6" && (() => {
+        const hl  = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
+        const cl  = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
+        const os  = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
+
+        type HapItem   = { icon?: string; type: string; strength?: string; hapEffect?: string; desc: string };
+        type ChungItem = { icon?: string; type: string; strength?: string; chungEffect?: string; resolve?: string; desc: string };
+
+        const hapItems   = Array.isArray(hl?.items)   ? (hl.items   as HapItem[])   : [];
+        const chungItems = Array.isArray(cl?.items)   ? (cl.items   as ChungItem[]) : [];
+
+        const score     = typeof os?.score === "number" ? os.score : 70;
+        const tier      = typeof os?.tier  === "string" ? os.tier  : "B";
+        const label     = typeof os?.label === "string" ? os.label : "합·충이 균형을 이루오";
+        const osParas   = Array.isArray(os?.paragraphs) ? (os.paragraphs as string[]) : (typeof os?.desc === "string" ? [os.desc] : []);
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주의 합과 충</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
+
+            {/* 두 명식 합쳐보기 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM6_HAP }}>✦ 두 명식 · 글자와 글자의 만남</p>
+            </div>
+            <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: "#fff", border: "1.5px solid #e5e0d8" }}>
+              <div className="px-5 py-4">
+                <GanjiRelation view={report?.view ?? null} />
               </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>충(沖) 목록</Heading>
-            {(jc.chungList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.length ? (
-              (jc.chungList as {items: Array<{type: string; desc: string; strength: string}>}).items.map((item, i) => (
-                <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[13px] font-bold" style={{ color: WARN }}>{item.type}</p>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${WARN}22`, color: WARN }}>{item.strength}</span>
-                  </div>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+            </div>
+
+            {/* 합(合) 목록 */}
+            {hapItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM6_HAP }}>✦ 합(合) · 서로 끌어당기는 기운</p>
                 </div>
-              ))
-            ) : (
-              <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 강한 충이 없소.</p>
+                <div className="px-4">
+                  {hapItems.map((item, i) => <IHapCard key={i} item={item} />)}
+                </div>
+              </>
             )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>종합 궁합 점수</Heading>
-            {(jc.overallScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.overallScore as {score: number}).score} label={(jc.overallScore as {label?: string}).label || ""} />
+
+            {/* 충(沖) 목록 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM6_CHUNG }}>✦ 충(沖) · 서로 밀어내는 기운</p>
+            </div>
+            {chungItems.length > 0 ? (
+              <div className="px-4">
+                {chungItems.map((item, i) => <IChungCard key={i} item={item} />)}
+              </div>
             ) : (
-              <AttractionGauge score={70} label="자녀 인연이 있는 부부이오" />
+              <div className="mx-4 mb-4 p-4 rounded-2xl" style={{ background: `${IM6_HAP}10`, border: `1px solid ${IM6_HAP}25` }}>
+                <p className="text-[13px]" style={{ color: IM6_HAP }}>🌿 두 사주 사이에 강한 충이 없소. 조화로운 만남이오.</p>
+              </div>
             )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-          <Quote>{`"합·충을 알았으니,\n건강 관리를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="6" go={next} />
-        </>
-      )}
+
+            {/* 합·충 종합 평가 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: "#555" }}>✦ 종합 평가 · 합과 충의 균형</p>
+            </div>
+            <HapChungSummaryCard
+              score={score}
+              tier={tier}
+              label={label}
+              hapCount={hapItems.length}
+              chungCount={chungItems.length}
+              paragraphs={osParas}
+            />
+
+            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
+            <Quote>{`"합·충을 알았으니,\n건강 관리를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="6" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제7장 · 건강 관리 ═══════════ */}
-      {ch === "7" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 건강 관리</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신·출산 시기의 건강</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_7/kunghap_imshin_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"임신·출산 시기에\n두 사람이 특히 주의해야 할\n건강 사항이 있소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>본인 건강 주의점</Heading>
-            {(jc.healthMine as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>배우자 건강 주의점</Heading>
-            {(jc.healthPartner as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: NAVY }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>건강 관리 조언</Heading>
-            {(jc.healthTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GREEN, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-          <Quote>{`"건강을 알았으니,\n감정적 유대를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="7" go={next} />
-        </>
-      )}
+      {ch === "7" && (() => {
+        const hm  = (jc.healthMine    as Record<string, unknown> | undefined) ?? null;
+        const hp  = (jc.healthPartner as Record<string, unknown> | undefined) ?? null;
+        const ht  = (jc.healthTips    as Record<string, unknown> | undefined) ?? null;
+
+        type HealthItem = { icon?: string; title: string; bodyPart?: string; caution?: string; desc: string };
+        type HealthTip  = { icon: string; title: string; desc: string };
+
+        const myItems      = Array.isArray(hm?.items) ? (hm.items as HealthItem[]) : [];
+        const partnerItems = Array.isArray(hp?.items) ? (hp.items as HealthItem[]) : [];
+        const tips         = Array.isArray(ht?.tips)  ? (ht.tips  as HealthTip[])  : [];
+
+        const myConstitution      = typeof hm?.constitution === "string" ? hm.constitution : undefined;
+        const partnerConstitution = typeof hp?.constitution === "string" ? hp.constitution : undefined;
+        const myName      = name || "나";
+        const partnerName = report?.partnerName || "배우자";
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 건강 관리</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신·출산 시기의 건강</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_7/kunghap_imshin_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"임신·출산 시기에\n두 사람이 특히 주의해야 할\n건강 사항이 있소."`}</Quote>
+
+            {/* 본인 건강 주의 카드 */}
+            {myItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM7_MY }}>✦ 본인 건강 · 사주가 가리키는 주의 신호</p>
+                </div>
+                <HealthPersonCard
+                  name={myName}
+                  role="임신 준비 당사자"
+                  constitution={myConstitution}
+                  items={myItems}
+                  color={IM7_MY}
+                  pale={IM7_MY_P}
+                />
+              </>
+            )}
+
+            {/* 배우자 건강 주의 카드 */}
+            {partnerItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM7_PT }}>✦ 배우자 건강 · 함께 지켜봐야 할 것</p>
+                </div>
+                <HealthPersonCard
+                  name={partnerName}
+                  role="배우자"
+                  constitution={partnerConstitution}
+                  items={partnerItems}
+                  color={IM7_PT}
+                  pale={IM7_PT_P}
+                />
+              </>
+            )}
+
+            {/* 건강 관리 조언 카드 */}
+            {tips.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM7_TIP }}>✦ 함께하는 건강 · 두 사람의 실천 지혜</p>
+                </div>
+                <HealthTipsCard tips={tips} color={IM7_TIP} pale={IM7_TIP_P} />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
+            <Quote>{`"건강을 알았으니,\n감정적 유대를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="7" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제8장 · 감정적 유대 ═══════════ */}
-      {ch === "8" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 감정 유대</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>감정적 유대와 지지</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_8/kunghap_imshin_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"임신 과정에서\n두 사람의 감정적 유대가\n얼마나 중요한지 살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>감정 유대 분석</Heading>
-            <ReportSec data={jc.emotionalBond as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.supportStyle as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: NAVY }}>지지 방식</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.supportStyle as {desc: string}).desc}</p>
-              </div>
+      {ch === "8" && (() => {
+        const eb  = (jc.emotionalBond as Record<string, unknown> | undefined) ?? null;
+        const ss  = (jc.supportStyle  as Record<string, unknown> | undefined) ?? null;
+        const ct  = (jc.coupleTips    as Record<string, unknown> | undefined) ?? null;
+
+        type SupportItem = { style: string; icon: string; desc: string };
+        type CoupleTip   = { icon: string; title: string; desc: string };
+
+        const bondType   = typeof eb?.bondType  === "string" ? eb.bondType  : "깊은 감응형";
+        const bondIcon   = typeof eb?.bondIcon  === "string" ? eb.bondIcon  : "💞";
+        const bondIntro  = typeof eb?.intro     === "string" ? eb.intro     : "";
+        const bondCallout= typeof eb?.callout   === "string" ? eb.callout   : "";
+        const bondParas  = Array.isArray(eb?.paragraphs) ? (eb.paragraphs as string[]) : [];
+
+        const ssRaw     = (ss as { mySupport?: unknown; partnerSupport?: unknown; bridgeDesc?: unknown }) ?? {};
+        const mySupport  = (ssRaw.mySupport      as SupportItem | undefined) ?? null;
+        const ptSupport  = (ssRaw.partnerSupport as SupportItem | undefined) ?? null;
+        const bridgeDesc = typeof ssRaw.bridgeDesc === "string" ? ssRaw.bridgeDesc : undefined;
+
+        const coupleTips = Array.isArray(ct?.tips) ? (ct.tips as CoupleTip[]) : [];
+
+        const myName      = name || "나";
+        const partnerName = report?.partnerName || "배우자";
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 감정 유대</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>감정적 유대와 지지</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_8/kunghap_imshin_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"임신 과정에서\n두 사람의 감정적 유대가\n얼마나 중요한지 살펴보겠소."`}</Quote>
+
+            {/* 감정 유대 분석 카드 */}
+            {(bondIntro || bondCallout || bondParas.length > 0) && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM8_BOND }}>✦ 감정 유대 · 두 사람이 맺은 마음의 인연</p>
+                </div>
+                <EmotionalBondCard
+                  bondType={bondType}
+                  bondIcon={bondIcon}
+                  intro={bondIntro || "두 사람의 마음은 보이지 않는 실로 연결되어 있소."}
+                  callout={bondCallout || ""}
+                  paragraphs={bondParas}
+                />
+              </>
             )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>부부 관계 조언</Heading>
-            {(jc.coupleTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: MAROON, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-          <Quote>{`"유대를 알았으니,\n임신 과정의 어려움을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="8" go={next} />
-        </>
-      )}
+
+            {/* 상호 지지 방식 카드 */}
+            {mySupport && ptSupport && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM8_SUP }}>✦ 지지 방식 · 서로를 돕는 사주의 성질</p>
+                </div>
+                <SupportStyleCard
+                  myName={myName}
+                  partnerName={partnerName}
+                  myStyle={mySupport}
+                  partnerStyle={ptSupport}
+                  bridgeDesc={bridgeDesc}
+                />
+              </>
+            )}
+
+            {/* 부부 관계 조언 카드 */}
+            {coupleTips.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM8_SUP }}>✦ 함께 가꾸는 유대 · 홍연의 부부 조언</p>
+                </div>
+                <CoupleTipsCard tips={coupleTips} />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
+            <Quote>{`"유대를 알았으니,\n임신 과정의 어려움을\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="8" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제9장 · 어려움과 극복 ═══════════ */}
-      {ch === "9" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 어려움·극복</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>어려움과 극복</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_9/kunghap_imshin_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"임신·출산 과정에\n어려움이 올 수 있소.\n미리 알고 대비하면 넘어설 수 있소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>주요 어려움</Heading>
-            {(jc.challengeItems as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>어려움의 원인</Heading>
-            <ReportSec data={jc.challengeReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>극복 조언</Heading>
-            {(jc.overcomeTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-          <Quote>{`"어려움을 알았으니,\n가장 좋은 시기를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="9" go={next} />
-        </>
-      )}
+      {ch === "9" && (() => {
+        const ci  = (jc.challengeItems  as Record<string, unknown> | undefined) ?? null;
+        const cr  = (jc.challengeReason as Record<string, unknown> | undefined) ?? null;
+        const ot  = (jc.overcomeTips    as Record<string, unknown> | undefined) ?? null;
+
+        type ChallengeItem = { icon?: string; title: string; phase?: string; caution?: string; desc: string };
+        type OvercomeTip   = { icon: string; title: string; desc: string };
+
+        const challengeItems = Array.isArray(ci?.items) ? (ci.items as ChallengeItem[]) : [];
+        const crIntro    = typeof cr?.intro    === "string" ? cr.intro    : "";
+        const crCallout  = typeof cr?.callout  === "string" ? cr.callout  : "";
+        const crParas    = Array.isArray(cr?.paragraphs) ? (cr.paragraphs as string[]) : [];
+        const overcomeTips   = Array.isArray(ot?.tips)  ? (ot.tips  as OvercomeTip[])  : [];
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 어려움·극복</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>어려움과 극복</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_9/kunghap_imshin_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"임신·출산 과정에\n어려움이 올 수 있소.\n미리 알고 대비하면 넘어설 수 있소."`}</Quote>
+
+            {/* 주요 어려움 카드 목록 */}
+            {challengeItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM9_DARK }}>✦ 주요 어려움 · 사주가 예고하는 도전</p>
+                </div>
+                <div className="px-4">
+                  {challengeItems.map((item, i) => <ChallengeItemCard key={i} item={item} />)}
+                </div>
+              </>
+            )}
+
+            {/* 어려움의 사주 원리 카드 */}
+            {(crIntro || crCallout || crParas.length > 0) && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM9_DARK }}>✦ 사주 원리 · 어려움이 오는 이유</p>
+                </div>
+                <ChallengeReasonCard
+                  intro={crIntro || "어려움을 아는 것이 곧 준비이오."}
+                  callout={crCallout || ""}
+                  paragraphs={crParas}
+                />
+              </>
+            )}
+
+            {/* 극복 조언 카드 */}
+            {overcomeTips.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM9_GOLD }}>✦ 극복의 길 · 어둠을 넘어 빛으로</p>
+                </div>
+                <OvercomeTipsCard tips={overcomeTips} />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
+            <Quote>{`"어려움을 알았으니,\n가장 좋은 시기를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="9" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제10장 · 빛나는 시기 ═══════════ */}
-      {ch === "10" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>가장 좋은 시기</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_10/kunghap_imshin_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람에게 가장 임신·출산이\n잘 이루어지는 시기가 있소.\n그때를 미리 알고 준비하시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기 흐름</Heading>
-            {(jc.goodTimeFlow as {items?: Array<{label: string; desc: string; highlight?: boolean}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: item.highlight ? `${GOLD}18` : `${NAVY}08`, border: `1px solid ${item.highlight ? GOLD : NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: item.highlight ? GOLD : NAVY }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기의 이유</Heading>
-            {(jc.goodTimeItems as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.cycleAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.cycleAdvice as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-          <Quote>{`"좋은 시기를 알았으니,\n두 사람의 미래를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="10" go={next} />
-        </>
-      )}
+      {ch === "10" && (() => {
+        const gtf = (jc.goodTimeFlow  as Record<string, unknown> | undefined) ?? null;
+        const gti = (jc.goodTimeItems as Record<string, unknown> | undefined) ?? null;
+        const ca  = (jc.cycleAdvice   as Record<string, unknown> | undefined) ?? null;
 
-      {/* ═══════════ 제11장 · 미래 흐름 ═══════════ */}
-      {ch === "11" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 미래 흐름</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>부모로서의 미래</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_11/kunghap_imshin_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 부모가 되었을 때\n어떤 미래가 펼쳐질지\n홍연이 보여드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>미래 흐름</Heading>
-            {(jc.futureFlow as {items?: ReportFlowItem[]} | undefined)?.items ? (
-              <RunFlowChart flow={(jc.futureFlow as {items: ReportFlowItem[]}).items} />
-            ) : (
-              <RelationFlowChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
+        type GoodTimeItem   = { icon?: string; label: string; desc: string; highlight?: boolean };
+        type GoodTimeReason = { icon?: string; title: string; desc: string };
+
+        const flowItems    = Array.isArray(gtf?.items) ? (gtf.items as GoodTimeItem[])   : [];
+        const reasonItems  = Array.isArray(gti?.items) ? (gti.items as GoodTimeReason[]) : [];
+
+        const caHeadline = typeof ca?.headline   === "string" ? ca.headline   : "황금의 시간을 맞이하시오";
+        const caCallout  = typeof ca?.callout    === "string" ? ca.callout    : "";
+        const caParas    = Array.isArray(ca?.paragraphs) ? (ca.paragraphs as string[]) : (typeof ca?.desc === "string" ? [ca.desc] : []);
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 시기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>가장 좋은 시기</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_10/kunghap_imshin_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"두 사람에게 가장 임신·출산이\n잘 이루어지는 시기가 있소.\n그때를 미리 알고 준비하시오."`}</Quote>
+
+            {/* 빛나는 시기 타임라인 */}
+            {flowItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM10_STAR }}>✦ 시기 흐름 · 황금 창이 열리는 순간</p>
+                </div>
+                <GoodTimeFlowCard items={flowItems} />
+              </>
             )}
-          </section>
-          <section className="px-6 pt-4 pb-4">
-            <Heading>부모로서의 비전</Heading>
-            {(jc.parentVision as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.finalMessage as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed font-medium" style={{ color: MAROON }}>{(jc.finalMessage as {desc: string}).desc}</p>
-              </div>
+
+            {/* 좋은 시기의 사주 근거 */}
+            {reasonItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM10_TEAL }}>✦ 사주 근거 · 이 시기가 빛나는 이유</p>
+                </div>
+                <GoodTimeReasonCard items={reasonItems} />
+              </>
             )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
-          <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
-          <ChapterNav cur="11" go={next} />
-        </>
-      )}
+
+            {/* 황금 창 종합 조언 카드 */}
+            {(caHeadline || caCallout || caParas.length > 0) && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM10_STAR }}>✦ 홍연의 당부 · 황금의 시간을 맞이하는 법</p>
+                </div>
+                <PeakTimingCard
+                  headline={caHeadline}
+                  callout={caCallout || "이 시기를 알았으니, 몸과 마음을 함께 준비하시오."}
+                  paragraphs={caParas}
+                />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
+            <Quote>{`"좋은 시기를 알았으니,\n두 사람의 미래를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="10" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
-      {ch === "12" && (
+      {ch === "11" && (
         <>
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -5073,7 +6608,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_12/kunghap_imshin_12_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_imshin/kunghap_imshin_11/kunghap_imshin_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -5091,7 +6626,7 @@ function ReportPreviewInner() {
           <ReviewBox />
           <EventBox />
           <RecoGrid />
-          <ChapterNav cur="12" go={next} />
+          <ChapterNav cur="11" go={next} />
         </div>
         {eventOpen && (
           <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
@@ -5100,7 +6635,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 알 수 없는 장 — 준비 중 ═══════════ */}
-      {!["0","1","2","3","4","5","6","7","8","9","10","11","12"].includes(ch) && (
+      {!["0","1","2","3","4","5","6","7","8","9","10","11"].includes(ch) && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중이오.</p>

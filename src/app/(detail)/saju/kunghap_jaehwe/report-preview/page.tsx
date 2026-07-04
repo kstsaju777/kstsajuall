@@ -11,6 +11,8 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
@@ -38,6 +40,29 @@ const GREEN = "#3f7d6b";
 const TAG_COLORS = ["#2d3a8c", "#b5891c", "#c9474f", "#3f8a52"];
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
+// 장별 색상 토큰
+const JCH1_COLOR = "#9b2335"; const JCH1_PALE = "#f9eef0";
+const JCH2_COLOR = "#1e3a6a"; const JCH2_PALE = "#eef2fb";
+const JCH3_COLOR = "#7a3010"; const JCH3_PALE = "#fdf3ee";
+const JCH3_DEEP  = "#3a1a1a"; const JCH3_HEAL = "#1e5c3a"; const JCH3_HEAL_P = "#eaf5ee";
+const JCH4_COLOR = "#3d2a6a"; const JCH4_PALE  = "#f2eefb";
+const JCH4_WARM  = "#7a3d6a"; const JCH4_WARM_P = "#faeef6";
+const JCH5_COLOR = "#1a3d6a"; const JCH5_PALE  = "#eef4fb";
+const JCH5_WARM  = "#1a5a4a"; const JCH5_WARM_P = "#eef7f3";
+const JCH6_COLOR = "#2a5a2a"; const JCH6_PALE  = "#eef7ee";
+const JCH6_CHUN  = "#7a4010"; const JCH6_CHUN_P = "#fdf3ee";
+const JCH7_COLOR = "#1a4a5a"; const JCH7_PALE  = "#eef6f8";
+const JCH7_MY    = "#3d2a6a"; const JCH7_PT    = "#1a3d6a";
+const JCH8_COLOR = "#7a5a10"; const JCH8_PALE  = "#fdf8ee";
+const JCH8_YES   = "#1a5a2a"; const JCH8_NO    = "#8a2a2a";
+const JCH9_COLOR = "#8a2a4a"; const JCH9_PALE  = "#fdf0f4";
+const JCH9_HOPE  = "#2a5a4a"; const JCH9_HOPE_P = "#edf7f3";
+const JCH10_COLOR = "#2a3a6a"; const JCH10_PALE  = "#eef0fb";
+const JCH10_GOOD  = "#1a5a2a"; const JCH10_WARN  = "#7a4a10";
+const JCH11_COLOR = "#6a3a1a"; const JCH11_PALE  = "#fdf6ee";
+const JCH11_GOLD  = "#8a6a10"; const JCH11_GOLD_P = "#fdf8e8";
+const JCH11_TEAL  = "#1a5a4a"; const JCH11_TEAL_P = "#edf7f3";
+
 // 오행 색상
 const OHAENG: { key: string; label: string; color: string }[] = [
   { key: "목", label: "목", color: "#7cc47f" },
@@ -47,56 +72,144 @@ const OHAENG: { key: string; label: string; color: string }[] = [
   { key: "수", label: "수", color: "#8fb3e0" },
 ];
 
-// 오행 균형 도넛 차트 (명식 천간·지지 오행 비율)
+// 오행 균형 도넛 + 바차트 (이혼궁합 동일 구조)
 function OhaengDonut({ view }: { view: MyeongsikView | null }) {
   const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
   if (view) {
     for (const p of view.pillars) {
       if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
-      if (p.jiEl && counts[p.jiEl] !== undefined) counts[p.jiEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
     }
   }
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
   const pct = (n: number) => Math.round((n / total) * 100);
   const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
-
-  // 도넛 (stroke-dasharray)
-  const R = 52, C = 2 * Math.PI * R;
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
   let acc = 0;
   return (
-    <div className="mx-5 my-2 rounded-2xl p-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <h3 className="text-[16px] font-black flex items-center gap-1.5 mb-1" style={{ color: INK }}>
-        <span style={{ color: ROSE }}>◎</span> 오행 균형
-      </h3>
-      <p className="text-[12px] mb-4" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 비율이에요.</p>
-      <div className="flex justify-center">
-        <svg viewBox="0 0 140 140" style={{ width: 150, height: 150 }}>
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
           <g transform="rotate(-90 70 70)">
             {OHAENG.map((e) => {
               const frac = counts[e.key] / total;
               const len = frac * C;
               const el = (
-                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="16"
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
                   strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
               );
               acc += len;
               return el;
             })}
           </g>
-          <text x="70" y="64" textAnchor="middle" fontSize="9" fill={MUTE}>가장 강한 기운</text>
-          <text x="70" y="80" textAnchor="middle" fontSize="20" fontWeight="900" fill={dom.color}>{dom.label}</text>
-          <text x="70" y="95" textAnchor="middle" fontSize="11" fontWeight="700" fill={INK_SOFT}>{pct(counts[dom.key])}%</text>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
         </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="flex gap-1.5 mt-3">
-        {OHAENG.map((e) => (
-          <div key={e.key} className="flex-1 text-center rounded-lg py-1.5" style={{ background: `${e.color}22` }}>
-            <div className="text-[12px] font-black" style={{ color: INK }}>{e.label}</div>
-            <div className="text-[11px] font-bold" style={{ color: INK_SOFT }}>{pct(counts[e.key])}%</div>
+    </div>
+  );
+}
+
+// 오행 균형 도넛 + 바차트 — 상대방용 (JCH2_COLOR 테두리)
+function OhaengDonutPartner({ view }: { view: MyeongsikView | null }) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const pct = (n: number) => Math.round((n / total) * 100);
+  const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${JCH2_COLOR}0e 0%, ${WHITE} 55%)`, border: `1.5px solid ${JCH2_COLOR}25` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
-      <p className="text-[10.5px] mt-3 text-center" style={{ color: MUTE }}>기운을 눌러 자세히 보세요</p>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
+          <g transform="rotate(-90 70 70)">
+            {OHAENG.map((e) => {
+              const frac = counts[e.key] / total;
+              const len = frac * C;
+              const el = (
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
+                  strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
+              );
+              acc += len;
+              return el;
+            })}
+          </g>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
+        </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1083,37 +1196,109 @@ function EventBox() {
   );
 }
 
-// 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
+// 추천 상품(크로스셀) 그리드 (마무리) — 전체 탭 카드 그대로
+const RECO_BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
+  "재물": "#eac660", "건강": "#2e7d32", "결혼": "#c2185b", "임신": "#6a1b9a",
+  "연애": "#e1337d", "자녀": "#0077b6", "유아": "#dddbd1", "재회": "#7b2fff",
+  "이혼": "#444", "비즈니스": "#1d6fce",
+};
+const RECO_TAG_COLORS: Record<string, string> = {
+  "사주": "#111111", "HOT": "#ff4500", "궁합": "#e1337d", "비즈니스": "#1d6fce",
+  "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b", "NEW": "#4fd5e8",
+  "BEST": "#b47221", "FREE": "#555",
+};
+
+function RecoProductCard({ card }: { card: CategoryCard }) {
+  const isVideo = !!card.videoUrl || card.type === "video";
+  const mediaSrc = card.videoUrl ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !isVideo) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isVideo]);
+  return (
+    <Link ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
+      {isVideo ? (
+        visible
+          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
+      ) : imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : card.tag === "NEW" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#4fd5e8", color: "#000", display: "inline-block", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>
+            ) : card.tag === "추천" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
+const RECO_EXCLUDE = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주"]);
+const SAJU_ORDER = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주"];
+const KUNGHAP_ORDER = ["찰떡콩떡 연애궁합", "말좀듣자 자녀궁합", "평생내짝 결혼궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
+
+function sortBy(cards: CategoryCard[], order: string[]) {
+  return order.flatMap((name) => cards.filter((c) => c.name === name));
+}
+
 function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("kunghap_jaehwe") && !RECO_EXCLUDE.has(c.name));
+  const sajuCards = sortBy(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER);
+  const kunghapCards = sortBy(all.filter((c) => c.href.includes("kunghap")), KUNGHAP_ORDER);
+
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes newBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} 60%{transform:translateY(-2px)} }
+        @keyframes chukNeon { 0%,100%{box-shadow:0 0 3px 1px rgba(0,255,115,0.5)} 50%{box-shadow:0 0 7px 2px rgba(0,255,115,0.9)} }
+      `}</style>
+      {sajuCards.length > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
     </div>
   );
 }
@@ -2319,6 +2504,1531 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
   );
 }
 
+// ─── 제1·2장 전용 컴포넌트 ────────────────────────────────────────
+
+// 원국 요약 카드 — intro 인용구 + callout 강조 + paragraphs 단락
+// 사주 원국의 핵심을 세 층위로 전달: "이런 사주요"(intro) → "핵심은 이것이오"(callout) → "자세한 풀이"(paragraphs)
+function JWongukCard({ data, color, pale }: { data: Record<string, unknown> | null; color: string; pale: string }) {
+  if (!data) return null;
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* intro — 사주 원국 한 줄 요약, 이탤릭 인용 형식 */}
+      {intro && (
+        <div className="mb-4 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${color}10 0%, ${pale} 100%)`, border: `1px solid ${color}20` }}>
+          <p className="text-[11px] font-black tracking-widest mb-2" style={{ color }}>— 원국 핵심 —</p>
+          <p className="text-[14px] font-bold leading-[1.75] italic" style={{ color: INK, fontFamily: SERIF }}>&ldquo;{intro}&rdquo;</p>
+        </div>
+      )}
+      {/* callout — 재회 맥락에서 가장 중요한 사주 포인트 */}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${color}0c`, borderLeft: `3px solid ${color}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
+        </div>
+      )}
+      {/* paragraphs — 오행·신강신약·일간 중심의 상세 풀이 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 기질 카드 — 키워드 태그 + 빛/이별 그림자 이중 블록 (재회 맥락)
+// 이 사람이 어떤 기질을 타고났는지, 그리고 이별 상황에서 그 기질이 어떤 방식으로 드러나는지를 대비 구조로 보여줌.
+// 재회를 고민하는 사람에게 "상대가 이별 후 어떻게 반응했을지"를 이해하는 실마리가 됨.
+function JNatureCard({ data, color, label }: { data: Record<string, unknown> | null; color: string; label: string }) {
+  if (!data) return null;
+  const keywords     = (data.keywords     as string[] | undefined) ?? [];
+  const strengthDesc = (data.strengthDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const shadowDesc   = (data.shadowDesc   as string | undefined) ?? "";
+  const KW_COLORS    = [color, "#3f7d6b", "#b07d2a", "#c9474f", "#3f63c4"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      {/* 키워드 태그 — 이 사람을 한 눈에 설명하는 기질 단어들 */}
+      <div className="px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${INK}08` }}>
+        <p className="text-[11px] font-bold mb-2.5" style={{ color }}>{label}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${KW_COLORS[i % KW_COLORS.length]}14`, color: KW_COLORS[i % KW_COLORS.length] }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+      {/* 빛 — 이 기질이 관계에서 발휘하는 긍정적 역할 */}
+      {strengthDesc && (
+        <div className="px-4 pt-3 pb-3" style={{ borderBottom: shadowDesc ? `1px solid ${INK}08` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">✨</span>
+            <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+        </div>
+      )}
+      {/* 이별 그림자 — 갈등·이별 상황에서 이 기질이 어떻게 드러났을지 */}
+      {shadowDesc && (
+        <div className="px-4 pt-3 pb-4" style={{ background: "#fffaf9" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">💔</span>
+            <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>헤어진 후 드러나는 그림자</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 관계 스타일 카드 — 연애·관계 방식 유형 배너 + callout + 단락
+// 이혼궁합의 DivorcePatternCard에 대응하는 재회판. 이 사람이 어떤 방식으로 관계를 맺고 유지하며,
+// 이별 이후 재회를 바라볼 때 어떤 심리적 패턴이 작동하는지를 사주로 풀어냄.
+// styleType(유형 이름) + styleIcon(이모지) + intro(소개) + callout(핵심) + paragraphs(풀이)
+function RelationStyleCard({ data, color, pale }: { data: Record<string, unknown> | null; color: string; pale: string }) {
+  if (!data) return null;
+  const styleType  = (data.styleType  as string | undefined) ?? "";
+  const styleIcon  = (data.styleIcon  as string | undefined) ?? "💞";
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 관계 스타일 유형 배너 — 이 사람의 연애·관계 방식을 하나의 유형으로 압축 */}
+      {(styleType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, border: `1px solid ${color}20` }}>
+          {styleType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]">{styleIcon}</span>
+              <span className="text-[15px] font-black" style={{ color }}>{styleType}</span>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>&ldquo;{intro}&rdquo;</p>}
+        </div>
+      )}
+      {/* callout — 재회 맥락에서 이 관계 스타일이 갖는 핵심 함의 */}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${color}0c`, borderLeft: `3px solid ${color}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
+        </div>
+      )}
+      {/* 풀이 단락 — 이 스타일이 재회를 앞두고 어떻게 작동하는지 상세 분석 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제3장 전용 컴포넌트 ────────────────────────────────────────
+
+// 이별 원인 카드 — 사주가 지목하는 이별의 근본 원인을 심각도 배지 + 사주 근거와 함께 표시
+// 이별은 감정적 사건이지만, 사주는 그 아래에 깔린 구조적 원인을 드러낸다.
+// level(심각도), title(원인명), desc(설명), sajuBasis(어떤 오행·신살이 이 원인을 만들었는지)
+function BreakupCauseCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const level      = (item.level      as string | undefined) ?? "중간";
+  const title      = (item.title      as string | undefined) ?? "";
+  const desc       = (item.desc       as string | undefined) ?? "";
+  const sajuBasis  = (item.sajuBasis  as string | undefined) ?? "";
+  const levelMap: Record<string, { color: string; pale: string; label: string; icon: string }> = {
+    "핵심": { color: JCH3_COLOR,  pale: JCH3_PALE,       label: "핵심 원인",  icon: "🔴" },
+    "중간": { color: "#b07d2a",   pale: "#fdf8ee",        label: "중요 원인",  icon: "🟠" },
+    "잠재": { color: "#5a6a3a",   pale: "#f3f7ee",        label: "잠재 요인",  icon: "🟡" },
+  };
+  const lm = levelMap[level] ?? levelMap["중간"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${lm.color}20`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {/* 헤더 — 번호 + 심각도 배지 + 원인 제목 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${lm.color}0a`, borderBottom: `1px solid ${lm.color}14` }}>
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-black flex-shrink-0" style={{ background: lm.color, color: WHITE }}>
+          {index + 1}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${lm.color}18`, color: lm.color }}>
+              {lm.icon} {lm.label}
+            </span>
+          </div>
+          <p className="text-[14px] font-black leading-snug" style={{ color: INK }}>{title}</p>
+        </div>
+      </div>
+      {/* 원인 설명 */}
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: sajuBasis ? `1px solid ${lm.color}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 사주 근거 — 어떤 오행/합충/신살이 이 원인을 만들었는지 */}
+      {sajuBasis && (
+        <div className="px-4 py-3" style={{ background: `${lm.color}06` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[12px]">⊕</span>
+            <p className="text-[11px] font-black" style={{ color: lm.color }}>사주 근거</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{sajuBasis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 이별 패턴 카드 — 두 사람이 헤어지게 된 반복 구조를 유형으로 분석
+// 한 번의 이별이 아닌 "왜 이 두 사람은 이런 식으로 헤어지게 되었는가"의 패턴을 사주로 풀어냄.
+// patternType(유형명), patternIcon, intro(소개), callout(핵심 경고), paragraphs(상세 분석)
+function BreakupPatternCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const patternType = (data.patternType as string | undefined) ?? "";
+  const patternIcon = (data.patternIcon as string | undefined) ?? "🔁";
+  const intro       = (data.intro       as string | undefined) ?? "";
+  const callout     = (data.callout     as string | undefined) ?? "";
+  const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 패턴 유형 배너 — 이 이별의 구조적 성격을 한 눈에 */}
+      {(patternType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH3_COLOR}12 0%, ${JCH3_PALE} 100%)`, border: `1px solid ${JCH3_COLOR}20` }}>
+          {patternType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[24px]">{patternIcon}</span>
+              <div>
+                <p className="text-[10px] font-bold mb-0.5" style={{ color: MUTE }}>이별 패턴 유형</p>
+                <span className="text-[16px] font-black" style={{ color: JCH3_COLOR }}>{patternType}</span>
+              </div>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>&ldquo;{intro}&rdquo;</p>}
+        </div>
+      )}
+      {/* callout — 이 패턴이 재회에 주는 경고 메시지 */}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH3_COLOR}0c`, borderLeft: `3px solid ${JCH3_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH3_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {/* 상세 분석 단락 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 치유·회복 경로 카드 — 이별의 상처를 어떻게 치유하고 재회를 준비할지
+// 단순한 위로가 아닌, 사주가 제시하는 구체적 치유 방향.
+// 나와 상대방 각각의 치유 키워드 + 공통 회복 방향 + 단락 풀이
+function HealingPathCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const myHealing      = (data.myHealing      as string | undefined) ?? "";
+  const myHealKey      = (data.myHealKey      as string | undefined) ?? "";
+  const partnerHealing = (data.partnerHealing as string | undefined) ?? "";
+  const partnerHealKey = (data.partnerHealKey as string | undefined) ?? "";
+  const sharedPath     = (data.sharedPath     as string | undefined) ?? "";
+  const paragraphs     = (data.paragraphs     as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 나 / 상대방 치유 방향 — 두 사람의 치유 경로가 다를 수 있음을 보여줌 */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        {myHealing && (
+          <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${JCH3_HEAL}20` }}>
+            <div className="px-3 py-2 text-center" style={{ background: `${JCH3_HEAL}0a` }}>
+              <p className="text-[10px] font-black" style={{ color: JCH3_HEAL }}>나의 치유</p>
+              {myHealKey && (
+                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: `${JCH3_HEAL}15`, color: JCH3_HEAL }}>
+                  🌿 {myHealKey}
+                </span>
+              )}
+            </div>
+            <div className="px-3 py-3" style={{ background: JCH3_HEAL_P }}>
+              <p className="text-[12px] leading-relaxed" style={{ color: INK, wordBreak: "keep-all" }}>{myHealing}</p>
+            </div>
+          </div>
+        )}
+        {partnerHealing && (
+          <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${JCH3_COLOR}20` }}>
+            <div className="px-3 py-2 text-center" style={{ background: `${JCH3_COLOR}0a` }}>
+              <p className="text-[10px] font-black" style={{ color: JCH3_COLOR }}>상대방의 치유</p>
+              {partnerHealKey && (
+                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: `${JCH3_COLOR}15`, color: JCH3_COLOR }}>
+                  🌿 {partnerHealKey}
+                </span>
+              )}
+            </div>
+            <div className="px-3 py-3" style={{ background: JCH3_PALE }}>
+              <p className="text-[12px] leading-relaxed" style={{ color: INK, wordBreak: "keep-all" }}>{partnerHealing}</p>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* 공통 회복 경로 — 재회를 원한다면 두 사람이 함께 걸어야 할 길 */}
+      {sharedPath && (
+        <div className="mb-4 rounded-2xl px-5 py-4" style={{ background: `linear-gradient(135deg, ${JCH3_HEAL}0e 0%, ${JCH3_HEAL_P} 100%)`, border: `1px solid ${JCH3_HEAL}22` }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[16px]">🌅</span>
+            <p className="text-[12px] font-black" style={{ color: JCH3_HEAL }}>두 사람이 함께 걸어야 할 회복의 길</p>
+          </div>
+          <p className="text-[13.5px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{sharedPath}</p>
+        </div>
+      )}
+      {/* 풀이 단락 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제4장 전용 컴포넌트 ────────────────────────────────────────
+
+// 미련·그리움 지수 게이지 — "나는 이 사람을 아직 어떻게 보는가"의 핵심 수치
+// AttractionGauge와 구조가 유사하지만, JCH4 색상 + 미련 맥락으로 특화.
+// score(0-100), label(상태 한 줄 설명), paragraphs(수치 풀이 단락들)
+function MyLongingGauge({ score, label, paragraphs }: { score: number; label: string; paragraphs?: string[] }) {
+  const pct  = Math.max(0, Math.min(100, score));
+  const dash = Math.PI * 2 * 54; // circumference (r=54)
+  const fill = dash * (pct / 100);
+  // 점수에 따라 상태 색상 — 낮으면 차갑게, 높으면 따뜻하게
+  const trackColor = pct >= 70 ? JCH4_WARM : pct >= 40 ? JCH4_COLOR : "#8a9ab0";
+  const label2 =
+    pct >= 80 ? "아직 깊이 남아있는 마음" :
+    pct >= 60 ? "상당한 미련이 남아있소" :
+    pct >= 40 ? "복잡한 감정이 뒤엉켜 있소" :
+    pct >= 20 ? "서서히 정리되어 가는 마음" :
+               "많이 비워졌으나 흔적이 남소";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${JCH4_COLOR}0d 0%, ${JCH4_PALE} 100%)`, border: `1px solid ${JCH4_COLOR}20` }}>
+      <div className="pt-5 pb-4 flex flex-col items-center">
+        {/* SVG 원형 게이지 */}
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          {/* 배경 트랙 */}
+          <circle cx="70" cy="70" r="54" fill="none" stroke={`${JCH4_COLOR}18`} strokeWidth="10" />
+          {/* 진행 */}
+          <circle
+            cx="70" cy="70" r="54"
+            fill="none"
+            stroke={trackColor}
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={`${fill} ${dash - fill}`}
+            strokeDashoffset={dash * 0.25}
+            style={{ transition: "stroke-dasharray 1s ease" }}
+          />
+          {/* 중앙 점수 */}
+          <text x="70" y="62" textAnchor="middle" fontSize="28" fontWeight="900" fill={trackColor}>{pct}</text>
+          <text x="70" y="79" textAnchor="middle" fontSize="10" fill={`${trackColor}99`}>/ 100</text>
+          <text x="70" y="95" textAnchor="middle" fontSize="8" fill={`${JCH4_COLOR}88`}>미련 지수</text>
+        </svg>
+        {/* 상태 라벨 */}
+        <div className="mt-1 px-4 py-1.5 rounded-full" style={{ background: `${trackColor}15`, border: `1px solid ${trackColor}30` }}>
+          <p className="text-[12px] font-black text-center" style={{ color: trackColor }}>{label || label2}</p>
+        </div>
+      </div>
+      {/* 풀이 단락 */}
+      {paragraphs && paragraphs.length > 0 && (
+        <div className="px-5 pb-5">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="mb-3 text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 감정 상태 카드 — 내 마음속에 남아있는 개별 감정들을 사주 근거와 함께 풀어냄
+// 이별 후 한 가지 감정만 남는 사람은 없다. 미련·서운함·그리움·분노·아직 사랑 등
+// 여러 감정이 뒤엉켜 있으며, 사주는 어떤 감정이 지배적인지 드러내준다.
+// emotion(감정명), emotionIcon, desc(이 감정이 어디서 오는지), sajuBasis(오행/신살 근거)
+function MyEmotionCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const emotion     = (item.emotion     as string | undefined) ?? "";
+  const emotionIcon = (item.emotionIcon as string | undefined) ?? "💜";
+  const desc        = (item.desc        as string | undefined) ?? "";
+  const sajuBasis   = (item.sajuBasis   as string | undefined) ?? "";
+  const tone        = (item.tone        as string | undefined) ?? "neutral"; // "longing" | "pain" | "love" | "anger" | "acceptance"
+  const toneMap: Record<string, { color: string; pale: string }> = {
+    longing:    { color: JCH4_COLOR,  pale: JCH4_PALE   },
+    love:       { color: JCH4_WARM,   pale: JCH4_WARM_P  },
+    pain:       { color: "#8a2a2a",   pale: "#fbeeee"    },
+    anger:      { color: "#7a4010",   pale: "#fdf3ee"    },
+    acceptance: { color: "#2a6a3a",   pale: "#edf7f0"    },
+    neutral:    { color: JCH4_COLOR,  pale: JCH4_PALE   },
+  };
+  const tm = toneMap[tone] ?? toneMap["neutral"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${tm.color}20`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {/* 감정 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${tm.color}0a`, borderBottom: `1px solid ${tm.color}12` }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] flex-shrink-0" style={{ background: `${tm.color}18` }}>
+          {emotionIcon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${tm.color}15`, color: tm.color }}>
+              감정 {index + 1}
+            </span>
+          </div>
+          <p className="text-[15px] font-black mt-0.5" style={{ color: INK }}>{emotion}</p>
+        </div>
+      </div>
+      {/* 감정 설명 — 이 감정이 왜 남아있는지 */}
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: sajuBasis ? `1px solid ${tm.color}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 사주 근거 — 어떤 오행·신살이 이 감정을 만드는지 */}
+      {sajuBasis && (
+        <div className="px-4 py-3" style={{ background: `${tm.color}06` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[11px]">⊕</span>
+            <p className="text-[11px] font-black" style={{ color: tm.color }}>사주 근거</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{sajuBasis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 내 마음의 구조 풀이 카드 — 개별 감정들을 넘어 "이 사람을 어떻게 보는가"의 근본 구조
+// 사주가 말하는 나의 연애관·집착 경향·이별 후 감정 처리 방식을 종합 분석.
+// intro(인용 배너), callout(핵심 통찰), paragraphs(상세 풀이)
+function MyHeartDescCard({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  void myName; void partnerName;
+  return (
+    <div className="mx-5 mb-5">
+      {/* 인용 배너 — 이 사람을 바라보는 내 마음을 한 줄로 */}
+      {intro && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH4_COLOR}12 0%, ${JCH4_PALE} 100%)`, border: `1px solid ${JCH4_COLOR}20` }}>
+          <span className="text-[22px] mb-1 block" style={{ opacity: 0.4 }}>&ldquo;</span>
+          <p className="text-[14px] leading-relaxed font-bold" style={{ color: JCH4_COLOR, fontStyle: "italic", wordBreak: "keep-all" }}>{intro}</p>
+          <span className="text-[22px] block text-right" style={{ opacity: 0.4 }}>&rdquo;</span>
+        </div>
+      )}
+      {/* callout — 사주가 말하는 핵심 통찰 */}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH4_COLOR}0c`, borderLeft: `3px solid ${JCH4_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH4_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {/* 상세 풀이 단락 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제5장 전용 컴포넌트 ────────────────────────────────────────
+
+// 상대방 미련·그리움 지수 게이지 — 내가 궁금한 바로 그것: "상대도 나를 그리워하는가"
+// MyLongingGauge와 구조는 동일하지만 JCH5(딥 블루) 색상으로 상대방 시각임을 시각적으로 구분.
+// 점수가 높을수록 상대방이 나에게 아직 감정이 남아있음을 의미.
+function PartnerLongingGauge({ score, label, paragraphs }: { score: number; label: string; paragraphs?: string[] }) {
+  const pct  = Math.max(0, Math.min(100, score));
+  const dash = Math.PI * 2 * 54;
+  const fill = dash * (pct / 100);
+  const trackColor = pct >= 70 ? JCH5_WARM : pct >= 40 ? JCH5_COLOR : "#8a9ab0";
+  const label2 =
+    pct >= 80 ? "아직 깊이 남아있는 마음" :
+    pct >= 60 ? "상당한 미련이 남아있소" :
+    pct >= 40 ? "복잡한 감정이 뒤엉켜 있소" :
+    pct >= 20 ? "서서히 정리되어 가는 마음" :
+               "많이 비워졌으나 흔적이 남소";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${JCH5_COLOR}0d 0%, ${JCH5_PALE} 100%)`, border: `1px solid ${JCH5_COLOR}20` }}>
+      <div className="pt-5 pb-4 flex flex-col items-center">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="54" fill="none" stroke={`${JCH5_COLOR}18`} strokeWidth="10" />
+          <circle
+            cx="70" cy="70" r="54"
+            fill="none"
+            stroke={trackColor}
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={`${fill} ${dash - fill}`}
+            strokeDashoffset={dash * 0.25}
+            style={{ transition: "stroke-dasharray 1s ease" }}
+          />
+          <text x="70" y="62" textAnchor="middle" fontSize="28" fontWeight="900" fill={trackColor}>{pct}</text>
+          <text x="70" y="79" textAnchor="middle" fontSize="10" fill={`${trackColor}99`}>/ 100</text>
+          <text x="70" y="95" textAnchor="middle" fontSize="8" fill={`${JCH5_COLOR}88`}>미련 지수</text>
+        </svg>
+        <div className="mt-1 px-4 py-1.5 rounded-full" style={{ background: `${trackColor}15`, border: `1px solid ${trackColor}30` }}>
+          <p className="text-[12px] font-black text-center" style={{ color: trackColor }}>{label || label2}</p>
+        </div>
+      </div>
+      {paragraphs && paragraphs.length > 0 && (
+        <div className="px-5 pb-5">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="mb-3 text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 상대방 감정 카드 — 상대방 마음속에 남아있는 개별 감정들을 사주 근거와 함께 풀어냄
+// "상대방이 나에 대해 어떤 감정을 품고 있는가"는 재회의 가장 핵심적인 질문.
+// MyEmotionCard와 구조는 동일하지만 JCH5 팔레트를 사용해 상대방의 시각임을 명확히 함.
+// emotion(감정명), emotionIcon, tone, desc(이 감정의 출처), sajuBasis(오행 근거)
+function PartnerEmotionCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const emotion     = (item.emotion     as string | undefined) ?? "";
+  const emotionIcon = (item.emotionIcon as string | undefined) ?? "💙";
+  const desc        = (item.desc        as string | undefined) ?? "";
+  const sajuBasis   = (item.sajuBasis   as string | undefined) ?? "";
+  const tone        = (item.tone        as string | undefined) ?? "neutral";
+  const toneMap: Record<string, { color: string; pale: string }> = {
+    longing:    { color: JCH5_COLOR,  pale: JCH5_PALE   },
+    love:       { color: JCH5_WARM,   pale: JCH5_WARM_P  },
+    pain:       { color: "#8a2a2a",   pale: "#fbeeee"    },
+    anger:      { color: "#7a4010",   pale: "#fdf3ee"    },
+    acceptance: { color: "#2a6a3a",   pale: "#edf7f0"    },
+    neutral:    { color: JCH5_COLOR,  pale: JCH5_PALE   },
+  };
+  const tm = toneMap[tone] ?? toneMap["neutral"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${tm.color}20`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${tm.color}0a`, borderBottom: `1px solid ${tm.color}12` }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] flex-shrink-0" style={{ background: `${tm.color}18` }}>
+          {emotionIcon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${tm.color}15`, color: tm.color }}>
+              상대방 감정 {index + 1}
+            </span>
+          </div>
+          <p className="text-[15px] font-black mt-0.5" style={{ color: INK }}>{emotion}</p>
+        </div>
+      </div>
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: sajuBasis ? `1px solid ${tm.color}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {sajuBasis && (
+        <div className="px-4 py-3" style={{ background: `${tm.color}06` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[11px]">⊕</span>
+            <p className="text-[11px] font-black" style={{ color: tm.color }}>사주 근거</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{sajuBasis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 상대방 마음의 구조 풀이 카드 — 개별 감정들을 종합해 상대방이 나를 어떻게 보는지의 근본 구조
+// 재회를 원할 때 가장 알고 싶은 것: 상대방은 지금 나를 어떤 시각으로 바라보는가.
+// 상대방 사주의 연애관·집착 경향·이별 후 감정 처리 방식을 분석해 내가 어떻게 접근해야 할지 안내.
+// intro(인용 배너), callout(핵심 통찰), paragraphs(상세 풀이 3단락)
+function PartnerHeartDescCard({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  void myName; void partnerName;
+  return (
+    <div className="mx-5 mb-5">
+      {intro && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH5_COLOR}12 0%, ${JCH5_PALE} 100%)`, border: `1px solid ${JCH5_COLOR}20` }}>
+          <span className="text-[22px] mb-1 block" style={{ opacity: 0.4 }}>&ldquo;</span>
+          <p className="text-[14px] leading-relaxed font-bold" style={{ color: JCH5_COLOR, fontStyle: "italic", wordBreak: "keep-all" }}>{intro}</p>
+          <span className="text-[22px] block text-right" style={{ opacity: 0.4 }}>&rdquo;</span>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH5_COLOR}0c`, borderLeft: `3px solid ${JCH5_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH5_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {/* 상대방 접근 방법 힌트 — 이 마음 구조를 알았다면 재회 시도는 어떻게 해야 하는가 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제6장 전용 컴포넌트 ────────────────────────────────────────
+
+// 합(合) 카드 — 두 사주가 서로 끌어당기는 글자 관계를 재회 맥락으로 풀어냄
+// 합은 단순히 "좋다"가 아니다. 천간합·지지합·삼합·방합 등 종류마다 재회에 주는 에너지가 다르다.
+// hapType(합 종류), hapIcon, strength(강/중/약), desc(합의 의미), reunionMeaning(재회 맥락)
+function JHapCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const hapType        = (item.hapType        as string | undefined) ?? "";
+  const hapIcon        = (item.hapIcon        as string | undefined) ?? "🔗";
+  const strength       = (item.strength       as string | undefined) ?? "중";
+  const desc           = (item.desc           as string | undefined) ?? "";
+  const reunionMeaning = (item.reunionMeaning as string | undefined) ?? "";
+  const strengthMap: Record<string, { color: string; label: string }> = {
+    "강": { color: "#1a6a1a", label: "강한 합" },
+    "중": { color: JCH6_COLOR, label: "중간 합" },
+    "약": { color: "#5a7a5a", label: "약한 합" },
+  };
+  const sm = strengthMap[strength] ?? strengthMap["중"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${JCH6_COLOR}22`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {/* 헤더 — 합 종류 + 강도 배지 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${JCH6_COLOR}08`, borderBottom: `1px solid ${JCH6_COLOR}12` }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-[20px] flex-shrink-0" style={{ background: `${JCH6_COLOR}15` }}>
+          {hapIcon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${sm.color}18`, color: sm.color }}>
+              {sm.label}
+            </span>
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${JCH6_COLOR}10`, color: JCH6_COLOR }}>
+              합 {index + 1}
+            </span>
+          </div>
+          <p className="text-[15px] font-black" style={{ color: INK }}>{hapType}</p>
+        </div>
+      </div>
+      {/* 합의 의미 */}
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: reunionMeaning ? `1px solid ${JCH6_COLOR}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 재회 맥락 — 이 합이 재회·재결합에 어떤 의미를 갖는지 */}
+      {reunionMeaning && (
+        <div className="px-4 py-3" style={{ background: `${JCH6_COLOR}06` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[12px]">💞</span>
+            <p className="text-[11px] font-black" style={{ color: JCH6_COLOR }}>재회에서 이 합의 의미</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{reunionMeaning}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 충(沖) 카드 — 두 사주가 서로 부딪히는 글자 관계를 재회 맥락으로 풀어냄
+// 충은 단순히 "나쁘다"가 아니다. 강한 자극이 되기도, 끊임없는 갈등의 원인이 되기도 한다.
+// 재회를 원한다면 이 충이 어떤 상황에서 폭발하는지, 어떻게 다룰 수 있는지 알아야 한다.
+// chungType(충 종류), chungIcon, severity(위험/주의/잠재), desc(충의 의미), riskDesc(재회 시 주의점)
+function JChungCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const chungType = (item.chungType as string | undefined) ?? "";
+  const chungIcon = (item.chungIcon as string | undefined) ?? "⚡";
+  const severity  = (item.severity  as string | undefined) ?? "주의";
+  const desc      = (item.desc      as string | undefined) ?? "";
+  const riskDesc  = (item.riskDesc  as string | undefined) ?? "";
+  const sevMap: Record<string, { color: string; label: string }> = {
+    "위험": { color: "#8a1a1a", label: "강한 충" },
+    "주의": { color: JCH6_CHUN, label: "주의 충" },
+    "잠재": { color: "#7a6a3a", label: "잠재 충" },
+  };
+  const sm = sevMap[severity] ?? sevMap["주의"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${sm.color}22`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${sm.color}08`, borderBottom: `1px solid ${sm.color}12` }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-[20px] flex-shrink-0" style={{ background: `${sm.color}15` }}>
+          {chungIcon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${sm.color}18`, color: sm.color }}>
+              {sm.label}
+            </span>
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${sm.color}10`, color: sm.color }}>
+              충 {index + 1}
+            </span>
+          </div>
+          <p className="text-[15px] font-black" style={{ color: INK }}>{chungType}</p>
+        </div>
+      </div>
+      {/* 충의 의미 */}
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: riskDesc ? `1px solid ${sm.color}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 재회 주의점 — 이 충이 재회·재결합 과정에서 어떻게 폭발할 수 있는지, 어떻게 다뤄야 하는지 */}
+      {riskDesc && (
+        <div className="px-4 py-3" style={{ background: `${sm.color}06` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[12px]">⚠️</span>
+            <p className="text-[11px] font-black" style={{ color: sm.color }}>재회 시 주의점</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{riskDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 종합 궁합 점수 카드 — 합과 충을 모두 종합한 두 사주의 궁합 총평
+// 단순한 숫자가 아니라, 합충의 균형이 재회와 재결합에 어떤 의미인지 종합적으로 풀어냄.
+// score(0-100), label(한 줄 요약), hapCount(합 개수), chungCount(충 개수), desc(종합 설명), paragraphs
+function HapChungSummaryCard({ data }: { data: Record<string, unknown> | null; }) {
+  if (!data) return null;
+  const score      = (data.score      as number | undefined) ?? 65;
+  const label      = (data.label      as string | undefined) ?? "";
+  const hapCount   = (data.hapCount   as number | undefined) ?? 0;
+  const chungCount = (data.chungCount as number | undefined) ?? 0;
+  const desc       = (data.desc       as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const pct  = Math.max(0, Math.min(100, score));
+  const dash = Math.PI * 2 * 54;
+  const fill = dash * (pct / 100);
+  const gaugeColor = pct >= 70 ? JCH6_COLOR : pct >= 45 ? "#7a6a2a" : JCH6_CHUN;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${JCH6_COLOR}0d 0%, ${JCH6_PALE} 100%)`, border: `1px solid ${JCH6_COLOR}20` }}>
+      {/* 상단: 게이지 + 합충 개수 요약 */}
+      <div className="pt-5 pb-4 flex flex-col items-center">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="54" fill="none" stroke={`${gaugeColor}18`} strokeWidth="10" />
+          <circle
+            cx="70" cy="70" r="54"
+            fill="none"
+            stroke={gaugeColor}
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={`${fill} ${dash - fill}`}
+            strokeDashoffset={dash * 0.25}
+            style={{ transition: "stroke-dasharray 1s ease" }}
+          />
+          <text x="70" y="62" textAnchor="middle" fontSize="28" fontWeight="900" fill={gaugeColor}>{pct}</text>
+          <text x="70" y="79" textAnchor="middle" fontSize="10" fill={`${gaugeColor}99`}>/ 100</text>
+          <text x="70" y="95" textAnchor="middle" fontSize="8" fill={`${JCH6_COLOR}88`}>종합 궁합</text>
+        </svg>
+        <div className="mt-1 px-4 py-1.5 rounded-full" style={{ background: `${gaugeColor}15`, border: `1px solid ${gaugeColor}30` }}>
+          <p className="text-[12px] font-black text-center" style={{ color: gaugeColor }}>{label}</p>
+        </div>
+      </div>
+      {/* 합충 개수 요약 pill */}
+      <div className="flex justify-center gap-3 pb-4">
+        <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full" style={{ background: `${JCH6_COLOR}12`, border: `1px solid ${JCH6_COLOR}25` }}>
+          <span className="text-[13px]">🔗</span>
+          <span className="text-[12px] font-black" style={{ color: JCH6_COLOR }}>합 {hapCount}개</span>
+        </div>
+        <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full" style={{ background: `${JCH6_CHUN}12`, border: `1px solid ${JCH6_CHUN}25` }}>
+          <span className="text-[13px]">⚡</span>
+          <span className="text-[12px] font-black" style={{ color: JCH6_CHUN }}>충 {chungCount}개</span>
+        </div>
+      </div>
+      {/* 종합 설명 + 단락 */}
+      <div className="px-5 pb-5">
+        {desc && (
+          <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${gaugeColor}0c`, borderLeft: `3px solid ${gaugeColor}` }}>
+            <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: gaugeColor }}>{desc}</p>
+          </div>
+        )}
+        {paragraphs.map((p, i) => (
+          <p key={i} className="mb-3 text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── 제7장 전용 컴포넌트 ────────────────────────────────────────
+
+// 감정 흐름 타임라인 — 이별 후 두 사람의 감정이 시간에 따라 어떻게 변하는지 단계별로 시각화
+// 이별 직후의 감정과 지금 현재의 감정은 다르다. 사주는 이 흐름의 패턴을 드러낸다.
+// 나와 상대방의 감정 상태를 각 단계별로 나란히 보여줌으로써 두 사람의 감정 간극을 파악할 수 있다.
+// phases: 각 단계별 { phase(단계명), icon, timeHint(예: "이별 직후"), myState(나 감정), partnerState(상대 감정), desc }
+function EmotionFlowTimeline({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const intro  = (data.intro  as string | undefined) ?? "";
+  const phases = (data.phases as Array<Record<string, unknown>> | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 소개 문장 */}
+      {intro && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH7_COLOR}0c`, borderLeft: `3px solid ${JCH7_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH7_COLOR }}>{intro}</p>
+        </div>
+      )}
+      {/* 타임라인 */}
+      <div className="relative">
+        {/* 수직 연결선 */}
+        <div className="absolute left-[19px] top-5 bottom-5 w-[2px]" style={{ background: `linear-gradient(to bottom, ${JCH7_COLOR}40, ${JCH7_COLOR}10)` }} />
+        {phases.map((ph, i) => {
+          const icon         = (ph.icon         as string | undefined) ?? "●";
+          const phase        = (ph.phase        as string | undefined) ?? "";
+          const timeHint     = (ph.timeHint     as string | undefined) ?? "";
+          const myState      = (ph.myState      as string | undefined) ?? "";
+          const partnerState = (ph.partnerState as string | undefined) ?? "";
+          const desc         = (ph.desc         as string | undefined) ?? "";
+          const isLast = i === phases.length - 1;
+          return (
+            <div key={i} className={`flex gap-3 ${isLast ? "mb-0" : "mb-5"}`}>
+              {/* 타임라인 dot */}
+              <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-[18px] z-10" style={{ background: `linear-gradient(135deg, ${JCH7_COLOR}22, ${JCH7_PALE})`, border: `2px solid ${JCH7_COLOR}40` }}>
+                {icon}
+              </div>
+              {/* 내용 */}
+              <div className="flex-1 min-w-0 pb-1">
+                {/* 단계명 + 시간 힌트 */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[13px] font-black" style={{ color: JCH7_COLOR }}>{phase}</span>
+                  {timeHint && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${JCH7_COLOR}12`, color: MUTE }}>{timeHint}</span>
+                  )}
+                </div>
+                {/* 나 / 상대방 감정 상태 pill */}
+                {(myState || partnerState) && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {myState && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: `${JCH7_MY}12`, border: `1px solid ${JCH7_MY}22` }}>
+                        <span className="text-[9px] font-black" style={{ color: JCH7_MY }}>{myName}</span>
+                        <span className="text-[11px]" style={{ color: INK }}>· {myState}</span>
+                      </div>
+                    )}
+                    {partnerState && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: `${JCH7_PT}12`, border: `1px solid ${JCH7_PT}22` }}>
+                        <span className="text-[9px] font-black" style={{ color: JCH7_PT }}>{partnerName}</span>
+                        <span className="text-[11px]" style={{ color: INK }}>· {partnerState}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* 단계 설명 */}
+                {desc && (
+                  <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 신뢰 회복 카드 — 이별로 깨진 신뢰를 어떻게 다시 쌓을 수 있는지 사주 근거와 함께 제시
+// 단순한 "잘 대화하라"가 아닌, 이 두 사람의 사주 구조가 말하는 신뢰 회복의 구체적 방법.
+// title(방법명), desc(상세 설명), sajuBasis(왜 이 두 사람에게 이 방법이 효과적인지), step(실천 방법)
+function TrustRebuildCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const title      = (item.title      as string | undefined) ?? "";
+  const desc       = (item.desc       as string | undefined) ?? "";
+  const sajuBasis  = (item.sajuBasis  as string | undefined) ?? "";
+  const step       = (item.step       as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${JCH7_COLOR}20`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${JCH7_COLOR}08`, borderBottom: `1px solid ${JCH7_COLOR}12` }}>
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-black flex-shrink-0" style={{ background: JCH7_COLOR, color: WHITE }}>
+          {index + 1}
+        </div>
+        <p className="text-[14px] font-black" style={{ color: INK }}>{title}</p>
+      </div>
+      {/* 상세 설명 */}
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: (sajuBasis || step) ? `1px solid ${JCH7_COLOR}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 사주 근거 — 왜 이 두 사람에게 이 방법이 효과적인지 */}
+      {sajuBasis && (
+        <div className="px-4 pt-3 pb-3" style={{ background: `${JCH7_COLOR}05`, borderBottom: step ? `1px solid ${JCH7_COLOR}0c` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[11px]">⊕</span>
+            <p className="text-[11px] font-black" style={{ color: JCH7_COLOR }}>사주 근거</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{sajuBasis}</p>
+        </div>
+      )}
+      {/* 실천 방법 — 실제로 어떻게 행동하면 되는지 */}
+      {step && (
+        <div className="px-4 py-3" style={{ background: `${JCH7_COLOR}08` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[12px]">✅</span>
+            <p className="text-[11px] font-black" style={{ color: JCH7_COLOR }}>실천 방법</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed font-medium" style={{ color: INK }}>{step}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 화해·재접근 가이드 카드 — 신뢰 회복 방법을 알았다면, 이제 어떻게 먼저 다가갈 것인가
+// 재접근의 타이밍·방식·말투까지 사주가 제안하는 구체적 가이드.
+// intro(상황 소개), callout(핵심 원칙), tips(각 조언: icon + title + text)
+function ReconcileGuideCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const intro   = (data.intro   as string | undefined) ?? "";
+  const callout = (data.callout as string | undefined) ?? "";
+  const tips    = (data.tips    as Array<Record<string, unknown>> | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 상황 소개 인용 배너 */}
+      {intro && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH7_COLOR}12 0%, ${JCH7_PALE} 100%)`, border: `1px solid ${JCH7_COLOR}20` }}>
+          <span className="text-[22px] mb-1 block" style={{ opacity: 0.4 }}>&ldquo;</span>
+          <p className="text-[14px] leading-relaxed font-bold" style={{ color: JCH7_COLOR, fontStyle: "italic", wordBreak: "keep-all" }}>{intro}</p>
+          <span className="text-[22px] block text-right" style={{ opacity: 0.4 }}>&rdquo;</span>
+        </div>
+      )}
+      {/* 핵심 원칙 callout */}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH7_COLOR}0c`, borderLeft: `3px solid ${JCH7_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH7_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {/* 조언 목록 — 아이콘 + 제목 + 설명 */}
+      {tips.map((tip, i) => {
+        const tipIcon  = (tip.icon  as string | undefined) ?? "💡";
+        const tipTitle = (tip.title as string | undefined) ?? "";
+        const tipText  = (tip.text  as string | undefined) ?? "";
+        return (
+          <div key={i} className="mb-3 flex gap-3 p-4 rounded-2xl" style={{ background: WHITE, border: `1px solid ${JCH7_COLOR}18`, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] flex-shrink-0" style={{ background: `${JCH7_COLOR}12` }}>
+              {tipIcon}
+            </div>
+            <div className="flex-1 min-w-0">
+              {tipTitle && <p className="text-[13px] font-black mb-1" style={{ color: JCH7_COLOR }}>{tipTitle}</p>}
+              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{tipText}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── 제8장 전용 컴포넌트 ────────────────────────────────────────
+
+// 재회 가능성 종합 게이지 — 8장 전체의 핵심 수치: "이 두 사람은 재회할 수 있는 인연인가"
+// 앞선 7장에서 분석한 합충·감정·미련·이별 패턴을 모두 종합한 최종 판정 점수.
+// 점수 구간에 따라 색상과 판정 레이블이 달라져 시각적으로 결론을 전달함.
+// score(0-100), label(판정 한 줄), paragraphs(점수 풀이 단락들)
+function ReunionGauge({ score, label, paragraphs }: { score: number; label: string; paragraphs?: string[] }) {
+  const pct  = Math.max(0, Math.min(100, score));
+  const dash = Math.PI * 2 * 54;
+  const fill = dash * (pct / 100);
+  // 점수 구간별 색상·판정
+  const gaugeColor =
+    pct >= 75 ? JCH8_YES  :   // 재회 가능성 높음 — 녹색
+    pct >= 50 ? JCH8_COLOR :  // 중간 — 골드
+    pct >= 30 ? "#7a4a10" :   // 낮음 — 어두운 갈색
+               JCH8_NO;       // 매우 낮음 — 적색
+  const verdict =
+    pct >= 75 ? "재회할 수 있는 인연이오" :
+    pct >= 55 ? "가능성이 있으나 노력이 필요하오" :
+    pct >= 35 ? "쉽지 않으나 불가능은 아니오" :
+               "인연의 실이 많이 약해졌소";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${JCH8_COLOR}0e 0%, ${JCH8_PALE} 100%)`, border: `1px solid ${JCH8_COLOR}22` }}>
+      <div className="pt-5 pb-4 flex flex-col items-center">
+        {/* 원형 게이지 */}
+        <svg width="150" height="150" viewBox="0 0 150 150">
+          {/* 배경 트랙 */}
+          <circle cx="75" cy="75" r="58" fill="none" stroke={`${gaugeColor}18`} strokeWidth="11" />
+          {/* 진행 호 */}
+          <circle
+            cx="75" cy="75" r="58"
+            fill="none"
+            stroke={gaugeColor}
+            strokeWidth="11"
+            strokeLinecap="round"
+            strokeDasharray={`${fill} ${dash - fill}`}
+            strokeDashoffset={dash * 0.25}
+            style={{ transition: "stroke-dasharray 1s ease" }}
+          />
+          {/* 중앙 점수 */}
+          <text x="75" y="66" textAnchor="middle" fontSize="30" fontWeight="900" fill={gaugeColor}>{pct}</text>
+          <text x="75" y="83" textAnchor="middle" fontSize="10" fill={`${gaugeColor}99`}>/ 100</text>
+          <text x="75" y="100" textAnchor="middle" fontSize="8" fill={`${JCH8_COLOR}80`}>재회 가능성</text>
+        </svg>
+        {/* 판정 라벨 */}
+        <div className="mt-2 px-5 py-1.5 rounded-full" style={{ background: `${gaugeColor}15`, border: `1px solid ${gaugeColor}35` }}>
+          <p className="text-[12px] font-black text-center" style={{ color: gaugeColor }}>{label || verdict}</p>
+        </div>
+      </div>
+      {/* 풀이 단락 */}
+      {paragraphs && paragraphs.length > 0 && (
+        <div className="px-5 pb-5">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="mb-3 text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 재회 징조 카드 — 사주에서 발견되는 재회를 가리키는 신호들
+// 단순히 "가능성이 있다"가 아니라, 어떤 사주 구조·운의 흐름이 재회를 가리키는지 구체적으로 보여줌.
+// 긍정 징조(재회 신호)와 부정 징조(이별 심화 신호)를 함께 다뤄 균형 잡힌 판단을 제공.
+// signType(징조명), signIcon, tone("positive"재회신호/"negative"이별신호), significance(핵심/보조/잠재), desc, sajuBasis
+function ReunionSignCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const signType     = (item.signType     as string | undefined) ?? "";
+  const signIcon     = (item.signIcon     as string | undefined) ?? "⊕";
+  const tone         = (item.tone         as string | undefined) ?? "positive";
+  const significance = (item.significance as string | undefined) ?? "보조";
+  const desc         = (item.desc         as string | undefined) ?? "";
+  const sajuBasis    = (item.sajuBasis    as string | undefined) ?? "";
+  const isPositive   = tone === "positive";
+  const themeColor   = isPositive ? JCH8_YES : JCH8_NO;
+  const sigMap: Record<string, { label: string }> = {
+    "핵심": { label: "핵심 신호" },
+    "보조": { label: "보조 신호" },
+    "잠재": { label: "잠재 신호" },
+  };
+  const sm = sigMap[significance] ?? sigMap["보조"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${themeColor}20`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${themeColor}08`, borderBottom: `1px solid ${themeColor}12` }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-[20px] flex-shrink-0" style={{ background: `${themeColor}15` }}>
+          {signIcon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${themeColor}18`, color: themeColor }}>
+              {isPositive ? "🟢 재회 신호" : "🔴 이별 신호"} · {sm.label}
+            </span>
+            <span className="text-[10px] text-gray-400 font-bold">#{index + 1}</span>
+          </div>
+          <p className="text-[14px] font-black" style={{ color: INK }}>{signType}</p>
+        </div>
+      </div>
+      {/* 징조 설명 */}
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: sajuBasis ? `1px solid ${themeColor}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 사주 근거 */}
+      {sajuBasis && (
+        <div className="px-4 py-3" style={{ background: `${themeColor}06` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[11px]">⊕</span>
+            <p className="text-[11px] font-black" style={{ color: themeColor }}>사주 근거</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{sajuBasis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 홍연의 종합 판단 카드 — "재회할 수 있는 인연인가"에 대한 사주의 최종 결론
+// 점수와 징조들을 모두 본 뒤, 홍연이 두 사람에게 직접 건네는 판단문.
+// 단순 예/아니오가 아니라, 어떤 조건 아래 재회가 가능한지, 무엇을 준비해야 하는지 담는다.
+// intro(판결 선언), callout(핵심 조건), paragraphs(종합 풀이 3단락)
+function ReunionVerdictCard({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  void myName; void partnerName;
+  return (
+    <div className="mx-5 mb-5">
+      {/* 판결 선언 배너 — 홍연이 직접 결론을 내리는 순간 */}
+      {intro && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH8_COLOR}14 0%, ${JCH8_PALE} 100%)`, border: `1px solid ${JCH8_COLOR}25` }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[16px]">⚖️</span>
+            <p className="text-[11px] font-black" style={{ color: JCH8_COLOR }}>홍연의 판단</p>
+          </div>
+          <p className="text-[14.5px] leading-relaxed font-black" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>
+        </div>
+      )}
+      {/* 핵심 조건 callout — 재회의 전제 조건 또는 핵심 경고 */}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH8_COLOR}0c`, borderLeft: `3px solid ${JCH8_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH8_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {/* 종합 풀이 단락 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제9장 전용 컴포넌트 ────────────────────────────────────────
+
+// 재회 후 관계 장면 카드 — "재회한다면 우린 어떤 모습일까"를 구체적 장면으로 그려냄
+// 단순 분석이 아닌 감성적 묘사. 사주가 그리는 재회 후 두 사람의 일상 장면을 이미지처럼 풀어냄.
+// 독자가 재회 후의 모습을 선명하게 상상할 수 있도록 장면(scene) 단위로 구성.
+// intro(재회 후 전체 분위기 한 줄), scenes: { icon, title, desc } 목록
+function ReunionSceneCard({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const intro  = (data.intro  as string | undefined) ?? "";
+  const scenes = (data.scenes as Array<Record<string, unknown>> | undefined) ?? [];
+  void myName; void partnerName;
+  return (
+    <div className="mx-5 mb-5">
+      {/* 재회 후 분위기 인용 배너 */}
+      {intro && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH9_COLOR}12 0%, ${JCH9_PALE} 100%)`, border: `1px solid ${JCH9_COLOR}22` }}>
+          <span className="text-[22px] mb-1 block" style={{ opacity: 0.4 }}>&ldquo;</span>
+          <p className="text-[14px] leading-relaxed font-bold" style={{ color: JCH9_COLOR, fontStyle: "italic", wordBreak: "keep-all" }}>{intro}</p>
+          <span className="text-[22px] block text-right" style={{ opacity: 0.4 }}>&rdquo;</span>
+        </div>
+      )}
+      {/* 장면 목록 */}
+      {scenes.map((scene, i) => {
+        const icon  = (scene.icon  as string | undefined) ?? "🎬";
+        const title = (scene.title as string | undefined) ?? "";
+        const desc  = (scene.desc  as string | undefined) ?? "";
+        return (
+          <div key={i} className="mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${JCH9_COLOR}18`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+            {/* 장면 헤더 */}
+            <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${JCH9_COLOR}08`, borderBottom: `1px solid ${JCH9_COLOR}10` }}>
+              <span className="text-[22px]">{icon}</span>
+              <p className="text-[13px] font-black" style={{ color: JCH9_COLOR }}>{title}</p>
+            </div>
+            {/* 장면 묘사 */}
+            <div className="px-4 py-3">
+              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// 재회 후 관계 역학 카드 — 재회가 만들어내는 강점과 여전히 풀어야 할 과제를 나란히 제시
+// 재회한다고 모든 것이 해결되는 건 아니다. 새롭게 생겨나는 좋은 것과, 여전히 남아있는 숙제를 함께 보여줌.
+// 강점과 과제를 2컬럼으로 나란히 배치해 균형 잡힌 시각을 제공.
+// strengths: [{icon, title, desc}], challenges: [{icon, title, desc}]
+function ReunionDynamicCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const strengths  = (data.strengths  as Array<Record<string, unknown>> | undefined) ?? [];
+  const challenges = (data.challenges as Array<Record<string, unknown>> | undefined) ?? [];
+  const summaryDesc = (data.summaryDesc as string | undefined) ?? "";
+  const maxLen = Math.max(strengths.length, challenges.length);
+  return (
+    <div className="mx-5 mb-5">
+      {/* 강점 / 과제 헤더 */}
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="px-3 py-2 rounded-xl text-center" style={{ background: `${JCH9_HOPE}10`, border: `1px solid ${JCH9_HOPE}20` }}>
+          <p className="text-[11px] font-black" style={{ color: JCH9_HOPE }}>💚 재회가 만드는 강점</p>
+        </div>
+        <div className="px-3 py-2 rounded-xl text-center" style={{ background: `${JCH9_COLOR}10`, border: `1px solid ${JCH9_COLOR}20` }}>
+          <p className="text-[11px] font-black" style={{ color: JCH9_COLOR }}>🔶 여전히 풀어야 할 과제</p>
+        </div>
+      </div>
+      {/* 강점 / 과제 쌍 나열 */}
+      {Array.from({ length: maxLen }).map((_, i) => {
+        const s = strengths[i];
+        const c = challenges[i];
+        return (
+          <div key={i} className="grid grid-cols-2 gap-3 mb-3">
+            {/* 강점 */}
+            {s ? (
+              <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${JCH9_HOPE}20` }}>
+                <div className="px-3 py-2 flex items-center gap-2" style={{ background: `${JCH9_HOPE}0a`, borderBottom: `1px solid ${JCH9_HOPE}14` }}>
+                  <span className="text-[16px]">{(s.icon as string | undefined) ?? "✅"}</span>
+                  <p className="text-[11px] font-black leading-tight" style={{ color: JCH9_HOPE }}>{(s.title as string | undefined) ?? ""}</p>
+                </div>
+                <div className="px-3 py-2.5" style={{ background: JCH9_HOPE_P }}>
+                  <p className="text-[11.5px] leading-relaxed" style={{ color: INK, wordBreak: "keep-all" }}>{(s.desc as string | undefined) ?? ""}</p>
+                </div>
+              </div>
+            ) : <div />}
+            {/* 과제 */}
+            {c ? (
+              <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${JCH9_COLOR}20` }}>
+                <div className="px-3 py-2 flex items-center gap-2" style={{ background: `${JCH9_COLOR}0a`, borderBottom: `1px solid ${JCH9_COLOR}14` }}>
+                  <span className="text-[16px]">{(c.icon as string | undefined) ?? "⚠️"}</span>
+                  <p className="text-[11px] font-black leading-tight" style={{ color: JCH9_COLOR }}>{(c.title as string | undefined) ?? ""}</p>
+                </div>
+                <div className="px-3 py-2.5" style={{ background: JCH9_PALE }}>
+                  <p className="text-[11.5px] leading-relaxed" style={{ color: INK, wordBreak: "keep-all" }}>{(c.desc as string | undefined) ?? ""}</p>
+                </div>
+              </div>
+            ) : <div />}
+          </div>
+        );
+      })}
+      {/* 종합 요약 */}
+      {summaryDesc && (
+        <div className="mt-2 px-4 py-3 rounded-xl" style={{ background: `${JCH9_COLOR}0c`, borderLeft: `3px solid ${JCH9_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH9_COLOR }}>{summaryDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 재회 후 미래 전망 카드 — 재회 직후·안정기·장기 흐름을 단계별로 예측
+// 재회는 시작이지, 끝이 아니다. 재회 후 시간이 흐르면서 관계가 어떻게 변화하는지
+// 단기·중기·장기 세 구간으로 나눠 각 시기의 특성·주의점·기회를 구체적으로 제시.
+// phases: [{phase, icon, timeHint, mood("밝음"|"주의"|"혼재"), desc, tip}]
+function ReunionOutlookCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const phases   = (data.phases   as Array<Record<string, unknown>> | undefined) ?? [];
+  const closing  = (data.closing  as string | undefined) ?? "";
+  const moodMap: Record<string, { color: string; pale: string; label: string }> = {
+    "밝음":  { color: JCH9_HOPE,  pale: JCH9_HOPE_P, label: "긍정적" },
+    "주의":  { color: JCH9_COLOR, pale: JCH9_PALE,   label: "주의 필요" },
+    "혼재":  { color: "#7a5a10",  pale: "#fdf8ee",   label: "복합적" },
+  };
+  return (
+    <div className="mx-5 mb-5">
+      {phases.map((ph, i) => {
+        const phase    = (ph.phase    as string | undefined) ?? "";
+        const icon     = (ph.icon     as string | undefined) ?? "📅";
+        const timeHint = (ph.timeHint as string | undefined) ?? "";
+        const mood     = (ph.mood     as string | undefined) ?? "혼재";
+        const desc     = (ph.desc     as string | undefined) ?? "";
+        const tip      = (ph.tip      as string | undefined) ?? "";
+        const mm = moodMap[mood] ?? moodMap["혼재"];
+        return (
+          <div key={i} className="mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${mm.color}20`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+            {/* 단계 헤더 */}
+            <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${mm.color}08`, borderBottom: `1px solid ${mm.color}12` }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-[18px] flex-shrink-0" style={{ background: `${mm.color}18` }}>
+                {icon}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${mm.color}18`, color: mm.color }}>{mm.label}</span>
+                  {timeHint && <span className="text-[10px]" style={{ color: MUTE }}>{timeHint}</span>}
+                </div>
+                <p className="text-[14px] font-black" style={{ color: INK }}>{phase}</p>
+              </div>
+            </div>
+            {/* 전망 설명 */}
+            <div className="px-4 pt-3 pb-3" style={{ borderBottom: tip ? `1px solid ${mm.color}0c` : "none" }}>
+              <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+            </div>
+            {/* 이 시기의 핵심 팁 */}
+            {tip && (
+              <div className="px-4 py-3" style={{ background: `${mm.color}06` }}>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[12px]">💡</span>
+                  <p className="text-[11px] font-black" style={{ color: mm.color }}>이 시기의 핵심</p>
+                </div>
+                <p className="text-[12.5px] leading-relaxed font-medium" style={{ color: INK }}>{tip}</p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {/* 마무리 문장 */}
+      {closing && (
+        <div className="px-4 py-3 rounded-xl" style={{ background: `linear-gradient(135deg, ${JCH9_COLOR}10 0%, ${JCH9_PALE} 100%)`, border: `1px solid ${JCH9_COLOR}20` }}>
+          <p className="text-[13.5px] leading-[1.8] font-bold text-center" style={{ color: JCH9_COLOR, wordBreak: "keep-all" }}>{closing}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── 제10장 전용 컴포넌트 ────────────────────────────────────────
+
+// 재회 좋은 시기 카드 — 사주가 가리키는 재회 적기를 품질 배지 + 구체 기간으로 시각화
+// "언제 다가가야 하는가"는 재회를 원하는 사람에게 가장 실질적인 정보다.
+// 시기별로 최고·좋음·보통·주의 4단계로 품질을 구분해 한눈에 비교할 수 있게 함.
+// period(시기명), periodIcon, quality(품질), periodRange(기간), desc(이 시기의 특성), sajuBasis(근거)
+function TimingWindowCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const period      = (item.period      as string | undefined) ?? "";
+  const periodIcon  = (item.periodIcon  as string | undefined) ?? "📅";
+  const quality     = (item.quality     as string | undefined) ?? "좋음";
+  const periodRange = (item.periodRange as string | undefined) ?? "";
+  const desc        = (item.desc        as string | undefined) ?? "";
+  const sajuBasis   = (item.sajuBasis   as string | undefined) ?? "";
+  const qualityMap: Record<string, { color: string; pale: string; label: string; bar: number }> = {
+    "최고": { color: JCH10_GOOD,  pale: "#edf7f0", label: "최고의 시기", bar: 100 },
+    "좋음": { color: JCH10_COLOR, pale: JCH10_PALE, label: "좋은 시기",   bar: 75  },
+    "보통": { color: "#7a7a5a",   pale: "#f5f5ee",  label: "보통",         bar: 50  },
+    "주의": { color: JCH10_WARN,  pale: "#fdf6ee",  label: "주의 시기",   bar: 30  },
+  };
+  const qm = qualityMap[quality] ?? qualityMap["좋음"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${qm.color}22`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      {/* 헤더 — 시기 아이콘 + 이름 + 품질 배지 + 기간 */}
+      <div className="px-4 py-3" style={{ background: `${qm.color}08`, borderBottom: `1px solid ${qm.color}12` }}>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-[20px] flex-shrink-0" style={{ background: `${qm.color}15` }}>
+            {periodIcon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${qm.color}18`, color: qm.color }}>
+                {qm.label}
+              </span>
+              <span className="text-[10px] font-bold" style={{ color: MUTE }}>#{index + 1}</span>
+            </div>
+            <p className="text-[14px] font-black" style={{ color: INK }}>{period}</p>
+          </div>
+        </div>
+        {/* 기간 표시 + 품질 바 */}
+        {periodRange && (
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] font-bold" style={{ color: qm.color }}>🗓 {periodRange}</span>
+          </div>
+        )}
+        {/* 품질 게이지 바 */}
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: `${qm.color}15` }}>
+          <div className="h-full rounded-full" style={{ width: `${qm.bar}%`, background: qm.color, transition: "width 0.8s ease" }} />
+        </div>
+      </div>
+      {/* 시기 특성 설명 */}
+      <div className="px-4 pt-3 pb-3" style={{ borderBottom: sajuBasis ? `1px solid ${qm.color}0c` : "none" }}>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 사주 근거 — 왜 이 시기가 좋은지(또는 주의인지)의 오행·운 근거 */}
+      {sajuBasis && (
+        <div className="px-4 py-3" style={{ background: `${qm.color}06` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[11px]">⊕</span>
+            <p className="text-[11px] font-black" style={{ color: qm.color }}>사주 근거</p>
+          </div>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{sajuBasis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 시기 판단 근거 카드 — 왜 이 시기들이 재회에 적합한지 사주 구조를 종합적으로 풀어냄
+// 개별 시기 카드에서 다룬 근거들을 하나의 큰 흐름으로 묶어 이해시키는 역할.
+// intro(종합 소개), reasons: [{ icon, title, desc }] — 핵심 사주 근거 목록
+function TimingReasonCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const intro   = (data.intro   as string | undefined) ?? "";
+  const callout = (data.callout as string | undefined) ?? "";
+  const reasons = (data.reasons as Array<Record<string, unknown>> | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 소개 인용 배너 */}
+      {intro && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH10_COLOR}12 0%, ${JCH10_PALE} 100%)`, border: `1px solid ${JCH10_COLOR}20` }}>
+          <span className="text-[22px] mb-1 block" style={{ opacity: 0.4 }}>&ldquo;</span>
+          <p className="text-[14px] leading-relaxed font-bold" style={{ color: JCH10_COLOR, fontStyle: "italic", wordBreak: "keep-all" }}>{intro}</p>
+          <span className="text-[22px] block text-right" style={{ opacity: 0.4 }}>&rdquo;</span>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH10_COLOR}0c`, borderLeft: `3px solid ${JCH10_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH10_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {/* 핵심 근거 목록 */}
+      {reasons.map((r, i) => {
+        const icon  = (r.icon  as string | undefined) ?? "🔑";
+        const title = (r.title as string | undefined) ?? "";
+        const desc  = (r.desc  as string | undefined) ?? "";
+        return (
+          <div key={i} className="mb-3 flex gap-3 p-4 rounded-2xl" style={{ background: WHITE, border: `1px solid ${JCH10_COLOR}18`, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] flex-shrink-0" style={{ background: `${JCH10_COLOR}12` }}>
+              {icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              {title && <p className="text-[13px] font-black mb-1" style={{ color: JCH10_COLOR }}>{title}</p>}
+              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// 실전 타이밍 행동 가이드 — 좋은 시기에 실제로 어떻게 행동해야 하는지 단계별로 제시
+// 시기를 알았다고 저절로 재회가 이루어지지 않는다. 이 시기에 무엇을 어떻게 해야 하는지
+// 구체적인 행동 단계(step)와 하지 말아야 할 것(avoid)까지 포함해 실전 지침 역할을 함.
+// intro, callout, steps: [{ icon, title, action(해야 할 것), avoid(하지 말아야 할 것) }]
+function TimingActionGuide({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const intro   = (data.intro   as string | undefined) ?? "";
+  const callout = (data.callout as string | undefined) ?? "";
+  const steps   = (data.steps   as Array<Record<string, unknown>> | undefined) ?? [];
+  void myName; void partnerName;
+  return (
+    <div className="mx-5 mb-5">
+      {intro && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH10_GOOD}10 0%, #edf7f0 100%)`, border: `1px solid ${JCH10_GOOD}22` }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[16px]">🎯</span>
+            <p className="text-[11px] font-black" style={{ color: JCH10_GOOD }}>실전 행동 가이드</p>
+          </div>
+          <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${JCH10_GOOD}0c`, borderLeft: `3px solid ${JCH10_GOOD}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JCH10_GOOD }}>{callout}</p>
+        </div>
+      )}
+      {steps.map((s, i) => {
+        const icon   = (s.icon   as string | undefined) ?? "📌";
+        const title  = (s.title  as string | undefined) ?? "";
+        const action = (s.action as string | undefined) ?? "";
+        const avoid  = (s.avoid  as string | undefined) ?? "";
+        return (
+          <div key={i} className="mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${JCH10_COLOR}18`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+            {/* 단계 헤더 */}
+            <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${JCH10_COLOR}08`, borderBottom: `1px solid ${JCH10_COLOR}10` }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-[16px] flex-shrink-0" style={{ background: `${JCH10_COLOR}15` }}>
+                {icon}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${JCH10_COLOR}15`, color: JCH10_COLOR }}>STEP {i + 1}</span>
+                <p className="text-[13px] font-black" style={{ color: INK }}>{title}</p>
+              </div>
+            </div>
+            {/* 해야 할 것 */}
+            {action && (
+              <div className="px-4 pt-3 pb-3" style={{ borderBottom: avoid ? `1px solid ${JCH10_GOOD}14` : "none" }}>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[11px]">✅</span>
+                  <p className="text-[11px] font-black" style={{ color: JCH10_GOOD }}>이렇게 하시오</p>
+                </div>
+                <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{action}</p>
+              </div>
+            )}
+            {/* 하지 말아야 할 것 */}
+            {avoid && (
+              <div className="px-4 py-3" style={{ background: `${JCH10_WARN}06` }}>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[11px]">🚫</span>
+                  <p className="text-[11px] font-black" style={{ color: JCH10_WARN }}>이것은 피하시오</p>
+                </div>
+                <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{avoid}</p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Ch11 컴포넌트 ────────────────────────────────────────────────────────
+
+// 재회 후 미래를 시간 순으로 펼쳐 보여주는 단계 카드.
+// 재회 직후부터 장기 미래까지 각 시기의 분위기(mood)·설명·팁을 한눈에 담아
+// "우리의 미래가 이렇게 흐를 것"이라는 구체적 그림을 그려준다.
+// { period, icon, timeHint, mood("밝음"|"주의"|"혼재"), desc, tip }
+function FutureStageCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const period   = (item.period   as string | undefined) ?? "";
+  const icon     = (item.icon     as string | undefined) ?? "🌱";
+  const timeHint = (item.timeHint as string | undefined) ?? "";
+  const mood     = (item.mood     as string | undefined) ?? "혼재";
+  const desc     = (item.desc     as string | undefined) ?? "";
+  const tip      = (item.tip      as string | undefined) ?? "";
+
+  const moodMap: Record<string, { color: string; pale: string; label: string }> = {
+    "밝음": { color: JCH11_TEAL,  pale: JCH11_TEAL_P, label: "밝은 시기"  },
+    "주의": { color: JCH11_COLOR, pale: JCH11_PALE,    label: "주의 시기"  },
+    "혼재": { color: JCH11_GOLD,  pale: JCH11_GOLD_P,  label: "복합 시기"  },
+  };
+  const m = moodMap[mood] ?? moodMap["혼재"];
+
+  return (
+    <div className="mx-6 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${m.color}18`, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+      {/* 단계 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${m.color}08`, borderBottom: `1px solid ${m.color}14` }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] flex-shrink-0" style={{ background: `${m.color}14` }}>
+          {icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${m.color}18`, color: m.color }}>
+              {index + 1}단계
+            </span>
+            <span className="text-[10px] font-bold" style={{ color: m.color }}>{m.label}</span>
+          </div>
+          <p className="text-[13.5px] font-black leading-snug" style={{ color: INK }}>{period}</p>
+          {timeHint && <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>{timeHint}</p>}
+        </div>
+      </div>
+      {/* 본문 */}
+      <div className="px-4 pt-3 pb-3">
+        <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+      {/* 이 시기를 잘 넘기기 위한 팁 */}
+      {tip && (
+        <div className="mx-4 mb-4 px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${m.color}08`, border: `1px solid ${m.color}14` }}>
+          <span className="text-[13px] flex-shrink-0 mt-0.5">💡</span>
+          <p className="text-[12px] leading-[1.7]" style={{ color: m.color, fontWeight: 700, wordBreak: "keep-all" }}>{tip}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 재회 후 두 사람이 어떤 미래를 만들어갈 수 있는지 비전 카드.
+// 단순한 "행복한 미래"가 아니라 사주 오행에 근거해 두 사람이 함께할 때
+// 어떤 빛나는 가능성과 조심해야 할 함정이 교차하는지 구체적으로 보여준다.
+// { intro, visions: [{ icon, title, desc }] }
+function FutureVisionCard({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const intro   = (data.intro   as string | undefined) ?? "";
+  const visions = (data.visions as Array<Record<string, unknown>> | undefined) ?? [];
+
+  return (
+    <div className="mx-6 mb-6">
+      {/* 인트로 인용 */}
+      {intro && (
+        <div className="mb-4 px-4 py-3 rounded-2xl" style={{ background: JCH11_GOLD_P, border: `1px solid ${JCH11_GOLD}20` }}>
+          <p className="text-[13px] leading-[1.8] italic" style={{ color: JCH11_GOLD, fontFamily: SERIF, wordBreak: "keep-all" }}>
+            &ldquo;{intro}&rdquo;
+          </p>
+          <p className="text-[11px] mt-1.5 text-right" style={{ color: MUTE }}>— {myName}님과 {partnerName}님의 미래</p>
+        </div>
+      )}
+      {/* 비전 카드 목록 */}
+      <div className="space-y-3">
+        {visions.map((v, i) => {
+          const icon  = (v.icon  as string | undefined) ?? "✨";
+          const title = (v.title as string | undefined) ?? "";
+          const desc  = (v.desc  as string | undefined) ?? "";
+          return (
+            <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${JCH11_COLOR}14`, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+              <div className="px-4 pt-3 pb-2 flex items-center gap-3" style={{ borderBottom: `1px solid ${JCH11_COLOR}0c` }}>
+                <span className="text-[20px]">{icon}</span>
+                <p className="text-[13.5px] font-black" style={{ color: JCH11_COLOR }}>{title}</p>
+              </div>
+              <div className="px-4 py-3">
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 홍연이 두 사람에게 남기는 마지막 당부 카드.
+// 분석과 예측을 마친 뒤 홍연이 직접 전하는 따뜻한 말로 구성된다.
+// 사주가 정해준 인연이라도 사람이 어떻게 마음을 쓰느냐에 달려있다는 메시지,
+// 그리고 두 사람을 향한 진심 어린 응원이 담긴 마무리 섹션이다.
+// { paragraphs: string[], closing: string }
+function FinalMessageCard({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const closing    = (data.closing    as string | undefined) ?? "";
+
+  return (
+    <div className="mx-6 mb-4">
+      {/* 홍연 서두 */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-[16px] flex-shrink-0" style={{ background: `${JCH11_COLOR}12` }}>
+          🪷
+        </div>
+        <div>
+          <p className="text-[10px] font-black tracking-widest" style={{ color: JCH11_COLOR }}>HONG YEON</p>
+          <p className="text-[11px]" style={{ color: MUTE }}>{myName}님과 {partnerName}님에게</p>
+        </div>
+      </div>
+      {/* 단락들 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[13px] leading-[1.9] mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+      {/* 클로징 명언 */}
+      {closing && (
+        <div className="mt-6 pt-5" style={{ borderTop: `1px solid ${JCH11_COLOR}14` }}>
+          <p className="text-[14px] font-black leading-[1.7] italic text-center" style={{ color: JCH11_COLOR, fontFamily: SERIF, wordBreak: "keep-all" }}>
+            &ldquo;{closing}&rdquo;
+          </p>
+          <p className="text-[11px] text-center mt-2" style={{ color: MUTE }}>— 홍연</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // 장번호 → 표시 제목 (재회궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 재회궁합에 대하여",
@@ -2330,7 +4040,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "6":  "제6장 · 궁합의 핵심: 합과 충",
   "7":  "제7장 · 헤어진 후 두 사람의 감정 흐름",
   "8":  "제8장 · 재회할 수 있는 인연인가",
-  "9":  "제9장 · 재회한다면 달라지는 것과 달라지지 않는 것",
+  "9":  "제9장 · 재회한다면 우린 어떻게 될까",
   "10": "제10장 · 재회하기 좋은 시기는 언제인가",
   "11": "제11장 · 재회 후 두 사람의 미래는",
   "12": "마무리 · 그대들에게 남기는 홍연의 서신",
@@ -3526,7 +5236,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제6장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                      no: "6" },
   { disp: "제7장",  chip: "감정흐름", title: "헤어진 후 두 사람의 감정 흐름",             no: "7" },
   { disp: "제8장",  chip: "재회가능", title: "재회할 수 있는 인연인가",                   no: "8" },
-  { disp: "제9장",  chip: "변화",    title: "재회한다면 달라지는 것과 달라지지 않는 것",   no: "9" },
+  { disp: "제9장",  chip: "변화",    title: "재회한다면 우린 어떻게 될까",               no: "9" },
   { disp: "제10장", chip: "재회시기", title: "재회하기 좋은 시기는 언제인가",             no: "10" },
   { disp: "제11장", chip: "미래",    title: "재회 후 두 사람의 미래는",                  no: "11" },
   { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",              no: "12" },
@@ -4558,497 +6268,684 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
-      {ch === "1" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_1/kunghap_jaehwe_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
-
-          <section className="pb-2">
-            <div className="px-6"><Heading>나의 명식</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          </section>
-
-          <section className="px-6 pt-6 pb-6">
-            <Heading>나의 오행 분포</Heading>
-            <P>목·화·토·금·수 다섯 기운이<br />내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-            <div className="flex justify-center mt-4">
-              <OhaengRadar view={report?.view ?? null} color={MAROON} />
+      {ch === "1" && (() => {
+        const myWonguk       = (jc.myWonguk       as Record<string, unknown> | undefined) ?? null;
+        const myNature       = (jc.myNature       as Record<string, unknown> | undefined) ?? null;
+        const myRelationStyle = (jc.myRelationStyle as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
             </div>
-          </section>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_1/kunghap_jaehwe_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          {jc.myWonguk && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>나의 원국 풀이</Heading>
-              <ReportSec data={jc.myWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+            <Quote>{`"재회를 논하기 전,\n먼저 나의 사주를 살펴보겠소.\n내가 어떤 기운의 사람인지 아는 것이 먼저이오."`}</Quote>
+
+            {/* 명식 표 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>나의 명식</Heading></div>
+              <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
             </section>
-          )}
-          {(jc.myNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>나의 타고난 성정</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.myNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{kw}</span>
-                ))}
-              </div>
-              {(jc.myNature as {desc?: string}).desc && <P>{(jc.myNature as {desc: string}).desc}</P>}
+
+            {/* 오행 분포 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>나의 오행 분포</Heading>
+              <P>목·화·토·금·수 다섯 기운이 내 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 관계를 맺고 유지하는 방식, 그리고 이별 후 감정을 처리하는 방향을 결정하오.</P>
             </section>
-          )}
-          {jc.myRelationStyle && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>나의 연애 스타일</Heading>
-              <ReportSec data={jc.myRelationStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+            <OhaengDonut view={report?.view ?? null} />
+
+            {/* 원국 풀이 카드 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>나의 사주 풀이</Heading>
+              <P>일간(日干)을 중심으로 내 사주의 오행 기운과 신강·신약의 흐름을 살펴보겠소. 이 풀이는 내가 어떤 에너지로 관계에 임하는지, 이별 이후 어떤 심리적 흐름을 타는지를 이해하는 출발점이 되오.</P>
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
-          <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
-          <ChapterNav cur="1" go={next} />
-        </>
-      )}
+            <JWongukCard data={myWonguk} color={JCH1_COLOR} pale={JCH1_PALE} />
+
+            {/* 기질 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>나의 기질</Heading>
+              <P>사주 원국에 깃든 본연의 성품이오. 이 기질이 평소 관계에서 어떻게 빛나는지, 그리고 헤어진 이후 어떤 그림자를 드리우는지 함께 살펴보겠소. 재회를 고민할 때 가장 먼저 이해해야 하는 것이 바로 자신의 기질이오.</P>
+            </section>
+            <JNatureCard data={myNature} color={JCH1_COLOR} label="나를 대표하는 기질" />
+
+            {/* 관계 스타일 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>나의 관계 스타일</Heading>
+              <P>사주가 보여주는 나의 연애·관계 방식이오. 어떻게 사랑을 표현하고, 갈등이 생겼을 때 어떻게 반응하며, 이별 후 어떤 방식으로 마음을 닫거나 여는지 — 이 스타일을 알아야 재회의 가능성도 가늠할 수 있소.</P>
+            </section>
+            <RelationStyleCard data={myRelationStyle} color={JCH1_COLOR} pale={JCH1_PALE} />
+
+            <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
+            <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
+            <ChapterNav cur="1" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
-      {ch === "2" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_2/kunghap_jaehwe_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
+      {ch === "2" && (() => {
+        const partnerName        = report?.partnerName || "상대방";
+        const partnerWonguk      = (jc.partnerWonguk      as Record<string, unknown> | undefined) ?? null;
+        const partnerNature      = (jc.partnerNature      as Record<string, unknown> | undefined) ?? null;
+        const partnerRelationStyle = (jc.partnerRelationStyle as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_2/kunghap_jaehwe_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
+            <Quote>{`"이번엔 그 사람의 사주를 살펴보겠소.\n재회를 고민한다면, 상대가 어떤 기운의\n사람인지 먼저 아는 것이 중요하오."`}</Quote>
 
-          {report?.partnerView ? (
-            <>
+            {/* 상대방 명식 표 */}
+            {report?.partnerView ? (
               <section className="pb-2">
-                <div className="px-6"><Heading>{report.partnerName || "상대방"}의 명식</Heading></div>
-                <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
+                <div className="px-6"><Heading>{partnerName}의 명식</Heading></div>
+                <MyeongsikTable view={report.partnerView} name={partnerName} birth={report.partnerBirth ?? null} />
               </section>
-
-              <section className="px-6 pt-6 pb-6">
-                <Heading>상대방의 오행 분포</Heading>
-                <P>목·화·토·금·수 다섯 기운이<br />상대방 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-                <div className="flex justify-center mt-4">
-                  <OhaengRadar view={report.partnerView} color={NAVY} />
-                </div>
+            ) : (
+              <section className="px-6 pt-6 pb-4">
+                <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
               </section>
-            </>
-          ) : (
-            <section className="px-6 pt-6 pb-6">
-              <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
-            </section>
-          )}
+            )}
 
-          {jc.partnerWonguk && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>{report?.partnerName || "상대방"}의 원국 풀이</Heading>
-              <ReportSec data={jc.partnerWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+            {/* 상대방 오행 분포 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>{partnerName}의 오행 분포</Heading>
+              <P>목·화·토·금·수 다섯 기운이 상대방의 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 그 사람이 관계를 맺고 유지하는 방식, 그리고 이별 후 감정을 처리하는 방향을 결정하오.</P>
             </section>
-          )}
-          {(jc.partnerNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>{report?.partnerName || "상대방"}의 타고난 성정</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.partnerNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
-                ))}
-              </div>
-              {(jc.partnerNature as {desc?: string}).desc && <P>{(jc.partnerNature as {desc: string}).desc}</P>}
+            <OhaengDonutPartner view={report?.partnerView ?? null} />
+
+            {/* 상대방 원국 풀이 카드 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>{partnerName}의 사주 풀이</Heading>
+              <P>일간(日干)을 중심으로 상대방의 오행 기운과 신강·신약의 흐름을 살펴보겠소. 이 풀이는 그 사람이 어떤 에너지로 관계에 임하는지, 이별 이후 어떤 심리적 흐름을 타는지를 이해하는 출발점이 되오.</P>
             </section>
-          )}
-          {jc.partnerRelationStyle && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>{report?.partnerName || "상대방"}의 연애 스타일</Heading>
-              <ReportSec data={jc.partnerRelationStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+            <JWongukCard data={partnerWonguk} color={JCH2_COLOR} pale={JCH2_PALE} />
+
+            {/* 상대방 기질 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>{partnerName}의 기질</Heading>
+              <P>상대방의 사주 원국에 깃든 본연의 성품이오. 이 기질이 평소 관계에서 어떻게 빛나는지, 그리고 헤어진 이후 어떤 그림자를 드리우는지 함께 살펴보겠소. 재회를 원한다면, 상대방의 기질을 먼저 이해해야 하오.</P>
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
-          <Quote>{`"두 사람의 원국을 보았으니,\n이제 재회 가능성을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
+            <JNatureCard data={partnerNature} color={JCH2_COLOR} label={`${partnerName}을(를) 대표하는 기질`} />
+
+            {/* 상대방 관계 스타일 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>{partnerName}의 관계 스타일</Heading>
+              <P>사주가 보여주는 상대방의 연애·관계 방식이오. 그 사람이 어떻게 사랑을 표현하고, 갈등이 생겼을 때 어떻게 반응하며, 이별 후 어떤 방식으로 마음을 닫거나 여는지 — 이 스타일을 알아야 재회의 접근법도 달라지오.</P>
+            </section>
+            <RelationStyleCard data={partnerRelationStyle} color={JCH2_COLOR} pale={JCH2_PALE} />
+
+            <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
+            <Quote>{`"두 사람의 원국을 보았으니,\n이제 두 사람이 왜 헤어졌는지\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="2" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제3장 · 재회 가능성 ═══════════ */}
-      {ch === "3" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 재회</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회 가능성</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"헤어진 두 사람이\n다시 만날 수 있는지\n사주로 풀어보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>재회 가능성 점수</Heading>
-            {(jc.reconnectScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.reconnectScore as {score: number}).score} label={(jc.reconnectScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={68} label="재회의 실이 끊어지지 않은 인연이오" />
-            )}
-            {(jc.reconnectScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>재회 가능성의 근거</Heading>
-            <ReportSec data={jc.reconnectReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-          <Quote>{`"재회 가능성을 알았으니,\n이별의 원인을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="3" go={next} />
-        </>
-      )}
+      {ch === "3" && (() => {
+        const myName      = name || "나";
+        const partnerName = report?.partnerName || "상대방";
+        const bc = (jc.breakupCause   as Record<string, unknown> | undefined) ?? null;
+        const bp = (jc.breakupPattern as Record<string, unknown> | undefined) ?? null;
+        const hd = (jc.healingDesc    as Record<string, unknown> | undefined) ?? null;
+        const causeItems = (bc?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 이별 원인</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 왜 헤어졌는가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"이별은 우연이 아니오.\n두 사람의 사주가\n왜 갈라서게 했는지 풀어보겠소."`}</Quote>
 
-      {/* ═══════════ 제4장 · 이별 원인 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 이별 원인</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>왜 헤어졌는가</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"이별에는 반드시 원인이 있소.\n두 사람의 사주가\n왜 갈라서게 했는지 풀어보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>이별의 근본 원인</Heading>
-            {(jc.breakupCause as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
+            {/* 이별의 근본 원인 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>이별의 근본 원인</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                사주는 이별을 운명이라 하지 않소. 두 사람의 오행·합충이 빚어낸 구조적 원인을 들여다보겠소.
+              </p>
+            </section>
+            {causeItems.map((item, i) => (
+              <BreakupCauseCard key={i} item={item} index={i} />
             ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>반복되는 이별 패턴</Heading>
-            <ReportSec data={jc.breakupPattern as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>치유와 회복</Heading>
-            {(jc.healingDesc as {desc?: string} | undefined)?.desc && <P>{(jc.healingDesc as {desc: string}).desc}</P>}
-          </section>
-          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"이별 원인을 알았으니,\n변화와 성장을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
+
+            {/* 반복되는 이별 패턴 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>반복되는 이별 패턴</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                한 번의 이별이 아닌, {myName}님과 {partnerName}님이 왜 이런 방식으로 헤어지게 됐는지 — 그 구조를 사주로 풀어보겠소.
+              </p>
+            </section>
+            <BreakupPatternCard data={bp} />
+
+            {/* 치유와 회복의 경로 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>치유와 회복의 경로</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                이별의 상처를 치유하지 않고 재회한다면, 같은 이별을 반복하게 되오. 두 사람 각각, 그리고 함께 걸어야 할 치유의 길을 안내하겠소.
+              </p>
+            </section>
+            <HealingPathCard data={hd} />
+
+            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
+            <Quote>{`"이별의 원인을 알았으니,\n재회의 가능성을\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제4장 · 재회 가능성 ═══════════ */}
+      {ch === "4" && (() => {
+        const myName      = name || "나";
+        const partnerName = report?.partnerName || "상대방";
+        const myLonging    = (jc.myLonging   as Record<string, unknown> | undefined) ?? null;
+        const myHeartDesc  = (jc.myHeartDesc as Record<string, unknown> | undefined) ?? null;
+        const myEmotions   = (jc.myEmotions  as Record<string, unknown> | undefined) ?? null;
+        const emotionItems = (myEmotions?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        const longingScore = (myLonging?.score as number | undefined) ?? 65;
+        const longingLabel = (myLonging?.label as string | undefined) ?? "";
+        const longingPara  = (myLonging?.paragraphs as string[] | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 내 시각</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 이 사람을 아직 어떻게 보는가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"헤어진 후에도\n그 사람이 마음에 남아있다면\n사주가 그 이유를 말해주겠소."`}</Quote>
+
+            {/* 미련·그리움 지수 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>미련·그리움 지수</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                {myName}님의 사주가 말하는 {partnerName}에 대한 미련과 그리움의 깊이요. 이 수치는 단순한 감정이 아니라, 사주 오행이 만들어내는 마음의 구조이오.
+              </p>
+            </section>
+            <MyLongingGauge score={longingScore} label={longingLabel} paragraphs={longingPara} />
+
+            {/* 마음속에 남은 감정들 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>마음속에 남은 감정들</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                이별 후 한 가지 감정만 남는 사람은 없소. {myName}님의 마음에 뒤엉켜 있는 감정들을 사주로 하나씩 살펴보겠소.
+              </p>
+            </section>
+            {emotionItems.map((item, i) => (
+              <MyEmotionCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 내 마음의 구조 — 종합 풀이 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>내 마음의 구조</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                사주는 {myName}님이 {partnerName}를 어떤 시각으로 바라보는지 — 그 마음의 근본 구조를 드러내오. 지금 느끼는 감정이 어디서 비롯된 것인지 풀어보겠소.
+              </p>
+            </section>
+            <MyHeartDescCard data={myHeartDesc} myName={myName} partnerName={partnerName} />
+
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
+            <Quote>{`"나의 마음을 알았으니,\n상대의 마음도\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제5장 · 변화와 성장 ═══════════ */}
-      {ch === "5" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 변화·성장</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회를 위한 변화와 성장</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_5/kunghap_jaehwe_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"재회가 이루어지려면\n두 사람 모두 변해야 하오.\n무엇이 달라져야 하는지 보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>변화의 방향</Heading>
-            <ReportSec data={jc.changeDesc as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>성장 포인트</Heading>
-            {(jc.growthItems as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
+      {ch === "5" && (() => {
+        const myName           = name || "나";
+        const partnerName      = report?.partnerName || "상대방";
+        const partnerLonging   = (jc.partnerLonging   as Record<string, unknown> | undefined) ?? null;
+        const partnerHeartDesc = (jc.partnerHeartDesc as Record<string, unknown> | undefined) ?? null;
+        const partnerEmotions  = (jc.partnerEmotions  as Record<string, unknown> | undefined) ?? null;
+        const emotionItems     = (partnerEmotions?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        const longingScore     = (partnerLonging?.score as number | undefined) ?? 60;
+        const longingLabel     = (partnerLonging?.label as string | undefined) ?? "";
+        const longingPara      = (partnerLonging?.paragraphs as string[] | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 상대 시각</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대는 나를 아직 어떻게 보는가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_5/kunghap_jaehwe_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"재회를 원할 때\n가장 궁금한 것은\n상대의 마음이오."`}</Quote>
+
+            {/* 상대방 미련·그리움 지수 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>상대방 미련·그리움 지수</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                {partnerName}님의 사주가 말하는 {myName}님에 대한 미련과 그리움의 깊이요. 상대방 스스로도 설명하지 못하는 마음을 사주가 드러내주겠소.
+              </p>
+            </section>
+            <PartnerLongingGauge score={longingScore} label={longingLabel} paragraphs={longingPara} />
+
+            {/* 상대방 마음속 감정들 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>상대방 마음속 감정들</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                {partnerName}님의 마음에 {myName}님에 대한 어떤 감정들이 남아있는지 하나씩 살펴보겠소. 이 감정들을 알면 재회 접근 방식이 달라지오.
+              </p>
+            </section>
+            {emotionItems.map((item, i) => (
+              <PartnerEmotionCard key={i} item={item} index={i} />
             ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>재회 준비도 체크</Heading>
-            {(jc.readyCheck as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${GOLD}12`, border: `1px solid ${GOLD}33` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.readyCheck as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-          <Quote>{`"변화를 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
-          <ChapterNav cur="5" go={next} />
-        </>
-      )}
+
+            {/* 상대방 마음의 구조 — 종합 풀이 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>상대방 마음의 구조</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                {partnerName}님이 {myName}님을 바라보는 시각의 근본 구조요. 사주가 드러내는 이 마음을 이해하는 것이 재회의 첫걸음이오.
+              </p>
+            </section>
+            <PartnerHeartDescCard data={partnerHeartDesc} myName={myName} partnerName={partnerName} />
+
+            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
+            <Quote>{`"두 사람의 마음을 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
+            <ChapterNav cur="5" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제6장 · 합과 충 ═══════════ */}
-      {ch === "6" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주의 합과 충</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_6/kunghap_jaehwe_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 명식을 합쳐서 보면</Heading>
-            <GanjiRelation view={report?.view ?? null} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>합(合) 목록</Heading>
-            {(jc.hapList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-[13px] font-bold" style={{ color: GREEN }}>{item.type}</p>
-                  <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${GREEN}22`, color: GREEN }}>{item.strength}</span>
-                </div>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+      {ch === "6" && (() => {
+        const myName      = name || "나";
+        const partnerName = report?.partnerName || "상대방";
+        const hapList     = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
+        const chungList   = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
+        const overallScore = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
+        const hapItems    = (hapList?.items   as Array<Record<string, unknown>> | undefined) ?? [];
+        const chungItems  = (chungList?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        void myName; void partnerName;
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_6/kunghap_jaehwe_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
+
+            {/* 두 명식 합충 시각화 — 기존 GanjiRelation 컴포넌트 활용 */}
+            <section className="px-6 pt-2 pb-4">
+              <Heading>두 명식을 합쳐서 보면</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                두 사람의 천간·지지 글자들이 서로 어떻게 반응하는지 한눈에 보이오. 선으로 연결된 글자들이 합이나 충 관계에 있소.
+              </p>
+              <GanjiRelation view={report?.view ?? null} />
+            </section>
+
+            {/* 합(合) 목록 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>합(合) — 끌어당기는 힘</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                합은 두 글자가 서로를 끌어당기는 힘이오. 이 인력이 강할수록 헤어졌어도 다시 만나게 되는 힘이 작용하오.
+              </p>
+            </section>
+            {hapItems.length > 0 ? hapItems.map((item, i) => (
+              <JHapCard key={i} item={item} index={i} />
+            )) : (
+              <div className="mx-5 mb-4 px-5 py-4 rounded-2xl" style={{ background: `${JCH6_COLOR}08`, border: `1px solid ${JCH6_COLOR}18` }}>
+                <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 뚜렷한 합이 없소. 끌어당기는 힘보다 각자의 독립성이 강한 관계이오.</p>
               </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>충(沖) 목록</Heading>
-            {(jc.chungList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.length ? (
-              (jc.chungList as {items: Array<{type: string; desc: string; strength: string}>}).items.map((item, i) => (
-                <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[13px] font-bold" style={{ color: WARN }}>{item.type}</p>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${WARN}22`, color: WARN }}>{item.strength}</span>
-                  </div>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 강한 충이 없소.</p>
             )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>종합 궁합 점수</Heading>
-            {(jc.overallScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.overallScore as {score: number}).score} label={(jc.overallScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={70} label="다시 이어질 수 있는 인연이오" />
+
+            {/* 충(沖) 목록 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>충(沖) — 부딪히는 힘</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                충은 두 글자가 서로 부딪히는 힘이오. 충이 있다고 인연이 아닌 것이 아니오 — 이 충돌을 어떻게 다루느냐가 재회의 열쇠이오.
+              </p>
+            </section>
+            {chungItems.length > 0 ? chungItems.map((item, i) => (
+              <JChungCard key={i} item={item} index={i} />
+            )) : (
+              <div className="mx-5 mb-4 px-5 py-4 rounded-2xl" style={{ background: `${JCH6_CHUN}08`, border: `1px solid ${JCH6_CHUN}18` }}>
+                <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 강한 충이 없소. 크게 부딪히지 않는 편안한 관계이오.</p>
+              </div>
             )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-          <Quote>{`"합·충을 알았으니,\n감정 흐름과 신뢰 회복을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="6" go={next} />
-        </>
-      )}
+
+            {/* 종합 궁합 점수 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>종합 궁합 점수</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                합과 충을 모두 종합한 두 사람의 사주 궁합 총점이오. 이 점수가 재회의 가능성과 방향에 어떤 의미인지 풀어보겠소.
+              </p>
+            </section>
+            <HapChungSummaryCard data={overallScore} />
+
+            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
+            <Quote>{`"합·충을 알았으니,\n헤어진 후 두 사람의\n감정 흐름을 보겠소."`}</Quote>
+            <ChapterNav cur="6" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제7장 · 감정 흐름과 신뢰 회복 ═══════════ */}
-      {ch === "7" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 감정 흐름</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>감정 흐름과 신뢰 회복</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_7/kunghap_jaehwe_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"재회 후 두 사람의 감정이\n어떻게 흐르는지,\n신뢰를 어떻게 쌓을 수 있는지 보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>재회 후 감정 흐름</Heading>
-            <ReportSec data={jc.emotionalFlow as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>신뢰 회복 방법</Heading>
-            {(jc.trustRebuild as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: NAVY }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>화해 조언</Heading>
-            {(jc.reconcileTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: MAROON, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-          <Quote>{`"감정 흐름을 알았으니,\n재회를 막는 장애물을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="7" go={next} />
-        </>
-      )}
+      {ch === "7" && (() => {
+        const myName        = name || "나";
+        const partnerName   = report?.partnerName || "상대방";
+        const emotionFlow   = (jc.emotionFlow   as Record<string, unknown> | undefined) ?? null;
+        const trustRebuild  = (jc.trustRebuild  as Record<string, unknown> | undefined) ?? null;
+        const reconcileGuide = (jc.reconcileGuide as Record<string, unknown> | undefined) ?? null;
+        const trustItems    = (trustRebuild?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 감정 흐름</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>헤어진 후 두 사람의 감정 흐름</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_7/kunghap_jaehwe_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"이별 후 감정은\n직선으로 흐르지 않소.\n두 사람 각각의 흐름을 보여드리겠소."`}</Quote>
 
-      {/* ═══════════ 제8장 · 장애물 ═══════════ */}
-      {ch === "8" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 장애물</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회를 막는 장애물</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_8/kunghap_jaehwe_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"재회를 가로막는 기운이 있소.\n미리 알고 대비하면\n넘어설 수 있소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>주요 장애물</Heading>
-            {(jc.obstacleItems as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>장애물의 원인</Heading>
-            <ReportSec data={jc.obstacleReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>극복 조언</Heading>
-            {(jc.overcomeTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-          <Quote>{`"장애물을 알았으니,\n위기 시기를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="8" go={next} />
-        </>
-      )}
+            {/* 감정 흐름 타임라인 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>이별 후 감정의 흐름</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                사주는 이별 후 감정이 어떤 단계를 거쳐 변화하는지 드러내오. {myName}님과 {partnerName}님의 감정 흐름이 어떻게 맞닿고 엇갈리는지 살펴보겠소.
+              </p>
+            </section>
+            <EmotionFlowTimeline data={emotionFlow} myName={myName} partnerName={partnerName} />
 
-      {/* ═══════════ 제9장 · 위기 시기 ═══════════ */}
-      {ch === "9" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회 후 위기 시기</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_9/kunghap_jaehwe_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"재회 후에도 흔들리는 시기가 있소.\n미리 알고 지혜롭게 넘기시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기 시기 점수</Heading>
-            {(jc.crisisScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.crisisScore as {score: number}).score} label={(jc.crisisScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={55} label="주의해야 할 시기가 있소" />
-            )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기의 원인</Heading>
-            <ReportSec data={jc.crisisReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기 대처 조언</Heading>
-            {(jc.crisisTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: NAVY, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
+            {/* 신뢰 회복 방법 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>신뢰 회복의 방법</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                이별로 깨진 신뢰는 시간만으로 회복되지 않소. 두 사람의 사주가 말하는 신뢰 회복의 구체적 방법이오.
+              </p>
+            </section>
+            {trustItems.map((item, i) => (
+              <TrustRebuildCard key={i} item={item} index={i} />
             ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-          <Quote>{`"위기 시기를 알았으니,\n재회에 좋은 시기를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="9" go={next} />
-        </>
-      )}
 
-      {/* ═══════════ 제10장 · 재회에 좋은 시기 ═══════════ */}
-      {ch === "10" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회에 가장 좋은 시기</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_10/kunghap_jaehwe_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 다시 만나기\n가장 좋은 시기가 있소.\n그 시기를 미리 알고 준비하시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기 흐름</Heading>
-            {(jc.goodTimeFlow as {items?: Array<{label: string; desc: string; highlight?: boolean}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: item.highlight ? `${GOLD}18` : `${NAVY}08`, border: `1px solid ${item.highlight ? GOLD : NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: item.highlight ? GOLD : NAVY }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기의 이유</Heading>
-            {(jc.goodTimeItems as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.timingAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.timingAdvice as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-          <Quote>{`"좋은 시기를 알았으니,\n두 사람의 미래를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="10" go={next} />
-        </>
-      )}
+            {/* 화해·재접근 가이드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>화해·재접근 가이드</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                신뢰가 어느 정도 회복됐다면, 이제 어떻게 다가가야 하는가. 사주가 말하는 재접근의 타이밍·방식·말투이오.
+              </p>
+            </section>
+            <ReconcileGuideCard data={reconcileGuide} />
 
-      {/* ═══════════ 제11장 · 미래 흐름 ═══════════ */}
-      {ch === "11" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 미래 흐름</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회 후의 미래</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_11/kunghap_jaehwe_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"재회에 성공한다면\n두 사람의 앞날이\n어떻게 펼쳐질지 보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>미래 흐름</Heading>
-            {(jc.futureFlow as {items?: ReportFlowItem[]} | undefined)?.items ? (
-              <RunFlowChart flow={(jc.futureFlow as {items: ReportFlowItem[]}).items} />
-            ) : (
-              <RelationFlowChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
-            )}
-          </section>
-          <section className="px-6 pt-4 pb-4">
-            <Heading>재회 이후의 비전</Heading>
-            {(jc.reunionVision as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.finalMessage as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed font-medium" style={{ color: MAROON }}>{(jc.finalMessage as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
-          <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
-          <ChapterNav cur="11" go={next} />
-        </>
-      )}
+            <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
+            <Quote>{`"감정 흐름을 알았으니,\n재회할 수 있는 인연인지\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="7" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제8장 · 재회할 수 있는 인연인가 ═══════════ */}
+      {ch === "8" && (() => {
+        const myName         = name || "나";
+        const partnerName    = report?.partnerName || "상대방";
+        const reconnectScore = (jc.reconnectScore as Record<string, unknown> | undefined) ?? null;
+        const reconnectSigns = (jc.reconnectSigns as Record<string, unknown> | undefined) ?? null;
+        const reunionVerdict = (jc.reunionVerdict as Record<string, unknown> | undefined) ?? null;
+        const signItems      = (reconnectSigns?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        const rsScore        = (reconnectScore?.score      as number   | undefined) ?? 65;
+        const rsLabel        = (reconnectScore?.label      as string   | undefined) ?? "";
+        const rsParagraphs   = (reconnectScore?.paragraphs as string[] | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 재회 판단</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회할 수 있는 인연인가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_8/kunghap_jaehwe_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"이별 후 두 사람의 사주를\n모두 살핀 후\n홍연이 답하겠소."`}</Quote>
+
+            {/* 재회 가능성 종합 점수 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>재회 가능성 종합 점수</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                앞선 장들에서 살핀 합충·감정 흐름·이별 패턴·두 사람의 미련을 모두 종합하여 재회 가능성 점수를 내겠소. 이 수치는 운명이 아닌 현재의 사주 기운이오.
+              </p>
+            </section>
+            <ReunionGauge score={rsScore} label={rsLabel} paragraphs={rsParagraphs} />
+
+            {/* 재회의 징조들 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>사주가 보내는 재회의 신호</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                사주는 재회를 가리키는 신호와 이별을 심화하는 신호를 동시에 보내오. {myName}님과 {partnerName}님의 사주에서 발견되는 신호들이오.
+              </p>
+            </section>
+            {signItems.map((item, i) => (
+              <ReunionSignCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 홍연의 종합 판단 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>홍연의 종합 판단</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                모든 것을 살핀 홍연이 {myName}님과 {partnerName}님에게 직접 건네는 결론이오. 사주의 언어로 내린 최종 판단을 들어보시오.
+              </p>
+            </section>
+            <ReunionVerdictCard data={reunionVerdict} myName={myName} partnerName={partnerName} />
+
+            <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
+            <Quote>{`"인연의 판단을 내렸으니,\n재회한다면 어떻게 될지\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="8" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제9장 · 재회한다면 우린 어떻게 될까 ═══════════ */}
+      {ch === "9" && (() => {
+        const myName       = name || "나";
+        const partnerName  = report?.partnerName || "상대방";
+        const reunionScene   = (jc.reunionScene   as Record<string, unknown> | undefined) ?? null;
+        const reunionDynamic = (jc.reunionDynamic as Record<string, unknown> | undefined) ?? null;
+        const reunionOutlook = (jc.reunionOutlook as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 재회 후</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회한다면 우린 어떻게 될까</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_9/kunghap_jaehwe_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"재회한 두 사람의 앞에\n어떤 그림이 펼쳐지는지\n사주로 그려드리겠소."`}</Quote>
+
+            {/* 재회 후 관계 장면 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>재회 후 두 사람의 모습</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                다시 만난 {myName}님과 {partnerName}님은 어떤 모습일까요. 사주가 그리는 재회 후의 장면들이오.
+              </p>
+            </section>
+            <ReunionSceneCard data={reunionScene} myName={myName} partnerName={partnerName} />
+
+            {/* 재회 후 관계 역학 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>재회가 만드는 것과 남겨진 것</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                재회한다고 모든 것이 해결되는 건 아니오. 재회가 새롭게 만들어내는 강점과, 여전히 함께 풀어야 할 과제를 나란히 살펴보겠소.
+              </p>
+            </section>
+            <ReunionDynamicCard data={reunionDynamic} />
+
+            {/* 재회 후 미래 전망 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>재회 후 시간의 흐름</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                재회 직후부터 시간이 흐르면서 관계는 어떻게 변하는가. 단기·중기·장기 흐름으로 전망하겠소.
+              </p>
+            </section>
+            <ReunionOutlookCard data={reunionOutlook} />
+
+            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
+            <Quote>{`"재회 후의 모습을 알았으니,\n가장 좋은 재회 시기를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="9" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제10장 · 재회하기 좋은 시기 ═══════════ */}
+      {ch === "10" && (() => {
+        const myName        = name || "나";
+        const partnerName   = report?.partnerName || "상대방";
+        const timingWindows = (jc.timingWindows as Record<string, unknown> | undefined) ?? null;
+        const timingReasons = (jc.timingReasons as Record<string, unknown> | undefined) ?? null;
+        const timingAction  = (jc.timingAction  as Record<string, unknown> | undefined) ?? null;
+        const windowItems   = (timingWindows?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 시기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회하기 좋은 시기는 언제인가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_10/kunghap_jaehwe_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"마음만으로는 부족하오.\n사주가 열어주는 시기를\n알고 움직여야 하오."`}</Quote>
+
+            {/* 재회 적기 시기 목록 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>재회하기 좋은 시기들</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                사주와 운의 흐름이 가리키는 {myName}님의 재회 적기요. 품질 배지로 시기별 강도를 한눈에 비교할 수 있소.
+              </p>
+            </section>
+            {windowItems.map((item, i) => (
+              <TimingWindowCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 시기 판단 근거 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>이 시기가 좋은 사주적 이유</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                위 시기들이 재회에 적합한 이유를 사주 오행과 운의 흐름으로 풀어보겠소.
+              </p>
+            </section>
+            <TimingReasonCard data={timingReasons} />
+
+            {/* 실전 행동 가이드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>이 시기, 실전 행동 가이드</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                좋은 시기를 알았다면 어떻게 움직여야 하는가. {myName}님이 {partnerName}님에게 다가가는 구체적 행동 단계요.
+              </p>
+            </section>
+            <TimingActionGuide data={timingAction} myName={myName} partnerName={partnerName} />
+
+            <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
+            <Quote>{`"시기를 알았으니,\n재회 후 두 사람의 미래를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="10" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제11장 · 재회 후 두 사람의 미래는 ═══════════ */}
+      {ch === "11" && (() => {
+        const myName       = name || "나";
+        const partnerName  = report?.partnerName || "상대방";
+        const futureStages = (jc.futureStages as Record<string, unknown> | undefined) ?? null;
+        const futureVision = (jc.futureVision as Record<string, unknown> | undefined) ?? null;
+        const finalMessage = (jc.finalMessage as Record<string, unknown> | undefined) ?? null;
+        const stageItems   = (futureStages?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 미래</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회 후 두 사람의 미래는</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_11/kunghap_jaehwe_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"재회에 성공한다면\n두 사람의 앞날이\n어떻게 펼쳐질지 보겠소."`}</Quote>
+
+            {/* 재회 후 시간 흐름별 단계 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>재회 후 시간의 흐름</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                재회가 이루어진 뒤 두 사람의 관계가 어떤 리듬으로 흘러갈지 사주 운의 흐름으로 살펴보겠소.
+                설레는 시작, 시험의 순간, 그리고 새롭게 자리 잡는 안정까지 — 각 시기를 미리 알면 흔들리지 않고 나아갈 수 있소.
+              </p>
+            </section>
+            {stageItems.map((item, i) => (
+              <FutureStageCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 두 사람이 만들어갈 미래 비전 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>두 사람이 만들어갈 미래</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                재회 후 시간이 쌓이면 두 사람은 어떤 관계가 되어 있을 것인가.
+                사주 오행이 그려주는 {myName}님과 {partnerName}님의 미래 가능성이오.
+                이것은 예언이 아니라, 두 사람이 함께 노력한다면 이룰 수 있는 미래의 그림이오.
+              </p>
+            </section>
+            <FutureVisionCard data={futureVision} myName={myName} partnerName={partnerName} />
+
+            {/* 홍연의 마지막 당부 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>홍연이 전하는 마지막 당부</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>
+                모든 분석을 마치고 홍연이 {myName}님과 {partnerName}님에게 직접 전하는 말이오.
+                사주는 방향을 가리킬 뿐, 그 길을 걷는 것은 언제나 사람의 몫이오.
+              </p>
+            </section>
+            <FinalMessageCard data={finalMessage} myName={myName} partnerName={partnerName} />
+
+            <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
+            <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
+            <ChapterNav cur="11" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
       {ch === "12" && (

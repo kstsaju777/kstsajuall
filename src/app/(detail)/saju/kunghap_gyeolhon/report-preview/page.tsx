@@ -10,6 +10,7 @@
 //    기존 hero 이미지를 끼워둠 — 추후 전용 일러스트로 교체.
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
@@ -35,6 +36,53 @@ const NAVY = "#2d3a8c";
 const GOLD = "#c2a23c";
 const GREEN = "#3f7d6b";
 const TAG_COLORS = ["#2d3a8c", "#b5891c", "#c9474f", "#3f8a52"];
+// 장별 테마 색상
+const GCH1_COLOR = "#7a2340"; // 딥 와인 로즈 — 1장 나의 원국
+const GCH1_PALE  = "#f8edf2";
+const GCH2_COLOR = "#2a3f8a"; // 딥 네이비 블루 — 2장 상대 원국
+const GCH2_PALE  = "#eef0fb";
+const GCH3_COLOR = "#6b3070"; // 딥 퍼플 — 3장 결혼 가능성
+const GCH3_PALE  = "#f5eef8";
+const GCH3_YES   = "#2e7d52"; // 인연 긍정 — 초록
+const GCH3_WARN  = "#b5451b"; // 인연 경고 — 주황
+const GCH4_COLOR = "#7a5c1e"; // 딥 앰버 골드 — 4장 부부상
+const GCH4_PALE  = "#fdf8ec";
+const GCH11_COLOR = "#3a2a5a"; // 11장 미래 — 딥 인디고
+const GCH11_PALE  = "#f0eef8";
+const GCH11_FAR   = "#1e3a6a"; // 노년·장기 — 다크 블루
+const GCH11_WARM  = "#6b3a5a"; // 성숙·깊이 — 플럼
+const GCH10_COLOR = "#2a4a7a"; // 10장 시기 — 딥 네이비
+const GCH10_PALE  = "#eef2fb";
+const GCH10_BEST  = "#1a5c8a"; // 최적 시기 — 코발트
+const GCH10_GOOD  = "#2e6b4a"; // 좋은 시기 — 그린
+const GCH10_WARN  = "#8b5a1a"; // 주의 시기 — 앰버 브라운
+const GCH9_CRISIS = "#8b2a1a"; // 9장 위기 — 딥 레드
+const GCH9_CRISIS_P = "#fdf0ed";
+const GCH9_SOLVE  = "#1e5c3a"; // 9장 극복 — 딥 그린
+const GCH9_SOLVE_P = "#eaf5ee";
+const GCH9_COLOR  = "#4a3060"; // 9장 기본 — 딥 퍼플
+const GCH9_PALE   = "#f3f0f8";
+const GCH8_COLOR = "#2e5a4a"; // 딥 틸 그린 — 8장 자녀운
+const GCH8_PALE  = "#eaf4f0";
+const GCH8_YES   = "#1e6b40"; // 자녀 인연 긍정
+const GCH8_SOFT  = "#7a5c3a"; // 자녀 특성 — 웜 브라운
+const GCH7_COLOR = "#5a3e1e"; // 딥 브라운 골드 — 7장 재물·가정
+const GCH7_PALE  = "#faf5ec";
+const GCH7_WLT   = "#7a5c1e"; // 재물운 — 앰버
+const GCH7_WLT_P = "#fdf8ec";
+const GCH7_HOM   = "#2a4f6e"; // 가정운 — 딥 스틸 블루
+const GCH7_HOM_P = "#eef4f9";
+const GCH6_COLOR = "#3d5a3e"; // 딥 모스 그린 — 6장 합·충
+const GCH6_HAP   = "#2e6b3a"; // 합(合) 색상 — 포레스트 그린
+const GCH6_HAP_P = "#eaf5ec";
+const GCH6_CHU   = "#7a2020"; // 충(沖) 색상 — 딥 버건디
+const GCH6_CHU_P = "#fdf0f0";
+const GCH5_STR   = "#1e6b40"; // 강점 — 딥 포레스트 그린
+const GCH5_STR_P = "#eaf5ee";
+const GCH5_WEK   = "#8b2a1a"; // 약점 — 딥 브릭 레드
+const GCH5_WEK_P = "#fdf0ed";
+const GCH5_BAL   = "#4a4080"; // 균형 — 딥 인디고
+const GCH5_BAL_P = "#f0eefb";
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
 // 오행 색상
@@ -46,56 +94,144 @@ const OHAENG: { key: string; label: string; color: string }[] = [
   { key: "수", label: "수", color: "#8fb3e0" },
 ];
 
-// 오행 균형 도넛 차트 (명식 천간·지지 오행 비율)
+// 오행 균형 도넛 + 세로 바차트 (연애궁합 OhaengDonutCh1과 동일 구조)
 function OhaengDonut({ view }: { view: MyeongsikView | null }) {
   const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
   if (view) {
     for (const p of view.pillars) {
       if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
-      if (p.jiEl && counts[p.jiEl] !== undefined) counts[p.jiEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
     }
   }
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
   const pct = (n: number) => Math.round((n / total) * 100);
   const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
-
-  // 도넛 (stroke-dasharray)
-  const R = 52, C = 2 * Math.PI * R;
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
   let acc = 0;
   return (
-    <div className="mx-5 my-2 rounded-2xl p-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <h3 className="text-[16px] font-black flex items-center gap-1.5 mb-1" style={{ color: INK }}>
-        <span style={{ color: ROSE }}>◎</span> 오행 균형
-      </h3>
-      <p className="text-[12px] mb-4" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 비율이에요.</p>
-      <div className="flex justify-center">
-        <svg viewBox="0 0 140 140" style={{ width: 150, height: 150 }}>
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
           <g transform="rotate(-90 70 70)">
             {OHAENG.map((e) => {
               const frac = counts[e.key] / total;
               const len = frac * C;
               const el = (
-                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="16"
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
                   strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
               );
               acc += len;
               return el;
             })}
           </g>
-          <text x="70" y="64" textAnchor="middle" fontSize="9" fill={MUTE}>가장 강한 기운</text>
-          <text x="70" y="80" textAnchor="middle" fontSize="20" fontWeight="900" fill={dom.color}>{dom.label}</text>
-          <text x="70" y="95" textAnchor="middle" fontSize="11" fontWeight="700" fill={INK_SOFT}>{pct(counts[dom.key])}%</text>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
         </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="flex gap-1.5 mt-3">
-        {OHAENG.map((e) => (
-          <div key={e.key} className="flex-1 text-center rounded-lg py-1.5" style={{ background: `${e.color}22` }}>
-            <div className="text-[12px] font-black" style={{ color: INK }}>{e.label}</div>
-            <div className="text-[11px] font-bold" style={{ color: INK_SOFT }}>{pct(counts[e.key])}%</div>
+    </div>
+  );
+}
+
+// 오행 균형 도넛 + 세로 바차트 — 상대방용 (GCH2_COLOR 팔레트)
+function OhaengDonutPartner({ view }: { view: MyeongsikView | null }) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const pct = (n: number) => Math.round((n / total) * 100);
+  const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${GCH2_COLOR}0e 0%, ${WHITE} 55%)`, border: `1.5px solid ${GCH2_COLOR}25` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
-      <p className="text-[10.5px] mt-3 text-center" style={{ color: MUTE }}>기운을 눌러 자세히 보세요</p>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
+          <g transform="rotate(-90 70 70)">
+            {OHAENG.map((e) => {
+              const frac = counts[e.key] / total;
+              const len = frac * C;
+              const el = (
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
+                  strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
+              );
+              acc += len;
+              return el;
+            })}
+          </g>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
+        </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -135,6 +271,1793 @@ function OhaengRadar({ view, color }: { view: MyeongsikView | null; color: strin
         </g>
       ))}
     </svg>
+  );
+}
+
+// ─── 제11장 전용 컴포넌트 ───────────────────────────────────────────────────────
+
+// 미래 전망 요약 배너 — 이 결혼의 장기 성격 + 핵심 예언
+function FutureVisionBanner({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const visionType = (data.visionType as string | undefined) ?? "";
+  const visionIcon = (data.visionIcon as string | undefined) ?? "🌅";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const intro      = (data.intro      as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-5">
+      {visionType && (
+        <div className="rounded-2xl px-5 py-5 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH11_COLOR} 0%, ${GCH11_FAR} 100%)` }}>
+          <span className="text-[36px] leading-none shrink-0">{visionIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-1" style={{ color: "rgba(255,255,255,0.65)" }}>이 결혼의 장기 전망</p>
+            <p className="text-[19px] font-black leading-tight" style={{ color: WHITE, fontFamily: SERIF }}>{visionType}</p>
+          </div>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: `${GCH11_COLOR}10`, borderLeft: `3px solid ${GCH11_COLOR}` }}>
+          <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH11_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {intro && <p className="text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+    </div>
+  );
+}
+
+// 시기별 미래 흐름 꺾은선 차트 — futureFlow.periods 기반
+function FutureFlowLineChart({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const intro   = (data.intro   as string | undefined) ?? "";
+  const rawItems = (data.periods as Record<string, unknown>[] | undefined) ?? [];
+  if (!rawItems.length) return null;
+
+  const toneScore = (tone: string, fallback?: number) => {
+    if (fallback !== undefined) return Math.min(100, Math.max(5, fallback));
+    if (tone === "flourish") return 88;
+    if (tone === "good")     return 75;
+    if (tone === "stable")   return 60;
+    if (tone === "caution")  return 42;
+    return 30; // challenge
+  };
+  const toneColor = (tone: string) =>
+    tone === "flourish" ? GCH11_FAR  :
+    tone === "good"     ? GCH11_COLOR :
+    tone === "stable"   ? "#4a6080"   :
+    tone === "caution"  ? GCH10_WARN  : GCH9_CRISIS;
+  const toneIcon = (tone: string) =>
+    tone === "flourish" ? "🌟" : tone === "good" ? "🌸" : tone === "stable" ? "🌿" : tone === "caution" ? "🌤️" : "⚡";
+  const toneLabel = (tone: string) =>
+    tone === "flourish" ? "번성" : tone === "good" ? "성장" : tone === "stable" ? "안정" : tone === "caution" ? "주의" : "도전";
+
+  const items = rawItems.map((it) => ({
+    label:   (it.label   as string | undefined) ?? "",
+    heading: (it.heading as string | undefined) ?? "",
+    tone:    (it.tone    as string | undefined) ?? "stable",
+    score:   toneScore((it.tone as string | undefined) ?? "stable", it.score as number | undefined),
+    text:    (it.text    as string | undefined) ?? "",
+    tip:     (it.tip     as string | undefined) ?? "",
+  }));
+
+  const n = items.length;
+  const W = 320, H = 170, padX = 28, padTop = 18, padBot = 48;
+  const minS = Math.min(...items.map((d) => d.score));
+  const maxS = Math.max(...items.map((d) => d.score));
+  const range = maxS - minS || 20;
+  const x = (i: number) => padX + ((W - padX * 2) * i) / Math.max(n - 1, 1);
+  const y = (v: number) =>
+    padTop + (H - padTop - padBot) * (1 - (v - (minS - range * 0.15)) / (range * 1.3));
+  const pts    = items.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
+  const areaBot = y(minS - range * 0.3);
+  const area   = `${x(0)},${areaBot} ${pts} ${x(n - 1)},${areaBot}`;
+
+  return (
+    <div className="mx-5 mb-5">
+      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+
+      {/* 차트 카드 */}
+      <div className="rounded-2xl p-4 mb-5" style={{ background: WHITE, border: `1px solid ${GCH11_COLOR}18`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+        {/* 범례 */}
+        <div className="flex items-center gap-3 mb-3 flex-wrap">
+          {[
+            { tone: "flourish", label: "번성기" },
+            { tone: "good",     label: "성장기" },
+            { tone: "stable",   label: "안정기" },
+            { tone: "caution",  label: "주의기" },
+            { tone: "challenge",label: "도전기" },
+          ].map(({ tone, label }) => (
+            <div key={tone} className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-0.5 rounded" style={{ background: toneColor(tone) }} />
+              <span className="text-[10px]" style={{ color: toneColor(tone) }}>{label}</span>
+            </div>
+          ))}
+        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
+          <defs>
+            <linearGradient id="futureFlowArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={GCH11_COLOR} stopOpacity="0.15" />
+              <stop offset="100%" stopColor={GCH11_COLOR} stopOpacity="0.01" />
+            </linearGradient>
+          </defs>
+          {[0, 1, 2, 3].map((gi) => {
+            const gy = padTop + ((H - padTop - padBot) * gi) / 3;
+            return <line key={gi} x1={padX} x2={W - padX} y1={gy} y2={gy} stroke={`${GCH11_COLOR}12`} strokeWidth="1" />;
+          })}
+          <polygon points={area} fill="url(#futureFlowArea)" />
+          {items.map((d, i) => {
+            if (i === 0) return null;
+            const prev = items[i - 1];
+            return (
+              <line key={i} x1={x(i-1)} y1={y(prev.score)} x2={x(i)} y2={y(d.score)}
+                stroke={toneColor(d.tone)} strokeWidth="2.5" strokeLinecap="round" />
+            );
+          })}
+          {items.map((d, i) => {
+            const col   = toneColor(d.tone);
+            const parts = d.label.split(/[\s~·년]/);
+            return (
+              <g key={i}>
+                <circle cx={x(i)} cy={y(d.score)} r={5}   fill={WHITE} stroke={col} strokeWidth="2.5" />
+                <circle cx={x(i)} cy={y(d.score)} r={2.5} fill={col} />
+                <text x={x(i)} y={y(d.score) - 10} fontSize="11" fill={col} textAnchor="middle" fontWeight="700">{d.score}</text>
+                {parts.slice(0, 2).map((p, pi) => (
+                  <text key={pi} x={x(i)} y={H - padBot + 14 + pi * 12} fontSize="9" fill={INK_SOFT} textAnchor="middle">{p}</text>
+                ))}
+                <text x={x(i)} y={H - padBot + 44} fontSize="14" textAnchor="middle">{toneIcon(d.tone)}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* 시기별 풀이 카드 */}
+      <div className="space-y-3">
+        {items.map((d, i) => {
+          const col = toneColor(d.tone);
+          return (
+            <div key={i} className="rounded-xl overflow-hidden" style={{ border: `1.5px solid ${col}22`, background: WHITE }}>
+              <div className="flex items-center gap-2.5 px-3.5 pt-3 pb-2" style={{ borderBottom: `1px solid ${col}15`, background: `${col}07` }}>
+                <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: col }}>
+                  <span className="text-[8px] font-black" style={{ color: WHITE }}>{i + 1}</span>
+                </div>
+                <span className="text-[11px]">{toneIcon(d.tone)}</span>
+                <p className="text-[12px] font-black" style={{ color: col }}>{d.label}</p>
+                {d.heading && <p className="text-[11px] font-bold" style={{ color: INK_SOFT }}>— {d.heading}</p>}
+                <span className="ml-auto text-[11px] font-black px-2 py-0.5 rounded-full shrink-0" style={{ background: `${col}18`, color: col }}>{toneLabel(d.tone)}</span>
+              </div>
+              <div className="px-3.5 pt-2.5 pb-2">
+                <p className="text-[13px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{d.text}</p>
+              </div>
+              {d.tip && (
+                <div className="mx-3.5 mb-3 rounded-lg px-3 py-2" style={{ background: `${col}08`, border: `1px solid ${col}18` }}>
+                  <p className="text-[10px] font-black mb-0.5" style={{ color: col }}>이 시기의 지혜</p>
+                  <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{d.tip}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 장기 전망 패널 — 10년·20년 후 관계 성숙 전망
+function LongTermOutlookPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const milestones = (data.milestones as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const MS_ICONS = ["💑", "🏡", "👨‍👩‍👧‍👦", "🌿", "🌟", "🧓"];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 결혼 이정표 */}
+      {milestones.length > 0 && (
+        <div className="rounded-2xl overflow-hidden mb-5" style={{ border: `1px solid ${GCH11_COLOR}18` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH11_COLOR}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH11_COLOR }}>결혼 여정의 이정표</p>
+          </div>
+          {milestones.map((ms, i) => {
+            const msLabel = (ms.label as string | undefined) ?? "";
+            const msTitle = (ms.title as string | undefined) ?? "";
+            const msDesc  = (ms.desc  as string | undefined) ?? "";
+            const msIcon  = (ms.icon  as string | undefined) ?? MS_ICONS[i % MS_ICONS.length];
+            return (
+              <div key={i} className="flex items-stretch" style={{ borderTop: i > 0 ? `1px solid ${GCH11_COLOR}0c` : "none" }}>
+                {/* 왼쪽 타임라인 */}
+                <div className="flex flex-col items-center py-4 px-3 shrink-0" style={{ background: `${GCH11_COLOR}05`, borderRight: `2px solid ${GCH11_COLOR}18`, minWidth: 56 }}>
+                  <span className="text-[18px] leading-none mb-1">{msIcon}</span>
+                  <p className="text-[10px] font-black text-center" style={{ color: GCH11_COLOR }}>{msLabel}</p>
+                </div>
+                {/* 본문 */}
+                <div className="flex-1 px-4 py-3.5" style={{ background: WHITE }}>
+                  <p className="text-[13px] font-black mb-1" style={{ color: GCH11_COLOR }}>{msTitle}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{msDesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 노년 인연 카드 — 두 사람이 함께 늙어가는 모습
+function OldAgeRelationCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const oldAgeType = (data.oldAgeType as string | undefined) ?? "";
+  const oldAgeIcon = (data.oldAgeIcon as string | undefined) ?? "🌙";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const traits     = (data.traits     as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 노년 유형 배너 */}
+      {oldAgeType && (
+        <div className="rounded-2xl px-5 py-4 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH11_WARM}18 0%, ${GCH11_PALE} 100%)`, border: `1.5px solid ${GCH11_WARM}25` }}>
+          <span className="text-[32px] leading-none shrink-0">{oldAgeIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-0.5" style={{ color: GCH11_WARM }}>두 사람의 노년 인연</p>
+            <p className="text-[17px] font-black leading-snug" style={{ color: GCH11_WARM, fontFamily: SERIF }}>{oldAgeType}</p>
+          </div>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${GCH11_WARM}0a`, borderLeft: `3px solid ${GCH11_WARM}` }}>
+          <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH11_WARM }}>{callout}</p>
+        </div>
+      )}
+      {/* 노년 특성 항목 */}
+      {traits.length > 0 && (
+        <div className="rounded-2xl overflow-hidden mb-4" style={{ border: `1px solid ${GCH11_WARM}18` }}>
+          {traits.map((tr, i) => {
+            const trIcon  = (tr.icon  as string | undefined) ?? "•";
+            const trTitle = (tr.title as string | undefined) ?? "";
+            const trDesc  = (tr.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3.5 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH11_WARM}0c` : "none" }}>
+                <span className="text-[18px] leading-none shrink-0 mt-0.5">{trIcon}</span>
+                <div>
+                  <p className="text-[12.5px] font-black mb-0.5" style={{ color: GCH11_WARM }}>{trTitle}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{trDesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 홍연의 마지막 조언 패널 — 장 마무리 + 12장으로 넘기는 브릿지
+function FinalAdvicePanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const wishes     = (data.wishes     as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 마무리 인용구 박스 */}
+      {callout && (
+        <div className="mb-5 px-5 py-5 rounded-2xl text-center" style={{ background: `linear-gradient(160deg, ${GCH11_COLOR}10 0%, ${GCH11_WARM}08 100%)`, border: `1.5px solid ${GCH11_COLOR}18` }}>
+          <p className="text-[15px] font-black leading-[1.75]" style={{ color: GCH11_COLOR, fontFamily: SERIF, whiteSpace: "pre-line" }}>{callout}</p>
+        </div>
+      )}
+      {/* 바람 리스트 */}
+      {wishes.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH11_WARM}20` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH11_WARM}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH11_WARM }}>홍연이 이 부부에게 바라는 것</p>
+          </div>
+          {wishes.map((ws, i) => {
+            const wsIcon = (ws.icon  as string | undefined) ?? "✨";
+            const wsText = (ws.text  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3.5 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH11_WARM}0c` : "none" }}>
+                <span className="text-[18px] leading-none shrink-0 mt-0.5">{wsIcon}</span>
+                <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK, wordBreak: "keep-all" }}>{wsText}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제10장 전용 컴포넌트 ───────────────────────────────────────────────────────
+
+// 결혼 시기 에너지 꺾은선 차트 — timingItems.items 기반
+function MarriageTimingLineChart({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const intro = (data.intro as string | undefined) ?? "";
+  const rawItems = (data.items as Record<string, unknown>[] | undefined) ?? [];
+  if (!rawItems.length) return null;
+
+  const toneScore = (tone: string, fallback?: number) => {
+    if (fallback !== undefined) return Math.min(100, Math.max(5, fallback));
+    if (tone === "best")    return 90;
+    if (tone === "good")    return 72;
+    if (tone === "normal")  return 55;
+    return 38; // caution
+  };
+  const toneColor = (tone: string) =>
+    tone === "best"    ? GCH10_BEST  :
+    tone === "good"    ? GCH10_GOOD  :
+    tone === "caution" ? GCH10_WARN  : GCH10_COLOR;
+  const toneIcon = (tone: string) =>
+    tone === "best" ? "💍" : tone === "good" ? "🌸" : tone === "caution" ? "⚠️" : "🌤️";
+  const toneLabel = (tone: string) =>
+    tone === "best" ? "최적" : tone === "good" ? "좋음" : tone === "caution" ? "주의" : "평이";
+
+  const items = rawItems.map((it) => ({
+    label:   (it.label   as string | undefined) ?? "",
+    heading: (it.heading as string | undefined) ?? "",
+    tone:    (it.tone    as string | undefined) ?? "normal",
+    score:   toneScore((it.tone as string | undefined) ?? "normal", it.score as number | undefined),
+    desc:    (it.desc    as string | undefined) ?? "",
+  }));
+
+  const n = items.length;
+  const W = 320, H = 170, padX = 28, padTop = 18, padBot = 48;
+  const minS = Math.min(...items.map((d) => d.score));
+  const maxS = Math.max(...items.map((d) => d.score));
+  const range = maxS - minS || 20;
+  const x = (i: number) => padX + ((W - padX * 2) * i) / Math.max(n - 1, 1);
+  const y = (v: number) =>
+    padTop + (H - padTop - padBot) * (1 - (v - (minS - range * 0.15)) / (range * 1.3));
+  const pts    = items.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
+  const areaBot = y(minS - range * 0.3);
+  const area   = `${x(0)},${areaBot} ${pts} ${x(n - 1)},${areaBot}`;
+
+  return (
+    <div className="mx-5 mb-5">
+      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+
+      {/* 차트 카드 */}
+      <div className="rounded-2xl p-4 mb-5" style={{ background: WHITE, border: `1px solid ${GCH10_COLOR}18`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+        {/* 범례 */}
+        <div className="flex items-center gap-3 mb-3 flex-wrap">
+          {[
+            { tone: "best",    label: "최적 시기" },
+            { tone: "good",    label: "좋은 시기" },
+            { tone: "normal",  label: "평이한 시기" },
+            { tone: "caution", label: "주의 시기" },
+          ].map(({ tone, label }) => (
+            <div key={tone} className="flex items-center gap-1.5">
+              <span className="inline-block w-3 h-0.5 rounded" style={{ background: toneColor(tone) }} />
+              <span className="text-[10px]" style={{ color: toneColor(tone) }}>{label}</span>
+            </div>
+          ))}
+        </div>
+
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
+          <defs>
+            <linearGradient id="mTimingArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={GCH10_COLOR} stopOpacity="0.15" />
+              <stop offset="100%" stopColor={GCH10_COLOR} stopOpacity="0.01" />
+            </linearGradient>
+          </defs>
+          {/* 수평 그리드 */}
+          {[0, 1, 2, 3].map((gi) => {
+            const gy = padTop + ((H - padTop - padBot) * gi) / 3;
+            return <line key={gi} x1={padX} x2={W - padX} y1={gy} y2={gy} stroke={`${GCH10_COLOR}12`} strokeWidth="1" />;
+          })}
+          {/* 영역 필 */}
+          <polygon points={area} fill="url(#mTimingArea)" />
+          {/* 꺾은선 — 세그먼트별 tone 색상 */}
+          {items.map((d, i) => {
+            if (i === 0) return null;
+            const prev = items[i - 1];
+            return (
+              <line
+                key={i}
+                x1={x(i - 1)} y1={y(prev.score)}
+                x2={x(i)}     y2={y(d.score)}
+                stroke={toneColor(d.tone)} strokeWidth="2.5" strokeLinecap="round"
+              />
+            );
+          })}
+          {/* 포인트 + 라벨 */}
+          {items.map((d, i) => {
+            const col   = toneColor(d.tone);
+            const parts = d.label.split(/[\s~·년]/);
+            return (
+              <g key={i}>
+                <circle cx={x(i)} cy={y(d.score)} r={5}   fill={WHITE} stroke={col} strokeWidth="2.5" />
+                <circle cx={x(i)} cy={y(d.score)} r={2.5} fill={col} />
+                {/* 점수 */}
+                <text x={x(i)} y={y(d.score) - 10} fontSize="11" fill={col} textAnchor="middle" fontWeight="700">{d.score}</text>
+                {/* 시기 라벨 (최대 2줄) */}
+                {parts.slice(0, 2).map((p, pi) => (
+                  <text key={pi} x={x(i)} y={H - padBot + 14 + pi * 12} fontSize="9" fill={INK_SOFT} textAnchor="middle">{p}</text>
+                ))}
+                {/* 아이콘 */}
+                <text x={x(i)} y={H - padBot + 44} fontSize="14" textAnchor="middle">{toneIcon(d.tone)}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* 시기별 풀이 카드 */}
+      <div className="space-y-3">
+        {items.map((d, i) => {
+          const col = toneColor(d.tone);
+          return (
+            <div key={i} className="rounded-xl overflow-hidden" style={{ border: `1.5px solid ${col}22`, background: WHITE }}>
+              {/* 헤더 */}
+              <div className="flex items-center gap-2.5 px-3.5 pt-3 pb-2" style={{ borderBottom: `1px solid ${col}15`, background: `${col}07` }}>
+                <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ background: col }}>
+                  <span className="text-[8px] font-black" style={{ color: WHITE }}>{i + 1}</span>
+                </div>
+                <span className="text-[11px]">{toneIcon(d.tone)}</span>
+                <p className="text-[12px] font-black" style={{ color: col }}>{d.label}</p>
+                {d.heading && <p className="text-[11px] font-bold" style={{ color: INK_SOFT }}>— {d.heading}</p>}
+                <span className="ml-auto text-[11px] font-black px-2 py-0.5 rounded-full shrink-0" style={{ background: `${col}18`, color: col }}>{toneLabel(d.tone)}</span>
+              </div>
+              {/* 설명 */}
+              <div className="px-3.5 pt-2.5 pb-3">
+                <p className="text-[13px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{d.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 최적 결혼 시기 배너 — 대운·세운 근거 + 시기 등급 뱃지
+function BestTimingBanner({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const bestYear   = (data.bestYear   as string | undefined) ?? "";
+  const bestIcon   = (data.bestIcon   as string | undefined) ?? "💍";
+  const bestGrade  = (data.bestGrade  as string | undefined) ?? "";
+  const bestBasis  = (data.bestBasis  as string | undefined) ?? "";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 최적 시기 메인 배너 */}
+      {bestYear && (
+        <div className="rounded-2xl px-5 py-5 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH10_COLOR} 0%, ${GCH10_BEST} 100%)` }}>
+          <span className="text-[38px] leading-none shrink-0">{bestIcon}</span>
+          <div className="flex-1">
+            <p className="text-[10px] font-bold mb-1" style={{ color: "rgba(255,255,255,0.65)" }}>사주가 가리키는 최적 결혼 시기</p>
+            <p className="text-[22px] font-black leading-tight" style={{ color: WHITE, fontFamily: SERIF }}>{bestYear}</p>
+            {bestGrade && (
+              <span className="inline-block mt-1.5 px-2.5 py-1 rounded-full text-[11px] font-black" style={{ background: "rgba(255,255,255,0.2)", color: WHITE }}>{bestGrade}</span>
+            )}
+          </div>
+        </div>
+      )}
+      {/* 최적 시기 사주 근거 */}
+      {bestBasis && (
+        <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: `${GCH10_COLOR}10`, borderLeft: `3px solid ${GCH10_COLOR}` }}>
+          <p className="text-[13px] font-black leading-relaxed" style={{ color: GCH10_COLOR }}>{bestBasis}</p>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${GCH10_BEST}08`, border: `1px solid ${GCH10_BEST}20` }}>
+          <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK_SOFT }}>{callout}</p>
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 시기별 결혼 점수 카드 — 연도·구간별 결혼 에너지 히트맵
+function TimingScoreCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const items = (data.items as Record<string, unknown>[] | undefined) ?? [];
+  const intro = (data.intro as string | undefined) ?? "";
+  const TONE_CONFIG: Record<string, { color: string; label: string; bar: string }> = {
+    best:    { color: GCH10_BEST,  label: "최적",  bar: "#1a5c8a" },
+    good:    { color: GCH10_GOOD,  label: "좋음",  bar: "#2e6b4a" },
+    normal:  { color: GCH10_COLOR, label: "평이",  bar: "#2a4a7a" },
+    caution: { color: GCH10_WARN,  label: "주의",  bar: "#8b5a1a" },
+  };
+  return (
+    <div className="mx-5 mb-5">
+      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH10_COLOR}18` }}>
+        <div className="px-4 py-2.5" style={{ background: `${GCH10_COLOR}0e` }}>
+          <p className="text-[11px] font-black" style={{ color: GCH10_COLOR }}>연도별 결혼 에너지</p>
+        </div>
+        {items.map((item, i) => {
+          const label   = (item.label   as string | undefined) ?? "";
+          const tone    = (item.tone    as string | undefined) ?? "normal";
+          const score   = Math.min(100, Math.max(0, (item.score as number | undefined) ?? 60));
+          const desc    = (item.desc    as string | undefined) ?? "";
+          const heading = (item.heading as string | undefined) ?? "";
+          const cfg = TONE_CONFIG[tone] ?? TONE_CONFIG.normal;
+          return (
+            <div key={i} className="px-4 py-3.5" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH10_COLOR}0c` : "none" }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2">
+                  <p className="text-[13px] font-black" style={{ color: cfg.color }}>{label}</p>
+                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full" style={{ background: `${cfg.color}16`, color: cfg.color }}>{cfg.label}</span>
+                  {heading && <p className="text-[11px] font-bold" style={{ color: INK_SOFT }}>— {heading}</p>}
+                </div>
+                <p className="text-[13px] font-black" style={{ color: cfg.color }}>{score}점</p>
+              </div>
+              {/* 에너지 바 */}
+              <div className="w-full rounded-full overflow-hidden mb-2" style={{ height: 5, background: `${GCH10_COLOR}12` }}>
+                <div style={{ width: `${score}%`, height: "100%", background: `linear-gradient(90deg, ${cfg.bar}80 0%, ${cfg.bar} 100%)`, borderRadius: 9999 }} />
+              </div>
+              {desc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 결혼 시기 판단 기준 카드 — 사주적 체크포인트 목록
+function TimingChecklistCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const intro  = (data.intro  as string | undefined) ?? "";
+  const checks = (data.checks as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const CHECK_ICONS = ["💍", "🌿", "⭐", "🏠", "🧭", "💰"];
+  return (
+    <div className="mx-5 mb-5">
+      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      {checks.length > 0 && (
+        <div className="rounded-2xl overflow-hidden mb-4" style={{ border: `1px solid ${GCH10_COLOR}18` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH10_COLOR}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH10_COLOR }}>결혼 시기 판단 체크리스트</p>
+          </div>
+          {checks.map((ck, i) => {
+            const ctitle  = (ck.title  as string | undefined) ?? "";
+            const cdesc   = (ck.desc   as string | undefined) ?? "";
+            const cstatus = (ck.status as string | undefined) ?? "check"; // "check" | "warn" | "info"
+            const cicon   = (ck.icon   as string | undefined) ?? CHECK_ICONS[i % CHECK_ICONS.length];
+            const STATUS_COLOR = cstatus === "warn" ? GCH10_WARN : cstatus === "info" ? GCH10_COLOR : GCH10_GOOD;
+            const STATUS_BADGE = cstatus === "warn" ? "주의" : cstatus === "info" ? "참고" : "확인";
+            return (
+              <div key={i} className="px-4 py-3.5 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH10_COLOR}0c` : "none" }}>
+                <span className="text-[20px] leading-none shrink-0 mt-0.5">{cicon}</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-[13px] font-black" style={{ color: STATUS_COLOR }}>{ctitle}</p>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full" style={{ background: `${STATUS_COLOR}15`, color: STATUS_COLOR }}>{STATUS_BADGE}</span>
+                  </div>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{cdesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 결혼 시기 최종 조언 패널 — 마음가짐 + 실천 팁 + 마무리
+function TimingAdvicePanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout  = (data.callout  as string | undefined) ?? "";
+  const tips     = (data.tips     as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="mb-4 px-4 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${GCH10_COLOR}12 0%, ${GCH10_BEST}08 100%)`, border: `1.5px solid ${GCH10_COLOR}20` }}>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: GCH10_COLOR, fontFamily: SERIF }}>{callout}</p>
+        </div>
+      )}
+      {tips.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH10_GOOD}20` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH10_GOOD}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH10_GOOD }}>결혼 준비 실천 조언</p>
+          </div>
+          {tips.map((tip, i) => {
+            const ticon  = (tip.icon  as string | undefined) ?? "✅";
+            const ttitle = (tip.title as string | undefined) ?? "";
+            const tdesc  = (tip.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3.5 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH10_GOOD}0c` : "none" }}>
+                <span className="text-[18px] leading-none shrink-0 mt-0.5">{ticon}</span>
+                <div>
+                  <p className="text-[12.5px] font-black mb-0.5" style={{ color: GCH10_GOOD }}>{ttitle}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{tdesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제9장 전용 컴포넌트 ────────────────────────────────────────────────────────
+
+// 위기 도입 배너 — 이 부부의 위기 유형 전체 성격 요약
+function CrisisBanner({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const crisisType = (data.crisisType as string | undefined) ?? "";
+  const crisisIcon = (data.crisisIcon as string | undefined) ?? "⚡";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const intro      = (data.intro      as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-5">
+      {/* 위기 유형 배너 */}
+      {crisisType && (
+        <div className="rounded-2xl px-5 py-4 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH9_CRISIS} 0%, #a33a22 100%)` }}>
+          <span className="text-[32px] leading-none">{crisisIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>이 부부의 위기 유형</p>
+            <p className="text-[18px] font-black leading-tight" style={{ color: WHITE }}>{crisisType}</p>
+          </div>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: `${GCH9_CRISIS}10`, borderLeft: `3px solid ${GCH9_CRISIS}` }}>
+          <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH9_CRISIS }}>{callout}</p>
+        </div>
+      )}
+      {intro && <p className="text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+    </div>
+  );
+}
+
+// 위기 카드 — 위기 요인 개별 카드 (icon + 제목 + 풍부한 서술 + 사주 근거 + 위기 신호)
+function CrisisCard({ item }: { item: Record<string, unknown> }) {
+  const icon   = (item.icon   as string | undefined) ?? "⚠️";
+  const title  = (item.title  as string | undefined) ?? "";
+  const desc   = (item.desc   as string | undefined) ?? "";
+  const basis  = (item.basis  as string | undefined) ?? "";
+  const signal = (item.signal as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${GCH9_CRISIS}22` }}>
+      {/* 카드 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `linear-gradient(135deg, ${GCH9_CRISIS}14 0%, ${GCH9_CRISIS_P} 100%)` }}>
+        <span className="text-[24px] leading-none shrink-0">{icon}</span>
+        <p className="text-[14px] font-black" style={{ color: GCH9_CRISIS }}>{title}</p>
+      </div>
+      {/* 본문 */}
+      <div className="px-4 py-3.5" style={{ background: WHITE }}>
+        <p className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        {/* 사주 근거 */}
+        {basis && (
+          <div className="mb-2.5 px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${GCH9_CRISIS}08` }}>
+            <span className="text-[12px] shrink-0 mt-0.5">🔍</span>
+            <p className="text-[12px] leading-relaxed" style={{ color: GCH9_CRISIS }}>
+              <span className="font-black">사주 근거 </span>{basis}
+            </p>
+          </div>
+        )}
+        {/* 위기 신호 */}
+        {signal && (
+          <div className="px-3 py-2 rounded-xl flex items-start gap-2" style={{ background: `${GOLD}10`, border: `1px solid ${GOLD}30` }}>
+            <span className="text-[12px] shrink-0 mt-0.5">📡</span>
+            <p className="text-[12px] leading-relaxed font-bold" style={{ color: GCH8_SOFT }}>
+              <span style={{ color: GOLD }}>위기 신호 </span>{signal}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 극복 카드 — 위기를 넘는 방법 (icon + 제목 + 설명 + 실천 팁)
+function OvercomeCard({ item, idx }: { item: Record<string, unknown>; idx: number }) {
+  const icon  = (item.icon  as string | undefined) ?? "💚";
+  const title = (item.title as string | undefined) ?? "";
+  const desc  = (item.desc  as string | undefined) ?? "";
+  const tip   = (item.tip   as string | undefined) ?? "";
+  const BEAD_COLORS = [GCH9_SOLVE, "#2a5a7a", "#4a3060", "#7a5c1e", "#2e5a4a"];
+  const col = BEAD_COLORS[idx % BEAD_COLORS.length];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${col}22` }}>
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${col}0e` }}>
+        <span className="text-[24px] leading-none shrink-0">{icon}</span>
+        <div>
+          <p className="text-[10px] font-bold mb-0.5" style={{ color: col }}>극복 방법 {idx + 1}</p>
+          <p className="text-[14px] font-black" style={{ color: col }}>{title}</p>
+        </div>
+      </div>
+      <div className="px-4 py-3.5" style={{ background: WHITE }}>
+        <p className="text-[13.5px] leading-[1.85] mb-2.5" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        {tip && (
+          <div className="px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${col}0a`, border: `1px solid ${col}18` }}>
+            <span className="text-[13px] shrink-0">✅</span>
+            <p className="text-[12.5px] leading-relaxed font-bold" style={{ color: col }}>{tip}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 위기·안정 흐름 타임라인 — 시기별 결혼 생활 기운 흐름
+function CrisisFlowTimeline({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const intro   = (data.intro   as string | undefined) ?? "";
+  const periods = (data.periods as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const TONE_MAP: Record<string, { color: string; label: string; bg: string }> = {
+    good:    { color: GCH9_SOLVE,  label: "안정",  bg: GCH9_SOLVE_P  },
+    stable:  { color: "#2a5a7a",   label: "평온",  bg: "#eef4f9"     },
+    caution: { color: GOLD,        label: "주의",  bg: "#fdf8ec"     },
+    warn:    { color: GCH9_CRISIS, label: "위기",  bg: GCH9_CRISIS_P },
+  };
+  return (
+    <div className="mx-5 mb-5">
+      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      {periods.length > 0 && (
+        <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH9_COLOR}18` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH9_COLOR}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH9_COLOR }}>시기별 결혼 기운 흐름</p>
+          </div>
+          {periods.map((pd, i) => {
+            const tone    = (pd.tone  as string | undefined) ?? "stable";
+            const meta    = TONE_MAP[tone] ?? TONE_MAP.stable;
+            const label   = (pd.label as string | undefined) ?? "";
+            const heading = (pd.heading as string | undefined) ?? "";
+            const text    = (pd.text  as string | undefined) ?? "";
+            return (
+              <div key={i} className="flex items-stretch" style={{ borderTop: i > 0 ? `1px solid ${GCH9_COLOR}0c` : "none" }}>
+                {/* 왼쪽 컬러 바 + 도트 */}
+                <div className="flex flex-col items-center py-4 px-3" style={{ background: `${meta.color}08`, borderRight: `2px solid ${meta.color}20` }}>
+                  <div className="w-3 h-3 rounded-full mb-1" style={{ background: meta.color }} />
+                  {i < periods.length - 1 && <div style={{ width: 2, flex: 1, background: `${meta.color}30` }} />}
+                </div>
+                {/* 본문 */}
+                <div className="flex-1 px-4 py-3" style={{ background: WHITE }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-[12px] font-black" style={{ color: meta.color }}>{label}</p>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${meta.color}16`, color: meta.color }}>{meta.label}</span>
+                    {heading && <p className="text-[11px] font-bold" style={{ color: INK_SOFT }}>— {heading}</p>}
+                  </div>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{text}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mt-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 위기 종합 극복 가이드 — 핵심 원칙 + 마무리 문단
+function CrisisRecoveryGuide({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const principles = (data.principles as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${GCH9_SOLVE}10`, borderLeft: `3px solid ${GCH9_SOLVE}` }}>
+          <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH9_SOLVE }}>{callout}</p>
+        </div>
+      )}
+      {principles.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH9_SOLVE}20` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH9_SOLVE}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH9_SOLVE }}>이 부부의 극복 핵심 원칙</p>
+          </div>
+          {principles.map((pr, i) => {
+            const num   = i + 1;
+            const ptitle = (pr.title as string | undefined) ?? "";
+            const pdesc  = (pr.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH9_SOLVE}0c` : "none" }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-black" style={{ background: GCH9_SOLVE, color: WHITE }}>{num}</div>
+                <div>
+                  <p className="text-[12.5px] font-black mb-0.5" style={{ color: GCH9_SOLVE }}>{ptitle}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{pdesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제8장 전용 컴포넌트 ────────────────────────────────────────────────────────
+
+// 자녀 궁합 점수 게이지 — 반원 + 자녀 인연 등급 배너
+function ChildScoreGauge({ data }: { data: Record<string, unknown> | null }) {
+  const score  = Math.min(100, Math.max(0, (data?.score as number | undefined) ?? 75));
+  const label  = (data?.label  as string | undefined) ?? "";
+  const basis  = (data?.basis  as string | undefined) ?? "";
+  const s = score;
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 130, cy = 110, r = 88;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? GCH8_YES : s >= 60 ? GCH8_COLOR : s >= 40 ? GOLD : MUTE;
+  const GRADE = s >= 85 ? "자녀복 풍성" : s >= 70 ? "자녀 인연 좋음" : s >= 55 ? "보통 자녀 인연" : "부부 중심 인연";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(160deg, ${GCH8_COLOR}0a 0%, ${WHITE} 60%)`, border: `1.5px solid ${GCH8_COLOR}22` }}>
+      <div className="px-5 pt-5 pb-1 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-bold mb-1" style={{ color: GCH8_COLOR }}>사주로 본 자녀 인연</p>
+          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-black" style={{ background: `${COLOR}18`, color: COLOR }}>{GRADE}</span>
+        </div>
+        <div className="text-right">
+          <p className="text-[42px] font-black leading-none" style={{ color: COLOR, fontFamily: SERIF }}>{s}</p>
+          <p className="text-[12px] font-bold" style={{ color: MUTE }}>/ 100점</p>
+        </div>
+      </div>
+      <svg viewBox="0 0 260 118" style={{ width: "100%", maxHeight: 130 }}>
+        <defs>
+          <linearGradient id="childGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={MUTE} />
+            <stop offset="45%" stopColor={GOLD} />
+            <stop offset="100%" stopColor={GCH8_YES} />
+          </linearGradient>
+        </defs>
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#ddeee8" strokeWidth="20" strokeLinecap="round" />
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#childGaugeGrad)" strokeWidth="20" strokeLinecap="round"
+          strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+        <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="6" fill={INK} />
+        <text x={cx - r - 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>0</text>
+        <text x={cx} y={cy - r - 6} textAnchor="middle" fontSize="9" fill={MUTE}>50</text>
+        <text x={cx + r + 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>100</text>
+      </svg>
+      {label && <p className="text-center text-[13.5px] font-black pb-2 px-5" style={{ color: COLOR }}>{label}</p>}
+      {basis && (
+        <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${GCH8_COLOR}08`, borderLeft: `3px solid ${GCH8_COLOR}` }}>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{basis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 자녀 인연 풀이 + 주의사항 패널
+function ChildCompatDetailPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const caution    = (data.caution    as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-4">
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+      {caution && (
+        <div className="px-4 py-3 rounded-xl flex items-start gap-2" style={{ background: `${GOLD}10`, borderLeft: `3px solid ${GOLD}` }}>
+          <span className="text-[14px] mt-0.5 shrink-0">⚠️</span>
+          <p className="text-[13px] leading-relaxed font-bold" style={{ color: GCH8_SOFT }}>{caution}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 자녀 시기 카드 — 최적 시기 배너 + 시기별 타임라인 + 풀이
+function ChildTimingCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const bestPeriod   = (data.bestPeriod   as string | undefined) ?? "";
+  const bestIcon     = (data.bestIcon     as string | undefined) ?? "🌸";
+  const bestDesc     = (data.bestDesc     as string | undefined) ?? "";
+  const periods      = (data.periods      as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs   = (data.paragraphs   as string[] | undefined) ?? [];
+  const prepAdvice   = (data.prepAdvice   as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-5">
+      {/* 최적 시기 배너 */}
+      {bestPeriod && (
+        <div className="rounded-2xl px-5 py-4 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH8_COLOR} 0%, #3a7a62 100%)` }}>
+          <span className="text-[32px] leading-none">{bestIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>자녀 인연이 가장 좋은 시기</p>
+            <p className="text-[18px] font-black leading-tight" style={{ color: WHITE }}>{bestPeriod}</p>
+          </div>
+        </div>
+      )}
+      {/* 최적 시기 설명 */}
+      {bestDesc && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: GCH8_PALE, borderLeft: `3px solid ${GCH8_COLOR}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: GCH8_COLOR }}>{bestDesc}</p>
+        </div>
+      )}
+      {/* 시기별 타임라인 */}
+      {periods.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH8_COLOR}18` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH8_COLOR}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH8_COLOR }}>연도별 자녀 인연 흐름</p>
+          </div>
+          {periods.map((pd, i) => {
+            const label = (pd.label as string | undefined) ?? "";
+            const tone  = (pd.tone  as string | undefined) ?? "normal"; // "best"|"good"|"caution"|"normal"
+            const text  = (pd.text  as string | undefined) ?? "";
+            const dotColor = tone === "best" ? GCH8_YES : tone === "good" ? GCH8_COLOR : tone === "caution" ? GOLD : MUTE;
+            const badge  = tone === "best" ? "최적" : tone === "good" ? "좋음" : tone === "caution" ? "주의" : "";
+            return (
+              <div key={i} className="px-4 py-3 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH8_COLOR}0c` : "none" }}>
+                <div className="flex flex-col items-center gap-1 shrink-0 mt-1">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: dotColor }} />
+                  {i < periods.length - 1 && <div style={{ width: 1, height: 24, background: `${GCH8_COLOR}20` }} />}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-[12px] font-black" style={{ color: dotColor }}>{label}</p>
+                    {badge && <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full" style={{ background: `${dotColor}18`, color: dotColor }}>{badge}</span>}
+                  </div>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{text}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+      {/* 준비 조언 */}
+      {prepAdvice && (
+        <div className="px-4 py-3 rounded-xl flex items-start gap-2" style={{ background: GCH8_PALE, border: `1px solid ${GCH8_COLOR}20` }}>
+          <span className="text-[14px] mt-0.5 shrink-0">🌱</span>
+          <p className="text-[13px] leading-relaxed font-bold" style={{ color: GCH8_COLOR }}>{prepAdvice}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 자녀 특성 카드 — 기운 키워드 + 특성 항목 + 양육 스타일
+function ChildStyleCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const childKeywords = (data.childKeywords as string[] | undefined) ?? [];
+  const traits        = (data.traits        as Record<string, unknown>[] | undefined) ?? [];
+  const parentStyle   = (data.parentStyle   as string | undefined) ?? "";
+  const parentIcon    = (data.parentIcon    as string | undefined) ?? "👨‍👩‍👧";
+  const paragraphs    = (data.paragraphs    as string[] | undefined) ?? [];
+  const KW_COLORS = [GCH8_COLOR, GCH8_SOFT, GCH8_YES, "#6b4080", "#2a5a7a"];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 자녀 기운 키워드 */}
+      {childKeywords.length > 0 && (
+        <div className="mb-4 p-4 rounded-2xl" style={{ background: GCH8_PALE, border: `1px solid ${GCH8_COLOR}20` }}>
+          <p className="text-[11px] font-black mb-2.5" style={{ color: GCH8_COLOR }}>이 부부에게 올 자녀의 기운</p>
+          <div className="flex flex-wrap gap-2">
+            {childKeywords.map((kw, i) => (
+              <span key={i} className="px-3 py-1.5 rounded-full text-[12px] font-black" style={{ background: `${KW_COLORS[i % KW_COLORS.length]}16`, color: KW_COLORS[i % KW_COLORS.length] }}>{kw}</span>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* 자녀 특성 항목 */}
+      {traits.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH8_COLOR}18` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH8_COLOR}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH8_COLOR }}>자녀 특성 분석</p>
+          </div>
+          {traits.map((tr, i) => {
+            const trLabel = (tr.label as string | undefined) ?? "";
+            const trIcon  = (tr.icon  as string | undefined) ?? "•";
+            const trDesc  = (tr.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3.5 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH8_COLOR}0c` : "none" }}>
+                <span className="text-[18px] leading-none shrink-0 mt-0.5">{trIcon}</span>
+                <div>
+                  <p className="text-[12px] font-black mb-0.5" style={{ color: GCH8_COLOR }}>{trLabel}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{trDesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {/* 양육 스타일 배너 */}
+      {parentStyle && (
+        <div className="mb-4 rounded-2xl px-4 py-4 flex items-center gap-3" style={{ background: `linear-gradient(135deg, ${GCH8_SOFT}14 0%, ${WHITE} 100%)`, border: `1.5px solid ${GCH8_SOFT}22` }}>
+          <span className="text-[28px] leading-none shrink-0">{parentIcon}</span>
+          <div>
+            <p className="text-[11px] font-bold mb-0.5" style={{ color: GCH8_SOFT }}>이 부부의 양육 스타일</p>
+            <p className="text-[14px] font-black" style={{ color: GCH8_SOFT }}>{parentStyle}</p>
+          </div>
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제7장 전용 컴포넌트 ────────────────────────────────────────────────────────
+
+// 재물운 요약 헤더 카드 — 재물 유형 + 점수 바 + callout
+function WealthSummaryCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const wealthType  = (data.wealthType  as string | undefined) ?? "";
+  const wealthIcon  = (data.wealthIcon  as string | undefined) ?? "💰";
+  const score       = Math.min(100, Math.max(0, (data.score as number | undefined) ?? 70));
+  const callout     = (data.callout     as string | undefined) ?? "";
+  const intro       = (data.intro       as string | undefined) ?? "";
+  const scoreLabel  = score >= 80 ? "재물운 왕성" : score >= 65 ? "재물운 양호" : score >= 50 ? "재물운 보통" : "재물운 주의";
+  const scoreColor  = score >= 80 ? GCH7_WLT : score >= 65 ? "#b8872e" : score >= 50 ? GOLD : MUTE;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${GCH7_WLT}25`, boxShadow: "0 2px 12px rgba(122,92,30,0.07)" }}>
+      {/* 재물 유형 배너 */}
+      <div className="px-5 py-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH7_WLT} 0%, #b8872e 100%)` }}>
+        <span className="text-[36px] leading-none">{wealthIcon}</span>
+        <div>
+          <p className="text-[10px] font-bold mb-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>결혼 후 재물 유형</p>
+          <p className="text-[17px] font-black leading-tight" style={{ color: WHITE }}>{wealthType}</p>
+        </div>
+        <div className="ml-auto text-right">
+          <p className="text-[32px] font-black leading-none" style={{ color: WHITE, fontFamily: SERIF }}>{score}</p>
+          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.7)" }}>재물 지수</p>
+        </div>
+      </div>
+      {/* 점수 바 */}
+      <div className="px-5 py-3" style={{ background: GCH7_WLT_P, borderBottom: `1px solid ${GCH7_WLT}15` }}>
+        <div className="flex items-center justify-between mb-1.5">
+          <p className="text-[11px] font-bold" style={{ color: GCH7_WLT }}>재물운 지수</p>
+          <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: `${scoreColor}18`, color: scoreColor }}>{scoreLabel}</span>
+        </div>
+        <div className="w-full rounded-full overflow-hidden" style={{ height: 8, background: `${GCH7_WLT}18` }}>
+          <div className="h-full rounded-full transition-all" style={{ width: `${score}%`, background: `linear-gradient(90deg, ${GCH7_WLT}80 0%, ${GCH7_WLT} 100%)` }} />
+        </div>
+      </div>
+      {/* callout + intro */}
+      <div className="px-5 pt-3 pb-4" style={{ background: WHITE }}>
+        {callout && <p className="text-[13.5px] font-black mb-2 leading-relaxed" style={{ color: GCH7_WLT }}>{callout}</p>}
+        {intro && <p className="text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{intro}"</p>}
+      </div>
+    </div>
+  );
+}
+
+// 재물운 흐름 단락 + 시기별 포인트
+function WealthDetailPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
+  const periods     = (data.periods     as Record<string, unknown>[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+      {periods.length > 0 && (
+        <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH7_WLT}18` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH7_WLT}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH7_WLT }}>시기별 재물 흐름</p>
+          </div>
+          {periods.map((pd, i) => {
+            const label = (pd.label as string | undefined) ?? "";
+            const tone  = (pd.tone  as string | undefined) ?? "normal";
+            const text  = (pd.text  as string | undefined) ?? "";
+            const dotColor = tone === "good" ? GCH7_WLT : tone === "caution" ? GOLD : MUTE;
+            return (
+              <div key={i} className="px-4 py-3 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH7_WLT}0c` : "none" }}>
+                <div className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ background: dotColor }} />
+                <div className="flex-1">
+                  <p className="text-[11px] font-black mb-0.5" style={{ color: dotColor }}>{label}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{text}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 가정운 카드 — 가정 유형 배너 + callout + 단락
+function HomeLifeCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const homeType   = (data.homeType   as string | undefined) ?? "";
+  const homeIcon   = (data.homeIcon   as string | undefined) ?? "🏡";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const aspects    = (data.aspects    as Record<string, unknown>[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 가정 유형 배너 */}
+      {homeType && (
+        <div className="rounded-2xl px-5 py-4 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH7_HOM} 0%, #3a6a8e 100%)` }}>
+          <span className="text-[36px] leading-none">{homeIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>이 부부의 가정 유형</p>
+            <p className="text-[17px] font-black leading-tight" style={{ color: WHITE }}>{homeType}</p>
+          </div>
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-5 py-4 rounded-2xl" style={{ background: GCH7_HOM_P, border: `1.5px solid ${GCH7_HOM}22` }}>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: GCH7_HOM }}>{callout}</p>
+        </div>
+      )}
+      {intro && (
+        <p className="mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{intro}"</p>
+      )}
+      {/* 가정 생활 측면 카드 */}
+      {aspects.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH7_HOM}18` }}>
+          {aspects.map((asp, i) => {
+            const asLabel = (asp.label as string | undefined) ?? "";
+            const asIcon  = (asp.icon  as string | undefined) ?? "•";
+            const asDesc  = (asp.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3 flex items-start gap-3" style={{ background: i % 2 === 0 ? GCH7_HOM_P : WHITE, borderTop: i > 0 ? `1px solid ${GCH7_HOM}0c` : "none" }}>
+                <span className="text-[18px] leading-none shrink-0 mt-0.5">{asIcon}</span>
+                <div>
+                  <p className="text-[12px] font-black mb-0.5" style={{ color: GCH7_HOM }}>{asLabel}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{asDesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 재물·가정 실천 조언 패널 — 번호 + 이모지 + 팁
+function WealthHomeTipPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout = (data.callout as string | undefined) ?? "";
+  const tips    = (data.tips    as Record<string, unknown>[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="mb-4 px-5 py-4 rounded-2xl" style={{ background: `linear-gradient(135deg, ${GCH7_COLOR}12 0%, ${GCH7_PALE} 100%)`, border: `1.5px solid ${GCH7_COLOR}22` }}>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: GCH7_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {tips.length > 0 && (
+        <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH7_COLOR}18` }}>
+          {tips.map((tip, i) => {
+            const tipIcon  = (tip.icon  as string | undefined) ?? "💡";
+            const tipTitle = (tip.title as string | undefined) ?? "";
+            const tipDesc  = (tip.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-4 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH7_COLOR}0c` : "none" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[16px] shrink-0" style={{ background: `${GCH7_COLOR}10` }}>
+                  {tipIcon}
+                </div>
+                <div className="flex-1">
+                  {tipTitle && <p className="text-[13px] font-black mb-1" style={{ color: GCH7_COLOR }}>{tipTitle}</p>}
+                  <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{tipDesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── 제6장 전용 컴포넌트 ────────────────────────────────────────────────────────
+
+// 합(合) 개념 배너 — 합 섹션 상단 설명
+function HapIntroPanel() {
+  return (
+    <div className="mx-5 mb-4 px-5 py-4 rounded-2xl flex items-start gap-3" style={{ background: GCH6_HAP_P, border: `1.5px solid ${GCH6_HAP}22` }}>
+      <span className="text-[24px] leading-none mt-0.5 shrink-0">🌿</span>
+      <div>
+        <p className="text-[13px] font-black mb-1" style={{ color: GCH6_HAP }}>합(合)이란</p>
+        <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>두 사주의 천간·지지가 서로 끌어당겨 하나로 합쳐지는 것이오. 합이 있는 자리에서 두 사람은 자연스럽게 통하고, 그 기운이 새로운 오행으로 변화하기도 하오. 많을수록 결혼 생활의 밀착도와 조화가 높아지오.</p>
+      </div>
+    </div>
+  );
+}
+
+// 합(合) 카드 — 합 종류·강도·합화 오행·결혼 영향·효과
+function GHapCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const type     = (item.type     as string | undefined) ?? "";
+  const hapEl    = (item.hapEl    as string | undefined) ?? "";
+  const desc     = (item.desc     as string | undefined) ?? "";
+  const strength = (item.strength as string | undefined) ?? "보통";
+  const effect   = (item.effect   as string | undefined) ?? "";
+  const OHAENG_COLOR: Record<string, string> = { 목: "#3f7d6b", 화: "#c9474f", 토: "#b07d2a", 금: "#7a8a3a", 수: "#2d3a8c" };
+  const elColor = hapEl ? (OHAENG_COLOR[hapEl] ?? GCH6_HAP) : GCH6_HAP;
+  const stars = strength === "강함" ? "★★★" : strength === "보통" ? "★★☆" : "★☆☆";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${GCH6_HAP}20`, boxShadow: "0 2px 10px rgba(46,107,58,0.06)" }}>
+      <div className="px-5 py-3.5 flex items-center justify-between" style={{ background: `${GCH6_HAP}0a`, borderBottom: `1px solid ${GCH6_HAP}12` }}>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-black px-2.5 py-1 rounded-full" style={{ background: GCH6_HAP, color: WHITE }}>合 {index + 1}</span>
+          <span className="text-[14px] font-black" style={{ color: GCH6_HAP }}>{type}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {hapEl && (
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${elColor}18`, color: elColor }}>→ {hapEl}으로 합화</span>
+          )}
+          <span className="text-[12px] font-bold" style={{ color: strength === "강함" ? GCH6_HAP : MUTE }}>{stars}</span>
+        </div>
+      </div>
+      {desc && (
+        <div className="px-5 py-3.5" style={{ borderBottom: effect ? `1px solid ${INK}06` : "none" }}>
+          <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        </div>
+      )}
+      {effect && (
+        <div className="px-5 py-3 flex items-start gap-2" style={{ background: `${GCH6_HAP}06` }}>
+          <span className="text-[12px] font-black shrink-0 mt-0.5" style={{ color: GCH6_HAP }}>✦</span>
+          <p className="text-[12.5px] leading-relaxed font-bold" style={{ color: GCH6_HAP }}>{effect}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 충(沖) 개념 배너
+function ChungIntroPanel() {
+  return (
+    <div className="mx-5 mb-4 px-5 py-4 rounded-2xl flex items-start gap-3" style={{ background: GCH6_CHU_P, border: `1.5px solid ${GCH6_CHU}22` }}>
+      <span className="text-[24px] leading-none mt-0.5 shrink-0">⚡</span>
+      <div>
+        <p className="text-[13px] font-black mb-1" style={{ color: GCH6_CHU }}>충(沖)이란</p>
+        <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>충은 두 사주의 지지가 정면으로 맞부딪히는 것이오. 갈등과 마찰을 일으키기도 하지만, 서로를 자극하여 성장하게 하는 힘이기도 하오. 충을 아는 것이 결혼 생활을 지키는 첫걸음이오.</p>
+      </div>
+    </div>
+  );
+}
+
+// 충(沖) 카드 — 충 종류·강도·결혼 영향·극복법
+function GChungCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const type     = (item.type     as string | undefined) ?? "";
+  const desc     = (item.desc     as string | undefined) ?? "";
+  const strength = (item.strength as string | undefined) ?? "보통";
+  const effect   = (item.effect   as string | undefined) ?? "";
+  const overcome = (item.overcome as string | undefined) ?? "";
+  const stars = strength === "강함" ? "▲▲▲" : strength === "보통" ? "▲▲△" : "▲△△";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${GCH6_CHU}20`, boxShadow: "0 2px 10px rgba(122,32,32,0.06)" }}>
+      <div className="px-5 py-3.5 flex items-center justify-between" style={{ background: `${GCH6_CHU}0a`, borderBottom: `1px solid ${GCH6_CHU}12` }}>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-black px-2.5 py-1 rounded-full" style={{ background: GCH6_CHU, color: WHITE }}>沖 {index + 1}</span>
+          <span className="text-[14px] font-black" style={{ color: GCH6_CHU }}>{type}</span>
+        </div>
+        <span className="text-[12px] font-bold" style={{ color: strength === "강함" ? GCH6_CHU : MUTE }}>{stars}</span>
+      </div>
+      {desc && (
+        <div className="px-5 py-3.5" style={{ borderBottom: (effect || overcome) ? `1px solid ${INK}06` : "none" }}>
+          <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        </div>
+      )}
+      {effect && (
+        <div className="px-5 py-3 flex items-start gap-2" style={{ background: `${GCH6_CHU}06`, borderBottom: overcome ? `1px solid ${INK}06` : "none" }}>
+          <span className="text-[12px] font-black shrink-0 mt-0.5" style={{ color: GCH6_CHU }}>▲</span>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: GCH6_CHU }}>{effect}</p>
+        </div>
+      )}
+      {overcome && (
+        <div className="px-5 py-3 flex items-start gap-2" style={{ background: GCH6_HAP_P }}>
+          <span className="text-[12px] font-black shrink-0 mt-0.5" style={{ color: GCH6_HAP }}>✦</span>
+          <p className="text-[12.5px] leading-relaxed font-bold" style={{ color: GCH6_HAP }}>{overcome}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 합·충 종합 스코어 카드 — 게이지 + 합/충 개수 칩 + 요약 단락
+function GHapChungScoreCard({ data, hapCount, chungCount }: { data: Record<string, unknown> | null; hapCount: number; chungCount: number }) {
+  if (!data) return null;
+  const score       = (data.score       as number | undefined) ?? 75;
+  const label       = (data.label       as string | undefined) ?? "";
+  const hapSummary  = (data.hapSummary  as string | undefined) ?? "";
+  const chungSummary= (data.chungSummary as string | undefined) ?? "";
+  const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
+  const s = Math.min(100, Math.max(0, score));
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 130, cy = 110, r = 88;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? GCH6_HAP : s >= 60 ? GCH6_COLOR : s >= 40 ? GOLD : GCH6_CHU;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${GCH6_COLOR}18`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+      {/* 헤더 타이틀 + 점수 */}
+      <div className="px-5 pt-5 pb-1 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-bold mb-0.5" style={{ color: GCH6_COLOR }}>합·충 종합 궁합</p>
+          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-black" style={{ background: `${COLOR}18`, color: COLOR }}>{label}</span>
+        </div>
+        <div className="text-right">
+          <p className="text-[42px] font-black leading-none" style={{ color: COLOR, fontFamily: SERIF }}>{s}</p>
+          <p className="text-[12px] font-bold" style={{ color: MUTE }}>/ 100점</p>
+        </div>
+      </div>
+      {/* 반원 게이지 */}
+      <svg viewBox="0 0 260 118" style={{ width: "100%", maxHeight: 130 }}>
+        <defs>
+          <linearGradient id="hcGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={GCH6_CHU} />
+            <stop offset="50%" stopColor={GCH6_COLOR} />
+            <stop offset="100%" stopColor={GCH6_HAP} />
+          </linearGradient>
+        </defs>
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#e8ede8" strokeWidth="20" strokeLinecap="round" />
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#hcGaugeGrad)" strokeWidth="20" strokeLinecap="round"
+          strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+        <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="6" fill={INK} />
+        <text x={cx - r - 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>0</text>
+        <text x={cx} y={cy - r - 6} textAnchor="middle" fontSize="9" fill={MUTE}>50</text>
+        <text x={cx + r + 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>100</text>
+      </svg>
+      {/* 합/충 개수 요약 칩 */}
+      <div className="flex gap-3 px-5 pb-4">
+        <div className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl" style={{ background: GCH6_HAP_P, border: `1px solid ${GCH6_HAP}25` }}>
+          <span className="text-[16px]">🌿</span>
+          <div>
+            <p className="text-[18px] font-black leading-none" style={{ color: GCH6_HAP }}>{hapCount}</p>
+            <p className="text-[10px] font-bold" style={{ color: MUTE }}>합(合)</p>
+          </div>
+          {hapSummary && <p className="text-[11px] leading-snug ml-1" style={{ color: GCH6_HAP }}>{hapSummary}</p>}
+        </div>
+        <div className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl" style={{ background: GCH6_CHU_P, border: `1px solid ${GCH6_CHU}25` }}>
+          <span className="text-[16px]">⚡</span>
+          <div>
+            <p className="text-[18px] font-black leading-none" style={{ color: GCH6_CHU }}>{chungCount}</p>
+            <p className="text-[10px] font-bold" style={{ color: MUTE }}>충(沖)</p>
+          </div>
+          {chungSummary && <p className="text-[11px] leading-snug ml-1" style={{ color: GCH6_CHU }}>{chungSummary}</p>}
+        </div>
+      </div>
+      {/* 종합 단락 */}
+      {paragraphs.length > 0 && (
+        <div className="px-5 pb-5">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="text-[13.5px] leading-[1.8] mb-3 last:mb-0" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{p}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── 제5장 전용 컴포넌트 ────────────────────────────────────────────────────────
+
+// 결혼 강점 카드 — 번호 뱃지 + 아이콘 + 제목 + 사주 근거 태그 + 풀이
+function MarriageStrengthCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const title  = (item.title  as string | undefined) ?? "";
+  const icon   = (item.icon   as string | undefined) ?? "✨";
+  const desc   = (item.desc   as string | undefined) ?? "";
+  const basis  = (item.basis  as string | undefined) ?? ""; // 사주 근거 한 줄
+  const effect = (item.effect as string | undefined) ?? ""; // 결혼 생활에서의 구체적 효과
+  const NUMS   = ["①", "②", "③", "④", "⑤"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${GCH5_STR}22`, boxShadow: "0 2px 10px rgba(30,107,64,0.06)" }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `linear-gradient(135deg, ${GCH5_STR}16 0%, ${GCH5_STR_P} 100%)` }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] shrink-0" style={{ background: `${GCH5_STR}20` }}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: GCH5_STR, color: WHITE }}>{NUMS[index] ?? `#${index+1}`} 강점</span>
+          </div>
+          <p className="text-[15px] font-black mt-0.5" style={{ color: INK }}>{title}</p>
+        </div>
+      </div>
+      {/* 본문 */}
+      <div className="px-4 pt-3 pb-1" style={{ background: WHITE }}>
+        <p className="text-[13.5px] leading-relaxed mb-3" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        {effect && (
+          <div className="mb-3 px-3 py-2 rounded-lg flex items-start gap-2" style={{ background: GCH5_STR_P }}>
+            <span className="text-[13px] mt-0.5 shrink-0">💚</span>
+            <p className="text-[12.5px] leading-relaxed font-bold" style={{ color: GCH5_STR }}>{effect}</p>
+          </div>
+        )}
+        {basis && (
+          <div className="mb-3 px-3 py-2 rounded-lg flex items-start gap-1.5" style={{ background: `${GCH5_STR}08`, borderLeft: `2px solid ${GCH5_STR}40` }}>
+            <span className="text-[11px] font-black mt-0.5 shrink-0" style={{ color: GCH5_STR }}>사주</span>
+            <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{basis}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 결혼 약점 카드 — 번호 뱃지 + 아이콘 + 제목 + 극복 방향
+function MarriageWeaknessCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const title   = (item.title   as string | undefined) ?? "";
+  const icon    = (item.icon    as string | undefined) ?? "⚡";
+  const desc    = (item.desc    as string | undefined) ?? "";
+  const basis   = (item.basis   as string | undefined) ?? "";
+  const overcome = (item.overcome as string | undefined) ?? ""; // 극복 방향 한 줄
+  const NUMS    = ["①", "②", "③", "④", "⑤"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${GCH5_WEK}22`, boxShadow: "0 2px 10px rgba(139,42,26,0.06)" }}>
+      {/* 헤더 */}
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `linear-gradient(135deg, ${GCH5_WEK}14 0%, ${GCH5_WEK_P} 100%)` }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-[18px] shrink-0" style={{ background: `${GCH5_WEK}18` }}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: GCH5_WEK, color: WHITE }}>{NUMS[index] ?? `#${index+1}`} 약점</span>
+          </div>
+          <p className="text-[15px] font-black mt-0.5" style={{ color: INK }}>{title}</p>
+        </div>
+      </div>
+      {/* 본문 */}
+      <div className="px-4 pt-3 pb-1" style={{ background: WHITE }}>
+        <p className="text-[13.5px] leading-relaxed mb-3" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        {basis && (
+          <div className="mb-3 px-3 py-2 rounded-lg flex items-start gap-1.5" style={{ background: `${GCH5_WEK}08`, borderLeft: `2px solid ${GCH5_WEK}40` }}>
+            <span className="text-[11px] font-black mt-0.5 shrink-0" style={{ color: GCH5_WEK }}>사주</span>
+            <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{basis}</p>
+          </div>
+        )}
+        {overcome && (
+          <div className="mb-3 px-3 py-2 rounded-lg flex items-start gap-2" style={{ background: GCH5_BAL_P }}>
+            <span className="text-[13px] mt-0.5 shrink-0">🌱</span>
+            <p className="text-[12.5px] leading-relaxed font-bold" style={{ color: GCH5_BAL }}>{overcome}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 균형 잡기 가이드 — 강점 살리기 + 약점 보완 실천 + 종합 단락
+function BalanceGuidePanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const tips       = (data.tips       as string[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 핵심 callout */}
+      {callout && (
+        <div className="mb-4 px-5 py-4 rounded-2xl" style={{ background: `linear-gradient(135deg, ${GCH5_BAL}14 0%, ${GCH5_BAL_P} 100%)`, border: `1.5px solid ${GCH5_BAL}22` }}>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: GCH5_BAL }}>{callout}</p>
+        </div>
+      )}
+      {/* 실천 팁 번호 리스트 */}
+      {tips.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH5_BAL}18` }}>
+          <div className="px-4 py-2.5" style={{ background: `${GCH5_BAL}10` }}>
+            <p className="text-[11px] font-black" style={{ color: GCH5_BAL }}>균형 실천 가이드</p>
+          </div>
+          {tips.map((tip, i) => (
+            <div key={i} className="px-4 py-3 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH5_BAL}10` : "none" }}>
+              <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5" style={{ background: GCH5_BAL, color: WHITE }}>{i + 1}</span>
+              <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{tip}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      {/* 종합 단락 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제4장 전용 컴포넌트 ────────────────────────────────────────────────────────
+
+// 부부상 유형 배너 — 부부 유형명 + 아이콘 + 핵심 callout
+function CoupleStyleBanner({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const coupleType = (data.coupleType as string | undefined) ?? "";
+  const coupleIcon = (data.coupleIcon as string | undefined) ?? "💑";
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {/* 부부 유형 배너 */}
+      {coupleType && (
+        <div className="rounded-2xl px-5 py-5 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${GCH4_COLOR} 0%, #b8872e 100%)` }}>
+          <span className="text-[40px] leading-none">{coupleIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>이 부부의 유형</p>
+            <p className="text-[18px] font-black leading-tight" style={{ color: WHITE }}>{coupleType}</p>
+          </div>
+        </div>
+      )}
+      {/* callout */}
+      {callout && (
+        <div className="mb-4 px-5 py-4 rounded-2xl" style={{ background: GCH4_PALE, border: `1.5px solid ${GCH4_COLOR}30` }}>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: GCH4_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {/* intro 이탤릭 */}
+      {intro && (
+        <p className="mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{intro}"</p>
+      )}
+      {/* 단락 풀이 */}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// 역할 분담 카드 — 아이콘 + 역할명 + 담당자 표시 + 설명
+function RoleBalanceCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const role   = (item.role   as string | undefined) ?? (item.label as string | undefined) ?? "";
+  const icon   = (item.icon   as string | undefined) ?? "⚖️";
+  const owner  = (item.owner  as string | undefined) ?? ""; // "나" | "상대" | "함께"
+  const desc   = (item.desc   as string | undefined) ?? "";
+  const OWNER_COLOR: Record<string, string> = { 나: GCH1_COLOR, 상대: GCH2_COLOR, 함께: GCH4_COLOR };
+  const OWNER_BG:    Record<string, string> = { 나: GCH1_PALE,  상대: GCH2_PALE,  함께: GCH4_PALE  };
+  const ownerColor = OWNER_COLOR[owner] ?? GCH4_COLOR;
+  const ownerBg    = OWNER_BG[owner]    ?? GCH4_PALE;
+  const BADGE_NUMS = ["①", "②", "③", "④", "⑤"];
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH4_COLOR}18`, boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${GCH4_COLOR}0e` }}>
+        <span className="text-[22px]">{icon}</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-[14px] font-black" style={{ color: INK }}>{role}</p>
+            {owner && (
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black" style={{ background: ownerBg, color: ownerColor, border: `1px solid ${ownerColor}30` }}>
+                {owner === "함께" ? "함께" : `${owner}의 몫`}
+              </span>
+            )}
+          </div>
+          <p className="text-[10px] font-bold mt-0.5" style={{ color: MUTE }}>{BADGE_NUMS[index] ?? `#${index + 1}`} 역할</p>
+        </div>
+      </div>
+      <div className="px-4 py-3" style={{ background: WHITE }}>
+        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+// 일상 장면 카드 — 시간대별 / 상황별 결혼 일상 스냅샷
+function DailySceneCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const scene   = (item.scene   as string | undefined) ?? ""; // 상황/시간대 (예: "아침", "주말", "갈등 순간")
+  const icon    = (item.icon    as string | undefined) ?? "🌅";
+  const desc    = (item.desc    as string | undefined) ?? "";
+  const tip     = (item.tip     as string | undefined) ?? "";
+  const BG_ALT  = index % 2 === 0 ? `${GCH4_COLOR}08` : `${GCH4_PALE}`;
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH4_COLOR}15` }}>
+      <div className="px-4 py-3 flex items-center gap-2.5" style={{ background: BG_ALT }}>
+        <span className="text-[20px]">{icon}</span>
+        <p className="text-[13px] font-black" style={{ color: GCH4_COLOR }}>{scene}</p>
+      </div>
+      <div className="px-4 py-3" style={{ background: WHITE }}>
+        <p className="text-[13.5px] leading-relaxed mb-2" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        {tip && (
+          <div className="flex items-start gap-1.5 pt-2" style={{ borderTop: `1px dashed ${GCH4_COLOR}20` }}>
+            <span className="text-[12px] mt-0.5">💡</span>
+            <p className="text-[12px] leading-relaxed font-bold" style={{ color: GCH4_COLOR }}>{tip}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── 제3장 전용 컴포넌트 ────────────────────────────────────────────────────────
+
+// 결혼 가능성 점수 — 풀 반원 게이지 + 점수 등급 뱃지
+function MarriageScoreGauge({ score, label, basis }: { score: number; label: string; basis?: string }) {
+  const s = Math.min(100, Math.max(0, score));
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 130, cy = 110, r = 88;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? GCH3_YES : s >= 60 ? GCH3_COLOR : s >= 40 ? GOLD : GCH3_WARN;
+  const GRADE = s >= 85 ? "천생연분" : s >= 70 ? "좋은 인연" : s >= 55 ? "노력하는 인연" : "도전적 인연";
+  const GRADE_BG = s >= 85 ? `${GCH3_YES}18` : s >= 70 ? `${GCH3_COLOR}18` : s >= 55 ? `${GOLD}22` : `${GCH3_WARN}18`;
+  return (
+    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(160deg, ${GCH3_COLOR}0a 0%, ${WHITE} 60%)`, border: `1.5px solid ${GCH3_COLOR}22` }}>
+      <div className="px-5 pt-5 pb-1 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-bold mb-0.5" style={{ color: GCH3_COLOR }}>사주로 본 결혼 가능성</p>
+          <span className="inline-block px-3 py-1 rounded-full text-[12px] font-black" style={{ background: GRADE_BG, color: COLOR }}>{GRADE}</span>
+        </div>
+        <div className="text-right">
+          <p className="text-[42px] font-black leading-none" style={{ color: COLOR, fontFamily: SERIF }}>{s}</p>
+          <p className="text-[12px] font-bold" style={{ color: MUTE }}>/ 100점</p>
+        </div>
+      </div>
+      <svg viewBox="0 0 260 118" style={{ width: "100%", maxHeight: 130 }}>
+        <defs>
+          <linearGradient id="mGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={GCH3_WARN} />
+            <stop offset="45%" stopColor={GOLD} />
+            <stop offset="100%" stopColor={GCH3_YES} />
+          </linearGradient>
+        </defs>
+        {/* 배경 트랙 */}
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#ece8f0" strokeWidth="20" strokeLinecap="round" />
+        {/* 채워진 게이지 */}
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#mGaugeGrad)" strokeWidth="20" strokeLinecap="round"
+          strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+        {/* 바늘 */}
+        <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="6" fill={INK} />
+        {/* 눈금 라벨 */}
+        <text x={cx - r - 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>0</text>
+        <text x={cx} y={cy - r - 6} textAnchor="middle" fontSize="9" fill={MUTE}>50</text>
+        <text x={cx + r + 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>100</text>
+      </svg>
+      {label && <p className="text-center text-[13.5px] font-black pb-3 px-5" style={{ color: COLOR }}>{label}</p>}
+      {basis && (
+        <div className="mx-5 mb-4 px-4 py-2.5 rounded-xl" style={{ background: `${GCH3_COLOR}08`, borderLeft: `3px solid ${GCH3_COLOR}` }}>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{basis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 결혼 인연 근거 항목 카드 — 긍정/보완 구분 아이콘 + 설명
+function MarriageEvidenceCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const title   = (item.title   as string | undefined) ?? "";
+  const icon    = (item.icon    as string | undefined) ?? "✦";
+  const desc    = (item.desc    as string | undefined) ?? "";
+  const type    = (item.type    as string | undefined) ?? "positive"; // "positive" | "caution"
+  const isPos   = type !== "caution";
+  const cardColor = isPos ? GCH3_YES : GCH3_WARN;
+  const cardPale  = isPos ? "#eef7f2" : "#fdf0ec";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${cardColor}20` }}>
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `${cardColor}12` }}>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-[16px] font-black shrink-0" style={{ background: `${cardColor}22`, color: cardColor }}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: cardColor, color: WHITE }}>
+              {isPos ? "인연의 증거" : "보완할 부분"}
+            </span>
+            <span className="text-[10px] font-bold" style={{ color: MUTE }}>#{index + 1}</span>
+          </div>
+          <p className="text-[14px] font-black mt-1" style={{ color: INK }}>{title}</p>
+        </div>
+      </div>
+      <div className="px-4 py-3" style={{ background: cardPale }}>
+        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+// 결혼 인연 종합 소견 — callout + 풀이 단락
+function MarriageVerdictPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const intro      = (data.intro      as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="mb-4 px-5 py-4 rounded-2xl" style={{ background: `linear-gradient(135deg, ${GCH3_COLOR}14 0%, ${GCH3_PALE} 100%)`, border: `1px solid ${GCH3_COLOR}22` }}>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: GCH3_COLOR }}>{callout}</p>
+        </div>
+      )}
+      {intro && (
+        <p className="mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{intro}"</p>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ─── 제1·2장 전용 컴포넌트 ────────────────────────────────────────────────────
+
+// 기질 카드 — 키워드 태그 + 강점/그림자 분리 표시
+function GNatureCard({ data, color = GCH1_COLOR, label = "나를 대표하는 기질" }: {
+  data: Record<string, unknown> | null; color?: string; label?: string;
+}) {
+  if (!data) return null;
+  const keywords    = (data.keywords    as string[] | undefined) ?? [];
+  const strengthDesc = (data.strengthDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const shadowDesc  = (data.shadowDesc  as string | undefined) ?? "";
+  const KW_COLORS   = [color, "#3f7d6b", "#b07d2a", "#c9474f", "#3f63c4"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${INK}08` }}>
+        <p className="text-[11px] font-bold mb-2.5" style={{ color }}>{label}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${KW_COLORS[i % KW_COLORS.length]}14`, color: KW_COLORS[i % KW_COLORS.length] }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+      {strengthDesc && (
+        <div className="px-4 pt-3 pb-3" style={{ borderBottom: shadowDesc ? `1px solid ${INK}08` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">✨</span>
+            <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+        </div>
+      )}
+      {shadowDesc && (
+        <div className="px-4 pt-3 pb-4" style={{ background: "#fffaf9" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">🌙</span>
+            <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 결혼 패턴 유형 카드 + 단락 풀이
+function MarriagePatternCard({ data, color = GCH1_COLOR, pale = GCH1_PALE }: {
+  data: Record<string, unknown> | null; color?: string; pale?: string;
+}) {
+  if (!data) return null;
+  const intro       = (data.intro       as string | undefined) ?? "";
+  const callout     = (data.callout     as string | undefined) ?? "";
+  const patternType = (data.patternType as string | undefined) ?? "";
+  const patternIcon = (data.patternIcon as string | undefined) ?? "💍";
+  const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {(patternType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, border: `1px solid ${color}20` }}>
+          {patternType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]">{patternIcon}</span>
+              <span className="text-[15px] font-black" style={{ color }}>{patternType}</span>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+        </div>
+      )}
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${color}0c`, borderLeft: `3px solid ${color}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
   );
 }
 
@@ -1082,37 +3005,110 @@ function EventBox() {
   );
 }
 
-// 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
+// 추천 상품(크로스셀) 그리드 (마무리) — 전체 탭 카드 기반
+const RECO_BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
+  "재물": "#eac660", "건강": "#2e7d32", "결혼": "#c2185b", "임신": "#6a1b9a",
+  "연애": "#e1337d", "자녀": "#0077b6", "유아": "#dddbd1", "재회": "#7b2fff",
+  "이혼": "#444", "비즈니스": "#1d6fce",
+};
+const RECO_TAG_COLORS_G: Record<string, string> = {
+  "사주": "#111111", "HOT": "#ff4500", "궁합": "#e1337d", "비즈니스": "#1d6fce",
+  "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b", "NEW": "#4fd5e8",
+  "BEST": "#b47221", "FREE": "#555",
+};
+
+function RecoProductCard({ card }: { card: CategoryCard }) {
+  const isVideo = !!card.videoUrl || card.type === "video";
+  const mediaSrc = card.videoUrl ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !isVideo) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isVideo]);
+  const tag = card.tag;
+  return (
+    <a ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
+      {isVideo ? (
+        visible
+          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
+      ) : imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {tag && (
+            tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : tag === "NEW" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#4fd5e8", color: "#000", display: "inline-block", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>
+            ) : tag === "추천" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS_G[tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS_G[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </a>
+  );
+}
+
+const RECO_EXCLUDE_G = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주", "평생내짝 결혼궁합"]);
+const SAJU_ORDER_G   = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주", "돈버는 재물사주"];
+const KUNGHAP_ORDER_G = ["찰떡콩떡 연애궁합", "말좀듣자 자녀궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
+
+function sortByG(cards: CategoryCard[], order: string[]) {
+  return order.flatMap((name) => cards.filter((c) => c.name === name));
+}
+
 function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("kunghap_gyeolhon") && !RECO_EXCLUDE_G.has(c.name));
+  const sajuCards    = sortByG(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER_G);
+  const kunghapCards = sortByG(all.filter((c) => c.href.includes("kunghap")),  KUNGHAP_ORDER_G);
+
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes newBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} 60%{transform:translateY(-2px)} }
+        @keyframes chukNeon { 0%,100%{box-shadow:0 0 3px 1px rgba(0,255,115,0.5)} 50%{box-shadow:0 0 7px 2px rgba(0,255,115,0.9)} }
+      `}</style>
+      {sajuCards.length    > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
     </div>
   );
 }
@@ -2328,11 +4324,11 @@ const CHAPTER_TITLES: Record<string, string> = {
   "5":  "제5장 · 이 결혼의 장점과 단점",
   "6":  "제6장 · 궁합의 핵심: 합과 충",
   "7":  "제7장 · 결혼 후 재물운과 가정운",
-  "8":  "제8장 · 자녀운 — 아이가 들어오는 인연인가",
+  "8":  "제8장 · 아이가 들어오는 인연일까",
   "9":  "제9장 · 이 결혼의 위기와 극복",
-  "10": "제10장 · 결혼하기 좋은 시기는 언제인가",
-  "11": "제11장 · 두 사람의 미래는 어디로 흐르는가",
-  "12": "마무리 · 그대들에게 남기는 홍연의 서신",
+  "10": "제10장 · 언제 결혼하면 좋을까",
+  "11": "제11장 · 두사람 미래의 흐름은",
+  "12": "마무리 · 그대들에게 남기는\n홍연의 서신",
 };
 
 // A안 읽기 순서 (연애궁합 0~12)
@@ -3484,7 +5480,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="min-w-0 flex-1 mr-3">
           <p className="text-[10px] font-bold mt-1" style={{ color: MUTE }}>{label}</p>
-          {subtitle && <p className="text-[14px] font-bold leading-snug mt-1" style={{ color: INK }}>{subtitle}</p>}
+          {subtitle && <p className="text-[14px] font-bold leading-snug mt-1" style={{ color: INK }}>{subtitle.split("\n").map((line, i) => <span key={i}>{line}{i < subtitle.split("\n").length - 1 && <br />}</span>)}</p>}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
@@ -3523,10 +5519,10 @@ const TOC_A: TocEntry[] = [
   { disp: "제5장",  chip: "장단점",  title: "이 결혼의 장점과 단점",                   no: "5" },
   { disp: "제6장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                   no: "6" },
   { disp: "제7장",  chip: "재물가정", title: "결혼 후 재물운과 가정운",               no: "7" },
-  { disp: "제8장",  chip: "자녀운",  title: "자녀운 — 아이가 들어오는 인연인가",       no: "8" },
+  { disp: "제8장",  chip: "자녀운",  title: "아이가 들어오는 인연일까",       no: "8" },
   { disp: "제9장",  chip: "위기극복", title: "이 결혼의 위기와 극복",                 no: "9" },
-  { disp: "제10장", chip: "결혼시기", title: "결혼하기 좋은 시기는 언제인가",          no: "10" },
-  { disp: "제11장", chip: "미래",    title: "두 사람의 미래는 어디로 흐르는가",        no: "11" },
+  { disp: "제10장", chip: "결혼시기", title: "언제 결혼하면 좋을까",                    no: "10" },
+  { disp: "제11장", chip: "미래",    title: "두사람 미래의 흐름은",        no: "11" },
   { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",           no: "12" },
 ];
 
@@ -4556,487 +6552,668 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
-      {ch === "1" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_1/kunghap_gyeolhon_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
-
-          <section className="pb-2">
-            <div className="px-6"><Heading>나의 명식</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          </section>
-
-          <section className="px-6 pt-6 pb-6">
-            <Heading>나의 오행 분포</Heading>
-            <P>목·화·토·금·수 다섯 기운이<br />내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-            <div className="flex justify-center mt-4">
-              <OhaengRadar view={report?.view ?? null} color={MAROON} />
+      {ch === "1" && (() => {
+        const myWonguk      = (jc.myWonguk      as Record<string, unknown> | undefined) ?? null;
+        const myNature      = (jc.myNature      as Record<string, unknown> | undefined) ?? null;
+        const myMarriagePattern = (jc.myMarriagePattern as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
             </div>
-          </section>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_1/kunghap_gyeolhon_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나의 사주 풀이</Heading>
-            <ReportSec data={jc.myWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          {(jc.myNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>나의 기질</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.myNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{kw}</span>
-                ))}
-              </div>
-              {(jc.myNature as {desc?: string}).desc && <P>{(jc.myNature as {desc: string}).desc}</P>}
+            <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
+
+            {/* 명식 표 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>나의 명식</Heading></div>
+              <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
             </section>
-          )}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나의 결혼 패턴</Heading>
-            <ReportSec data={jc.myMarriagePattern as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
-          <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
-          <ChapterNav cur="1" go={next} />
-        </>
-      )}
+
+            {/* 오행 분포 — 도넛 차트 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>나의 오행 분포</Heading>
+              <P>목·화·토·금·수 다섯 기운이 내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
+            </section>
+            <OhaengDonut view={report?.view ?? null} />
+
+            {/* 사주 원국 풀이 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>나의 사주 풀이</Heading>
+            </section>
+            {myWonguk?.callout && (
+              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${GCH1_COLOR}0c`, borderLeft: `3px solid ${GCH1_COLOR}` }}>
+                <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: GCH1_COLOR }}>{myWonguk.callout as string}</p>
+              </div>
+            )}
+            {myWonguk?.intro && (
+              <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{myWonguk.intro as string}"</p>
+            )}
+            {((myWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
+              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            ))}
+
+            {/* 기질 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>나의 기질</Heading>
+              <P>사주 원국에 깃든 본연의 성품과 기질이오. 강점과 함께 주의해야 할 그림자도 살펴보시오.</P>
+            </section>
+            <GNatureCard data={myNature} color={GCH1_COLOR} label="나를 대표하는 기질" />
+
+            {/* 결혼 패턴 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>나의 결혼 패턴</Heading>
+              <P>내 사주가 품은 결혼의 인연 구조와 배우자 복이오. 어떤 방식으로 인연을 맺고 가정을 꾸리는지 살펴보겠소.</P>
+            </section>
+            <MarriagePatternCard data={myMarriagePattern} color={GCH1_COLOR} pale={GCH1_PALE} />
+
+            <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
+            <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
+            <ChapterNav cur="1" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
-      {ch === "2" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_2/kunghap_gyeolhon_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
+      {ch === "2" && (() => {
+        const partnerName        = report?.partnerName || "상대방";
+        const partnerWonguk      = (jc.partnerWonguk      as Record<string, unknown> | undefined) ?? null;
+        const partnerNature      = (jc.partnerNature      as Record<string, unknown> | undefined) ?? null;
+        const partnerMarriagePattern = (jc.partnerMarriagePattern as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_2/kunghap_gyeolhon_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
+            <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
 
-          {report?.partnerView ? (
-            <>
-              <section className="pb-2">
-                <div className="px-6"><Heading>{report.partnerName || "상대방"}의 명식</Heading></div>
-                <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
-              </section>
-
-              <section className="px-6 pt-6 pb-6">
-                <Heading>상대방의 오행 분포</Heading>
-                <P>목·화·토·금·수 다섯 기운이<br />상대방 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-                <div className="flex justify-center mt-4">
-                  <OhaengRadar view={report.partnerView} color={NAVY} />
-                </div>
-              </section>
-            </>
-          ) : (
-            <section className="px-6 pt-6 pb-6">
-              <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
+            {/* 상대방 명식 표 */}
+            <section className="pb-2">
+              <div className="px-6"><Heading>{partnerName}의 명식</Heading></div>
+              {report?.partnerView ? (
+                <MyeongsikTable view={report.partnerView} name={partnerName} birth={report.partnerBirth ?? null} />
+              ) : (
+                <p className="mx-6 text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
+              )}
             </section>
-          )}
 
-          <section className="px-6 pt-2 pb-4">
-            <Heading>상대방 사주 풀이</Heading>
-            <ReportSec data={jc.partnerWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          {(jc.partnerNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>상대방의 기질</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.partnerNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
-                ))}
+            {/* 상대방 오행 분포 — 도넛 차트 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>{partnerName}의 오행 분포</Heading>
+              <P>목·화·토·금·수 다섯 기운이 {partnerName}의 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
+            </section>
+            <OhaengDonutPartner view={report?.partnerView ?? null} />
+
+            {/* 상대방 사주 원국 풀이 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>{partnerName}의 사주 풀이</Heading>
+            </section>
+            {partnerWonguk?.callout && (
+              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${GCH2_COLOR}0c`, borderLeft: `3px solid ${GCH2_COLOR}` }}>
+                <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: GCH2_COLOR }}>{partnerWonguk.callout as string}</p>
               </div>
-              {(jc.partnerNature as {desc?: string}).desc && <P>{(jc.partnerNature as {desc: string}).desc}</P>}
-            </section>
-          )}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>상대방의 결혼 패턴</Heading>
-            <ReportSec data={jc.partnerMarriagePattern as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
-          <Quote>{`"두 사람의 원국을 보았으니,\n이제 결혼 궁합 점수를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제3장 · 첫인상과 끌림의 비밀 ═══════════ */}
-      {ch === "3" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 끌림</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>첫인상과 끌림의 비밀</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_3/kunghap_gyeolhon_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람의 원국을 살핀 뒤,\n이제 가장 중요한 것을 보겠소.\n두 사람, 결혼할 수 있는 인연인가."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>결혼 궁합 점수</Heading>
-            {(jc.marriageScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.marriageScore as {score: number}).score} label={(jc.marriageScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={82} label="천생연분의 결혼 인연이오" />
             )}
-            {(jc.marriageScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>결혼 인연의 근거</Heading>
-            <ReportSec data={jc.marriageReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-          <Quote>{`"결혼 가능성을 살펴보았으니,\n이제 두 사람이 부부가 되면\n어떤 모습일지 보겠소."`}</Quote>
-          <ChapterNav cur="3" go={next} />
-        </>
-      )}
+            {partnerWonguk?.intro && (
+              <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{partnerWonguk.intro as string}"</p>
+            )}
+            {((partnerWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
+              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            ))}
+
+            {/* 상대방 기질 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>{partnerName}의 기질</Heading>
+              <P>상대방의 사주 원국에 깃든 본연의 성품이오. 강점과 함께 결혼 생활에서 주의해야 할 그림자도 살펴보시오.</P>
+            </section>
+            <GNatureCard data={partnerNature} color={GCH2_COLOR} label={`${partnerName}을 대표하는 기질`} />
+
+            {/* 상대방 결혼 패턴 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>{partnerName}의 결혼 패턴</Heading>
+              <P>{partnerName}의 사주가 품은 결혼의 인연 구조와 배우자 복이오. 어떤 방식으로 가정을 꾸리고 배우자를 대하는지 살펴보겠소.</P>
+            </section>
+            <MarriagePatternCard data={partnerMarriagePattern} color={GCH2_COLOR} pale={GCH2_PALE} />
+
+            <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
+            <Quote>{`"두 사람의 원국을 보았으니,\n이제 결혼 궁합 점수를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="2" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제3장 · 두 사람, 결혼할 수 있는 인연인가 ═══════════ */}
+      {ch === "3" && (() => {
+        const ms   = (jc.marriageScore  as Record<string, unknown> | undefined) ?? null;
+        const mr   = (jc.marriageReason as Record<string, unknown> | undefined) ?? null;
+        const score     = (ms?.score     as number | undefined) ?? 0;
+        const label     = (ms?.label     as string | undefined) ?? "";
+        const basis     = (ms?.basis     as string | undefined) ?? "";
+        const evidences = (mr?.items     as Record<string, unknown>[] | undefined) ?? [];
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 결혼 가능성</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 결혼할 수 있는 인연인가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_3/kunghap_gyeolhon_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"두 사람의 원국을 살핀 뒤,\n이제 가장 중요한 것을 보겠소.\n두 사람, 결혼할 수 있는 인연인가."`}</Quote>
+
+            {/* 결혼 가능성 점수 게이지 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>결혼 가능성 점수</Heading>
+              <P>사주 원국의 구조와 오행의 상생·상극, 천간·지지의 합충(合沖)을 종합하여 두 사람의 결혼 인연을 수치로 나타낸 것이오.</P>
+            </section>
+            <MarriageScoreGauge
+              score={score || 75}
+              label={label || "사주로 본 결혼 가능성"}
+              basis={basis}
+            />
+
+            {/* 결혼 점수 풀이 단락 */}
+            {((ms?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
+              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            ))}
+
+            {/* 결혼 인연의 증거 & 보완점 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>결혼 인연의 근거</Heading>
+              <P>두 사람의 사주에서 발견된 결혼 인연의 증거와 함께 보완해야 할 부분도 솔직하게 살펴보겠소.</P>
+            </section>
+            {evidences.length > 0 ? (
+              evidences.map((item, i) => <MarriageEvidenceCard key={i} item={item} index={i} />)
+            ) : null}
+
+            {/* 종합 소견 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>홍연의 종합 소견</Heading>
+              <P>두 사람의 결혼 가능성에 대한 홍연의 솔직한 견해이오.</P>
+            </section>
+            <MarriageVerdictPanel data={mr} />
+
+            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={280} />
+            <Quote>{`"결혼 가능성을 살펴보았으니,\n이제 두 사람이 부부가 되면\n어떤 모습일지 보겠소."`}</Quote>
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제4장 · 결혼하면 어떤 부부가 될까 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 부부상</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼하면 어떤 부부가 될까</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_4/kunghap_gyeolhon_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"결혼 후 두 사람이 어떻게 살아갈지,\n역할과 일상의 모습을\n살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 사람이 이루는 부부상</Heading>
-            <ReportSec data={jc.coupleStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>역할 분담</Heading>
-            {(jc.roleBalance as {items?: Array<{label: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GOLD}12`, border: `1px solid ${GOLD}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GOLD }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
+      {ch === "4" && (() => {
+        const cs = (jc.coupleStyle  as Record<string, unknown> | undefined) ?? null;
+        const rb = (jc.roleBalance  as Record<string, unknown> | undefined) ?? null;
+        const dl = (jc.dailyLife    as Record<string, unknown> | undefined) ?? null;
+        const roleItems   = (rb?.items  as Record<string, unknown>[] | undefined) ?? [];
+        const sceneItems  = (dl?.scenes as Record<string, unknown>[] | undefined) ?? [];
+        const dailyParas  = (dl?.paragraphs as string[] | undefined) ?? [];
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 부부상</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼하면 어떤 부부가 될까</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_4/kunghap_gyeolhon_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"결혼 후 두 사람이 어떻게 살아갈지,\n역할과 일상의 모습을\n함께 살펴보겠소."`}</Quote>
+
+            {/* 부부 유형 배너 + 풀이 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>두 사람이 이루는 부부상</Heading>
+              <P>사주가 보여주는 두 사람만의 부부 유형이오. 어떤 빛깔의 부부가 될지 살펴보겠소.</P>
+            </section>
+            <CoupleStyleBanner data={cs} />
+
+            {/* 역할 분담 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>두 사람의 역할 분담</Heading>
+              <P>결혼 생활에서 두 사람이 자연스럽게 맡게 될 역할이오. 사주가 보여주는 각자의 자리를 살펴보겠소.</P>
+            </section>
+            {roleItems.map((item, i) => (
+              <RoleBalanceCard key={i} item={item} index={i} />
             ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>결혼 후 일상</Heading>
-            {(jc.dailyLife as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"부부상을 알았으니,\n이 결혼의 장점과 단점을\n솔직하게 살펴보겠소."`}</Quote>
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
+
+            {/* 일상 장면 카드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>결혼 후 일상의 모습</Heading>
+              <P>두 사람이 함께하는 일상의 장면들이오. 아침부터 밤까지, 평일과 주말, 위기의 순간까지 어떤 모습일지 보겠소.</P>
+            </section>
+            {sceneItems.map((item, i) => (
+              <DailySceneCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 일상 종합 풀이 단락 */}
+            {dailyParas.length > 0 && (
+              <div className="mx-5 mt-2 mb-4 px-5 py-4 rounded-2xl" style={{ background: GCH4_PALE, border: `1px solid ${GCH4_COLOR}20` }}>
+                {dailyParas.map((p, i) => (
+                  <p key={i} className="text-[14px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+                ))}
+              </div>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={280} />
+            <Quote>{`"부부상을 알았으니,\n이 결혼의 장점과 단점을\n솔직하게 살펴보겠소."`}</Quote>
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제5장 · 이 결혼의 장점과 단점 ═══════════ */}
-      {ch === "5" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 장단점</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 결혼의 장점과 단점</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_5/kunghap_gyeolhon_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"장점만큼 단점을 아는 것이\n더 단단한 결혼을 만드오.\n솔직하게 살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>이 결혼의 강점</Heading>
-            {(jc.strengths as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
+      {ch === "5" && (() => {
+        const str = (jc.strengths  as Record<string, unknown> | undefined) ?? null;
+        const wek = (jc.weaknesses as Record<string, unknown> | undefined) ?? null;
+        const bal = (jc.balanceTip as Record<string, unknown> | undefined) ?? null;
+        const strItems = (str?.items as Record<string, unknown>[] | undefined) ?? [];
+        const wekItems = (wek?.items as Record<string, unknown>[] | undefined) ?? [];
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 장단점</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 결혼의 장점과 단점</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_5/kunghap_gyeolhon_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"장점만큼 단점을 아는 것이\n더 단단한 결혼을 만드오.\n솔직하게 살펴보겠소."`}</Quote>
+
+            {/* 이 결혼의 강점 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>이 결혼의 강점</Heading>
+              <P>두 사람의 사주가 만나 만들어내는 결혼의 빛나는 면이오. 이 강점들이 두 사람의 결혼을 더욱 풍요롭게 할 것이오.</P>
+            </section>
+            {strItems.map((item, i) => (
+              <MarriageStrengthCard key={i} item={item} index={i} />
             ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>이 결혼의 약점</Heading>
-            {(jc.weaknesses as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
+
+            {/* 이 결혼의 약점 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>이 결혼의 약점</Heading>
+              <P>솔직하게 보아야 더 잘 대비할 수 있소. 이 약점들은 두 사람이 알고 있으면 충분히 넘어설 수 있는 것들이오.</P>
+            </section>
+            {wekItems.map((item, i) => (
+              <MarriageWeaknessCard key={i} item={item} index={i} />
             ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>균형 잡는 법</Heading>
-            {(jc.balanceTip as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-          <Quote>{`"장단점을 알았으니,\n이제 두 사주 사이의\n합·충을 짚어보겠소."`}</Quote>
-          <ChapterNav cur="5" go={next} />
-        </>
-      )}
+
+            {/* 균형 잡기 가이드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>강점을 살리고 약점을 보완하는 법</Heading>
+              <P>강점을 더 빛나게 하고 약점을 지혜롭게 보완하는 구체적인 방법이오.</P>
+            </section>
+            <BalanceGuidePanel data={bal} />
+
+            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={280} />
+            <Quote>{`"장단점을 알았으니,\n이제 두 사주 사이의\n합·충을 짚어보겠소."`}</Quote>
+            <ChapterNav cur="5" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제6장 · 궁합의 핵심: 합과 충 ═══════════ */}
-      {ch === "6" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_6/kunghap_gyeolhon_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 명식을 합쳐서 보면</Heading>
+      {ch === "6" && (() => {
+        const hapList     = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
+        const chungList   = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
+        const overallScore= (jc.overallScore as Record<string, unknown> | undefined) ?? null;
+        const hapItems    = (hapList?.items   as Record<string, unknown>[] | undefined) ?? [];
+        const chungItems  = (chungList?.items as Record<string, unknown>[] | undefined) ?? [];
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_6/kunghap_gyeolhon_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
+
+            {/* 두 명식 간지 관계 시각화 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>두 명식을 합쳐서 보면</Heading>
+              <P>두 사주의 천간과 지지가 서로 어떤 관계를 맺는지 한눈에 살펴보겠소.</P>
+            </section>
             <GanjiRelation view={report?.view ?? null} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>합(合) 목록</Heading>
-            {(jc.hapList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-[13px] font-bold" style={{ color: GREEN }}>{item.type}</p>
-                  <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${GREEN}22`, color: GREEN }}>{item.strength}</span>
-                </div>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+
+            {/* 합(合) 목록 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>합(合) — 두 사주가 끌어당기는 힘</Heading>
+            </section>
+            <HapIntroPanel />
+            {hapItems.length > 0 ? (
+              hapItems.map((item, i) => <GHapCard key={i} item={item} index={i} />)
+            ) : (
+              <p className="mx-5 mb-4 text-[13px]" style={{ color: MUTE }}>두 사주 사이에 특별한 합이 발견되지 않았소.</p>
+            )}
+
+            {/* 충(沖) 목록 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>충(沖) — 두 사주가 맞부딪히는 힘</Heading>
+            </section>
+            <ChungIntroPanel />
+            {chungItems.length > 0 ? (
+              chungItems.map((item, i) => <GChungCard key={i} item={item} index={i} />)
+            ) : (
+              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: GCH6_HAP_P, border: `1px solid ${GCH6_HAP}20` }}>
+                <p className="text-[13px] font-bold" style={{ color: GCH6_HAP }}>두 사주 사이에 강한 충이 없소. 이는 결혼 생활에서 큰 마찰 없이 지낼 수 있는 좋은 신호이오.</p>
               </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>충(沖) 목록</Heading>
-            {(jc.chungList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.length ? (
-              (jc.chungList as {items: Array<{type: string; desc: string; strength: string}>}).items.map((item, i) => (
-                <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[13px] font-bold" style={{ color: WARN }}>{item.type}</p>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${WARN}22`, color: WARN }}>{item.strength}</span>
-                  </div>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 강한 충이 없소.</p>
             )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>종합 궁합 점수</Heading>
-            {(jc.overallScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.overallScore as {score: number}).score} label={(jc.overallScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={78} label="좋은 결혼 궁합이오" />
-            )}
-            {(jc.overallScore as {desc?: string} | undefined)?.desc && (
-              <p className="text-[13px] leading-relaxed mt-2" style={{ color: INK_SOFT }}>{(jc.overallScore as {desc: string}).desc}</p>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-          <Quote>{`"합·충을 파악했으니,\n이제 연애 스타일이\n얼마나 맞는지 살펴보겠소."`}</Quote>
-          <ChapterNav cur="6" go={next} />
-        </>
-      )}
+
+            {/* 합·충 종합 점수 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>합·충 종합 궁합 점수</Heading>
+              <P>합과 충의 수·강도·위치를 종합하여 두 사주 사이의 궁합 에너지를 수치로 나타낸 것이오.</P>
+            </section>
+            <GHapChungScoreCard data={overallScore} hapCount={hapItems.length} chungCount={chungItems.length} />
+
+            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={280} />
+            <Quote>{`"합·충을 파악했으니,\n이제 결혼 후 재물과 가정이\n어떻게 흘러가는지 보겠소."`}</Quote>
+            <ChapterNav cur="6" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제7장 · 결혼 후 재물·가정운 ═══════════ */}
-      {ch === "7" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 재물·가정</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼 후 재물·가정운</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_7/kunghap_gyeolhon_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"결혼 후 재물과 가정이\n어떻게 흘러가는지\n살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>재물운</Heading>
-            <ReportSec data={jc.wealthFlow as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>가정운</Heading>
-            <ReportSec data={jc.homeLife as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>재물·가정 조언</Heading>
-            {(jc.wealthTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-          <Quote>{`"재물과 가정을 살펴보았으니,\n이제 자녀 인연을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="7" go={next} />
-        </>
-      )}
+      {ch === "7" && (() => {
+        const wf = (jc.wealthFlow as Record<string, unknown> | undefined) ?? null;
+        const hl = (jc.homeLife   as Record<string, unknown> | undefined) ?? null;
+        const wt = (jc.wealthTips as Record<string, unknown> | undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 재물·가정</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼 후 재물운과 가정운</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_7/kunghap_gyeolhon_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"결혼 후 재물과 가정이\n어떻게 흘러가는지\n살펴보겠소."`}</Quote>
+
+            {/* 재물운 — 요약 헤더 + 풀이 + 시기별 흐름 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>결혼 후 재물운</Heading>
+              <P>두 사람이 결혼하면 재물이 어떻게 모이고 흐르는지, 사주가 보여주는 재물의 구조를 살펴보겠소.</P>
+            </section>
+            <WealthSummaryCard data={wf} />
+            <WealthDetailPanel data={wf} />
+
+            {/* 가정운 — 가정 유형 배너 + 측면 카드 + 단락 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>결혼 후 가정운</Heading>
+              <P>두 사람이 함께 꾸릴 가정의 분위기와 에너지이오. 어떤 빛깔의 가정을 만들어갈지 살펴보겠소.</P>
+            </section>
+            <HomeLifeCard data={hl} />
+
+            {/* 재물·가정 실천 조언 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>재물·가정을 풍요롭게 하는 법</Heading>
+              <P>이 두 사람의 사주 구조에서 나온 재물·가정 실천 조언이오. 결혼 생활에서 바로 써먹을 수 있는 것들이오.</P>
+            </section>
+            <WealthHomeTipPanel data={wt} />
+
+            <Illust src="/media/report/kunghap/kh-7-1.jpg" h={280} />
+            <Quote>{`"재물과 가정을 살펴보았으니,\n이제 자녀 인연을\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="7" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제8장 · 자녀운 ═══════════ */}
-      {ch === "8" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 자녀운</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀운 — 아이가 들어오는 인연인가</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_8/kunghap_gyeolhon_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"아이가 이 인연에 들어오는가.\n자녀 궁합을\n살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>자녀 궁합 점수</Heading>
-            {(jc.childCompatibility as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.childCompatibility as {score: number}).score} label={(jc.childCompatibility as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={75} label="자녀 복이 풍성한 인연이오" />
-            )}
-            {(jc.childCompatibility as {desc?: string} | undefined)?.desc && (
-              <p className="text-[13px] leading-relaxed mt-2" style={{ color: INK_SOFT }}>{(jc.childCompatibility as {desc: string}).desc}</p>
-            )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>자녀 시기</Heading>
-            {(jc.childTiming as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>자녀 특성</Heading>
-            {(jc.childStyle as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-          <Quote>{`"자녀 인연을 살펴보았으니,\n이제 결혼 생활에서 올 위기와\n그 극복법을 보겠소."`}</Quote>
-          <ChapterNav cur="8" go={next} />
-        </>
-      )}
+      {ch === "8" && (() => {
+        const cc  = (jc.childCompatibility as Record<string,unknown>|undefined) ?? null;
+        const cti = (jc.childTiming        as Record<string,unknown>|undefined) ?? null;
+        const cst = (jc.childStyle         as Record<string,unknown>|undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 자녀운</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이가 들어오는 인연일까</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_8/kunghap_gyeolhon_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"아이가 이 인연에 들어오는가.\n자녀 궁합을\n살펴보겠소."`}</Quote>
+
+            {/* 자녀 인연 점수 */}
+            <section className="px-0 pt-4 pb-2">
+              <div className="px-6 pb-2">
+                <Heading>자녀 인연 점수</Heading>
+                <P>두 분의 사주 구조가 자녀와의 인연을 얼마나 품고 있는지, 오행과 신살을 통해 헤아려 보았소. 자녀궁(子女宮)과 식상(食傷)의 기운이 이 점수의 뼈대가 되오.</P>
+              </div>
+              <ChildScoreGauge data={cc} />
+              <div className="px-6">
+                <ChildCompatDetailPanel data={cc} />
+              </div>
+            </section>
+
+            {/* 자녀 시기 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>자녀 인연이 오는 시기</Heading>
+              <P>사주에서 자녀가 인연을 맺기 좋은 시기와, 그 시기를 어떻게 준비할지 살펴보았소. 대운과 세운의 흐름이 자녀 인연의 문을 열고 닫소.</P>
+            </section>
+            <ChildTimingCard data={cti} />
+
+            {/* 자녀 특성 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>자녀의 기운과 특성</Heading>
+              <P>이 부부의 사주 기운이 어떤 기질의 자녀를 품을 것인지, 그리고 어떤 양육 방식이 잘 맞는지를 헤아렸소. 부부의 오행 배합이 자녀의 기질로 이어지오.</P>
+            </section>
+            <ChildStyleCard data={cst} />
+
+            <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
+            <Quote>{`"자녀 인연을 살펴보았으니,\n이제 결혼 생활에서 올 위기와\n그 극복법을 보겠소."`}</Quote>
+            <ChapterNav cur="8" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제9장 · 위기와 극복 ═══════════ */}
-      {ch === "9" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기·극복</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>위기와 극복</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_9/kunghap_gyeolhon_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기 요소</Heading>
-            {(jc.crisisPoints as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>극복법</Heading>
-            {(jc.overcomeTips as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>시기별 결혼 생활 흐름</Heading>
-            {(jc.crisisFlow as {items?: ReportFlowItem[]} | undefined)?.items ? (
-              <RunFlowChart flow={(jc.crisisFlow as {items: ReportFlowItem[]}).items} />
-            ) : (
-              <RelationFlowChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-          <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 결혼하기 가장 좋은 시기를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="9" go={next} />
-        </>
-      )}
+      {ch === "9" && (() => {
+        const cp  = (jc.crisisPoints  as Record<string,unknown>|undefined) ?? null;
+        const ot  = (jc.overcomeTips  as Record<string,unknown>|undefined) ?? null;
+        const cf  = (jc.crisisFlow    as Record<string,unknown>|undefined) ?? null;
+        const rg  = (jc.recoveryGuide as Record<string,unknown>|undefined) ?? null;
+        const cpItems = (cp?.items as Record<string,unknown>[]|undefined) ?? [];
+        const otItems = (ot?.items as Record<string,unknown>[]|undefined) ?? [];
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기와 극복</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 결혼의 위기와 극복</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_9/kunghap_gyeolhon_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
 
-      {/* ═══════════ 제10장 · 결혼하기 좋은 시기 ═══════════ */}
-      {ch === "10" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼하기 좋은 시기는 언제인가</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_10/kunghap_gyeolhon_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"결혼 시기도 사주에 흔적이 있소.\n두 사람이 결혼하기 가장 좋은 때를\n짚어드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>결혼하기 좋은 시기</Heading>
-            {(jc.bestTiming as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>시기별 체크리스트</Heading>
-            {(jc.timingItems as {items?: Array<{label: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GOLD}12`, border: `1px solid ${GOLD}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GOLD }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>결혼 시기 조언</Heading>
-            {(jc.timingAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.timingAdvice as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-          <Quote>{`"결혼 시기를 살펴보았으니,\n이제 두 사람의 먼 미래를\n함께 보겠소."`}</Quote>
-          <ChapterNav cur="10" go={next} />
-        </>
-      )}
+            {/* 위기 유형 도입 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>이 부부의 위기 유형</Heading>
+              <P>두 분의 사주 구조가 맞닿는 지점에서 어떤 갈등과 긴장이 생겨날 수 있는지, 오행의 충·극 관계와 일주의 기질 차이를 통해 살펴보았소.</P>
+            </section>
+            <CrisisBanner data={cp} />
+
+            {/* 위기 요인 카드 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>위기 요인 분석</Heading>
+              <P>결혼 생활에서 두 사람 사이에 불씨가 될 수 있는 구체적인 위기 요인들을 하나씩 짚어보겠소. 알면 피할 수 있고, 알면 넘을 수 있소.</P>
+            </section>
+            {cpItems.map((item, i) => <CrisisCard key={i} item={item} />)}
+
+            {/* 극복 방법 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>위기를 넘는 방법</Heading>
+              <P>위기를 아는 것만으로는 부족하오. 두 사람이 함께 써내려갈 극복의 방법들을 사주의 상생 기운에서 찾아 정리하였소.</P>
+            </section>
+            {otItems.map((item, i) => <OvercomeCard key={i} item={item} idx={i} />)}
+
+            {/* 시기별 흐름 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>시기별 결혼 기운 흐름</Heading>
+              <P>위기가 집중되는 시기와 안정이 찾아오는 시기가 있소. 대운과 세운의 흐름 속에서 이 부부의 결혼 생활이 어떻게 펼쳐지는지 살펴보겠소.</P>
+            </section>
+            <CrisisFlowTimeline data={cf} />
+
+            {/* 종합 극복 가이드 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>이 부부의 극복 원칙</Heading>
+              <P>위기를 함께 넘기 위해 이 두 사람이 붙들어야 할 핵심 원칙들이오. 사주의 기운이 가리키는 이 부부만의 화해와 성장의 방향이오.</P>
+            </section>
+            <CrisisRecoveryGuide data={rg} />
+
+            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
+            <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 결혼하기 가장 좋은 시기를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="9" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제10장 · 언제 결혼하면 좋을까 ═══════════ */}
+      {ch === "10" && (() => {
+        const bt = (jc.bestTiming   as Record<string,unknown>|undefined) ?? null;
+        const ti = (jc.timingItems  as Record<string,unknown>|undefined) ?? null;
+        const tc = (jc.timingChecks as Record<string,unknown>|undefined) ?? null;
+        const ta = (jc.timingAdvice as Record<string,unknown>|undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 결혼 시기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>언제 결혼하면 좋을까</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_10/kunghap_gyeolhon_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"결혼 시기도 사주에 흔적이 있소.\n두 사람이 결혼하기 가장 좋은 때를\n짚어드리겠소."`}</Quote>
+
+            {/* 최적 결혼 시기 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>최적 결혼 시기</Heading>
+              <P>두 사람의 대운과 세운이 겹쳐 결혼 에너지가 가장 응집되는 시기를 사주 구조에서 읽어내었소. 언제 혼인하느냐는 두 사람의 결혼 인연만큼이나 중요한 선택이오.</P>
+            </section>
+            <BestTimingBanner data={bt} />
+
+            {/* 연도별 결혼 에너지 꺾은선 차트 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>연도별 결혼 에너지</Heading>
+              <P>2026년부터 향후 수 년간, 매 구간마다 결혼 에너지가 어떻게 달라지는지 점수와 함께 살펴보겠소. 시기에 따라 하늘의 허락이 두텁기도 하고 얕기도 하오.</P>
+            </section>
+            <MarriageTimingLineChart data={ti} />
+
+            {/* 결혼 시기 판단 체크리스트 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>결혼 시기 판단 기준</Heading>
+              <P>결혼 시기를 고를 때 사주에서 반드시 살펴야 할 체크포인트들이오. 이 기준들이 충족되는 때가 두 사람에게 가장 길한 혼인 시기가 되오.</P>
+            </section>
+            <TimingChecklistCard data={tc} />
+
+            {/* 결혼 시기 조언 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>결혼을 앞두고 준비할 것들</Heading>
+              <P>좋은 시기를 알았다면, 그 시기를 어떻게 준비하고 맞이할지도 중요하오. 이 부부가 혼인을 앞두고 챙겨야 할 실천 조언을 마련하였소.</P>
+            </section>
+            <TimingAdvicePanel data={ta} />
+
+            <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
+            <Quote>{`"결혼 시기를 살펴보았으니,\n이제 두 사람의 먼 미래를\n함께 보겠소."`}</Quote>
+            <ChapterNav cur="10" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제11장 · 두 사람의 미래는 어디로 ═══════════ */}
-      {ch === "11" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 미래</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 미래는 어디로 흐르는가</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_11/kunghap_gyeolhon_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람의 먼 미래가\n어떻게 펼쳐지는지\n함께 살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 사람의 미래 흐름</Heading>
-            {(jc.futureFlow as {items?: ReportFlowItem[]} | undefined)?.items ? (
-              <RunFlowChart flow={(jc.futureFlow as {items: ReportFlowItem[]}).items} />
-            ) : (
-              <RelationFlowChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
-            )}
-          </section>
-          <section className="px-6 pt-4 pb-4">
-            <Heading>장기 전망</Heading>
-            {(jc.longTermOutlook as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>마지막 조언</Heading>
-            {(jc.finalAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.finalAdvice as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
-          <Quote>{`"좋은 때를 알았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
-          <ChapterNav cur="11" go={next} />
-        </>
-      )}
+      {ch === "11" && (() => {
+        const fv  = (jc.futureVision    as Record<string,unknown>|undefined) ?? null;
+        const ff  = (jc.futureFlow      as Record<string,unknown>|undefined) ?? null;
+        const lt  = (jc.longTermOutlook as Record<string,unknown>|undefined) ?? null;
+        const oa  = (jc.oldAgeRelation  as Record<string,unknown>|undefined) ?? null;
+        const fa  = (jc.finalAdvice     as Record<string,unknown>|undefined) ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 두 사람의 미래</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두사람 미래의 흐름은</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_11/kunghap_gyeolhon_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"두 사람의 먼 미래가\n어떻게 펼쳐지는지\n함께 살펴보겠소."`}</Quote>
+
+            {/* 미래 전망 도입 배너 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>이 결혼의 장기 전망</Heading>
+              <P>두 사람이 함께 걸어갈 결혼의 긴 여정을 사주가 어떻게 예고하는지 살펴보겠소. 오행의 흐름과 대운의 교차 속에서 이 인연이 시간과 함께 어떻게 성숙해지는지 먼저 헤아려 보겠소.</P>
+            </section>
+            <FutureVisionBanner data={fv} />
+
+            {/* 시기별 미래 흐름 꺾은선 차트 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>시기별 미래 흐름</Heading>
+              <P>결혼 초기부터 노년까지, 이 두 사람의 인연이 각 시기마다 어떤 기운을 품는지 꺾은선으로 살펴보겠소. 번성의 때도, 도전의 때도 모두 이 부부만의 이야기가 되오.</P>
+            </section>
+            <FutureFlowLineChart data={ff} />
+
+            {/* 결혼 여정 이정표 + 장기 전망 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>결혼 여정의 이정표</Heading>
+              <P>결혼 후 10년, 20년, 노년에 이르기까지 이 부부가 함께 지나게 될 중요한 삶의 이정표들을 사주에서 읽어내었소. 두 사람이 함께 만들어갈 시간의 윤곽이오.</P>
+            </section>
+            <LongTermOutlookPanel data={lt} />
+
+            {/* 노년 인연 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>노년의 두 사람</Heading>
+              <P>가장 오래된 인연이 가장 깊어지는 법이오. 두 사람이 함께 늙어갔을 때 어떤 모습으로 서로 곁에 있는지, 사주가 보여주는 노년의 인연을 살펴보겠소.</P>
+            </section>
+            <OldAgeRelationCard data={oa} />
+
+            {/* 홍연의 마지막 당부 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>홍연의 마지막 당부</Heading>
+              <P>열한 개의 장을 함께 살펴보았소. 홍연이 이 두 사람의 결혼 인연을 보며 마지막으로 건네는 말이오.</P>
+            </section>
+            <FinalAdvicePanel data={fa} />
+
+            <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
+            <Quote>{`"두 사람의 미래를 살펴보았으니,\n이제 홍연의 마지막 서신을\n받아보시오."`}</Quote>
+            <ChapterNav cur="11" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
       {ch === "12" && (

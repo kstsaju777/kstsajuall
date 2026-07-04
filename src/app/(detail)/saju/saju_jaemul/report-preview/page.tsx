@@ -9,7 +9,9 @@
 // ⚠️ 이미지는 전부 임시(placeholder)다. 레퍼런스의 한복 일러스트 대신
 //    기존 hero 이미지를 끼워둠 — 추후 전용 일러스트로 교체.
 
+import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
@@ -990,37 +992,109 @@ function EventBox() {
   );
 }
 
-// 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
+// 추천 상품(크로스셀) 그리드 (마무리) — 전체 탭 카드 그대로
+const RECO_BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
+  "재물": "#eac660", "건강": "#2e7d32", "결혼": "#c2185b", "임신": "#6a1b9a",
+  "연애": "#e1337d", "자녀": "#0077b6", "유아": "#dddbd1", "재회": "#7b2fff",
+  "이혼": "#444", "비즈니스": "#1d6fce",
+};
+const RECO_TAG_COLORS: Record<string, string> = {
+  "사주": "#111111", "HOT": "#ff4500", "궁합": "#e1337d", "비즈니스": "#1d6fce",
+  "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b", "NEW": "#4fd5e8",
+  "BEST": "#b47221", "FREE": "#555",
+};
+
+function RecoProductCard({ card }: { card: CategoryCard }) {
+  const isVideo = !!card.videoUrl || card.type === "video";
+  const mediaSrc = card.videoUrl ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !isVideo) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isVideo]);
+  return (
+    <Link ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
+      {isVideo ? (
+        visible
+          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
+      ) : imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : card.tag === "NEW" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#4fd5e8", color: "#000", display: "inline-block", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>
+            ) : card.tag === "추천" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
+const RECO_EXCLUDE = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주"]);
+const SAJU_ORDER = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주"];
+const KUNGHAP_ORDER = ["찰떡콩떡 연애궁합", "말좀듣자 자녀궁합", "평생내짝 결혼궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
+
+function sortBy(cards: CategoryCard[], order: string[]) {
+  return order.flatMap((name) => cards.filter((c) => c.name === name));
+}
+
 function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("saju_jaemul") && !RECO_EXCLUDE.has(c.name));
+  const sajuCards = sortBy(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER);
+  const kunghapCards = sortBy(all.filter((c) => c.href.includes("kunghap")), KUNGHAP_ORDER);
+
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes newBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} 60%{transform:translateY(-2px)} }
+        @keyframes chukNeon { 0%,100%{box-shadow:0 0 3px 1px rgba(0,255,115,0.5)} 50%{box-shadow:0 0 7px 2px rgba(0,255,115,0.9)} }
+      `}</style>
+      {sajuCards.length > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
     </div>
   );
 }
@@ -2230,10 +2304,10 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 const CHAPTER_TITLES: Record<string, string> = {
   "0": "인트로 · 재물사주에 대하여",
   "1": "제1장 · 나는 어떤 그릇으로 태어났나",
-  "2": "제2장 · 내 재물 기질 — 돈을 대하는 나의 방식",
+  "2": "제2장 · 돈을 대하는 나의 방식",
   "3": "제3장 · 내 사주에 재물이 보이는가",
   "4": "제4장 · 돈이 되는 일과 나의 천직",
-  "5": "제5장 · 내 재물 대운 — 언제 벌고 언제 조심할까",
+  "5": "제5장 · 언제 벌고 언제 조심할까",
   "6": "제6장 · 내 재물운을 바꾸는 개운법",
   "7": "마무리 · 그대에게 남기는 홍연의 서신",
 };
@@ -3276,10 +3350,10 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",   title: "재물사주에 대하여",                         no: "0" },
   { disp: "제1장",  chip: "그릇",   title: "나는 어떤 그릇으로 태어났나",               no: "1" },
-  { disp: "제2장",  chip: "재물기질", title: "내 재물 기질 — 돈을 대하는 나의 방식",   no: "2" },
+  { disp: "제2장",  chip: "재물기질", title: "돈을 대하는 나의 방식",   no: "2" },
   { disp: "제3장",  chip: "재물",   title: "내 사주에 재물이 보이는가",                 no: "3" },
   { disp: "제4장",  chip: "천직",   title: "돈이 되는 일과 나의 천직",                  no: "4" },
-  { disp: "제5장",  chip: "대운",   title: "내 재물 대운 — 언제 벌고 언제 조심할까",   no: "5" },
+  { disp: "제5장",  chip: "대운",   title: "언제 벌고 언제 조심할까",   no: "5" },
   { disp: "제6장",  chip: "개운법", title: "내 재물운을 바꾸는 개운법",                 no: "6" },
   { disp: "마무리", chip: "결론",   title: "그대에게 남기는 홍연의 서신",               no: "7" },
 ];
@@ -3860,7 +3934,7 @@ function ReportPreviewInner() {
 
   // 마무리(단하의 편지) 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
   useEffect(() => {
-    if (ch !== "16") { setEventOpen(false); return; }
+    if (ch !== "7") { setEventOpen(false); return; }
     if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
     setEventOpen(true);
   }, [ch]);
@@ -4512,7 +4586,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 재물기질</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              내 재물 기질<br />돈을 대하는 나의 방식
+              돈을 대하는 나의 방식
             </h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -4644,9 +4718,7 @@ function ReportPreviewInner() {
               conditions?: { type: "good" | "warn"; text: string }[];
               condDesc?: string;
             } | undefined) ?? {};
-            const jf = (jc.jobFit as { clusters?: { category: string; keywords: string[]; jobs: string[]; desc?: string }[] } | undefined) ?? {};
             const inv = (jc.investStyle as { types?: { category: string; icon: string; score: number; products: string[]; tip: string }[] } | undefined) ?? {};
-            const sp = (jc.splitType as { leftLabel?: string; left?: number; rightLabel?: string; right?: number; leftDesc?: string; rightDesc?: string; leftTips?: string[]; rightTips?: string[] } | undefined) ?? {};
 
             // 재성 강도 게이지 설정
             const WP_SEGMENTS = [
@@ -4719,31 +4791,6 @@ function ReportPreviewInner() {
                   </section>
                 )}
 
-                {/* ③ 어울리는 직군 */}
-                {jf.clusters && jf.clusters.length > 0 && (
-                  <section className="px-6 pt-6 pb-2">
-                    <Heading>어울리는 직군</Heading>
-                    <div className="space-y-3 mt-2">
-                      {jf.clusters.map((cl, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[14px] font-bold" style={{ color: INK, fontFamily: SERIF }}>{cl.category}</span>
-                            {cl.keywords.map((kw, j) => (
-                              <span key={j} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: CALLOUT_BG, color: MAROON }}>{kw}</span>
-                            ))}
-                          </div>
-                          {cl.desc && <p className="text-[12px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{cl.desc}</p>}
-                          <div className="flex flex-wrap gap-1.5">
-                            {cl.jobs.map((job, j) => (
-                              <span key={j} className="text-[11px] px-2 py-1 rounded-lg" style={{ background: "#f3f0eb", color: INK_SOFT }}>{job}</span>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
                 {/* ④ 투자 스타일 */}
                 {inv.types && inv.types.length > 0 && (
                   <section className="px-6 pt-6 pb-2">
@@ -4773,38 +4820,6 @@ function ReportPreviewInner() {
                   </section>
                 )}
 
-                {/* ⑤ 직장인형 vs 사업가형 */}
-                {sp.leftLabel && (
-                  <section className="px-6 pt-6 pb-6">
-                    <Heading>직장인형 vs 사업가형</Heading>
-                    <div className="flex gap-3 mb-3 mt-2">
-                      {[
-                        { label: sp.leftLabel!, pct: sp.left ?? 0, desc: sp.leftDesc ?? "", tips: sp.leftTips ?? [], color: "#2a6080" },
-                        { label: sp.rightLabel!, pct: sp.right ?? 0, desc: sp.rightDesc ?? "", tips: sp.rightTips ?? [], color: GOLD },
-                      ].map((side, i) => (
-                        <div key={i} className="flex-1 rounded-2xl p-4" style={{ background: WHITE, border: `1.5px solid ${side.color}30` }}>
-                          <p className="text-[12px] font-bold mb-1" style={{ color: side.color }}>{side.label}</p>
-                          <p className="text-[26px] font-black mb-1" style={{ color: side.color }}>{side.pct}%</p>
-                          <p className="text-[11px] mb-2" style={{ color: MUTE }}>{side.desc}</p>
-                          {side.tips.length > 0 && (
-                            <ul className="space-y-1">
-                              {side.tips.map((tip, j) => (
-                                <li key={j} className="flex items-start gap-1.5">
-                                  <span className="text-[11px] mt-0.5" style={{ color: side.color }}>•</span>
-                                  <span className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex rounded-full overflow-hidden h-3">
-                      <div style={{ width: `${sp.left ?? 0}%`, background: "#2a6080" }} />
-                      <div style={{ flex: 1, background: GOLD }} />
-                    </div>
-                  </section>
-                )}
               </>
             );
           })()}
@@ -4826,30 +4841,129 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <Quote>{`사주에는 나에게\n맞는 일이 새겨져 있소.\n\n돈이 되는 천직과\n황금기를 살펴보겠소.`}</Quote>
+          <Quote>{`타고난 기운이 이끄는\n일이 있소.\n\n그 천직을 찾으면\n재물은 자연히 따르오.`}</Quote>
           {(() => {
-            const cw = (jc.careerWealth as { intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
-            const pk = (jc.wealthPeak as { title?: string; when?: string; todo?: string } | undefined) ?? {};
+            const cw = (jc.careerWealth as {
+              vocType?: string; vocKeywords?: string[]; intro?: string;
+              cards?: { icon: string; title: string; desc: string }[];
+              summary?: string;
+            } | undefined) ?? {};
+            const jf = (jc.jobFit as { clusters?: { category: string; keywords: string[]; jobs: string[]; desc?: string }[] } | undefined) ?? {};
+            const sp = (jc.splitType as { leftLabel?: string; left?: number; rightLabel?: string; right?: number; leftDesc?: string; rightDesc?: string; leftTips?: string[]; rightTips?: string[] } | undefined) ?? {};
             return (
               <>
-                <section className="px-6 pt-2 pb-4">
-                  <Heading>천직과 재물 방향</Heading>
-                  {cw.intro && <P>{cw.intro}</P>}
-                  {cw.callout && <Callout>{cw.callout}</Callout>}
-                  {cw.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-                </section>
-                {pk.title && (
-                  <section className="px-6 pt-2 pb-6">
-                    <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #1a1200 0%, #3a2800 100%)", border: `1px solid ${GOLD}44` }}>
-                      <p className="text-[10px] tracking-widest mb-2" style={{ color: GOLD }}>💰 재물 황금기</p>
-                      <p className="text-[16px] font-black mb-1" style={{ color: "#fff", fontFamily: SERIF }}>{pk.title}</p>
-                      <p className="text-[13px] mb-3" style={{ color: `${GOLD}cc` }}>{pk.when}</p>
-                      <div className="rounded-xl px-3 py-2" style={{ background: `${GOLD}22` }}>
-                        <p className="text-[12px]" style={{ color: "#fff" }}>✦ {pk.todo}</p>
+                {/* ① 천직 방향 */}
+                <section className="px-6 pt-2 pb-6">
+                  {/* 천직 유형 배지 */}
+                  {cw.vocType && (
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="rounded-2xl px-4 py-2" style={{ background: `${GOLD}15`, border: `1.5px solid ${GOLD}40` }}>
+                        <span className="text-[13px] font-black" style={{ color: GOLD, fontFamily: SERIF }}>{cw.vocType}</span>
                       </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {cw.vocKeywords?.map((kw, i) => (
+                          <span key={i} className="text-[11px] px-2.5 py-1 rounded-full font-bold" style={{ background: `${INK}08`, color: INK_SOFT }}>{kw}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {cw.intro && (
+                    <div className="rounded-xl px-4 py-3 mb-4" style={{ background: `${GOLD}0c`, borderLeft: `3px solid ${GOLD}` }}>
+                      <p className="text-[13px] font-bold leading-relaxed" style={{ color: INK }}>{cw.intro}</p>
+                    </div>
+                  )}
+                  {/* 3관점 카드 */}
+                  {cw.cards && cw.cards.length > 0 && (
+                    <div className="space-y-3">
+                      {cw.cards.map((card, i) => (
+                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">{card.icon}</span>
+                            <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{card.title}</span>
+                          </div>
+                          <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{card.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {cw.summary && (
+                    <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${INK}10` }}>
+                      <P>{cw.summary}</P>
+                    </div>
+                  )}
+                </section>
+
+                {/* ② 어울리는 직군 */}
+                {jf.clusters && jf.clusters.length > 0 && (
+                  <section className="px-6 pt-2 pb-6">
+                    <Heading>어울리는 직군</Heading>
+                    <div className="space-y-3 mt-2">
+                      {jf.clusters.map((cl, i) => {
+                        const ACCENT_COLORS = ["#7b3fa0", "#2a6080", "#3f7d6b"];
+                        const accent = ACCENT_COLORS[i % ACCENT_COLORS.length];
+                        return (
+                          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${accent}25` }}>
+                            <div className="px-4 pt-4 pb-3" style={{ background: `${accent}0c` }}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[15px] font-black" style={{ color: accent, fontFamily: SERIF }}>{cl.category}</span>
+                                <div className="flex gap-1.5 flex-wrap">
+                                  {cl.keywords.map((kw, j) => (
+                                    <span key={j} className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${accent}18`, color: accent }}>{kw}</span>
+                                  ))}
+                                </div>
+                              </div>
+                              {cl.desc && <p className="text-[12px] leading-[1.7]" style={{ color: INK_SOFT }}>{cl.desc}</p>}
+                            </div>
+                            <div className="px-4 py-3 flex flex-wrap gap-2" style={{ background: WHITE }}>
+                              {cl.jobs.map((job, j) => (
+                                <span key={j} className="text-[11px] px-3 py-1 rounded-full font-bold" style={{ background: `${accent}12`, color: accent, border: `1px solid ${accent}30` }}>{job}</span>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </section>
                 )}
+
+                {/* ③ 직장인형 vs 사업가형 */}
+                {sp.leftLabel && (
+                  <section className="px-6 pt-2 pb-6">
+                    <Heading>직장인형 vs 사업가형</Heading>
+                    <div className="flex gap-3 mt-2 mb-3">
+                      {[
+                        { label: sp.leftLabel!, pct: sp.left ?? 0, desc: sp.leftDesc ?? "", tips: sp.leftTips ?? [], color: "#2a6080" },
+                        { label: sp.rightLabel!, pct: sp.right ?? 0, desc: sp.rightDesc ?? "", tips: sp.rightTips ?? [], color: GOLD },
+                      ].map((side, i) => (
+                        <div key={i} className="flex-1 rounded-2xl p-4" style={{ background: WHITE, border: `1.5px solid ${side.color}30` }}>
+                          <p className="text-[11px] font-bold mb-1" style={{ color: side.color }}>{side.label}</p>
+                          <p className="text-[26px] font-black mb-2" style={{ color: side.color }}>{side.pct}%</p>
+                          <p className="text-[12px] leading-[1.75] mb-3" style={{ color: INK_SOFT }}>{side.desc}</p>
+                          {side.tips.length > 0 && (
+                            <ul className="space-y-1.5 pt-2" style={{ borderTop: `1px solid ${side.color}20` }}>
+                              {side.tips.map((tip, j) => (
+                                <li key={j} className="flex items-start gap-1.5">
+                                  <span className="text-[11px] mt-0.5 flex-shrink-0" style={{ color: side.color }}>•</span>
+                                  <span className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {/* 비율 바 */}
+                    <div className="rounded-full overflow-hidden h-2.5 flex">
+                      <div style={{ width: `${sp.left ?? 0}%`, background: "#2a6080" }} />
+                      <div style={{ flex: 1, background: GOLD }} />
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-[10px]" style={{ color: "#2a6080" }}>{sp.leftLabel}</span>
+                      <span className="text-[10px]" style={{ color: GOLD }}>{sp.rightLabel}</span>
+                    </div>
+                  </section>
+                )}
+
               </>
             );
           })()}
@@ -4863,7 +4977,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 대운</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              내 재물 대운<br />언제 벌고 언제 조심할까
+              언제 벌고 언제 조심할까
             </h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -4871,40 +4985,135 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <Quote>{`재물 대운에도\n흐름이 있소.\n\n벌 때와 조심할 때를\n미리 알고 대비하시오.`}</Quote>
+          <Quote>{`재물 대운은\n밀물과 썰물처럼 흐르오.\n\n언제 벌고 언제 지킬지\n미리 알고 준비하시오.`}</Quote>
           {(() => {
-            const mt = (jc.moneyTrap as { title?: string; desc?: string; items?: string[] } | undefined) ?? {};
-            const wf = (jc.warningFlow as { items?: {label:string;tone:string;text:string}[] } | undefined) ?? {};
+            const pk = (jc.wealthPeak as {
+              peakTitle?: string; peakWhen?: string; peakDesc?: string;
+              phases?: { label: string; tone: "grow" | "peak" | "rest"; text: string }[];
+              action?: string;
+            } | undefined) ?? {};
+            const mt = (jc.moneyTrap as {
+              trapType?: string; intro?: string;
+              traps?: { icon: string; title: string; desc: string; counter: string }[];
+            } | undefined) ?? {};
+            const wf = (jc.warningFlow as {
+              summary?: string;
+              items?: { label: string; trend?: string; title?: string; text: string }[];
+            } | undefined) ?? {};
             return (
               <>
-                {mt.title && (
-                  <section className="px-6 pt-2 pb-4">
-                    <Heading>돈의 함정</Heading>
-                    <div className="rounded-2xl p-4 mb-2" style={{ background: "#fff0f0", border: `1px solid ${WARN}33` }}>
-                      <p className="text-[14px] font-bold mb-2" style={{ color: INK }}>{mt.title}</p>
-                      <p className="text-[13px] leading-relaxed mb-3" style={{ color: INK_SOFT }}>{mt.desc}</p>
-                      {mt.items && mt.items.length > 0 && (
-                        <ul className="space-y-1">
-                          {mt.items.map((item, i) => (
-                            <li key={i} className="flex gap-2 text-[12px]" style={{ color: WARN }}>
-                              <span>•</span>{item}
-                            </li>
-                          ))}
-                        </ul>
+                {/* 재물 황금기 */}
+                {pk.peakTitle && (
+                  <section className="px-6 pt-2 pb-6">
+                    <Heading>재물 황금기</Heading>
+                    <div className="rounded-2xl overflow-hidden mt-2 mb-4" style={{ background: "linear-gradient(135deg, #1a1200 0%, #2e1f00 100%)", border: `1px solid ${GOLD}44` }}>
+                      <div className="px-5 pt-5 pb-4">
+                        <p className="text-[10px] tracking-[0.2em] mb-2" style={{ color: `${GOLD}88` }}>💰 WEALTH PEAK</p>
+                        <p className="text-[20px] font-black mb-1" style={{ color: "#fff", fontFamily: SERIF }}>{pk.peakTitle}</p>
+                        <p className="text-[13px] font-bold mb-3" style={{ color: GOLD }}>{pk.peakWhen}</p>
+                        {pk.peakDesc && (
+                          <p className="text-[12px] leading-[1.8]" style={{ color: "rgba(255,255,255,0.75)" }}>{pk.peakDesc}</p>
+                        )}
+                      </div>
+                      {pk.action && (
+                        <div className="px-5 py-3" style={{ background: `${GOLD}18`, borderTop: `1px solid ${GOLD}30` }}>
+                          <p className="text-[11px] font-bold" style={{ color: GOLD }}>✦ 지금 해야 할 일</p>
+                          <p className="text-[12px] mt-0.5" style={{ color: "#fff" }}>{pk.action}</p>
+                        </div>
                       )}
                     </div>
                   </section>
                 )}
-                {wf.items && wf.items.length > 0 && (
+
+                {/* ② 재물의 함정 */}
+                {(mt.trapType || (mt.traps && mt.traps.length > 0)) && (
                   <section className="px-6 pt-2 pb-6">
-                    <Heading>시기별 재물 흐름</Heading>
-                    <div className="space-y-2">
-                      {wf.items.map((item, i) => (
-                        <div key={i} className="rounded-xl px-4 py-3" style={{ background: item.tone === "warn" ? "#fff0f0" : "#eef6f0", borderLeft: `3px solid ${item.tone === "warn" ? WARN : GREEN}` }}>
-                          <p className="text-[12px] font-bold mb-1" style={{ color: item.tone === "warn" ? WARN : GREEN }}>{item.label}</p>
-                          <p className="text-[13px]" style={{ color: INK_SOFT }}>{item.text}</p>
+                    <Heading>재물의 함정</Heading>
+                    {/* 함정 유형 배지 + 인트로 */}
+                    {mt.trapType && (
+                      <div className="flex items-center gap-2 mb-3 mt-2">
+                        <div className="rounded-full px-3 py-1" style={{ background: `${WARN}15`, border: `1.5px solid ${WARN}40` }}>
+                          <span className="text-[12px] font-black" style={{ color: WARN }}>⚠ {mt.trapType}</span>
                         </div>
-                      ))}
+                      </div>
+                    )}
+                    {mt.intro && (
+                      <div className="rounded-xl px-4 py-3 mb-4" style={{ background: `${WARN}08`, borderLeft: `3px solid ${WARN}` }}>
+                        <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{mt.intro}</p>
+                      </div>
+                    )}
+                    {/* 3개 함정 카드 */}
+                    {mt.traps && mt.traps.length > 0 && (
+                      <div className="space-y-3">
+                        {mt.traps.map((trap, i) => (
+                          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${WARN}20` }}>
+                            <div className="px-4 pt-4 pb-3" style={{ background: WHITE }}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-lg">{trap.icon}</span>
+                                <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{trap.title}</span>
+                              </div>
+                              <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{trap.desc}</p>
+                            </div>
+                            {trap.counter && (
+                              <div className="px-4 py-2.5 flex items-center gap-2" style={{ background: "#eef6f0", borderTop: `1px solid ${GREEN}30` }}>
+                                <span className="text-[11px]" style={{ color: GREEN }}>✓</span>
+                                <p className="text-[11px] font-bold" style={{ color: GREEN }}>{trap.counter}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {/* ③ 시기별 재물 흐름 */}
+                {wf.items && wf.items.length > 0 && (
+                  <section className="px-6 pt-2 pb-8">
+                    <Heading>시기별 재물 흐름</Heading>
+                    {/* 재물운 꺾은선 차트 */}
+                    <div className="mb-2">
+                      <p className="text-[11px] mb-1" style={{ color: "#9a8a7a" }}>📈 2024–2033 재물운 흐름 (세운 십성 기반)</p>
+                      <WealthLineChart view={report?.view ?? null} />
+                    </div>
+                    <div className="relative">
+                      {/* 타임라인 연결선 */}
+                      <div className="absolute left-[15px] top-4 bottom-4 w-[2px]" style={{ background: `${INK}08` }} />
+                      <div className="space-y-3">
+                        {wf.items.map((item, i) => {
+                          const trendMeta: Record<string, { icon: string; color: string }> = {
+                            "상승 중":   { icon: "↗", color: "#3f7d6b" },
+                            "고점":      { icon: "▲", color: GOLD },
+                            "하락 중":   { icon: "↘", color: "#9b4a4a" },
+                            "저점":      { icon: "▼", color: WARN },
+                            "유지":      { icon: "→", color: "#7a6a5a" },
+                          };
+                          const meta = trendMeta[item.trend ?? ""] ?? { icon: "•", color: INK_SOFT };
+                          return (
+                            <div key={i} className="flex gap-3 items-start">
+                              {/* 도트 */}
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 mt-1" style={{ background: `${meta.color}12`, border: `2px solid ${meta.color}35` }}>
+                                <span className="text-[12px] font-black" style={{ color: meta.color }}>{meta.icon}</span>
+                              </div>
+                              {/* 카드 */}
+                              <div className="flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}0d` }}>
+                                <div className="px-4 pt-3 pb-2" style={{ background: `${meta.color}07` }}>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[12px] font-black" style={{ color: INK }}>{item.label}</span>
+                                    <div className="flex items-center gap-1.5">
+                                      {item.trend && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${meta.color}18`, color: meta.color }}>{item.trend}</span>}
+                                      {item.title && <span className="text-[10px]" style={{ color: INK_SOFT }}>{item.title}</span>}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="px-4 pt-2 pb-3" style={{ background: WHITE }}>
+                                  <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{item.text}</p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </section>
                 )}
@@ -4931,40 +5140,130 @@ function ReportPreviewInner() {
           </div>
           <Quote>{`부족한 기운을 채우면\n재물의 흐름이 달라지오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}에게\n맞는 개운법이오.`}</Quote>
           {(() => {
-            const wc = (jc.wealthCare as { element?: string; tips?: string[] } | undefined) ?? {};
-            const ws = (jc.wealthSummary as { title?: string; items?: {title:string;desc:string}[] } | undefined) ?? {};
+            const wc = (jc.wealthCare as {
+              element?: string; elementDesc?: string;
+              tips?: { icon: string; category: string; text: string }[];
+            } | undefined) ?? {};
+            const wa = (jc.wealthAvoid as {
+              intro?: string;
+              blocks?: { icon: string; title: string; desc: string }[];
+            } | undefined) ?? {};
+            const ws = (jc.wealthSummary as {
+              coreMessage?: string;
+              items?: { icon: string; title: string; desc: string }[];
+              closing?: string;
+            } | undefined) ?? {};
+
+            const OHAENG_COLOR: Record<string, string> = {
+              목: "#3c7a3c", 화: "#c94040", 토: "#8a6a00", 금: "#5a5a80", 수: "#2a5080",
+            };
+            const elColor = OHAENG_COLOR[wc.element ?? ""] ?? GOLD;
+            const OHAENG_ICON: Record<string, string> = {
+              목: "🌿", 화: "🔥", 토: "🪨", 금: "⚙️", 수: "💧",
+            };
+            const elIcon = OHAENG_ICON[wc.element ?? ""] ?? "✦";
+
             return (
               <>
+                {/* ① 재물 개운법 */}
                 {(wc.element || (wc.tips && wc.tips.length > 0)) && (
-                  <section className="px-6 pt-2 pb-4">
+                  <section className="px-6 pt-2 pb-6">
                     <Heading>재물 개운법</Heading>
+
+                    {/* 오행 배지 + 설명 */}
                     {wc.element && (
-                      <div className="mb-4 rounded-2xl p-4 text-center" style={{ background: "#7cc47f22", border: "1px solid #7cc47f66" }}>
-                        <p className="text-[13px] font-bold" style={{ color: GREEN }}>보강해야 할 오행 — {wc.element}</p>
+                      <div className="rounded-2xl overflow-hidden mt-2 mb-4" style={{ border: `1.5px solid ${elColor}30` }}>
+                        <div className="px-4 pt-4 pb-3" style={{ background: `${elColor}0c` }}>
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-2xl">{elIcon}</span>
+                            <div>
+                              <p className="text-[10px] font-bold tracking-widest mb-0.5" style={{ color: elColor }}>보강할 오행</p>
+                              <p className="text-[20px] font-black" style={{ color: elColor, fontFamily: SERIF }}>{wc.element}({wc.element === "목" ? "木" : wc.element === "화" ? "火" : wc.element === "토" ? "土" : wc.element === "금" ? "金" : "水"})</p>
+                            </div>
+                          </div>
+                          {wc.elementDesc && <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{wc.elementDesc}</p>}
+                        </div>
                       </div>
                     )}
+
+                    {/* 실천법 카드 */}
                     {wc.tips && wc.tips.length > 0 && (
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         {wc.tips.map((tip, i) => (
-                          <div key={i} className="flex items-start gap-2">
-                            <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+                          <div key={i} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
+                            <span className="text-lg flex-shrink-0 mt-0.5">{tip.icon}</span>
+                            <div className="flex-1">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mr-2" style={{ background: `${elColor}12`, color: elColor }}>{tip.category}</span>
+                              <p className="text-[12px] leading-[1.75] mt-1" style={{ color: INK_SOFT }}>{tip.text}</p>
+                            </div>
                           </div>
                         ))}
                       </div>
                     )}
                   </section>
                 )}
-                {ws.title && (
+
+                {/* ② 재물을 막는 것들 */}
+                {(wa.intro || (wa.blocks && wa.blocks.length > 0)) && (
                   <section className="px-6 pt-2 pb-6">
-                    <Heading>종합 정리</Heading>
-                    <P>{ws.title}</P>
-                    {ws.items?.map((item, i) => (
-                      <div key={i} className="mb-4 pb-4" style={{ borderBottom: i < (ws.items!.length - 1) ? `1px solid ${INK}08` : "none" }}>
-                        <p className="text-[13px] font-bold mb-1" style={{ color: MAROON }}>{item.title}</p>
-                        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                    <Heading>재물을 막는 것들</Heading>
+
+                    {wa.intro && (
+                      <div className="rounded-xl px-4 py-3 mt-2 mb-4" style={{ background: "#fff0f0", border: "1px solid #e0a0a020" }}>
+                        <p className="text-[12px] leading-[1.75]" style={{ color: "#7a3030" }}>{wa.intro}</p>
                       </div>
-                    ))}
+                    )}
+
+                    {wa.blocks && wa.blocks.length > 0 && (
+                      <div className="space-y-2.5">
+                        {wa.blocks.map((blk, i) => (
+                          <div key={i} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "#fff8f8", border: "1px solid #e0a0a025" }}>
+                            <span className="text-lg flex-shrink-0 mt-0.5">{blk.icon}</span>
+                            <div className="flex-1">
+                              <p className="text-[13px] font-black mb-1" style={{ color: "#7a3030", fontFamily: SERIF }}>{blk.title}</p>
+                              <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{blk.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {/* ③ 종합 정리 */}
+                {(ws.coreMessage || (ws.items && ws.items.length > 0)) && (
+                  <section className="px-6 pt-2 pb-8">
+                    <Heading>종합 정리</Heading>
+
+                    {/* 핵심 메시지 강조 박스 */}
+                    {ws.coreMessage && (
+                      <div className="rounded-2xl px-5 py-4 mt-2 mb-4 text-center" style={{ background: `linear-gradient(135deg, ${GOLD}0e, ${GOLD}18)`, border: `1.5px solid ${GOLD}35` }}>
+                        <p className="text-[10px] tracking-widest mb-2" style={{ color: `${GOLD}88` }}>✦ CORE MESSAGE</p>
+                        <p className="text-[15px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{ws.coreMessage}</p>
+                      </div>
+                    )}
+
+                    {/* 3개 정리 카드 */}
+                    {ws.items && ws.items.length > 0 && (
+                      <div className="space-y-3">
+                        {ws.items.map((item, i) => (
+                          <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-lg">{item.icon}</span>
+                              <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{item.title}</span>
+                            </div>
+                            <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{item.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 클로징 한 마디 */}
+                    {ws.closing && (
+                      <div className="mt-5 pt-4 text-center" style={{ borderTop: `1px solid ${INK}10` }}>
+                        <p className="text-[13px] font-bold leading-relaxed" style={{ color: MAROON, fontFamily: SERIF }}>{ws.closing}</p>
+                      </div>
+                    )}
                   </section>
                 )}
               </>
@@ -4977,29 +5276,48 @@ function ReportPreviewInner() {
       {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "7" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name}님께<br />홍연의 서신
-            </h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_jaemul/saju_jaemul_7/saju_jaemul_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <section className="px-6 pt-10 pb-8">
-            <div className="text-center mb-8">
-              <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
-                <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
-              </div>
+          <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
+                그대에게 남기는<br />홍연의 서신
+              </h1>
             </div>
-            {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
-              <P key={i}>{p}</P>
-            ))}
-            <p className="text-right mt-6 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
-          </section>
-          <ChapterNav cur="7" go={next} />
+            <div className="relative overflow-hidden" style={{ height: 320 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_jaemul/saju_jaemul_7/saju_jaemul_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <section className="px-6 pt-10 pb-8">
+              <div className="text-center mb-8">
+                <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
+                  <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
+                </div>
+              </div>
+              {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
+                <P key={i}>{p}</P>
+              ))}
+              <div className="flex items-center justify-end gap-3 mt-8 mb-2">
+                <span className="text-[13.5px] font-bold" style={{ color: INK }}>홍연 올림</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/dojang.png" alt="도장" style={{ width: 56, height: 56, objectFit: "contain" }} />
+              </div>
+            </section>
+
+            {/* 만족도 리뷰 */}
+            <ReviewBox />
+
+            {/* 후기 이벤트 */}
+            <EventBox />
+
+            {/* 추천 상품 */}
+            <RecoGrid />
+
+            <ChapterNav cur="7" go={next} />
+          </div>
+          {eventOpen && (
+            <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
+          )}
         </>
       )}
       </>

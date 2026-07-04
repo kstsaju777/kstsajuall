@@ -9,7 +9,9 @@
 // ⚠️ 이미지는 전부 임시(placeholder)다. 레퍼런스의 한복 일러스트 대신
 //    기존 hero 이미지를 끼워둠 — 추후 전용 일러스트로 교체.
 
+import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
@@ -1083,36 +1085,103 @@ function EventBox() {
 }
 
 // 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
+const RECO_TAG_COLORS: Record<string, string> = {
+  "HOT": "#e03a2b", "BEST": "#b47221", "FREE": "#555",
+};
+const RECO_BADGE_COLORS: Record<string, string> = {
+  "종합": "#711b20", "연애": "#c2185b", "재물": "#f9a825", "건강": "#2e7d32", "궁합": "#4527a0", "유아": "#ef6c00",
+};
+
+function RecoProductCard({ card }: { card: CategoryCard }) {
+  const isVideo = !!card.videoUrl || card.type === "video";
+  const mediaSrc = card.videoUrl ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !isVideo) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isVideo]);
+  return (
+    <Link ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
+      {isVideo ? (
+        visible
+          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
+      ) : imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : card.tag === "NEW" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#4fd5e8", color: "#000", display: "inline-block", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>
+            ) : card.tag === "추천" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
+const RECO_EXCLUDE = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주"]);
+const SAJU_ORDER = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주"];
+const KUNGHAP_ORDER = ["찰떡콩떡 연애궁합", "말좀듣자 자녀궁합", "평생내짝 결혼궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
+
+function sortBy(cards: CategoryCard[], order: string[]) {
+  return order.flatMap((name) => cards.filter((c) => c.name === name));
+}
+
 function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("kunghap_banryeo") && !RECO_EXCLUDE.has(c.name));
+  const sajuCards = sortBy(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER);
+  const kunghapCards = sortBy(all.filter((c) => c.href.includes("kunghap")), KUNGHAP_ORDER);
+
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes newBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} 60%{transform:translateY(-2px)} }
+        @keyframes chukNeon { 0%,100%{box-shadow:0 0 3px 1px rgba(0,255,115,0.5)} 50%{box-shadow:0 0 7px 2px rgba(0,255,115,0.9)} }
+      `}</style>
+      {sajuCards.length > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
     </div>
   );
 }
@@ -2318,6 +2387,1265 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
   );
 }
 
+// ── 장별 테마 색상 ──────────────────────────────────────────────────────────
+const BR1_COLOR = "#5a3e8a"; const BR1_PALE = "#f0ebf8"; // 1장 — 딥바이올렛 (나의 사주 원국)
+const BR1_ACCENT = "#7c5fb5";
+const BR2_COLOR = "#1a6a5a"; const BR2_PALE = "#e8f6f3"; // 2장 — 딥틸 (반려동물의 사주 원국)
+const BR2_ACCENT = "#2a9a7a";
+const BR3_COLOR = "#a05a10"; const BR3_PALE = "#fdf3e3"; // 3장 — 웜앰버 (인연의 깊이·따뜻함)
+const BR3_ACCENT = "#d4820a";
+const BR4_MY    = "#3a5a9a"; const BR4_MY_P  = "#eef2fb"; // 4장 보호자 시선 — 딥블루
+const BR4_PET   = "#2a7a5a"; const BR4_PET_P = "#eaf6f0"; // 4장 반려동물 시선 — 딥그린
+const BR5_COLOR = "#a03050"; const BR5_PALE  = "#fdf0f3"; // 5장 기질·건강 — 딥로즈
+const BR5_ACCENT = "#c84060";
+const BR6_COLOR = "#2a6a4a"; const BR6_PALE  = "#eaf5ef"; // 6장 환경·생활 — 딥세이지그린
+const BR6_ACCENT = "#3a9a6a";
+const BR7_COLOR = "#7a3a1a"; const BR7_PALE  = "#fdf2ed"; // 7장 갈등·마찰 — 딥테라코타
+const BR7_ACCENT = "#c05830";
+const BR8_COLOR = "#8a6010"; const BR8_PALE  = "#fdf8ec"; // 8장 개운법 — 딥골드
+const BR8_ACCENT = "#c49020";
+const BR9_COLOR = "#3a3a7a"; const BR9_PALE  = "#f0f0fa"; // 9장 인연의 시간 — 딥인디고
+const BR9_ACCENT = "#5a5aba";
+
+/**
+ * OhaengDonutBr1 — 오행 균형 도넛 + 세로 바차트 (1장 · 나의 원국)
+ *
+ * 보호자의 사주팔자에 내재한 목·화·토·금·수 다섯 기운의 분포를 한눈에
+ * 시각화하오. 왼쪽에는 SVG 도넛 차트를 배치해 가장 강한 기운(주기운)을
+ * 한자와 퍼센트로 강조하고, 오른쪽에는 다섯 오행을 세로 막대 그래프로
+ * 늘어놓아 상대적 비중을 직관적으로 비교할 수 있도록 하오.
+ * 주기운의 색상이 카드 배경 그라데이션과 도넛 테두리에 그대로 반영되어,
+ * 보호자가 어떤 기운의 사람인지를 분위기만으로도 느낄 수 있도록 연출하오.
+ * 반려동물과의 궁합 분석에 앞서 "보호자 자신이 어떤 기운을 타고났는가"를
+ * 먼저 정확히 파악하는 것이 반려궁합의 출발점이기 때문이오.
+ */
+function OhaengDonutBr1({ view }: { view: MyeongsikView | null }) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const pct = (n: number) => Math.round((n / total) * 100);
+  const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
+          <g transform="rotate(-90 70 70)">
+            {OHAENG.map((e) => {
+              const frac = counts[e.key] / total;
+              const len = frac * C;
+              const el = (
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
+                  strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
+              );
+              acc += len;
+              return el;
+            })}
+          </g>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
+        </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.color : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * MyNatureBr1Card — 보호자 기질 카드 (1장 · 나의 사주 원국)
+ *
+ * 보호자의 사주에서 읽어낸 타고난 기질을 키워드 태그, 빛(강점), 그림자(주의점)
+ * 세 층위로 나누어 보여주오. 키워드 태그는 3~5개 단어로 기질의 핵심을
+ * 압축해 한눈에 인식하게 하고, '빛' 섹션에서는 반려동물과의 관계에서
+ * 이 기질이 어떻게 긍정적으로 발현되는지를 서술하오. '그림자' 섹션에서는
+ * 반려동물을 돌볼 때 이 기질이 자칫 과해지거나 굳어졌을 때 나타나는
+ * 부작용을 솔직히 짚어주오. 보호자 스스로 자신의 기질을 알고 반려동물을
+ * 대할 때 의식적으로 조율할 수 있게 돕는 것이 이 카드의 목적이오.
+ */
+function MyNatureBr1Card({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const keywords = (data.keywords as string[] | undefined) ?? [];
+  const strengthDesc = (data.strengthDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const shadowDesc = (data.shadowDesc as string | undefined) ?? "";
+  const KW_COLORS = [BR1_COLOR, "#3f7d6b", "#b07d2a", "#c9474f", BR1_ACCENT];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${INK}08` }}>
+        <p className="text-[11px] font-bold mb-2.5" style={{ color: BR1_COLOR }}>나를 대표하는 기질</p>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold"
+              style={{ background: `${KW_COLORS[i % KW_COLORS.length]}14`, color: KW_COLORS[i % KW_COLORS.length] }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+      {strengthDesc && (
+        <div className="px-4 pt-3 pb-3" style={{ borderBottom: shadowDesc ? `1px solid ${INK}08` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">✨</span>
+            <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+        </div>
+      )}
+      {shadowDesc && (
+        <div className="px-4 pt-3 pb-4" style={{ background: "#fffaf9" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">🌙</span>
+            <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * PetStyleCard — 반려동물을 대하는 나의 방식 카드 (1장 · 나의 사주 원국)
+ *
+ * 결혼궁합의 '연애 패턴 카드'에 대응하는, 반려궁합 전용 섹션이오.
+ * 보호자의 사주에서 반려동물을 대하는 스타일 유형(styleType)을 상징
+ * 아이콘과 함께 뽑아내고, intro 문장으로 그 유형의 본질을 한 줄로
+ * 요약한 뒤, paragraphs에서 실제 일상의 돌봄 행태·감정 표현 방식·
+ * 반려동물과 쌓는 교감 방식을 구체적으로 서술하오.
+ * 예컨대 "조용히 곁에 있어주는 수호자형"이라면 말보다 눈빛으로 교감하고,
+ * 갑자기 껴안거나 오버하지 않으며 일정한 루틴과 안정감으로 신뢰를
+ * 쌓는다는 식으로 풀어내오. 보호자가 자신의 돌봄 스타일을 인식하면
+ * 반려동물과 더 자연스러운 관계를 만들어갈 수 있기 때문이오.
+ */
+function PetStyleCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const styleType = (data.styleType as string | undefined) ?? (data.patternType as string | undefined) ?? "";
+  const styleIcon = (data.styleIcon as string | undefined) ?? (data.patternIcon as string | undefined) ?? "🐾";
+  const intro = (data.intro as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {(styleType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${BR1_COLOR}12 0%, ${BR1_PALE} 100%)`, border: `1px solid ${BR1_COLOR}20` }}>
+          {styleType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]">{styleIcon}</span>
+              <span className="text-[15px] font-black" style={{ color: BR1_COLOR }}>{styleType}</span>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * OhaengDonutBr2 — 오행 균형 도넛 + 세로 바차트 (2장 · 반려동물의 원국)
+ *
+ * 반려동물의 사주팔자에 담긴 목·화·토·금·수 다섯 기운의 분포를 시각화하오.
+ * 1장의 OhaengDonutBr1과 동일한 구조이나, 2장 테마색(딥틸 BR2_COLOR)을 사용해
+ * 보호자와 반려동물의 장을 시각적으로 명확히 구분하오.
+ * 반려동물의 주기운(가장 강한 오행)을 한자와 퍼센트로 중앙에 표시하고,
+ * 세로 바차트로 다섯 기운의 상대적 비중을 한눈에 비교할 수 있게 하오.
+ * 반려동물의 기운 분포는 이후 기질·성격·건강·궁합 분석의 기초가 되므로,
+ * 이 도넛 차트에서 "이 아이가 어떤 원소의 아이인가"를 먼저 각인시키는 것이 중요하오.
+ */
+function OhaengDonutBr2({ view }: { view: MyeongsikView | null }) {
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (view) {
+    for (const p of view.pillars) {
+      if (p.ganEl && counts[p.ganEl] !== undefined) counts[p.ganEl]++;
+      if (p.jiEl  && counts[p.jiEl]  !== undefined) counts[p.jiEl]++;
+    }
+  }
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+  const pct = (n: number) => Math.round((n / total) * 100);
+  const dom = OHAENG.reduce((a, b) => (counts[b.key] > counts[a.key] ? b : a), OHAENG[0]);
+  const maxCount = Math.max(...Object.values(counts)) || 1;
+  const HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+  const R = 54, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
+          <p className="text-[11px] mt-0.5" style={{ color: MUTE }}>목·화·토·금·수, 다섯 기운의 분포</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] font-bold mb-1" style={{ color: MUTE }}>가장 강한 기운</p>
+          <div className="flex items-center gap-1.5 justify-end">
+            <span className="text-[22px] font-black leading-none" style={{ color: dom.color, fontFamily: SERIF }}>{HANJA[dom.key]}</span>
+            <div>
+              <p className="text-[13px] font-black leading-tight" style={{ color: dom.color }}>{dom.label}</p>
+              <p className="text-[12px] font-bold leading-tight" style={{ color: dom.color }}>{pct(counts[dom.key])}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 px-5 pb-5">
+        <svg viewBox="0 0 140 140" style={{ width: 116, height: 116, flexShrink: 0 }}>
+          <g transform="rotate(-90 70 70)">
+            {OHAENG.map((e) => {
+              const frac = counts[e.key] / total;
+              const len = frac * C;
+              const el = (
+                <circle key={e.key} cx="70" cy="70" r={R} fill="none" stroke={e.color} strokeWidth="18"
+                  strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />
+              );
+              acc += len;
+              return el;
+            })}
+          </g>
+          <text x="70" y="62" textAnchor="middle" fontSize="30" fontWeight="900" fill={dom.color} fontFamily={SERIF}>{HANJA[dom.key]}</text>
+          <text x="70" y="80" textAnchor="middle" fontSize="12" fontWeight="700" fill={INK_SOFT}>{dom.label}</text>
+          <text x="70" y="96" textAnchor="middle" fontSize="14" fontWeight="900" fill={dom.color}>{pct(counts[dom.key])}%</text>
+        </svg>
+        <div className="flex-1 flex items-end gap-1.5" style={{ height: 110 }}>
+          {OHAENG.map((e) => {
+            const p = pct(counts[e.key]);
+            const barH = Math.max(6, (counts[e.key] / maxCount) * 75);
+            const isDom = e.key === dom.key;
+            return (
+              <div key={e.key} className="flex-1 flex flex-col items-center justify-end gap-1">
+                <span className="text-[10px] font-bold" style={{ color: isDom ? e.color : MUTE }}>{p}%</span>
+                <div className="w-full rounded-t-md transition-all" style={{ height: barH, background: isDom ? e.color : `${e.color}50` }} />
+                <span className="text-[11px] font-black" style={{ color: isDom ? e.key === dom.key ? e.color : INK_SOFT : INK_SOFT }}>{e.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PetNatureBr2Card — 반려동물 기질 카드 (2장 · 반려동물의 사주 원국)
+ *
+ * 반려동물의 사주에서 읽히는 타고난 기질을 키워드 태그, 빛(긍정적 특성),
+ * 그림자(주의 특성) 세 층위로 나누어 보여주오.
+ * 1장의 MyNatureBr1Card와 대응되는 구조이나 2장 테마색(딥틸 BR2_COLOR)을 사용하고,
+ * 레이블을 "이 아이를 대표하는 기질"로 변경해 반려동물 전용임을 명확히 하오.
+ * '빛' 섹션에서는 이 기질이 보호자와의 일상에서 어떻게 사랑스럽게 발현되는지,
+ * '그림자' 섹션에서는 이 기질이 강하게 표출될 때 보호자가 어떤 점을
+ * 이해하고 받아들여야 하는지를 솔직하고 따뜻하게 서술하오.
+ * 반려동물은 말로 표현할 수 없으므로, 보호자가 먼저 이 아이의 기질을
+ * 사주로 읽어내 더 깊이 이해하는 계기가 되도록 구성하오.
+ */
+function PetNatureBr2Card({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const keywords = (data.keywords as string[] | undefined) ?? [];
+  const strengthDesc = (data.strengthDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const shadowDesc = (data.shadowDesc as string | undefined) ?? "";
+  const KW_COLORS = [BR2_COLOR, "#b07d2a", "#c9474f", "#5a3e8a", BR2_ACCENT];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${INK}08` }}>
+        <p className="text-[11px] font-bold mb-2.5" style={{ color: BR2_COLOR }}>이 아이를 대표하는 기질</p>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold"
+              style={{ background: `${KW_COLORS[i % KW_COLORS.length]}14`, color: KW_COLORS[i % KW_COLORS.length] }}>
+              {kw}
+            </span>
+          ))}
+        </div>
+      </div>
+      {strengthDesc && (
+        <div className="px-4 pt-3 pb-3" style={{ borderBottom: shadowDesc ? `1px solid ${INK}08` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">🐾</span>
+            <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 아이의 사랑스러운 면</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+        </div>
+      )}
+      {shadowDesc && (
+        <div className="px-4 pt-3 pb-4" style={{ background: "#fffaf9" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">🌙</span>
+            <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>보호자가 이해해야 할 부분</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * PetPersonalityCard — 반려동물의 성격 유형 카드 (2장 · 반려동물의 사주 원국)
+ *
+ * 1장의 PetStyleCard(보호자 돌봄 스타일)에 대응하는 반려동물 전용 카드이오.
+ * 반려동물의 사주에서 읽히는 성격 유형(personalityType)을 상징 아이콘과 함께
+ * 뽑아내고, intro 문장으로 그 유형의 본질을 한 줄로 요약한 뒤,
+ * paragraphs에서 일상 행동 패턴·감정 표현 방식·보호자와의 교감 방식을
+ * 구체적으로 서술하오.
+ * 예컨대 "조용히 관찰하는 현자형"이라면 낯선 환경에서 즉각 반응하지 않고
+ * 먼저 지켜보며 안전을 확인한 뒤 조심스럽게 다가오는 행동 패턴을,
+ * "에너지 넘치는 탐험가형"이라면 새 자극에 즉각 반응하고 보호자를
+ * 놀이로 끌어들이려는 방식을 구체적으로 묘사하오.
+ * 보호자가 이 카드를 읽고 "맞아, 우리 아이가 딱 그래"라는 공감을
+ * 얻는 것이 목표이오.
+ */
+function PetPersonalityCard({ data, petName }: { data: Record<string, unknown> | null; petName: string }) {
+  if (!data) return null;
+  const personalityType = (data.personalityType as string | undefined) ?? (data.patternType as string | undefined) ?? "";
+  const personalityIcon = (data.personalityIcon as string | undefined) ?? (data.patternIcon as string | undefined) ?? "🐾";
+  const intro = (data.intro as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {(personalityType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${BR2_COLOR}12 0%, ${BR2_PALE} 100%)`, border: `1px solid ${BR2_COLOR}20` }}>
+          {personalityType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]">{personalityIcon}</span>
+              <span className="text-[15px] font-black" style={{ color: BR2_COLOR }}>{personalityType}</span>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+      {!paragraphs.length && !personalityType && (
+        <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>{petName}의 성격 분석이 준비 중이오.</p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * BondGaugeBr3 — 반려 인연 점수 게이지 (3장 · 우리는 잘 맞는 인연인가)
+ *
+ * 보호자와 반려동물 사이에 흐르는 인연의 깊이를 0~100점 반원 게이지로
+ * 시각화하오. 반원 좌측(낮은 점수)은 차분한 회색에서 시작해 중앙 골드를
+ * 거쳐 우측(높은 점수)의 앰버(BR3_COLOR)로 마무리되는 그라데이션을 사용해,
+ * 점수가 높을수록 따뜻한 인연의 빛이 짙어지는 느낌을 연출하오.
+ * 바늘이 현재 점수 위치를 가리키고, 중앙에는 숫자 점수와 인연 등급(label)을
+ * 표시하오. 점수 구간별로 메시지 색상이 달라져(80+ 앰버/60+ 골드/40+ 회색)
+ * 한눈에 인연의 강도를 감지할 수 있도록 하오.
+ * 게이지 하단에는 이 점수가 의미하는 바를 풀어주는 단락(paragraphs)을 이어 붙여,
+ * 숫자만이 아닌 사주 근거를 함께 전달하오.
+ */
+function BondGaugeBr3({ score, label }: { score: number; label: string }) {
+  const s = Math.min(100, Math.max(0, score));
+  const angle = -180 + (s / 100) * 180;
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 110, cy = 100, r = 72;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? BR3_COLOR : s >= 60 ? BR3_ACCENT : s >= 40 ? GOLD : MUTE;
+  const GRADE = s >= 85 ? "천생연분이오" : s >= 70 ? "깊은 인연이오" : s >= 55 ? "좋은 인연이오" : s >= 40 ? "평범한 인연이오" : "조심이 필요한 인연이오";
+  return (
+    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${BR3_COLOR}22`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+      <div className="px-5 pt-4 pb-1 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] font-bold" style={{ color: BR3_COLOR }}>반려 인연 점수</p>
+          <h3 className="text-[16px] font-black" style={{ color: INK }}>두 사람의 인연 깊이</h3>
+        </div>
+        <span className="text-[28px]">🐾</span>
+      </div>
+      <svg viewBox="0 0 220 110" style={{ width: "100%", maxHeight: 130 }}>
+        <defs>
+          <linearGradient id="bondGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={MUTE} />
+            <stop offset="50%" stopColor={GOLD} />
+            <stop offset="100%" stopColor={BR3_COLOR} />
+          </linearGradient>
+        </defs>
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#eee" strokeWidth="18" strokeLinecap="round" />
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#bondGaugeGrad)" strokeWidth="18" strokeLinecap="round" strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+        <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="5" fill={INK} />
+        <text x={cx} y={cy - 14} textAnchor="middle" fontSize="26" fontWeight="900" fill={COLOR}>{s}</text>
+        <text x={cx} y={cy + 4} textAnchor="middle" fontSize="10" fill={MUTE}>점</text>
+      </svg>
+      <div className="px-5 pb-4 text-center">
+        <p className="text-[14px] font-black mb-0.5" style={{ color: COLOR }}>{label || GRADE}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * BondKeywordsBr3 — 인연 키워드 스트립 (3장 · 우리는 잘 맞는 인연인가)
+ *
+ * 보호자와 반려동물의 인연을 한마디로 압축한 키워드 태그들을 가로로
+ * 나열하오. 각 키워드는 이 두 사람의 관계에서 핵심적으로 흐르는 기운
+ * (예: "보호", "치유", "장난", "신뢰", "의존", "자유")을 담아,
+ * 독자가 한눈에 "아, 이런 관계구나"를 직감할 수 있도록 하오.
+ * 키워드는 BR3(앰버) 계열과 보조 색상을 번갈아 사용해 시각적 리듬을 주고,
+ * 둥근 pill 형태로 감싸 따뜻하고 부드러운 인연의 분위기를 살리오.
+ * 인연 점수 게이지 바로 아래 배치해 "이 점수의 근거가 되는 키워드"라는
+ * 맥락을 자연스럽게 연결하오.
+ */
+function BondKeywordsBr3({ keywords }: { keywords: string[] }) {
+  if (!keywords.length) return null;
+  const KW_BG = [`${BR3_COLOR}18`, `${BR3_ACCENT}14`, `${GREEN}12`, `${NAVY}10`, `${MAROON}12`];
+  const KW_TEXT = [BR3_COLOR, BR3_ACCENT, GREEN, NAVY, MAROON];
+  return (
+    <div className="mx-5 mb-4 flex flex-wrap gap-2">
+      {keywords.map((kw, i) => (
+        <span key={i} className="px-3 py-1.5 rounded-full text-[12px] font-bold"
+          style={{ background: KW_BG[i % KW_BG.length], color: KW_TEXT[i % KW_TEXT.length] }}>
+          {kw}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * BondReasonCard — 인연이 특별한 이유 카드 (3장 · 우리는 잘 맞는 인연인가)
+ *
+ * 보호자와 반려동물의 인연이 사주적으로 왜 특별한지를 구체적인 이유 항목(items)
+ * 으로 나열하오. 각 항목은 아이콘(icon)·제목(title)·설명(desc)으로 구성되며,
+ * 단순한 "잘 맞는다"는 결론이 아니라 "어떤 기운이 어떻게 맞물려서" 이 인연이
+ * 형성됐는지를 명리 근거와 함께 풀어주오.
+ * 예컨대 "보호자의 일간 壬水가 반려동물의 월령 木을 생(生)해 에너지를 나눠주는
+ * 관계"처럼 구체적인 사주 근거를 일상 언어로 번역해 서술하오.
+ * 상단 callout에 이 인연의 전체 성격을 한 문장으로 먼저 제시하고,
+ * 항목들로 그 근거를 뒷받침한 뒤, 하단 단락(paragraphs)으로 두 존재가
+ * 만남으로써 서로의 삶이 어떻게 채워지는지 따뜻하게 마무리하오.
+ */
+function BondReasonCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout = (data.callout as string | undefined) ?? "";
+  const items = (data.items as Array<{ icon?: string; title: string; desc: string }> | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${BR3_COLOR}12 0%, ${BR3_PALE} 100%)`, border: `1px solid ${BR3_COLOR}22` }}>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[18px]">✨</span>
+            <p className="text-[13px] font-black" style={{ color: BR3_COLOR }}>이 인연이 특별한 이유</p>
+          </div>
+          <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK, fontStyle: "italic" }}>"{callout}"</p>
+        </div>
+      )}
+      {items.length > 0 && (
+        <div className="space-y-3 mb-4">
+          {items.map((item, i) => (
+            <div key={i} className="flex items-start gap-3 p-4 rounded-2xl"
+              style={{ background: WHITE, border: `1px solid ${BR3_COLOR}18`, boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+              <span className="text-[22px] flex-shrink-0 mt-0.5">{item.icon ?? "🌿"}</span>
+              <div>
+                <p className="text-[13px] font-black mb-1" style={{ color: INK }}>{item.title}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * ViewBannerBr4 — 시선 배너 카드 (4장 · 이 아이는 어떤 성격인가)
+ *
+ * 보호자의 눈에 반려동물이 어떻게 보이는지, 또는 반려동물이 보호자를
+ * 어떻게 느끼는지를 나타내는 '시선(視線) 배너'이오.
+ * 상단에 시선의 주체(누가 누구를 보는지)를 아이콘·라벨로 명시하고,
+ * viewType(시선 유형명, 예: "엄마처럼 느끼는 존재")을 크게 배치해
+ * 이 시선의 핵심 성격을 단번에 파악하게 하오.
+ * intro 문장은 이탤릭체로 감성적으로 전달하며, 색상은 보호자 시선(딥블루)과
+ * 반려동물 시선(딥그린)을 달리해 두 시선이 교차하는 구조를 시각적으로
+ * 명확히 구분하오. 사주에서 읽히는 '상대를 바라보는 방식'은 관계의 심리적
+ * 역학을 드러내기 때문에, 보호자가 "내가 이 아이를 이렇게 보고 있구나"
+ * 혹은 "이 아이가 나를 이렇게 느끼고 있구나"를 인식하는 계기가 되오.
+ */
+function ViewBannerBr4({ viewType, viewIcon, intro, color, pale, fromLabel, toLabel }:
+  { viewType?: string; viewIcon?: string; intro?: string; color: string; pale: string; fromLabel: string; toLabel: string }) {
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${color}22`, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+      {/* 시선 방향 헤더 */}
+      <div className="px-4 py-2.5 flex items-center gap-2" style={{ background: `${color}14`, borderBottom: `1px solid ${color}18` }}>
+        <span className="text-[13px] font-black" style={{ color }}>{fromLabel}</span>
+        <span className="text-[12px]" style={{ color: MUTE }}>→</span>
+        <span className="text-[13px] font-black" style={{ color }}>{toLabel}</span>
+        <span className="text-[11px] px-2 py-0.5 rounded-full ml-auto" style={{ background: `${color}18`, color }}>시선</span>
+      </div>
+      {/* 유형 + intro */}
+      <div className="px-5 py-4" style={{ background: pale }}>
+        {(viewType || viewIcon) && (
+          <div className="flex items-center gap-2 mb-2">
+            {viewIcon && <span className="text-[24px]">{viewIcon}</span>}
+            {viewType && <span className="text-[15px] font-black" style={{ color }}>{viewType}</span>}
+          </div>
+        )}
+        {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ViewDetailBr4 — 시선 풀이 본문 (4장 · 이 아이는 어떤 성격인가)
+ *
+ * ViewBannerBr4가 "이 시선의 유형은 무엇인가"를 요약했다면,
+ * ViewDetailBr4는 그 시선이 일상에서 어떻게 구체적으로 드러나는지를
+ * 풀어주는 본문 카드이오.
+ * callout을 먼저 배치해 풀이의 핵심을 강조한 뒤, paragraphs로 상세 서술하오.
+ * 보호자 시선 카드(딥블루)와 반려동물 시선 카드(딥그린)의 색상을 각각 달리해
+ * 두 관점이 페이지 안에서 자연스럽게 대비·조화를 이루도록 하오.
+ * 반려동물이 보호자를 "어떻게 느끼는가"는 사주의 상관·식신·재성 등의
+ * 십성 관계에서 도출되며, 보호자가 이 시선을 읽고 "이 아이가 나를
+ * 이렇게 의지하는구나"를 이해할 때 관계가 더욱 깊어지오.
+ */
+function ViewDetailBr4({ data, color, pale }: { data: Record<string, unknown> | null; color: string; pale: string }) {
+  if (!data) return null;
+  const callout = (data.callout as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="px-4 py-3 rounded-xl mb-4" style={{ background: pale, borderLeft: `3px solid ${color}` }}>
+          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * ViewMirrorBr4 — 시선 교차 요약 배너 (4장 · 이 아이는 어떤 성격인가)
+ *
+ * 보호자 시선(블루)과 반려동물 시선(그린)을 두 열로 나란히 배치해
+ * 두 시선의 핵심을 한눈에 비교하는 미러 뷰 배너이오.
+ * 왼쪽에는 보호자가 반려동물을 어떻게 보는지의 한 줄 핵심,
+ * 오른쪽에는 반려동물이 보호자를 어떻게 느끼는지의 한 줄 핵심을 배치하고,
+ * 중앙의 ⇌ 기호로 두 시선이 서로를 향해 교차함을 나타내오.
+ * 이 배너는 본문 풀이가 끝난 후 마무리 전에 삽입해, 독자가 두 시선의
+ * 핵심을 한 번 더 정리하고 느낄 수 있는 여백을 제공하오.
+ * "나는 이 아이를 이렇게 보고, 이 아이는 나를 이렇게 느낀다"는
+ * 관계의 심리적 구조를 시각적으로 각인시키는 것이 목적이오.
+ */
+function ViewMirrorBr4({ mySummary, petSummary, myName, petName }:
+  { mySummary: string; petSummary: string; myName: string; petName: string }) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="grid grid-cols-2">
+        {/* 보호자 시선 */}
+        <div className="px-4 py-4" style={{ background: BR4_MY_P, borderRight: `1px solid ${INK}08` }}>
+          <p className="text-[10px] font-black mb-1.5" style={{ color: BR4_MY }}>{myName}의 눈</p>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{mySummary}</p>
+        </div>
+        {/* 반려동물 시선 */}
+        <div className="px-4 py-4" style={{ background: BR4_PET_P }}>
+          <p className="text-[10px] font-black mb-1.5" style={{ color: BR4_PET }}>{petName}의 느낌</p>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{petSummary}</p>
+        </div>
+      </div>
+      <div className="py-2 text-center" style={{ background: WHITE, borderTop: `1px solid ${INK}08` }}>
+        <span className="text-[12px] font-bold" style={{ color: MUTE }}>⇌ 두 시선이 교차하는 관계</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PetTemperBr5Card — 반려동물 기질 카드 (5장)
+ *
+ * 반려동물의 사주에서 읽어낸 핵심 기질을 한눈에 보여주는 카드.
+ * 상단엔 기질 키워드 배지들이 나란히 놓이고, 그 아래로 기질의 깊이를
+ * 풀어쓴 본문 단락과 건강·행동에 미치는 영향(healthNote)이 이어진다.
+ * 카드 좌측에 색깔 바를 세워 5장의 딥로즈 테마를 시각적으로 고정한다.
+ */
+function PetTemperBr5Card({ keywords, desc, healthNote, petName }:
+  { keywords: string[]; desc: string; healthNote?: string; petName: string }) {
+  const KW_COLORS = [BR5_COLOR, BR5_ACCENT, "#8b2040", "#7a1535"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR5_COLOR}20`, boxShadow: "0 2px 16px rgba(160,48,80,0.08)" }}>
+      {/* 헤더 */}
+      <div className="px-5 pt-4 pb-3" style={{ background: `linear-gradient(135deg, ${BR5_COLOR}12, ${BR5_PALE})` }}>
+        <p className="text-[10px] font-black tracking-widest mb-2" style={{ color: BR5_COLOR }}>🐾 {petName}의 타고난 기질</p>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[11px] font-black" style={{ background: KW_COLORS[i % KW_COLORS.length], color: "#fff" }}>{kw}</span>
+          ))}
+        </div>
+      </div>
+      {/* 본문 */}
+      <div className="flex">
+        <div className="w-1 shrink-0" style={{ background: `linear-gradient(to bottom, ${BR5_COLOR}, ${BR5_ACCENT})` }} />
+        <div className="px-4 py-4 flex-1">
+          {desc.split(/\n+/).map((p, i) => (
+            <p key={i} className="text-[13px] leading-[1.85] mb-2 last:mb-0" style={{ color: INK_SOFT }}>{p}</p>
+          ))}
+          {healthNote && (
+            <div className="mt-3 px-3 py-2.5 rounded-xl text-[12px] leading-relaxed" style={{ background: `${BR5_COLOR}0c`, color: BR5_COLOR, fontWeight: 700 }}>
+              💡 {healthNote}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PetHabitsBr5Card — 반려동물 주요 습관·특성 목록 (5장)
+ *
+ * 습관과 행동 패턴을 개별 항목 카드로 펼쳐 보여주는 섹션.
+ * 각 항목은 아이콘·이름·설명 3요소로 구성되며, 좌측 원형 아이콘 배지가
+ * 아이템 간 리듬감을 준다. 홍연이 관찰한 반려동물의 일상적 행동 패턴을
+ * 보호자가 직관적으로 파악하도록 설계되었다.
+ */
+function PetHabitsBr5Card({ items }: {
+  items: Array<{ icon?: string; title: string; desc: string }>;
+}) {
+  return (
+    <div className="mx-5 mb-5 flex flex-col gap-3">
+      {items.map((item, i) => (
+        <div key={i} className="flex gap-3 p-4 rounded-2xl" style={{ background: i % 2 === 0 ? BR5_PALE : WHITE, border: `1px solid ${BR5_COLOR}15`, boxShadow: "0 1px 6px rgba(160,48,80,0.05)" }}>
+          <div className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[18px]" style={{ background: `${BR5_COLOR}14`, border: `1.5px solid ${BR5_COLOR}22` }}>
+            {item.icon ?? "🐾"}
+          </div>
+          <div className="flex-1">
+            <p className="text-[13px] font-black mb-1" style={{ color: BR5_COLOR }}>{item.title}</p>
+            <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * PetCareTipsBr5Card — 이 아이를 위한 돌봄 포인트 (5장)
+ *
+ * 반려동물의 사주에서 도출된 맞춤형 돌봄 팁을 카드 형태로 전달한다.
+ * 팁 하나하나가 실질적인 행동 가이드가 되도록, 아이콘·제목·상세 설명의
+ * 3단 구조를 가진다. 팁 카드들은 세로로 쌓이며, 마지막 팁에는 포인트
+ * 강조 처리가 적용되어 핵심 메시지를 눈에 띄게 한다.
+ */
+function PetCareTipsBr5Card({ tips, petName }: {
+  tips: Array<{ icon?: string; title?: string; desc: string }>;
+  petName: string;
+}) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR5_COLOR}18`, boxShadow: "0 2px 12px rgba(160,48,80,0.07)" }}>
+      <div className="px-5 py-3" style={{ background: BR5_COLOR }}>
+        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🩺 {petName}에게 필요한 돌봄 포인트</p>
+      </div>
+      <div className="divide-y" style={{ borderColor: `${BR5_COLOR}12` }}>
+        {tips.map((tip, i) => (
+          <div key={i} className="flex items-start gap-3 px-4 py-3.5" style={{ background: i === tips.length - 1 ? `${BR5_COLOR}08` : WHITE }}>
+            <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[14px] mt-0.5" style={{ background: BR5_PALE, border: `1.5px solid ${BR5_COLOR}30` }}>
+              {tip.icon ?? (i === 0 ? "🌿" : i === 1 ? "☀️" : i === 2 ? "💧" : "🏡")}
+            </div>
+            <div className="flex-1">
+              {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR5_COLOR }}>{tip.title}</p>}
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+            </div>
+            {i === tips.length - 1 && (
+              <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR5_ACCENT, color: "#fff" }}>핵심</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PetEnvBr6Card — 이 아이에게 맞는 환경 유형 카드 (6장)
+ *
+ * 반려동물 사주에서 읽어낸 이상적인 생활 환경 유형을 한눈에 보여주는 핵심 카드.
+ * 상단에는 환경 유형명(envType)이 대형 배지로 표시되고, 아이콘과 함께 이 아이가
+ * 어떤 공간·분위기·자극 수준에서 가장 편안함을 느끼는지 한눈에 전달된다.
+ * 본문에는 오행과 일간에서 도출한 풍부한 설명이 이어지며, 환경 키워드 배지들이
+ * 하단에 나열되어 보호자가 집안 환경을 꾸밀 때 참고할 수 있는 직관적 가이드를 제공한다.
+ * callout 박스는 이 모든 환경 요소 중 가장 핵심이 되는 한 문장을 강조한다.
+ */
+function PetEnvBr6Card({ envType, envIcon, desc, keywords, callout, petName }:
+  { envType: string; envIcon: string; desc: string; keywords: string[]; callout?: string; petName: string }) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR6_COLOR}22`, boxShadow: "0 3px 18px rgba(42,106,74,0.09)" }}>
+      {/* 환경 유형 헤더 */}
+      <div className="px-5 pt-5 pb-4" style={{ background: `linear-gradient(135deg, ${BR6_COLOR}14 0%, ${BR6_PALE} 100%)` }}>
+        <p className="text-[10px] font-black tracking-widest mb-2" style={{ color: BR6_COLOR }}>🌿 {petName}에게 맞는 환경</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-[26px] shrink-0" style={{ background: WHITE, border: `1.5px solid ${BR6_COLOR}25`, boxShadow: "0 2px 8px rgba(42,106,74,0.12)" }}>
+            {envIcon}
+          </div>
+          <div>
+            <p className="text-[18px] font-black leading-tight" style={{ color: BR6_COLOR }}>{envType}</p>
+            <p className="text-[10px] font-bold mt-0.5" style={{ color: BR6_ACCENT }}>이 아이가 가장 편안한 공간</p>
+          </div>
+        </div>
+        {/* 키워드 배지 */}
+        {keywords.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {keywords.map((kw, i) => (
+              <span key={i} className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold" style={{ background: `${BR6_COLOR}18`, color: BR6_COLOR }}>{kw}</span>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* 본문 */}
+      <div className="px-5 py-4">
+        {desc.split(/\n+/).map((p, i) => (
+          <p key={i} className="text-[13px] leading-[1.85] mb-2 last:mb-0" style={{ color: INK_SOFT }}>{p}</p>
+        ))}
+        {callout && (
+          <div className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl" style={{ background: `${BR6_COLOR}0d`, border: `1px solid ${BR6_COLOR}20` }}>
+            <span className="text-[16px] shrink-0 mt-0.5">🌱</span>
+            <p className="text-[12.5px] font-bold leading-relaxed" style={{ color: BR6_COLOR }}>{callout}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PetLifeStyleBr6Card — 이 아이의 생활 방식 패턴 목록 (6장)
+ *
+ * 반려동물이 선호하는 일상의 리듬과 행동 패턴을 아이템 카드 형태로 펼쳐 보여준다.
+ * 각 항목은 이모지 아이콘, 패턴명(title), 사주 기반 설명(desc)으로 구성된다.
+ * 항목 카드들은 세로로 쌓이며, 좌측의 초록 포인트 라인이 시각적 계단감을 주고
+ * 각 패턴이 이 아이의 사주 어떤 부분에서 비롯된 것인지 명확하게 연결해 준다.
+ * 보호자가 이 아이의 하루 루틴을 이해하고, 그에 맞는 생활 환경을 조성하는 데
+ * 실질적인 인사이트를 제공하는 것이 이 컴포넌트의 핵심 목적이다.
+ */
+function PetLifeStyleBr6Card({ items }: {
+  items: Array<{ icon?: string; title: string; desc: string }>;
+}) {
+  return (
+    <div className="mx-5 mb-5 flex flex-col gap-3">
+      {items.map((item, i) => (
+        <div key={i} className="flex gap-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR6_COLOR}18`, boxShadow: "0 1px 8px rgba(42,106,74,0.06)" }}>
+          <div className="w-1 shrink-0" style={{ background: i % 2 === 0 ? BR6_COLOR : BR6_ACCENT }} />
+          <div className="flex gap-3 px-4 py-3.5 flex-1" style={{ background: i % 2 === 0 ? WHITE : BR6_PALE }}>
+            <div className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-[18px]" style={{ background: `${BR6_COLOR}12` }}>
+              {item.icon ?? "🌿"}
+            </div>
+            <div className="flex-1">
+              <p className="text-[13px] font-black mb-1" style={{ color: BR6_COLOR }}>{item.title}</p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * PetEnvTipsBr6Card — 보호자를 위한 환경 조성 실천 조언 (6장)
+ *
+ * 반려동물의 사주와 기질에 맞는 생활 환경을 만들기 위해 보호자가 실천할 수 있는
+ * 구체적인 행동 가이드를 담은 조언 카드 모음.
+ * 딥세이지그린 계열의 좌측 숫자 인덱스와 함께 각 팁이 카드로 배치되며,
+ * 가장 중요한 마지막 팁에는 별도의 강조 처리가 적용된다.
+ * 단순한 격언이 아닌, 오늘 당장 실천할 수 있는 구체적 조언을 담아
+ * 보호자와 반려동물이 더 조화로운 일상을 만들어 가도록 돕는다.
+ */
+function PetEnvTipsBr6Card({ tips, petName }: {
+  tips: Array<{ icon?: string; title?: string; desc: string }>;
+  petName: string;
+}) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR6_COLOR}20`, boxShadow: "0 2px 14px rgba(42,106,74,0.08)" }}>
+      <div className="px-5 py-3" style={{ background: `linear-gradient(90deg, ${BR6_COLOR}, ${BR6_ACCENT})` }}>
+        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🏡 {petName}을 위한 환경 조성 포인트</p>
+      </div>
+      <div className="divide-y" style={{ borderColor: `${BR6_COLOR}10` }}>
+        {tips.map((tip, i) => {
+          const isLast = i === tips.length - 1;
+          return (
+            <div key={i} className="flex items-start gap-3 px-4 py-3.5" style={{ background: isLast ? `${BR6_COLOR}08` : WHITE }}>
+              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-black mt-0.5 shrink-0"
+                style={{ background: isLast ? BR6_COLOR : BR6_PALE, color: isLast ? "#fff" : BR6_COLOR, border: `1.5px solid ${BR6_COLOR}30` }}>
+                {tip.icon ?? (i + 1)}
+              </div>
+              <div className="flex-1">
+                {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR6_COLOR }}>{tip.title}</p>}
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              </div>
+              {isLast && (
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR6_ACCENT, color: "#fff" }}>핵심</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ConflictPointBr7Card — 보호자와 반려동물 사이의 구체적 갈등 포인트 목록 (7장)
+ *
+ * 두 사주가 만날 때 발생하는 긴장·마찰 지점들을 항목 카드로 나열한다.
+ * 각 항목은 아이콘·갈등명(title)·설명(desc)·강도 배지(intensity)로 구성된다.
+ * intensity 배지는 "강" / "중" / "약" 3단계로 표시되어 어느 갈등이
+ * 관계에서 가장 자주, 강하게 드러나는지 보호자가 직관적으로 가늠하게 한다.
+ * 카드 좌측에 테라코타 강도 바를 세워 7장의 긴장감 있는 분위기를 시각화하고,
+ * 각 갈등의 사주적 배경을 설명함으로써 "왜 이 아이와 이런 순간이 오는지"를
+ * 이해의 언어로 풀어낸다. 이해가 생기면 비난이 줄어들기 때문이다.
+ */
+function ConflictPointBr7Card({ items }: {
+  items: Array<{ icon?: string; title: string; desc: string; intensity?: string }>;
+}) {
+  const intensityStyle: Record<string, { bg: string; color: string }> = {
+    강: { bg: BR7_ACCENT, color: "#fff" },
+    중: { bg: `${BR7_COLOR}30`, color: BR7_COLOR },
+    약: { bg: `${BR7_COLOR}14`, color: BR7_COLOR },
+  };
+  return (
+    <div className="mx-5 mb-5 flex flex-col gap-3">
+      {items.map((item, i) => {
+        const ist = item.intensity ? (intensityStyle[item.intensity] ?? intensityStyle["중"]) : intensityStyle["중"];
+        return (
+          <div key={i} className="flex gap-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR7_COLOR}18`, boxShadow: "0 1px 8px rgba(122,58,26,0.07)" }}>
+            <div className="w-1 shrink-0" style={{ background: item.intensity === "강" ? BR7_ACCENT : item.intensity === "약" ? `${BR7_COLOR}40` : BR7_COLOR }} />
+            <div className="flex gap-3 px-4 py-3.5 flex-1" style={{ background: i % 2 === 0 ? WHITE : BR7_PALE }}>
+              <div className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-[18px]" style={{ background: `${BR7_COLOR}12` }}>
+                {item.icon ?? "⚡"}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[13px] font-black" style={{ color: BR7_COLOR }}>{item.title}</p>
+                  {item.intensity && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black" style={{ background: ist.bg, color: ist.color }}>{item.intensity}</span>
+                  )}
+                </div>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * ConflictRootBr7Card — 갈등의 사주적 근본 원인 카드 (7장)
+ *
+ * 보호자와 반려동물 사이에 이 갈등들이 생기는 근본적인 이유를
+ * 사주 오행·일간 충돌의 관점에서 풀어낸다.
+ * 상단 callout 박스에는 이 모든 갈등의 본질을 한 문장으로 압축한 핵심 메시지가 담기고,
+ * 그 아래 본문 단락들에서 왜 이런 긴장이 구조적으로 발생하는지 깊이 설명한다.
+ * 갈등을 문제로만 보지 않고, 두 존재의 기질 차이에서 오는 자연스러운 현상으로
+ * 이해하도록 돕는 것이 이 카드의 핵심 목적이다.
+ * 카드 전체에 테라코타와 크림 계열 그라디언트를 입혀 긴장감 속에서도
+ * 따뜻한 시선을 잃지 않는 홍연의 태도를 시각적으로 표현한다.
+ */
+function ConflictRootBr7Card({ callout, paragraphs }: {
+  callout: string;
+  paragraphs: string[];
+}) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR7_COLOR}20`, boxShadow: "0 3px 16px rgba(122,58,26,0.08)" }}>
+      {/* callout 강조 */}
+      <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${BR7_COLOR}15 0%, ${BR7_PALE} 100%)` }}>
+        <div className="flex items-start gap-3">
+          <span className="text-[22px] shrink-0 mt-0.5">🔍</span>
+          <p className="text-[13px] font-black leading-relaxed" style={{ color: BR7_COLOR }}>{callout}</p>
+        </div>
+      </div>
+      {/* 본문 */}
+      <div className="flex">
+        <div className="w-1 shrink-0" style={{ background: `linear-gradient(to bottom, ${BR7_COLOR}, ${BR7_ACCENT})` }} />
+        <div className="px-5 py-4 flex-1">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="text-[13px] leading-[1.85] mb-2 last:mb-0" style={{ color: INK_SOFT }}>{p}</p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ReconcileTipsBr7Card — 갈등 완화·화해를 위한 보호자 실천 조언 (7장)
+ *
+ * 두 사주 사이의 마찰을 줄이고 더 조화로운 관계를 만들기 위해
+ * 보호자가 일상에서 실천할 수 있는 구체적 행동 가이드를 담은 팁 카드 모음.
+ * 각 팁은 아이콘·제목·설명으로 구성되며, "이해하면 달라진다"는 홍연의 시각을 담아
+ * 단순한 훈련 기술이 아닌 사주 기반 통찰을 행동으로 연결한다.
+ * 갈등을 억지로 없애려 하지 않고, 서로의 기질을 인정하는 방식으로
+ * 공존의 길을 안내하는 것이 이 컴포넌트의 정체성이다.
+ * 마지막 팁에는 핵심 배지가 붙어 가장 중요한 한 가지가 눈에 들어오게 한다.
+ */
+function ReconcileTipsBr7Card({ tips, name, petName }: {
+  tips: Array<{ icon?: string; title?: string; desc: string }>;
+  name: string;
+  petName: string;
+}) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR7_COLOR}20`, boxShadow: "0 2px 14px rgba(122,58,26,0.08)" }}>
+      <div className="px-5 py-3" style={{ background: `linear-gradient(90deg, ${BR7_COLOR}, ${BR7_ACCENT})` }}>
+        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🤝 {name}님과 {petName}을 위한 공존 처방</p>
+      </div>
+      <div className="divide-y" style={{ borderColor: `${BR7_COLOR}10` }}>
+        {tips.map((tip, i) => {
+          const isLast = i === tips.length - 1;
+          return (
+            <div key={i} className="flex items-start gap-3 px-4 py-3.5" style={{ background: isLast ? `${BR7_COLOR}08` : WHITE }}>
+              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[15px] mt-0.5"
+                style={{ background: isLast ? BR7_COLOR : BR7_PALE, border: `1.5px solid ${BR7_COLOR}30` }}>
+                {tip.icon ?? (i === 0 ? "💬" : i === 1 ? "⏸️" : i === 2 ? "🌀" : "🫶")}
+              </div>
+              <div className="flex-1">
+                {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR7_COLOR }}>{tip.title}</p>}
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              </div>
+              {isLast && (
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR7_ACCENT, color: "#fff" }}>핵심</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * GaeunMethodBr8Card — 이 아이를 위한 개운 실천법 카드 (8장)
+ *
+ * 반려동물 사주에서 도출한 핵심 개운법들을 아이템 목록으로 펼쳐 보여주는 메인 카드.
+ * 상단에 이 아이의 개운 전체를 아우르는 intro 문장과 callout 강조 박스가 배치되고,
+ * 그 아래로 각 개운 실천법이 아이콘·제목·설명의 3요소 카드로 이어진다.
+ * 개운법은 오행 보완의 원리에서 출발한다 — 이 아이의 사주에서 부족하거나
+ * 과잉된 오행을 바로잡는 구체적인 행동, 환경, 음식, 활동 등을 담는다.
+ * 골드 계열 배색이 개운(開運)이라는 단어가 품은 빛나는 전환의 이미지를 시각화한다.
+ * 보호자가 이 카드를 보고 "오늘 당장 이걸 해줄 수 있겠다"는 느낌을 받도록
+ * 추상적 이론이 아닌 실질적 행동으로 설계한다.
+ */
+function GaeunMethodBr8Card({ intro, callout, items, petName }:
+  { intro: string; callout?: string; items: Array<{ icon?: string; title: string; desc: string }>; petName: string }) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR8_COLOR}22`, boxShadow: "0 3px 18px rgba(138,96,16,0.09)" }}>
+      {/* 헤더 */}
+      <div className="px-5 pt-5 pb-4" style={{ background: `linear-gradient(135deg, ${BR8_COLOR}14 0%, ${BR8_PALE} 100%)` }}>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[20px]">✨</span>
+          <p className="text-[10px] font-black tracking-widest" style={{ color: BR8_COLOR }}>{petName}의 개운 처방</p>
+        </div>
+        {intro && <p className="text-[13px] leading-relaxed mb-3" style={{ color: INK_SOFT }}>{intro}</p>}
+        {callout && (
+          <div className="px-4 py-2.5 rounded-xl" style={{ background: `${BR8_COLOR}12`, border: `1px solid ${BR8_COLOR}22` }}>
+            <p className="text-[12.5px] font-black leading-relaxed" style={{ color: BR8_COLOR }}>💡 {callout}</p>
+          </div>
+        )}
+      </div>
+      {/* 개운법 아이템 */}
+      <div className="divide-y" style={{ borderColor: `${BR8_COLOR}10` }}>
+        {items.map((item, i) => (
+          <div key={i} className="flex gap-3 px-4 py-3.5" style={{ background: i % 2 === 0 ? WHITE : BR8_PALE }}>
+            <div className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-[18px]" style={{ background: `${BR8_COLOR}14`, border: `1.5px solid ${BR8_COLOR}20` }}>
+              {item.icon ?? "🌟"}
+            </div>
+            <div className="flex-1">
+              <p className="text-[13px] font-black mb-1" style={{ color: BR8_COLOR }}>{item.title}</p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * LuckyElementBr8Card — 이 아이의 행운 요소 격자 카드 (8장)
+ *
+ * 반려동물 사주에서 도출한 행운의 색깔·방위·오행·시간대 등
+ * 개운에 도움이 되는 구체적 요소들을 격자(grid) 형태로 한눈에 보여주는 카드.
+ * 각 요소는 type(분류명)·value(값)·reason(이유) 3가지로 구성되며,
+ * value는 크고 굵게 표시되어 한 번 보면 기억에 남는다.
+ * 보호자가 이 아이의 밥그릇 색을 바꾸거나, 산책 방향을 정하거나,
+ * 잠자리 위치를 고를 때 실질적으로 참고할 수 있는 생활 가이드 역할을 한다.
+ * 딥골드 포인트가 각 요소에 권위와 신뢰감을 부여하며,
+ * "이것이 이 아이에게 맞는 기운이오"라는 홍연의 확신이 배색에 담긴다.
+ */
+function LuckyElementBr8Card({ items }: {
+  items: Array<{ type: string; value: string; reason: string; icon?: string }>;
+}) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR8_COLOR}20`, boxShadow: "0 2px 14px rgba(138,96,16,0.08)" }}>
+      <div className="px-5 py-3" style={{ background: `linear-gradient(90deg, ${BR8_COLOR}, ${BR8_ACCENT})` }}>
+        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>☀️ 이 아이에게 맞는 행운 요소</p>
+      </div>
+      <div className="grid grid-cols-2 gap-px" style={{ background: `${BR8_COLOR}12` }}>
+        {items.map((el, i) => (
+          <div key={i} className="px-4 py-4" style={{ background: WHITE }}>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              {el.icon && <span className="text-[13px]">{el.icon}</span>}
+              <p className="text-[10px] font-black" style={{ color: BR8_ACCENT }}>{el.type}</p>
+            </div>
+            <p className="text-[18px] font-black leading-tight mb-1" style={{ color: BR8_COLOR }}>{el.value}</p>
+            <p className="text-[11px] leading-snug" style={{ color: MUTE }}>{el.reason}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * GaeunTimingBr8Card — 개운에 좋은 시기 & 주의할 시기 카드 (8장)
+ *
+ * 이 아이의 사주 흐름에 따라 기운이 상승하는 시기와 보호자가
+ * 더욱 세심하게 살펴야 할 시기를 구분하여 안내하는 타이밍 카드.
+ * 상단 callout에는 이 아이의 전반적인 기운 흐름에 대한 핵심 한 줄이 담기고,
+ * 그 아래 시기별 항목들이 긍정/주의 배지와 함께 배열된다.
+ * 항목마다 어느 계절·시기인지(period), 기운의 성격(title), 구체적 설명(desc)이
+ * 포함되어 보호자가 "이 시기에는 이렇게 해줘야겠다"는 실천적 감각을 얻게 한다.
+ * 개운(開運)의 핵심은 흐름을 읽는 것 — 이 카드가 그 흐름의 달력이 된다.
+ */
+function GaeunTimingBr8Card({ callout, items }: {
+  callout: string;
+  items: Array<{ period: string; title: string; desc: string; type?: "good" | "caution" }>;
+}) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR8_COLOR}20`, boxShadow: "0 2px 14px rgba(138,96,16,0.07)" }}>
+      {/* callout */}
+      <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${BR8_COLOR}12 0%, ${BR8_PALE} 100%)` }}>
+        <div className="flex items-start gap-2.5">
+          <span className="text-[20px] shrink-0 mt-0.5">🌊</span>
+          <p className="text-[13px] font-black leading-relaxed" style={{ color: BR8_COLOR }}>{callout}</p>
+        </div>
+      </div>
+      {/* 시기별 항목 */}
+      <div className="divide-y" style={{ borderColor: `${BR8_COLOR}10` }}>
+        {items.map((item, i) => {
+          const isGood = item.type !== "caution";
+          return (
+            <div key={i} className="flex items-start gap-3 px-4 py-3.5" style={{ background: WHITE }}>
+              <div className="shrink-0 flex flex-col items-center gap-1 mt-0.5">
+                <div className="w-2 h-2 rounded-full" style={{ background: isGood ? BR8_ACCENT : "#c05830" }} />
+                <p className="text-[9px] font-black leading-none text-center" style={{ color: isGood ? BR8_COLOR : "#c05830", maxWidth: 28 }}>{item.period}</p>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="text-[13px] font-black" style={{ color: INK }}>{item.title}</p>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black" style={{ background: isGood ? `${BR8_ACCENT}20` : "#c0583015", color: isGood ? BR8_ACCENT : "#c05830" }}>
+                    {isGood ? "개운" : "주의"}
+                  </span>
+                </div>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * BondDepthBr9Card — 인연의 깊이와 지속 게이지 카드 (9장)
+ *
+ * 보호자와 반려동물이 사주로 맺어진 인연이 얼마나 깊고 오래 이어질 수 있는지를
+ * 수치와 언어로 함께 전달하는 핵심 카드.
+ * 상단의 반원형 게이지(score)는 0~100 사이 인연 지속력 점수를 시각화하며,
+ * label은 이 점수를 홍연의 언어로 짧게 해석한다.
+ * callout 강조박스에는 이 인연의 본질을 꿰뚫는 한 문장이 담기고,
+ * 그 아래 본문 단락에서 왜 이 인연이 이런 깊이와 지속성을 갖는지
+ * 오행·합충·일간의 관점에서 풀어낸다.
+ * 반려동물과의 이별은 보호자에게 깊은 슬픔을 남긴다 — 그러므로 이 카드는
+ * 불안을 자극하는 방식이 아니라, "이 인연을 얼마나 소중히 여길 것인가"라는
+ * 긍정적 질문으로 보호자에게 다가선다. 딥인디고 배색이 시간과 신뢰를 상징한다.
+ */
+function BondDepthBr9Card({ score, label, callout, paragraphs }:
+  { score: number; label: string; callout?: string; paragraphs: string[] }) {
+  const pct = Math.max(1, Math.min(99, score));
+  // 반원 게이지: 왼쪽(0%)→위(50%)→오른쪽(100%), 시계방향
+  // θ: π(왼쪽) → 0(오른쪽), pct 증가에 따라 감소
+  const r = 54; const cx = 70; const cy = 74;
+  const theta = Math.PI * (1 - pct / 100);
+  const endX = (cx + r * Math.cos(theta)).toFixed(1);
+  const endY = (cy - r * Math.sin(theta)).toFixed(1);
+  const bgArc   = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+  const progArc = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${endX} ${endY}`;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR9_COLOR}20`, boxShadow: "0 3px 18px rgba(58,58,122,0.09)" }}>
+      {/* 게이지 헤더 */}
+      <div className="px-5 pt-5 pb-4 flex flex-col items-center" style={{ background: `linear-gradient(160deg, ${BR9_COLOR}14 0%, ${BR9_PALE} 100%)` }}>
+        <svg width="140" height="88" viewBox="0 0 140 88" className="mb-2">
+          {/* 배경 반원 */}
+          <path d={bgArc} fill="none" stroke={`${BR9_COLOR}22`} strokeWidth="10" strokeLinecap="round" />
+          {/* 진행 반원 */}
+          <path d={progArc} fill="none" stroke={BR9_COLOR} strokeWidth="10" strokeLinecap="round" />
+          {/* 점수 텍스트 */}
+          <text x={cx} y={cy - 10} textAnchor="middle" fontSize="24" fontWeight="900" fill={BR9_COLOR}>{pct}</text>
+          <text x={cx} y={cy + 6} textAnchor="middle" fontSize="9" fontWeight="700" fill={BR9_ACCENT}>/ 100</text>
+        </svg>
+        <p className="text-[13px] font-black text-center" style={{ color: BR9_COLOR }}>{label}</p>
+        {callout && (
+          <div className="mt-3 w-full px-4 py-2.5 rounded-xl" style={{ background: `${BR9_COLOR}10`, border: `1px solid ${BR9_COLOR}20` }}>
+            <p className="text-[12.5px] font-black leading-relaxed text-center" style={{ color: BR9_COLOR }}>🔮 {callout}</p>
+          </div>
+        )}
+      </div>
+      {/* 본문 */}
+      <div className="flex">
+        <div className="w-1 shrink-0" style={{ background: `linear-gradient(to bottom, ${BR9_COLOR}, ${BR9_ACCENT})` }} />
+        <div className="px-5 py-4 flex-1">
+          {paragraphs.map((p, i) => (
+            <p key={i} className="text-[13px] leading-[1.85] mb-2 last:mb-0" style={{ color: INK_SOFT }}>{p}</p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * TogetherPhasesBr9Card — 함께하는 시기별 인연 흐름 타임라인 (9장)
+ *
+ * 보호자와 반려동물이 함께하는 시간 속에서 인연의 강도가 어떻게 변화하는지를
+ * 시기별 흐름으로 펼쳐 보여주는 타임라인 카드.
+ * 각 시기(period)는 "절정"·"안정"·"성장" 세 가지 타입으로 분류되며,
+ * 타입에 따라 배지 색과 좌측 연결선 색이 달라져 흐름의 리듬을 시각화한다.
+ * 인연이 가장 빛나는 절정 시기, 안정적으로 함께하는 시기,
+ * 둘의 관계가 더 깊어지는 성장 시기를 구분하여 보여줌으로써
+ * 보호자가 "지금 우리가 어떤 시기를 보내고 있는가"를 사주로 이해하게 돕는다.
+ * 타임라인 왼쪽의 세로선과 원형 노드가 흐름의 연속성을 표현하며,
+ * 이 아이와 함께하는 시간이 얼마나 소중한지를 조용히 상기시킨다.
+ */
+function TogetherPhasesBr9Card({ items }: {
+  items: Array<{ period: string; title: string; desc: string; type?: "peak" | "steady" | "grow" }>;
+}) {
+  const typeStyle: Record<string, { dot: string; badge: string; badgeText: string; label: string }> = {
+    peak:   { dot: BR9_COLOR,  badge: BR9_COLOR,           badgeText: "#fff",          label: "절정" },
+    steady: { dot: BR9_ACCENT, badge: `${BR9_ACCENT}25`,   badgeText: BR9_ACCENT,      label: "안정" },
+    grow:   { dot: "#5a9a6a",  badge: "#5a9a6a20",         badgeText: "#3a7a4a",       label: "성장" },
+  };
+  return (
+    <div className="mx-5 mb-5">
+      <div className="relative pl-8">
+        {/* 세로선 */}
+        <div className="absolute left-3 top-2 bottom-2 w-0.5 rounded-full" style={{ background: `linear-gradient(to bottom, ${BR9_COLOR}, ${BR9_PALE})` }} />
+        {items.map((item, i) => {
+          const st = typeStyle[item.type ?? "steady"] ?? typeStyle["steady"];
+          return (
+            <div key={i} className="relative mb-4 last:mb-0">
+              {/* 노드 */}
+              <div className="absolute -left-8 w-6 h-6 rounded-full border-2 flex items-center justify-center" style={{ background: WHITE, borderColor: st.dot, top: 2 }}>
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: st.dot }} />
+              </div>
+              <div className="p-4 rounded-2xl" style={{ background: i % 2 === 0 ? BR9_PALE : WHITE, border: `1px solid ${BR9_COLOR}15`, boxShadow: "0 1px 6px rgba(58,58,122,0.05)" }}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <p className="text-[10px] font-black" style={{ color: BR9_ACCENT }}>{item.period}</p>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black" style={{ background: st.badge, color: st.badgeText }}>{st.label}</span>
+                  <p className="text-[13px] font-black ml-auto" style={{ color: BR9_COLOR }}>{item.title}</p>
+                </div>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * BondKeepTipsBr9Card — 이 인연을 오래 이어가기 위한 보호자 조언 (9장)
+ *
+ * 보호자가 이 아이와의 시간을 더 풍요롭고 오래 이어가기 위해
+ * 사주의 관점에서 건네는 따뜻한 조언 카드 모음.
+ * 단순한 돌봄 팁이 아니라 인연의 깊이를 더하는 관계적 지혜를 담는다.
+ * 각 조언은 아이콘·제목·설명으로 구성되며, 감성적이고 따뜻한 톤이
+ * 딥인디고와 크림 배색 위에서 홍연의 진심 어린 서신처럼 읽힌다.
+ * "이 아이가 곁에 있는 지금 이 순간이 가장 소중한 시간이오"라는
+ * 홍연의 메시지가 이 카드 전체를 관통한다.
+ * 마지막 조언에는 핵심 배지가 붙어, 이 모든 조언 중 단 하나만 기억한다면
+ * 무엇을 실천해야 하는지 보호자의 마음에 남긴다.
+ */
+function BondKeepTipsBr9Card({ tips, petName }: {
+  tips: Array<{ icon?: string; title?: string; desc: string }>;
+  petName: string;
+}) {
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR9_COLOR}20`, boxShadow: "0 2px 14px rgba(58,58,122,0.08)" }}>
+      <div className="px-5 py-3" style={{ background: `linear-gradient(90deg, ${BR9_COLOR}, ${BR9_ACCENT})` }}>
+        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🌙 {petName}과의 시간을 더 깊게 만드는 법</p>
+      </div>
+      <div className="divide-y" style={{ borderColor: `${BR9_COLOR}10` }}>
+        {tips.map((tip, i) => {
+          const isLast = i === tips.length - 1;
+          return (
+            <div key={i} className="flex items-start gap-3 px-4 py-3.5" style={{ background: isLast ? `${BR9_COLOR}08` : WHITE }}>
+              <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[16px] mt-0.5"
+                style={{ background: isLast ? BR9_COLOR : BR9_PALE, border: `1.5px solid ${BR9_COLOR}30` }}>
+                {tip.icon ?? (i === 0 ? "🌟" : i === 1 ? "🕯️" : i === 2 ? "🫂" : "💜")}
+              </div>
+              <div className="flex-1">
+                {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR9_COLOR }}>{tip.title}</p>}
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              </div>
+              {isLast && (
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR9_ACCENT, color: "#fff" }}>핵심</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // 장번호 → 표시 제목 (반려궁합 11장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 반려궁합에 대하여",
@@ -3472,6 +4800,16 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
       </button>
     );
   };
+  // 반려동물 전용 버튼 — 발바닥 아이콘 + 웜브라운 배색
+  const PetBtn = ({ onClick, text }: { onClick: () => void; text: string }) => (
+    <button onClick={onClick} className="relative flex items-center w-full" style={{ background: "none", border: "none", padding: 0 }}>
+      <div className="flex items-center w-full rounded-full overflow-hidden"
+        style={{ background: "linear-gradient(to bottom, #fff8f3 0%, #ffe0c8 40%, #ffd0b0 60%, #fff0e4 100%)", border: "1.5px solid #c87040", boxShadow: "0 1px 4px rgba(140,70,20,0.18)", height: 26 }}>
+        <span style={{ fontSize: 12, paddingLeft: 7, lineHeight: 1, flexShrink: 0 }}>🐾</span>
+        <span style={{ flex: 1, textAlign: "center", fontFamily: SERIF, fontSize: 10, fontWeight: 800, color: "#7a3a10", letterSpacing: "0.05em", whiteSpace: "nowrap", paddingRight: 7 }}>{text}</span>
+      </div>
+    </button>
+  );
   return (
     <div
       className="sticky top-0 z-30"
@@ -3488,7 +4826,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
           <div className="flex flex-col gap-1.5" style={{ width: 96 }}>
             <ScrollBtn onClick={onMyeongsik} text={`명식(${myName ?? "나"})`} color={isFemale(myGender) ? "pink" : "blue"} />
             {hasPartner && onPartnerMyeongsik && (
-              <ScrollBtn onClick={onPartnerMyeongsik} text={`명식(${partnerName ?? "상대방"})`} color={isFemale(partnerGender) ? "pink" : "blue"} />
+              <PetBtn onClick={onPartnerMyeongsik} text={`명식(${partnerName ?? "반려동물"})`} />
             )}
           </div>
           {/* 목차 버튼 */}
@@ -4105,7 +5443,7 @@ function ReportPreviewInner() {
 
   // 마무리 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
   useEffect(() => {
-    if (ch !== "12") { setEventOpen(false); return; }
+    if (ch !== "10" && ch !== "12") { setEventOpen(false); return; }
     if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
     setEventOpen(true);
   }, [ch]);
@@ -4208,6 +5546,8 @@ function ReportPreviewInner() {
         view={report?.partnerView ?? null}
         loading={false}
         meta={report?.partnerName ? { name: report.partnerName, gender: report.partnerGender ?? "", date: report.partnerBirth?.date ?? "", calendar: report.partnerBirth?.calendar ?? "", time: report.partnerBirth?.time ?? "" } : undefined}
+        titleOverride={report?.partnerName ? `${report.partnerName} 명식` : "반려동물 명식"}
+        genderOverride={(g) => g === "여성" ? "암컷" : g === "남성" ? "수컷" : g}
       />
       {isAdmin && Number(ch) >= 1 && Number(ch) <= 11 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
@@ -4551,457 +5891,789 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
-      {ch === "1" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_1/kunghap_banryeo_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
-
-          <section className="pb-2">
-            <div className="px-6"><Heading>나의 명식</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          </section>
-
-          <section className="px-6 pt-6 pb-6">
-            <Heading>나의 오행 분포</Heading>
-            <P>목·화·토·금·수 다섯 기운이<br />내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-            <div className="flex justify-center mt-4">
-              <OhaengRadar view={report?.view ?? null} color={MAROON} />
+      {ch === "1" && (() => {
+        const wonguk = (jc.myWonguk as Record<string, unknown> | undefined) ?? {};
+        const nature = (jc.myNature as Record<string, unknown> | undefined) ?? null;
+        const petStyle = (jc.myPetStyle as Record<string, unknown> | undefined) ?? null;
+        const wongukParas = (wonguk.paragraphs as string[] | undefined) ?? [];
+        const callout = (wonguk.callout as string | undefined) ?? "";
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
             </div>
-          </section>
 
-          {(jc.myWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined) && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>나의 원국 풀이</Heading>
-              <ReportSec data={jc.myWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-            </section>
-          )}
-          {(jc.myNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>나의 기질</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.myNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{kw}</span>
-                ))}
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_1/kunghap_banryeo_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"반려동물과의 궁합을 풀기 전,\n먼저 그대 자신의 사주팔자를\n살펴보겠소."`}</Quote>
+
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <div className="px-5 mb-2">
+                <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>나의 명식</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>사주 원국 기둥</h2>
               </div>
-              {(jc.myNature as {desc?: string}).desc && <P>{(jc.myNature as {desc: string}).desc}</P>}
+              <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
             </section>
-          )}
-          {(jc.myPetStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined) && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>반려동물을 대하는 나의 방식</Heading>
-              <ReportSec data={jc.myPetStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-            </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
-          <Quote>{`"나의 기운을 살펴보았으니,\n이제 반려동물의 사주를\n펼쳐보겠소."`}</Quote>
-          <ChapterNav cur="1" go={next} />
-        </>
-      )}
 
-      {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
-      {ch === "2" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_2/kunghap_banryeo_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-
-          <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
-
-          {report?.partnerView ? (
-            <>
-              <section className="pb-2">
-                <div className="px-6"><Heading>{report.partnerName || "상대방"}의 명식</Heading></div>
-                <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
-              </section>
-
-              <section className="px-6 pt-6 pb-6">
-                <Heading>상대방의 오행 분포</Heading>
-                <P>목·화·토·금·수 다섯 기운이<br />상대방 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-                <div className="flex justify-center mt-4">
-                  <OhaengRadar view={report.partnerView} color={NAVY} />
+            {/* ── 오행 도넛 + 원국 풀이 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>일간과 오행</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+              </div>
+              <OhaengDonutBr1 view={report?.view ?? null} />
+              {callout && (
+                <div className="mx-5 mt-3 mb-4 px-4 py-3 rounded-xl" style={{ background: BR1_PALE, borderLeft: `3px solid ${BR1_COLOR}` }}>
+                  <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: BR1_COLOR }}>{callout}</p>
                 </div>
-              </section>
-            </>
-          ) : (
-            <section className="px-6 pt-6 pb-6">
-              <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
-            </section>
-          )}
-
-          {(jc.petWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined) && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>반려동물의 원국 풀이</Heading>
-              <ReportSec data={jc.petWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-            </section>
-          )}
-          {(jc.petNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>반려동물의 기질</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.petNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
+              )}
+              <div className="px-5">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
                 ))}
               </div>
-              {(jc.petNature as {desc?: string}).desc && <P>{(jc.petNature as {desc: string}).desc}</P>}
             </section>
-          )}
-          {(jc.petPersonality as {intro?: string; callout?: string; paragraphs?: string[]} | undefined) && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>반려동물의 성격</Heading>
-              <ReportSec data={jc.petPersonality as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+
+            {/* ── 기질 카드 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>나의 기질</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <MyNatureBr1Card data={nature} />
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
-          <Quote>{`"두 사람의 원국을 보았으니,\n이제 두 사람의 인연 깊이를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
+
+            {/* ── 반려동물을 대하는 나의 방식 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>나의 돌봄 스타일</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>반려동물을 대하는 나는 어떤 사람인가</h2>
+              </div>
+              <PetStyleCard data={petStyle} />
+            </section>
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${BR1_COLOR}10, ${BR1_PALE})`, border: `1px solid ${BR1_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR1_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {"\"나의 기운을 살펴보았으니,\n이제 반려동물의 사주를 펼쳐보겠소.\""}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="1" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제2장 · 반려동물의 사주 원국 ═══════════ */}
+      {ch === "2" && (() => {
+        const petName = report?.partnerName || "반려동물";
+        const petWonguk = (jc.petWonguk as Record<string, unknown> | undefined) ?? {};
+        const petNature = (jc.petNature as Record<string, unknown> | undefined) ?? null;
+        const petPersonality = (jc.petPersonality as Record<string, unknown> | undefined) ?? null;
+        const petWongukParas = (petWonguk.paragraphs as string[] | undefined) ?? [];
+        const petCallout = (petWonguk.callout as string | undefined) ?? "";
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 반려동물의 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>반려동물의 사주 원국</h1>
+            </div>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_2/kunghap_banryeo_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"이번엔 ${petName}의 사주팔자를\n펼쳐보겠소.\n이 아이가 어떤 기운을 타고났는지\n살펴보시오."`}</Quote>
+
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <div className="px-5 mb-2">
+                <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>{petName}의 명식</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>사주 원국 기둥</h2>
+              </div>
+              {report?.partnerView ? (
+                <MyeongsikTable view={report.partnerView} name={petName} birth={report.partnerBirth ?? null} />
+              ) : (
+                <p className="px-6 text-[14px] leading-relaxed" style={{ color: MUTE }}>반려동물의 명식 정보가 아직 준비 중이오.</p>
+              )}
+            </section>
+
+            {/* ── 오행 도넛 + 원국 풀이 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>일간과 오행</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>이 아이가 타고난 기운</h2>
+              </div>
+              <OhaengDonutBr2 view={report?.partnerView ?? null} />
+              {petCallout && (
+                <div className="mx-5 mt-3 mb-4 px-4 py-3 rounded-xl" style={{ background: BR2_PALE, borderLeft: `3px solid ${BR2_COLOR}` }}>
+                  <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: BR2_COLOR }}>{petCallout}</p>
+                </div>
+              )}
+              <div className="px-5">
+                {petWongukParas.map((p, i) => (
+                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+                ))}
+              </div>
+            </section>
+
+            {/* ── 기질 카드 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>{petName}의 기질</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>사랑스러운 면과 이해해야 할 부분</h2>
+              </div>
+              <PetNatureBr2Card data={petNature} />
+            </section>
+
+            {/* ── 성격 유형 카드 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>{petName}의 성격 유형</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>이 아이는 어떻게 세상을 대하는가</h2>
+              </div>
+              <PetPersonalityCard data={petPersonality} petName={petName} />
+            </section>
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${BR2_COLOR}10, ${BR2_PALE})`, border: `1px solid ${BR2_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR2_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"${petName}의 기운을 살펴보았으니,\n이제 두 사람의 인연 깊이를 풀어보겠소."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="2" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제3장 · 인연의 깊이 ═══════════ */}
-      {ch === "3" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 인연의 깊이</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>보호자와 반려동물의 인연</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_3/kunghap_banryeo_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"사주에는 이성을 끌어당기는 기운이\n숨겨져 있소.\n두 사람이 왜 서로에게 끌렸는지\n사주로 풀어보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>인연 점수</Heading>
-            {(jc.bondScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.bondScore as {score: number}).score} label={(jc.bondScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={72} label="깊은 인연으로 만난 사이이오" />
+      {/* ═══════════ 제3장 · 우리는 잘 맞는 인연인가 ═══════════ */}
+      {ch === "3" && (() => {
+        const petName = report?.partnerName || "반려동물";
+        const bondScore = (jc.bondScore as Record<string, unknown> | undefined) ?? {};
+        const bondReason = (jc.bondReason as Record<string, unknown> | undefined) ?? null;
+        const score = typeof bondScore.score === "number" ? bondScore.score : 72;
+        const scoreLabel = (bondScore.label as string | undefined) ?? "";
+        const scoreParas = (bondScore.paragraphs as string[] | undefined) ?? [];
+        const keywords = (bondScore.keywords as string[] | undefined) ?? [];
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 인연의 깊이</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>우리는 잘 맞는 인연인가</h1>
+            </div>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_3/kunghap_banryeo_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"사주에는 인연을 끌어당기는 기운이\n숨겨져 있소.\n${name}님과 ${petName}이(가)\n왜 함께하게 됐는지 풀어보겠소."`}</Quote>
+
+            {/* ── 인연 점수 게이지 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR3_COLOR }}>반려 인연 점수</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>두 사람의 사주가 빚어낸 인연</h2>
+              </div>
+              <BondGaugeBr3 score={score} label={scoreLabel} />
+            </section>
+
+            {/* ── 인연 키워드 ── */}
+            {keywords.length > 0 && (
+              <section className="pt-1 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR3_COLOR }}>이 인연을 나타내는 키워드</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>두 사람 사이에 흐르는 기운</h2>
+                </div>
+                <BondKeywordsBr3 keywords={keywords} />
+              </section>
             )}
-            {(jc.bondScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>이 인연이 특별한 이유</Heading>
-            <ReportSec data={jc.bondReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-          <Quote>{`"인연의 깊이를 살펴보았으니,\n보호자가 반려동물을\n어떻게 보는지 살펴보겠소."`}</Quote>
-          <ChapterNav cur="3" go={next} />
-        </>
-      )}
 
-      {/* ═══════════ 제4장 · 서로의 시각 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 서로의 시각</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>서로를 어떻게 바라보는가</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_4/kunghap_banryeo_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"보호자의 눈에 반려동물이 어떻게 보이는지,\n그리고 반려동물은 보호자를\n어떻게 느끼는지 살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>보호자가 반려동물을 보는 시각</Heading>
-            <ReportSec data={jc.myView as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>반려동물이 보호자를 느끼는 방식</Heading>
-            <ReportSec data={jc.petViewDesc as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"서로의 시각을 알았으니,\n이제 반려동물의 기질을\n상세히 살펴보겠소."`}</Quote>
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제5장 · 반려동물의 기질 ═══════════ */}
-      {ch === "5" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 반려동물 기질</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>반려동물의 기질과 습관</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_5/kunghap_banryeo_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"반려동물의 사주에는\n기질과 습관이 담겨 있소.\n상세히 살펴보겠소."`}</Quote>
-          {(jc.petTemper as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>기질 키워드</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.petTemper as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
+            {/* ── 인연 점수 풀이 단락 ── */}
+            {scoreParas.length > 0 && (
+              <div className="px-5 pb-2">
+                {scoreParas.map((p, i) => (
+                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
                 ))}
               </div>
-              {(jc.petTemper as {desc?: string}).desc && <P>{(jc.petTemper as {desc: string}).desc}</P>}
+            )}
+
+            {/* ── 인연이 특별한 이유 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR3_COLOR }}>인연의 사주 근거</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>이 만남이 우연이 아닌 이유</h2>
+              </div>
+              <BondReasonCard data={bondReason} />
             </section>
-          )}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>주요 습관과 특성</Heading>
-            {(jc.petHabits as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: NAVY }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>돌봄 포인트</Heading>
-            {(jc.petCareNeeds as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-          <Quote>{`"기질과 습관을 살펴보았으니,\n이제 두 사주의 합·충을\n짚어보겠소."`}</Quote>
-          <ChapterNav cur="5" go={next} />
-        </>
-      )}
 
-      {/* ═══════════ 제6장 · 두 사주의 합과 충 ═══════════ */}
-      {ch === "6" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주의 합과 충</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_6/kunghap_banryeo_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>두 명식을 합쳐서 보면</Heading>
-            <GanjiRelation view={report?.view ?? null} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>합(合) 목록</Heading>
-            {(jc.hapList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-[13px] font-bold" style={{ color: GREEN }}>{item.type}</p>
-                  <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${GREEN}22`, color: GREEN }}>{item.strength}</span>
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center" style={{ background: `linear-gradient(135deg, ${BR3_COLOR}10, ${BR3_PALE})`, border: `1px solid ${BR3_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR3_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"인연의 깊이를 살펴보았으니,\n이제 ${petName}이(가) 어떤 성격인지\n들여다보겠소."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제4장 · 이 아이는 어떤 성격인가 ═══════════ */}
+      {ch === "4" && (() => {
+        const petName = report?.partnerName || "반려동물";
+        const myView = (jc.myView as Record<string, unknown> | undefined) ?? null;
+        const petView = (jc.petViewDesc as Record<string, unknown> | undefined) ?? null;
+        const myViewType  = (myView?.viewType  as string | undefined) ?? "";
+        const myViewIcon  = (myView?.viewIcon  as string | undefined) ?? "👀";
+        const myViewIntro = (myView?.intro     as string | undefined) ?? "";
+        const myViewSummary = (myView?.summary as string | undefined) ?? myViewIntro;
+        const petViewType  = (petView?.viewType  as string | undefined) ?? "";
+        const petViewIcon  = (petView?.viewIcon  as string | undefined) ?? "🐾";
+        const petViewIntro = (petView?.intro     as string | undefined) ?? "";
+        const petViewSummary = (petView?.summary as string | undefined) ?? petViewIntro;
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 서로의 시각</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>서로를 어떻게 바라보는가</h1>
+            </div>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_4/kunghap_banryeo_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"보호자의 눈에 ${petName}이(가) 어떻게 보이는지,\n그리고 ${petName}은(는) 보호자를\n어떻게 느끼는지 살펴보겠소."`}</Quote>
+
+            {/* ── 보호자 시선 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR4_MY }}>보호자의 눈</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>{name}님이 {petName}을(를) 보는 방식</h2>
+              </div>
+              <ViewBannerBr4
+                viewType={myViewType} viewIcon={myViewIcon} intro={myViewIntro}
+                color={BR4_MY} pale={BR4_MY_P}
+                fromLabel={name} toLabel={petName}
+              />
+              <ViewDetailBr4 data={myView} color={BR4_MY} pale={BR4_MY_P} />
+            </section>
+
+            {/* ── 반려동물 시선 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <p className="text-[11px] font-bold" style={{ color: BR4_PET }}>{petName}의 느낌</p>
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}이(가) 보호자를 느끼는 방식</h2>
+              </div>
+              <ViewBannerBr4
+                viewType={petViewType} viewIcon={petViewIcon} intro={petViewIntro}
+                color={BR4_PET} pale={BR4_PET_P}
+                fromLabel={petName} toLabel={name}
+              />
+              <ViewDetailBr4 data={petView} color={BR4_PET} pale={BR4_PET_P} />
+            </section>
+
+            {/* ── 시선 교차 미러 ── */}
+            {(myViewSummary || petViewSummary) && (
+              <section className="pt-2 pb-4">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: MUTE }}>두 시선의 교차</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>서로가 서로에게 비치는 모습</h2>
                 </div>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>충(沖) 목록</Heading>
-            {(jc.chungList as {items?: Array<{type: string; desc: string; strength: string}>} | undefined)?.items?.length ? (
-              (jc.chungList as {items: Array<{type: string; desc: string; strength: string}>}).items.map((item, i) => (
-                <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[13px] font-bold" style={{ color: WARN }}>{item.type}</p>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${WARN}22`, color: WARN }}>{item.strength}</span>
-                  </div>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <ViewMirrorBr4
+                  mySummary={myViewSummary} petSummary={petViewSummary}
+                  myName={name} petName={petName}
+                />
+              </section>
+            )}
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center"
+              style={{ background: `linear-gradient(135deg, ${BR4_MY}0e, ${BR4_PET_P})`, border: `1px solid ${BR4_PET}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR4_PET, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"두 시선을 살펴보았소.\n이제 ${petName}이(가) 어떤 성격인지\n깊이 들여다보겠소."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제5장 · 이 아이의 건강과 약한 곳 ═══════════ */}
+      {ch === "5" && (() => {
+        const petName = report?.partnerName || "반려동물";
+        const temper  = (jc.petTemper   as Record<string, unknown> | undefined) ?? null;
+        const habits  = (jc.petHabits   as Record<string, unknown> | undefined) ?? null;
+        const care    = (jc.petCareNeeds as Record<string, unknown> | undefined) ?? null;
+
+        const temperKws  = (temper?.keywords  as string[] | undefined) ?? [];
+        const temperDesc = (temper?.desc       as string | undefined) ?? "";
+        const temperHealth = (temper?.healthNote as string | undefined) ?? "";
+
+        const habitItems = (habits?.items as Array<{ icon?: string; title: string; desc: string }> | undefined) ?? [];
+        const careTips   = (care?.tips    as Array<{ icon?: string; title?: string; desc: string }> | undefined) ?? [];
+
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 건강과 돌봄</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이의 건강과 약한 곳</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_5/kunghap_banryeo_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* ── 홍연 인용구 ── */}
+            <Quote>{`"사주에는 타고난 기질만이 아니라\n건강의 취약한 부분도 새겨져 있소.\n이 아이를 더 잘 돌보기 위해\n함께 살펴보겠소."`}</Quote>
+
+            {/* ── 기질 섹션 ── */}
+            {temperKws.length > 0 && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR5_COLOR }}>타고난 기질</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}의 사주가 품은 기질</h2>
                 </div>
-              ))
-            ) : (
-              <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 강한 충이 없소.</p>
+                <PetTemperBr5Card
+                  keywords={temperKws}
+                  desc={temperDesc}
+                  healthNote={temperHealth || undefined}
+                  petName={petName}
+                />
+              </section>
             )}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>종합 궁합 점수</Heading>
-            {(jc.overallScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.overallScore as {score: number}).score} label={(jc.overallScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={68} label="잘 맞는 반려 인연이오" />
+
+            {/* ── 습관·특성 섹션 ── */}
+            {habitItems.length > 0 && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR5_COLOR }}>행동 패턴</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>이 아이가 보이는 주요 습관</h2>
+                </div>
+                <PetHabitsBr5Card items={habitItems} />
+              </section>
             )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-          <Quote>{`"합·충을 파악했으니,\n이제 함께하는 일상을\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="6" go={next} />
-        </>
-      )}
 
-      {/* ═══════════ 제7장 · 함께하는 삶 ═══════════ */}
-      {ch === "7" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 함께하는 삶</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께하는 일상의 리듬</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_7/kunghap_banryeo_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"보호자와 반려동물의 생활 리듬이\n얼마나 맞는지 살펴보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>생활 리듬 궁합</Heading>
-            <ReportSec data={jc.lifePattern as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>일상 생활의 주요 요소</Heading>
-            {(jc.dailyRhythm as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: NAVY }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>함께하는 삶을 위한 조언</Heading>
-            {(jc.livingTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: MAROON, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-          <Quote>{`"일상 리듬을 알았으니,\n이제 건강 관리를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="7" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제8장 · 건강과 케어 ═══════════ */}
-      {ch === "8" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 건강·케어</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>반려동물의 건강과 케어</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_8/kunghap_banryeo_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"반려동물의 사주에는\n건강의 흐름도 담겨 있소.\n미리 알고 대비하시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>건강 위험 요소</Heading>
-            {(jc.healthRisk as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>건강 사이클</Heading>
-            <ReportSec data={jc.healthCycle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>건강 관리 조언</Heading>
-            {(jc.careTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GREEN, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-          <Quote>{`"건강을 살펴보았으니,\n이제 이별의 위기 시기를\n짚어보겠소."`}</Quote>
-          <ChapterNav cur="8" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제9장 · 위기와 이별 ═══════════ */}
-      {ch === "9" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기·이별</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>위기와 이별의 시기</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_9/kunghap_banryeo_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"어떤 인연에도 위기는 있소.\n미리 알고 대비하면\n함께할 시간이 더 길어지오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>이별 위험 점수</Heading>
-            {(jc.crisisScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.crisisScore as {score: number}).score} label={(jc.crisisScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={30} label="이별 위험이 낮은 인연이오" />
+            {/* ── 돌봄 팁 섹션 ── */}
+            {careTips.length > 0 && (
+              <section className="pt-2 pb-4">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR5_COLOR }}>맞춤 돌봄</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}에게 필요한 것들</h2>
+                </div>
+                <PetCareTipsBr5Card tips={careTips} petName={petName} />
+              </section>
             )}
-            {(jc.crisisScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기의 원인</Heading>
-            <ReportSec data={jc.crisisReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기 극복 조언</Heading>
-            {(jc.crisisTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-          <Quote>{`"위기를 알았으니,\n이제 가장 좋은 시기를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="9" go={next} />
-        </>
-      )}
 
-      {/* ═══════════ 제10장 · 함께 빛나는 시기 ═══════════ */}
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center"
+              style={{ background: `linear-gradient(135deg, ${BR5_COLOR}0e, ${BR5_PALE})`, border: `1px solid ${BR5_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR5_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"이 아이의 기질과 약한 곳을 알았으니,\n이제 어떤 환경과 생활 방식이\n이 아이에게 잘 맞는지 살펴보겠소."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="5" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제6장 · 이 아이에게 맞는 환경과 생활 방식 ═══════════ */}
+      {ch === "6" && (() => {
+        const petName = report?.partnerName || "반려동물";
+        const env       = (jc.petEnv       as Record<string, unknown> | undefined) ?? null;
+        const lifestyle = (jc.petLifeStyle  as Record<string, unknown> | undefined) ?? null;
+        const tips      = (jc.envTips       as Record<string, unknown> | undefined) ?? null;
+
+        const envType    = (env?.envType    as string | undefined) ?? "";
+        const envIcon    = (env?.envIcon    as string | undefined) ?? "🌿";
+        const envDesc    = (env?.desc       as string | undefined) ?? "";
+        const envKws     = (env?.keywords   as string[] | undefined) ?? [];
+        const envCallout = (env?.callout    as string | undefined) ?? "";
+
+        const lifeItems  = (lifestyle?.items as Array<{ icon?: string; title: string; desc: string }> | undefined) ?? [];
+        const tipItems   = (tips?.tips       as Array<{ icon?: string; title?: string; desc: string }> | undefined) ?? [];
+
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 환경과 생활</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이에게 맞는 환경과 생활 방식</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_6/kunghap_banryeo_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* ── 홍연 인용구 ── */}
+            <Quote>{`"사주에는 이 아이가 어떤 공간에서\n편안함을 느끼는지가 담겨 있소.\n그 환경을 함께 살펴보겠소."`}</Quote>
+
+            {/* ── 환경 유형 섹션 ── */}
+            {envType && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR6_COLOR }}>이상적인 환경</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}이 편안함을 느끼는 공간</h2>
+                </div>
+                <PetEnvBr6Card
+                  envType={envType}
+                  envIcon={envIcon}
+                  desc={envDesc}
+                  keywords={envKws}
+                  callout={envCallout || undefined}
+                  petName={petName}
+                />
+              </section>
+            )}
+
+            {/* ── 생활 방식 섹션 ── */}
+            {lifeItems.length > 0 && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR6_COLOR }}>일상의 리듬</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}이 즐기는 생활 패턴</h2>
+                </div>
+                <PetLifeStyleBr6Card items={lifeItems} />
+              </section>
+            )}
+
+            {/* ── 환경 조성 팁 섹션 ── */}
+            {tipItems.length > 0 && (
+              <section className="pt-2 pb-4">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR6_COLOR }}>보호자 실천 가이드</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}을 위한 환경 만들기</h2>
+                </div>
+                <PetEnvTipsBr6Card tips={tipItems} petName={petName} />
+              </section>
+            )}
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center"
+              style={{ background: `linear-gradient(135deg, ${BR6_COLOR}0e, ${BR6_PALE})`, border: `1px solid ${BR6_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR6_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"이 아이가 편안한 환경을 살펴보았소.\n이제 두 사주 사이에 부딪히는 부분과\n갈등 요소를 짚어보겠소."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="6" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제7장 · 나와 부딪히는 부분과 갈등 요소 ═══════════ */}
+      {ch === "7" && (() => {
+        const name    = report?.name    || "보호자";
+        const petName = report?.partnerName || "반려동물";
+        const conflict = (jc.conflictPoints as Record<string, unknown> | undefined) ?? null;
+        const root     = (jc.conflictRoot   as Record<string, unknown> | undefined) ?? null;
+        const reconcile = (jc.reconcileTips as Record<string, unknown> | undefined) ?? null;
+
+        const conflictItems   = (conflict?.items      as Array<{ icon?: string; title: string; desc: string; intensity?: string }> | undefined) ?? [];
+        const rootCallout     = (root?.callout         as string | undefined) ?? "";
+        const rootParas       = (root?.paragraphs      as string[] | undefined) ?? [];
+        const reconcileItems  = (reconcile?.tips       as Array<{ icon?: string; title?: string; desc: string }> | undefined) ?? [];
+
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 갈등과 마찰</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나와 부딪히는 부분과 갈등 요소</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_7/kunghap_banryeo_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* ── 홍연 인용구 ── */}
+            <Quote>{`"아무리 좋은 인연이라도\n부딪히는 순간은 있는 법이오.\n그 지점을 알아야 진정한 이해가 시작되오."`}</Quote>
+
+            {/* ── 갈등 포인트 섹션 ── */}
+            {conflictItems.length > 0 && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR7_COLOR }}>긴장이 생기는 지점</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{name}님과 {petName} 사이의 마찰 포인트</h2>
+                </div>
+                <ConflictPointBr7Card items={conflictItems} />
+              </section>
+            )}
+
+            {/* ── 갈등 근본 원인 섹션 ── */}
+            {(rootCallout || rootParas.length > 0) && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR7_COLOR }}>갈등의 뿌리</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>왜 이런 순간이 찾아오는가</h2>
+                </div>
+                <ConflictRootBr7Card callout={rootCallout} paragraphs={rootParas} />
+              </section>
+            )}
+
+            {/* ── 화해·공존 팁 섹션 ── */}
+            {reconcileItems.length > 0 && (
+              <section className="pt-2 pb-4">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR7_COLOR }}>공존의 지혜</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>갈등을 넘어 조화로 가는 길</h2>
+                </div>
+                <ReconcileTipsBr7Card tips={reconcileItems} name={name} petName={petName} />
+              </section>
+            )}
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center"
+              style={{ background: `linear-gradient(135deg, ${BR7_COLOR}0e, ${BR7_PALE})`, border: `1px solid ${BR7_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR7_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"마찰을 이해한다는 것은\n이미 절반을 넘어선 것이오.\n이제 이 아이를 위한 개운법을 살펴보겠소."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="7" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제8장 · 이 아이를 위한 개운법 ═══════════ */}
+      {ch === "8" && (() => {
+        const petName = report?.partnerName || "반려동물";
+        const method  = (jc.gaeunMethod   as Record<string, unknown> | undefined) ?? null;
+        const lucky   = (jc.luckyElements  as Record<string, unknown> | undefined) ?? null;
+        const timing  = (jc.gaeunTiming    as Record<string, unknown> | undefined) ?? null;
+
+        const methodIntro   = (method?.intro   as string | undefined) ?? "";
+        const methodCallout = (method?.callout as string | undefined) ?? "";
+        const methodItems   = (method?.items   as Array<{ icon?: string; title: string; desc: string }> | undefined) ?? [];
+
+        const luckyItems    = (lucky?.items    as Array<{ type: string; value: string; reason: string; icon?: string }> | undefined) ?? [];
+
+        const timingCallout = (timing?.callout as string | undefined) ?? "";
+        const timingItems   = (timing?.items   as Array<{ period: string; title: string; desc: string; type?: "good" | "caution" }> | undefined) ?? [];
+
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 개운법</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이를 위한 개운법</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_8/kunghap_banryeo_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* ── 홍연 인용구 ── */}
+            <Quote>{`"사주는 운명을 바꾸지 못하지만\n기운은 바꿀 수 있소.\n이 아이의 운을 열어주는 방법을 알려드리겠소."`}</Quote>
+
+            {/* ── 개운 실천법 섹션 ── */}
+            {(methodIntro || methodItems.length > 0) && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR8_COLOR }}>개운 실천법</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}의 기운을 여는 방법</h2>
+                </div>
+                <GaeunMethodBr8Card
+                  intro={methodIntro}
+                  callout={methodCallout || undefined}
+                  items={methodItems}
+                  petName={petName}
+                />
+              </section>
+            )}
+
+            {/* ── 행운 요소 섹션 ── */}
+            {luckyItems.length > 0 && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR8_COLOR }}>행운 요소</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}에게 맞는 기운의 색과 방향</h2>
+                </div>
+                <LuckyElementBr8Card items={luckyItems} />
+              </section>
+            )}
+
+            {/* ── 개운 타이밍 섹션 ── */}
+            {(timingCallout || timingItems.length > 0) && (
+              <section className="pt-2 pb-4">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR8_COLOR }}>기운의 흐름</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>개운에 좋은 시기와 주의할 시기</h2>
+                </div>
+                <GaeunTimingBr8Card callout={timingCallout} items={timingItems} />
+              </section>
+            )}
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center"
+              style={{ background: `linear-gradient(135deg, ${BR8_COLOR}0e, ${BR8_PALE})`, border: `1px solid ${BR8_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR8_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"개운의 씨앗을 심었소.\n이제 이 아이와 얼마나\n함께할 수 있는지 살펴보겠소."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="8" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제9장 · 이 아이와 얼마나 함께할 수 있는가 ═══════════ */}
+      {ch === "9" && (() => {
+        const petName = report?.partnerName || "반려동물";
+        const depth   = (jc.bondDepth       as Record<string, unknown> | undefined) ?? null;
+        const phases  = (jc.togetherPhases   as Record<string, unknown> | undefined) ?? null;
+        const keep    = (jc.bondKeepTips     as Record<string, unknown> | undefined) ?? null;
+
+        const depthScore    = (depth?.score      as number | undefined) ?? 0;
+        const depthLabel    = (depth?.label      as string | undefined) ?? "";
+        const depthCallout  = (depth?.callout    as string | undefined) ?? "";
+        const depthParas    = (depth?.paragraphs as string[] | undefined) ?? [];
+
+        const phaseItems    = (phases?.items     as Array<{ period: string; title: string; desc: string; type?: "peak" | "steady" | "grow" }> | undefined) ?? [];
+        const keepTips      = (keep?.tips        as Array<{ icon?: string; title?: string; desc: string }> | undefined) ?? [];
+
+        return (
+          <>
+            {/* ── 커버 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 함께하는 시간</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이와 얼마나 함께할 수 있는가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_9/kunghap_banryeo_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* ── 홍연 인용구 ── */}
+            <Quote>{`"모든 인연에는 그 깊이와 길이가 있소.\n이 아이와 그대의 사주가 맺은\n인연의 무게를 살펴보겠소."`}</Quote>
+
+            {/* ── 인연 깊이 게이지 섹션 ── */}
+            {(depthLabel || depthParas.length > 0) && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR9_COLOR }}>인연의 깊이</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>사주로 본 이 인연의 무게</h2>
+                </div>
+                <BondDepthBr9Card
+                  score={depthScore}
+                  label={depthLabel}
+                  callout={depthCallout || undefined}
+                  paragraphs={depthParas}
+                />
+              </section>
+            )}
+
+            {/* ── 함께하는 시기 흐름 섹션 ── */}
+            {phaseItems.length > 0 && (
+              <section className="pt-2 pb-2">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR9_COLOR }}>인연의 흐름</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}과 함께하는 시간의 흐름</h2>
+                </div>
+                <TogetherPhasesBr9Card items={phaseItems} />
+              </section>
+            )}
+
+            {/* ── 인연 지속 조언 섹션 ── */}
+            {keepTips.length > 0 && (
+              <section className="pt-2 pb-4">
+                <div className="px-5 mb-3">
+                  <p className="text-[11px] font-bold" style={{ color: BR9_COLOR }}>더 깊은 인연으로</p>
+                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}과의 시간을 더 소중히 하는 법</h2>
+                </div>
+                <BondKeepTipsBr9Card tips={keepTips} petName={petName} />
+              </section>
+            )}
+
+            {/* ── 마무리 인용구 ── */}
+            <div className="mx-5 mb-6 px-5 py-4 rounded-2xl text-center"
+              style={{ background: `linear-gradient(135deg, ${BR9_COLOR}0e, ${BR9_PALE})`, border: `1px solid ${BR9_COLOR}18` }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: BR9_COLOR, fontFamily: SERIF, fontStyle: "italic" }}>
+                {`"이 아이와 함께하는 지금 이 순간이\n가장 소중한 시간이오.\n이제 홍연의 마지막 서신을 받아보시오."`}
+              </p>
+              <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
+            </div>
+
+            <ChapterNav cur="9" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제10장 · 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "10" && (
         <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람이 함께 빛나는 시기</h1>
+          <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대들에게 남기는<br />홍연의 서신</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_10/kunghap_banryeo_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <section className="px-6 pt-10 pb-8">
+              <div className="text-center mb-8">
+                <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
+                  <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
+                </div>
+              </div>
+              {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
+                <P key={i}>{p}</P>
+              ))}
+              <div className="flex items-center justify-end gap-3 mt-8 mb-2">
+                <span className="text-[13.5px] font-bold" style={{ color: INK }}>홍연 올림</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/dojang.png" alt="도장" style={{ width: 56, height: 56, objectFit: "contain" }} />
+              </div>
+            </section>
+
+            <ReviewBox />
+            <EventBox />
+            <RecoGrid />
+            <ChapterNav cur="10" go={next} />
           </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_banryeo/kunghap_banryeo_10/kunghap_banryeo_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람에게 가장 빛나는 시기가 있소.\n그때를 미리 알고 더 많은 시간을\n함께하시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기 흐름</Heading>
-            {(jc.goodTimeFlow as {items?: Array<{label: string; desc: string; highlight?: boolean}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: item.highlight ? `${GOLD}18` : `${NAVY}08`, border: `1px solid ${item.highlight ? GOLD : NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: item.highlight ? GOLD : NAVY }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기의 이유</Heading>
-            {(jc.goodTimeItems as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.timingAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.timingAdvice as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-          <Quote>{`"좋은 시기를 알았으니,\n이제 두 사람의 미래를\n살펴보겠소."`}</Quote>
-          <ChapterNav cur="10" go={next} />
+          {eventOpen && (
+            <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
+          )}
         </>
       )}
 
