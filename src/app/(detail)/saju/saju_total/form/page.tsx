@@ -493,7 +493,7 @@ function StepConcern({
   return (
     <>
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
-        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>자세히 적을수록 좋소</p>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>괜찮소, 나에게 털어놔 보시오.</p>
         <h2 className="text-[20px] font-bold mb-4 whitespace-nowrap" style={{ color: TEXT_CLR }}>
           고민을 상세히 적어주겠소?{" "}
           <span className="text-[13px] font-normal" style={{ color: "#888" }}>(선택)</span>
