@@ -222,9 +222,10 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
               )}
               <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
               <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
-                <div className="flex gap-1.5" style={{ marginBottom: 3 }}>
-                  {card.tag && <span className="font-bold rounded-full" style={{ fontSize: 12, padding: "2px 10px", backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>}
-                  <span className="font-bold rounded-full" style={{ fontSize: 12, padding: "2px 10px", backgroundColor: "#711b20", color: "#fff" }}>{card.badge}</span>
+                <div className="flex gap-1.5 flex-wrap" style={{ marginBottom: 3 }}>
+                  {card.tag && <TagBadge value={card.tag} size={12} />}
+                  {card.tag2 && <TagBadge value={card.tag2} size={12} />}
+                  <span className="font-bold rounded-full" style={{ fontSize: 12, padding: "2px 10px", backgroundColor: BADGE_COLORS[card.badge] ?? "#711b20", color: BADGE_DARK_TEXT.includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
                 </div>
                 {card.tagline && <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
                 {(() => {
