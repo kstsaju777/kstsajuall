@@ -684,16 +684,18 @@ const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
 function LoadBubble({ text, size, width }: { text: string; size?: string; width?: string }) {
   return (
     <div className="flex items-center justify-center text-center" style={{
-      backgroundColor: "#ffffff",
-      borderRadius: "50%",
-      aspectRatio: "4/3",
+      backgroundColor: "rgba(255,255,255,0.18)",
+      backdropFilter: "blur(10px)",
+      WebkitBackdropFilter: "blur(10px)",
+      borderRadius: "20px",
       width: width ?? "190px",
-      padding: "0 26px",
+      padding: "16px 24px",
       boxSizing: "border-box",
-      boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+      border: "1px solid rgba(255,255,255,0.3)",
     }}>
       <p className="font-bold leading-snug whitespace-pre-line" style={{
-        color: "#1a1a1a", fontSize: size ?? "16px",
+        color: "#ffffff", fontSize: size ?? "16px",
         fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
       }}>
         {text}
