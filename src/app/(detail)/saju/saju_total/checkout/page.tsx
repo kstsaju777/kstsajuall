@@ -1364,7 +1364,7 @@ const REVIEW_DATES = (() => {
   return dates;
 })();
 
-type DBReview = { id: string; name: string; gender: string; star: number; text: string; created_at: string };
+type DBReview = { id: string; name: string; gender: string | null; star: number; text: string; created_at: string };
 
 function ReviewSection() {
   const [page, setPage] = useState(0);
