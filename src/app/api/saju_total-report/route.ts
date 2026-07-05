@@ -26,7 +26,7 @@ export const maxDuration = 300;
 
 const PRODUCT_SLUG = "total";
 const PRODUCT_NAME = "정통사주";
-const PRODUCT_PRICE = 29900;
+const PRODUCT_PRICE = 24900;
 const REPORT_PATH = "saju/saju_total/report-preview";
 
 const createSchema = z.object({

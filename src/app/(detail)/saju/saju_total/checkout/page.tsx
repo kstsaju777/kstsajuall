@@ -698,7 +698,7 @@ function FAQSection() {
 }
 
 // ─── 결제 모달 ────────────────────────────────────────────────────────────────
-const PRODUCT = { name: "정통사주", original: 59800, discount: 50, price: 29900 };
+const PRODUCT = { name: "종합사주", original: 49800, discount: 50, price: 24900 };
 
 function PayBottomSheet({ open, onClose, onConfirm }: {
   open: boolean; onClose: () => void; onConfirm: () => void;
