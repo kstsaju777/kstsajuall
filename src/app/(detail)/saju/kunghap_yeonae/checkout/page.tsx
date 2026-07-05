@@ -116,7 +116,7 @@ function MyeongsikSection({
   return (
     <div style={{ backgroundColor: WHITE }}>
       <div className="pt-6 pb-2">
-        <div ref={ref} style={style} className="space-y-4">
+        <div ref={ref} style={style}>
           <MyeongsikTable
             view={msView}
             name={name}
@@ -129,19 +129,26 @@ function MyeongsikSection({
               </div>
             }
           />
-          <MyeongsikTable
-            view={partnerMsView}
-            name={partnerName}
-            birth={null}
-            rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
-            header={
-              <div className="text-center">
-                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{partnerName}님의 사주팔자</p>
-                {formatDateLabel(partnerDate, partnerCalendar, partnerGender) && <p className="text-[13px]" style={{ color: "#5b504a" }}>{formatDateLabel(partnerDate, partnerCalendar, partnerGender)}</p>}
-              </div>
-            }
-          />
         </div>
+      </div>
+      <div className="relative">
+        <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
+        <img src="/media/checkout/kunghap_yeonae/s2.jpg" alt="" className="w-full block" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+      </div>
+      <div className="pb-2">
+        <MyeongsikTable
+          view={partnerMsView}
+          name={partnerName}
+          birth={null}
+          rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
+          header={
+            <div className="text-center">
+              <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{partnerName}님의 사주팔자</p>
+              {formatDateLabel(partnerDate, partnerCalendar, partnerGender) && <p className="text-[13px]" style={{ color: "#5b504a" }}>{formatDateLabel(partnerDate, partnerCalendar, partnerGender)}</p>}
+            </div>
+          }
+        />
       </div>
       <div className="h-4" />
     </div>
@@ -154,7 +161,6 @@ const FAQS = [
   { q: "결과지는 얼마나 걸리나요?", a: "결제 직후 약 1~2분 내에 자동 생성됩니다. 입력하신 이메일로도 링크를 보내드려, 언제든 다시 확인하실 수 있소." },
   { q: "상대방 생년월일이 정확하지 않으면요?", a: "시주까지 입력할 수 있으나, 시간을 모르는 경우도 분석이 가능하오. 다만 시주 관련 항목의 정확도는 다소 낮을 수 있소." },
   { q: "어떤 궁합 항목을 분석하나요?", a: "두 사람의 기질 분석, 궁합 점수, 상대방의 마음, 연애 시기, 관계를 방해하는 요인 등 총 14장에 걸쳐 상세히 풀이하오." },
-  { q: "환불이 가능한가요?", a: "AI가 생성한 콘텐츠 특성상, 결과지가 생성된 후에는 환불이 어렵습니다. 구매 전 신중히 결정해주시오." },
 ];
 
 function FAQSection() {
@@ -585,7 +591,7 @@ function CheckoutContent() {
         {/* ③ 하단 이미지 */}
         <div className="relative">
           <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
-          <img src="/media/checkout/kunghap_yeonae/s2.jpg" alt="" className="w-full block" />
+          <img src="/media/checkout/kunghap_yeonae/s3.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
         </div>
 
