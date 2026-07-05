@@ -36,12 +36,13 @@ const createSchema = z.object({
   calendar: z.string().optional().default("양력"),
   gender: z.string().optional().default(""),
   email: z.string().optional().default(""),
+  concern: z.string().optional().default(""),
 });
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
-  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, input);
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string }) {
+  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl });
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
@@ -180,7 +181,7 @@ async function createReport(body: unknown) {
   }
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { name, date, time, calendar, gender, email } = parsed.data;
+  const { name, date, time, calendar, gender, email, concern } = parsed.data;
 
   const ymd = parseDate(date);
   if (!ymd) return NextResponse.json({ error: "생년월일 형식 오류" }, { status: 400 });
@@ -239,7 +240,7 @@ async function createReport(body: unknown) {
 
         const { data: result, error: resultErr } = await service
           .from("saju_results")
-          .insert({ order_id: order.id, myeongsik: { view, name, birth, manseryeokText, gender: g } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
+          .insert({ order_id: order.id, myeongsik: { view, name, birth, manseryeokText, gender: g, concern: concern || "" } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
           .select("id").single();
         if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패" }, { status: 500 });
 
@@ -258,7 +259,7 @@ async function createReport(body: unknown) {
               const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
               if (uploadErr) throw uploadErr;
               const sajuImageUrl = service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
-              await service.from("saju_results").update({ myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl } as never }).eq("id", result.id);
+              await service.from("saju_results").update({ myeongsik: { view, name, birth, manseryeokText, gender: g, concern: concern || "", sajuImageUrl } as never }).eq("id", result.id);
               break;
             } catch (e) {
               console.error(`[jeongtong] 이미지 생성 실패 (시도${attempt + 1}):`, e);
@@ -311,13 +312,32 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? ""; // "yyyy.mm.dd"
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+
+    // myeongsik에 저장된 확정 용신 오행 읽기 (2장 생성 후 업데이트됨)
+    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
       pillars: applyLocalSinsal(stored?.view?.pillars ?? []),
       birthYear: birthYear || undefined,
+      concern: stored?.concern || undefined,
+      yongsinEl,
+      heusinEl,
+      gisinEl,
     });
+
+    // 2장 생성 완료 시 용신 오행을 myeongsik에 즉시 저장 (이후 모든 장에서 참조)
+    if (chapter === 2) {
+      const y = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
+      if (y?.yongsinEl) {
+        const updatedMyeongsik = { ...stored, yongsinEl: y.yongsinEl, heusinEl: y.heusinEl ?? "", gisinEl: y.gisinEl ?? "" };
+        await service.from("saju_results").update({ myeongsik: updatedMyeongsik as never }).eq("id", id);
+      }
+    }
 
     return NextResponse.json({ sections: obj });
   } catch (err) {

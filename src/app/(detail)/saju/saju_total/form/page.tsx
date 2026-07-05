@@ -742,9 +742,9 @@ function JeongtongEmailIntro({ onNext }: { onNext: () => void }) {
 }
 
 function StepLoading({
-  name, date, time, calendar, gender, email,
+  name, date, time, calendar, gender, email, concern,
 }: {
-  name: string; date: string; time: string; calendar: string; gender?: string; email: string;
+  name: string; date: string; time: string; calendar: string; gender?: string; email: string; concern: string;
 }) {
   const [progress, setProgress] = useState(0);
   const [b1, setB1] = useState(false);
@@ -764,7 +764,7 @@ function StepLoading({
   }, []);
 
   const goNext = () => {
-    const params = new URLSearchParams({ name, date, time, calendar, gender: gender ?? "", email: email ?? "" });
+    const params = new URLSearchParams({ name, date, time, calendar, gender: gender ?? "", email: email ?? "", concern: concern ?? "" });
     router.push(`/saju/saju_total/checkout?${params.toString()}`);
   };
 
@@ -895,6 +895,7 @@ export default function SajuFormPage() {
           calendar={form.calendar ?? "양력"}
           gender={form.gender}
           email={form.email ?? ""}
+          concern={form.concern ?? ""}
         />
       )}
     </>

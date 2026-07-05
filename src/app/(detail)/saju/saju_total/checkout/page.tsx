@@ -192,7 +192,7 @@ function MyeongsikSection({
             rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
             header={
               <div className="text-center">
-                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}{(gender === "female" || gender === "여자") ? "양" : "군"}의 사주팔자</p>
+                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}님의 사주팔자</p>
                 {dateLabel && <p className="text-[13px]" style={{ color: "#5b504a" }}>{dateLabel}</p>}
               </div>
             }
@@ -939,12 +939,22 @@ function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
 }
 
 // ─── 생성 로딩 화면 ───────────────────────────────────────────────────────────
+// API 생성 순서(2 먼저, 나머지 1·3~14) 기준 14개 → 표시 이름은 결과지 목차와 일치
 const CHAPTER_TITLES = [
-  "제1장 — 사주 원국", "제2장 — 운명의 구조", "제3장 — 인간관계",
-  "제4장 — 숨겨진 특징", "제5장 — 재물과 직업", "제6장 — 사랑과 결혼",
-  "제7장 — 건강", "제8장 — 귀인", "제9장 — 주의할 사람",
-  "제10장 — 굴곡과 위기", "제11장 — 대운 흐름", "제12장 — 주의 시기",
-  "제13장 — 당부의 말", "마무리 — 홍연의 서신",
+  "제2장 — 나의 진짜 모습은 무엇일까",   // API 2 (먼저)
+  "제1장 — 나는 어떤 그릇으로 태어났나", // API 1
+  "제3장 — 나는 세상을 어떻게 대하는가", // API 3
+  "제4장 — 내 사주에 나타나는 특이점",   // API 4
+  "제5장 — 내 재물과 천직은 어떠한가",   // API 5
+  "제6장 — 내 인연과 혼인의 때는 언제인가", // API 6
+  "제7장 — 내 건강과 약한 곳은 어디인가", // API 7
+  "제4장 — 내 사주에 나타나는 특이점",   // API 8 (4장 보조)
+  "제4장 — 내 사주에 나타나는 특이점",   // API 9 (4장 보조)
+  "제4장 — 내 사주에 나타나는 특이점",   // API 10 (4장 보조)
+  "제8장 — 내 인생은 어떻게 흐르는가",   // API 11
+  "제4장 — 내 사주에 나타나는 특이점",   // API 12 (4장 보조)
+  "인트로 — 사주팔자란 무엇인가",        // API 13
+  "마무리 — 그대에게 남기는 홍연의 서신", // API 14
 ];
 const TOTAL = 14;
 
@@ -982,7 +992,7 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
       </p>
       <div className="w-full max-w-[280px] mb-3">
         <div className="flex justify-between text-[11px] mb-2" style={{ color: "#c9909a" }}>
-          <span>{doneCount} / {TOTAL} 장 완성</span>
+          <span>풀이 진행 중</span>
           <span>{pct}%</span>
         </div>
         <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a0005" }}>
@@ -1010,6 +1020,7 @@ function CheckoutContent() {
   const calendar = searchParams.get("calendar") ?? "양력";
   const gender   = searchParams.get("gender")   ?? "";
   const email    = searchParams.get("email")    ?? "";
+  const concern  = searchParams.get("concern")  ?? "";
 
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
@@ -1027,7 +1038,7 @@ function CheckoutContent() {
       const res = await fetch("/api/saju_total-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, date, time, calendar, gender, email }),
+        body: JSON.stringify({ name, date, time, calendar, gender, email, concern }),
       });
       if (!res.ok) {
         router.push(`/saju/saju_total/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
@@ -1039,10 +1050,29 @@ function CheckoutContent() {
         return;
       }
 
-      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+      const FIRST = [2]; // 용신 확정을 위해 2장 먼저 단독 생성
+      const REST  = [1,3,4,5,6,7,8,9,10,11,12,13,14];
       let done = 0;
       const allContent: Record<string, unknown> = {};
-      await Promise.all(chapters.map(async (ch) => {
+
+      // 2장 먼저 생성 — 완료 시 route.ts가 myeongsik에 yongsinEl 저장
+      for (const ch of FIRST) {
+        try {
+          const r = await fetch("/api/saju_total-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: resultId, chapter: ch }),
+          });
+          const data = await r.json();
+          if (data.sections) Object.assign(allContent, data.sections);
+        } catch { /* 실패해도 계속 */ }
+        done++;
+        setDoneCount(done);
+        setCurrentChapter(Math.min(done + 1, TOTAL));
+      }
+
+      // 나머지 장 병렬 생성 (myeongsik에 yongsinEl이 저장된 상태)
+      await Promise.all(REST.map(async (ch) => {
         try {
           const r = await fetch("/api/saju_total-report", {
             method: "POST",
@@ -1084,7 +1114,7 @@ function CheckoutContent() {
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "28.2%", left: "33%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
             <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>
-              {(gender === "female" || gender === "여자") ? `${name}양` : `${name}군`}
+              {`${name}님`}
             </p>
             <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>
               만나서 반갑소.
@@ -1092,7 +1122,7 @@ function CheckoutContent() {
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "94.5%", left: "37%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
             <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>자, 한번 보시오.</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{(gender === "female" || gender === "여자") ? `${name}양` : `${name}군`} 사주팔자요.</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{`${name}님`} 사주팔자요.</p>
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "36%", left: "68%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
             <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>소인은,</p>
@@ -1106,7 +1136,7 @@ function CheckoutContent() {
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "59.2%", left: "43%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
             <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>풀이에 앞서,</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{(gender === "female" || gender === "여자") ? `${name}양` : `${name}군`}의 사주팔자가</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{`${name}님`}의 사주팔자가</p>
             <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>어떻게 생겼는지 봐야하오.</p>
           </div>
         </div>
