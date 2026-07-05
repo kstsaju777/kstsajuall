@@ -552,10 +552,12 @@ function StepEmail({
   onPrev,
   onNext,
   initial,
+  initialPhone,
 }: {
   onPrev: () => void;
-  onNext: (email: string) => void;
+  onNext: (email: string, phone: string) => void;
   initial?: string;
+  initialPhone?: string;
 }) {
   // initial 파싱
   const initLocal = initial?.split("@")[0] ?? "";
@@ -566,11 +568,24 @@ function StepEmail({
   const [domain, setDomain] = useState(initDom ? (initIsKnown ? initDom : "직접입력") : "");
   const [custom, setCustom] = useState(initDom && !initIsKnown ? initDom : "");
   const [open, setOpen] = useState(false);
+  const PHONE_PREFIXES = ["010", "011", "016", "017", "018", "019"];
+  const initPhone = initialPhone ?? "";
+  const initPrefix = PHONE_PREFIXES.includes(initPhone.slice(0, 3)) ? initPhone.slice(0, 3) : "010";
+  const initMid = initPhone.slice(3, 7);
+  const initEnd = initPhone.slice(7, 11);
 
+  const [phonePrefix, setPhonePrefix] = useState(initPrefix);
+  const [phoneMid, setPhoneMid] = useState(initMid);
+  const [phoneEnd, setPhoneEnd] = useState(initEnd);
+  const [phoneOpen, setPhoneOpen] = useState(false);
+
+  const phone = `${phonePrefix}${phoneMid}${phoneEnd}`;
   const isCustom = domain === "직접입력";
   const fullDomain = isCustom ? custom.trim() : domain;
   const email = local.trim() && fullDomain ? `${local.trim()}@${fullDomain}` : "";
-  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhoneValid = /^\d{11}$/.test(phone);
+  const isValid = isEmailValid && isPhoneValid;
 
   return (
     <>
@@ -658,10 +673,71 @@ function StepEmail({
             )}
           </div>
         </div>
+
+        {/* 전화번호 */}
+        <div className="mt-5">
+          <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>카카오톡으로도 받아보시게</p>
+          <div className="flex items-end gap-2">
+            {/* 앞자리 드롭다운 */}
+            <div className="relative" style={{ flex: "0 0 auto" }}>
+              {phoneOpen && (
+                <div className="absolute bottom-full left-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
+                  style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.55)", backdropFilter: "blur(8px)", minWidth: 80 }}>
+                  {PHONE_PREFIXES.map((p) => (
+                    <div key={p} onClick={() => { setPhonePrefix(p); setPhoneOpen(false); }}
+                      className="px-4 py-3 text-[14px] cursor-pointer"
+                      style={{ backgroundColor: phonePrefix === p ? "rgba(155,35,53,0.25)" : "transparent", color: phonePrefix === p ? "#fff" : "#ddd", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      {p}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => setPhoneOpen((v) => !v)}
+                className="flex items-center gap-1 text-[17px] pb-2.5"
+                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent", fontFamily: MONO_FONT }}>
+                <span>{phonePrefix}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ transform: phoneOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </div>
+
+            {/* - */}
+            <span className="text-[17px] font-bold pb-2.5" style={{ color: "#ffffff", fontFamily: MONO_FONT }}>-</span>
+
+            {/* 가운데 4자리 */}
+            <input
+              type="tel"
+              inputMode="numeric"
+              placeholder="0000"
+              maxLength={4}
+              value={phoneMid}
+              onChange={(e) => setPhoneMid(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneMid ? TEXT_CLR : PH_CLR, caretColor: NAVY }}
+            />
+
+            {/* - */}
+            <span className="text-[17px] font-bold pb-2.5" style={{ color: "#ffffff", fontFamily: MONO_FONT }}>-</span>
+
+            {/* 끝 4자리 */}
+            <input
+              type="tel"
+              inputMode="numeric"
+              placeholder="0000"
+              maxLength={4}
+              value={phoneEnd}
+              onChange={(e) => setPhoneEnd(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneEnd ? TEXT_CLR : PH_CLR, caretColor: NAVY }}
+            />
+          </div>
+        </div>
       </div>
       <BottomNav
         onPrev={onPrev}
-        onNext={() => isValid && onNext(email)}
+        onNext={() => isValid && onNext(email, phone)}
         nextLabel="작성완료"
         nextDisabled={!isValid}
       />
@@ -742,9 +818,9 @@ function JeongtongEmailIntro({ onNext }: { onNext: () => void }) {
 }
 
 function StepLoading({
-  name, date, time, calendar, gender, email, concern,
+  name, date, time, calendar, gender, email, concern, phone,
 }: {
-  name: string; date: string; time: string; calendar: string; gender?: string; email: string; concern: string;
+  name: string; date: string; time: string; calendar: string; gender?: string; email: string; concern: string; phone: string;
 }) {
   const [progress, setProgress] = useState(0);
   const [b1, setB1] = useState(false);
@@ -764,7 +840,7 @@ function StepLoading({
   }, []);
 
   const goNext = () => {
-    const params = new URLSearchParams({ name, date, time, calendar, gender: gender ?? "", email: email ?? "", concern: concern ?? "" });
+    const params = new URLSearchParams({ name, date, time, calendar, gender: gender ?? "", email: email ?? "", concern: concern ?? "", phone: phone ?? "" });
     router.push(`/saju/saju_total/checkout?${params.toString()}`);
   };
 
@@ -830,6 +906,7 @@ type FormData = {
   name: string;
   concern: string;
   email: string;
+  phone: string;
 };
 
 export default function SajuFormPage() {
@@ -880,8 +957,9 @@ export default function SajuFormPage() {
           {step === 7 && (
             <StepEmail
               initial={form.email}
+              initialPhone={form.phone}
               onPrev={() => setStep(6)}
-              onNext={(email) => next({ email }, 8)}
+              onNext={(email, phone) => next({ email, phone }, 8)}
             />
           )}
         </FormShell>
@@ -896,6 +974,7 @@ export default function SajuFormPage() {
           gender={form.gender}
           email={form.email ?? ""}
           concern={form.concern ?? ""}
+          phone={form.phone ?? ""}
         />
       )}
     </>
