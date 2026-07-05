@@ -1605,9 +1605,9 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
 
   const user = `[대상] ${honor} (${input.gender === "male" ? "남성" : "여성"}) — 풀이 전체에서 이름을 부를 때 반드시 '${honor}'로만 호칭하오. '님' 호칭은 절대 사용하지 마오.
 
-[사주 명식]
+${pillarTable}[사주 명식]
 ${input.manseryeokText}
-${ageGuide}${pillarTable}${deungTable}${ohaengTable}${wealthTable}${healthTable}${guiinTable}
+${ageGuide}${deungTable}${ohaengTable}${wealthTable}${healthTable}${guiinTable}
 위 명식을 근거로, ${honor}의 ${CH_THEME[chapter] ?? ""} 에 대한 결과지 콘텐츠를 작성하세요.
 ${CH_GUIDE[chapter]?.trim() ? `\n[이 장에서 특히 신경 쓸 것]\n${CH_GUIDE[chapter].trim()}\n` : ""}${input.yongsinEl ? `\n[확정 용신·희신·기신 — 전 결과지 통일 필수]\n용신: ${input.yongsinEl}오행 / 희신: ${input.heusinEl || "미정"}오행 / 기신: ${input.gisinEl || "미정"}오행\n이 오행은 이 결과지 전체에서 확정된 값이오. 이 장에서 용신·희신·기신을 언급할 때는 반드시 위 값을 그대로 사용하오. 독자적으로 재산출하거나 다른 오행으로 바꾸는 것은 절대 금지하오.\n` : ""}${chapter === 14 && input.concern?.trim() ? `\n[신청자가 남긴 고민]\n${input.concern.trim()}\n위 고민이 사주팔자와 어떻게 연결되는지, 마무리 서신 안에서 자연스럽게 언급하고 명식에 근거한 조언을 건네오. 고민과 전혀 관련 없는 내용을 억지로 끼워 맞추지는 마오.\n` : ""}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
