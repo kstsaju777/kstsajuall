@@ -1983,6 +1983,7 @@ function CheckoutContent() {
         </div>
 
         <img src="/media/checkout/saju_total/s3-v.jpg" alt="" className="w-full block" />
+        <video src="/media/checkout/saju_total/s3-vv1.mp4" autoPlay muted loop playsInline className="w-full block" />
         <div className="relative">
           <img src="/media/checkout/saju_total/s4-v3.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
