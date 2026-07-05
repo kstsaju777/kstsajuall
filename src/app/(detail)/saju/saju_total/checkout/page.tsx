@@ -752,7 +752,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               style={{ backgroundColor: DCARD, border: `1.5px solid ${ACCENT}`, boxShadow: `0 0 0 3px ${ACCENT}22` }}>
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>정통사주</span>
+                  <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>종합사주</span>
                   <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 나의 운명 이야기</p>
                 </div>
                 <div className="text-right flex-shrink-0">
