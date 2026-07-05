@@ -1093,16 +1093,12 @@ function CheckoutContent() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
-      // 이미지 생성 완료 대기 (최대 60초 폴링)
-      const deadline = Date.now() + 60_000;
-      while (Date.now() < deadline) {
-        await new Promise(r => setTimeout(r, 3000));
-        try {
-          const r = await fetch(`/api/saju_total-report?id=${resultId}`);
-          const d = await r.json();
-          if (d.sajuImageUrl) break;
-        } catch { /* 폴링 실패 무시 */ }
-      }
+      // 이미지 생성 (PATCH로 명시적 await — 응답 전 컨텍스트 종료 방지)
+      await fetch("/api/saju_total-report", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId }),
+      }).catch(() => { /* 실패해도 결과지는 오픈 */ });
 
       router.push(`/saju/saju_total/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     } catch {

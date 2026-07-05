@@ -54,7 +54,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
       } catch (parseErr) {
         console.error(`[jeongtong] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         // 16장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
-        if (chapter === 14) {
+        if (chapter === 10) {
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else {
@@ -248,24 +248,6 @@ async function createReport(body: unknown) {
         const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
         sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
         if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
-
-        // 3단계: 이미지 백그라운드 시작 (클라이언트 병렬 장 생성 중에 동시 실행)
-        const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
-        (async () => {
-          for (let attempt = 0; attempt < 3; attempt++) {
-            try {
-              const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-              const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-              const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-              if (uploadErr) throw uploadErr;
-              const sajuImageUrl = service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
-              await service.from("saju_results").update({ myeongsik: { view, name, birth, manseryeokText, gender: g, concern: concern || "", sajuImageUrl } as never }).eq("id", result.id);
-              break;
-            } catch (e) {
-              console.error(`[jeongtong] 이미지 생성 실패 (시도${attempt + 1}):`, e);
-            }
-          }
-        })();
 
         return NextResponse.json({ resultId: result.id });
       } catch (err) {
