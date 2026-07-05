@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 type Product = { id: string; name: string; slug: string | null; price: number; is_active: boolean; image_url?: string; badge?: string; tag?: string; is_video?: boolean };
 type Usage = { used: number; limit: number; bySource: { confirm: number; demo: number; manual: number } } | null;
-type SajuReview = { id: string; name: string; gender: string; star: number; text: string; created_at: string; approved: boolean };
+type SajuReview = { id: string; name: string; gender: string | null; star: number; text: string; created_at: string; approved: boolean };
 
 const EMPTY_FORM = { name: "", slug: "", price: "", description: "", image_url: "", badge: "", tag: "", is_video: false, display_order: "99" };
 
