@@ -932,7 +932,7 @@ function StickyPayCTA({ onPay, name }: { onPay: () => void; name: string }) {
       <button onClick={onPay}
         className="flex-1 py-3.5 rounded-2xl font-black text-[18px] text-white flex items-center justify-center"
         style={{ animation: "jeongtongBtnNeon 3s ease-in-out infinite, jeongtongBtnBeat 2s ease-in-out infinite" }}>
-        정통사주 확인하기
+        종합사주 확인하기
       </button>
     </div>
   );
