@@ -740,7 +740,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
         </div>
         <div className="px-5 pt-2 pb-7">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[18px] font-black" style={{ color: DTXT }}>정통사주 결제 안내</h3>
+            <h3 className="text-[18px] font-black" style={{ color: DTXT }}>종합사주 결제 안내</h3>
             <button onClick={requestClose} className="flex items-center justify-center" style={{ width: 28, height: 28, color: "rgba(255,255,255,0.6)", fontSize: 18 }}>✕</button>
           </div>
           <div className="inline-block text-[13px] font-bold px-3.5 py-1.5 rounded-full mb-5"
