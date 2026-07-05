@@ -1483,44 +1483,6 @@ function ReviewSection() {
   );
 }
 
-// ─── FAQ 섹션 ────────────────────────────────────────────────────────────────
-const FAQS = [
-  { q: "결과지는 얼마나 걸리나요?", a: "결제 직후 약 1~2분 내에 자동 생성됩니다. 입력하신 이메일로도 링크를 보내드려, 언제든 다시 확인하실 수 있소." },
-  { q: "생년월일 시간을 모르면요?", a: "시주까지 입력할 수 있으나, 시간을 모르는 경우도 분석이 가능하오. 다만 시주 관련 항목의 정확도는 다소 낮을 수 있소." },
-  { q: "어떤 항목을 분석하나요?", a: "타고난 운명 구조, 대운 흐름, 재물과 직업운, 사랑과 결혼운, 주의 시기 등 총 16장에 걸쳐 상세히 풀이하오." },
-  { q: "환불이 가능한가요?", a: "AI가 생성한 콘텐츠 특성상, 결과지가 생성된 후에는 환불이 어렵습니다. 구매 전 신중히 결정해주시오." },
-];
-
-function FAQSection() {
-  const [openIdx, setOpenIdx] = useState<number | null>(null);
-
-  return (
-    <div className="px-5 py-7" style={{ backgroundColor: WHITE }}>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>자주 묻는 질문</h2>
-      <div className="space-y-2">
-        {FAQS.map((faq, i) => (
-          <div key={i} className="rounded-2xl overflow-hidden"
-            style={{ border: `1px solid ${openIdx === i ? ROSE : GRAY4}`, transition: "border-color 0.2s" }}>
-            <button
-              className="w-full flex items-center justify-between px-4 py-3.5 text-left"
-              style={{ backgroundColor: openIdx === i ? RED_PALE : WHITE }}
-              onClick={() => setOpenIdx(openIdx === i ? null : i)}>
-              <span className="text-[13.5px] font-bold pr-2" style={{ color: GRAY1 }}>{faq.q}</span>
-              <span className="flex-shrink-0 text-[18px] font-light transition-transform duration-200"
-                style={{ color: "#7a1020", transform: openIdx === i ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
-            </button>
-            {openIdx === i && (
-              <div className="px-4 pb-4 pt-1" style={{ backgroundColor: RED_PALE }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: GRAY2 }}>{faq.a}</p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── 결제 모달 ────────────────────────────────────────────────────────────────
 const PRODUCT = { name: "종합사주", original: 49800, discount: 50, price: 24900 };
 
@@ -1937,7 +1899,7 @@ function CheckoutContent() {
   return (
     <div className="w-full h-full" style={{ backgroundColor: WHITE }}>
       <div className="w-full h-full overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 80 }}>
-        <style>{`div::-webkit-scrollbar{display:none}`}</style>
+        <style>{`div::-webkit-scrollbar{display:none} @font-face{font-family:'GmarketSans';font-weight:700;src:url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff2') format('woff2');}`}</style>
 
         {/* ① 상단 이미지 */}
         <div className="relative w-full" style={{ aspectRatio: "1000/7000" }}>
@@ -1980,22 +1942,65 @@ function CheckoutContent() {
           <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
           <img src="/media/checkout/saju_total/s2-v.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "13.5%", left: "65%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>어떤 내용들인지</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>일부만 말해주겠소</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>&nbsp;</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>아주 디테일하오.</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "39.5%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${name}님 사주가 과연`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>신강한지 신약한지</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "57.8%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${name}님에게 꼭 필요한 오행과`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>도와주는 오행, 피해야할 오행</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "73.8%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${name}님의 연애/재물흐름`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>그리고 건강운의 흐름</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "103%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${name}님 적성에 잘 맞는`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>직군과 직업들 (사업vs직장인)</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "121%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${name}님에게 잘맞는 이성의`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>사주팔자와 생일까지...❤️</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "175%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>내 사주상 취약한 신체부위와</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>개운을 위한 일상속 방법들</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "147.5%", left: "34%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>이뿐이겠소?</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>&nbsp;</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>아주 극히</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000", lineHeight: 1.4 }}>일부일 뿐이오</p>
+          </div>
         </div>
 
         <img src="/media/checkout/saju_total/s3-v.jpg" alt="" className="w-full block" />
-        <video src="/media/checkout/saju_total/s3-vv1.mp4" autoPlay muted loop playsInline className="w-full block" />
+        <div className="relative">
+          <video src="/media/checkout/saju_total/s3-vv1.mp4" autoPlay muted loop playsInline className="w-full block" />
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "13%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>대운과 세운의 흐름까지</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>속시원하게 볼 수 있소.</p>
+          </div>
+        </div>
         <div className="relative">
           <img src="/media/checkout/saju_total/s4-v3.jpg" alt="" className="w-full block" />
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "2.5%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>지금, 소인의 손에</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>들려 있소이다.</p>
+          </div>
           <div className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
         </div>
 
         {/* ④ 후기 */}
         <ReviewSection />
 
-        {/* ⑤ FAQ */}
-        <FAQSection />
-
-        <div className="h-4" />
+<div className="h-4" />
       </div>
 
       <ToastLayer />

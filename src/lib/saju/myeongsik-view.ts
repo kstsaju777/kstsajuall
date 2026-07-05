@@ -324,12 +324,27 @@ export function buildMyeongsikView(a: any): MyeongsikView {
     yearStart: Number(d.year_start ?? 0),
   }));
 
-  // 세운 (현재 주변) — recent 는 내림차순으로 오므로 오름차순 정렬
+  // 세운 — 육십갑자 로컬 계산으로 현재+미래 10년 보장
   const sEl = a?.seun ?? {};
   const recentSeunAsc = [...(sEl.recentSeuns ?? [])].reverse();
-  const seunRaw = [...recentSeunAsc.slice(-3), sEl.currentSeun, ...(sEl.upcomingSeuns ?? []).slice(0, 4)].filter(Boolean);
-  const curYear = sEl.currentSeun?.year;
-  const seun: MsFlowItem[] = seunRaw.map((s: any) => ({ label: String(s.year ?? ""), gz: s.ganji_hanja ?? s.ganji ?? "", active: s.year === curYear })); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const seunApiRaw = [...recentSeunAsc.slice(-3), sEl.currentSeun, ...(sEl.upcomingSeuns ?? [])].filter(Boolean); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const curYear = sEl.currentSeun?.year as number | undefined;
+  const STEMS_S   = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+  const BRANCHES_S = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  const ganji60 = (y: number) => STEMS_S[((y - 4) % 10 + 10) % 10] + BRANCHES_S[((y - 4) % 12 + 12) % 12];
+  // API 데이터를 map으로 취합
+  const seunMap = new Map<number, string>();
+  for (const s of seunApiRaw as any[]) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (s?.year) seunMap.set(Number(s.year), s.ganji_hanja ?? s.ganji ?? ganji60(Number(s.year)));
+  }
+  // 현재 연도부터 9년 미래 보정
+  if (curYear) {
+    for (let y = curYear; y < curYear + 10; y++) {
+      if (!seunMap.has(y)) seunMap.set(y, ganji60(y));
+    }
+  }
+  const seun: MsFlowItem[] = [...seunMap.entries()].sort((a, b) => a[0] - b[0])
+    .map(([year, gz]) => ({ label: String(year), gz, active: year === curYear }));
 
   // 월운 (현재 주변) — recent 는 내림차순으로 오므로 오름차순 정렬
   const wEl = a?.weolun ?? {};

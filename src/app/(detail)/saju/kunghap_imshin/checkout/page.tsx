@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect, useRef } from "react";
 import { calcSaju, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
-import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
+import { MyeongsikTable } from "@/components/saju/MyeongsikModal";
+import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
@@ -19,10 +20,8 @@ const GRAY3    = "#888888";
 const GRAY4    = "#dddddd";
 const CARD_BG  = "#ffffff";
 
-const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
-
 // ─── 스크롤 슬라이드 인 훅 ────────────────────────────────────────────────────
-function useSlideIn(direction: "left" | "right" = "left") {
+function useSlideInUp() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -38,7 +37,7 @@ function useSlideIn(direction: "left" | "right" = "left") {
   }, []);
 
   const style: React.CSSProperties = {
-    transform: visible ? "translateX(0)" : direction === "left" ? "translateX(-60px)" : "translateX(60px)",
+    transform: visible ? "translateY(0)" : "translateY(60px)",
     opacity: visible ? 1 : 0,
     transition: "transform 0.55s cubic-bezier(0.22,1,0.36,1), opacity 0.55s ease",
   };
@@ -46,314 +45,112 @@ function useSlideIn(direction: "left" | "right" = "left") {
   return { ref, style };
 }
 
-// ─── 명식 카드 (슬라이드 인) ──────────────────────────────────────────────────
-function MyeongsikCard({
-  saju, label, direction,
-}: {
-  saju: LocalSajuResult | null;
-  label: string;
-  direction: "left" | "right";
-}) {
-  const { ref, style } = useSlideIn(direction);
-  const pillars = saju
-    ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year]
-    : null;
-
-  return (
-    <div ref={ref} style={{ ...style, flex: 1 }}>
-      <div className="rounded-2xl overflow-hidden"
-        style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
-        <div className="py-2.5 text-center" style={{ backgroundColor: RED_PALE, borderBottom: `1px solid ${ROSE}` }}>
-          <p className="text-[12px] font-bold" style={{ color: RED }}>{label}</p>
-        </div>
-        <div className="p-3">
-          <div className="grid grid-cols-4 gap-1.5">
-            {(pillars ?? Array(4).fill(null)).map((p, i) => (
-              <div key={i} className="flex flex-col items-center gap-0.5">
-                <p className="text-[9px] font-medium tracking-wider" style={{ color: GRAY3 }}>{PILLAR_LABELS[i]}</p>
-                <span style={{ fontSize: 9, color: RED, lineHeight: 1 }}>{p?.stemSs || " "}</span>
-                <div className="w-full aspect-square flex items-center justify-center">
-                  {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                    : <div className="w-full h-full animate-pulse rounded" style={{ backgroundColor: "#eee" }} />}
-                </div>
-                <div className="w-full aspect-square flex items-center justify-center">
-                  {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                    : <div className="w-full h-full animate-pulse rounded" style={{ backgroundColor: "#eee" }} />}
-                </div>
-                <span style={{ fontSize: 9, color: RED, lineHeight: 1 }}>{p?.branchSs || " "}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+// ─── LocalSajuResult → MyeongsikView 변환 ─────────────────────────────────
+const CLASS_TO_EL: Record<string, string> = { wood: "목", fire: "화", earth: "토", metal: "금", water: "수" };
+const JIJANG_LOCAL: Record<string, string> = {
+  자: "壬·癸", 축: "癸·辛·己", 인: "戊·丙·甲", 묘: "甲·乙",
+  진: "乙·癸·戊", 사: "戊·庚·丙", 오: "丙·己·丁", 미: "丁·乙·己",
+  신: "戊·壬·庚", 유: "庚·辛", 술: "辛·丁·戊", 해: "戊·甲·壬",
+};
+function localSajuToMsView(saju: LocalSajuResult): MyeongsikView {
+  const order = [
+    { key: "time" as const, pos: "시주" },
+    { key: "day" as const, pos: "일주" },
+    { key: "month" as const, pos: "월주" },
+    { key: "year" as const, pos: "년주" },
+  ];
+  const pillars = order.map(({ key, pos }, idx) => {
+    const p = saju.pillars[key];
+    return {
+      pos,
+      sipTop: idx === 1 ? "일원" : (p.stemSs || "—"),
+      gan: p.stem,
+      ganEl: CLASS_TO_EL[p.stemClass] ?? "",
+      ji: p.branch,
+      jiEl: CLASS_TO_EL[p.branchClass] ?? "",
+      sipBot: p.branchSs || "—",
+      jijang: JIJANG_LOCAL[p.branchHg] ?? "",
+      unseong: "",
+      sinsal: "",
+    };
+  });
+  const now = new Date();
+  return {
+    ilgan: saju.dayStem,
+    pillars,
+    daeun: [],
+    seun: [],
+    weolun: [],
+    currentYear: now.getFullYear(),
+    currentMonth: now.getMonth() + 1,
+  };
 }
 
-// ─── 히어로 섹션 ──────────────────────────────────────────────────────────────
-function HeroSection({ name, partnerName }: { name: string; partnerName: string }) {
-  return (
-    <div style={{ backgroundColor: WHITE }}>
-      {/* 카피 텍스트 */}
-      <div className="px-6 pt-10 pb-5 text-center">
-        <p className="text-[11px] tracking-[0.2em] mb-3 font-medium" style={{ color: RED }}>임신궁합 · 정밀 리포트</p>
-        <h1 className="text-[26px] font-black leading-snug" style={{ color: GRAY1 }}>
-          두 사람의 임신운,<br />
-          사주가 <span style={{ color: RED }}>모두</span> 알고 있소
-        </h1>
-        <p className="text-[13px] mt-3 leading-relaxed" style={{ color: GRAY2 }}>
-          {name}님과 {partnerName}님의 팔자를<br />
-          낱낱이 풀었소. 지금 확인하시오.
-        </p>
-      </div>
-
-      {/* 영상 */}
-      <div className="relative overflow-hidden w-full" style={{ aspectRatio: "9/16" }}>
-        <div className="absolute top-0 left-0 right-0 h-20 pointer-events-none z-10"
-          style={{ background: `linear-gradient(to bottom, ${WHITE}, transparent)` }} />
-        <video
-          src="/media/cards/kunghap_imshin/imshin-0.mp4"
-          autoPlay muted loop playsInline
-          className="absolute inset-0 w-full h-full object-cover object-top"
-        />
-        <div className="absolute inset-0" style={{ backgroundColor: "rgba(255,255,255,0.55)" }} />
-        <div className="absolute bottom-0 left-0 right-0 h-28 pointer-events-none z-10"
-          style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
-      </div>
-    </div>
-  );
+function formatDateLabel(date: string, calendar: string, gender: string) {
+  const calLabel = calendar === "음력" ? "음력" : calendar === "윤달" ? "음력(윤달)" : "양력";
+  const dateFormatted = date ? date.replace(/\./g, "년 ").replace(/\.$/, "").split("년 ").map((v, i) => i === 0 ? v + "년" : i === 1 ? v + "월" : v + "일").join(" ") : "";
+  const genderLabel = gender === "female" || gender === "여자" ? "여성" : gender === "male" || gender === "남자" ? "남성" : gender;
+  return dateFormatted ? `${calLabel} ${dateFormatted}${genderLabel ? ` (${genderLabel})` : ""}` : "";
 }
 
 // ─── 두 사람 명식 섹션 ────────────────────────────────────────────────────────
 function MyeongsikSection({
   saju, partnerSaju, name, partnerName,
+  date, calendar, gender, partnerDate, partnerCalendar, partnerGender,
 }: {
   saju: LocalSajuResult | null;
   partnerSaju: LocalSajuResult | null;
   name: string;
   partnerName: string;
+  date: string;
+  calendar: string;
+  gender: string;
+  partnerDate: string;
+  partnerCalendar: string;
+  partnerGender: string;
 }) {
+  const { ref, style } = useSlideInUp();
+  const msView        = useMemo(() => saju        ? localSajuToMsView(saju)        : null, [saju]);
+  const partnerMsView = useMemo(() => partnerSaju ? localSajuToMsView(partnerSaju) : null, [partnerSaju]);
+
   return (
     <div style={{ backgroundColor: WHITE }}>
-      <div className="px-5 pb-2">
-        <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: RED }}>✦ 사주 명식 ✦</p>
-        <p className="text-center text-[13px] font-bold mb-4" style={{ color: GRAY1 }}>두 사람의 팔자가 품은 이야기</p>
-        <div className="flex gap-3">
-          <MyeongsikCard saju={saju} label={`${name}님`} direction="left" />
-          <div style={{ width: 1, backgroundColor: GRAY4, flexShrink: 0, alignSelf: "stretch" }} />
-          <MyeongsikCard saju={partnerSaju} label={`${partnerName}님`} direction="right" />
+      <div className="pt-6 pb-2">
+        <div ref={ref} style={style}>
+          <MyeongsikTable
+            view={msView}
+            name={name}
+            birth={null}
+            rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
+            header={
+              <div className="text-center">
+                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}님의 사주팔자</p>
+                {formatDateLabel(date, calendar, gender) && <p className="text-[13px]" style={{ color: "#5b504a" }}>{formatDateLabel(date, calendar, gender)}</p>}
+              </div>
+            }
+          />
         </div>
       </div>
-      <div className="h-6" />
-    </div>
-  );
-}
-
-// ─── 분석 미리보기 섹션 ───────────────────────────────────────────────────────
-const PREVIEW_SECTIONS = [
-  {
-    icon: "🌱", title: "두 사람의 임신 인연", free: true,
-    content: "각자의 일간과 오행 구성을 바탕으로 두 사람의 임신 인연과 자녀 복을 분석합니다. 두 사람의 팔자가 임신을 향해 어떻게 맞닿아 있는지 사주 속에 답이 있습니다.\n\n처음 임신을 꿈꿨던 순간부터, 함께 부모가 될 운의 흐름까지 사주는 조용히 기록하고 있습니다.",
-    blurLines: [],
-  },
-  {
-    icon: "🤰", title: "임신 가능 시기 분석", free: false,
-    content: "",
-    blurLines: [
-      "두 사람의 ████간 오행 조화가 임신 시기를 좌우합니다.",
-      "████년 ████월, 임신운이 가장 강하게 열리는 시기입니다.",
-      "이 시기의 시도는 사주상 ████한 영향을 받고 있습니다.",
-    ],
-  },
-  {
-    icon: "👶", title: "자녀 인연과 자녀 복", free: false,
-    content: "",
-    blurLines: [
-      "상대방의 일간 기준으로 자녀궁에 ████이 자리하고 있습니다.",
-      "현재 두 사람의 자녀 인연은 ████한 기운으로 연결되어 있습니다.",
-      "자녀 복을 높이려면 ████한 방향의 노력이 효과적입니다.",
-    ],
-  },
-  {
-    icon: "🌸", title: "임신에 유리한 운의 흐름", free: false,
-    content: "",
-    blurLines: [
-      "두 사람 모두 임신운이 강해지는 시기는 ████년 ████월입니다.",
-      "현재 두 사람의 대운은 ████으로 ████한 기운이 작용합니다.",
-      "이 시기를 놓치면 다음 기회는 ████년 이후로 밀립니다.",
-    ],
-  },
-  {
-    icon: "⚡", title: "임신을 방해하는 요인", free: false,
-    content: "",
-    blurLines: [
-      "당신의 사주에서 ████살이 임신 에너지를 방해하고 있습니다.",
-      "████ 방향의 접근과 ████한 생활 습관은 반드시 피하세요.",
-      "████년 ████월은 특별히 주의가 필요한 시기입니다.",
-    ],
-  },
-];
-
-function PreviewCard({ s }: { s: typeof PREVIEW_SECTIONS[number] }) {
-  return (
-    <div className="mx-5 mb-4 rounded-2xl overflow-hidden"
-      style={{ backgroundColor: CARD_BG, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 6px rgba(0,0,0,0.06)" }}>
-      <div className="flex items-center gap-2.5 px-4 py-3.5"
-        style={{ borderBottom: `1px solid ${GRAY4}`, backgroundColor: s.free ? RED_PALE : WHITE }}>
-        <span className="text-[18px]">{s.icon}</span>
-        <span className="text-[15px] font-bold" style={{ color: GRAY1 }}>{s.title}</span>
-        <span className="ml-auto text-[10px] px-2.5 py-0.5 rounded-full font-medium"
-          style={{ backgroundColor: s.free ? `${RED}15` : "#f5f5f5", color: s.free ? RED : GRAY3, border: `1px solid ${s.free ? RED + "30" : GRAY4}` }}>
-          {s.free ? "✓ 공개" : "🔒 잠김"}
-        </span>
+      <div className="relative">
+        <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
+        <img src="/media/checkout/kunghap_imshin/s2.jpg" alt="" className="w-full block" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
       </div>
-      <div className="px-4 py-4">
-        {s.free ? (
-          <p className="text-[13px] leading-relaxed whitespace-pre-line" style={{ color: GRAY2 }}>{s.content}</p>
-        ) : (
-          <div className="relative py-1">
-            <div className="space-y-2 select-none">
-              {s.blurLines.map((line, i) => (
-                <p key={i} className="text-[13px] leading-relaxed"
-                  style={{ color: GRAY2, filter: "blur(5.5px)", userSelect: "none" }}>
-                  {line || "█████████████████████████████"}
-                </p>
-              ))}
+      <div className="pb-2">
+        <MyeongsikTable
+          view={partnerMsView}
+          name={partnerName}
+          birth={null}
+          rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
+          header={
+            <div className="text-center">
+              <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{partnerName}님의 사주팔자</p>
+              {formatDateLabel(partnerDate, partnerCalendar, partnerGender) && <p className="text-[13px]" style={{ color: "#5b504a" }}>{formatDateLabel(partnerDate, partnerCalendar, partnerGender)}</p>}
             </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: RED_PALE, border: `1px solid ${ROSE}` }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={RED} strokeWidth="2.5">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-              </div>
-              <span className="text-[11px] font-semibold" style={{ color: RED }}>결제 후 열람 가능</span>
-            </div>
-          </div>
-        )}
+          }
+        />
       </div>
-    </div>
-  );
-}
-
-function PreviewSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.1 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} style={{
-      backgroundColor: CREAM,
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(30px)",
-      transition: "opacity 0.6s ease, transform 0.6s ease",
-    }}>
-      <div className="pt-7 pb-2 text-center px-5">
-        <p className="text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: RED }}>✦ AI 정밀 분석 · 14장 ✦</p>
-        <h2 className="text-[20px] font-black mb-1.5" style={{ color: GRAY1 }}>두 사람의 운명, 이제 확인하오</h2>
-        <p className="text-[12px]" style={{ color: GRAY3 }}>일부 내용은 결제 후 열람할 수 있소</p>
-      </div>
-      <div className="pt-4 pb-5">
-        {PREVIEW_SECTIONS.map((s, i) => <PreviewCard key={i} s={s} />)}
-      </div>
-    </div>
-  );
-}
-
-// ─── 목차 섹션 ───────────────────────────────────────────────────────────────
-const CHAPTER_LIST = [
-  { ch: 1,  title: "사주 원국",         emoji: "🏛️" },
-  { ch: 2,  title: "운명의 구조",        emoji: "🔮" },
-  { ch: 3,  title: "인간관계",           emoji: "🤝" },
-  { ch: 4,  title: "숨겨진 특징",        emoji: "🌙" },
-  { ch: 5,  title: "재물과 직업",        emoji: "💰" },
-  { ch: 6,  title: "사랑과 결혼",        emoji: "💑" },
-  { ch: 7,  title: "건강",              emoji: "🌿" },
-  { ch: 8,  title: "귀인",              emoji: "✨" },
-  { ch: 9,  title: "주의할 사람",        emoji: "⚠️" },
-  { ch: 10, title: "굴곡과 위기",        emoji: "⚡" },
-  { ch: 11, title: "대운 흐름",          emoji: "🌊" },
-  { ch: 12, title: "주의 시기",          emoji: "📅" },
-  { ch: 13, title: "당부의 말",          emoji: "📝" },
-  { ch: 14, title: "개운법",            emoji: "🌸" },
-];
-
-function TableOfContents() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); observer.disconnect(); } }, { threshold: 0.1 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} className="px-5 py-7" style={{
-      backgroundColor: WHITE,
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(30px)",
-      transition: "opacity 0.6s ease, transform 0.6s ease",
-    }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: RED }}>✦ 목차 ✦</p>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>총 14장 구성</h2>
-      <div className="space-y-2">
-        {CHAPTER_LIST.map(({ ch, title, emoji }, i) => (
-          <div key={ch} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-            style={{
-              backgroundColor: CREAM,
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateX(0)" : "translateX(-20px)",
-              transition: `opacity 0.4s ease ${i * 0.04}s, transform 0.4s ease ${i * 0.04}s`,
-            }}>
-            <span className="text-[13px] w-5 text-center flex-shrink-0">{emoji}</span>
-            <span className="text-[12px] font-medium flex-shrink-0" style={{ color: RED, minWidth: 32 }}>제{ch}장</span>
-            <span className="text-[13px] font-bold" style={{ color: GRAY1 }}>{title}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── 후기 섹션 ───────────────────────────────────────────────────────────────
-const REVIEWS = [
-  { star: 5, text: "두 사람의 궁합이 이렇게 정확하게 나올 줄 몰랐어요. 상대방 성격 분석이 소름돋을 정도로 맞았습니다.", name: "30대 직장인 김○○", date: "2025.05.12" },
-  { star: 5, text: "연애 시기가 딱 맞았어요. 홍연이 알려준 대로 접근했더니 관계가 더 깊어졌습니다.", name: "20대 대학생 이○○", date: "2025.04.28" },
-  { star: 5, text: "두 사람 모두 분석해주는 게 정말 좋았어요. 상대방 입장에서 이해할 수 있게 됐습니다.", name: "30대 자영업자 박○○", date: "2025.05.03" },
-  { star: 5, text: "막연하게 불안했는데, 이 사람이 나한테 어떤 존재인지 딱 짚어줘서 결심이 서더라구요.", name: "20대 대학원생 최○○", date: "2025.06.01" },
-];
-
-function ReviewSection() {
-  return (
-    <div className="px-5 py-7" style={{ backgroundColor: CREAM }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: RED }}>✦ 실제 후기 ✦</p>
-      <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>이미 수천 명이 확인했소</h2>
-      <div className="space-y-3">
-        {REVIEWS.map((r, i) => (
-          <div key={i} className="rounded-2xl px-4 py-4"
-            style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <span key={j} className="text-[13px]" style={{ color: j < r.star ? "#f5a623" : GRAY4 }}>★</span>
-                ))}
-              </div>
-              <span className="text-[11px]" style={{ color: GRAY3 }}>{r.date}</span>
-            </div>
-            <p className="text-[13px] leading-relaxed mb-1.5" style={{ color: GRAY2 }}>"{r.text}"</p>
-            <p className="text-[11px]" style={{ color: GRAY3 }}>— {r.name}</p>
-          </div>
-        ))}
-      </div>
+      <div className="h-4" />
     </div>
   );
 }
@@ -363,7 +160,6 @@ const FAQS = [
   { q: "결과지는 얼마나 걸리나요?", a: "결제 직후 약 1~2분 내에 자동 생성됩니다. 입력하신 이메일로도 링크를 보내드려, 언제든 다시 확인하실 수 있소." },
   { q: "상대방 생년월일이 정확하지 않으면요?", a: "시주까지 입력할 수 있으나, 시간을 모르는 경우도 분석이 가능하오. 다만 시주 관련 항목의 정확도는 다소 낮을 수 있소." },
   { q: "어떤 항목을 분석하나요?", a: "두 사람의 임신 인연, 임신 가능 시기, 자녀 인연과 자녀 복, 임신에 유리한 운의 흐름, 임신을 방해하는 요인 등 총 14장에 걸쳐 상세히 풀이하오." },
-  { q: "환불이 가능한가요?", a: "AI가 생성한 콘텐츠 특성상, 결과지가 생성된 후에는 환불이 어렵습니다. 구매 전 신중히 결정해주시오." },
 ];
 
 function FAQSection() {
@@ -371,7 +167,6 @@ function FAQSection() {
 
   return (
     <div className="px-5 py-7" style={{ backgroundColor: WHITE }}>
-      <p className="text-center text-[11px] tracking-[0.2em] mb-1 font-medium" style={{ color: RED }}>✦ FAQ ✦</p>
       <h2 className="text-center text-[20px] font-black mb-4" style={{ color: GRAY1 }}>자주 묻는 질문</h2>
       <div className="space-y-2">
         {FAQS.map((faq, i) => (
@@ -457,7 +252,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-[11px]" style={{ color: DSTRIKE }}>
-                    <span style={{ color: ACCENT, fontWeight: 700 }}>{PRODUCT.discount}%</span>{" "}
+                    <span style={{ color: "#738e6f", fontWeight: 700 }}>{PRODUCT.discount}%</span>{" "}
                     <span className="line-through">{PRODUCT.original.toLocaleString()}</span>
                   </p>
                   <p className="text-[16px] font-black mt-0.5" style={{ color: DTXT }}>{PRODUCT.price.toLocaleString()}원</p>
@@ -608,14 +403,11 @@ function StickyPayCTA({ onPay }: { onPay: () => void; name: string; partnerName:
   return (
     <div className="fixed bottom-0 flex items-center gap-3 px-4 z-50"
       style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", height: 80, backgroundColor: "#141414" } as React.CSSProperties}>
-      {/* 왼쪽: 타이머 */}
       <div className="flex flex-col items-start flex-shrink-0">
         <span className="text-[13px] font-bold tracking-wider" style={{ color: RED }}>할인 혜택까지</span>
         <span className="text-[18px] font-black tabular-nums" style={{ color: WHITE }}>{timeLeft}</span>
       </div>
-      {/* 구분선 */}
       <div style={{ width: 1, height: 36, backgroundColor: "rgba(255,255,255,0.15)", flexShrink: 0 }} />
-      {/* 오른쪽: 버튼 */}
       <style>{`
         @keyframes imshinBtnNeon {
           0%   { background: #738e6f; box-shadow: 0 0 12px 3px rgba(115,142,111,0.7); }
@@ -680,18 +472,18 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
         {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
       </p>
       <div className="w-full max-w-[280px] mb-3">
-        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#668866" }}>
+        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#4f7060" }}>
           <span>{doneCount} / {TOTAL} 장 완성</span>
           <span>{pct}%</span>
         </div>
-        <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#0a1209" }}>
+        <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#0a1009" }}>
           <div className="h-full rounded-full relative overflow-hidden transition-all duration-700"
-            style={{ width: `${pct}%`, background: "linear-gradient(90deg, #2a4a28, #738e6f, #9ab897)", animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none" }}>
+            style={{ width: `${pct}%`, background: "linear-gradient(90deg, #2a4028, #738e6f, #9ab897)", animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)", animation: "shimmer 1.6s linear infinite", width: "40%" }} />
           </div>
         </div>
       </div>
-      <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#556655" }}>
+      <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#3a5538" }}>
         풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.
       </p>
     </div>
@@ -783,31 +575,23 @@ function CheckoutContent() {
       <div className="w-full h-full overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 80 }}>
         <style>{`div::-webkit-scrollbar{display:none}`}</style>
 
-        {/* ① 히어로 */}
-        <HeroSection name={name} partnerName={partnerName} />
+        {/* ① 상단 이미지 */}
+        <div className="relative">
+          <img src="/media/checkout/kunghap_imshin/s1.jpg" alt="" className="w-full block" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+        </div>
 
         {/* ② 두 사람 명식 */}
-        <MyeongsikSection saju={saju} partnerSaju={partnerSaju} name={name} partnerName={partnerName} />
+        <MyeongsikSection saju={saju} partnerSaju={partnerSaju} name={name} partnerName={partnerName} date={date} calendar={calendar} gender={gender} partnerDate={partnerDate} partnerCalendar={partnerCalendar} partnerGender={partnerGender} />
 
-        {/* s1 */}
-        <img src="/media/checkout/kunghap_imshin/s1.jpg" alt="" className="w-full block" />
+        {/* ③ 하단 이미지 */}
+        <div className="relative">
+          <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
+          <img src="/media/checkout/kunghap_imshin/s3.jpg" alt="" className="w-full block" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+        </div>
 
-        {/* ③ 미리보기 티저 */}
-        <PreviewSection />
-
-        {/* s2 */}
-        <img src="/media/checkout/kunghap_imshin/s2.jpg" alt="" className="w-full block" />
-
-        {/* ④ 목차 */}
-        <TableOfContents />
-
-        {/* ⑤ 후기 */}
-        <ReviewSection />
-
-        {/* s3 */}
-        <img src="/media/checkout/kunghap_imshin/s3.jpg" alt="" className="w-full block" />
-
-        {/* ⑥ FAQ */}
+        {/* ④ FAQ */}
         <FAQSection />
 
         <div className="h-4" />
