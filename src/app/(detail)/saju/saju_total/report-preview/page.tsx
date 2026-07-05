@@ -1749,14 +1749,35 @@ function SealStamp() {
   );
 }
 
-// 결과지 만족도 리뷰 위젯 (마무리) — 게스트 백엔드 연결 전이라 로컬 완료 처리
-function ReviewBox() {
+// 결과지 만족도 리뷰 위젯 (마무리)
+function ReviewBox({ resultId, name, gender }: { resultId: string; name: string; gender: string }) {
   const faces = [
     { v: 1, e: "😞", l: "매우불만" }, { v: 2, e: "😕", l: "불만" }, { v: 3, e: "😐", l: "보통" }, { v: 4, e: "🙂", l: "만족" }, { v: 5, e: "😍", l: "매우만족" },
   ];
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!rating || loading) return;
+    setLoading(true);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      await supabase.from("saju_total_reviews").insert({
+        result_id: resultId,
+        name,
+        gender,
+        star: rating,
+        text: text.trim() || "",
+        approved: false,
+      });
+    } catch (_) { /* 저장 실패해도 완료 처리 */ }
+    setLoading(false);
+    setDone(true);
+  };
+
   if (done) {
     return (
       <div className="rounded-2xl p-6 mx-6 mb-8 text-center" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
@@ -1783,7 +1804,9 @@ function ReviewBox() {
         })}
       </div>
       <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="풀이에 대한 솔직한 의견을 남겨주세요. 남겨주신 의견은 서비스 개선에 꼭 참고할게요." className="w-full rounded-xl p-3 text-[13px] outline-none resize-none" style={{ background: "#faf6f2", border: `1px solid ${INK}14`, color: INK }} />
-      <button onClick={() => rating && setDone(true)} disabled={!rating} className="w-full mt-3 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all active:scale-[0.99]" style={{ background: rating ? MAROON : `${INK}33` }}>제출하기</button>
+      <button onClick={handleSubmit} disabled={!rating || loading} className="w-full mt-3 py-3.5 rounded-xl text-[15px] font-bold text-white transition-all active:scale-[0.99]" style={{ background: rating ? MAROON : `${INK}33` }}>
+        {loading ? "제출 중..." : "제출하기"}
+      </button>
     </div>
   );
 }
@@ -4568,9 +4591,7 @@ function ReportPreviewInner() {
     }).catch(() => {});
   };
 
-  // 화면 번호(ch) → API 실제 chapter 번호 매핑
-  const CH_API: Record<number, number> = { 8: 11, 9: 15, 10: 14 };
-  const toApiChapter = (n: number) => CH_API[n] ?? n;
+  const toApiChapter = (n: number) => n; // display ch = API ch
 
   // 단일 장 재시도 (에러 화면 '다시 시도'). 실패하면 needGen 유지 → 에러 화면 그대로
   const genChapter = (n: number, force = false) => {
@@ -6302,7 +6323,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 만족도 리뷰 */}
-          <ReviewBox />
+          <ReviewBox resultId={id} name={nameParam} gender={gender} />
 
           {/* 추천 상품 (크로스셀) */}
           <RecoGrid />

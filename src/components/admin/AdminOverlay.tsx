@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 
 type Product = { id: string; name: string; slug: string | null; price: number; is_active: boolean; image_url?: string; badge?: string; tag?: string; is_video?: boolean };
 type Usage = { used: number; limit: number; bySource: { confirm: number; demo: number; manual: number } } | null;
+type SajuReview = { id: string; name: string; gender: string; star: number; text: string; created_at: string; approved: boolean };
 
 const EMPTY_FORM = { name: "", slug: "", price: "", description: "", image_url: "", badge: "", tag: "", is_video: false, display_order: "99" };
 
@@ -11,6 +12,31 @@ export function AdminOverlay() {
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [usage, setUsage] = useState<Usage>(null);
+  const [reviews, setReviews] = useState<SajuReview[]>([]);
+  const [reviewTab, setReviewTab] = useState<"pending" | "approved">("pending");
+
+  const loadReviews = async () => {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("saju_total_reviews")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setReviews(data ?? []);
+  };
+
+  const approveReview = async (id: string) => {
+    const { createClient } = await import("@/lib/supabase/client");
+    await createClient().from("saju_total_reviews").update({ approved: true }).eq("id", id);
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, approved: true } : r));
+  };
+
+  const deleteReview = async (id: string) => {
+    const { createClient } = await import("@/lib/supabase/client");
+    await createClient().from("saju_total_reviews").delete().eq("id", id);
+    setReviews(prev => prev.filter(r => r.id !== id));
+  };
   const [toggling, setToggling] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -92,16 +118,16 @@ export function AdminOverlay() {
           </div>
 
           {/* API 사용량 */}
-          {usage && (
+          {usage && usage.used != null && (
             <div style={{ margin: "16px 20px", padding: "14px 16px", background: "#f8f8f8", borderRadius: 10 }}>
               <p style={{ fontSize: 11, color: "#aaa", margin: "0 0 6px", letterSpacing: 1 }}>API 사용량</p>
               <p style={{ fontSize: 22, fontWeight: 700, color: "#111", margin: 0 }}>
-                {usage.used.toLocaleString()}
-                <span style={{ fontSize: 13, color: "#888", fontWeight: 400 }}> / {usage.limit.toLocaleString()}회</span>
+                {(usage.used ?? 0).toLocaleString()}
+                <span style={{ fontSize: 13, color: "#888", fontWeight: 400 }}> / {(usage.limit ?? 0).toLocaleString()}회</span>
               </p>
               <div style={{ margin: "8px 0 4px", height: 6, background: "#e0e0e0", borderRadius: 3 }}>
                 <div style={{
-                  width: `${Math.min(100, Math.round(usage.used / usage.limit * 100))}%`,
+                  width: `${Math.min(100, Math.round((usage.used ?? 0) / (usage.limit || 1) * 100))}%`,
                   height: "100%", background: "#22c55e", borderRadius: 3,
                 }} />
               </div>
@@ -260,6 +286,50 @@ export function AdminOverlay() {
             >
               로그아웃
             </button>
+          </div>
+
+          {/* 후기 관리 */}
+          <div style={{ margin: "16px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <p style={{ fontSize: 11, color: "#aaa", margin: 0, letterSpacing: 1 }}>후기 관리</p>
+              <button onClick={loadReviews} style={{ fontSize: 11, color: "#9b2335", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>불러오기</button>
+            </div>
+            <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+              {(["pending", "approved"] as const).map(tab => (
+                <button key={tab} onClick={() => setReviewTab(tab)}
+                  style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer",
+                    background: reviewTab === tab ? "#9b2335" : "#f5f5f5", color: reviewTab === tab ? "#fff" : "#888" }}>
+                  {tab === "pending" ? `대기 (${reviews.filter(r => !r.approved).length})` : `승인 (${reviews.filter(r => r.approved).length})`}
+                </button>
+              ))}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {reviews.filter(r => reviewTab === "pending" ? !r.approved : r.approved).map(r => (
+                <div key={r.id} style={{ background: "#f9f9f9", borderRadius: 10, padding: "10px 12px", border: "1px solid #eee" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#333" }}>{"★".repeat(r.star)}{"☆".repeat(5 - r.star)}</span>
+                    <span style={{ fontSize: 11, color: "#aaa" }}>{r.created_at?.slice(0, 10)}</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: "#555", margin: "0 0 6px", lineHeight: 1.5 }}>{r.text || "(텍스트 없음)"}</p>
+                  <p style={{ fontSize: 11, color: "#aaa", margin: "0 0 8px" }}>{r.name} · {r.gender}</p>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {!r.approved && (
+                      <button onClick={() => approveReview(r.id)}
+                        style={{ flex: 1, padding: "5px 0", borderRadius: 6, border: "none", background: "#9b2335", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                        승인
+                      </button>
+                    )}
+                    <button onClick={() => deleteReview(r.id)}
+                      style={{ flex: 1, padding: "5px 0", borderRadius: 6, border: "1px solid #ddd", background: "#fff", color: "#888", fontSize: 12, cursor: "pointer" }}>
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {reviews.filter(r => reviewTab === "pending" ? !r.approved : r.approved).length === 0 && (
+                <p style={{ fontSize: 12, color: "#ccc", textAlign: "center", padding: "16px 0" }}>없음</p>
+              )}
+            </div>
           </div>
         </div>
       )}
