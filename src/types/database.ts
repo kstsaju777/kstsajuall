@@ -192,6 +192,40 @@ export type Database = {
         Update: Partial<SajuApiCallRow>;
         Relationships: [];
       };
+      saju_total_reviews: {
+        Row: {
+          id: string;
+          result_id: string;
+          name: string;
+          gender: string | null;
+          age_group: string | null;
+          star: number;
+          text: string;
+          approved: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          result_id: string;
+          name: string;
+          gender?: string | null;
+          age_group?: string | null;
+          star: number;
+          text: string;
+          approved?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<{
+          result_id: string;
+          name: string;
+          gender: string | null;
+          age_group: string | null;
+          star: number;
+          text: string;
+          approved: boolean;
+        }>;
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
