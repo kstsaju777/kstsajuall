@@ -956,7 +956,7 @@ const CHAPTER_TITLES = [
   "인트로 — 사주팔자란 무엇인가",        // API 13
   "마무리 — 그대에게 남기는 홍연의 서신", // API 14
 ];
-const TOTAL = 14;
+const TOTAL = 10;
 
 function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; currentChapter: number }) {
   const pct = Math.round((doneCount / TOTAL) * 100);
@@ -1051,7 +1051,7 @@ function CheckoutContent() {
       }
 
       const FIRST = [2]; // 용신 확정을 위해 2장 먼저 단독 생성
-      const REST  = [1,3,4,5,6,7,8,9,10,11,12,13,14];
+      const REST  = [1,3,4,5,6,7,11,14,15]; // 실제 표시 목차에 대응하는 API ch만 생성
       let done = 0;
       const allContent: Record<string, unknown> = {};
 
