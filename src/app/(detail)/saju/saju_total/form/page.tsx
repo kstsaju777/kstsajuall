@@ -793,7 +793,7 @@ function StepLoading({
 
       {/* 말풍선 — 좌상단 (1초 후, b3 등장 시 페이드아웃) */}
       <div className="absolute" style={{ top: "10%", left: "6%", opacity: b1 ? 1 : 0, transition: "opacity 0.5s ease" }}>
-        <LoadBubble text={`${name}${honor}\n사주를 보니`} size="20px" width="200px" />
+        <LoadBubble text={`${name}님\n사주를 보니`} size="20px" width="200px" />
       </div>
 
       {/* 말풍선 — 중앙 (2초 후, b3 등장 시 페이드아웃) */}
