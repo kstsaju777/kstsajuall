@@ -1051,7 +1051,7 @@ function CheckoutContent() {
       }
 
       const FIRST = [2]; // 용신 확정을 위해 2장 먼저 단독 생성
-      const REST  = [1,3,4,5,6,7,11,14,15]; // 실제 표시 목차에 대응하는 API ch만 생성
+      const REST  = [1,3,4,5,6,7,8,9,10]; // display ch = API ch 동기화
       let done = 0;
       const allContent: Record<string, unknown> = {};
 
@@ -1092,6 +1092,17 @@ function CheckoutContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
+
+      // 이미지 생성 완료 대기 (최대 60초 폴링)
+      const deadline = Date.now() + 60_000;
+      while (Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 3000));
+        try {
+          const r = await fetch(`/api/saju_total-report?id=${resultId}`);
+          const d = await r.json();
+          if (d.sajuImageUrl) break;
+        } catch { /* 폴링 실패 무시 */ }
+      }
 
       router.push(`/saju/saju_total/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     } catch {
