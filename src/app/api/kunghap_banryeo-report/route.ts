@@ -26,7 +26,7 @@ export const maxDuration = 300;
 
 const PRODUCT_SLUG = "kunghap_banryeo";
 const PRODUCT_NAME = "반려궁합";
-const PRODUCT_PRICE = 24900;
+const PRODUCT_PRICE = 29900;
 const REPORT_PATH = "saju/kunghap_banryeo/report-preview";
 
 const createSchema = z.object({
