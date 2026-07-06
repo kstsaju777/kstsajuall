@@ -2021,8 +2021,7 @@ function CheckoutContent() {
               .toss-widget-wrap button[class*="inline-flex"][class*="w-full"]:hover {
                 background: #1b6fe8 !important;
               }
-              .toss-widget-wrap #payment-methods { margin-bottom: -20px !important; }
-              .toss-widget-wrap #agreement { transform: scale(0.75); transform-origin: left top; margin-bottom: -32px; width: 133% !important; }
+              .toss-widget-wrap #agreement { transform: scale(0.75); transform-origin: left top; width: 133% !important; }
 
             `}</style>
             <div className="px-5 pt-2 pb-8">
