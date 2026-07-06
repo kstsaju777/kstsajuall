@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useMemo, useState, useEffect, useRef } from "react";
+import { Suspense, useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { TossWidget } from "@/components/checkout/TossWidget";
 import { calcSaju, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { MyeongsikTable } from "@/components/saju/MyeongsikModal";
@@ -1812,93 +1813,72 @@ function CheckoutContent() {
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
   const [showSheet, setShowSheet] = useState(false);
+  const [showWidget, setShowWidget] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
-  // 페이지 로드 시 미리 주문 생성 → 버튼 클릭 즉시 토스 창 이동
+  const [widgetOrderId, setWidgetOrderId] = useState<string | null>(null);
+  const [widgetAmount, setWidgetAmount] = useState<number>(PRODUCT.price);
+
+  // 페이지 로드 시 미리 주문 생성 → 버튼 클릭 즉시 위젯 오픈
   const pendingOrderId = useRef<string | null>(null);
-  const orderCreating = useRef(false);
+  const pendingAmount  = useRef<number>(PRODUCT.price);
+  const orderCreating  = useRef(false);
+
+  const buildOrderBody = useCallback(async () => {
+    const { parseTimeVal, parseCalendar } = await import("@/lib/saju/local-manseryeok");
+    const birthDate   = date.replace(/\./g, "-");
+    const timeVal     = parseTimeVal(time);
+    const birthTime   = timeVal !== "unknown" ? timeVal : null;
+    const timeUnknown = timeVal === "unknown";
+    const calApi      = parseCalendar(calendar) === "solar" ? "solar" : "lunar";
+    const genderApi: "male" | "female" =
+      gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
+    return { productSlug: "total", email, name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: concern ? [concern] : [] };
+  }, [date, time, calendar, gender, email, name, concern]);
 
   useEffect(() => {
     if (orderCreating.current) return;
     orderCreating.current = true;
     (async () => {
       try {
-        const { parseTimeVal, parseCalendar } = await import("@/lib/saju/local-manseryeok");
-        const birthDate = date.replace(/\./g, "-");
-        const timeVal = parseTimeVal(time);
-        const birthTime = timeVal !== "unknown" ? timeVal : null;
-        const timeUnknown = timeVal === "unknown";
-        const calApi = parseCalendar(calendar) === "solar" ? "solar" : "lunar";
-        const genderApi: "male" | "female" =
-          gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
-
-        const res = await fetch("/api/orders/create-guest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            productSlug: "total",
-            email,
-            name,
-            birthDate,
-            birthTime,
-            timeUnknown,
-            gender: genderApi,
-            calendar: calApi,
-            concerns: concern ? [concern] : [],
-          }),
-        });
+        const body = await buildOrderBody();
+        const res = await fetch("/api/orders/create-guest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
         if (res.ok) {
-          const { orderId } = await res.json();
+          const { orderId, amount } = await res.json();
           pendingOrderId.current = orderId;
+          pendingAmount.current  = amount;
         }
       } catch { /* 실패 시 handleConfirm에서 재시도 */ }
     })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [buildOrderBody]);
 
   const handleConfirm = async () => {
     setShowSheet(false);
     setOrderError(null);
     if (pendingOrderId.current) {
-      router.push(`/checkout/${pendingOrderId.current}`);
+      setWidgetOrderId(pendingOrderId.current);
+      setWidgetAmount(pendingAmount.current);
+      setShowWidget(true);
       return;
     }
     // 미리 생성 실패 시 즉석 재시도
     try {
-      const { parseTimeVal, parseCalendar } = await import("@/lib/saju/local-manseryeok");
-      const birthDate = date.replace(/\./g, "-");
-      const timeVal = parseTimeVal(time);
-      const birthTime = timeVal !== "unknown" ? timeVal : null;
-      const timeUnknown = timeVal === "unknown";
-      const calApi = parseCalendar(calendar) === "solar" ? "solar" : "lunar";
-      const genderApi: "male" | "female" =
-        gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
-
-      const res = await fetch("/api/orders/create-guest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productSlug: "total",
-          email,
-          name,
-          birthDate,
-          birthTime,
-          timeUnknown,
-          gender: genderApi,
-          calendar: calApi,
-          concerns: concern ? [concern] : [],
-        }),
-      });
+      const body = await buildOrderBody();
+      const res = await fetch("/api/orders/create-guest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
         setOrderError(json.error ?? "주문 생성에 실패했습니다. 다시 시도해 주세요.");
         return;
       }
-      const { orderId } = await res.json();
-      router.push(`/checkout/${orderId}`);
+      const { orderId, amount } = await res.json();
+      setWidgetOrderId(orderId);
+      setWidgetAmount(amount);
+      setShowWidget(true);
     } catch {
       setOrderError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
     }
   };
+
+  const SITE = typeof window !== "undefined" ? window.location.origin : "";
 
   void phone; // TODO: Solapi 알림톡 연동 시 사용
 
@@ -2019,6 +1999,33 @@ function CheckoutContent() {
             <button onClick={() => setOrderError(null)} className="ml-3 underline opacity-70">닫기</button>
           </div>
         </div>
+      )}
+      {/* 토스 결제 위젯 오버레이 */}
+      {showWidget && widgetOrderId && (
+        <>
+          <div className="fixed inset-0 z-[70]" style={{ background: "rgba(0,0,0,0.6)" }} onClick={() => setShowWidget(false)} />
+          <div className="fixed z-[71] overflow-y-auto rounded-t-3xl"
+            style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", bottom: 0, maxHeight: "92vh", background: "#fff", scrollbarWidth: "none" }}>
+            <div className="flex justify-center pt-3 pb-1">
+              <div style={{ width: 40, height: 4, borderRadius: 99, background: "rgba(0,0,0,0.15)" }} />
+            </div>
+            <div className="px-5 pt-2 pb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[17px] font-black" style={{ color: "#1a1a1a" }}>결제</h3>
+                <button onClick={() => setShowWidget(false)} style={{ fontSize: 18, color: "#888" }}>✕</button>
+              </div>
+              <TossWidget
+                orderId={widgetOrderId}
+                amount={widgetAmount}
+                customerKey={`guest_${widgetOrderId}`}
+                productName="종합사주풀이"
+                customerEmail={email || null}
+                successUrl={`${SITE}/saju/saju_total/checkout/success`}
+                failUrl={`${SITE}/checkout/fail`}
+              />
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
