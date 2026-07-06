@@ -107,12 +107,11 @@ const SIJU_HOUR_MAP: Record<string, string> = {
 // "신시 (15:30 ~ 17:30)" → "16:30" / "시간 모름" → "unknown"
 export function parseTimeVal(timeStr: string): string {
   if (!timeStr || timeStr === '시간 모름') return 'unknown';
-  // 시진 이름 추출 (첫 두 글자 + '시')
-  const nameMatch = timeStr.match(/^([가-힣]{2}시)/);
-  if (nameMatch && SIJU_HOUR_MAP[nameMatch[1]]) {
-    return SIJU_HOUR_MAP[nameMatch[1]];
+  // 시진 이름 추출 — SIJU_HOUR_MAP 키와 직접 매칭
+  for (const key of Object.keys(SIJU_HOUR_MAP)) {
+    if (timeStr.startsWith(key)) return SIJU_HOUR_MAP[key];
   }
-  // fallback: 기존 방식
+  // fallback: 괄호 안 시각 추출
   const match = timeStr.match(/\((\d{2}:\d{2})/);
   return match ? match[1] : 'unknown';
 }
