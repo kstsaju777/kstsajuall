@@ -1812,25 +1812,64 @@ function CheckoutContent() {
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
   const [showSheet, setShowSheet] = useState(false);
-  const [orderLoading, setOrderLoading] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
+  // 페이지 로드 시 미리 주문 생성 → 버튼 클릭 즉시 토스 창 이동
+  const pendingOrderId = useRef<string | null>(null);
+  const orderCreating = useRef(false);
+
+  useEffect(() => {
+    if (orderCreating.current) return;
+    orderCreating.current = true;
+    (async () => {
+      try {
+        const { parseTimeVal, parseCalendar } = await import("@/lib/saju/local-manseryeok");
+        const birthDate = date.replace(/\./g, "-");
+        const timeVal = parseTimeVal(time);
+        const birthTime = timeVal !== "unknown" ? timeVal : null;
+        const timeUnknown = timeVal === "unknown";
+        const calApi = parseCalendar(calendar) === "solar" ? "solar" : "lunar";
+        const genderApi: "male" | "female" =
+          gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
+
+        const res = await fetch("/api/orders/create-guest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productSlug: "total",
+            email,
+            name,
+            birthDate,
+            birthTime,
+            timeUnknown,
+            gender: genderApi,
+            calendar: calApi,
+            concerns: concern ? [concern] : [],
+          }),
+        });
+        if (res.ok) {
+          const { orderId } = await res.json();
+          pendingOrderId.current = orderId;
+        }
+      } catch { /* 실패 시 handleConfirm에서 재시도 */ }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleConfirm = async () => {
     setShowSheet(false);
-    setOrderLoading(true);
     setOrderError(null);
+    if (pendingOrderId.current) {
+      router.push(`/checkout/${pendingOrderId.current}`);
+      return;
+    }
+    // 미리 생성 실패 시 즉석 재시도
     try {
-      // date "1991.11.18" → "1991-11-18"
-      const birthDate = date.replace(/\./g, "-");
-      // time → "HH:mm" or null
       const { parseTimeVal, parseCalendar } = await import("@/lib/saju/local-manseryeok");
+      const birthDate = date.replace(/\./g, "-");
       const timeVal = parseTimeVal(time);
       const birthTime = timeVal !== "unknown" ? timeVal : null;
       const timeUnknown = timeVal === "unknown";
-      // calendar → solar/lunar
-      const calEnum = parseCalendar(calendar);
-      const calApi = calEnum === "solar" ? "solar" : "lunar";
-      // gender
+      const calApi = parseCalendar(calendar) === "solar" ? "solar" : "lunar";
       const genderApi: "male" | "female" =
         gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
 
@@ -1849,33 +1888,19 @@ function CheckoutContent() {
           concerns: concern ? [concern] : [],
         }),
       });
-
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
         setOrderError(json.error ?? "주문 생성에 실패했습니다. 다시 시도해 주세요.");
-        setOrderLoading(false);
         return;
       }
-
       const { orderId } = await res.json();
       router.push(`/checkout/${orderId}`);
     } catch {
       setOrderError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
-      setOrderLoading(false);
     }
   };
 
   void phone; // TODO: Solapi 알림톡 연동 시 사용
-
-  if (orderLoading) {
-    return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center"
-        style={{ background: "radial-gradient(ellipse at 50% 40%, #3a0008 0%, #0a0002 100%)" }}>
-        <span style={{ fontSize: 32, filter: "drop-shadow(0 0 10px #9b2335)" }}>✦</span>
-        <p className="mt-4 text-[15px] font-bold" style={{ color: "#fff5f5" }}>결제 창을 열고 있소…</p>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full h-full" style={{ backgroundColor: WHITE }}>
