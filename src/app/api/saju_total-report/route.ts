@@ -300,11 +300,39 @@ async function generateChapter(body: unknown) {
     const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
     const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
 
+    // pillars fallback: view.pillars가 없으면 manseryeokText에서 재계산
+    let pillars = stored?.view?.pillars ?? [];
+    if (pillars.length === 0 && stored?.birth) {
+      try {
+        const bd = stored.birth as { date?: string; time?: string; calendar?: string };
+        const parsedDate = parseDate(bd.date ?? "");
+        if (parsedDate) {
+          const { year, month, day } = parsedDate;
+          const timeVal = parseTimeVal(bd.time ?? "");
+          const hasTime = timeVal !== "unknown";
+          const [hh, mm] = hasTime ? timeVal.split(":") : ["", ""];
+          const cal = parseCalendar(bd.calendar ?? "양력");
+          const birthInfo: BirthInfo = {
+            birthYear: String(year), birthMonth: String(month), birthDay: String(day),
+            ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
+            calendarType: cal === "solar" ? "양력" : "음력",
+            isLeapMonth: cal === "leap",
+            gender: stored?.gender === "female" ? "female" : "male",
+          };
+          const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
+          const rebuiltView = buildMyeongsikView(analysis);
+          pillars = rebuiltView.pillars ?? [];
+          // 복원된 view를 DB에 저장 (다음 호출부터 재계산 불필요)
+          await service.from("saju_results").update({ myeongsik: { ...stored, view: rebuiltView } as never }).eq("id", id);
+        }
+      } catch { /* 복원 실패 시 빈 pillars로 진행 */ }
+    }
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
-      pillars: applyLocalSinsal(stored?.view?.pillars ?? []),
+      pillars: applyLocalSinsal(pillars),
       birthYear: birthYear || undefined,
       concern: stored?.concern || undefined,
       yongsinEl,
