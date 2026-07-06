@@ -2033,7 +2033,7 @@ function CheckoutContent() {
                 <h3 className="text-[17px] font-normal" style={{ color: "#1a1a1a" }}>복비를 결제해 주세요</h3>
                 <button onClick={() => setShowWidget(false)} style={{ fontSize: 18, color: "#888" }}>✕</button>
               </div>
-              <p className="text-[16px] font-normal mb-4 pl-6" style={{ color: "#1a1a1a" }}>
+              <p className="text-[16px] font-normal mb-4 pl-6" style={{ color: "#3182F6" }}>
                 [종합사주] - {widgetAmount.toLocaleString()}원
               </p>
               <div className="toss-widget-wrap">
