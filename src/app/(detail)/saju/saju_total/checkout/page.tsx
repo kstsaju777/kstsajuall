@@ -1806,94 +1806,75 @@ function CheckoutContent() {
   const calendar = searchParams.get("calendar") ?? "양력";
   const gender   = searchParams.get("gender")   ?? "";
   const email    = searchParams.get("email")    ?? "";
+  const phone    = searchParams.get("phone")    ?? "";
   const concern  = searchParams.get("concern")  ?? "";
 
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
   const [showSheet, setShowSheet] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [doneCount, setDoneCount] = useState(0);
-  const [currentChapter, setCurrentChapter] = useState(1);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   const handleConfirm = async () => {
     setShowSheet(false);
-    setCreating(true);
-    setDoneCount(0);
-    setCurrentChapter(1);
+    setOrderLoading(true);
+    setOrderError(null);
     try {
-      const res = await fetch("/api/saju_total-report", {
+      // date "1991.11.18" → "1991-11-18"
+      const birthDate = date.replace(/\./g, "-");
+      // time → "HH:mm" or null
+      const { parseTimeVal, parseCalendar } = await import("@/lib/saju/local-manseryeok");
+      const timeVal = parseTimeVal(time);
+      const birthTime = timeVal !== "unknown" ? timeVal : null;
+      const timeUnknown = timeVal === "unknown";
+      // calendar → solar/lunar
+      const calEnum = parseCalendar(calendar);
+      const calApi = calEnum === "solar" ? "solar" : "lunar";
+      // gender
+      const genderApi: "male" | "female" =
+        gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
+
+      const res = await fetch("/api/orders/create-guest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, date, time, calendar, gender, email, concern }),
+        body: JSON.stringify({
+          productSlug: "total",
+          email,
+          name,
+          birthDate,
+          birthTime,
+          timeUnknown,
+          gender: genderApi,
+          calendar: calApi,
+          concerns: concern ? [concern] : [],
+        }),
       });
+
       if (!res.ok) {
-        router.push(`/saju/saju_total/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
-        return;
-      }
-      const { resultId } = await res.json();
-      if (!resultId) {
-        router.push(`/saju/saju_total/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
+        const json = await res.json().catch(() => ({}));
+        setOrderError(json.error ?? "주문 생성에 실패했습니다. 다시 시도해 주세요.");
+        setOrderLoading(false);
         return;
       }
 
-      const FIRST = [2]; // 용신 확정을 위해 2장 먼저 단독 생성
-      const REST  = [1,3,4,5,6,7,8,9,10]; // display ch = API ch 동기화
-      let done = 0;
-      const allContent: Record<string, unknown> = {};
-
-      // 2장 먼저 생성 — 완료 시 route.ts가 myeongsik에 yongsinEl 저장
-      for (const ch of FIRST) {
-        try {
-          const r = await fetch("/api/saju_total-report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, chapter: ch }),
-          });
-          const data = await r.json();
-          if (data.sections) Object.assign(allContent, data.sections);
-        } catch { /* 실패해도 계속 */ }
-        done++;
-        setDoneCount(done);
-        setCurrentChapter(Math.min(done + 1, TOTAL));
-      }
-
-      // 나머지 장 병렬 생성 (myeongsik에 yongsinEl이 저장된 상태)
-      await Promise.all(REST.map(async (ch) => {
-        try {
-          const r = await fetch("/api/saju_total-report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, chapter: ch }),
-          });
-          const data = await r.json();
-          if (data.sections) Object.assign(allContent, data.sections);
-        } catch { /* 장 실패해도 계속 */ }
-        done++;
-        setDoneCount(done);
-        setCurrentChapter(Math.min(done + 1, TOTAL));
-      }));
-
-      await fetch("/api/saju_total-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: allContent }),
-      });
-
-      // 이미지 생성 (PATCH로 명시적 await — 응답 전 컨텍스트 종료 방지)
-      await fetch("/api/saju_total-report", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId }),
-      }).catch(() => { /* 실패해도 결과지는 오픈 */ });
-
-      router.push(`/saju/saju_total/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
+      const { orderId } = await res.json();
+      router.push(`/checkout/${orderId}`);
     } catch {
-      router.push(`/saju/saju_total/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
+      setOrderError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
+      setOrderLoading(false);
     }
   };
 
-  if (creating) {
-    return <CreatingScreen doneCount={doneCount} currentChapter={currentChapter} />;
+  void phone; // TODO: Solapi 알림톡 연동 시 사용
+
+  if (orderLoading) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center"
+        style={{ background: "radial-gradient(ellipse at 50% 40%, #3a0008 0%, #0a0002 100%)" }}>
+        <span style={{ fontSize: 32, filter: "drop-shadow(0 0 10px #9b2335)" }}>✦</span>
+        <p className="mt-4 text-[15px] font-bold" style={{ color: "#fff5f5" }}>결제 창을 열고 있소…</p>
+      </div>
+    );
   }
 
   return (
@@ -2006,6 +1987,14 @@ function CheckoutContent() {
       <ToastLayer />
       <StickyPayCTA onPay={() => setShowSheet(true)} name={name} />
       <PayBottomSheet open={showSheet} onClose={() => setShowSheet(false)} onConfirm={handleConfirm} />
+      {orderError && (
+        <div className="fixed bottom-24 z-[60] px-4" style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)" }}>
+          <div className="rounded-2xl px-4 py-3 text-center" style={{ background: "#7a1020", color: "#fff", fontSize: 13 }}>
+            {orderError}
+            <button onClick={() => setOrderError(null)} className="ml-3 underline opacity-70">닫기</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

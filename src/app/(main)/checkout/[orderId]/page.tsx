@@ -39,6 +39,19 @@ export default async function CheckoutPage({
   const customerKey = order.user_id ?? `guest_${order.id}`;
   const email = order.guest_email;
 
+  const { data: productSlugRow } = await service
+    .from("products")
+    .select("slug")
+    .eq("id", order.product_id)
+    .single();
+  const slug = productSlugRow?.slug ?? "";
+
+  // 상품별 전용 successUrl
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const successUrl = slug === "total"
+    ? `${SITE}/saju/saju_total/checkout/success`
+    : `${SITE}/checkout/success`;
+
   return (
     <div className="container py-12 max-w-2xl">
       <Card>
@@ -55,6 +68,7 @@ export default async function CheckoutPage({
             customerKey={customerKey}
             productName={product?.name ?? "사주 상품"}
             customerEmail={email}
+            successUrl={successUrl}
           />
         </CardContent>
       </Card>

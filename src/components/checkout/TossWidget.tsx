@@ -12,9 +12,11 @@ type Props = {
   customerKey: string;
   productName: string;
   customerEmail: string | null;
+  successUrl?: string;
+  failUrl?: string;
 };
 
-export function TossWidget({ orderId, amount, customerKey, productName, customerEmail }: Props) {
+export function TossWidget({ orderId, amount, customerKey, productName, customerEmail, successUrl, failUrl }: Props) {
   const paymentMethodsRef = useRef<HTMLDivElement>(null);
   const agreementRef = useRef<HTMLDivElement>(null);
   const widgetsRef = useRef<Awaited<ReturnType<typeof loadWidgets>> | null>(null);
@@ -49,8 +51,8 @@ export function TossWidget({ orderId, amount, customerKey, productName, customer
       await widgets.requestPayment({
         orderId,
         orderName: productName,
-        successUrl: `${publicEnv.NEXT_PUBLIC_SITE_URL}/checkout/success`,
-        failUrl: `${publicEnv.NEXT_PUBLIC_SITE_URL}/checkout/fail`,
+        successUrl: successUrl ?? `${publicEnv.NEXT_PUBLIC_SITE_URL}/checkout/success`,
+        failUrl: failUrl ?? `${publicEnv.NEXT_PUBLIC_SITE_URL}/checkout/fail`,
         customerEmail: customerEmail ?? undefined,
       });
     } catch (err) {
