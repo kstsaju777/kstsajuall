@@ -2017,6 +2017,8 @@ function CheckoutContent() {
                 font-weight: 700 !important;
                 font-size: 16px !important;
                 box-shadow: none !important;
+                width: calc(100% - 48px) !important;
+                margin-left: 24px !important;
               }
               .toss-widget-wrap button[class*="inline-flex"][class*="w-full"]:hover {
                 background: #1b6fe8 !important;
