@@ -64,10 +64,10 @@ export function TossWidget({ orderId, amount, customerKey, productName, customer
   return (
     <div className="space-y-4">
       <div id="payment-methods" ref={paymentMethodsRef} />
+      <div id="agreement" ref={agreementRef} />
       <Button onClick={handlePay} disabled={!ready || paying} size="lg" className="w-full">
         {paying ? "결제 진행 중..." : "결제하기"}
       </Button>
-      <div id="agreement" ref={agreementRef} />
     </div>
   );
 }
