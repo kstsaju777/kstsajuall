@@ -2030,7 +2030,7 @@ function CheckoutContent() {
             `}</style>
             <div className="px-5 pt-2 pb-8">
               <div className="flex items-center justify-between mb-3 pl-6">
-                <h3 className="text-[17px] font-black" style={{ color: "#1a1a1a" }}>복비를 결제해 주세요</h3>
+                <h3 className="text-[17px] font-normal" style={{ color: "#1a1a1a" }}>복비를 결제해 주세요</h3>
                 <button onClick={() => setShowWidget(false)} style={{ fontSize: 18, color: "#888" }}>✕</button>
               </div>
               <p className="text-[16px] font-bold mb-4 pl-6" style={{ color: "#1a1a1a" }}>
