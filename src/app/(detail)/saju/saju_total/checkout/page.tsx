@@ -2009,11 +2009,28 @@ function CheckoutContent() {
             <div className="flex justify-center pt-3 pb-1">
               <div style={{ width: 40, height: 4, borderRadius: 99, background: "rgba(0,0,0,0.15)" }} />
             </div>
+            <style>{`
+              .toss-widget-wrap button[class*="inline-flex"][class*="w-full"] {
+                background: #3182F6 !important;
+                color: #fff !important;
+                border-radius: 12px !important;
+                font-weight: 700 !important;
+                font-size: 16px !important;
+                box-shadow: none !important;
+              }
+              .toss-widget-wrap button[class*="inline-flex"][class*="w-full"]:hover {
+                background: #1b6fe8 !important;
+              }
+            `}</style>
             <div className="px-5 pt-2 pb-8">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-1">
                 <h3 className="text-[17px] font-black" style={{ color: "#1a1a1a" }}>결제</h3>
                 <button onClick={() => setShowWidget(false)} style={{ fontSize: 18, color: "#888" }}>✕</button>
               </div>
+              <p className="text-[13px] mb-4" style={{ color: "#888" }}>
+                종합사주풀이 · <span className="font-bold" style={{ color: "#1a1a1a" }}>{widgetAmount.toLocaleString()}원</span>
+              </p>
+              <div className="toss-widget-wrap">
               <TossWidget
                 orderId={widgetOrderId}
                 amount={widgetAmount}
@@ -2023,6 +2040,7 @@ function CheckoutContent() {
                 successUrl={`${SITE}/saju/saju_total/checkout/success`}
                 failUrl={`${SITE}/checkout/fail`}
               />
+              </div>
             </div>
           </div>
         </>
