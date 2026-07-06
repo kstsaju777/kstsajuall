@@ -2020,7 +2020,7 @@ function CheckoutContent() {
                 width: calc(100% - 48px) !important;
                 margin-left: 24px !important;
                 height: 56px !important;
-                margin-top: -8px !important;
+                margin-top: -18px !important;
               }
               .toss-widget-wrap button[class*="inline-flex"][class*="w-full"]:hover {
                 background: #1b6fe8 !important;
