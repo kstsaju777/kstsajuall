@@ -323,14 +323,14 @@ function StepSajuPreview({ onPrev, onNext, date, time, calendar, name, isPartner
             {(pillars ?? Array(4).fill(null)).map((p, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
                 <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>{PILLAR_LABELS[i]}</span>
-                <span style={{ fontSize: 13, color: ACCENT, lineHeight: 1, fontWeight: 700 }}>{p?.stemSs || " "}</span>
+                <span style={{ fontSize: 13, color: ACCENT, lineHeight: 1, fontWeight: 700 }}>{p?.stemSs || "-"}</span>
                 <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
                   {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                 </div>
                 <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
                   {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                 </div>
-                <span style={{ fontSize: 13, color: ACCENT, lineHeight: 1, fontWeight: 700 }}>{p?.branchSs || " "}</span>
+                <span style={{ fontSize: 13, color: ACCENT, lineHeight: 1, fontWeight: 700 }}>{p?.branchSs || "-"}</span>
               </div>
             ))}
           </div>
@@ -362,14 +362,14 @@ function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: s
       <div className="grid grid-cols-4 gap-1 rounded-2xl p-2.5" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-1">
-            <span style={{ fontSize: 11, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || " "}</span>
+            <span style={{ fontSize: 11, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || "-"}</span>
             <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
               {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
             <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
               {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
-            <span style={{ fontSize: 11, color: LABEL_CLR, lineHeight: 1 }}>{p?.branchSs || " "}</span>
+            <span style={{ fontSize: 11, color: LABEL_CLR, lineHeight: 1 }}>{p?.branchSs || "-"}</span>
           </div>
         ))}
       </div>
@@ -422,8 +422,9 @@ function StepConcern({ onPrev, onNext,
 // ─── 이메일 ──────────────────────────────────────────────────────────────────
 const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "hotmail.com", "직접입력"];
 const MONO_FONT = "'Pretendard', 'Apple SD Gothic Neo', sans-serif";
+const PHONE_PREFIXES = ["010", "011", "016", "017", "018", "019"];
 
-function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v: string) => void; initial?: string }) {
+function StepEmail({ onPrev, onNext, initial, initialPhone }: { onPrev: () => void; onNext: (email: string, phone: string) => void; initial?: string; initialPhone?: string }) {
   const initLocal = initial?.split("@")[0] ?? "";
   const initDom   = initial?.split("@")[1] ?? "";
   const initIsKnown = EMAIL_DOMAINS.includes(initDom);
@@ -433,10 +434,20 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v
   const [custom, setCustom] = useState(initDom && !initIsKnown ? initDom : "");
   const [open, setOpen]     = useState(false);
 
+  const initPhone = initialPhone ?? "";
+  const initPrefix = PHONE_PREFIXES.includes(initPhone.slice(0, 3)) ? initPhone.slice(0, 3) : "010";
+  const [phonePrefix, setPhonePrefix] = useState(initPrefix);
+  const [phoneMid, setPhoneMid] = useState(initPhone.slice(3, 7));
+  const [phoneEnd, setPhoneEnd] = useState(initPhone.slice(7, 11));
+  const [phoneOpen, setPhoneOpen] = useState(false);
+
   const isCustom   = domain === "직접입력";
   const fullDomain = isCustom ? custom.trim() : domain;
   const email      = local.trim() && fullDomain ? `${local.trim()}@${fullDomain}` : "";
-  const isValid    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const phone      = `${phonePrefix}${phoneMid}${phoneEnd}`;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhoneValid = /^\d{11}$/.test(phone);
+  const isValid    = isEmailValid && isPhoneValid;
 
   return (
     <>
@@ -490,16 +501,56 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (v
           </div>
         </div>
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(email)} nextLabel="작성완료" nextDisabled={!isValid} />
+
+        {/* 전화번호 */}
+        <div className="px-6 pt-5 pb-2" style={{ backgroundColor: CARD_BG }}>
+          <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>카카오톡으로도 받아보시게</p>
+          <h2 className="text-[20px] font-bold mb-5" style={{ color: TEXT_CLR }}>전화번호를 알려주시오</h2>
+          <div className="flex items-end gap-2">
+            <div className="relative" style={{ flexShrink: 0 }}>
+              {phoneOpen && (
+                <div className="absolute bottom-full left-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
+                  style={{ minWidth: 80, border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(8,20,10,0.9)", backdropFilter: "blur(8px)" }}>
+                  {PHONE_PREFIXES.map((p) => (
+                    <div key={p} onClick={() => { setPhonePrefix(p); setPhoneOpen(false); }}
+                      className="px-4 py-3 text-[14px] cursor-pointer"
+                      style={{ backgroundColor: phonePrefix === p ? "rgba(115,142,111,0.2)" : "transparent", color: phonePrefix === p ? "#fff" : "#ddd", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      {p}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => setPhoneOpen((v) => !v)}
+                className="flex items-center gap-1 pb-2.5 text-[17px]"
+                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent", fontFamily: MONO_FONT }}>
+                {phonePrefix}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ transform: phoneOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </div>
+            <input type="text" inputMode="numeric" maxLength={4} placeholder="0000" value={phoneMid}
+              onChange={(e) => setPhoneMid(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneMid ? TEXT_CLR : PH_CLR, caretColor: ACCENT }} />
+            <input type="text" inputMode="numeric" maxLength={4} placeholder="0000" value={phoneEnd}
+              onChange={(e) => setPhoneEnd(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneEnd ? TEXT_CLR : PH_CLR, caretColor: ACCENT }} />
+          </div>
+        </div>
+
+      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(email, phone)} nextLabel="작성완료" nextDisabled={!isValid} />
     </>
   );
 }
 
 // ─── 로딩 ────────────────────────────────────────────────────────────────────
 function StepLoading({ name, date, time, calendar, gender, email, concern,
-  partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender }: {
+  partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, phone }: {
   name: string; date: string; time: string; calendar: string; gender: string; email: string; concern: string;
-  partnerName: string; partnerDate: string; partnerTime: string; partnerCalendar: string; partnerGender: string;
+  partnerName: string; partnerDate: string; partnerTime: string; partnerCalendar: string; partnerGender: string; phone: string;
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
@@ -530,7 +581,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern,
 
   const goNext = () => {
     const params = new URLSearchParams({
-      name, date, time, calendar, gender, email, concern: concern ?? "", ch: "0",
+      name, date, time, calendar, gender, email, concern: concern ?? "", phone, ch: "0",
       partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender,
     });
     router.push(`/saju/kunghap_imshin/checkout?${params.toString()}`);
@@ -560,7 +611,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern,
 type FormData = {
   gender: string; date: string; time: string; calendar: string; name: string;
   partnerGender: string; partnerDate: string; partnerTime: string; partnerCalendar: string; partnerName: string;
-  concern: string; email: string;
+  concern: string; email: string; phone: string;
 };
 
 export default function ImshinFormPage() {
@@ -635,8 +686,9 @@ export default function ImshinFormPage() {
           {step === 8 && (
             <StepEmail
               onPrev={() => setStep(7)}
-              onNext={(email) => next({ email }, 9)}
+              onNext={(email, phone) => next({ email, phone }, 9)}
               initial={form.email}
+              initialPhone={form.phone}
             />
           )}
         </FormShell>
@@ -648,6 +700,7 @@ export default function ImshinFormPage() {
           calendar={form.calendar ?? "양력"} gender={form.gender ?? ""} email={form.email ?? ""} concern={form.concern ?? ""}
           partnerName={form.partnerName ?? ""} partnerDate={form.partnerDate ?? ""} partnerTime={form.partnerTime ?? "시간 모름"}
           partnerCalendar={form.partnerCalendar ?? "양력"} partnerGender={form.partnerGender ?? ""}
+          phone={form.phone ?? ""}
         />
       )}
     </>

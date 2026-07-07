@@ -719,14 +719,14 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
               {(pillars ?? Array(4).fill(null)).map((p, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <p className="text-[15px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
-                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.stemSs || ""}</span>
+                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.stemSs || "-"}</span>
                   <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
                     {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                   </div>
                   <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
                     {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                   </div>
-                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.branchSs || ""}</span>
+                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.branchSs || "-"}</span>
                 </div>
               ))}
             </div>
@@ -751,14 +751,14 @@ function MiniMyeongsik({ date, time, calendar, name }: { date?: string; time?: s
       <div className="grid grid-cols-4 gap-1.5 rounded-2xl p-3" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {(pillars ?? Array(4).fill(null)).map((p, i) => (
           <div key={i} className="flex flex-col items-center gap-1.5">
-            <span style={{ fontSize: 12, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || " "}</span>
+            <span style={{ fontSize: 12, color: LABEL_CLR, lineHeight: 1 }}>{p?.stemSs || "-"}</span>
             <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
               {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
             <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
               {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
             </div>
-            <span style={{ fontSize: 12, color: LABEL_CLR, lineHeight: 1 }}>{p?.branchSs || " "}</span>
+            <span style={{ fontSize: 12, color: LABEL_CLR, lineHeight: 1 }}>{p?.branchSs || "-"}</span>
           </div>
         ))}
       </div>
@@ -813,9 +813,10 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
 // ─── 이메일 도메인 ────────────────────────────────────────────────────────────
 const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "hotmail.com", "직접입력"];
 const MONO_FONT = "'Pretendard', 'Apple SD Gothic Neo', sans-serif";
+const PHONE_PREFIXES = ["010", "011", "016", "017", "018", "019"];
 
 // ─── Step 6: 이메일 ───────────────────────────────────────────────────────────
-function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (email: string) => void; initial?: string }) {
+function StepEmail({ onPrev, onNext, initial, initialPhone }: { onPrev: () => void; onNext: (email: string, phone: string) => void; initial?: string; initialPhone?: string }) {
   const initLocal = initial?.split("@")[0] ?? "";
   const initDom = initial?.split("@")[1] ?? "";
   const initIsKnown = EMAIL_DOMAINS.includes(initDom);
@@ -825,10 +826,20 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (e
   const [custom, setCustom] = useState(initDom && !initIsKnown ? initDom : "");
   const [open, setOpen] = useState(false);
 
+  const initPhone = initialPhone ?? "";
+  const initPrefix = PHONE_PREFIXES.includes(initPhone.slice(0, 3)) ? initPhone.slice(0, 3) : "010";
+  const [phonePrefix, setPhonePrefix] = useState(initPrefix);
+  const [phoneMid, setPhoneMid] = useState(initPhone.slice(3, 7));
+  const [phoneEnd, setPhoneEnd] = useState(initPhone.slice(7, 11));
+  const [phoneOpen, setPhoneOpen] = useState(false);
+
   const isCustom = domain === "직접입력";
   const fullDomain = isCustom ? custom.trim() : domain;
   const email = local.trim() && fullDomain ? `${local.trim()}@${fullDomain}` : "";
-  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const phone = `${phonePrefix}${phoneMid}${phoneEnd}`;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhoneValid = /^\d{11}$/.test(phone);
+  const isValid = isEmailValid && isPhoneValid;
 
   return (
     <>
@@ -897,7 +908,47 @@ function StepEmail({ onPrev, onNext, initial }: { onPrev: () => void; onNext: (e
           </div>
         </div>
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(email)} nextLabel="작성완료" nextDisabled={!isValid} />
+
+        {/* 전화번호 */}
+        <div className="px-6 pt-5 pb-2" style={{ backgroundColor: CARD_BG }}>
+          <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>카카오톡으로도 받아보시게</p>
+          <h2 className="text-[20px] font-bold mb-5" style={{ color: TEXT_CLR }}>전화번호를 알려주시게</h2>
+          <div className="flex items-end gap-2">
+            <div className="relative" style={{ flexShrink: 0 }}>
+              {phoneOpen && (
+                <div className="absolute bottom-full left-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
+                  style={{ minWidth: 80, border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.55)", backdropFilter: "blur(8px)" }}>
+                  {PHONE_PREFIXES.map((p) => (
+                    <div key={p} onClick={() => { setPhonePrefix(p); setPhoneOpen(false); }}
+                      className="px-4 py-3 text-[14px] cursor-pointer"
+                      style={{ backgroundColor: phonePrefix === p ? "rgba(155,35,53,0.25)" : "transparent", color: phonePrefix === p ? "#fff" : "#ddd", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      {p}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => setPhoneOpen((v) => !v)}
+                className="flex items-center gap-1 pb-2.5 text-[17px]"
+                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent", fontFamily: MONO_FONT }}>
+                {phonePrefix}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ transform: phoneOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </div>
+            <input type="text" inputMode="numeric" maxLength={4} placeholder="0000" value={phoneMid}
+              onChange={(e) => setPhoneMid(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneMid ? TEXT_CLR : PH_CLR, caretColor: NAVY }} />
+            <input type="text" inputMode="numeric" maxLength={4} placeholder="0000" value={phoneEnd}
+              onChange={(e) => setPhoneEnd(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneEnd ? TEXT_CLR : PH_CLR, caretColor: NAVY }} />
+          </div>
+        </div>
+
+      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(email, phone)} nextLabel="작성완료" nextDisabled={!isValid} />
     </>
   );
 }
@@ -940,9 +991,9 @@ function EhonEmailIntro({ onNext }: { onNext: () => void }) {
   );
 }
 
-function StepLoading({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern }: {
+function StepLoading({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern, phone }: {
   name: string; date: string; time: string; calendar: string; gender?: string; email: string;
-  partnerName?: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string; concern?: string;
+  partnerName?: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string; concern?: string; phone: string;
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
@@ -973,7 +1024,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
 
   const goNext = () => {
     const params = new URLSearchParams({
-      name, date, time, calendar, gender: gender ?? "", email, concern: concern ?? "",
+      name, date, time, calendar, gender: gender ?? "", email, concern: concern ?? "", phone,
       partnerName: partnerName ?? "", partnerDate: partnerDate ?? "", partnerTime: partnerTime ?? "",
       partnerCalendar: partnerCalendar ?? "", partnerGender: partnerGender ?? "",
     });
@@ -1001,7 +1052,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
 }
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
-type FormData = { gender: string; date: string; calendar: string; time: string; name: string; concern: string; partnerGender: string; partnerDate: string; partnerCalendar: string; partnerTime: string; partnerName: string; email: string; };
+type FormData = { gender: string; date: string; calendar: string; time: string; name: string; concern: string; partnerGender: string; partnerDate: string; partnerCalendar: string; partnerTime: string; partnerName: string; email: string; phone: string; };
 
 export default function EhonFormPage() {
   const [step, setStep] = useState(1);
@@ -1036,7 +1087,7 @@ export default function EhonFormPage() {
               partnerDate={form.partnerDate} partnerTime={form.partnerTime} partnerCalendar={form.partnerCalendar} partnerName={form.partnerName} />
           )}
           {step === 7 && (
-            <StepEmail initial={form.email} onPrev={() => setStep(6)} onNext={(email) => next({ email }, 8)} />
+            <StepEmail initial={form.email} initialPhone={form.phone} onPrev={() => setStep(6)} onNext={(email, phone) => next({ email, phone }, 8)} />
           )}
         </FormShell>
       )}
@@ -1047,6 +1098,7 @@ export default function EhonFormPage() {
           calendar={form.calendar ?? "양력"} gender={form.gender} email={form.email ?? ""} concern={form.concern ?? ""}
           partnerName={form.partnerName ?? ""} partnerDate={form.partnerDate ?? ""} partnerTime={form.partnerTime ?? "시간 모름"}
           partnerCalendar={form.partnerCalendar ?? "양력"} partnerGender={form.partnerGender ?? ""}
+          phone={form.phone ?? ""}
         />
       )}
     </>

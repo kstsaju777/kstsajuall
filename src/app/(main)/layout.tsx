@@ -82,8 +82,9 @@ function SiteFooter() {
             <a href={businessInfo.kakaoChannel} target="_blank" rel="noreferrer" className="underline hover:opacity-70">
               카카오톡 홍연당 채널
             </a>
-            {" "}|{" "}<span className="text-mute">MAIL</span> {businessInfo.email}
           </p>
+          <p><span className="text-mute">MAIL</span> {businessInfo.email}</p>
+          <p><span className="text-mute">TEL</span> 010-2395-8953</p>
         </div>
         <FooterLegal />
         <div className="space-y-1 pt-1">

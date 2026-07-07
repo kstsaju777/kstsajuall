@@ -1,7 +1,8 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useMemo, useState, useEffect, useRef } from "react";
+import { Suspense, useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { TossWidget } from "@/components/checkout/TossWidget";
 import { calcSaju, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
@@ -470,6 +471,9 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
 }
 
 // ─── 메인 ─────────────────────────────────────────────────────────────────────
+const PRODUCT_SLUG = "saju_jaemul";
+const PRODUCT_INFO = { name: "재물사주", price: 19900 };
+
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -484,64 +488,63 @@ function CheckoutContent() {
   const saju = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
 
   const [showSheet, setShowSheet] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [doneCount, setDoneCount] = useState(0);
-  const [currentChapter, setCurrentChapter] = useState(1);
+  const [showWidget, setShowWidget] = useState(false);
+  const [widgetOrderId, setWidgetOrderId] = useState<string | null>(null);
+  const [widgetAmount, setWidgetAmount] = useState<number>(PRODUCT_INFO.price);
+  const [orderError, setOrderError] = useState<string | null>(null);
+
+  const pendingOrderId = useRef<string | null>(null);
+  const pendingAmount = useRef<number>(PRODUCT_INFO.price);
+  const orderCreating = useRef(false);
+
+  const buildOrderBody = useCallback(() => {
+    const birthDate = date.replace(/\./g, "-");
+    const birthTime = time === "시간 모름" ? null : time;
+    const timeUnknown = time === "시간 모름";
+    const calApi = calendar === "음력" ? "lunar" : "solar";
+    const genderApi: "male" | "female" = gender === "여자" || gender === "여성" || gender === "female" ? "female" : "male";
+    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [] };
+  }, [name, date, time, calendar, gender, email]);
+
+  useEffect(() => {
+    if (orderCreating.current) return;
+    orderCreating.current = true;
+    const body = buildOrderBody();
+    fetch("/api/orders/create-guest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(r => r.json())
+      .then(({ orderId, amount }) => { pendingOrderId.current = orderId; pendingAmount.current = amount; setWidgetAmount(amount); })
+      .catch(() => setOrderError("주문 준비 중 오류가 발생했습니다."));
+  }, [buildOrderBody]);
 
   const handleConfirm = async () => {
     setShowSheet(false);
-    setCreating(true);
-    setDoneCount(0);
-    setCurrentChapter(1);
-    try {
-      const res = await fetch("/api/jaemul-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, date, time, calendar, gender, email }),
-      });
-      if (!res.ok) {
-        router.push(`/saju/saju_jaemul/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
+    if (!pendingOrderId.current) {
+      orderCreating.current = false;
+      try {
+        const body = buildOrderBody();
+        const r = await fetch("/api/orders/create-guest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const json = await r.json();
+        if (json.orderId) {
+          pendingOrderId.current = json.orderId;
+          pendingAmount.current = json.amount;
+          setWidgetAmount(json.amount);
+        } else {
+          setOrderError("주문 생성에 실패했습니다. 다시 시도해 주세요.");
+          return;
+        }
+      } catch {
+        setOrderError("주문 생성에 실패했습니다. 다시 시도해 주세요.");
         return;
       }
-      const { resultId } = await res.json();
-      if (!resultId) {
-        router.push(`/saju/saju_jaemul/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
-        return;
-      }
-
-      const chapters = [1,2,3,4,5,6,7];
-      let done = 0;
-      const allContent: Record<string, unknown> = {};
-      await Promise.all(chapters.map(async (ch) => {
-        try {
-          const r = await fetch("/api/jaemul-report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, chapter: ch }),
-          });
-          const data = await r.json();
-          if (data.sections) Object.assign(allContent, data.sections);
-        } catch { /* 장 실패해도 계속 */ }
-        done++;
-        setDoneCount(done);
-        setCurrentChapter(Math.min(done + 1, TOTAL));
-      }));
-
-      await fetch("/api/jaemul-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: allContent }),
-      });
-
-      router.push(`/saju/saju_jaemul/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
-    } catch {
-      router.push(`/saju/saju_jaemul/report-preview?${new URLSearchParams({ name, gender }).toString()}`);
     }
+    setOrderError(null);
+    setWidgetOrderId(pendingOrderId.current);
+    setShowWidget(true);
   };
-
-  if (creating) {
-    return <CreatingScreen doneCount={doneCount} currentChapter={currentChapter} />;
-  }
 
   return (
     <div className="w-full h-full" style={{ backgroundColor: WHITE }}>
@@ -573,6 +576,44 @@ function CheckoutContent() {
       <ToastLayer />
       <StickyPayCTA onPay={() => setShowSheet(true)} name={name} />
       <PayBottomSheet open={showSheet} onClose={() => setShowSheet(false)} onConfirm={handleConfirm} />
+
+      {showWidget && widgetOrderId && (
+        <>
+          <div className="fixed inset-0 z-[55]" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setShowWidget(false)} />
+          <div className="fixed bottom-0 z-[60] rounded-t-3xl overflow-hidden"
+            style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)", background: "#fff", boxShadow: "0 -12px 40px rgba(0,0,0,0.3)", maxHeight: "90vh", overflowY: "auto" }}>
+            <style>{`
+              .toss-widget-wrap button[class*="inline-flex"][class*="w-full"] { background: #3182F6 !important; color: #fff !important; border-radius: 12px !important; font-weight: 700 !important; font-size: 16px !important; box-shadow: none !important; width: calc(100% - 48px) !important; margin-left: 24px !important; height: 56px !important; margin-top: -18px !important; }
+              .toss-widget-wrap button[class*="inline-flex"][class*="w-full"]:hover { background: #1b6fe8 !important; }
+              .toss-widget-wrap #agreement { transform: scale(0.75); transform-origin: left top; width: 133% !important; margin-top: -12px; }
+            `}</style>
+            <div className="flex justify-center pt-3 pb-1">
+              <div style={{ width: 40, height: 4, borderRadius: 99, background: "#e0e0e0" }} />
+            </div>
+            <div className="px-6 pt-2 pb-2">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-[17px] font-normal" style={{ color: "#1a1a1a" }}>복비를 결제해 주세요</h3>
+                <button onClick={() => setShowWidget(false)} style={{ fontSize: 18, color: "#888" }}>✕</button>
+              </div>
+              <p className="text-[16px] font-normal mb-4" style={{ color: "#3182F6" }}>[{PRODUCT_INFO.name}] - {widgetAmount.toLocaleString()}원</p>
+            </div>
+            <div className="toss-widget-wrap">
+              <TossWidget
+                orderId={widgetOrderId}
+                amount={widgetAmount}
+                customerKey={widgetOrderId}
+                productName={PRODUCT_INFO.name}
+                customerEmail={email || null}
+                successUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://www.hongyeondang.com'}/saju/saju_jaemul/checkout/success`}
+                failUrl={`${typeof window !== 'undefined' ? window.location.origin : 'https://www.hongyeondang.com'}/checkout/fail`}
+              />
+            </div>
+          </div>
+        </>
+      )}
+      {orderError && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[70] bg-red-500 text-white text-sm px-4 py-2 rounded-full">{orderError}</div>
+      )}
     </div>
   );
 }

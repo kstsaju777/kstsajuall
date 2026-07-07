@@ -355,14 +355,14 @@ function StepSajuPreview({ onPrev, onNext, date, time, calendar, name }: {
             {(pillars ?? Array(4).fill(null)).map((p, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
                 <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1 }}>{PILLAR_LABELS[i]}</span>
-                <span style={{ fontSize: 13, color: GOLD, lineHeight: 1, fontWeight: 700 }}>{p?.stemSs || " "}</span>
+                <span style={{ fontSize: 13, color: GOLD, lineHeight: 1, fontWeight: 700 }}>{p?.stemSs || "-"}</span>
                 <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
                   {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                 </div>
                 <div className="w-full flex items-center justify-center" style={{ aspectRatio: "1" }}>
                   {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "100%", height: "100%", objectFit: "contain" }} /> : <div className="w-full h-full animate-pulse rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
                 </div>
-                <span style={{ fontSize: 13, color: GOLD, lineHeight: 1, fontWeight: 700 }}>{p?.branchSs || " "}</span>
+                <span style={{ fontSize: 13, color: GOLD, lineHeight: 1, fontWeight: 700 }}>{p?.branchSs || "-"}</span>
               </div>
             ))}
           </div>
@@ -413,9 +413,10 @@ function StepConcern({ onPrev, onNext, initial }: {
 // ─── Step 8: 이메일 ──────────────────────────────────────────────────────────
 const EMAIL_DOMAINS = ["naver.com", "gmail.com", "kakao.com", "daum.net", "hanmail.net", "hotmail.com", "직접입력"];
 const MONO_FONT = "'Pretendard', 'Apple SD Gothic Neo', sans-serif";
+const PHONE_PREFIXES = ["010", "011", "016", "017", "018", "019"];
 
-function StepEmail({ onPrev, onNext, initial }: {
-  onPrev: () => void; onNext: (v: string) => void; initial?: string;
+function StepEmail({ onPrev, onNext, initial, initialPhone }: {
+  onPrev: () => void; onNext: (email: string, phone: string) => void; initial?: string; initialPhone?: string;
 }) {
   const initLocal = initial?.split("@")[0] ?? "";
   const initDom   = initial?.split("@")[1] ?? "";
@@ -424,10 +425,21 @@ function StepEmail({ onPrev, onNext, initial }: {
   const [domain, setDomain] = useState(initDom ? (initIsKnown ? initDom : "직접입력") : "");
   const [custom, setCustom] = useState(initDom && !initIsKnown ? initDom : "");
   const [open, setOpen]     = useState(false);
+
+  const initPhone = initialPhone ?? "";
+  const initPrefix = PHONE_PREFIXES.includes(initPhone.slice(0, 3)) ? initPhone.slice(0, 3) : "010";
+  const [phonePrefix, setPhonePrefix] = useState(initPrefix);
+  const [phoneMid, setPhoneMid] = useState(initPhone.slice(3, 7));
+  const [phoneEnd, setPhoneEnd] = useState(initPhone.slice(7, 11));
+  const [phoneOpen, setPhoneOpen] = useState(false);
+
   const isCustom   = domain === "직접입력";
   const fullDomain = isCustom ? custom.trim() : domain;
   const email      = local.trim() && fullDomain ? `${local.trim()}@${fullDomain}` : "";
-  const isValid    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const phone      = `${phonePrefix}${phoneMid}${phoneEnd}`;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPhoneValid = /^\d{11}$/.test(phone);
+  const isValid    = isEmailValid && isPhoneValid;
 
   return (
     <>
@@ -481,14 +493,55 @@ function StepEmail({ onPrev, onNext, initial }: {
           </div>
         </div>
       </div>
-      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(email)} nextLabel="작성완료" nextDisabled={!isValid} />
+
+        {/* 전화번호 */}
+        <div className="px-6 pt-5 pb-2" style={{ backgroundColor: CARD_BG }}>
+          <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>카카오톡으로도 받아보시게</p>
+          <h2 className="text-[20px] font-bold mb-5" style={{ color: TEXT_CLR }}>전화번호를 알려주시오</h2>
+          <div className="flex items-end gap-2">
+            {/* 국번 드롭다운 */}
+            <div className="relative" style={{ flexShrink: 0 }}>
+              {phoneOpen && (
+                <div className="absolute bottom-full left-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
+                  style={{ minWidth: 80, border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.9)", backdropFilter: "blur(8px)" }}>
+                  {PHONE_PREFIXES.map((p) => (
+                    <div key={p} onClick={() => { setPhonePrefix(p); setPhoneOpen(false); }}
+                      className="px-4 py-3 text-[14px] cursor-pointer"
+                      style={{ backgroundColor: phonePrefix === p ? "rgba(249,220,100,0.15)" : "transparent", color: phonePrefix === p ? GOLD : "#ddd", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      {p}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button onClick={() => setPhoneOpen((v) => !v)}
+                className="flex items-center gap-1 pb-2.5 text-[17px]"
+                style={{ borderBottom: `1.5px solid ${BORDER_CLR}`, color: TEXT_CLR, background: "transparent", fontFamily: MONO_FONT }}>
+                {phonePrefix}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={PH_CLR} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ transform: phoneOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </div>
+            <input type="text" inputMode="numeric" maxLength={4} placeholder="0000" value={phoneMid}
+              onChange={(e) => setPhoneMid(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneMid ? TEXT_CLR : PH_CLR, caretColor: GOLD }} />
+            <input type="text" inputMode="numeric" maxLength={4} placeholder="0000" value={phoneEnd}
+              onChange={(e) => setPhoneEnd(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
+              style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneEnd ? TEXT_CLR : PH_CLR, caretColor: GOLD }} />
+          </div>
+        </div>
+
+      <BottomNav onPrev={onPrev} onNext={() => isValid && onNext(email, phone)} nextLabel="작성완료" nextDisabled={!isValid} />
     </>
   );
 }
 
 // ─── 로딩 ────────────────────────────────────────────────────────────────────
-function StepLoading({ name, date, time, calendar, gender, email, concern }: {
-  name: string; date: string; time: string; calendar: string; gender: string; email: string; concern: string;
+function StepLoading({ name, date, time, calendar, gender, email, concern, phone }: {
+  name: string; date: string; time: string; calendar: string; gender: string; email: string; concern: string; phone: string;
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
@@ -519,7 +572,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern }: {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goNext = () => {
-    const params = new URLSearchParams({ name, date, time, calendar, gender, email, concern, ch: "0" });
+    const params = new URLSearchParams({ name, date, time, calendar, gender, email, concern, phone, ch: "0" });
     router.push(`/saju/saju_jaemul/checkout?${params.toString()}`);
   };
 
@@ -546,7 +599,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern }: {
 // ─── 페이지 ──────────────────────────────────────────────────────────────────
 type FormData = {
   gender: string; date: string; calendar: string; time: string; name: string;
-  concern: string; email: string;
+  concern: string; email: string; phone: string;
 };
 
 export default function JaemulFormPage() {
@@ -611,8 +664,9 @@ export default function JaemulFormPage() {
           {step === 8 && (
             <StepEmail
               onPrev={() => setStep(7)}
-              onNext={(email) => next({ email }, 9)}
+              onNext={(email, phone) => next({ email, phone }, 9)}
               initial={form.email}
+              initialPhone={form.phone}
             />
           )}
         </FormShell>
@@ -627,6 +681,7 @@ export default function JaemulFormPage() {
           gender={form.gender ?? ""}
           email={form.email ?? ""}
           concern={form.concern ?? ""}
+          phone={form.phone ?? ""}
         />
       )}
     </>
