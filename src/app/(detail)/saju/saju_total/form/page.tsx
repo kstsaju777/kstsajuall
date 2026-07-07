@@ -822,12 +822,13 @@ function StepLoading({
 }: {
   name: string; date: string; time: string; calendar: string; gender?: string; email: string; concern: string; phone: string;
 }) {
-  const [progress, setProgress] = useState(0);
   const [b1, setB1] = useState(false);
   const [b2, setB2] = useState(false);
   const [b3, setB3] = useState(false);
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
 
   const honor = gender === "남성" ? "군" : "양";
 
@@ -844,13 +845,14 @@ function StepLoading({
     router.push(`/saju/saju_total/checkout?${params.toString()}`);
   };
 
-  // 영상 진행률을 로딩바에 동기화
+  // DOM 직접 조작으로 React 리렌더링 없이 로딩바 업데이트
   const handleTime = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const v = e.currentTarget;
-    if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+    if (!v.duration) return;
+    const pct = Math.min(100, Math.round((v.currentTime / v.duration) * 100));
+    if (barRef.current) barRef.current.style.width = `${pct}%`;
+    if (labelRef.current) labelRef.current.textContent = `${pct}%`;
   };
-
-  const pct = Math.min(100, Math.round(progress));
 
   return (
     <div className="relative w-full h-full overflow-hidden" style={{ backgroundColor: "#0a0a0a" }}>
@@ -887,10 +889,10 @@ function StepLoading({
       {/* 하단 로딩바 */}
       <div className="absolute bottom-0 left-0 right-0 px-6 pb-12">
         <p className="text-center text-[15px] font-bold mb-3" style={{ color: "#ffffff" }}>
-          사주팔자 정밀분석중... <span style={{ color: "#ffc107" }}>{pct}%</span>
+          사주팔자 정밀분석중... <span ref={labelRef} style={{ color: "#ffc107" }}>0%</span>
         </p>
         <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-          <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: "#9b2335", transition: "width 0.2s" }} />
+          <div ref={barRef} className="h-full rounded-full" style={{ width: "0%", backgroundColor: "#9b2335", transition: "width 0.2s" }} />
         </div>
       </div>
     </div>

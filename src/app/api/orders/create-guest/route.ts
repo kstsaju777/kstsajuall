@@ -12,7 +12,7 @@ const bodySchema = z.object({
   timeUnknown: z.boolean(),
   gender: z.enum(["male", "female"]),
   calendar: z.enum(["solar", "lunar"]),
-  concerns: z.array(z.string().max(100)).max(20),
+  concerns: z.array(z.string().max(500)).max(20),
   partnerName: z.string().optional(),
   partnerBirthDate: z.string().optional(),
   partnerBirthTime: z.string().nullable().optional(),
