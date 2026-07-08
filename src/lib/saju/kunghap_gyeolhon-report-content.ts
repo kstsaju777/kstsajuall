@@ -851,6 +851,7 @@ export function buildGyeolhonKunghapChapterPrompt(
   const schema = CH_SCHEMA[chapter] ?? "{}";
 
   const user = `아래 두 사람의 명식을 바탕으로 결혼궁합 결과지 풀이를 JSON으로 출력하시오.
+⚠️ 이름 호칭 규칙: 풀이 전체에서 이름을 언급할 때 반드시 성(姓)을 제외한 이름만 사용하고, 이름 뒤에 "님"을 붙이시오. (예: "김선우" → "선우님", "박소현" → "소현님"). 성+이름 전체나 성만 단독으로 쓰는 것은 절대 금지.
 
 【 본인 】
 이름: ${name} (${myGenderLabel})

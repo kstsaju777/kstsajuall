@@ -6542,7 +6542,11 @@ function ReportPreviewInner() {
         const wonguk = (jc.myWonguk as Record<string,unknown> | undefined) ?? {};
         const nature = (jc.myNature as Record<string, unknown> | undefined) ?? null;
         const marriagePattern = (jc.myMarriagePattern as Record<string, unknown> | undefined) ?? null;
-        const wongukParas = (wonguk.paragraphs as string[] | undefined) ?? [];
+        const firstName = name.length > 1 ? name.slice(1) : name;
+        const normName = (text: string) =>
+          text.replace(new RegExp(name + "님", "g"), `${firstName}님`)
+              .replace(new RegExp(name, "g"), `${firstName}님`);
+        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normName);
         return (
           <>
             {/* ── 다크 헤더 ── */}
@@ -6625,11 +6629,14 @@ function ReportPreviewInner() {
       {/* ═══════════ 제2장 · 상대는 어떤 사람인가? ═══════════ */}
       {ch === "2" && (() => {
         const partnerName = report?.partnerName || "상대방";
-        const partnerFirstName = partnerName.slice(1) || partnerName;
+        const partnerFirstName = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
         const wonguk = (jc.partnerWonguk as Record<string,unknown> | undefined) ?? {};
         const nature = (jc.partnerNature as Record<string, unknown> | undefined) ?? null;
         const marriagePattern = (jc.partnerMarriagePattern as Record<string, unknown> | undefined) ?? null;
-        const wongukParas = (wonguk.paragraphs as string[] | undefined) ?? [];
+        const normPartnerName = (text: string) =>
+          text.replace(new RegExp(partnerName + "님", "g"), `${partnerFirstName}님`)
+              .replace(new RegExp(partnerName, "g"), `${partnerFirstName}님`);
+        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normPartnerName);
         return (
           <>
             {/* ── 다크 헤더 ── */}
