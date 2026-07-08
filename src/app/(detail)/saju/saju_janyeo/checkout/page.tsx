@@ -485,6 +485,7 @@ function CheckoutContent() {
   const calendar = searchParams.get("calendar") ?? "양력";
   const gender   = searchParams.get("gender")   ?? "";
   const email    = searchParams.get("email")    ?? "";
+  const phone    = searchParams.get("phone")    ?? "";
 
   const suffix = gender === "남아" ? "군" : gender === "여아" ? "양" : "님";
 
@@ -506,8 +507,8 @@ function CheckoutContent() {
     const timeUnknown = time === "시간 모름";
     const calApi = calendar === "음력" ? "lunar" : "solar";
     const genderApi: "male" | "female" = gender === "여자" || gender === "여성" || gender === "female" || gender === "여아" ? "female" : "male";
-    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [] };
-  }, [name, date, time, calendar, gender, email]);
+    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [], phone: phone || undefined };
+  }, [name, date, time, calendar, gender, email, phone]);
 
   useEffect(() => {
     if (orderCreating.current) return;

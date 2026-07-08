@@ -1,15 +1,28 @@
 import { Resend } from "resend";
 import crypto from "crypto";
 
-export function sendOrderSms({ customerName, productName, price }: { customerName: string; productName: string; price: number }) {
+function solapiAuth() {
   const apiKey = process.env.SOLAPI_API_KEY ?? "";
   const apiSecret = process.env.SOLAPI_API_SECRET ?? "";
-  if (!apiKey || !apiSecret) return Promise.resolve();
-  const fromNumber = "01096768847";
-  const toNumber = "01096768847";
   const date = new Date().toISOString();
   const salt = Math.random().toString(36).substring(2, 15);
   const signature = crypto.createHmac("sha256", apiSecret).update(date + salt).digest("hex");
+  return { apiKey, date, salt, signature };
+}
+
+export function sendAlimtalk({
+  customerPhone,
+  customerName,
+  resultUrl,
+}: {
+  customerPhone: string;
+  customerName: string;
+  resultUrl: string;
+}) {
+  const phone = customerPhone.replace(/\D/g, "");
+  if (!phone) return Promise.resolve();
+  const { apiKey, date, salt, signature } = solapiAuth();
+  if (!apiKey) return Promise.resolve();
   return fetch("https://api.solapi.com/messages/v4/send", {
     method: "POST",
     headers: {
@@ -18,8 +31,34 @@ export function sendOrderSms({ customerName, productName, price }: { customerNam
     },
     body: JSON.stringify({
       message: {
-        to: toNumber,
-        from: fromNumber,
+        to: phone,
+        from: "01096768847",
+        kakaoOptions: {
+          pfId: "KA01PF260705184430144ZqSBMiZSdjb",
+          templateId: "KA01TP260705185306355QVmxcJYJwzX",
+          variables: {
+            "#{이름}": customerName,
+            "#{결과링크}": resultUrl,
+          },
+        },
+      },
+    }),
+  }).catch((e) => console.error("[Alimtalk] 발송 실패:", e));
+}
+
+export function sendOrderSms({ customerName, productName, price }: { customerName: string; productName: string; price: number }) {
+  const { apiKey, date, salt, signature } = solapiAuth();
+  if (!apiKey) return Promise.resolve();
+  return fetch("https://api.solapi.com/messages/v4/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `HMAC-SHA256 apiKey=${apiKey}, date=${date}, salt=${salt}, signature=${signature}`,
+    },
+    body: JSON.stringify({
+      message: {
+        to: "01096768847",
+        from: "01096768847",
         text: `[홍연당 주문알림]\n${customerName}님이 결제했습니다.\n상품: ${productName}\n금액: ${price.toLocaleString()}원`,
       },
     }),

@@ -1832,8 +1832,8 @@ function CheckoutContent() {
     const calApi      = parseCalendar(calendar) === "solar" ? "solar" : "lunar";
     const genderApi: "male" | "female" =
       gender === "여자" || gender === "여성" || gender === "여아" || gender === "female" ? "female" : "male";
-    return { productSlug: "total", email, name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: concern ? [concern] : [] };
-  }, [date, time, calendar, gender, email, name, concern]);
+    return { productSlug: "total", email, name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: concern ? [concern] : [], phone: phone || undefined };
+  }, [date, time, calendar, gender, email, name, concern, phone]);
 
   useEffect(() => {
     if (orderCreating.current) return;
@@ -1879,8 +1879,6 @@ function CheckoutContent() {
   };
 
   const SITE = typeof window !== "undefined" ? window.location.origin : "";
-
-  void phone; // TODO: Solapi 알림톡 연동 시 사용
 
   return (
     <div className="w-full h-full" style={{ backgroundColor: WHITE }}>

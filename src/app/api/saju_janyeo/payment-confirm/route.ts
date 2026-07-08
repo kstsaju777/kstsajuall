@@ -5,7 +5,7 @@ import { confirmTossPayment } from "@/lib/toss/confirm";
 import { isSajuApiConfigured, fetchSajuAnalysis, formatSajuToManseryeok, type BirthInfo } from "@/lib/saju/saju-api";
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
-import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
+import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 
 export const maxDuration = 60;
 
@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
 
     const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
     sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
+    if (input.phone) sendAlimtalk({ customerPhone: input.phone, customerName: input.name ?? "고객", resultUrl: reportUrl });
     if (order.guest_email) sendOrderEmail({ customerEmail: order.guest_email, customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
 
     return NextResponse.json({ resultId: result.id, name: input.name ?? "", gender: input.gender ?? "male" });

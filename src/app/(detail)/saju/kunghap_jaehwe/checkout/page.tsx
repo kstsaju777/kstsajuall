@@ -713,6 +713,7 @@ function CheckoutContent() {
   const calendar        = searchParams.get("calendar")        ?? "양력";
   const gender          = searchParams.get("gender")          ?? "";
   const email           = searchParams.get("email")           ?? "";
+  const phone    = searchParams.get("phone")    ?? "";
   const partnerName     = searchParams.get("partnerName")     ?? "상대방";
   const partnerDate     = searchParams.get("partnerDate")     ?? "";
   const partnerTime     = searchParams.get("partnerTime")     ?? "시간 모름";
@@ -743,8 +744,8 @@ function CheckoutContent() {
     const partnerTimeUnknown = !partnerBirthTime;
     const partnerCalApi = partnerCalendar === "음력" ? "lunar" : "solar";
     const partnerGenderApi: "male" | "female" = partnerGender === "여자" || partnerGender === "여성" || partnerGender === "female" ? "female" : "male";
-    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [], partnerName, partnerBirthDate, partnerBirthTime, partnerTimeUnknown, partnerGender: partnerGenderApi, partnerCalendar: partnerCalApi };
-  }, [name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender]);
+    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [], phone: phone || undefined, partnerName, partnerBirthDate, partnerBirthTime, partnerTimeUnknown, partnerGender: partnerGenderApi, partnerCalendar: partnerCalApi };
+  }, [name, date, time, calendar, gender, email, phone, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender]);
 
   useEffect(() => {
     if (orderCreating.current) return;

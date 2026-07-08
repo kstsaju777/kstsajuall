@@ -6,6 +6,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 const bodySchema = z.object({
   productSlug: z.string(),
   email: z.string().email().or(z.literal("")).optional(),
+  phone: z.string().max(20).optional(),
   name: z.string().max(50),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   birthTime: z.string().nullable(),
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
     gender: body.gender,
     calendar: body.calendar,
     concerns,
+    phone: body.phone ?? null,
   });
 
   if (inputErr) {
