@@ -22,6 +22,7 @@ import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-mansery
 import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
+import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
 
 export const maxDuration = 300;
 
@@ -238,10 +239,10 @@ async function saveContent(id: string, content: Record<string, unknown>) {
 
   const totalChapters = Object.keys(YEONAE_KUNGHAP_CHAPTER_SECTIONS).map(Number);
   const allDone = totalChapters.every(n => isYeonaeKunghapChapterReady(merged, n));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const storedMyeongsik = data?.myeongsik as any;
+  const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const imageReady = !!storedMyeongsik?.sajuImageUrl;
-  if (allDone && imageReady && data?.order_id) {
+  const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
+  if (allDone && (!needsImage || imageReady) && data?.order_id) {
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
     if (si?.phone) {
       const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${id}`;
