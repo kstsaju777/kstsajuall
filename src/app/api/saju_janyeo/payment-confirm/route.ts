@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { confirmTossPayment } from "@/lib/toss/confirm";
@@ -90,9 +90,11 @@ export async function POST(request: NextRequest) {
     if (resultErr || !result) return NextResponse.json({ error: "결과 레코드 저장 실패", detail: resultErr?.message }, { status: 500 });
 
     const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
-    sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
-    if (input.phone) sendAlimtalk({ customerPhone: input.phone, customerName: input.name ?? "고객", resultUrl: reportUrl });
-    if (order.guest_email) sendOrderEmail({ customerEmail: order.guest_email, customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
+    await Promise.all([
+      sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE }),
+      input.phone ? sendAlimtalk({ customerPhone: input.phone, customerName: input.name ?? "고객", resultUrl: reportUrl }) : Promise.resolve(),
+      order.guest_email ? sendOrderEmail({ customerEmail: order.guest_email, customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl }) : Promise.resolve(),
+    ]);
 
     return NextResponse.json({ resultId: result.id, name: input.name ?? "", gender: input.gender ?? "male" });
   } catch (err) {
