@@ -10,7 +10,7 @@ import {
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
-import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
+import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
 export const maxDuration = 60;
 
@@ -144,7 +144,6 @@ export async function POST(request: NextRequest) {
     // 알림 발송 (fire-and-forget)
     const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
     sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
-    if (input.phone) sendAlimtalk({ customerPhone: input.phone, customerName: input.name ?? "고객", resultUrl: reportUrl });
     if (order.guest_email) {
       sendOrderEmail({
         customerEmail: order.guest_email,

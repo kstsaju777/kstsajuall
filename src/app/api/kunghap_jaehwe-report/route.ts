@@ -20,7 +20,7 @@ import { buildJaehweKunghapChapterPrompt, isJaehweKunghapChapterReady, JAEHWE_KU
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
-import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
+import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 
 export const maxDuration = 300;
 
@@ -111,11 +111,20 @@ export async function POST(request: NextRequest) {
 // 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
 async function saveContent(id: string, content: Record<string, unknown>) {
   const service = createServiceClient();
-  const { data } = await service.from("saju_results").select("interpretation_md").eq("id", id).maybeSingle();
+  const { data } = await service.from("saju_results").select("interpretation_md, order_id").eq("id", id).maybeSingle();
   let existing: Record<string, unknown> = {};
   try { existing = JSON.parse(data?.interpretation_md || "{}") || {}; } catch { existing = {}; }
   const merged = { ...existing, ...content };
   await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
+  const totalChapters = Object.keys(JAEHWE_KUNGHAP_CHAPTER_SECTIONS).map(Number);
+  const allDone = totalChapters.every(n => isJaehweKunghapChapterReady(merged, n));
+  if (allDone && data?.order_id) {
+    const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
+    if (si?.phone) {
+      const reportUrl = `https://www.hongyeondang.com/saju/kunghap_jaehwe/report-preview?id=${id}`;
+      sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+    }
+  }
   return NextResponse.json({ ok: true });
 }
 
