@@ -550,35 +550,68 @@ async function generateChapter(body: unknown) {
         const tGanKor = GAN_KOR_60[tGan] ?? tGan;
         const tJiKor  = JI_KOR_60[tJi]  ?? tJi;
 
-        function findDaeunDetail(daeunList: DaeunItem[], myIlgan: string): string {
-          if (!daeunList?.length || !myIlgan) return "";
+        type DaeunDetail = { gz: string; ganKor: string; jiKor: string; ganSip: string; jiSip: string; position: string; yearStart: number } | null;
+        function getDaeunDetail(daeunList: DaeunItem[], myIlgan: string): DaeunDetail {
+          if (!daeunList?.length || !myIlgan) return null;
           const sorted = [...daeunList].sort((a, b) => a.yearStart - b.yearStart);
-          let found: DaeunItem | null = null;
           for (let i = 0; i < sorted.length; i++) {
             const cur = sorted[i];
             const next = sorted[i + 1];
             const end = next ? next.yearStart - 1 : cur.yearStart + 9;
-            if (targetYear >= cur.yearStart && targetYear <= end) { found = cur; break; }
+            if (targetYear >= cur.yearStart && targetYear <= end) {
+              const gz = cur.gz;
+              const dGan = gz[0]; const dJi = gz[1];
+              const offset = targetYear - cur.yearStart;
+              return {
+                gz,
+                ganKor: GAN_KOR_60[dGan] ?? dGan,
+                jiKor:  JI_KOR_60[dJi]  ?? dJi,
+                ganSip: sipseongOfStem(myIlgan, dGan) || "—",
+                jiSip:  sipseongOfBranch(myIlgan, dJi) || "—",
+                position: offset <= 2 ? "대운 초반" : offset <= 6 ? "대운 중반" : "대운 후반",
+                yearStart: cur.yearStart,
+              };
+            }
           }
-          if (!found) return "";
-          const gz = found.gz;
-          const dGan = gz[0]; const dJi = gz[1];
-          const dGanKor = GAN_KOR_60[dGan] ?? dGan;
-          const dJiKor  = JI_KOR_60[dJi]  ?? dJi;
-          const offset = targetYear - found.yearStart;
-          const position = offset <= 2 ? "대운 초반" : offset <= 6 ? "대운 중반" : "대운 후반";
-          return `대운: ${gz}(${dGanKor}${dJiKor}) [시작: ${found.yearStart}년, ${targetYear}년은 ${position}]
-  대운 천간 ${gz[0]}(${dGanKor}) 십성: ${sipseongOfStem(myIlgan, dGan) || "—"}
-  대운 지지 ${gz[1]}(${dJiKor}) 십성: ${sipseongOfBranch(myIlgan, dJi) || "—"}
-  ${targetYear}년 세운: ${tGan}${tJi}(${tGanKor}${tJiKor})년
-  세운 천간 ${tGan}(${tGanKor}) 십성: ${sipseongOfStem(myIlgan, tGan) || "—"}
-  세운 지지 ${tJi}(${tJiKor}) 십성: ${sipseongOfBranch(myIlgan, tJi) || "—"}`;
+          return null;
         }
 
-        const myDaeunInfo      = findDaeunDetail(stored.view?.daeun ?? [], ilgan);
-        const partnerDaeunInfo = findDaeunDetail(stored.partnerView?.daeun ?? [], partnerIlgan);
-        if (myDaeunInfo || partnerDaeunInfo) {
-          timingContext = `\n⚠️ [${targetYear}년 사주 흐름 — 서버 계산 확정값. 반드시 이 값 그대로 사용. 임의 변경·재계산 절대 금지]\n본인 일간: ${ilgan}\n${myDaeunInfo}\n\n상대방 일간: ${partnerIlgan}\n${partnerDaeunInfo}\n위 대운·세운·십성을 근거로 desc를 작성하시오.`;
+        const myD  = getDaeunDetail(stored.view?.daeun ?? [], ilgan);
+        const ptD  = getDaeunDetail(stored.partnerView?.daeun ?? [], partnerIlgan);
+        const mySeunGanSip = sipseongOfStem(ilgan, tGan) || "—";
+        const mySeunJiSip  = sipseongOfBranch(ilgan, tJi) || "—";
+        const ptSeunGanSip = sipseongOfStem(partnerIlgan, tGan) || "—";
+        const ptSeunJiSip  = sipseongOfBranch(partnerIlgan, tJi) || "—";
+
+        // 서버가 desc 첫 문단을 직접 작성 → LLM 십성 오류 원천 차단
+        const myDescSentence = myD
+          ? `${myFirstName}님은 ${myD.gz[0] ? myD.ganKor : ""}${myD.gz[1] ? myD.jiKor : ""}(${myD.gz}) 대운 ${myD.position}에 해당하는 해이오. 대운 천간 ${myD.ganKor}(${myD.gz[0]})은(는) ${myD.ganSip}, 지지 ${myD.jiKor}(${myD.gz[1]})은(는) ${myD.jiSip}의 기운이오.`
+          : "";
+        const ptDescSentence = ptD
+          ? `${ptFirstName}님 또한 ${ptD.gz[0] ? ptD.ganKor : ""}${ptD.gz[1] ? ptD.jiKor : ""}(${ptD.gz}) 대운 ${ptD.position}에 해당하며, 천간 ${ptD.ganKor}(${ptD.gz[0]})은(는) ${ptD.ganSip}, 지지 ${ptD.jiKor}(${ptD.gz[1]})은(는) ${ptD.jiSip}의 기운이 흐르오.`
+          : "";
+        const seunDescSentence = `${targetYear}년 세운은 ${tGanKor}${tJiKor}(${tGan}${tJi})년이오. 이 해의 세운 천간 ${tGanKor}(${tGan})은(는) ${myFirstName}님께 ${mySeunGanSip}, ${ptFirstName}님께 ${ptSeunGanSip}으로 작용하오. 세운 지지 ${tJiKor}(${tJi})은(는) ${myFirstName}님께 ${mySeunJiSip}, ${ptFirstName}님께 ${ptSeunJiSip}의 기운이오.`;
+
+        const descFirstLines = [myDescSentence, ptDescSentence, seunDescSentence].filter(Boolean).join(" ");
+
+        const myRawInfo = myD
+          ? `대운: ${myD.gz}(${myD.ganKor}${myD.jiKor}) [시작: ${myD.yearStart}년, ${targetYear}년은 ${myD.position}]\n  천간 ${myD.ganKor}(${myD.gz[0]}) 십성: ${myD.ganSip}\n  지지 ${myD.jiKor}(${myD.gz[1]}) 십성: ${myD.jiSip}\n  세운 천간 ${tGanKor}(${tGan}) 십성: ${mySeunGanSip}\n  세운 지지 ${tJiKor}(${tJi}) 십성: ${mySeunJiSip}`
+          : "";
+        const ptRawInfo = ptD
+          ? `대운: ${ptD.gz}(${ptD.ganKor}${ptD.jiKor}) [시작: ${ptD.yearStart}년, ${targetYear}년은 ${ptD.position}]\n  천간 ${ptD.ganKor}(${ptD.gz[0]}) 십성: ${ptD.ganSip}\n  지지 ${ptD.jiKor}(${ptD.gz[1]}) 십성: ${ptD.jiSip}\n  세운 천간 ${tGanKor}(${tGan}) 십성: ${ptSeunGanSip}\n  세운 지지 ${tJiKor}(${tJi}) 십성: ${ptSeunJiSip}`
+          : "";
+
+        if (myRawInfo || ptRawInfo) {
+          timingContext = `\n⚠️ [${targetYear}년 사주 흐름 — 서버 계산 확정값. 임의 변경·재계산 절대 금지]
+본인(${myFirstName}님) 일간: ${ilgan}
+${myRawInfo}
+
+상대방(${ptFirstName}님) 일간: ${partnerIlgan}
+${ptRawInfo}
+
+⚠️ marriageTiming.desc는 반드시 아래 문장들로 시작하시오 (한 글자도 변경 금지):
+"${descFirstLines}"
+위 문장 이후, 왜 이 대운·세운이 결혼 기운을 만드는지 감성적으로 이어서 서술하시오.`;
         }
       }
     }
