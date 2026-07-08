@@ -39,11 +39,19 @@ const createSchema = z.object({
   email: z.string().optional().default(""),
   concern: z.string().optional().default(""),
 });
-const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
+const chapterSchema = z.object({
+  id: z.string().min(1),
+  chapter: z.number().int().min(1).max(30),
+  force: z.boolean().optional().default(false),
+  deungResult: z.object({
+    deungnyeong: z.boolean(), deungji: z.boolean(), deungsi: z.boolean(), deungse: z.boolean(),
+    ilganEl: z.string(), woljiEl: z.string(), iljiEl: z.string(), sijiEl: z.string(), seCount: z.number(),
+  }).optional(),
+});
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string }) {
-  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl });
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number } }) {
+  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult });
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
@@ -156,7 +164,7 @@ async function loadManseryeokFromInputs(service: any, resultId: string): Promise
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   if (body && typeof body.id === "string" && body.content && typeof body.content === "object") {
-    return saveContent(body.id, body.content as Record<string, unknown>);
+    return saveContent(body.id, body.content as Record<string, unknown>, !!body.force);
   }
   if (body && typeof body.id === "string" && typeof body.chapter === "number") {
     return generateChapter(body); // 그 장 생성해서 반환만(저장은 클라가 합본 1회)
@@ -165,7 +173,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
-async function saveContent(id: string, content: Record<string, unknown>) {
+async function saveContent(id: string, content: Record<string, unknown>, skipAlimtalk = false) {
   const service = createServiceClient();
   const { data } = await service.from("saju_results").select("interpretation_md, order_id, myeongsik").eq("id", id).maybeSingle();
   let existing: Record<string, unknown> = {};
@@ -177,7 +185,7 @@ async function saveContent(id: string, content: Record<string, unknown>) {
   const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const imageReady = !!storedMyeongsik?.sajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
-  if (allDone && (!needsImage || imageReady) && data?.order_id) {
+  if (!skipAlimtalk && allDone && (!needsImage || imageReady) && data?.order_id) {
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
     if (si?.phone) {
       const reportUrl = `https://www.hongyeondang.com/saju/saju_total/report-preview?id=${id}`;
@@ -272,7 +280,7 @@ async function createReport(body: unknown) {
 async function generateChapter(body: unknown) {
   const parsed = chapterSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { id, chapter, force } = parsed.data;
+  const { id, chapter, force, deungResult } = parsed.data;
 
   const service = createServiceClient();
   const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
@@ -351,6 +359,7 @@ async function generateChapter(body: unknown) {
       yongsinEl,
       heusinEl,
       gisinEl,
+      deungResult: deungResult ?? undefined,
     });
 
     // 2장 생성 완료 시 용신 오행을 myeongsik에 즉시 저장 (이후 모든 장에서 참조)

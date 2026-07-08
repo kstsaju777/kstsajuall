@@ -1523,30 +1523,16 @@ const RECO_TAG_COLORS: Record<string, string> = {
 };
 
 function RecoProductCard({ card }: { card: CategoryCard }) {
-  const isVideo = !!card.videoUrl || card.type === "video";
-  const mediaSrc = card.videoUrl ?? card.image;
+  const imgSrc = card.image;
   const [imgErr, setImgErr] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLAnchorElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !isVideo) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [isVideo]);
   return (
-    <Link ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+    <Link href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
       style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
-      {isVideo ? (
-        visible
-          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
-          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
-      ) : imgErr ? (
+      {imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+        <img src={imgSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
       )}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
@@ -3852,7 +3838,7 @@ const SAMPLE_CONTENT = {
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
 
 // 상단 앱바 (챕터 타이틀 + 공유/목차 + 진행 게이지)
-function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void }) {
+function TopBar({ progressRef, title, onMenu, onMyeongsik }: { progressRef: React.RefObject<HTMLDivElement | null>; title: string; onMenu: () => void; onMyeongsik: () => void }) {
   const [label, subtitle] = title.includes("·") ? title.split(" · ") : [title, ""];
   return (
     <div
@@ -3912,9 +3898,10 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
       {/* 진행 게이지 */}
       <div style={{ height: 3, background: `${INK}12` }}>
         <div
+          ref={progressRef}
           style={{
             height: "100%",
-            width: `${progress}%`,
+            width: "0%",
             background: `linear-gradient(to right, ${ROSE}, ${MAROON})`,
             transition: "width 0.08s linear",
           }}
@@ -4527,7 +4514,7 @@ function ReportPreviewInner() {
   const email = searchParams.get("email") ?? "";
 
   const rootRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const [tocOpen, setTocOpen] = useState(false);
   const [msOpen, setMsOpen] = useState(false);
 
@@ -4583,11 +4570,11 @@ function ReportPreviewInner() {
   }, [ch]);
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
-  const persist = (mergedContent: Record<string, unknown>) => {
+  const persist = (mergedContent: Record<string, unknown>, force = false) => {
     fetch("/api/saju_total-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, content: mergedContent }),
+      body: JSON.stringify({ id, content: mergedContent, ...(force ? { force: true } : {}) }),
     }).catch(() => {});
   };
 
@@ -4599,10 +4586,25 @@ function ReportPreviewInner() {
     setGenerating(true);
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), 90_000); // 90초 타임아웃
+    // 2장: 컴포넌트와 동일한 로직으로 득령·득지·득시·득세 계산 → 서버에 전달
+    let deungResult: Record<string, unknown> | undefined;
+    if (toApiChapter(n) === 2 && report?.view?.pillars && report.view.pillars.length >= 4) {
+      const ps = report.view.pillars; // [시,일,월,년]
+      const ilganEl = ps[1].ganEl;
+      const generates: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+      const helps = (el: string) => el === ilganEl || generates[el] === ilganEl;
+      const seElems = [ps[0].ganEl, ps[2].ganEl, ps[3].ganEl, ps[3].jiEl];
+      const seCount = seElems.filter(helps).length;
+      deungResult = {
+        deungnyeong: helps(ps[2].jiEl), deungji: helps(ps[1].jiEl),
+        deungsi: helps(ps[0].jiEl), deungse: seCount >= 2,
+        ilganEl, woljiEl: ps[2].jiEl, iljiEl: ps[1].jiEl, sijiEl: ps[0].jiEl, seCount,
+      };
+    }
     fetch("/api/saju_total-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, chapter: toApiChapter(n), force }),
+      body: JSON.stringify({ id, chapter: toApiChapter(n), force, ...(deungResult ? { deungResult } : {}) }),
       signal: abort.signal,
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -4612,7 +4614,7 @@ function ReportPreviewInner() {
         setReport((p) => {
           if (!p) return p;
           const merged = { ...(p.content as Record<string, unknown>), ...sec };
-          persist(merged);
+          persist(merged, force);
           return { ...p, content: merged as ReportContent, sajuImageUrl: d.sajuImageUrl ?? p.sajuImageUrl };
         });
       })
@@ -4634,7 +4636,7 @@ function ReportPreviewInner() {
       const max = scroller
         ? scroller.scrollHeight - scroller.clientHeight
         : document.body.scrollHeight - window.innerHeight;
-      setProgress(max > 0 ? Math.min(100, (st / max) * 100) : 0);
+      if (progressBarRef.current) progressBarRef.current.style.width = `${max > 0 ? Math.min(100, (st / max) * 100) : 0}%`;
     };
     const target: HTMLElement | Window = scroller ?? window;
     target.addEventListener("scroll", onScroll, { passive: true });
@@ -4659,7 +4661,7 @@ function ReportPreviewInner() {
   return (
     <ReportNameContext.Provider value={name}>
     <div ref={rootRef} style={{ backgroundColor: CREAM, minHeight: "100%" }}>
-      <TopBar progress={progress} title={CHAPTER_TITLES[ch] ?? `제${ch}장`} onMenu={() => setTocOpen(true)} onMyeongsik={openMyeongsik} />
+      <TopBar progressRef={progressBarRef} title={CHAPTER_TITLES[ch] ?? `제${ch}장`} onMenu={() => setTocOpen(true)} onMyeongsik={openMyeongsik} />
       <TocPanel
         open={tocOpen}
         onClose={() => setTocOpen(false)}
@@ -5065,7 +5067,7 @@ function ReportPreviewInner() {
 
           {/* 맺음말 삽화 */}
           <div className="relative overflow-hidden mx-0" style={{ background: CREAM }}>
-            <video src="/media/report/total/total-0/total-0-3.mp4" autoPlay muted loop playsInline className="w-full object-cover" />
+            <img src="/media/report/total/total-0/total-0-4.jpg" alt="" className="w-full object-cover" />
             <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 35%, transparent 65%, ${CREAM} 100%)` }} />
           </div>
 
@@ -6323,7 +6325,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 만족도 리뷰 */}
-          <ReviewBox resultId={id} name={nameParam} gender={gender} />
+          <ReviewBox resultId={id} name={nameParam || report?.name || ""} gender={gender || report?.gender || ""} />
 
           {/* 추천 상품 (크로스셀) */}
           <RecoGrid />

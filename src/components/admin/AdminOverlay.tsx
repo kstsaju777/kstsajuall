@@ -16,25 +16,18 @@ export function AdminOverlay() {
   const [reviewTab, setReviewTab] = useState<"pending" | "approved">("pending");
 
   const loadReviews = async () => {
-    const { createClient } = await import("@/lib/supabase/client");
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("saju_total_reviews")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(100);
-    setReviews(data ?? []);
+    const res = await fetch("/api/admin/reviews");
+    const data = await res.json();
+    setReviews(Array.isArray(data) ? data : []);
   };
 
   const approveReview = async (id: string) => {
-    const { createClient } = await import("@/lib/supabase/client");
-    await createClient().from("saju_total_reviews").update({ approved: true }).eq("id", id);
+    await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     setReviews(prev => prev.map(r => r.id === id ? { ...r, approved: true } : r));
   };
 
   const deleteReview = async (id: string) => {
-    const { createClient } = await import("@/lib/supabase/client");
-    await createClient().from("saju_total_reviews").delete().eq("id", id);
+    await fetch(`/api/admin/reviews?id=${id}`, { method: "DELETE" });
     setReviews(prev => prev.filter(r => r.id !== id));
   };
   const [toggling, setToggling] = useState<string | null>(null);

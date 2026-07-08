@@ -156,6 +156,10 @@ export type ReportPromptInput = {
   yongsinEl?: string; // 확정 용신 오행 — 2장 생성 후 myeongsik에 저장, 모든 장에 주입
   heusinEl?: string;  // 확정 희신 오행
   gisinEl?: string;   // 확정 기신 오행
+  deungResult?: {     // 클라이언트가 계산한 득령·득지·득시·득세 (컴포넌트와 동일 값 보장)
+    deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean;
+    ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number;
+  };
 };
 
 // 6장 desc 지시 — JSON 바깥 plaintext로 추가 (이스케이프 문제 방지)
@@ -775,7 +779,7 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
   const top3Tags: string[][] = [];
   let ch6RankData: DescRankData[] = [];
   let ch6Pillars: { nyeon:{gan:string;ji:string;ganEl:string;jiEl:string}; wol:{gan:string;ji:string;ganEl:string;jiEl:string}; il:{gan:string;ji:string;ganEl:string;jiEl:string}; si:{gan:string;ji:string;ganEl:string;jiEl:string}; birthDate:string; siName:string; tags:string[] }[] = [];
-  if (chapter === 1 && input.pillars && input.pillars.length > 0) {
+  if (input.pillars && input.pillars.length > 0) {
     // pillars 순서: [0]=시주, [1]=일주, [2]=월주, [3]=년주
     const ORDER = ["년주", "월주", "일주", "시주"];
     const byPos: Record<string, typeof input.pillars[0]> = {};
@@ -841,23 +845,37 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     }
   }
 
-  // chapter 2: 득령·득지·득시·득세 계산 후 주입
+  // chapter 2: 득령·득지·득시·득세 — 클라이언트 계산값 우선, 없으면 서버 재계산
+  // 첫 문장을 서버에서 완성해 LLM이 그대로 복사하도록 함 (직접 구성 시 오류 방지)
   let deungTable = "";
-  if (chapter === 2 && input.pillars && input.pillars.length >= 4) {
-    const ps = input.pillars; // [시주, 일주, 월주, 년주] — index 0=시,1=일,2=월,3=년
-    const byPos: Record<string, typeof ps[0]> = {};
-    for (const p of ps) byPos[p.pos] = p;
-    const siju = byPos["시주"]; const ilju = byPos["일주"]; const wolju = byPos["월주"]; const nyeonju = byPos["년주"];
-    if (siju && ilju && wolju && nyeonju) {
-      const ilganEl = ilju.ganEl;
-      const generates: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
-      const helps = (el: string) => el === ilganEl || generates[el] === ilganEl;
-      const deungnyeong = helps(wolju.jiEl);
-      const deungji = helps(ilju.jiEl);
-      const deungsi = helps(siju.jiEl);
-      const seCount = [siju.ganEl, wolju.ganEl, nyeonju.ganEl, nyeonju.jiEl].filter(helps).length;
-      const deungse = seCount >= 2;
-      deungTable = `\n[득령·득지·득시·득세 판정 — strength 풀이 첫 문장에서 반드시 언급]\n득령(월지 ${wolju.jiEl}): ${deungnyeong ? "득" : "실패"}\n득지(일지 ${ilju.jiEl}): ${deungji ? "득" : "실패"}\n득시(시지 ${siju.jiEl}): ${deungsi ? "득" : "실패"}\n득세(시간·월간·년간·년지 중 ${seCount}개 도움): ${deungse ? "득" : "실패"}\n→ 종합: ${[deungnyeong, deungji, deungsi, deungse].filter(Boolean).length}득 ${[deungnyeong, deungji, deungsi, deungse].filter(x => !x).length}실패\n`;
+  if (chapter === 2) {
+    const buildDeungTable = (dn: boolean, dj: boolean, ds: boolean, dse: boolean, wolji: string, ilji: string, siji: string, seCount: number) => {
+      const successItems = [dn && "득령", dj && "득지", ds && "득시", dse && "득세"].filter(Boolean) as string[];
+      const failItems = [!dn && "득령", !dj && "득지", !ds && "득시", !dse && "득세"].filter(Boolean) as string[];
+      const shingang = successItems.length >= 3 || (successItems.length === 2 && (dn || dse));
+      const sinDesc = shingang ? "신강한 편에 속하오" : "신약한 편에 속하오";
+      const firstSentence = failItems.length === 0
+        ? `득령·득지·득시·득세 모두에 성공했으므로 ${sinDesc}.`
+        : successItems.length === 0
+        ? `득령·득지·득시·득세 모두에 실패했으므로 ${sinDesc}.`
+        : `${successItems.join("·")}에는 성공했지만 ${failItems.join("·")}에는 실패했으므로 ${sinDesc}.`;
+      return `\n[득령·득지·득시·득세 판정]\n득령(월지 ${wolji}): ${dn ? "득" : "실패"}\n득지(일지 ${ilji}): ${dj ? "득" : "실패"}\n득시(시지 ${siji}): ${ds ? "득" : "실패"}\n득세(시간·월간·년간·년지 중 ${seCount}개 도움): ${dse ? "득" : "실패"}\n\n[strength.intro 첫 문장 — 아래 문장을 글자 하나도 바꾸지 말고 그대로 복사하오]\n"${firstSentence}"\n`;
+    };
+    const dr = input.deungResult;
+    if (dr) {
+      deungTable = buildDeungTable(dr.deungnyeong, dr.deungji, dr.deungsi, dr.deungse, dr.woljiEl, dr.iljiEl, dr.sijiEl, dr.seCount);
+    } else if (input.pillars && input.pillars.length >= 4) {
+      const ps = input.pillars;
+      const byPos: Record<string, typeof ps[0]> = {};
+      for (const p of ps) byPos[p.pos] = p;
+      const siju = byPos["시주"]; const ilju = byPos["일주"]; const wolju = byPos["월주"]; const nyeonju = byPos["년주"];
+      if (siju && ilju && wolju && nyeonju) {
+        const ilganEl = ilju.ganEl;
+        const generates: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+        const helps = (el: string) => el === ilganEl || generates[el] === ilganEl;
+        const seCount = [siju.ganEl, wolju.ganEl, nyeonju.ganEl, nyeonju.jiEl].filter(helps).length;
+        deungTable = buildDeungTable(helps(wolju.jiEl), helps(ilju.jiEl), helps(siju.jiEl), seCount >= 2, wolju.jiEl, ilju.jiEl, siju.jiEl, seCount);
+      }
     }
   }
 

@@ -1385,9 +1385,29 @@ function ReviewSection() {
   }, []);
 
   // DB 후기 + 정적 후기 합산 (DB 최신순 앞에)
-  const totalStatic = REVIEWS_RAW.length;
-  const totalPages = Math.ceil((dbReviews.length + totalStatic) / REVIEWS_PER_PAGE);
-  const allCount = dbReviews.length + totalStatic;
+  const totalStaticCount = getTotalReviewCount();
+  const extraCount = Math.max(0, totalStaticCount - REVIEWS_RAW.length);
+  const totalPages = Math.ceil((dbReviews.length + totalStaticCount) / REVIEWS_PER_PAGE);
+  const allCount = dbReviews.length + totalStaticCount;
+
+  // 추가 생성된 후기 날짜 (2026-07-05 이후 순방향)
+  const extraDates = (() => {
+    const dates: string[] = [];
+    let cur = new Date("2026-07-05");
+    let idx = 0;
+    while (idx < extraCount) {
+      const seed = (591 + idx) * 31 + 7;
+      const count = (seed % 6) + 3;
+      const y = cur.getFullYear();
+      const m = String(cur.getMonth() + 1).padStart(2, "0");
+      const d = String(cur.getDate()).padStart(2, "0");
+      const dateStr = `${y}.${m}.${d}`;
+      for (let k = 0; k < count && idx < extraCount; k++, idx++) dates.push(dateStr);
+      cur.setDate(cur.getDate() + 1);
+    }
+    return dates;
+  })();
+  const AGE_GROUPS = ["20대", "30대", "30대", "40대", "50대"];
   const pageStart = page * REVIEWS_PER_PAGE;
   const pageEnd = pageStart + REVIEWS_PER_PAGE;
 
@@ -1439,12 +1459,11 @@ function ReviewSection() {
                   <span className="text-[11px]" style={{ color: GRAY3 }}>{dr.created_at?.slice(0, 10).replace(/-/g, ".")}</span>
                 </div>
                 <p className="text-[13px] leading-relaxed mb-1.5" style={{ color: GRAY2 }}>{dr.text}</p>
-                <p className="text-[11px]" style={{ color: GRAY3 }}>— {dr.name} {dr.gender}</p>
+                <p className="text-[11px]" style={{ color: GRAY3 }}>— {dr.name || "고객님"} {dr.gender || ""}</p>
               </div>
             );
           }
           const staticIdx = globalIdx - dbReviews.length;
-          const r = REVIEWS_RAW[staticIdx];
           const gender = globalIdx % 2 === 0 ? "여성" : "남성";
           const prefixes = ["rladk","ghkd","dkagh","tnals","wjdgh","ekdl","alswl","dhkdl","qkrgh","thsms","whdms","rlaqo","sksms","dnjsgh","ghkrl"];
           const domainPool = ["naver.com","naver.com","naver.com","naver.com","gmail.com","gmail.com","gmail.com","gmail.com","kakao.com","daum.net","nate.com","hanmail.net","icloud.com","outlook.com","yahoo.co.kr"];
@@ -1452,7 +1471,6 @@ function ReviewSection() {
           const num = ((globalIdx * 37 + 13) % 90) + 10;
           const domain = domainPool[globalIdx % domainPool.length];
           const maskedEmail = `${prefix}${num}***@${domain}`;
-          const agePart = r.name.match(/\d+대/)?.[0] ?? "";
           const surnames = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권","황","안","송","전","홍","고","문","양","손","배","백","허","유","남","심","노","하","곽","성","차","주","우","구","민","류"];
           const surWeights = [10,8,6,4,4,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
           const surTotal = surWeights.reduce((a,b)=>a+b,0);
@@ -1460,8 +1478,24 @@ function ReviewSection() {
           let surName = surnames[0];
           for (let si = 0; si < surWeights.length; si++) { if (surPick < surWeights[si]) { surName = surnames[si]; break; } surPick -= surWeights[si]; }
           const namePart = `${surName}OO`;
-          const star = getReviewStar(globalIdx);
-          const reviewText = getReviewText(globalIdx, parseInt(agePart) || 30, star);
+          // 새로 자동생성된 후기 (extraCount개) → 동적 생성
+          let agePart: string;
+          let star: number;
+          let reviewText: string;
+          let dateStr: string;
+          if (staticIdx < extraCount) {
+            agePart = AGE_GROUPS[staticIdx % AGE_GROUPS.length];
+            star = getReviewStar(591 + staticIdx);
+            reviewText = getReviewText(591 + staticIdx, parseInt(agePart) || 30, star);
+            dateStr = extraDates[staticIdx] ?? "2026.07.05";
+          } else {
+            const rawIdx = staticIdx - extraCount;
+            const r = REVIEWS_RAW[rawIdx];
+            agePart = r.name.match(/\d+대/)?.[0] ?? "";
+            star = getReviewStar(globalIdx);
+            reviewText = getReviewText(globalIdx, parseInt(agePart) || 30, star);
+            dateStr = REVIEW_DATES[rawIdx] ?? "";
+          }
           return (
             <div key={i} className="rounded-2xl px-4 py-4"
               style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
@@ -1471,7 +1505,7 @@ function ReviewSection() {
                     <span key={j} className="text-[13px]" style={{ color: j < star ? "#f5a623" : GRAY4 }}>★</span>
                   ))}
                 </div>
-                <span className="text-[11px]" style={{ color: GRAY3 }}>{REVIEW_DATES[staticIdx]}</span>
+                <span className="text-[11px]" style={{ color: GRAY3 }}>{dateStr}</span>
               </div>
               <p className="text-[13px] leading-relaxed mb-1.5" style={{ color: GRAY2 }}>{reviewText}</p>
               <p className="text-[11px]" style={{ color: GRAY3 }}>— {agePart} {gender} {namePart} | {maskedEmail}</p>
