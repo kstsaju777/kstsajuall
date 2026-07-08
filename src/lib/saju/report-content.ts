@@ -10,6 +10,7 @@
 // ※ 풀이 프롬프트(말투·주제·지시문)는 ./report-prompts.ts 에서 관리합니다.
 
 import { SYSTEM, CH_THEME, CH_GUIDE } from "./report-prompts";
+import { fixJosaInObject } from "../utils/fix-josa";
 
 export type ReportSection = {
   intro: string;        // 도입 문단
@@ -1580,5 +1581,6 @@ export function parseContentJson(text: string): Record<string, unknown> {
   const s = t.indexOf("{");
   const e = t.lastIndexOf("}");
   if (s >= 0 && e > s) t = t.slice(s, e + 1);
-  return JSON.parse(t) as Record<string, unknown>;
+  const parsed = JSON.parse(t) as Record<string, unknown>;
+  return fixJosaInObject(parsed);
 }
