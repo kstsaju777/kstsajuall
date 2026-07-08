@@ -578,6 +578,7 @@ function StepEmail({
   const [phoneMid, setPhoneMid] = useState(initMid);
   const [phoneEnd, setPhoneEnd] = useState(initEnd);
   const [phoneOpen, setPhoneOpen] = useState(false);
+  const phoneEndRef = useRef<HTMLInputElement>(null);
 
   const phone = `${phonePrefix}${phoneMid}${phoneEnd}`;
   const isCustom = domain === "직접입력";
@@ -713,7 +714,11 @@ function StepEmail({
               placeholder="0000"
               maxLength={4}
               value={phoneMid}
-              onChange={(e) => setPhoneMid(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                setPhoneMid(val);
+                if (val.length === 4) phoneEndRef.current?.focus();
+              }}
               className="bg-transparent text-[17px] pb-2.5 outline-none text-center"
               style={{ flex: "1 1 0", minWidth: 0, fontFamily: MONO_FONT, borderBottom: `1.5px solid ${BORDER_CLR}`, color: phoneMid ? TEXT_CLR : PH_CLR, caretColor: NAVY }}
             />
@@ -723,6 +728,7 @@ function StepEmail({
 
             {/* 끝 4자리 */}
             <input
+              ref={phoneEndRef}
               type="tel"
               inputMode="numeric"
               placeholder="0000"
