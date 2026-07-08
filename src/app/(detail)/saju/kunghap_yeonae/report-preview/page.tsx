@@ -3483,7 +3483,6 @@ function AttractionGauge({ score, label }: { score: number; label: string }) {
         <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
         <circle cx={cx} cy={cy} r="5" fill={INK} />
         <text x={cx} y={cy - 12} textAnchor="middle" fontSize="24" fontWeight="900" fill={COLOR}>{s}</text>
-        <text x={cx} y={cy + 4} textAnchor="middle" fontSize="10" fill={MUTE}>점</text>
       </svg>
       <p className="text-center text-[13px] font-bold mt-1" style={{ color: COLOR }}>{label}</p>
     </div>
