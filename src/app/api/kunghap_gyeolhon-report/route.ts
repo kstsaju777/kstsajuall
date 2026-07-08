@@ -17,6 +17,7 @@ import {
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
 import { buildGyeolhonKunghapChapterPrompt, isGyeolhonKunghapChapterReady, GYEOLHON_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_gyeolhon-report-content";
+import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -45,11 +46,76 @@ const createSchema = z.object({
 });
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
+// ── 대운·세운 계산 헬퍼 ──
+const STEMS_60  = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+const BRANCHES_60 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+const GAN_KOR_60: Record<string,string> = {甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계"};
+const JI_KOR_60:  Record<string,string> = {子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해"};
+
+function seunGanJiG(year: number) {
+  const gan = STEMS_60[((year - 4) % 10 + 10) % 10];
+  const ji  = BRANCHES_60[((year - 4) % 12 + 12) % 12];
+  return { gan, ji };
+}
+
+type DaeunItemG = { label: string; gz: string; active: boolean; yearStart: number };
+
+function buildFullDaeunTableG(daeunList: DaeunItemG[], myIlgan: string, personLabel: string, refYear: number): string {
+  if (!daeunList.length || !myIlgan) return "";
+  const rows = daeunList.map(d => {
+    const gz = d.gz ?? "";
+    const gan = gz[0] ?? "";
+    const ji  = gz[1] ?? "";
+    const ganKor = GAN_KOR_60[gan] ?? gan;
+    const jiKor  = JI_KOR_60 [ji]  ?? ji;
+    const ganSip = gan ? sipseongOfStem(myIlgan, gan)   : "-";
+    const jiSip  = ji  ? sipseongOfBranch(myIlgan, ji)  : "-";
+    const active = d.yearStart <= refYear && (d.yearStart + 10) > refYear;
+    const pos = (() => {
+      const offset = refYear - d.yearStart;
+      if (offset < 0) return "미래";
+      if (offset < 3)  return "초반";
+      if (offset < 7)  return "중반";
+      return "후반";
+    })();
+    const marker = active ? `★현재(${pos})` : (d.yearStart > refYear ? `(${d.yearStart}년~)` : "(과거)");
+    return `  ${d.label ?? ""} ${ganKor}${jiKor}(${gz}) 대운: 천간→${ganSip} / 지지→${jiSip} ${marker}`;
+  });
+  return `[${personLabel} 대운 전체 십성 — 서버 계산 확정값]\n${rows.join("\n")}`;
+}
+
+function buildSeunTableG(myIlgan: string, ptIlgan: string, myLabel: string, ptLabel: string, startYear: number, endYear: number): string {
+  if (!myIlgan || !ptIlgan) return "";
+  const rows: string[] = [];
+  for (let y = startYear; y <= endYear; y++) {
+    const { gan, ji } = seunGanJiG(y);
+    const ganKor = GAN_KOR_60[gan] ?? gan;
+    const jiKor  = JI_KOR_60 [ji]  ?? ji;
+    const myGanSip = sipseongOfStem(myIlgan, gan);
+    const myJiSip  = sipseongOfBranch(myIlgan, ji);
+    const ptGanSip = sipseongOfStem(ptIlgan, gan);
+    const ptJiSip  = sipseongOfBranch(ptIlgan, ji);
+    rows.push(`  ${y}년 ${ganKor}${jiKor}(${gan}${ji}): ${myLabel} 천간→${myGanSip}/지지→${myJiSip} | ${ptLabel} 천간→${ptGanSip}/지지→${ptJiSip}`);
+  }
+  return `[${startYear}~${endYear}년 세운 십성 — 서버 계산 확정값. 임의 변경 절대 금지]\n${rows.join("\n")}`;
+}
+
 // 한 장 생성 (JSON 모드 + 출력 검증 + 3회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: {
   name: string; gender: "male" | "female"; manseryeokText: string;
   partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
+  ilgan?: string;
+  partnerIlgan?: string;
+  ilganFull?: string;
+  partnerIlganFull?: string;
+  ohaengSummary?: string;
+  partnerOhaengSummary?: string;
+  mySipseong?: string;
+  partnerSipseong?: string;
+  myPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
+  partnerPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
+  daeunSeunContext?: string;
 }) {
   const { system, user } = buildGyeolhonKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -310,6 +376,66 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+
+    // 일간 추출
+    const ilgan: string | undefined = stored?.view?.ilgan ?? undefined;
+    const partnerIlgan: string | undefined = stored?.partnerView?.ilgan ?? undefined;
+    const ilganFull: string | undefined = (() => {
+      const p = (stored?.view?.pillars ?? []).find((x: { pos?: string }) => x.pos === "일주");
+      return p ? `${p.gan ?? ""}${p.ji ?? ""}` : undefined;
+    })();
+    const partnerIlganFull: string | undefined = (() => {
+      const p = (stored?.partnerView?.pillars ?? []).find((x: { pos?: string }) => x.pos === "일주");
+      return p ? `${p.gan ?? ""}${p.ji ?? ""}` : undefined;
+    })();
+
+    // 오행 요약
+    const ohaengSummary: string | undefined = (() => {
+      const dist = stored?.view?.ohaengDist as Record<string,number> | undefined;
+      if (!dist) return undefined;
+      return Object.entries(dist).map(([k,v]) => `${k}:${v}`).join(" ");
+    })();
+    const partnerOhaengSummary: string | undefined = (() => {
+      const dist = stored?.partnerView?.ohaengDist as Record<string,number> | undefined;
+      if (!dist) return undefined;
+      return Object.entries(dist).map(([k,v]) => `${k}:${v}`).join(" ");
+    })();
+
+    // 십성 요약 (내 일간 기준 상대방 기둥 십성)
+    const mySipseong: string | undefined = (() => {
+      if (!ilgan || !stored?.partnerView?.pillars) return undefined;
+      const pillars = stored.partnerView.pillars as Array<{ pos?: string; gan?: string; ji?: string }>;
+      return pillars.map(p => {
+        const gs = p.gan ? sipseongOfStem(ilgan, p.gan) : "-";
+        const js = p.ji  ? sipseongOfBranch(ilgan, p.ji) : "-";
+        return `${p.pos ?? ""}(${p.gan ?? ""}${p.ji ?? ""}: 천간→${gs}/지지→${js})`;
+      }).join(", ");
+    })();
+    const partnerSipseong: string | undefined = (() => {
+      if (!partnerIlgan || !stored?.view?.pillars) return undefined;
+      const pillars = stored.view.pillars as Array<{ pos?: string; gan?: string; ji?: string }>;
+      return pillars.map(p => {
+        const gs = p.gan ? sipseongOfStem(partnerIlgan, p.gan) : "-";
+        const js = p.ji  ? sipseongOfBranch(partnerIlgan, p.ji) : "-";
+        return `${p.pos ?? ""}(${p.gan ?? ""}${p.ji ?? ""}: 천간→${gs}/지지→${js})`;
+      }).join(", ");
+    })();
+
+    // 대운·세운 컨텍스트 (9장·10장에만)
+    const myFirstName = (stored?.name ?? "").slice(1) || (stored?.name ?? "");
+    const ptFirstName = (stored?.partnerName ?? "").slice(1) || (stored?.partnerName ?? "");
+    const REF_YEAR = 2026;
+    let daeunSeunContext: string | undefined;
+    if ((chapter === 9 || chapter === 10) && ilgan && partnerIlgan) {
+      const myDaeunTable = buildFullDaeunTableG(stored?.view?.daeun ?? [], ilgan, `${myFirstName}님`, REF_YEAR);
+      const ptDaeunTable = buildFullDaeunTableG(stored?.partnerView?.daeun ?? [], partnerIlgan, `${ptFirstName}님`, REF_YEAR);
+      const seunTable    = buildSeunTableG(ilgan, partnerIlgan, `${myFirstName}님`, `${ptFirstName}님`, REF_YEAR, REF_YEAR + 8);
+      const parts = [myDaeunTable, ptDaeunTable, seunTable].filter(Boolean);
+      if (parts.length) {
+        daeunSeunContext = `\n⚠️ [대운·세운 서버 계산 확정값 — 반드시 이 값만 사용. 임의 추론·재계산 절대 금지]\n${parts.join("\n\n")}\n위 확정값을 근거로 시기별 기운을 서술하시오.`;
+      }
+    }
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -318,6 +444,17 @@ async function generateChapter(body: unknown) {
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
       partnerManseryeokText: stored?.partnerManseryeokText ?? "",
       birthYear: birthYear || undefined,
+      ilgan,
+      partnerIlgan,
+      ilganFull,
+      partnerIlganFull,
+      ohaengSummary,
+      partnerOhaengSummary,
+      mySipseong,
+      partnerSipseong,
+      myPillars: stored?.view?.pillars ?? [],
+      partnerPillars: stored?.partnerView?.pillars ?? [],
+      daeunSeunContext,
     });
 
     return NextResponse.json({ sections: obj });

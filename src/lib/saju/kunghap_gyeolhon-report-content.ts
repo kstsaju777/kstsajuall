@@ -4,6 +4,25 @@
 // 두 사람(본인 + 상대방) 사주를 함께 풀이하는 결혼궁합 전용 파일.
 
 import { SYSTEM } from "./report-prompts";
+import { sipseongOfStem, sipseongOfBranch } from "./sipseong-calc";
+
+// ── 기둥별 십성 확인표 빌더 ──
+type PillarItem = { pos?: string; gan?: string; ji?: string };
+const GAN_KOR_P: Record<string,string> = {甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계"};
+const JI_KOR_P: Record<string,string>  = {子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해"};
+const POS_LABEL: Record<string,string> = {년주:"년주(조상·초년)",월주:"월주(부모·청년)",일주:"일주(본인·배우자)",시주:"시주(자녀·말년)"};
+function buildKunghapPillarTable(ilgan: string, pillars: PillarItem[], personLabel: string): string {
+  if (!pillars.length) return "";
+  const rows = pillars.map(p => {
+    const pos   = POS_LABEL[p.pos ?? ""] ?? (p.pos ?? "");
+    const ganKor = p.gan ? (GAN_KOR_P[p.gan] ?? p.gan) : "?";
+    const jiKor  = p.ji  ? (JI_KOR_P [p.ji]  ?? p.ji)  : "?";
+    const ganSip = p.gan ? sipseongOfStem(ilgan, p.gan)  : "-";
+    const jiSip  = p.ji  ? sipseongOfBranch(ilgan, p.ji) : "-";
+    return `  ${pos}: 천간 ${ganKor}(${p.gan ?? "?"})→${ganSip} / 지지 ${jiKor}(${p.ji ?? "?"})→${jiSip}`;
+  });
+  return `⚠️ [${personLabel} 기둥별 십성 확인표 — 서버 계산 확정값. 임의 변경 절대 금지]\n${rows.join("\n")}`;
+}
 
 // ── 장별 필수 섹션 키 ──
 export const GYEOLHON_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
@@ -316,7 +335,7 @@ const CH_GUIDE: Record<number, string> = {
   · label: 시기 (예: "2026~2027년", "2028년 戊子 대운")
   · heading: 그 시기의 핵심 성격 한 마디 (예: "신혼 적응기", "최대 위기 구간", "안정 회복기")
   · tone: "good" | "stable" | "caution" | "warn"
-  · text: 그 시기 결혼 기운 설명 2~3문장. 어떤 일이 일어날 수 있고 어떻게 대응하면 좋은지.
+  · text: "[대운·세운 서버 계산 확정값]"에서 해당 연도의 두 사람 대운·세운 십성을 확인하여 반드시 인용하고, 그 십성이 결혼 기운에 어떻게 작용하는지 설명하시오. 임의 추론 절대 금지.
 - paragraphs 3개 이상(각 180자+):
   ①전체 흐름을 통해 보이는 이 부부 결혼 생활의 큰 그림.
   ②위기와 안정이 반복되는 패턴과 그 의미.
@@ -339,7 +358,7 @@ const CH_GUIDE: Record<number, string> = {
 - bestBasis: 최적 시기의 핵심 사주 근거 한 문장 (예: "남명 정관이 투간하고 여명 식신이 합을 이루어 혼인 에너지가 응집되는 시기이오.").
 - callout: 이 시기가 왜 특별한지 부연 설명 한 문장.
 - paragraphs 4개 이상(각 200자+):
-  ①최적 시기의 대운·세운 구조 전체 분석 — 두 사람 모두의 사주에서 어떤 흐름이 만나는지.
+  ①⚠️ 프롬프트 하단 "[대운·세운 서버 계산 확정값]" 블록에서 두 사람의 대운 간지·십성, 세운 간지·십성을 확인하여 그대로 인용하시오. 이 값을 임의로 변경·재계산하는 것 절대 금지. 최적 시기의 대운·세운 구조 전체를 이 확정값 기준으로 서술하시오.
   ②이 시기에 결혼하면 두 사람의 인연이 어떻게 단단해지는지 음양오행 관점 서술.
   ③이 시기를 놓쳤을 때의 차선책 — 다음 좋은 시기와 그 특징.
   ④결혼 시기를 고르는 마음가짐 — 사주의 흐름을 믿고 준비하는 자세.
@@ -802,11 +821,42 @@ export function buildGyeolhonKunghapChapterPrompt(
     partnerGender: "male" | "female";
     partnerManseryeokText: string;
     birthYear?: number;
+    ilgan?: string;
+    partnerIlgan?: string;
+    ilganFull?: string;
+    partnerIlganFull?: string;
+    ohaengSummary?: string;
+    partnerOhaengSummary?: string;
+    mySipseong?: string;
+    partnerSipseong?: string;
+    myPillars?: PillarItem[];
+    partnerPillars?: PillarItem[];
+    daeunSeunContext?: string;
   }
 ): { system: string; user: string } {
-  const { name, gender, manseryeokText, partnerName, partnerGender, partnerManseryeokText } = input;
+  const { name, gender, manseryeokText, partnerName, partnerGender, partnerManseryeokText, ilgan, partnerIlgan, ilganFull, partnerIlganFull, ohaengSummary, partnerOhaengSummary, mySipseong, partnerSipseong, myPillars, partnerPillars, daeunSeunContext } = input;
   const myGenderLabel = gender === "female" ? "여성" : "남성";
   const partnerGenderLabel = partnerGender === "female" ? "여성" : "남성";
+
+  const firstName = name ? (name.length > 1 ? name.slice(1) : name) : name;
+  const partnerFirstName = partnerName ? (partnerName.length > 1 ? partnerName.slice(1) : partnerName) : partnerName;
+
+  const myPillarTable = ilgan && myPillars?.length ? buildKunghapPillarTable(ilgan, myPillars, `${firstName}님`) : "";
+  const partnerPillarTable = partnerIlgan && partnerPillars?.length ? buildKunghapPillarTable(partnerIlgan, partnerPillars, `${partnerFirstName}님`) : "";
+
+  const myDataBlock = [
+    ilgan ? `⛔ 일간(日干) 확정값: ${ilganFull || ilgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지.` : "",
+    ohaengSummary ? `오행 분포(서버 사전계산): ${ohaengSummary}` : "",
+    myPillarTable,
+    mySipseong ? `내 일간 기준 상대방 십성(서버 계산 확정값): ${mySipseong} ← 절대 바꾸지 마시오.` : "",
+  ].filter(Boolean).join("\n");
+
+  const partnerDataBlock = [
+    partnerIlgan ? `⛔ 상대방 일간(日干) 확정값: ${partnerIlganFull || partnerIlgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지.` : "",
+    partnerOhaengSummary ? `상대방 오행 분포(서버 사전계산): ${partnerOhaengSummary}` : "",
+    partnerPillarTable,
+    partnerSipseong ? `상대방 일간 기준 내 십성(서버 계산 확정값): ${partnerSipseong} ← 절대 바꾸지 마시오.` : "",
+  ].filter(Boolean).join("\n");
 
   const theme = CH_THEME[chapter] ?? "";
   const guide = CH_GUIDE[chapter] ?? "";
@@ -817,15 +867,17 @@ export function buildGyeolhonKunghapChapterPrompt(
 【 본인 】
 이름: ${name} (${myGenderLabel})
 ${manseryeokText}
+${myDataBlock ? `\n${myDataBlock}` : ""}
 
 【 상대방 】
 이름: ${partnerName} (${partnerGenderLabel})
 ${partnerManseryeokText}
+${partnerDataBlock ? `\n${partnerDataBlock}` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━
 ▶ 이번 장 주제: ${theme}
 ━━━━━━━━━━━━━━━━━━━━━
-${guide}
+${guide}${daeunSeunContext ? `\n\n${daeunSeunContext}` : ""}
 
 출력 JSON 형식 (이 형식 그대로, 다른 키 추가 금지):
 ${schema}
