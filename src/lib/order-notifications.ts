@@ -50,7 +50,11 @@ export function sendAlimtalk({
         },
       },
     }),
-  }).catch((e) => console.error("[Alimtalk] 발송 실패:", e));
+  }).then(async (res) => {
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) console.error("[Alimtalk] 발송 실패:", res.status, JSON.stringify(body));
+    else console.log("[Alimtalk] 발송 성공:", JSON.stringify(body));
+  }).catch((e) => console.error("[Alimtalk] 네트워크 오류:", e));
 }
 
 export function sendOrderSms({ customerName, productName, price }: { customerName: string; productName: string; price: number }) {
@@ -69,7 +73,11 @@ export function sendOrderSms({ customerName, productName, price }: { customerNam
         text: `[홍연당 주문알림]\n${customerName}님이 결제했습니다.\n상품: ${productName}\n금액: ${price.toLocaleString()}원`,
       },
     }),
-  }).catch((e) => console.error("[SMS] 발송 실패:", e));
+  }).then(async (res) => {
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) console.error("[SMS] 발송 실패:", res.status, JSON.stringify(body));
+    else console.log("[SMS] 발송 성공:", JSON.stringify(body));
+  }).catch((e) => console.error("[SMS] 네트워크 오류:", e));
 }
 
 export function sendOrderEmail({
