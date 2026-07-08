@@ -19,10 +19,94 @@ import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-conten
 import { buildYeonaeKunghapChapterPrompt, isYeonaeKunghapChapterReady, YEONAE_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_yeonae-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
+import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
 export const maxDuration = 300;
+
+// 합충 점수 계산 (ch10 프롬프트 주입용)
+const HANJA_KOR: Record<string,string> = {
+  "甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무","己":"기","庚":"경","辛":"신","壬":"임","癸":"계",
+  "子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사","午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해",
+};
+const toK = (h: string) => HANJA_KOR[h] ?? h;
+const GAN_HAP_S: [string,string][] = [["갑","기"],["을","경"],["병","신"],["정","임"],["무","계"]];
+const GAN_CHUNG_S: [string,string][] = [["갑","경"],["을","신"],["병","임"],["정","계"],["무","임"],["갑","무"],["경","병"],["기","을"],["계","기"]];
+const YUK_HAP_S: [string,string][] = [["자","축"],["인","해"],["묘","술"],["진","유"],["사","신"],["오","미"]];
+const SAM_HAP_S: string[][] = [["인","오","술"],["신","자","진"],["해","묘","미"],["사","유","축"]];
+const JI_CHUNG_S: [string,string][] = [["자","오"],["축","미"],["인","신"],["묘","유"],["진","술"],["사","해"]];
+const HYEONG_S: string[][] = [["인","사","신"],["축","술","미"],["진","진"],["오","오"],["유","유"],["해","해"],["자","묘"]];
+const PA_S: [string,string][] = [["자","유"],["오","묘"],["인","해"],["사","신"],["축","진"],["술","미"]];
+const HAE_S: [string,string][] = [["자","미"],["축","오"],["인","사"],["묘","진"],["신","해"],["유","술"]];
+const WONJIN_S: [string,string][] = [["자","미"],["축","오"],["인","유"],["묘","신"],["진","해"],["사","술"]];
+const REL_SCORE_S: Record<string,number> = { "삼합":12,"천간합":8,"육합":7,"천간충":-8,"원진":-7,"충":-6,"형":-5,"해":-4,"파":-3 };
+function calcHapChungScore(myView: { pillars: Array<{gan:string;ji:string}> }, ptView: { pillars: Array<{gan:string;ji:string}> }): number {
+  const mg = myView.pillars.map(p => toK(p.gan));
+  const mj = myView.pillars.map(p => toK(p.ji));
+  const pg = ptView.pillars.map(p => toK(p.gan));
+  const pj = ptView.pillars.map(p => toK(p.ji));
+  let raw = 70;
+  const added = new Set<string>();
+  const add = (kind: string, key: string) => { if (!added.has(key)) { added.add(key); raw += REL_SCORE_S[kind] ?? 0; } };
+  for (const [a,b] of GAN_HAP_S) { if ((mg.includes(a)&&pg.includes(b))||(mg.includes(b)&&pg.includes(a))) add("천간합",`천간합${a}${b}`); }
+  for (const [a,b] of GAN_CHUNG_S) { if ((mg.includes(a)&&pg.includes(b))||(mg.includes(b)&&pg.includes(a))) add("천간충",`천간충${a}${b}`); }
+  for (const [a,b] of YUK_HAP_S) { if ((mj.includes(a)&&pj.includes(b))||(mj.includes(b)&&pj.includes(a))) add("육합",`육합${a}${b}`); }
+  for (const arr of SAM_HAP_S) { const mf=arr.filter(c=>mj.includes(c)),pf=arr.filter(c=>pj.includes(c)); if([...new Set([...mf,...pf])].length>=2&&mf.length>=1&&pf.length>=1) add("삼합",`삼합${arr.join("")}`); }
+  for (const [a,b] of JI_CHUNG_S) { if ((mj.includes(a)&&pj.includes(b))||(mj.includes(b)&&pj.includes(a))) add("충",`충${a}${b}`); }
+  for (const arr of HYEONG_S) { const mf=arr.filter(c=>mj.includes(c)),pf=arr.filter(c=>pj.includes(c)); if([...new Set([...mf,...pf])].length>=2&&mf.length>=1&&pf.length>=1) add("형",`형${arr.join("")}`); }
+  for (const [a,b] of PA_S) { if ((mj.includes(a)&&pj.includes(b))||(mj.includes(b)&&pj.includes(a))) add("파",`파${a}${b}`); }
+  for (const [a,b] of HAE_S) { if ((mj.includes(a)&&pj.includes(b))||(mj.includes(b)&&pj.includes(a))) add("해",`해${a}${b}`); }
+  for (const [a,b] of WONJIN_S) { if ((mj.includes(a)&&pj.includes(b))||(mj.includes(b)&&pj.includes(a))) add("원진",`원진${a}${b}`); }
+  return Math.min(100, Math.max(0, raw));
+}
+
+// 한국어 조사 자동 교정
+function hasBatchim(ch: string): boolean {
+  const code = ch.charCodeAt(0) - 0xAC00;
+  if (code < 0 || code > 11171) return false;
+  return code % 28 !== 0;
+}
+function fixJosa(text: string): string {
+  if (!text) return text;
+  return text
+    .replace(/([가-힣])(은|는)/g, (_, w, j) => w + (hasBatchim(w) ? "은" : "는"))
+    .replace(/([가-힣])(이|가)(?=[ .,·\n'"」』\)]|$)/g, (_, w) => w + (hasBatchim(w) ? "이" : "가"))
+    .replace(/([가-힣])(을|를)/g, (_, w) => w + (hasBatchim(w) ? "을" : "를"))
+    .replace(/([가-힣])(과|와)/g, (_, w) => w + (hasBatchim(w) ? "과" : "와"))
+    .replace(/([가-힣])(으로|로)(?!서)/g, (_, w) => {
+      const code = w.charCodeAt(0) - 0xAC00;
+      const batchim = code % 28;
+      return w + (batchim === 0 || batchim === 8 ? "로" : "으로"); // 받침없거나 ㄹ → 로
+    });
+}
+function fixJosaDeep(obj: unknown): unknown {
+  if (typeof obj === "string") return fixJosa(obj);
+  if (Array.isArray(obj)) return obj.map(fixJosaDeep);
+  if (obj && typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) result[k] = fixJosaDeep(v);
+    return result;
+  }
+  return obj;
+}
+
+// 오행 사전 계산 유틸
+const GAN_EL: Record<string, string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+const JI_EL: Record<string, string>  = { 寅:"목",卯:"목",巳:"화",午:"화",辰:"토",戌:"토",丑:"토",未:"토",申:"금",酉:"금",亥:"수",子:"수" };
+
+function computeOhaengSummary(pillars: Array<{ gan?: string; ji?: string }> | undefined): { summary: string; ilgan: string } {
+  if (!pillars || pillars.length === 0) return { summary: "", ilgan: "" };
+  const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  for (const p of pillars) {
+    if (p.gan && GAN_EL[p.gan]) counts[GAN_EL[p.gan]]++;
+    if (p.ji  && JI_EL[p.ji])   counts[JI_EL[p.ji]]++;
+  }
+  const summary = ["목","화","토","금","수"].map(e => `${e} ${counts[e]}개`).join(", ");
+  // pillars ORDER: 시주(0)·일주(1)·월주(2)·년주(3) — 일주는 index 1
+  const ilgan = pillars[1]?.gan ?? "";
+  return { summary, ilgan };
+}
 
 const PRODUCT_SLUG = "kunghap_yeonae";
 const PRODUCT_NAME = "연애궁합";
@@ -49,6 +133,17 @@ async function genChapterContent(chapter: number, input: {
   name: string; gender: "male" | "female"; manseryeokText: string;
   partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
+  ohaengSummary?: string; partnerOhaengSummary?: string;
+  ilgan?: string; partnerIlgan?: string;
+  mySipseong?: string; partnerSipseong?: string;
+  hapChungScore?: number;
+  bestTimingPeriod?: string;
+  worstTimingPeriod?: string;
+  worstTimingText?: string;
+  timingContext?: string;
+  prevChapterSummary?: string;
+  ilganFull?: string;
+  partnerIlganFull?: string;
 }) {
   const { system, user } = buildYeonaeKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -68,7 +163,29 @@ async function genChapterContent(chapter: number, input: {
           continue;
         }
       }
-      if (isYeonaeKunghapChapterReady(obj, chapter)) return { obj, ...meta };
+      if (isYeonaeKunghapChapterReady(obj, chapter)) {
+        obj = fixJosaDeep(obj) as Record<string, unknown>;
+        const SIPSEONG_ALL = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
+        function fixSipseongInText(text: string, correct: string): string {
+          for (const s of SIPSEONG_ALL) {
+            if (s !== correct) text = text.replace(new RegExp(s, "g"), correct);
+          }
+          return text;
+        }
+        // 4장: mySipseong sipseong + desc 강제 교정
+        if (chapter === 4 && input.mySipseong && obj.mySipseong && typeof obj.mySipseong === "object") {
+          const ms = obj.mySipseong as Record<string, unknown>;
+          ms.sipseong = input.mySipseong;
+          if (typeof ms.desc === "string") ms.desc = fixSipseongInText(ms.desc, input.mySipseong);
+        }
+        // 5장: partnerSipseong sipseong + desc 강제 교정
+        if (chapter === 5 && input.partnerSipseong && obj.partnerSipseong && typeof obj.partnerSipseong === "object") {
+          const ps = obj.partnerSipseong as Record<string, unknown>;
+          ps.sipseong = input.partnerSipseong;
+          if (typeof ps.desc === "string") ps.desc = fixSipseongInText(ps.desc, input.partnerSipseong);
+        }
+        return { obj, ...meta };
+      }
       console.error(`[kunghap_yeonae] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
     } catch (e) {
       console.error(`[kunghap_yeonae] ${chapter}장 예외 (시도${i+1}):`, e);
@@ -297,6 +414,156 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+
+    const { summary: ohaengSummary } = computeOhaengSummary(stored?.view?.pillars);
+    const { summary: partnerOhaengSummary } = computeOhaengSummary(stored?.partnerView?.pillars);
+
+    // 일간: API가 이미 계산한 view.ilgan 에서 직접 추출 (재계산 금지)
+    // view.ilgan 형식: "庚 (경금)" → 첫 글자가 한자 일간
+    const ilganFull: string = stored?.view?.ilgan ?? "";
+    const partnerIlganFull: string = stored?.partnerView?.ilgan ?? "";
+    const ilgan = ilganFull.charAt(0) || "";          // "庚"
+    const partnerIlgan = partnerIlganFull.charAt(0) || ""; // "丙"
+
+    // 십성 서버 계산 (LLM 오류 방지)
+    const mySipseong = ilgan && partnerIlgan ? sipseongOfStem(ilgan, partnerIlgan) : undefined;
+    const partnerSipseong = ilgan && partnerIlgan ? sipseongOfStem(partnerIlgan, ilgan) : undefined;
+
+    // 합충 점수 서버 계산 (ch10 프롬프트에 주입용)
+    let hapChungScore: number | undefined;
+    let bestTimingPeriod: string | undefined;
+    let worstTimingPeriod: string | undefined;
+    let worstTimingText: string | undefined;
+    let timingContext: string | undefined;
+    if (chapter === 10 && stored?.view && stored?.partnerView) {
+      hapChungScore = calcHapChungScore(stored.view, stored.partnerView);
+      // ch9 crisisFlow에서 가장 좋은 시기 추출 → ch10 프롬프트에 주입
+      type FlowItem = { label: string; tone: string; score?: number };
+      const ch9Flow = (content?.crisisFlow as { items?: FlowItem[] } | undefined)?.items ?? [];
+      const toneScore = (t: string, s?: number) => s !== undefined ? Math.min(100, Math.max(5, s)) : t === "good" ? 80 : t === "caution" ? 55 : 30;
+      const bestItem = ch9Flow.reduce<FlowItem | null>((best, cur) =>
+        !best || toneScore(cur.tone, cur.score) > toneScore(best.tone, best.score) ? cur : best
+      , null);
+      const worstItem = ch9Flow.reduce<FlowItem | null>((worst, cur) =>
+        !worst || toneScore(cur.tone, cur.score) < toneScore(worst.tone, worst.score) ? cur : worst
+      , null);
+      if (bestItem?.label) bestTimingPeriod = bestItem.label;
+      if (worstItem?.label) worstTimingPeriod = worstItem.label;
+      if (worstItem) worstTimingText = (worstItem as FlowItem & { text?: string }).text ?? undefined;
+
+      // 타겟 연도 대운·세운·십성 서버 계산 → LLM에 확정값으로 주입
+      const targetYear = bestTimingPeriod
+        ? Number(bestTimingPeriod.replace(/[^0-9]/g, "").slice(0, 4))
+        : 0;
+      if (targetYear >= 1900) {
+        // 세운 간지 계산 (육십갑자)
+        const STEMS_60   = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+        const BRANCHES_60 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+        const GAN_KOR_60: Record<string,string> = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무","己":"기","庚":"경","辛":"신","壬":"임","癸":"계"};
+        const JI_KOR_60: Record<string,string>  = {"子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사","午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해"};
+        const seunGan = STEMS_60[((targetYear - 4) % 10 + 10) % 10];
+        const seunJi  = BRANCHES_60[((targetYear - 4) % 12 + 12) % 12];
+        const seunGanKor = GAN_KOR_60[seunGan] ?? seunGan;
+        const seunJiKor  = JI_KOR_60[seunJi]  ?? seunJi;
+
+        // 대운 조회 함수
+        type DaeunItem = { label: string; gz: string; active: boolean; yearStart: number };
+        function findDaeun(daeunList: DaeunItem[], myIlgan: string): string {
+          if (!daeunList?.length || !myIlgan) return "";
+          // yearStart 기준으로 정렬
+          const sorted = [...daeunList].sort((a, b) => a.yearStart - b.yearStart);
+          let found: DaeunItem | null = null;
+          for (let i = 0; i < sorted.length; i++) {
+            const cur = sorted[i];
+            const next = sorted[i + 1];
+            const end = next ? next.yearStart - 1 : cur.yearStart + 9;
+            if (targetYear >= cur.yearStart && targetYear <= end) {
+              found = cur;
+              break;
+            }
+          }
+          if (!found) return "";
+          const gz = found.gz; // e.g. "壬申"
+          const dGan = gz[0]; const dJi = gz[1];
+          const dGanKor = GAN_KOR_60[dGan] ?? dGan;
+          const dJiKor  = JI_KOR_60[dJi]  ?? dJi;
+          const dGanSip = sipseongOfStem(myIlgan, dGan);
+          const dJiSip  = sipseongOfBranch(myIlgan, dJi);
+          const seunGanSip = sipseongOfStem(myIlgan, seunGan);
+          const seunJiSip  = sipseongOfBranch(myIlgan, seunJi);
+          // 대운 내 위치
+          const daeunStart = found.yearStart;
+          const offset = targetYear - daeunStart;
+          const position = offset <= 2 ? "대운 초반" : offset <= 6 ? "대운 중반" : "대운 후반";
+          return `대운: ${gz}(${dGanKor}${dJiKor}) [시작: ${daeunStart}년, ${targetYear}년은 ${position}]
+  대운 천간 ${gz[0]}(${dGanKor}) 십성: ${dGanSip || "—"}
+  대운 지지 ${gz[1]}(${dJiKor}) 십성: ${dJiSip || "—"}
+  ${targetYear}년 세운: ${seunGan}${seunJi}(${seunGanKor}${seunJiKor})년
+  세운 천간 ${seunGan}(${seunGanKor}) 십성: ${seunGanSip || "—"}
+  세운 지지 ${seunJi}(${seunJiKor}) 십성: ${seunJiSip || "—"}`;
+        }
+
+        const myDaeunInfo      = findDaeun(stored.view?.daeun ?? [], ilgan);
+        const partnerDaeunInfo = findDaeun(stored.partnerView?.daeun ?? [], partnerIlgan);
+
+        if (myDaeunInfo || partnerDaeunInfo) {
+          timingContext = `\n⚠️ [${targetYear}년 사주 흐름 — 서버 계산 확정값. 반드시 이 값 그대로 사용. 임의 변경·재계산 절대 금지]\n본인 일간: ${ilgan}\n${myDaeunInfo}\n\n상대방 일간: ${partnerIlgan}\n${partnerDaeunInfo}\n위 대운·세운·십성을 근거로 desc를 작성하시오.`;
+        }
+      }
+    }
+
+    // ch11: 이전 장에서 실제 작성된 텍스트 추출 → 서신이 전체 분석과 맥락 일치하도록
+    let prevChapterSummary: string | undefined;
+    if (chapter === 11) {
+      const c = content as Record<string, unknown>;
+      const blocks: string[] = [];
+
+      const firstPara = (paras: unknown) =>
+        Array.isArray(paras) && typeof paras[0] === "string" ? paras[0] : undefined;
+
+      // ch1 본인 원국
+      const myW = c.myWonguk as Record<string,unknown> | undefined;
+      if (myW?.intro) blocks.push(`[제1장 — 본인 원국] ${myW.intro}${myW.callout ? ` / ${myW.callout}` : ""}`);
+      const myWp = firstPara(myW?.paragraphs);
+      if (myWp) blocks.push(`  → ${myWp}`);
+
+      // ch2 상대 원국
+      const ptW = c.partnerWonguk as Record<string,unknown> | undefined;
+      if (ptW?.intro) blocks.push(`[제2장 — 상대 원국] ${ptW.intro}${ptW.callout ? ` / ${ptW.callout}` : ""}`);
+      const ptWp = firstPara(ptW?.paragraphs);
+      if (ptWp) blocks.push(`  → ${ptWp}`);
+
+      // ch3 끌림
+      const attr = c.attractionReason as Record<string,unknown> | undefined;
+      if (attr?.intro) blocks.push(`[제3장 — 끌림] ${attr.intro}${attr.callout ? ` / ${attr.callout}` : ""}`);
+      const attrP = firstPara(attr?.paragraphs);
+      if (attrP) blocks.push(`  → ${attrP}`);
+
+      // ch8 빛/그림자
+      const str = c.strengths as Record<string,unknown> | undefined;
+      if (str?.summary) blocks.push(`[제8장 — 이 관계의 빛] ${str.summary}`);
+      const shad = c.shadows as Record<string,unknown> | undefined;
+      if (shad?.summary) blocks.push(`[제8장 — 이 관계의 그림자] ${shad.summary}`);
+
+      // ch9 위기·극복
+      const crisis = c.crisisPoints as { summary?: string; items?: Array<{title:string; desc?:string}> } | undefined;
+      if (crisis?.summary) blocks.push(`[제9장 — 위기 요약] ${crisis.summary}`);
+      else if (crisis?.items?.length) blocks.push(`[제9장 — 주요 위기] ${crisis.items.slice(0,3).map(i => i.title).join(" / ")}`);
+      const overcome = c.overcomeTips as { summary?: string } | undefined;
+      if (overcome?.summary) blocks.push(`[제9장 — 극복 핵심] ${overcome.summary}`);
+
+      // ch10 결혼 가능성 핵심 문장
+      const mp = c.marriagePossibility as Record<string,unknown> | undefined;
+      if (mp?.label) blocks.push(`[제10장 — 결혼 가능성] ${mp.label}`);
+      const mpParas = mp?.paragraphs;
+      const mpFirst = firstPara(mpParas);
+      if (mpFirst) blocks.push(`  → ${mpFirst}`);
+
+      if (blocks.length) {
+        prevChapterSummary = `\n⚠️ [1~10장 분석 내용 요약 — 이 서신은 아래 내용의 총정리이오. 반드시 같은 맥락으로 작성하고, 아래 내용과 모순되는 서술 절대 금지]\n${blocks.join("\n")}`;
+      }
+    }
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -305,6 +572,20 @@ async function generateChapter(body: unknown) {
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
       partnerManseryeokText: stored?.partnerManseryeokText ?? "",
       birthYear: birthYear || undefined,
+      ohaengSummary,
+      partnerOhaengSummary,
+      ilgan,
+      partnerIlgan,
+      mySipseong,
+      partnerSipseong,
+      hapChungScore,
+      bestTimingPeriod,
+      worstTimingPeriod,
+      worstTimingText,
+      timingContext,
+      prevChapterSummary,
+      ilganFull,
+      partnerIlganFull,
     });
 
     return NextResponse.json({ sections: obj });
