@@ -6647,7 +6647,7 @@ function ReportPreviewInner() {
 
             <div className="px-8 py-12 text-center">
               <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-                {`이번에는 ${partnerFirstName}님의\n사주를 펼쳐보겠소.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${partnerFirstName}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${partnerFirstName}님의 사주팔자요.`}
+                {`이번에는 ${partnerFirstName}님의\n사주를 펼쳐보겠소.`}
               </p>
             </div>
 
