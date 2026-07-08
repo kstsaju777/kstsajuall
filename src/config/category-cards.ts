@@ -114,7 +114,7 @@ export const CATEGORY_CARDS: Record<string, CategoryCard[]> = {
   기타: [
     { image: "/media/cards/kunghap_banryeo/banryeo-0.jpg", videoUrl: "/media/cards/kunghap_banryeo/banryeo-0.mp4", badge: "반려동물", tag: "HOT", tag2: "궁합", name: "똥멍냥이 반려궁합", tagline: "우리 강아지, 행복했음 좋겠어", desc: "나와 반려동물의 궁합과 함께할 흐름을 봅니다", shortDesc: "반려동물과의 궁합과 인연", href: "/saju/kunghap_banryeo" },
     { image: "/media/cards/saju_health/health-0.jpg", videoUrl: "/media/cards/saju_health/health-0.mp4", badge: "건강", tag: "사주", name: "오래살자 건강사주", tagline: "건강하게 오래오래 살고싶다", desc: "타고난 체질과 건강 조심 시기를 분석합니다", shortDesc: "체질과 건강 조심 시기 분석", href: "/saju/saju_health" },
-    { image: "/media/cards/saju_total/total-0-image.jpg", videoUrl: "/media/cards/saju_total/total-0.mp4", badge: "종합", tag: "BEST", tag2: "사주", name: "정통명리 종합사주", tagline: "내 인생 완전 정복하자", desc: "기질·직업·연애·재물·건강·대운·세운 종합풀이", shortDesc: "직업·재물·연애·건강·흐름 내 인생 종합", href: "/saju/total" },
+    { image: "/media/cards/saju_total/total-0-image.jpg", type: "video", videoUrl: "/media/cards/saju_total/total-0.mp4", badge: "종합", tag: "BEST", tag2: "사주", name: "정통명리 종합사주", tagline: "내 인생 완전 정복하자", desc: "기질·직업·연애·재물·건강·대운·세운 종합풀이", shortDesc: "직업·재물·연애·건강·흐름 내 인생 종합", href: "/saju/total" },
   ],
 
   /*
