@@ -148,6 +148,8 @@ async function genChapterContent(chapter: number, input: {
   myPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
   partnerPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
   daeunSeunContext?: string;
+  marriageScore?: number;
+  marriageLabel?: string;
 }) {
   const { system, user } = buildYeonaeKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -525,8 +527,20 @@ async function generateChapter(body: unknown) {
       }
     }
 
+    let marriageScore: number | undefined;
+    let marriageLabel: string | undefined;
+
     if (chapter === 10 && stored?.view && stored?.partnerView) {
       hapChungScore = calcHapChungScore(stored.view, stored.partnerView);
+      if (hapChungScore !== undefined) {
+        marriageScore = hapChungScore;
+        marriageLabel = marriageScore >= 85 ? "천생연분에 가까운 인연이오"
+          : marriageScore >= 70 ? "결혼을 권하는 인연이오"
+          : marriageScore >= 60 ? "노력하면 충분히 가능한 인연이오"
+          : marriageScore >= 50 ? "결혼을 서두르기엔 아직 이른 인연이오"
+          : marriageScore >= 40 ? "많은 준비가 필요한 인연이오"
+          : "더 깊이 이해하는 시간이 필요한 인연이오";
+      }
       // ch9 crisisFlow에서 가장 좋은 시기 추출 → ch10 프롬프트에 주입
       type FlowItem = { label: string; tone: string; score?: number };
       const ch9Flow = (content?.crisisFlow as { items?: FlowItem[] } | undefined)?.items ?? [];
@@ -699,6 +713,8 @@ ${ptRawInfo}
       myPillars: stored?.view?.pillars ?? [],
       partnerPillars: stored?.partnerView?.pillars ?? [],
       daeunSeunContext,
+      marriageScore,
+      marriageLabel,
     });
 
     return NextResponse.json({ sections: obj });

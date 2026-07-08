@@ -997,30 +997,16 @@ const RECO_TAG_COLORS: Record<string, string> = {
 };
 
 function RecoProductCard({ card }: { card: CategoryCard }) {
-  const isVideo = !!card.videoUrl || card.type === "video";
-  const mediaSrc = card.videoUrl ?? card.image;
+  const imgSrc = card.thumbnail ?? card.image;
   const [imgErr, setImgErr] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLAnchorElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !isVideo) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }, { threshold: 0.1 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [isVideo]);
   return (
-    <Link ref={ref} href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+    <Link href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
       style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
-      {isVideo ? (
-        visible
-          ? <video src={mediaSrc} className="w-full h-full object-cover" autoPlay muted loop playsInline />
-          : <div className="w-full h-full" style={{ background: "#1a1a1a" }} />
-      ) : imgErr ? (
+      {imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={mediaSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+        <img src={imgSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
       )}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
@@ -5260,7 +5246,6 @@ function ReportPreviewInner() {
             </section>
 
             <ReviewBox />
-            <EventBox />
             <RecoGrid />
 
             <ChapterNav cur="7" go={next} />

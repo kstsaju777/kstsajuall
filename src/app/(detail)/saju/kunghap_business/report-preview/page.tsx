@@ -5084,7 +5084,6 @@ function ReportPreviewInner() {
           </section>
 
           <ReviewBox />
-          <EventBox />
           <RecoGrid />
           <ChapterNav cur="12" go={next} />
         </div>

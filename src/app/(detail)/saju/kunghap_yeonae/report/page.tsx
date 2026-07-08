@@ -17,6 +17,8 @@ import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/re
 import { isChapterReady, CHAPTER_SECTIONS } from "@/lib/saju/report-content";
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
+import { CATEGORY_CARDS } from "@/config/category-cards";
+import type { CategoryCard } from "@/config/category-cards";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
@@ -967,36 +969,75 @@ function EventBox() {
 }
 
 // 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
+const RECO_EXCLUDE_Y = new Set(["찰떡콩떡 연애궁합"]);
+const KUNGHAP_ORDER_Y = ["말좀듣자 자녀궁합", "평생내짝 결혼궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
+const SAJU_ORDER_Y = ["정통명리 종합사주", "나만솔로? 연애사주", "영재발굴 자녀사주", "오래살자 건강사주", "우리아가 유아사주"];
+const RECO_TAG_COLORS_Y: Record<string, string> = { "HOT": "#ff4500", "BEST": "#b47221", "FREE": "#555" };
+const RECO_BADGE_COLORS_Y: Record<string, string> = { "사주": "#711b20", "궁합": "#1b4b71", "자미두수": "#2d3a8c", "유아": "#e8c84a", "재물": "#4a8c3a" };
+function sortByY(cards: CategoryCard[], order: string[]) {
+  const ordered = order.flatMap((name) => cards.filter((c) => c.name === name));
+  const rest = cards.filter((c) => !order.includes(c.name));
+  return [...ordered, ...rest];
+}
+function RecoProductCardY({ card }: { card: CategoryCard }) {
+  const imgSrc = card.thumbnail ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  return (
+    <a href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start", textDecoration: "none" }}>
+      {imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={imgSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS_Y[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS_Y[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS_Y[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </a>
+  );
+}
 function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("kunghap_yeonae") && !RECO_EXCLUDE_Y.has(c.name));
+  const sajuCards = sortByY(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER_Y);
+  const kunghapCards = sortByY(all.filter((c) => c.href.includes("kunghap")), KUNGHAP_ORDER_Y);
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCardY key={i} card={c} />)}
+      </div>
+    </div>
+  );
   return (
     <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+      `}</style>
+      {sajuCards.length > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
     </div>
   );
 }
@@ -5766,9 +5807,6 @@ function ReportPreviewInner() {
 
           {/* 만족도 리뷰 */}
           <ReviewBox />
-
-          {/* 후기 이벤트 */}
-          <EventBox />
 
           {/* 추천 상품 (크로스셀) */}
           <RecoGrid />
