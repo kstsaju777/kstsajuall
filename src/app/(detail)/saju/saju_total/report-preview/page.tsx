@@ -1523,7 +1523,7 @@ const RECO_TAG_COLORS: Record<string, string> = {
 };
 
 function RecoProductCard({ card }: { card: CategoryCard }) {
-  const imgSrc = card.image;
+  const imgSrc = card.thumbnail ?? card.image;
   const [imgErr, setImgErr] = useState(false);
   return (
     <Link href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
