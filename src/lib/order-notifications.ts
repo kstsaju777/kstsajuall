@@ -43,7 +43,7 @@ export function sendAlimtalk({
             {
               buttonType: "WL",
               buttonName: "풀이 확인하기",
-              linkMobile: resultUrl,
+              linkMo: resultUrl,
               linkPc: resultUrl,
             },
           ],
