@@ -6537,70 +6537,86 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
+      {/* ═══════════ 제1장 · 나는 어떤 사람인가? ═══════════ */}
       {ch === "1" && (() => {
-        const myWonguk      = (jc.myWonguk      as Record<string, unknown> | undefined) ?? null;
-        const myNature      = (jc.myNature      as Record<string, unknown> | undefined) ?? null;
-        const myMarriagePattern = (jc.myMarriagePattern as Record<string, unknown> | undefined) ?? null;
+        const wonguk = (jc.myWonguk as Record<string,unknown> | undefined) ?? {};
+        const nature = (jc.myNature as Record<string, unknown> | undefined) ?? null;
+        const marriagePattern = (jc.myMarriagePattern as Record<string, unknown> | undefined) ?? null;
+        const wongukParas = (wonguk.paragraphs as string[] | undefined) ?? [];
         return (
           <>
+            {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 어떤 사람인가?</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 300 }}>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_1/kunghap_gyeolhon_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
+            <div className="px-8 py-12 text-center">
+              <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`${name.slice(1) || name}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name.slice(1) || name}님의 사주팔자요.`}
+              </p>
+            </div>
 
-            {/* 명식 표 */}
-            <section className="pb-2">
-              <div className="px-6"><Heading>나의 명식</Heading></div>
-              <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <MyeongsikTable
+                view={report?.view ?? null}
+                name={name}
+                birth={report?.birth ?? null}
+                header={
+                  <div className="text-center">
+                    <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name.slice(1) || name}님의 사주팔자</p>
+                    {report?.birth?.date && (
+                      <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                        {report.birth.date}{" "}
+                        {report.birth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                        {(report.birth.gender || gender) === "female" ? "여자" : "남자"}
+                      </p>
+                    )}
+                  </div>
+                }
+              />
             </section>
 
-            {/* 오행 분포 — 도넛 차트 */}
-            <section className="px-6 pt-6 pb-2">
-              <Heading>나의 오행 분포</Heading>
-              <P>목·화·토·금·수 다섯 기운이 내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-            </section>
-            <OhaengDonut view={report?.view ?? null} />
-
-            {/* 사주 원국 풀이 */}
-            <section className="px-6 pt-6 pb-2">
-              <Heading>나의 사주 풀이</Heading>
-            </section>
-            {myWonguk?.callout && (
-              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${GCH1_COLOR}0c`, borderLeft: `3px solid ${GCH1_COLOR}` }}>
-                <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: GCH1_COLOR }}>{myWonguk.callout as string}</p>
+            {/* ── 타고난 기운의 뿌리 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
-            )}
-            {myWonguk?.intro && (
-              <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{myWonguk.intro as string}"</p>
-            )}
-            {((myWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
-            ))}
-
-            {/* 기질 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>나의 기질</Heading>
-              <P>사주 원국에 깃든 본연의 성품과 기질이오. 강점과 함께 주의해야 할 그림자도 살펴보시오.</P>
+              <OhaengDonut view={report?.view ?? null} />
+              <div className="px-5 mt-4">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+                ))}
+              </div>
             </section>
-            <GNatureCard data={myNature} color={GCH1_COLOR} label="나를 대표하는 기질" />
 
-            {/* 결혼 패턴 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>나의 결혼 패턴</Heading>
-              <P>내 사주가 품은 결혼의 인연 구조와 배우자 복이오. 어떤 방식으로 인연을 맺고 가정을 꾸리는지 살펴보겠소.</P>
+            {/* ── 빛과 그림자 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <GNatureCard data={nature} color={GCH1_COLOR} label="나를 대표하는 기질" />
             </section>
-            <MarriagePatternCard data={myMarriagePattern} color={GCH1_COLOR} pale={GCH1_PALE} />
 
-            <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
-            <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
+            {/* ── 결혼할 때 나는 어떤 사람인가 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[17px] font-black" style={{ color: INK }}>결혼할 때 나는 어떤 사람인가</h2>
+              </div>
+              <MarriagePatternCard data={marriagePattern} color={GCH1_COLOR} pale={GCH1_PALE} />
+            </section>
+
+            {/* ── 마무리 인용구 ── */}
+            <Quote>{'"나의 기운을 살펴보았으니,\n이제 상대방의 사주를 펼쳐보겠소."'}</Quote>
+
             <ChapterNav cur="1" go={next} />
           </>
         );
