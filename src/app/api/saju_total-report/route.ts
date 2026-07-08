@@ -166,14 +166,17 @@ export async function POST(request: NextRequest) {
 // 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
 async function saveContent(id: string, content: Record<string, unknown>) {
   const service = createServiceClient();
-  const { data } = await service.from("saju_results").select("interpretation_md, order_id").eq("id", id).maybeSingle();
+  const { data } = await service.from("saju_results").select("interpretation_md, order_id, myeongsik").eq("id", id).maybeSingle();
   let existing: Record<string, unknown> = {};
   try { existing = JSON.parse(data?.interpretation_md || "{}") || {}; } catch { existing = {}; }
   const merged = { ...existing, ...content };
   await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
   const totalChapters = Object.keys(CHAPTER_SECTIONS).map(Number);
   const allDone = totalChapters.every(n => isChapterReady(merged, n));
-  if (allDone && data?.order_id) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const storedMyeongsik = data?.myeongsik as any;
+  const imageReady = !!storedMyeongsik?.sajuImageUrl;
+  if (allDone && imageReady && data?.order_id) {
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
     if (si?.phone) {
       const reportUrl = `https://www.hongyeondang.com/saju/saju_total/report-preview?id=${id}`;
@@ -404,6 +407,23 @@ export async function PATCH(request: NextRequest) {
     const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
     const sajuImageUrl = pubData.publicUrl;
     await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
+
+    // 모든 챕터 완료 + 이미지 완료 시 알림톡 발송
+    const { data: resultData } = await service.from("saju_results").select("interpretation_md, order_id").eq("id", id).maybeSingle();
+    if (resultData?.order_id) {
+      let contentForCheck: Record<string, unknown> = {};
+      try { contentForCheck = JSON.parse(resultData.interpretation_md || "{}") || {}; } catch { contentForCheck = {}; }
+      const chapterKeys = Object.keys(CHAPTER_SECTIONS).map(Number);
+      const allDone = chapterKeys.every(n => isChapterReady(contentForCheck, n));
+      if (allDone) {
+        const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultData.order_id).maybeSingle();
+        if (si?.phone) {
+          const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${id}`;
+          sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+        }
+      }
+    }
+
     return NextResponse.json({ sajuImageUrl });
   } catch (e) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
