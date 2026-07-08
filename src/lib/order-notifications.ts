@@ -38,8 +38,15 @@ export function sendAlimtalk({
           templateId: "KA01TP260705185306355QVmxcJYJwzX",
           variables: {
             "#{이름}": customerName,
-            "#{결과링크}": resultUrl,
           },
+          buttons: [
+            {
+              buttonType: "WL",
+              buttonName: "풀이 확인하기",
+              linkMo: resultUrl,
+              linkPc: resultUrl,
+            },
+          ],
         },
       },
     }),
