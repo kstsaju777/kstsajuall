@@ -3813,7 +3813,7 @@ function HapChungScoreCard({ data, hapCount, chungCount }: { data: Record<string
     <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
       {/* 게이지 */}
       <div className="px-5 pt-4 pb-2">
-        <svg viewBox="0 20 220 95" style={{ width: "100%", maxHeight: 110 }}>
+        <svg viewBox="0 10 220 100" style={{ width: "100%", maxHeight: 120 }}>
           <defs>
             <linearGradient id="gaugeGrad6" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor={CHUNG_COLOR} />
@@ -3826,7 +3826,6 @@ function HapChungScoreCard({ data, hapCount, chungCount }: { data: Record<string
           <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
           <circle cx={cx} cy={cy} r="5" fill={INK} />
           <text x={cx} y={cy - 12} textAnchor="middle" fontSize="24" fontWeight="900" fill={COLOR}>{s}</text>
-          <text x={cx} y={cy + 4} textAnchor="middle" fontSize="10" fill={MUTE}>점</text>
         </svg>
         <p className="text-center text-[13px] font-bold mb-1" style={{ color: COLOR }}>{label}</p>
       </div>
