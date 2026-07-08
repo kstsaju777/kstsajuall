@@ -41,6 +41,10 @@ export function fixJosa(text: string): string {
   // 이며/며
   text = text.replace(/([가-힣])(이며|며)/g, (_, p) => p + (hasBatchim(p) ? "이며" : "며"));
 
+  // 동사 활용 오류 교정
+  text = text.replace(/있은/g, "있는");
+  text = text.replace(/없은/g, "없는");
+
   return text;
 }
 
