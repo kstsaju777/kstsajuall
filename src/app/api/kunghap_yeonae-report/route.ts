@@ -145,6 +145,8 @@ async function genChapterContent(chapter: number, input: {
   prevChapterSummary?: string;
   ilganFull?: string;
   partnerIlganFull?: string;
+  myPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
+  partnerPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
 }) {
   const { system, user } = buildYeonaeKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -601,6 +603,8 @@ async function generateChapter(body: unknown) {
       prevChapterSummary,
       ilganFull,
       partnerIlganFull,
+      myPillars: stored?.view?.pillars ?? [],
+      partnerPillars: stored?.partnerView?.pillars ?? [],
     });
 
     return NextResponse.json({ sections: obj });

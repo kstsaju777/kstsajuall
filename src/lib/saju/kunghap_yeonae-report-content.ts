@@ -5,6 +5,7 @@
 // 홍연 화자 SYSTEM은 report-prompts.ts에서 공유.
 
 import { SYSTEM } from "./report-prompts";
+import { sipseongOfStem, sipseongOfBranch } from "./sipseong-calc";
 
 // ── 장별 필수 섹션 키 ──
 export const YEONAE_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
@@ -441,6 +442,28 @@ const CH_SCHEMA: Record<number, string> = {
 }`,
 };
 
+// ── 기둥별 십성 확인표 빌더 ──
+type PillarItem = { pos?: string; gan?: string; ji?: string };
+const GAN_KOR_P: Record<string,string> = {甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계"};
+const JI_KOR_P: Record<string,string>  = {子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해"};
+const POS_LABEL: Record<string,string> = {년주:"년주(조상·초년)",월주:"월주(부모·청년)",일주:"일주(본인·배우자)",시주:"시주(자녀·말년)"};
+function buildKunghapPillarTable(ilgan: string, pillars: PillarItem[], personLabel: string): string {
+  if (!ilgan || !pillars.length) return "";
+  const ORDER = ["년주","월주","일주","시주"];
+  const byPos: Record<string,PillarItem> = {};
+  for (const p of pillars) if (p.pos) byPos[p.pos] = p;
+  const rows = ORDER.map(pos => {
+    const p = byPos[pos]; if (!p) return null;
+    const ganKor = p.gan ? GAN_KOR_P[p.gan] ?? p.gan : "—";
+    const jiKor  = p.ji  ? JI_KOR_P[p.ji]   ?? p.ji  : "—";
+    const ganSip = p.gan && p.gan !== ilgan ? sipseongOfStem(ilgan, p.gan) : "비견(일간)";
+    const jiSip  = p.ji  ? sipseongOfBranch(ilgan, p.ji) : "—";
+    return `  ${(POS_LABEL[pos]??pos).padEnd(14)}| 천간: ${ganKor}(${p.gan??""}) → ${ganSip} | 지지: ${jiKor}(${p.ji??""}) → ${jiSip}`;
+  }).filter(Boolean);
+  if (!rows.length) return "";
+  return `[${personLabel} 기둥별 십성 확인표 — 반드시 이 값만 사용, 임의 추론 절대 금지]\n${rows.join("\n")}\n⚠️ 위 표에 없는 십성을 임의로 언급하는 것은 절대 금지하오.`;
+}
+
 // ── 프롬프트 빌더 ──
 export function buildYeonaeKunghapChapterPrompt(
   chapter: number,
@@ -466,9 +489,11 @@ export function buildYeonaeKunghapChapterPrompt(
     prevChapterSummary?: string;
     ilganFull?: string;
     partnerIlganFull?: string;
+    myPillars?: PillarItem[];
+    partnerPillars?: PillarItem[];
   }
 ): { system: string; user: string } {
-  const { name, gender, manseryeokText, partnerName, partnerGender, partnerManseryeokText, ohaengSummary, partnerOhaengSummary, ilgan, partnerIlgan, mySipseong, partnerSipseong, hapChungScore, bestTimingPeriod, worstTimingPeriod, worstTimingText, timingContext, prevChapterSummary, ilganFull, partnerIlganFull } = input;
+  const { name, gender, manseryeokText, partnerName, partnerGender, partnerManseryeokText, ohaengSummary, partnerOhaengSummary, ilgan, partnerIlgan, mySipseong, partnerSipseong, hapChungScore, bestTimingPeriod, worstTimingPeriod, worstTimingText, timingContext, prevChapterSummary, ilganFull, partnerIlganFull, myPillars, partnerPillars } = input;
   const firstName = name.slice(1) || name;
   const partnerFirstName = partnerName.slice(1) || partnerName;
   const myGenderLabel = gender === "female" ? "여성" : "남성";
@@ -522,9 +547,13 @@ export function buildYeonaeKunghapChapterPrompt(
     .replace(/\{\{WORST_TIMING_TEXT\}\}/g, worstTimingText ?? "두 사람 사이에 갈등과 충돌이 생길 수 있는 시기");
   const schema = CH_SCHEMA[chapter] ?? "{}";
 
+  const myPillarTable = ilgan && myPillars?.length ? buildKunghapPillarTable(ilgan, myPillars, `${firstName}님`) : "";
+  const partnerPillarTable = partnerIlgan && partnerPillars?.length ? buildKunghapPillarTable(partnerIlgan, partnerPillars, `${partnerFirstName}님`) : "";
+
   const myDataBlock = [
     ilgan ? `⛔ 일간(日干) 확정값: ${ilganFull || ilgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지. 예) "${ilganFull || ilgan}의 기운" "○○님은 ${ilganFull || ilgan}을 일간으로" 처럼만 쓰시오.` : "",
     ohaengSummary ? `오행 분포(서버 사전계산): ${ohaengSummary}` : "",
+    myPillarTable,
     mySipseong ? `내 일간 기준 상대방 십성(서버 계산 확정값): ${mySipseong} ← 절대 바꾸지 마시오.` : "",
     mySipseongFirstSentence ? `mySipseong.desc 첫 문장 반드시 이렇게 시작: "${mySipseongFirstSentence}"` : "",
   ].filter(Boolean).join("\n");
@@ -532,6 +561,7 @@ export function buildYeonaeKunghapChapterPrompt(
   const partnerDataBlock = [
     partnerIlgan ? `⛔ 일간(日干) 확정값: ${partnerIlganFull || partnerIlgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지. 예) "${partnerIlganFull || partnerIlgan}의 기운" "○○님은 ${partnerIlganFull || partnerIlgan}을 일간으로" 처럼만 쓰시오.` : "",
     partnerOhaengSummary ? `오행 분포(서버 사전계산): ${partnerOhaengSummary}` : "",
+    partnerPillarTable,
     partnerSipseong ? `상대 일간 기준 나의 십성(서버 계산 확정값): ${partnerSipseong} ← 절대 바꾸지 마시오.` : "",
     partnerSipseongFirstSentence ? `partnerSipseong.desc 첫 문장 반드시 이렇게 시작: "${partnerSipseongFirstSentence}"` : "",
   ].filter(Boolean).join("\n");
