@@ -56,6 +56,7 @@ type SajuInputRow = {
   gender: GenderKind;
   calendar: CalendarKind;
   concerns: string[];
+  phone: string | null;
   created_at: string;
 };
 
