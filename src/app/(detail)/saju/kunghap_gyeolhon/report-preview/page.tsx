@@ -2055,7 +2055,7 @@ function MarriagePatternCard({ data, color = GCH1_COLOR, pale = GCH1_PALE }: {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, textAlign: "justify", wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
@@ -6593,7 +6593,7 @@ function ReportPreviewInner() {
               <OhaengDonut view={report?.view ?? null} />
               <div className="px-5 mt-4">
                 {wongukParas.map((p, i) => (
-                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, textAlign: "justify", wordBreak: "break-all" }}>{p}</p>
                 ))}
               </div>
             </section>
