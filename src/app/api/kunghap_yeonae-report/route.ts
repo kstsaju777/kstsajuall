@@ -21,7 +21,7 @@ import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
 import { serverEnv } from "@/lib/env";
-import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
+import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 
 export const maxDuration = 300;
 
@@ -587,6 +587,14 @@ async function generateChapter(body: unknown) {
       ilganFull,
       partnerIlganFull,
     });
+
+    if (chapter === 12) {
+      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
+      if (si?.phone) {
+        const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${id}`;
+        sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+      }
+    }
 
     return NextResponse.json({ sections: obj });
   } catch (err) {
