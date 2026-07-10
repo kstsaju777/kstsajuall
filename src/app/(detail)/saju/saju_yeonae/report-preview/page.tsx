@@ -4415,13 +4415,13 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제2장 ═══════════ */}
-      {/* ═══════════ 제1장 · 나는 어떤 그릇으로 태어났나 ═══════════ */}
+      {/* ═══════════ 제1장 — 나는 어떤 그릇으로 태어났나 ═══════════ */}
       {ch === "1" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 그릇</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              나는 어떤 그릇으로 태어났나
+              {name}님은<br />어떤 그릇으로 태어났나
             </h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -4429,58 +4429,43 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_yeonae/saju_yeonae_1/saju_yeonae_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
+          <Quote>{`사랑을 담는 그릇도\n타고난 것이오.\n\n${name}님의\n사주 원국을 살펴보겠소.`}</Quote>
 
-          <Quote>{`연애를 풀어보기 전에,\n먼저 ${name}${effectiveGender === "female" ? "양" : "군"}이\n어떤 기운으로 태어났는지\n살펴보겠소.`}</Quote>
-
-          {/* ① 명식표 + 신강신약 풀이 */}
+          {/* ① 명식표 */}
           <section className="px-6 pt-2 pb-2">
             <Heading>나의 사주 명식</Heading>
           </section>
           <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          <div className="px-5">
-            <SinStrengthGauge view={report?.view ?? null} />
-          </div>
-          {(() => {
-            const w = (jc.wonguk as { sinDesc?: string } | undefined) ?? {};
-            return w.sinDesc ? (
-              <section className="px-6 pt-4 pb-2"><P>{w.sinDesc}</P></section>
-            ) : null;
-          })()}
 
-          {/* ② 오행 도넛 + 오행 풀이 */}
-          <section className="px-6 pt-6 pb-2">
-            <Heading>오행 균형</Heading>
-          </section>
-          <OhaengDonut view={report?.view ?? null} />
-          {(() => {
-            const w = (jc.wonguk as { ohaengDesc?: string } | undefined) ?? {};
-            return w.ohaengDesc ? (
-              <section className="px-6 pt-4 pb-2"><P>{w.ohaengDesc}</P></section>
-            ) : null;
-          })()}
+          <Quote>{`풀이를 읽다 명식이 궁금할 때면\n상단 `}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", position: "relative", top: -2, pointerEvents: "none", userSelect: "none" }}>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "1px 0 3px rgba(0,0,0,0.4)" }} />
+              <span style={{ padding: "4px 8px", background: "linear-gradient(to bottom, #f9f0d8 0%, #edd9a3 40%, #e8d090 60%, #f0e0b0 100%)", borderTop: "1.5px solid #b8892a", borderBottom: "1.5px solid #b8892a", color: "#5a2e14", fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", lineHeight: 1, whiteSpace: "nowrap" }}>나의 명식</span>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "-1px 0 3px rgba(0,0,0,0.4)" }} />
+            </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
-          {/* ③ 일간 카드 + 일간 풀이 */}
+          {/* 나의 일간 */}
           {(() => {
             const ilganFull = report?.view?.ilgan ?? "";
             const ilganHanja = ilganFull[0] ?? "";
             const ilganLabel = ilganFull.match(/\(([^)]+)\)/)?.[1] ?? "";
-            const ILGAN_META: Record<string, { oh: string; color: string; love: string }> = {
-              甲: { oh: "목(木)", color: "#3a7d44", love: "큰 나무처럼 우직하게 사랑을 지키오. 한번 마음을 주면 끝까지 책임지는 기운이오." },
-              乙: { oh: "목(木)", color: "#3a7d44", love: "덩굴처럼 유연하게 상대에게 스며들며 관계를 이어가오." },
-              丙: { oh: "화(火)", color: "#c0392b", love: "태양처럼 밝고 적극적으로 사랑을 표현하오. 열정과 에너지로 상대를 끌어당기오." },
-              丁: { oh: "화(火)", color: "#c0392b", love: "촛불처럼 섬세하고 깊게 타오르는 사랑을 하오. 한 사람을 진심으로 밝혀주는 기운이오." },
-              戊: { oh: "토(土)", color: "#b07d2a", love: "산처럼 묵직하고 안정감 있게 상대를 품어주오. 믿음직한 기운으로 관계를 지켜가오." },
-              己: { oh: "토(土)", color: "#b07d2a", love: "논밭처럼 부드럽고 꾸준하게 사랑을 가꾸오. 현실적인 방식으로 관계를 돌보는 기운이오." },
-              庚: { oh: "금(金)", color: "#7a7a7a", love: "바위처럼 원칙 있고 단호하게 사랑하오. 한 번 정한 인연은 흔들리지 않는 기운이오." },
-              辛: { oh: "금(金)", color: "#7a7a7a", love: "보석처럼 정제된 감각으로 사랑을 느끼오. 높은 기준을 가지고 진짜 인연을 고르는 기운이오." },
-              壬: { oh: "수(水)", color: "#1a5fa8", love: "바다처럼 넓고 깊게 감정을 품는 기운이오. 다양한 인연을 경험하며 진정한 사랑을 찾아가오." },
-              癸: { oh: "수(水)", color: "#1a5fa8", love: "샘물처럼 예리한 직관으로 상대의 마음을 꿰뚫오. 감수성이 풍부해 깊이 공감하며 사랑하오." },
+            const ILGAN_META: Record<string, { oh: string; color: string; wealth: string }> = {
+              甲: { oh: "목(木)", color: "#3a7d44", wealth: "큰 나무처럼 뻗어나가는 재물 기질. 성장과 확장 속에서 돈이 쌓이오." },
+              乙: { oh: "목(木)", color: "#3a7d44", wealth: "덩굴처럼 유연하게 환경에 적응하며 재물을 모으오." },
+              丙: { oh: "화(火)", color: "#c0392b", wealth: "태양처럼 드러내고 활동하는 방식으로 재물을 끌어당기오." },
+              丁: { oh: "화(火)", color: "#c0392b", wealth: "촛불처럼 섬세하게 관계를 밝히며 재물과 인연을 맺소." },
+              戊: { oh: "토(土)", color: "#b07d2a", wealth: "산처럼 뚝심 있게 쌓아가는 재물 구조를 타고났소." },
+              己: { oh: "토(土)", color: "#b07d2a", wealth: "논밭처럼 꾸준히 가꾸는 방식으로 재물을 일구오." },
+              庚: { oh: "금(金)", color: "#7a7a7a", wealth: "바위처럼 원칙 있게, 결단력으로 재물 기회를 잡소." },
+              辛: { oh: "금(金)", color: "#7a7a7a", wealth: "보석처럼 정제된 능력으로 고부가가치 재물을 만드오." },
+              壬: { oh: "수(水)", color: "#1a5fa8", wealth: "바다처럼 넓게 흐르며 유연한 방식으로 재물을 끌어오." },
+              癸: { oh: "수(水)", color: "#1a5fa8", wealth: "샘물처럼 직관과 예리함으로 재물의 흐름을 감지하오." },
             };
-            const meta = ILGAN_META[ilganHanja] ?? { oh: "", color: MAROON, love: "" };
-            const w = (jc.wonguk as { ilganDesc?: string } | undefined) ?? {};
+            const meta = ILGAN_META[ilganHanja] ?? { oh: "", color: MAROON, wealth: "" };
+            const w = (jc.wonguk as { ilganDesc?: string; paragraphs?: string[] } | undefined) ?? {};
+            const ilText = w.ilganDesc ?? w.paragraphs?.[0];
             return ilganHanja ? (
               <section className="px-6 pt-6 pb-2">
-                <Heading>나의 일간 — 사랑 그릇의 재질</Heading>
+                <Heading>{name.slice(1) || name}님의 일간으로 보는 특징</Heading>
                 <div className="rounded-2xl p-5 flex gap-4 items-center mb-4" style={{ background: WHITE, border: `1.5px solid ${meta.color}30` }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={ganCharImage(ilganHanja)} alt={ilganLabel} style={{ width: 64, height: 64, objectFit: "contain", flexShrink: 0 }} />
@@ -4490,60 +4475,82 @@ function ReportPreviewInner() {
                       <span className="text-[13px] font-bold" style={{ color: INK }}>{ilganLabel}</span>
                       <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${meta.color}18`, color: meta.color }}>{meta.oh}</span>
                     </div>
-                    <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{meta.love}</p>
+                    <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{meta.wealth}</p>
                   </div>
                 </div>
-                {w.ilganDesc && <P>{w.ilganDesc}</P>}
+                {ilText && <P>{ilText}</P>}
               </section>
             ) : null;
           })()}
 
-          {/* ④ 격국 배지 + 격국 풀이 */}
+          {/* 신강·신약 지수 */}
+          <section className="px-6 pt-6 pb-0">
+            <Heading>{name.slice(1) || name}님의 기운은 얼마나 강한가</Heading>
+          </section>
+          <div className="px-5 mt-2">
+            <SinStrengthGauge view={report?.view ?? null} />
+          </div>
+          <section className="px-6 pt-4 pb-2">
+            <P>{`${name}님은 '${report?.view?.sinStrength?.strength ?? "중화"}'한 편에 속하오.\n\n우선, 신강신약을 판단하는\n기준에 대해 자세하게 알려주겠소.\n\n사주팔자를 구성하는 글자들 중에서\n일간을 기준으로 다른 위치에 있는 글자들이\n일간과 같거나 돕는 오행일 경우 '득'이라 하오.\n그렇지 않으면 실패를 했다고 하는 것이오.\n\n일간은 곧 '나 자신'이므로,\n나와 같거나 돕는 오행이 많을수록\n신강한 상태에 가까워지는 것이오.`}</P>
+            <DeungCheck view={report?.view ?? null} />
+            <div className="mt-6" />
+            {(() => {
+              const w = (jc.wonguk as { sinStrength?: { intro?: string; paragraphs?: string[] }; sinDesc?: string } | undefined) ?? {};
+              const ss = w.sinStrength;
+              if (ss?.intro) return <P>{[ss.intro, ...(ss.paragraphs ?? [])].join("\n")}</P>;
+              if (w.sinDesc) return <P>{w.sinDesc}</P>;
+              return null;
+            })()}
+          </section>
+
+          {/* ② 오행 도넛 + 오행 풀이 */}
+          <section className="px-6 pt-6 pb-2">
+            <Heading>{name.slice(1) || name}님이 가진 오행들의 분포</Heading>
+          </section>
+          <OhaengDonut view={report?.view ?? null} />
           {(() => {
-            const gg = (jc.geokguk as { name?: string; keyword?: string; desc?: string } | undefined) ?? {};
+            const w = (jc.wonguk as { ohaengDesc?: { intro?: string; paragraphs?: string[] } | string; paragraphs?: string[] } | undefined) ?? {};
+            const od = w.ohaengDesc;
+            const oText = od && typeof od === "object" && od.intro
+              ? [od.intro, ...(od.paragraphs ?? [])].join("\n")
+              : typeof od === "string" ? od : (w.paragraphs?.[1] ?? "");
+            return oText ? (
+              <section className="px-6 pt-4 pb-2">
+                <P>{oText}</P>
+              </section>
+            ) : null;
+          })()}
+
+          {/* ③ 격국 배지 + 격국 풀이 */}
+          {(() => {
+            const gg = (jc.geokguk as { name?: string; keyword?: string; desc?: string; intro?: string; callout?: string; paragraphs?: string[] } | undefined) ?? {};
+            const ggText = gg.intro
+              ? [gg.intro, ...(gg.paragraphs ?? [])].join("\n")
+              : gg.desc ?? "";
             return gg.name ? (
               <section className="px-6 pt-6 pb-2">
-                <Heading>격국 — 내 사랑의 틀</Heading>
+                <Heading>{name.slice(1) || name}님의 사주를 대표하는 격국</Heading>
                 <div className="rounded-2xl p-5" style={{ background: `${MAROON}08`, border: `1.5px solid ${MAROON}25` }}>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="px-4 py-1.5 rounded-full font-black text-[15px]" style={{ background: MAROON, color: "#fff", fontFamily: SERIF }}>{gg.name}</div>
                     {gg.keyword && <p className="text-[12px] font-bold" style={{ color: MAROON }}>{gg.keyword}</p>}
                   </div>
-                  {gg.desc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{gg.desc}</p>}
+                  {gg.callout && <p className="text-[13px] font-bold mb-2 leading-relaxed" style={{ color: MAROON }}>{gg.callout}</p>}
+                  {ggText && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{ggText}</p>}
                 </div>
               </section>
             ) : null;
           })()}
 
-          {/* ⑤ 연애성 점검 */}
-          {(() => {
-            const ys = (jc.yeonaeseong as { items?: { label: string; exists: boolean; desc: string }[]; summary?: string } | undefined) ?? {};
-            const w = (jc.wonguk as { intro?: string } | undefined) ?? {};
-            const summary = ys.summary ?? w.intro;
-            return ys.items?.length ? (
-              <section className="px-6 pt-6 pb-2">
-                <Heading>{effectiveGender === "female" ? "관성(官星)" : "재성(財星)"} — 연애성 점검</Heading>
-                <div className="space-y-2 mb-4">
-                  {ys.items.map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: WHITE, border: `1px solid ${item.exists ? "#c0dbc8" : "#f8d7da"}` }}>
-                      <span className="text-[16px] flex-shrink-0 mt-0.5">{item.exists ? "✅" : "⚠️"}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-bold mb-0.5" style={{ color: item.exists ? GREEN : WARN }}>{item.label}</p>
-                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {summary && (
-                  <div className="mt-2 pt-4" style={{ borderTop: `1px solid ${INK}10` }}>
-                    <P>{summary}</P>
-                  </div>
-                )}
-              </section>
-            ) : null;
-          })()}
-
-          <ChapterNav cur="1" go={next} />
+          {/* 제1장 하단 전환 멘트 + 네비 */}
+          <div style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div className="px-8 pt-10 pb-10 text-center">
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`"자, 다음 장에서는\n${name}님이 사랑을 대하는\n방식에 대해서 살펴보겠소."`}
+              </p>
+            </div>
+            <ChapterNav cur="1" go={next} />
+          </div>
         </>
       )}
 
