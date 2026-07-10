@@ -4739,7 +4739,7 @@ function ReportPreviewInner() {
                 )}
                 {ct.avoidTypes && ct.avoidTypes.length > 0 && (
                   <section className="px-6 pt-4 pb-2">
-                    <Heading>피해야 할 유형</Heading>
+                    <Heading>{name.slice(1) || name}님이 피해야 할 유형</Heading>
                     <div className="space-y-3 mt-2">
                       {ct.avoidTypes.map((t, i) => (
                         <div key={i} className="rounded-2xl p-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}25` }}>
