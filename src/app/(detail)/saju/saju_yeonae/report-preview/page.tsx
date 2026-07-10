@@ -4696,13 +4696,13 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제3장 · 이상형과 궁합 ═══════════ */}
+      {/* ═══════════ 제3장 · 이상형 ═══════════ */}
       {ch === "3" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 이상형</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              어떤 사람에게 끌리고 잘 맞는가
+              어떤 사람이 나와 잘 맞는가
             </h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -4713,102 +4713,33 @@ function ReportPreviewInner() {
 
           <Quote>{`사주 안에는\n내가 끌리는 사람의 특징이\n이미 새겨져 있소.`}</Quote>
 
-          {(() => {
-            const it = (jc.idealType as {
-              intro?: string;
-              keywords?: string[];
-              cards?: { icon: string; title: string; desc: string }[];
-              summary?: string;
-            } | undefined) ?? {};
-            const ct = (jc.compatTypes as {
-              wellTypes?: { icon: string; typeDesc: string; reason: string }[];
-              avoidTypes?: { icon: string; typeDesc: string; reason: string }[];
-            } | undefined) ?? {};
+          {/* 내 사주가 추구하는 연애관 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>내 사주가 추구하는 연애관</Heading>
+            {(jc.loveStyle as { paragraphs?: string[] } | undefined)?.paragraphs?.[0] && (
+              <P>{(jc.loveStyle as { paragraphs: string[] }).paragraphs[0]}</P>
+            )}
+          </section>
 
-            const KEYWORD_COLORS = [
-              { bg: "#fdf0f3", border: "#e8a0b0", text: "#9b2335" },
-              { bg: "#f5f0fd", border: "#c4a8e0", text: "#6a3090" },
-              { bg: "#f0f5fa", border: "#a0c0e0", text: "#2a5080" },
-            ];
+          {/* 나의 시기별 연애 흐름 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>나의 시기별 연애 흐름</Heading>
+            <LoveLineChart view={report?.view ?? null} gender={effectiveGender} />
+            {(jc.loveFlow as { paragraphs?: string[] } | undefined)?.paragraphs?.[0] && (
+              <P>{(jc.loveFlow as { paragraphs: string[] }).paragraphs[0]}</P>
+            )}
+          </section>
 
-            return (
-              <>
-                {/* ① 이상형 키워드 배지 + intro */}
-                <section className="px-6 pt-6 pb-2">
-                  <Heading>내가 끌리는 사람</Heading>
-                  {it.intro && <P>{it.intro}</P>}
-                  {it.keywords && it.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {it.keywords.map((kw, i) => {
-                        const c = KEYWORD_COLORS[i % KEYWORD_COLORS.length];
-                        return (
-                          <span key={i} className="px-4 py-2 rounded-full text-[14px] font-bold" style={{ background: c.bg, border: `1.5px solid ${c.border}`, color: c.text, fontFamily: SERIF }}>
-                            {kw}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
-
-                {/* ② 이상형 카드 3개 */}
-                {it.cards && it.cards.length > 0 && (
-                  <section className="px-6 pt-4 pb-2">
-                    <div className="space-y-3">
-                      {it.cards.map((card, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{card.icon}</span>
-                            <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{card.title}</span>
-                          </div>
-                          <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{card.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                    {it.summary && <div className="mt-4"><P>{it.summary}</P></div>}
-                  </section>
-                )}
-
-                {/* ③ 잘 맞는 유형 */}
-                {ct.wellTypes && ct.wellTypes.length > 0 && (
-                  <section className="px-6 pt-6 pb-2">
-                    <Heading>잘 맞는 유형</Heading>
-                    <div className="space-y-3 mt-2">
-                      {ct.wellTypes.map((t, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: `${GREEN}0a`, border: `1px solid ${GREEN}25` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{t.icon}</span>
-                            <span className="text-[12px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${GREEN}18`, color: GREEN }}>잘 맞는</span>
-                          </div>
-                          <p className="text-[13px] font-bold mb-1" style={{ color: INK }}>{t.typeDesc}</p>
-                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* ④ 피해야 할 유형 */}
-                {ct.avoidTypes && ct.avoidTypes.length > 0 && (
-                  <section className="px-6 pt-4 pb-6">
-                    <Heading>피해야 할 유형</Heading>
-                    <div className="space-y-3 mt-2">
-                      {ct.avoidTypes.map((t, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}25` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{t.icon}</span>
-                            <span className="text-[12px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${WARN}18`, color: WARN }}>주의</span>
-                          </div>
-                          <p className="text-[13px] font-bold mb-1" style={{ color: INK }}>{t.typeDesc}</p>
-                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </>
-            );
-          })()}
+          {/* 나와 찰떡궁합인 이성의 사주 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>나와 찰떡궁합인 이성의 사주</Heading>
+            <p style={{ fontSize:12, color:"#9a9a9a", margin:"-8px 0 16px", fontStyle:"italic", lineHeight:1 }}>(시주는 비중이 적으니 참고만 하시오.)</p>
+            <CompatibleJujuCards
+              items={jc.compatibleJuju as Parameters<typeof CompatibleJujuCards>[0]["items"]}
+              myPillars={report?.view?.pillars?.map(p => ({ pos: p.pos, gan: p.gan, ji: p.ji }))}
+              myBirthYear={report?.birth?.date ? parseInt(String(report.birth.date).slice(0,4)) : undefined}
+            />
+          </section>
 
           <ChapterNav cur="3" go={next} />
         </>

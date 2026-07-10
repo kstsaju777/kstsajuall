@@ -16,7 +16,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
-import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
+import { parseContentJson, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData } from "@/lib/saju/report-content";
 import { buildYeonaeSajuChapterPrompt, isYeonaeSajuChapterReady, YEONAE_SAJU_CHAPTER_SECTIONS } from "@/lib/saju/yeonae-saju-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
@@ -43,7 +43,7 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[] }) {
-  const { system, user } = buildYeonaeSajuChapterPrompt(chapter, input);
+  const { system, user, ch3Pillars, ch3RankData } = buildYeonaeSajuChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
@@ -54,13 +54,36 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
         obj = parseContentJson(llm.text);
       } catch (parseErr) {
         console.error(`[saju_yeonae] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
-        // 8장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
-        if (chapter === 8) {
+        // 7장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
+        if (chapter === 7) {
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else {
           continue;
         }
+      }
+      // ch3: 서버 계산된 pillars/tags를 LLM 결과에 덮어씌우기
+      if (Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
+        const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
+        if (ch3Pillars) ch3Pillars.forEach((p, idx) => { if (cj[idx]) { cj[idx].pillars = p; cj[idx].tags = p.tags; } });
+      }
+      // ch3: desc를 각 순위별 별도 호출로 생성
+      if (chapter === 3 && ch3RankData && ch3RankData.length > 0 && Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
+        const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];
+        const personLabel = input.gender === "male" ? "이 여자는" : "이 남자는";
+        const baseName = input.name ? (input.name.slice(1) || input.name) : "";
+        const honor = baseName ? `${baseName}님` : "그대";
+        await Promise.all((ch3RankData as DescRankData[]).map(async (rankData, idx) => {
+          if (!cj[idx]) return;
+          const { system: ds, user: du } = buildCompatDescPrompt(idx, honor, personLabel, rankData, system);
+          for (let r = 0; r < 2; r++) {
+            try {
+              const descLlm = await generateInterpretation({ system: ds, user: du, json: false });
+              cj[idx].desc = descLlm.text.trim();
+              break;
+            } catch { /* 재시도 */ }
+          }
+        }));
       }
       if (isYeonaeSajuChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[saju_yeonae] ${chapter}장 isYeonaeSajuChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));

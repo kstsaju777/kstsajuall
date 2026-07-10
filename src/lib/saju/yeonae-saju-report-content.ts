@@ -6,11 +6,32 @@
 
 import { SYSTEM } from "./report-prompts";
 
+// ── 찰떡궁합 순위 데이터 타입 (buildCompatDescPrompt 호환) ──
+interface DescRankDataLocal {
+  iKr: string;
+  ageRel: string;
+  ageDesc: string;
+  ilGanEl: string;
+  styleHint: string;
+  jobHint: string;
+  reasons: string;
+}
+
+type CompatPillarObj = {
+  nyeon: { gan: string; ji: string; ganEl: string; jiEl: string };
+  wol:   { gan: string; ji: string; ganEl: string; jiEl: string };
+  il:    { gan: string; ji: string; ganEl: string; jiEl: string };
+  si:    { gan: string; ji: string; ganEl: string; jiEl: string };
+  birthDate: string;
+  siName: string;
+  tags: string[];
+};
+
 // ── 장별 필수 섹션 키 ──
 export const YEONAE_SAJU_CHAPTER_SECTIONS: Record<number, string[]> = {
   1: ["wonguk", "geokguk", "yeonaeseong"],
   2: ["loveStyle"],
-  3: ["idealType", "compatTypes"],
+  3: ["loveStyle", "loveFlow", "compatibleJuju"],
   4: ["loveTiming", "loveFlow", "lovePattern"],
   5: ["meetingWay", "meetingFlow"],
   6: ["loveCare", "loveAvoid", "loveSummary"],
@@ -26,7 +47,10 @@ export function isYeonaeSajuChapterReady(
   const keys = YEONAE_SAJU_CHAPTER_SECTIONS[chapter] ?? [];
   return keys.every((k) => {
     const val = content[k];
-    if (!val || typeof val !== "object") return false;
+    if (!val) return false;
+    // compatibleJuju is a plain array
+    if (Array.isArray(val)) return (val as unknown[]).length > 0;
+    if (typeof val !== "object") return false;
     const v = val as Record<string, unknown>;
     if ("sinDesc" in v) return typeof v.sinDesc === "string" && (v.sinDesc as string).length > 0;
     if ("keyword" in v) return typeof v.keyword === "string" && (v.keyword as string).length > 0;
@@ -128,18 +152,36 @@ summary: 위 4가지 점검 결과를 종합한 연애성 풀이. 3~4문장. 이
   [2] 감정 표현·헌신 방식에서 이 기질이 어떻게 나타나는지 서술하고, 이 기질의 맹점(지나친 집착·감정 억압·독립 고집 등)을 구체적으로 짚어줌.
   [3] 강점을 살리면서 맹점을 보완하는 연애 방향 조언. 이 사람만의 사랑 길을 제시하는 마무리 단락.`,
 
-  3: `[idealType 섹션 — 이상형]
-- intro: 내가 끌리는 사람의 핵심 특징 3~4문장. 사주 명식의 근거를 포함해 구체적으로. 홍연 화자.
-- keywords: 이상형을 압축하는 키워드 3개. 각 2~4글자. (예: ["따뜻한 눈빛", "듬직한 리더", "감성 충만"])
-- cards: 이상형 묘사 카드 3개. 각 card:
-  - icon: 관련 이모지 1개
-  - title: 짧은 소제목 (예: "외모와 분위기", "성격과 가치관", "생활방식과 직업")
-  - desc: 그 관점에서 끌리는 사람의 특징 5~6문장. 구체적인 십성·오행 근거 포함. 각 문장 최소 30자 이상. 홍연 화자.
-- summary: 이상형 종합 풀이 4~5문장. 홍연 화자.
+  3: `[loveStyle 섹션 작성 규칙]
+① intro·callout은 반드시 빈 문자열("")로 두오.
+② paragraphs는 반드시 1개 항목, 단락 구분 없이 하나의 흐름으로 작성하오.
+   순서: 일주 연애 성향 → 어떤 이성에게 끌리는지(성격·분위기·조건) → 일지 배우자궁 + 합충형 경고.
+③ 사주 용어를 쓸 때마다 반드시 괄호 안에 쉬운 설명을 붙이오. 예: "건록(자수성가와 독립을 상징하는 기운)".
+   【일주 표기 규칙】 일주를 언급할 때는 반드시 주입된 일주 명칭(예: 을묘일주, 갑자일주)을 그대로 사용하오. "일간이 을목" 처럼 일간만 단독으로 먼저 얘기하지 마오. 반드시 "을묘일주(~의 기운)" 형식으로 일주 전체를 말하오.
+   【합충형 절대 규칙】 주입된 [지지 합·충·형 실제 목록]에 있는 것만 언급하오. 목록에 없는 합·충·형을 임의로 만들어내면 절대 안 되오. 목록이 "없음"이면 해당 내용은 쓰지 마오.
+④ 신강/신약 여부, 일지 십이운성, 합·충·형 유무를 실제 명식에서 확인하여 근거로 사용하오.
+   【인연성 분석 금지】 재성·관성 위치 분석은 하지 마오. 구체적 기둥 위치(년주·월주 등)를 인연성과 연결하는 서술도 금지.
+⑤ 【핵심 원칙】 어렵고 딱딱한 사주 설명이 아니라, 읽는 사람이 "맞아, 나 이런 사람이야" 하고 공감할 수 있는 쉬운 언어로 쓰오. 다음 세 가지를 자연스럽게 녹이오:
+   - 이 사람의 연애관 (어떻게 사랑하는 사람인지)
+   - 어떤 이성에게 끌리는지 (구체적 분위기·성격)
+   - 연애에서 주의할 점 (실제 갈등 패턴과 조언)
+⑥ 【말투 엄수】 홍연 말투(~이오/~하오/~겠소/~있소). "~ㅂ니다", "~어요" 단 한 문장도 금지.
+⑦ 【글자수 엄수】 700~900자. 짧으면 탈락이오.
 
-[compatTypes 섹션 — 궁합 유형]
-- wellTypes: 잘 맞는 유형 2개. 각 { icon, typeDesc(유형 특징 명사형으로 끝내기, 예: "협력적이고 진취적인 성향의 유형"), reason(사주적 이유 2문장) }
-- avoidTypes: 피해야 할 유형 2개. 각 { icon, typeDesc(유형 특징 명사형으로 끝내기, 예: "감정기복이 크고 의존적인 유형"), reason(왜 충극되는지 2문장) }`,
+[loveFlow 섹션 작성 규칙]
+① intro·callout·peakCallout은 반드시 빈 문자열("")로 두오.
+② flow 배열은 반드시 빈 배열([])로 두오.
+③ paragraphs는 1개 항목만. 위에 주입된 [2024~2033 세운별 연애운 점수표]를 반드시 참고하여 작성하오.
+   - 2024~2033년 중 최소 5개 연도를 반드시 직접 언급하오. 점수 높은 해·낮은 해·전환점이 되는 해를 골고루 짚으오.
+   - 점수 숫자는 언급 금지.
+   - 연도 표기: '○○년 갑진년은' 형식. '가장' 최상급은 점수 1위 연도에만 사용.
+   - 각 연도마다 그 시기에 어떻게 행동하면 좋은지, 어떤 점을 조심해야 하는지 짧게 조언을 담으오.
+   - 【시제 규칙】 프롬프트에 주입된 '리포트 생성 기준일'을 확인하오.
+     · 기준일 이전 연도 → 과거형 (~이었소, ~았소, ~했소)
+     · 기준일이 속한 연도 → 현재형 (~이오, ~하오, ~있소)
+     · 기준일 이후 연도 → 미래형 (~될 것이오, ~찾아오겠소, ~될 가능성이 높소)
+   - 홍연 말투. '~ㅂ니다', '~어요' 절대 금지.
+   - 500자 내외.`,
 
   4: `[loveTiming 섹션 — 인연 시기 방향]
 - timingType: 이 명식의 인연 유형 이름. 2~5글자로 압축. (예: "늦봄 인연형", "불꽃 인연형", "차근차근형")
@@ -267,26 +309,54 @@ const YEONAE_CH_SCHEMA: Record<number, string> = {
   }
 }`,
   3: `{
-  "idealType": {
-    "intro": "이상형 핵심 특징 3~4문장 (사주 근거 포함)",
-    "keywords": ["키워드1", "키워드2", "키워드3"],
-    "cards": [
-      { "icon": "✨", "title": "외모와 분위기", "desc": "5~6문장 (각 문장 최소 30자 이상)" },
-      { "icon": "💬", "title": "성격과 가치관", "desc": "5~6문장 (각 문장 최소 30자 이상)" },
-      { "icon": "🏡", "title": "생활방식과 직업", "desc": "5~6문장 (각 문장 최소 30자 이상)" }
-    ],
-    "summary": "이상형 종합 풀이 2~3문장"
-  },
-  "compatTypes": {
-    "wellTypes": [
-      { "icon": "💚", "typeDesc": "협력적이고 진취적인 성향의 유형", "reason": "사주적 이유 2문장" },
-      { "icon": "💚", "typeDesc": "감성적이고 따뜻한 마음의 유형", "reason": "사주적 이유 2문장" }
-    ],
-    "avoidTypes": [
-      { "icon": "⚠️", "typeDesc": "감정기복이 크고 의존적인 유형", "reason": "충극 이유 2문장" },
-      { "icon": "⚠️", "typeDesc": "지배적이고 통제적 성향의 유형", "reason": "충극 이유 2문장" }
+  "loveStyle": {
+    "intro": "절대 쓰지 마오 — 빈 문자열로",
+    "callout": "절대 쓰지 마오 — 빈 문자열로",
+    "paragraphs": [
+      "【필수 — 하나의 흐름으로 700~900자】 아래 세 가지를 순서대로, 누구나 쉽게 이해할 수 있는 말로 풀어 쓰오. 사주 용어를 쓸 때는 반드시 괄호 안에 쉬운 말로 풀이하오. 어렵거나 딱딱한 표현 금지. 홍연 말투(~이오/~하오/~겠소).\n【필수 규칙】 ① 첫 문장은 반드시 '○○일주로 태어난 {이름}님은 ~' 형식으로 시작하오. ② 이름 뒤에는 반드시 '님'을 붙이오. ③ '그', '그녀', '이 사람', '이분' 등의 3인칭 호칭은 절대 사용 금지. ④ 가능하면 주어를 생략하거나 '~한 기질이오', '~하는 성향이오' 등 주어 없는 문장 구조를 활용하오.\n1) 연애관: 일주 전체 명칭을 쓰고, 연애에서 어떤 태도와 방식으로 사랑하는지 일상적 언어로 묘사하오.\n2) 어떤 이성에게 끌리는지: 어떤 분위기·성격·조건의 사람에게 끌리는지 구체적으로 묘사하오.\n3) 주의할 점: 주입된 합충형 목록에 있는 것만 근거로, 연애에서 어떤 갈등 패턴이 생기기 쉬운지, 어떻게 하면 좋은지 따뜻하게 조언하오. 합충형이 없으면 일지 기운에서 주의점을 찾으오."
     ]
-  }
+  },
+  "loveFlow": {
+    "intro": "절대 쓰지 마오 — 빈 문자열로",
+    "callout": "절대 쓰지 마오 — 빈 문자열로",
+    "flow": [],
+    "peakCallout": "절대 쓰지 마오 — 빈 문자열로",
+    "paragraphs": [
+      "【필수 — 500자 내외】 위 연애운 점수표를 기반으로 2024~2033년 중 최소 5개 연도를 반드시 직접 언급하오. 점수 높은 해·낮은 해·전환점이 되는 해를 골고루 짚으오. 점수 숫자는 언급 금지. 연도는 반드시 '○○년 갑진년은' 형식으로 표기하오. '가장' 최상급은 1위 연도에만 사용하오. 각 연도마다 그 시기에 어떻게 행동하면 좋은지, 어떤 점을 조심해야 하는지 조언을 담으오. 【시제】 위에 주입된 리포트 생성 기준일을 확인하여 시제를 적용하오. 홍연 말투. '~ㅂ니다', '~어요' 절대 금지."
+    ]
+  },
+  "compatibleJuju": [
+    {
+      "juju": "【순서 절대 고정】[1순위 pillars] 블록의 일주명 그대로",
+      "ganEl": "il.ganEl 값 그대로", "jiEl": "il.jiEl 값 그대로",
+      "avoidTti": "주입된 '피해야 할 상대 띠' 문자열 그대로 (1번만, 2·3번은 빈 문자열)",
+      "birthDate": "[1순위 pillars] birthDate 값 그대로 (예: 1986.01.06)",
+      "siName": "[1순위 pillars] siName 값 그대로 (예: 진시)",
+      "tags": "[1순위 pillars] tags 배열 그대로",
+      "pillars": { "nyeon":{"gan":"[1순위] nyeon.gan","ji":"nyeon.ji","ganEl":"nyeon.ganEl","jiEl":"nyeon.jiEl"}, "wol":{"gan":"wol.gan","ji":"wol.ji","ganEl":"wol.ganEl","jiEl":"wol.jiEl"}, "il":{"gan":"il.gan","ji":"il.ji","ganEl":"il.ganEl","jiEl":"il.jiEl"}, "si":{"gan":"si.gan","ji":"si.ji","ganEl":"si.ganEl","jiEl":"si.jiEl"} },
+      "desc": "아래 [1순위 DESC 작성 지시] 참조하여 작성"
+    },
+    {
+      "juju": "[2순위 pillars] 블록의 일주명 그대로",
+      "ganEl": "il.ganEl 값 그대로", "jiEl": "il.jiEl 값 그대로",
+      "avoidTti": "",
+      "birthDate": "[2순위 pillars] birthDate 값 그대로",
+      "siName": "[2순위 pillars] siName 값 그대로",
+      "tags": "[2순위 pillars] tags 배열 그대로",
+      "pillars": { "nyeon":{"gan":"[2순위] nyeon.gan","ji":"nyeon.ji","ganEl":"nyeon.ganEl","jiEl":"nyeon.jiEl"}, "wol":{"gan":"wol.gan","ji":"wol.ji","ganEl":"wol.ganEl","jiEl":"wol.jiEl"}, "il":{"gan":"il.gan","ji":"il.ji","ganEl":"il.ganEl","jiEl":"il.jiEl"}, "si":{"gan":"si.gan","ji":"si.ji","ganEl":"si.ganEl","jiEl":"si.jiEl"} },
+      "desc": "▶ 아래 [2순위 DESC 작성 지시] 참조하여 작성"
+    },
+    {
+      "juju": "[3순위 pillars] 블록의 일주명 그대로",
+      "ganEl": "il.ganEl 값 그대로", "jiEl": "il.jiEl 값 그대로",
+      "avoidTti": "",
+      "birthDate": "[3순위 pillars] birthDate 값 그대로",
+      "siName": "[3순위 pillars] siName 값 그대로",
+      "tags": "[3순위 pillars] tags 배열 그대로",
+      "pillars": { "nyeon":{"gan":"[3순위] nyeon.gan","ji":"nyeon.ji","ganEl":"nyeon.ganEl","jiEl":"nyeon.jiEl"}, "wol":{"gan":"wol.gan","ji":"wol.ji","ganEl":"wol.ganEl","jiEl":"wol.jiEl"}, "il":{"gan":"il.gan","ji":"il.ji","ganEl":"il.ganEl","jiEl":"il.jiEl"}, "si":{"gan":"si.gan","ji":"si.ji","ganEl":"si.ganEl","jiEl":"si.jiEl"} },
+      "desc": "▶ 아래 [3순위 DESC 작성 지시] 참조하여 작성"
+    }
+  ]
 }`,
   4: `{
   "loveTiming": {
@@ -388,7 +458,7 @@ export function buildYeonaeSajuChapterPrompt(
     birthYear?: number;
     seun?: { label: string; gz: string; active?: boolean }[];
   }
-): { system: string; user: string } {
+): { system: string; user: string; ch3Pillars?: CompatPillarObj[]; ch3RankData?: DescRankDataLocal[] } {
   const theme = YEONAE_CH_THEME[chapter] ?? `[제${chapter}장]`;
   const guide = YEONAE_CH_GUIDE[chapter] ?? "";
   const schema = YEONAE_CH_SCHEMA[chapter] ?? "{}";
@@ -505,9 +575,422 @@ export function buildYeonaeSajuChapterPrompt(
       groupRows.join("\n") + "\n";
   }
 
+  // ── ch3 전용: 찰떡궁합 사주 TOP 3 + 연애운 점수표 계산 (종합사주 ch6 동일 알고리즘) ──
+  let compatPillarBlock = "";
+  let ch3Pillars: CompatPillarObj[] = [];
+  let ch3RankData: DescRankDataLocal[] = [];
+
+  if (chapter === 3 && input.pillars && input.pillars.length > 0) {
+    const ORDER3 = ["년주", "월주", "일주", "시주"];
+    const byPos3: Record<string, typeof input.pillars[0]> = {};
+    for (const p of input.pillars) byPos3[p.pos] = p;
+    const rows3 = ORDER3.map(pos => {
+      const p = byPos3[pos];
+      if (!p) return null;
+      const GAN_KR3: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+      const JI_KR3: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+      const ganKr = `${GAN_KR3[p.gan] ?? p.gan}${p.ganEl}`;
+      const jiKr = `${JI_KR3[p.ji] ?? p.ji}${p.jiEl}`;
+      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})`;
+    }).filter(Boolean);
+
+    const isFemale3 = input.gender === "female";
+    const loveStars3 = isFemale3 ? ["정관", "편관"] : ["정재", "편재"];
+    const loveStarName3 = isFemale3 ? "관성(정관·편관)" : "재성(정재·편재)";
+    const found3: string[] = [];
+    for (const p of input.pillars) {
+      if (loveStars3.includes(p.sipTop)) found3.push(`${p.pos} 천간`);
+      if (loveStars3.includes(p.sipBot)) found3.push(`${p.pos} 지지`);
+    }
+    const loveStarResult3 = found3.length > 0
+      ? `${loveStarName3} 위치: ${found3.join(", ")}`
+      : `${loveStarName3}: 명식에 없음 → ${isFemale3 ? "무관(無官) 사주" : "무재(無財) 사주"}`;
+
+    // 연애운 점수표
+    const STEM_EL3: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+    const BRANCH_EL3: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+    const GEN3: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+    const CTL3: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+    const GAN_KR3x: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+    const JI_KR3x: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+    const LOVE_SCORE3: Record<string, number> = isFemale3
+      ? { 관성:90,편관:88,정관:92,재성:70,편재:68,정재:72,식상:75,식신:76,상관:74,인성:60,편인:58,정인:62,비겁:50,비견:50,겁재:48 }
+      : { 재성:90,편재:88,정재:92,관성:70,편관:68,정관:72,식상:75,식신:76,상관:74,인성:60,편인:58,정인:62,비겁:50,비견:50,겁재:48 };
+    function toSip3(ilEl: string, tEl: string): string {
+      if (ilEl === tEl) return "비겁";
+      if (GEN3[ilEl] === tEl) return "식상";
+      if (CTL3[ilEl] === tEl) return "재성";
+      if (CTL3[tEl] === ilEl) return "관성";
+      if (GEN3[tEl] === ilEl) return "인성";
+      return "비겁";
+    }
+    const ilEl3 = byPos3["일주"]?.ganEl ?? "목";
+    const GANJIS3 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+    const BASE_IDX3 = GANJIS3.indexOf("甲辰");
+    const loveRows3: string[] = [];
+    for (let yi = 0; yi < 10; yi++) {
+      const year = 2024 + yi;
+      const gz = GANJIS3[(BASE_IDX3 + yi) % 60];
+      const stem = gz[0]; const branch = gz[1];
+      const sEl = STEM_EL3[stem]; const bEl = BRANCH_EL3[branch];
+      const sip_t = sEl ? toSip3(ilEl3, sEl) : "비겁";
+      const sip_b = bEl ? toSip3(ilEl3, bEl) : "비겁";
+      const score = Math.min(95, Math.max(40, Math.round((LOVE_SCORE3[sip_t] ?? 55) * 0.6 + (LOVE_SCORE3[sip_b] ?? 55) * 0.4)));
+      const gzKr = `${GAN_KR3x[stem] ?? ""}${JI_KR3x[branch] ?? ""}년`;
+      loveRows3.push(`${year}년 ${gzKr}: 연애점수=${score}`);
+    }
+    const sortedLove3 = loveRows3.map((r, i) => ({ i, score: Number(r.split("연애점수=")[1]) })).sort((a, b) => b.score - a.score);
+    const lovePeakYear3 = 2024 + sortedLove3[0].i;
+    const lovePeakGz3 = loveRows3[sortedLove3[0].i].split(" ")[1];
+
+    // 일주 명칭
+    const ilP3 = byPos3["일주"];
+    const ilGanKr3 = ilP3 ? (GAN_KR3x[ilP3.gan] ?? "") : "";
+    const ilJiKr3 = ilP3 ? (JI_KR3x[ilP3.ji] ?? "") : "";
+    const ilJuName3 = `${ilGanKr3}${ilJiKr3}일주`;
+
+    // 지지 합충형
+    const jiList3: { pos: string; ji: string }[] = ["년주","월주","일주","시주"]
+      .map(pos => ({ pos, ji: byPos3[pos]?.ji ?? "" }))
+      .filter(x => x.ji);
+    const YUKAP3: [string,string,string][] = [
+      ["子","丑","토"],["寅","亥","목"],["卯","戌","화"],
+      ["辰","酉","금"],["巳","申","수"],["午","未","화"],
+    ];
+    const CHUNG3: [string,string][] = [
+      ["子","午"],["丑","未"],["寅","申"],["卯","酉"],["辰","戌"],["巳","亥"]
+    ];
+    const HYEONG3: [string[],string][] = [
+      [["子","卯"],"무은지형(예의 없는 갈등)"],
+      [["寅","巳","申"],"지세지형(세력 다툼)"],
+      [["丑","戌","未"],"무례지형(고집 충돌)"],
+    ];
+    const hapResults3: string[] = [];
+    const chungResults3: string[] = [];
+    const hyeongResults3: string[] = [];
+    for (let i = 0; i < jiList3.length; i++) {
+      for (let j = i+1; j < jiList3.length; j++) {
+        const a = jiList3[i]; const b = jiList3[j];
+        const aKr = JI_KR3x[a.ji] ?? a.ji; const bKr = JI_KR3x[b.ji] ?? b.ji;
+        for (const [x,y] of YUKAP3) {
+          if ((a.ji===x && b.ji===y)||(a.ji===y && b.ji===x))
+            hapResults3.push(`${a.pos}(${aKr}) ↔ ${b.pos}(${bKr}) 육합`);
+        }
+        for (const [x,y] of CHUNG3) {
+          if ((a.ji===x && b.ji===y)||(a.ji===y && b.ji===x))
+            chungResults3.push(`${a.pos}(${aKr}) ↔ ${b.pos}(${bKr}) 충`);
+        }
+      }
+    }
+    for (const [group, name] of HYEONG3) {
+      const matched = jiList3.filter(x => group.includes(x.ji));
+      if (matched.length === group.length)
+        hyeongResults3.push(`${matched.map(x=>`${x.pos}(${JI_KR3x[x.ji]??x.ji})`).join("·")} ${name}`);
+    }
+    const hapChungHyeong3 = [
+      hapResults3.length ? `합: ${hapResults3.join(", ")}` : "합: 없음",
+      chungResults3.length ? `충: ${chungResults3.join(", ")}` : "충: 없음",
+      hyeongResults3.length ? `형: ${hyeongResults3.join(", ")}` : "형: 없음",
+    ].join("\n");
+
+    // 잘 맞는 사주팔자 TOP 3 — 만세력 탐색
+    {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { Solar } = require("lunar-javascript");
+
+      const STEM_EL_C: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+      const BRANCH_EL_C: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+      const GAN_KR_C: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+      const JI_KR_C: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+      const JI_띠: Record<string,string> = { 子:"자(쥐)띠",丑:"축(소)띠",寅:"인(호랑이)띠",卯:"묘(토끼)띠",辰:"진(용)띠",巳:"사(뱀)띠",午:"오(말)띠",未:"미(양)띠",申:"신(원숭이)띠",酉:"유(닭)띠",戌:"술(개)띠",亥:"해(돼지)띠" };
+      const CHEONGAN_HAP_PARTNER: Record<string,string> = { 甲:"己",己:"甲",乙:"庚",庚:"乙",丙:"辛",辛:"丙",丁:"壬",壬:"丁",戊:"癸",癸:"戊" };
+      const YUKAP_PARTNER: Record<string,string> = { 子:"丑",丑:"子",寅:"亥",亥:"寅",卯:"戌",戌:"卯",辰:"酉",酉:"辰",巳:"申",申:"巳",午:"未",未:"午" };
+      const CHUNG_PARTNER: Record<string,string> = { 子:"午",午:"子",丑:"未",未:"丑",寅:"申",申:"寅",卯:"酉",酉:"卯",辰:"戌",戌:"辰",巳:"亥",亥:"巳" };
+      const WONJIN_PARTNER: Record<string,string> = { 子:"未",未:"子",丑:"午",午:"丑",寅:"酉",酉:"寅",卯:"申",申:"卯",辰:"亥",亥:"辰",巳:"戌",戌:"巳" };
+      const CTL_C: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+      const GEN_C: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+
+      const myIlGan3    = byPos3["일주"]?.gan ?? "";
+      const myIlJi3     = byPos3["일주"]?.ji  ?? "";
+      const myWolJi3    = byPos3["월주"]?.ji  ?? "";
+      const myNyeonJi3  = byPos3["년주"]?.ji  ?? "";
+      const myIlEl3     = byPos3["일주"]?.ganEl ?? "목";
+
+      const elCntC: Record<string,number> = { 목:0,화:0,토:0,금:0,수:0 };
+      for (const p of input.pillars) {
+        if (p.ganEl && elCntC[p.ganEl] !== undefined) elCntC[p.ganEl]++;
+        if (p.jiEl  && elCntC[p.jiEl]  !== undefined) elCntC[p.jiEl]++;
+      }
+      const sortedElC   = Object.entries(elCntC).sort((a,b) => a[1]-b[1]);
+      const yongsinEl   = sortedElC[0][0];
+      const heesinEl    = sortedElC[1][0];
+
+      const hapIlGan    = CHEONGAN_HAP_PARTNER[myIlGan3] ?? "";
+      const hapIlJi     = YUKAP_PARTNER[myIlJi3] ?? "";
+      const hapWolJi    = YUKAP_PARTNER[myWolJi3] ?? "";
+      const avoidNyeonJi = new Set([
+        CHUNG_PARTNER[myNyeonJi3],
+        WONJIN_PARTNER[myNyeonJi3],
+      ].filter(Boolean));
+      const avoidTtiStr = [...avoidNyeonJi].map(j => JI_띠[j] ?? j).join(", ") || "없음";
+
+      const GANJIS_60 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+      const myNyeonGz3   = `${byPos3["년주"]?.gan ?? ""}${myNyeonJi3}`;
+      const gjIdx3       = GANJIS_60.indexOf(myNyeonGz3);
+      const nowYear3     = new Date().getFullYear();
+      let myBirthYear3   = nowYear3 - 30;
+      if (gjIdx3 >= 0) {
+        const candidate = nowYear3 - ((nowYear3 - (1924 + gjIdx3)) % 60 + 60) % 60;
+        myBirthYear3 = candidate;
+      }
+
+      const SAMHAP3C: Record<string, string[]> = {
+        子:["申","辰"], 丑:["酉","巳"], 寅:["午","戌"], 卯:["亥","未"],
+        辰:["子","申"], 巳:["酉","丑"], 午:["寅","戌"], 未:["卯","亥"],
+        申:["子","辰"], 酉:["巳","丑"], 戌:["午","寅"], 亥:["卯","未"],
+      };
+      const BANGHAP3C: Record<string, string[]> = {
+        子:["亥","丑"], 丑:["子","寅"], 寅:["丑","卯"], 卯:["寅","辰"],
+        辰:["卯","巳"], 巳:["辰","午"], 午:["巳","未"], 未:["午","申"],
+        申:["未","酉"], 酉:["申","戌"], 戌:["酉","亥"], 亥:["戌","子"],
+      };
+      function wolJiScoreDyn3(wj: string): number {
+        if (wj === hapWolJi) return 30;
+        if (SAMHAP3C[myWolJi3]?.includes(wj)) return 20;
+        if (BANGHAP3C[myWolJi3]?.includes(wj)) return 15;
+        if (BRANCH_EL_C[wj] === yongsinEl) return 10;
+        if (BRANCH_EL_C[wj] === heesinEl) return 8;
+        return 0;
+      }
+      const SAMHAP3_NYEON = SAMHAP3C[myNyeonJi3] ?? [];
+      const BANGHAP3_NYEON = BANGHAP3C[myNyeonJi3] ?? [];
+      function nyeonJiScore3(nj: string): number {
+        if (avoidNyeonJi.has(nj)) return -9999;
+        if (YUKAP_PARTNER[myNyeonJi3] === nj) return 45;
+        if (SAMHAP3_NYEON.includes(nj)) return 35;
+        if (BANGHAP3_NYEON.includes(nj)) return 25;
+        if (BRANCH_EL_C[nj] === yongsinEl) return 15;
+        if (BRANCH_EL_C[nj] === heesinEl) return 10;
+        return 0;
+      }
+      function iljuScore3(ilGan: string, ilJi: string): number | null {
+        const ganEl = STEM_EL_C[ilGan] ?? ""; const jiEl = BRANCH_EL_C[ilJi] ?? "";
+        const isHap = ilGan === hapIlGan;
+        if (!isHap && CTL_C[ganEl] === myIlEl3) return null;
+        if (!isHap && CTL_C[myIlEl3] === ganEl) return null;
+        if (WONJIN_PARTNER[myIlJi3] === ilJi) return null;
+        let s = 0;
+        if (isHap) s += 40;
+        else if (GEN_C[ganEl] === myIlEl3 || GEN_C[myIlEl3] === ganEl) s += 10;
+        if (ilJi === hapIlJi) s += 30;
+        if (ganEl === yongsinEl) s += 15; else if (ganEl === heesinEl) s += 10;
+        if (jiEl === yongsinEl)  s += 15; else if (jiEl === heesinEl)  s += 10;
+        return s;
+      }
+      function agePenalty3(year: number): number {
+        const diff = Math.abs(year - myBirthYear3);
+        if (diff > 10) return -9999;
+        if (diff >= 7) return -20;
+        if (diff >= 4) return -10;
+        return 0;
+      }
+
+      type CompatResult3 = {
+        year: number; month: number; day: number;
+        nyeon: string; wol: string; il: string;
+        nyeonGan: string; nyeonJi: string;
+        wolGan: string; wolJi: string;
+        ilGan: string; ilJi: string;
+        totalScore: number;
+        reasons: string[];
+      };
+
+      const candidates3: CompatResult3[] = [];
+      const searchStart3 = myBirthYear3 - 10;
+      const searchEnd3   = myBirthYear3 + 10;
+
+      for (let yr = searchStart3; yr <= searchEnd3; yr++) {
+        const ap = agePenalty3(yr);
+        if (ap <= -9999) continue;
+        for (let mo = 1; mo <= 12; mo++) {
+          const daysInMonth = new Date(yr, mo, 0).getDate();
+          for (let dy = 1; dy <= daysInMonth; dy++) {
+            try {
+              const bazi = Solar.fromYmdHms(yr, mo, dy, 12, 0, 0).getLunar().getEightChar();
+              const nyeonStr: string = bazi.getYear();
+              const wolStr: string   = bazi.getMonth();
+              const ilStr: string    = bazi.getDay();
+              const nGan = nyeonStr[0]; const nJi = nyeonStr[1];
+              const wGan = wolStr[0];   const wJi  = wolStr[1];
+              const iGan = ilStr[0];    const iJi  = ilStr[1];
+
+              const njs = nyeonJiScore3(nJi);
+              if (njs <= -9999) continue;
+              const ijs = iljuScore3(iGan, iJi);
+              if (ijs === null || ijs <= 0) continue;
+              const wjs = wolJiScoreDyn3(wJi);
+              if (wjs <= 0) continue;
+
+              const total = ijs + njs + wjs + ap;
+              const CHEONGAN_HAP_NAME: Record<string,string> = { 甲:"갑기합",己:"갑기합",乙:"을경합",庚:"을경합",丙:"병신합",辛:"병신합",丁:"정임합",壬:"정임합",戊:"무계합",癸:"무계합" };
+              const YUKAP_NAME: Record<string,string> = { 子:"자축합",丑:"자축합",寅:"인해합",亥:"인해합",卯:"묘술합",戌:"묘술합",辰:"진유합",酉:"진유합",巳:"사신합",申:"사신합",午:"오미합",未:"오미합" };
+              const SAMHAP_NAME: Record<string,string> = { 子:"신자진 삼합",申:"신자진 삼합",辰:"신자진 삼합",丑:"사유축 삼합",酉:"사유축 삼합",巳:"사유축 삼합",寅:"인오술 삼합",午:"인오술 삼합",戌:"인오술 삼합",卯:"해묘미 삼합",亥:"해묘미 삼합",未:"해묘미 삼합" };
+              const reasons3: string[] = [];
+              if (iGan === hapIlGan) reasons3.push(`일간 ${CHEONGAN_HAP_NAME[iGan]??'천간합'}`);
+              if (iJi === hapIlJi)   reasons3.push(`일지 ${YUKAP_NAME[iJi]??'육합'}`);
+              if (nJi === YUKAP_PARTNER[myNyeonJi3]) reasons3.push(`년지 ${YUKAP_NAME[nJi]??'육합'}`);
+              if (SAMHAP3_NYEON.includes(nJi)) reasons3.push(`년지 ${SAMHAP_NAME[nJi]??'삼합'}`);
+              if (wJi === hapWolJi) reasons3.push(`월지 ${YUKAP_NAME[wJi]??'육합'}`);
+              if (SAMHAP3C[myWolJi3]?.includes(wJi)) reasons3.push(`월지 ${SAMHAP_NAME[wJi]??'삼합'}`);
+
+              candidates3.push({ year:yr, month:mo, day:dy, nyeon:nyeonStr, wol:wolStr, il:ilStr, nyeonGan:nGan, nyeonJi:nJi, wolGan:wGan, wolJi:wJi, ilGan:iGan, ilJi:iJi, totalScore:total, reasons:reasons3 });
+            } catch { /* ignore */ }
+          }
+        }
+      }
+
+      const sorted3 = candidates3.slice().sort((a, b) => b.totalScore - a.totalScore);
+      const usedIlGan3 = new Set<string>();
+      const usedYear3  = new Set<number>();
+      const usedWolJi3 = new Set<string>();
+      const picked3: CompatResult3[] = [];
+      const pickOne3 = (filter?: (c: CompatResult3) => boolean) => {
+        for (const c of sorted3) {
+          if (usedIlGan3.has(c.ilGan) || usedYear3.has(c.year) || usedWolJi3.has(c.wolJi)) continue;
+          if (filter && !filter(c)) continue;
+          usedIlGan3.add(c.ilGan); usedYear3.add(c.year); usedWolJi3.add(c.wolJi); picked3.push(c);
+          return;
+        }
+      };
+      pickOne3(c => c.year < myBirthYear3);
+      pickOne3(c => c.year > myBirthYear3);
+      pickOne3();
+      const top3 = picked3.sort((a, b) => b.totalScore - a.totalScore);
+
+      const compatTable3 = top3.map((t,i) => {
+        const nKr = `${GAN_KR_C[t.nyeonGan]??t.nyeonGan}${JI_KR_C[t.nyeonJi]??t.nyeonJi}`;
+        const wKr = `${GAN_KR_C[t.wolGan]??t.wolGan}${JI_KR_C[t.wolJi]??t.wolJi}`;
+        const iKr = `${GAN_KR_C[t.ilGan]??t.ilGan}${JI_KR_C[t.ilJi]??t.ilJi}`;
+        return `${i+1}순위: 년주 ${nKr}(${t.year}년생) / 월주 ${wKr} / 일주 ${iKr}일주 — ${t.reasons.join(", ")} — 실제날짜: ${t.year}.${t.month}.${t.day}`;
+      }).join("\n");
+
+      // 시주 배정
+      const SI_TABLE3: Record<string, string[]> = {
+        甲: ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥"],
+        己: ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥"],
+        乙: ["丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥"],
+        庚: ["丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥"],
+        丙: ["戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥"],
+        辛: ["戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥"],
+        丁: ["庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥"],
+        壬: ["庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥"],
+        戊: ["壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"],
+        癸: ["壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"],
+      };
+      function siScore3(gz: string): number {
+        const g = gz[0], j = gz[1];
+        let s = 0;
+        const ge = STEM_EL_C[g] ?? ""; const je = BRANCH_EL_C[j] ?? "";
+        if (ge === yongsinEl) s += 20; else if (ge === heesinEl) s += 12;
+        if (je === yongsinEl) s += 15; else if (je === heesinEl) s += 10;
+        return s;
+      }
+      const usedSiJi3 = new Set<string>();
+      const assignedSi3 = top3.map(t => {
+        const cands = (SI_TABLE3[t.ilGan] ?? [])
+          .filter(gz => !usedSiJi3.has(gz[1]))
+          .map(gz => ({ gz, score: siScore3(gz) }))
+          .sort((a, b) => b.score - a.score);
+        const best = cands[0]?.gz ?? "";
+        if (best) usedSiJi3.add(best[1]);
+        return best;
+      });
+
+      // ch3Pillars 확정
+      const JI_SI_NAME3: Record<string,string> = { 子:"자시",丑:"축시",寅:"인시",卯:"묘시",辰:"진시",巳:"사시",午:"오시",未:"미시",申:"신시",酉:"유시",戌:"술시",亥:"해시" };
+      ch3Pillars = top3.map((t, i) => {
+        const siGz = assignedSi3[i] ?? "";
+        const birthDate = `${t.year}.${String(t.month).padStart(2,"0")}.${String(t.day).padStart(2,"0")}`;
+        const siName = siGz[1] ? (JI_SI_NAME3[siGz[1]] ?? "") : "";
+        return {
+          nyeon: { gan:t.nyeonGan, ji:t.nyeonJi, ganEl:STEM_EL_C[t.nyeonGan]??"", jiEl:BRANCH_EL_C[t.nyeonJi]??"" },
+          wol:   { gan:t.wolGan,   ji:t.wolJi,   ganEl:STEM_EL_C[t.wolGan]??"",   jiEl:BRANCH_EL_C[t.wolJi]??"" },
+          il:    { gan:t.ilGan,    ji:t.ilJi,     ganEl:STEM_EL_C[t.ilGan]??"",    jiEl:BRANCH_EL_C[t.ilJi]??"" },
+          si:    { gan:siGz[0]??"", ji:siGz[1]??"", ganEl:STEM_EL_C[siGz[0]]??"", jiEl:BRANCH_EL_C[siGz[1]]??"" },
+          birthDate, siName, tags: t.reasons,
+        };
+      });
+
+      // ch3RankData 확정
+      ch3RankData = top3.map(t => {
+        const iKrD = `${GAN_KR_C[t.ilGan]??t.ilGan}${JI_KR_C[t.ilJi]??t.ilJi}`;
+        const ilGanElD = STEM_EL_C[t.ilGan] ?? "";
+        const ageDiffD = Math.abs(t.year - myBirthYear3);
+        const ageRelD = t.year < myBirthYear3 ? `연상 ${ageDiffD}살` : t.year > myBirthYear3 ? `연하 ${ageDiffD}살` : `동갑`;
+        const ageDescD = t.year < myBirthYear3
+          ? `${honor}보다 ${ageDiffD}살 위라 어딘지 모르게 믿음직한 구석이 있소`
+          : t.year > myBirthYear3
+            ? `${honor}보다 ${ageDiffD}살 어리지만 어딘지 모르게 성숙한 구석이 있소`
+            : `동갑이라 처음부터 편하게 말 놓을 수 있는 스타일이오`;
+        const JH: Record<string,string> = { 금:"IT 개발자·회계사·공무원·법조인·의료기기 영업", 목:"교사·작가·편집자·환경 관련·인테리어 디자이너", 화:"마케터·유튜버·셰프·뷰티 관련·이벤트 기획자", 수:"연구원·약사·의사·무역·여행업", 토:"건축·부동산·공무원·요리사·농업 관련" };
+        const SH: Record<string,string> = { 금:"단정하고 깔끔, 말보다 행동, 한번 마음 주면 끝까지", 목:"표정 풍부하고 온기 있는 말투, 감수성 높고 취미 많음", 화:"에너지 폭발, 눈에 확 띄고 분위기 주도형", 수:"겉은 시크해 보이지만 속은 다정한 로맨티스트", 토:"든든하고 믿음직, 말 아끼지만 한마디에 무게감" };
+        return { iKr: iKrD, ageRel: ageRelD, ageDesc: ageDescD, ilGanEl: ilGanElD, styleHint: SH[ilGanElD]??ilGanElD, jobHint: JH[ilGanElD]??ilGanElD, reasons: t.reasons.join(", ") };
+      });
+
+      // 순위별 4기둥 프롬프트 주입
+      const personLabel3 = input.gender === "male" ? "이 여자는" : "이 남자는";
+      const pillarRows3 = top3.map((t, i) => {
+        const siGz = assignedSi3[i] ?? "";
+        const JI_SI_NAME3x: Record<string,string> = { 子:"자시",丑:"축시",寅:"인시",卯:"묘시",辰:"진시",巳:"사시",午:"오시",未:"미시",申:"신시",酉:"유시",戌:"술시",亥:"해시" };
+        const birthDate = `${t.year}.${String(t.month).padStart(2,"0")}.${String(t.day).padStart(2,"0")}`;
+        const siName = siGz[1] ? (JI_SI_NAME3x[siGz[1]] ?? "") : "";
+        const pillarObj = {
+          nyeon: { gan:t.nyeonGan, ji:t.nyeonJi, ganEl:STEM_EL_C[t.nyeonGan]??"", jiEl:BRANCH_EL_C[t.nyeonJi]??"" },
+          wol:   { gan:t.wolGan,   ji:t.wolJi,   ganEl:STEM_EL_C[t.wolGan]??"",   jiEl:BRANCH_EL_C[t.wolJi]??"" },
+          il:    { gan:t.ilGan,    ji:t.ilJi,     ganEl:STEM_EL_C[t.ilGan]??"",    jiEl:BRANCH_EL_C[t.ilJi]??"" },
+          si:    { gan:siGz[0]??"", ji:siGz[1]??"", ganEl:STEM_EL_C[siGz[0]]??"", jiEl:BRANCH_EL_C[siGz[1]]??"" },
+          birthDate, siName, tags: t.reasons,
+        };
+        const nKr = `${GAN_KR_C[t.nyeonGan]??t.nyeonGan}${JI_KR_C[t.nyeonJi]??t.nyeonJi}`;
+        const wKr = `${GAN_KR_C[t.wolGan]??t.wolGan}${JI_KR_C[t.wolJi]??t.wolJi}`;
+        const iKr = `${GAN_KR_C[t.ilGan]??t.ilGan}${JI_KR_C[t.ilJi]??t.ilJi}`;
+        const ilGanEl = STEM_EL_C[t.ilGan] ?? "";
+        const ageDiff = Math.abs(t.year - myBirthYear3);
+        const ageRel = t.year < myBirthYear3
+          ? `연상 ${ageDiff}살 (${honor}보다 ${ageDiff}살 위)`
+          : t.year > myBirthYear3
+            ? `연하 ${ageDiff}살 (${honor}보다 ${ageDiff}살 아래)`
+            : `동갑`;
+        const JOB_HINT3: Record<string,string> = { 금:"IT 개발자·회계사·공무원·법조인·의료기기 영업", 목:"교사·작가·편집자·환경 관련·인테리어 디자이너", 화:"마케터·유튜버·셰프·뷰티 관련·이벤트 기획자", 수:"연구원·약사·의사·무역·여행업", 토:"건축·부동산·공무원·요리사·농업 관련" };
+        const STYLE_HINT3: Record<string,string> = { 금:"단정하고 깔끔, 말보다 행동, 한번 마음 주면 끝까지", 목:"표정 풍부하고 온기 있는 말투, 감수성 높고 취미 많음", 화:"에너지 폭발, 눈에 확 띄고 분위기 주도형", 수:"겉은 시크해 보이지만 속은 다정한 로맨티스트", 토:"든든하고 믿음직, 말 아끼지만 한마디에 무게감" };
+        const ageDesc3 = t.year < myBirthYear3
+          ? `${honor}보다 ${ageDiff}살 위라 어딘지 모르게 믿음직한 구석이 있소`
+          : t.year > myBirthYear3
+            ? `${honor}보다 ${ageDiff}살 어리지만 어딘지 모르게 성숙한 구석이 있소`
+            : `동갑이라 처음부터 편하게 말 놓을 수 있는 스타일이오`;
+        return `[${i+1}순위 desc 작성용 정보 — 아래 값을 JSON 파싱 없이 그대로 사용하오]\n` +
+          `일주명: ${iKr}일주\n` +
+          `나이 관계: ${ageRel} → "${ageDesc3}"\n` +
+          `상대방 일간 오행: ${ilGanEl} → 성격 힌트: "${STYLE_HINT3[ilGanEl]??ilGanEl}"\n` +
+          `상대방 직업 힌트: ${JOB_HINT3[ilGanEl]??ilGanEl}\n` +
+          `상대방 일지 오행: ${BRANCH_EL_C[t.ilJi]??""}\n` +
+          `찰떡인 이유: ${t.reasons.join(", ")}\n` +
+          `신청자 일간: ${GAN_KR_C[myIlGan3]??myIlGan3}(${myIlEl3})\n` +
+          `★ 호칭: 상대방='${personLabel3}' / 신청자='${honor}' — 다른 표현 절대 금지\n` +
+          `[pillars JSON — compatibleJuju[${i}].pillars 에 그대로 사용]\n${JSON.stringify(pillarObj)}`;
+      }).join("\n\n");
+
+      const now3 = new Date();
+      const refYear3 = now3.getFullYear();
+      const refMonth3 = now3.getMonth() + 1;
+
+      compatPillarBlock = `\n[기둥별 십성 확인표 — 3장 연애 풀이에서 반드시 이 값만 사용, 임의 추론 금지]\n${rows3.join("\n")}\n\n[인연성 분석 결과 — 반드시 이 결과를 그대로 사용하오]\n${loveStarResult3}\n\n[2024~2033 세운별 연애운 점수표 — loveFlow 풀이에서 반드시 이 수치 기반으로만 서술]\n${loveRows3.join("\n")}\n연애운 1위(정점): ${lovePeakYear3}년 ${lovePeakGz3} (점수=${sortedLove3[0].score})\n연애운 상위: ${sortedLove3.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n연애운 하위: ${sortedLove3.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n[연도 표기] '○○년 갑진년은' 형식. '가장' 최상급은 1위 연도(${lovePeakYear3}년)에만 사용.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n\n[일주 명칭 — 반드시 이 표현 그대로 사용]\n이 사주의 일주: ${ilJuName3} (일간 ${ilGanKr3}${ilP3?.ganEl ?? ""} / 일지 ${ilJiKr3}${ilP3?.jiEl ?? ""})\n\n[지지 합·충·형 실제 목록 — 없는 합충형을 언급하면 절대 안 되오. 아래 목록에 있는 것만 언급하오]\n${hapChungHyeong3}\n\n[리포트 생성 기준일 — 절대 규칙, 위반 시 탈락]\n오늘: ${refYear3}년 ${refMonth3}월\n\n【시제 적용 — 연도별 예시】\n- ${refYear3 - 2}년, ${refYear3 - 1}년 → 이미 지난 해 → 반드시 과거형: "~이었소", "~았소", "~높았소"\n- ${refYear3}년 → 지금 이 해 → 반드시 현재형: "~이오", "~하오", "~있소"\n- ${refYear3 + 1}년 이후 → 아직 오지 않은 해 → 반드시 미래형: "~될 것이오", "~찾아오겠소"\n\n[잘 맞는 사주팔자 TOP 3 — 만세력 실존 날짜 기반 / 순서 절대 변경 금지]\n※ 아래 순위 순서는 알고리즘 확정값이오. LLM이 임의로 순서를 바꾸는 것은 절대 금지. 반드시 1순위→2순위→3순위 순서 그대로 compatibleJuju 배열에 채울 것.\n※ desc 서술 시 상대방을 지칭할 때 '이 사람', '상대방' 등의 표현을 절대 쓰지 마오. 반드시 '${personLabel3}'로만 표현하오.\n${compatTable3}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n피해야 할 상대 띠: ${avoidTtiStr}\n\n${pillarRows3}\n`;
+    }
+  }
+
   const user = `아래는 ${honor}의 사주 명식입니다.
 
-${deungTable}${ohaengTable}${loveScoreBlock}${input.manseryeokText}
+${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.manseryeokText}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -535,5 +1018,5 @@ ${guide ? `\n작성 지침:\n${guide}\n` : ""}
 
 ${schema}`;
 
-  return { system: SYSTEM, user };
+  return { system: SYSTEM, user, ch3Pillars: chapter === 3 ? ch3Pillars : undefined, ch3RankData: chapter === 3 ? ch3RankData : undefined };
 }
