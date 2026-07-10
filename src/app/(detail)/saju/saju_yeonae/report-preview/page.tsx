@@ -4642,7 +4642,6 @@ function ReportPreviewInner() {
                 {/* ② 사랑 방식 카드 3개 */}
                 {ls.modes && ls.modes.length > 0 && (
                   <section className="px-6 pt-6 pb-2">
-                    <Heading>나만의 사랑 방식</Heading>
                     <div className="space-y-3">
                       {ls.modes.map((m, i) => (
                         <div key={i} className="rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
