@@ -4743,7 +4743,7 @@ function ReportPreviewInner() {
                     <div className="space-y-3 mt-2">
                       {ct.wellTypes.map((t, i) => (
                         <div key={i} className="rounded-2xl p-4" style={{ background: `${GREEN}0a`, border: `1px solid ${GREEN}25` }}>
-                          <p className="text-[13px] font-bold mb-1" style={{ color: INK }}>{t.typeDesc}</p>
+                          <p className="text-[14px] font-black mb-2 pb-2" style={{ color: GREEN, borderBottom: `1px solid ${GREEN}25`, fontFamily: SERIF }}>{t.typeDesc}</p>
                           <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
                         </div>
                       ))}
