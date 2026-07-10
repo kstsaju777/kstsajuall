@@ -4643,14 +4643,14 @@ function ReportPreviewInner() {
                 {ls.modes && ls.modes.length > 0 && (
                   <section className="px-6 pt-6 pb-2">
                     <Heading>나만의 사랑 방식</Heading>
-                    <div className="space-y-3 mt-2">
+                    <div className="space-y-3">
                       {ls.modes.map((m, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
+                        <div key={i} className="rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{m.icon}</span>
-                            <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{m.title}</span>
+                            <span className="text-[22px]">{m.icon}</span>
+                            <p className="text-[14px] font-bold" style={{ color: INK, fontFamily: SERIF }}>{m.title}</p>
                           </div>
-                          <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{m.desc}</p>
+                          <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT }}>{m.desc}</p>
                         </div>
                       ))}
                     </div>
