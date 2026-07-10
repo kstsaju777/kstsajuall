@@ -388,9 +388,8 @@ export function buildYeonaeSajuChapterPrompt(
   const theme = YEONAE_CH_THEME[chapter] ?? `[제${chapter}장]`;
   const guide = YEONAE_CH_GUIDE[chapter] ?? "";
   const schema = YEONAE_CH_SCHEMA[chapter] ?? "{}";
-  const honor = input.name
-    ? input.gender === "male" ? `${input.name}군` : `${input.name}양`
-    : "그대";
+  const baseName = input.name ? (input.name.slice(1) || input.name) : "";
+  const honor = baseName ? `${baseName}님` : "그대";
   const currentYear = new Date().getFullYear();
 
   // ch1 전용: 득령·득지·득시·득세 판정표 생성 → sinStrength.intro 첫 문장 고정
