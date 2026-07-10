@@ -4601,6 +4601,7 @@ function ReportPreviewInner() {
               keywords?: string[];
               modes?: { icon: string; title: string; desc: string }[];
               traits?: { label: string; score: number }[];
+              summaryParagraphs?: string[];
               summary?: string;
               callout?: string;
               paragraphs?: string[];
@@ -4677,11 +4678,13 @@ function ReportPreviewInner() {
                 )}
 
                 {/* ④ 종합 풀이 */}
-                {(ls.summary ?? ls.paragraphs) && (
+                {(ls.summaryParagraphs ?? ls.summary ?? ls.paragraphs) && (
                   <section className="px-6 pt-6 pb-4">
-                    {ls.summary
-                      ? <P>{ls.summary}</P>
-                      : ls.paragraphs?.map((p, i) => <P key={i}>{p}</P>)
+                    {ls.summaryParagraphs
+                      ? ls.summaryParagraphs.map((p, i) => <P key={i}>{p}</P>)
+                      : ls.summary
+                        ? <P>{ls.summary}</P>
+                        : ls.paragraphs?.map((p, i) => <P key={i}>{p}</P>)
                     }
                   </section>
                 )}
