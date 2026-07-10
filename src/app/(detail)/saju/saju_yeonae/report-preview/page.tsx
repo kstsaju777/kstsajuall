@@ -3453,6 +3453,38 @@ function Cover() {
   );
 }
 
+function LoveCareTabs({ tips, elColor }: { tips: { icon: string; category: string; text: string }[]; elColor: string }) {
+  const [active, setActive] = useState(0);
+  const tip = tips[active];
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${INK}12` }}>
+      <div className="flex" style={{ background: `${INK}05`, borderBottom: `1.5px solid ${INK}12` }}>
+        {tips.map((t, i) => (
+          <button
+            key={i}
+            onClick={() => setActive(i)}
+            className="flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-all"
+            style={{
+              background: active === i ? WHITE : "transparent",
+              borderRight: i < tips.length - 1 ? `1px solid ${INK}10` : "none",
+              borderBottom: active === i ? `2.5px solid ${elColor}` : "none",
+              marginBottom: active === i ? "-1.5px" : 0,
+            }}
+          >
+            <span className="text-[15px] leading-none">{t.icon}</span>
+            <span className="text-[9px] font-bold leading-tight text-center" style={{ color: active === i ? elColor : INK_SOFT }}>{t.category}</span>
+          </button>
+        ))}
+      </div>
+      {tip && (
+        <div className="px-5 py-4" style={{ background: WHITE }}>
+          <p className="text-[12.5px] leading-[1.85]" style={{ color: INK_SOFT }}>{tip.text}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // 중앙 세리프 인용구
 function Quote({ children }: { children: React.ReactNode }) {
   return (
@@ -4679,7 +4711,14 @@ function ReportPreviewInner() {
             );
           })()}
 
-          <ChapterNav cur="2" go={next} />
+          <div style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div className="px-8 pt-10 pb-10 text-center">
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`"연애 기질을 알았으니,\n이제 어떤 사람이 잘 맞는지\n다음 장에서 살펴보겠소."`}
+              </p>
+            </div>
+            <ChapterNav cur="2" go={next} />
+          </div>
         </>
       )}
 
@@ -4703,73 +4742,27 @@ function ReportPreviewInner() {
           {/* 내 사주가 추구하는 연애관 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>내 사주가 추구하는 연애관</Heading>
-            {(jc.loveStyle as { paragraphs?: string[] } | undefined)?.paragraphs?.[0] && (
-              <P>{(jc.loveStyle as { paragraphs: string[] }).paragraphs[0]}</P>
+            {(jc.loveStyleDesc as { paragraphs?: string[] } | undefined)?.paragraphs?.[0] && (
+              <P>{(jc.loveStyleDesc as { paragraphs: string[] }).paragraphs[0]}</P>
             )}
           </section>
 
-          {/* 나와 찰떡궁합인 이성의 사주 */}
-          {/* 잘 맞는 유형 / 피해야 할 유형 */}
+          {/* 잘 맞는 유형 */}
           {(() => {
             const ct = (jc.compatTypes as { wellTypes?: { icon: string; typeDesc: string; reason: string }[]; avoidTypes?: { icon: string; typeDesc: string; reason: string }[] } | undefined) ?? {};
-            return (
-              <>
-                {ct.wellTypes && ct.wellTypes.length > 0 && (
-                  <section className="px-6 pt-6 pb-2">
-                    <Heading>{name.slice(1) || name}님과 잘 맞는 유형</Heading>
-                    <div className="space-y-3 mt-2">
-                      {ct.wellTypes.map((t, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: `${GREEN}0a`, border: `1px solid ${GREEN}25` }}>
-                          <p className="text-[14px] font-black mb-2 pb-2" style={{ color: GREEN, borderBottom: `1px solid ${GREEN}25`, fontFamily: SERIF }}>{t.typeDesc}</p>
-                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
-                        </div>
-                      ))}
+            return ct.wellTypes && ct.wellTypes.length > 0 ? (
+              <section className="px-6 pt-6 pb-2">
+                <Heading>{name.slice(1) || name}님과 잘 맞는 유형</Heading>
+                <div className="space-y-3 mt-2">
+                  {ct.wellTypes.map((t, i) => (
+                    <div key={i} className="rounded-2xl p-4" style={{ background: `${GREEN}0a`, border: `1px solid ${GREEN}25` }}>
+                      <p className="text-[14px] font-black mb-2 pb-2" style={{ color: GREEN, borderBottom: `1px solid ${GREEN}25`, fontFamily: SERIF }}>{t.typeDesc}</p>
+                      <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
                     </div>
-                  </section>
-                )}
-                {ct.avoidTypes && ct.avoidTypes.length > 0 && (
-                  <section className="px-6 pt-4 pb-2">
-                    <Heading>{name.slice(1) || name}님이 피해야 할 유형</Heading>
-                    <div className="space-y-3 mt-2">
-                      {ct.avoidTypes.map((t, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}25` }}>
-                          <p className="text-[14px] font-black mb-2 pb-2" style={{ color: WARN, borderBottom: `1px solid ${WARN}25`, fontFamily: SERIF }}>{t.typeDesc}</p>
-                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-                {(() => {
-                  const avoidTti = (jc.compatibleJuju as { avoidTti?: string }[] | undefined)?.[0]?.avoidTti?.trim() ?? "";
-                  const myBirthYear = report?.birth?.date ? parseInt(String(report.birth.date).slice(0,4)) : undefined;
-                  if (!avoidTti) return null;
-                  return (
-                    <section className="px-6 pt-4 pb-6">
-                      <div style={{ background:"#fff8f0", border:"1.5px solid #e53935", borderRadius:10, overflow:"hidden" }}>
-                        <div style={{ background:"#fde8d0", padding:"7px 14px", borderBottom:"1px solid #e5393555" }}>
-                          <p style={{ fontSize:12, fontWeight:700, color:"#c62828", margin:0 }}>⚠️ 피해야 할 상대방 띠</p>
-                        </div>
-                        <div style={{ padding:"10px 14px", display:"flex", flexDirection:"column", gap:4 }}>
-                          {avoidTti.split(",").map(t => t.trim()).map((t, ti) => {
-                            const TTI_EMOJI: Record<string,string> = { 쥐:"🐭",소:"🐮",호랑이:"🐯",토끼:"🐰",용:"🐲",뱀:"🐍",말:"🐴",양:"🐑",원숭이:"🐵",닭:"🐔",개:"🐶",돼지:"🐷" };
-                            const years = myBirthYear ? (() => {
-                              const TTI_JI: Record<string,number> = { 쥐:0,소:1,호랑이:2,토끼:3,용:4,뱀:5,말:6,양:7,원숭이:8,닭:9,개:10,돼지:11 };
-                              const idx = TTI_JI[t]; if (idx === undefined) return "";
-                              const base = 1900 + ((idx - (myBirthYear - 1900) % 12 + 12) % 12);
-                              const yrs: number[] = [];
-                              for (let y = base - 24; y <= myBirthYear + 24; y += 12) if (y >= myBirthYear - 15 && y <= myBirthYear + 15) yrs.push(y);
-                              return yrs.length ? `${Math.min(...yrs)}년생~${Math.max(...yrs)}년생` : "";
-                            })() : "";
-                            return <span key={ti} style={{ fontSize:13, color:"#7a4020" }}>{TTI_EMOJI[t] ?? ""} <strong>{t}</strong>{years ? ` (${years})` : ""}</span>;
-                          })}
-                        </div>
-                      </div>
-                    </section>
-                  );
-                })()}
-              </>
-            );
+                  ))}
+                </div>
+              </section>
+            ) : null;
           })()}
 
           {/* 나와 찰떡궁합인 이성의 사주 */}
@@ -4783,7 +4776,53 @@ function ReportPreviewInner() {
             />
           </section>
 
-          <ChapterNav cur="3" go={next} />
+          {/* 피해야 할 유형 + 피해야 할 상대방 띠 */}
+          {(() => {
+            const ct = (jc.compatTypes as { avoidTypes?: { icon: string; typeDesc: string; reason: string }[] } | undefined) ?? {};
+            const avoidTti = (jc.compatibleJuju as { avoidTti?: string }[] | undefined)?.[0]?.avoidTti?.trim() ?? "";
+            const myBirthYear = report?.birth?.date ? parseInt(String(report.birth.date).slice(0,4)) : undefined;
+            return (
+              <>
+                {ct.avoidTypes && ct.avoidTypes.length > 0 && (
+                  <section className="px-6 pt-6 pb-2">
+                    <Heading>{name.slice(1) || name}님이 피해야 할 유형</Heading>
+                    <div className="space-y-3 mt-2">
+                      {ct.avoidTypes.map((t, i) => (
+                        <div key={i} className="rounded-2xl p-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}25` }}>
+                          <p className="text-[14px] font-black mb-2 pb-2" style={{ color: WARN, borderBottom: `1px solid ${WARN}25`, fontFamily: SERIF }}>{t.typeDesc}</p>
+                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+                {avoidTti && (
+                  <section className="px-6 pt-4 pb-6">
+                    <div style={{ background:"#fff8f0", border:"1.5px solid #e53935", borderRadius:10, overflow:"hidden" }}>
+                      <div style={{ background:"#fde8d0", padding:"7px 14px", borderBottom:"1px solid #e5393555" }}>
+                        <p style={{ fontSize:12, fontWeight:700, color:"#c62828", margin:0 }}>⚠️ 피해야 할 상대방 띠</p>
+                      </div>
+                      <div style={{ padding:"10px 14px", display:"flex", flexDirection:"column", gap:4 }}>
+                        {avoidTti.split(",").map(t => t.trim()).map((t, ti) => {
+                          const years = myBirthYear ? getTtiYearsNear(t, myBirthYear) : "";
+                          return <span key={ti} style={{ fontSize:13, color:"#7a4020" }}>{TTI_EMOJI[t] ?? ""} <strong>{t}</strong>{years ? ` (${years})` : ""}</span>;
+                        })}
+                      </div>
+                    </div>
+                  </section>
+                )}
+              </>
+            );
+          })()}
+
+          <div style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div className="px-8 pt-10 pb-10 text-center">
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`"인연의 모습은 알았소.\n이제 그 인연이 언제 오는지\n다음 장에서 살펴보겠소."`}
+              </p>
+            </div>
+            <ChapterNav cur="3" go={next} />
+          </div>
         </>
       )}
 
@@ -4802,7 +4841,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`인연은 흐르오.\n언제 만나고, 언제 기다려야 하는지\n대운이 알려주고 있소.`}</Quote>
+          <Quote>{`인연에는 때가 있소.\n\n서두른다고 오는 것도,\n기다린다고 늦어지는 것도 아니오.\n\n${name}님의 사주로\n그 흐름을 보겠소.`}</Quote>
 
           {(() => {
             const lt = (jc.loveTiming as {
@@ -4811,52 +4850,14 @@ function ReportPreviewInner() {
               summary?: string;
             } | undefined) ?? {};
             const lf = (jc.loveFlow as { items?: { label: string; trend: string; title: string; text: string }[] } | undefined) ?? {};
-            const lp = (jc.lovePattern as { leftLabel?: string; left?: number; rightLabel?: string; right?: number; leftDesc?: string; rightDesc?: string; leftTips?: string[]; rightTips?: string[] } | undefined) ?? {};
+            const lpeak = (jc.lovePeak as { peakPeriod?: string; peakTitle?: string; peakDesc?: string; peakTips?: string[] } | undefined) ?? {};
+            const lnow = (jc.loveNow as { nowTitle?: string; nowDesc?: string; actions?: { icon: string; title: string; desc: string }[] } | undefined) ?? {};
 
             const LOVE_GOLD = "#c27b3e";
 
             return (
               <>
-                {/* ① 인연 시기 방향 */}
-                <section className="px-6 pt-2 pb-6">
-                  {lt.timingType && (
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="rounded-2xl px-4 py-2" style={{ background: `${LOVE_GOLD}15`, border: `1.5px solid ${LOVE_GOLD}40` }}>
-                        <span className="text-[13px] font-black" style={{ color: LOVE_GOLD, fontFamily: SERIF }}>{lt.timingType}</span>
-                      </div>
-                      <div className="flex gap-2 flex-wrap">
-                        {lt.timingKeywords?.map((kw, i) => (
-                          <span key={i} className="text-[11px] px-2.5 py-1 rounded-full font-bold" style={{ background: `${INK}08`, color: INK_SOFT }}>{kw}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {lt.intro && (
-                    <div className="rounded-xl px-4 py-3 mb-4" style={{ background: `${LOVE_GOLD}0c`, borderLeft: `3px solid ${LOVE_GOLD}` }}>
-                      <p className="text-[13px] font-bold leading-relaxed" style={{ color: INK }}>{lt.intro}</p>
-                    </div>
-                  )}
-                  {lt.cards && lt.cards.length > 0 && (
-                    <div className="space-y-3">
-                      {lt.cards.map((card, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-lg">{card.icon}</span>
-                            <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{card.title}</span>
-                          </div>
-                          <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{card.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {lt.summary && (
-                    <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${INK}10` }}>
-                      <P>{lt.summary}</P>
-                    </div>
-                  )}
-                </section>
-
-                {/* ② 시기별 인연 흐름 */}
+                {/* ① 시기별 인연 흐름 */}
                 {lf.items && lf.items.length > 0 && (
                   <section className="px-6 pt-2 pb-6">
                     <Heading>시기별 인연 흐름</Heading>
@@ -4903,47 +4904,76 @@ function ReportPreviewInner() {
                   </section>
                 )}
 
-                {/* ③ 인연 패턴: 일찍 오는 인연형 vs 늦게 피는 인연형 */}
-                {lp.leftLabel && (
+                {/* ② 나의 인연 황금기 */}
+                {lpeak.peakPeriod && (
                   <section className="px-6 pt-2 pb-6">
-                    <Heading>나의 인연 패턴</Heading>
-                    <div className="flex gap-3 mt-2 mb-3">
-                      {[
-                        { label: lp.leftLabel!, pct: lp.left ?? 0, desc: lp.leftDesc ?? "", tips: lp.leftTips ?? [], color: "#2a6080" },
-                        { label: lp.rightLabel!, pct: lp.right ?? 0, desc: lp.rightDesc ?? "", tips: lp.rightTips ?? [], color: LOVE_GOLD },
-                      ].map((side, i) => (
-                        <div key={i} className="flex-1 rounded-2xl p-4" style={{ background: WHITE, border: `1.5px solid ${side.color}30` }}>
-                          <p className="text-[11px] font-bold mb-1" style={{ color: side.color }}>{side.label}</p>
-                          <p className="text-[26px] font-black mb-2" style={{ color: side.color }}>{side.pct}%</p>
-                          <p className="text-[12px] leading-[1.75] mb-3" style={{ color: INK_SOFT }}>{side.desc}</p>
-                          {side.tips.length > 0 && (
-                            <ul className="space-y-1.5 pt-2" style={{ borderTop: `1px solid ${side.color}20` }}>
-                              {side.tips.map((tip, j) => (
-                                <li key={j} className="flex items-start gap-1.5">
-                                  <span className="text-[11px] mt-0.5 flex-shrink-0" style={{ color: side.color }}>•</span>
-                                  <span className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
+                    <Heading>나의 인연 황금기</Heading>
+                    <div className="rounded-2xl overflow-hidden mb-4" style={{ border: `2px solid #e8547a30` }}>
+                      <div className="px-5 py-4" style={{ background: "linear-gradient(135deg, #e8547a12, #c27b3e0a)" }}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="text-2xl">💘</span>
+                          <div>
+                            <p className="text-[11px] font-bold mb-0.5" style={{ color: "#e8547a" }}>{lpeak.peakPeriod}</p>
+                            <p className="text-[15px] font-black" style={{ color: INK, fontFamily: SERIF }}>{lpeak.peakTitle}</p>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                    <div className="rounded-full overflow-hidden h-2.5 flex">
-                      <div style={{ width: `${lp.left ?? 0}%`, background: "#2a6080" }} />
-                      <div style={{ flex: 1, background: LOVE_GOLD }} />
-                    </div>
-                    <div className="flex justify-between mt-1">
-                      <span className="text-[10px]" style={{ color: "#2a6080" }}>{lp.leftLabel}</span>
-                      <span className="text-[10px]" style={{ color: LOVE_GOLD }}>{lp.rightLabel}</span>
+                        <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{lpeak.peakDesc}</p>
+                      </div>
+                      {lpeak.peakTips && lpeak.peakTips.length > 0 && (
+                        <div className="px-5 py-3" style={{ background: WHITE, borderTop: `1px solid #e8547a18` }}>
+                          <p className="text-[11px] font-black mb-2" style={{ color: "#e8547a" }}>황금기를 위한 준비</p>
+                          <ul className="space-y-1.5">
+                            {lpeak.peakTips.map((tip, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="text-[11px] mt-0.5 flex-shrink-0" style={{ color: "#e8547a" }}>✦</span>
+                                <span className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </section>
                 )}
+
+                {/* ③ 지금 당장 해야 할 것 */}
+                {lnow.nowTitle && (
+                  <section className="px-6 pt-2 pb-6">
+                    <Heading>지금 당장 해야 할 것</Heading>
+                    <div className="rounded-xl px-4 py-3 mb-4" style={{ background: `${LOVE_GOLD}0c`, borderLeft: `3px solid ${LOVE_GOLD}` }}>
+                      <p className="text-[13px] font-black mb-1" style={{ color: LOVE_GOLD, fontFamily: SERIF }}>{lnow.nowTitle}</p>
+                      <p className="text-[12px] leading-[1.75]" style={{ color: INK }}>{lnow.nowDesc}</p>
+                    </div>
+                    {lnow.actions && lnow.actions.length > 0 && (
+                      <div className="space-y-3">
+                        {lnow.actions.map((action, i) => (
+                          <div key={i} className="rounded-2xl p-4 flex gap-3" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${LOVE_GOLD}12` }}>
+                              <span className="text-lg">{action.icon}</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-[13px] font-black mb-1" style={{ color: INK, fontFamily: SERIF }}>{action.title}</p>
+                              <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{action.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
+
               </>
             );
           })()}
 
-          <ChapterNav cur="4" go={next} />
+          <div style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div className="px-8 pt-10 pb-10 text-center">
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`"시기를 알았으니,\n이제 어디서 어떻게 만나게 될지\n다음 장에서 살펴보겠소."`}
+              </p>
+            </div>
+            <ChapterNav cur="4" go={next} />
+          </div>
         </>
       )}
 
@@ -4962,7 +4992,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`인연은\n뜻밖의 장소에서 시작되오.\n${name}${effectiveGender === "female" ? "양" : "군"}의 만남이\n어떻게 이루어지는지 보겠소.`}</Quote>
+          <Quote>{`${name}님의 인연,\n어디서 어떻게 시작되는지\n\n지금 펼쳐드리겠소.`}</Quote>
 
           {(() => {
             const mw = (jc.meetingWay as {
@@ -4970,7 +5000,6 @@ function ReportPreviewInner() {
               cards?: { icon: string; title: string; desc: string }[];
               summary?: string;
             } | undefined) ?? {};
-            const mf = (jc.meetingFlow as { items?: { label: string; tone: string; title: string; text: string }[] } | undefined) ?? {};
 
             const MEET_COLOR = "#4a7a9b";
             const KEYWORD_COLORS = [
@@ -4981,41 +5010,47 @@ function ReportPreviewInner() {
 
             return (
               <>
-                {/* ① 만남 유형 배지 + intro */}
+                {/* ① 만남 유형 + intro */}
                 <section className="px-6 pt-2 pb-6">
+                  <Heading>인연이 찾아오는 방식</Heading>
                   {mw.meetingType && (
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="rounded-2xl px-4 py-2" style={{ background: `${MEET_COLOR}15`, border: `1.5px solid ${MEET_COLOR}40` }}>
-                        <span className="text-[13px] font-black" style={{ color: MEET_COLOR, fontFamily: SERIF }}>{mw.meetingType}</span>
-                      </div>
-                      <div className="flex gap-2 flex-wrap">
-                        {mw.meetingKeywords?.map((kw, i) => {
-                          const c = KEYWORD_COLORS[i % KEYWORD_COLORS.length];
-                          return (
-                            <span key={i} className="px-3 py-1 rounded-full text-[11px] font-bold" style={{ background: c.bg, border: `1.5px solid ${c.border}`, color: c.text }}>
-                              {kw}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                  {mw.intro && (
-                    <div className="rounded-xl px-4 py-3 mb-4" style={{ background: `${MEET_COLOR}0c`, borderLeft: `3px solid ${MEET_COLOR}` }}>
-                      <p className="text-[13px] font-bold leading-relaxed" style={{ color: INK }}>{mw.intro}</p>
+                    <div className="rounded-2xl p-5 mb-4" style={{ background: `${MEET_COLOR}08`, border: `1.5px solid ${MEET_COLOR}25` }}>
+                      <div className="px-4 py-2 rounded-xl font-black text-[16px] inline-block mb-3" style={{ background: MEET_COLOR, color: "#fff", fontFamily: SERIF }}>{mw.meetingType}</div>
+                      {mw.meetingKeywords && mw.meetingKeywords.length > 0 && (
+                        <div className="flex gap-2 flex-wrap mb-3">
+                          {mw.meetingKeywords.map((kw, i) => (
+                            <span key={i} className="text-[11px] px-2.5 py-1 rounded-full font-bold" style={{ background: `${MEET_COLOR}15`, color: MEET_COLOR }}>{kw}</span>
+                          ))}
+                        </div>
+                      )}
+                      {mw.intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{mw.intro}</p>}
                     </div>
                   )}
 
                   {/* ② 만남 3관점 카드 */}
                   {mw.cards && mw.cards.length > 0 && (
                     <div className="space-y-3">
-                      {mw.cards.map((card, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-lg">{card.icon}</span>
-                            <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{card.title}</span>
+                      {mw.cards.map((card: { icon: string; title: string; desc: string; tags?: string[]; tip?: string }, i) => (
+                        <div key={i} className="rounded-2xl overflow-hidden" style={{ background: `${MEET_COLOR}05`, border: `1px solid ${MEET_COLOR}18` }}>
+                          <div className="flex items-center gap-2 px-4 py-3" style={{ background: `${MEET_COLOR}0e`, borderBottom: `1px solid ${MEET_COLOR}15` }}>
+                            <span className="text-xl">{card.icon}</span>
+                            <span className="text-[15px] font-black" style={{ color: INK, fontFamily: SERIF }}>{card.title}</span>
                           </div>
-                          <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{card.desc}</p>
+                          <div className="px-4 pt-3 pb-4">
+                          <p className="text-[12px] leading-[1.75] mb-3" style={{ color: INK_SOFT }}>{card.desc}</p>
+                          {card.tags && card.tags.length > 0 && (
+                            <div className="flex gap-1.5 flex-wrap mb-3">
+                              {card.tags.map((tag, j) => (
+                                <span key={j} className="text-[11px] px-2.5 py-1 rounded-lg font-bold" style={{ background: `${MEET_COLOR}10`, color: MEET_COLOR }}>{tag}</span>
+                              ))}
+                            </div>
+                          )}
+                          {card.tip && (
+                            <div className="rounded-lg px-3 py-2" style={{ background: `${MEET_COLOR}08`, borderLeft: `2.5px solid ${MEET_COLOR}60` }}>
+                              <p className="text-[11px] font-bold leading-relaxed" style={{ color: MEET_COLOR }}>{card.tip}</p>
+                            </div>
+                          )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -5027,47 +5062,18 @@ function ReportPreviewInner() {
                   )}
                 </section>
 
-                {/* ③ 만남 단계 타임라인 */}
-                {mf.items && mf.items.length > 0 && (
-                  <section className="px-6 pt-2 pb-8">
-                    <Heading>만남 단계별 흐름</Heading>
-                    <div className="relative mt-2">
-                      <div className="absolute left-[15px] top-4 bottom-4 w-[2px]" style={{ background: `${INK}08` }} />
-                      <div className="space-y-3">
-                        {mf.items.map((item, i) => {
-                          const isGood = item.tone !== "warn";
-                          const color = isGood ? MEET_COLOR : WARN;
-                          return (
-                            <div key={i} className="flex gap-3 items-start">
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 mt-1" style={{ background: `${color}12`, border: `2px solid ${color}35` }}>
-                                <span className="text-[11px] font-black" style={{ color }}>{i + 1}</span>
-                              </div>
-                              <div className="flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}0d` }}>
-                                <div className="px-4 pt-3 pb-2" style={{ background: `${color}07` }}>
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-[12px] font-black" style={{ color: INK }}>{item.label}</span>
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${color}18`, color }}>{isGood ? "좋음" : "주의"}</span>
-                                      {item.title && <span className="text-[10px]" style={{ color: INK_SOFT }}>{item.title}</span>}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="px-4 pt-2 pb-3" style={{ background: WHITE }}>
-                                  <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{item.text}</p>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </section>
-                )}
               </>
             );
           })()}
 
-          <ChapterNav cur="5" go={next} />
+          <div style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div className="px-8 pt-10 pb-16 text-center">
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`"${name.slice(1) || name}님의 인연,\n충분히 가까이 있소.\n\n다음 장에서 그 기운을\n직접 끌어오는 법을 알려드리겠소."`}
+              </p>
+            </div>
+            <ChapterNav cur="5" go={next} />
+          </div>
         </>
       )}
 
@@ -5107,23 +5113,36 @@ function ReportPreviewInner() {
               목: "#3c7a3c", 화: "#c94040", 토: "#8a6a00", 금: "#5a5a80", 수: "#2a5080",
             };
             const elColor = OHAENG_COLOR[lc.element ?? ""] ?? ROSE;
-            const OHAENG_ICON: Record<string, string> = {
-              목: "🌿", 화: "🔥", 토: "🪨", 금: "⚙️", 수: "💧",
+            const OHAENG_IMG: Record<string, string> = {
+              목: "/media/ohaeng/mok.png", 화: "/media/ohaeng/hwa.png",
+              토: "/media/ohaeng/to.png", 금: "/media/ohaeng/geum.png", 수: "/media/ohaeng/su.png",
             };
-            const elIcon = OHAENG_ICON[lc.element ?? ""] ?? "✦";
+            const elImg = OHAENG_IMG[lc.element ?? ""] ?? "";
 
             return (
               <>
                 {/* ① 연애 개운법 */}
                 {(lc.element || (lc.tips && lc.tips.length > 0)) && (
                   <section className="px-6 pt-2 pb-6">
-                    <Heading>연애 개운법</Heading>
+                    <Heading>{name.slice(1)}님의 연애운을 높일 개운법</Heading>
 
                     {lc.element && (
                       <div className="rounded-2xl overflow-hidden mt-2 mb-4" style={{ border: `1.5px solid ${elColor}30` }}>
                         <div className="px-4 pt-4 pb-3" style={{ background: `${elColor}0c` }}>
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="text-2xl">{elIcon}</span>
+                            {elImg && (
+                              <div className="relative flex-shrink-0" style={{
+                                width: 52, height: 52,
+                                background: "linear-gradient(145deg, #f5e070 0%, #c2a23c 40%, #f5e070 60%, #a07820 100%)",
+                                padding: 2.5,
+                                boxShadow: `0 0 0 1px #a07820, 0 2px 10px ${GOLD}66`,
+                              }}>
+                                <div style={{ width: "100%", height: "100%", background: "#fffdf5", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={elImg} alt={lc.element} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                </div>
+                              </div>
+                            )}
                             <div>
                               <p className="text-[10px] font-bold tracking-widest mb-0.5" style={{ color: elColor }}>보강할 오행</p>
                               <p className="text-[20px] font-black" style={{ color: elColor, fontFamily: SERIF }}>{lc.element}({lc.element === "목" ? "木" : lc.element === "화" ? "火" : lc.element === "토" ? "土" : lc.element === "금" ? "金" : "水"})</p>
@@ -5135,17 +5154,7 @@ function ReportPreviewInner() {
                     )}
 
                     {lc.tips && lc.tips.length > 0 && (
-                      <div className="space-y-2.5">
-                        {lc.tips.map((tip, i) => (
-                          <div key={i} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
-                            <span className="text-lg flex-shrink-0 mt-0.5">{tip.icon}</span>
-                            <div className="flex-1">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mr-2" style={{ background: `${elColor}12`, color: elColor }}>{tip.category}</span>
-                              <p className="text-[12px] leading-[1.75] mt-1" style={{ color: INK_SOFT }}>{tip.text}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <LoveCareTabs tips={lc.tips} elColor={elColor} />
                     )}
                   </section>
                 )}
@@ -5153,7 +5162,7 @@ function ReportPreviewInner() {
                 {/* ② 연애를 막는 것들 */}
                 {(la.intro || (la.blocks && la.blocks.length > 0)) && (
                   <section className="px-6 pt-2 pb-6">
-                    <Heading>연애를 막는 것들</Heading>
+                    <Heading>{name.slice(1)}님의 연애를 막는 행동들</Heading>
 
                     {la.intro && (
                       <div className="rounded-xl px-4 py-3 mt-2 mb-4" style={{ background: "#fff0f0", border: "1px solid #e0a0a020" }}>
@@ -5180,41 +5189,43 @@ function ReportPreviewInner() {
                 {/* ③ 종합 정리 */}
                 {(ls.coreMessage || (ls.items && ls.items.length > 0)) && (
                   <section className="px-6 pt-2 pb-8">
-                    <Heading>종합 정리</Heading>
-
-                    {ls.coreMessage && (
-                      <div className="rounded-2xl px-5 py-4 mt-2 mb-4 text-center" style={{ background: `linear-gradient(135deg, ${ROSE}0e, ${ROSE}18)`, border: `1.5px solid ${ROSE}35` }}>
-                        <p className="text-[10px] tracking-widest mb-2" style={{ color: `${ROSE}88` }}>✦ CORE MESSAGE</p>
-                        <p className="text-[15px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{ls.coreMessage}</p>
-                      </div>
-                    )}
+                    <Heading>{name.slice(1)}님은 이렇게 하는게 좋소</Heading>
 
                     {ls.items && ls.items.length > 0 && (
                       <div className="space-y-3">
                         {ls.items.map((item, i) => (
-                          <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-lg">{item.icon}</span>
-                              <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{item.title}</span>
+                          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}0d` }}>
+                            <div className="px-4 py-3 flex items-center gap-2.5" style={{ background: `linear-gradient(135deg, ${MAROON}0f 0%, ${GOLD}12 100%)` }}>
+                              <span style={{
+                                fontSize: 22, fontWeight: 900, fontFamily: SERIF, lineHeight: 1,
+                                background: `linear-gradient(135deg, ${MAROON}, ${GOLD})`,
+                                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                                flexShrink: 0,
+                              }}>{i + 1}</span>
+                              <span className="text-[15px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{item.title}</span>
                             </div>
-                            <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{item.desc}</p>
+                            <div className="px-4 py-3" style={{ background: WHITE }}>
+                              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{item.desc}</p>
+                            </div>
                           </div>
                         ))}
                       </div>
                     )}
 
-                    {ls.closing && (
-                      <div className="mt-5 pt-4 text-center" style={{ borderTop: `1px solid ${INK}10` }}>
-                        <p className="text-[13px] font-bold leading-relaxed" style={{ color: MAROON, fontFamily: SERIF }}>{ls.closing}</p>
-                      </div>
-                    )}
                   </section>
                 )}
               </>
             );
           })()}
 
-          <ChapterNav cur="6" go={next} />
+          <div style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div className="px-8 pt-10 pb-20 text-center">
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`"마지막으로,\n홍연이 ${name.slice(1) || name}님께\n직접 전하고 싶은 말이 있소."`}
+              </p>
+            </div>
+            <ChapterNav cur="6" go={next} />
+          </div>
         </>
       )}
 
@@ -5234,11 +5245,6 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <section className="px-6 pt-10 pb-8">
-              <div className="text-center mb-8">
-                <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
-                  <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
-                </div>
-              </div>
               {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
                 <P key={i}>{p}</P>
               ))}
