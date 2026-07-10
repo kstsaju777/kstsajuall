@@ -175,7 +175,7 @@ async function loadPartnerManseryeokFromStored(stored: any): Promise<string | nu
   const [y, m, d] = String(pb.date).split(".");
   const hasTime = pb.time && pb.time !== "시간 모름";
   const [hh, mm] = hasTime ? String(pb.time).split(":") : ["", ""];
-  const calendarType = pb.calendar === "양력" ? "양력" : pb.calendar === "윤달" ? "윤달" : "음력";
+  const calendarType = (pb.calendar === "양력" ? "양력" : pb.calendar === "윤달" ? "윤달" : "음력") as BirthInfo["calendarType"];
   const gender: "male" | "female" = stored?.partnerGender === "female" ? "female" : "male";
   const birthInfo: BirthInfo = {
     birthYear: y,
