@@ -3525,6 +3525,55 @@ function Heading({ children }: { children: React.ReactNode }) {
   );
 }
 
+const SINSAL_DESC: Record<string, string> = {
+  천을귀인: "하늘이 내린 귀인의 별이오. 어려운 고비마다 뜻밖의 조력자가 나타나 위기를 넘기게 해주는 기운이라오. 단순한 운이 좋다는 뜻이 아니오 — 진심으로 그대를 돕고자 하는 사람이 결정적인 순간에 곁에 나타난다는 의미이오. 인연복이 깊어 살면서 귀한 사람을 여럿 만나게 되며, 그 인연들이 그대의 인생을 한 단계씩 끌어올려 주는 역할을 하오.",
+  문곡귀인: "학문과 글재주를 관장하는 별이오. 언어와 글로 인생을 개척하는 능력이 뛰어나오. 문서·계약·시험 등에서 특히 빛을 발하며, 말 한마디로 사람의 마음을 움직이는 힘이 있소. 배움에 대한 열의도 남다르고, 지식을 쌓을수록 삶의 문이 넓게 열리는 구조의 사주라오. 글로 쓰거나 말로 전달하는 모든 일에서 뛰어난 성과를 낼 수 있소.",
+  금여록: "귀한 수레에 오른다는 뜻으로, 품격과 고귀함을 나타내는 기운이오. 외모에서 자연스러운 우아함과 기품이 풍기며, 처음 만나는 사람에게도 좋은 인상을 주오. 이성에게 호감을 얻는 힘이 있고, 배우자 인연도 좋은 편이라오. 외면의 아름다움뿐 아니라 내면의 품위도 함께 갖춘 기운이니, 스스로를 가꾸고 품위 있게 처신할수록 더 큰 복이 따르오.",
+  태극귀인: "사주 중에서도 드물게 만나는 귀한 기운이오. 인생의 큰 전환점마다 하늘의 도움이 따르고, 위기가 오히려 도약의 기회로 뒤바뀌는 신기한 운명을 타고났소. 스스로는 절망적이라 느끼는 순간에도 보이지 않는 손이 그대를 붙잡아 주오. 이 기운을 가진 사람은 포기하지 않는 것 자체가 곧 전략이오 — 버티는 자에게 하늘이 답을 내리오.",
+  현침살: "날카로운 침 같은 기운으로, 섬세함과 예리함이 특출한 기질이오. 남들이 그냥 지나치는 작은 것들을 포착하는 관찰력이 뛰어나오. 의술·침술·미용·요리 등 손끝의 정밀한 기술이 필요한 분야에서 탁월한 재능을 발휘하오. 이 기운은 때로 신경이 날카롭게 서는 것으로도 나타나니, 충분한 휴식과 혼자만의 시간을 챙기는 것이 중요하오.",
+  귀문관살: "보통 사람이 감지하지 못하는 것을 느끼는 신비로운 직관력을 타고났소. 감수성이 극도로 예민하여 분위기나 사람의 감정을 본능적으로 읽어내오. 이 기운은 양날의 검으로, 잘 다스리면 예술·심리·상담 분야에서 남다른 통찰을 발휘하오. 다만 쓸데없이 많은 것을 감지하다 보면 에너지 소모가 크니, 스스로를 보호하는 법도 함께 익혀야 하오.",
+  도화살: "복숭아꽃처럼 매력을 발산하는 기운이오. 타고난 미적 감각과 끼로 주변 사람들을 자연스럽게 끌어당기오. 의도하지 않아도 눈길을 받는 존재감이 있으며, 사람을 편안하게 만드는 분위기를 풍기오. 예술·방송·영업 등 대인관계가 핵심인 분야에서 두드러진 강점이 되며, 이 매력을 올바른 방향으로 활용하면 큰 성과를 거둘 수 있소.",
+  역마살: "끊임없이 움직이려는 활동적인 기운이오. 한 곳에 오래 머물면 답답함을 느끼고, 이동·출장·변화와 함께할 때 비로소 에너지가 살아나오. 해외나 타지와 인연이 깊으며, 새로운 환경에 빠르게 적응하는 능력도 뛰어나오. 여행·무역·영업 등 이동이 많은 직업에서 특히 빛을 발하며, 자유롭게 움직일 수 있는 환경이 주어질수록 성과가 커지오.",
+  장성살: "장수의 별로, 뚝심과 통솔력을 상징하오. 자신의 분야에서 책임자나 리더의 자리에 오르는 기운이 강하며, 한번 결심한 일은 어떤 어려움이 와도 끝까지 밀고 나가는 추진력이 있소. 권위와 원칙을 중시하며, 주변 사람들이 자연스럽게 그대를 의지하게 되오. 이 기운이 강할수록 조직이나 집단 안에서 중심적인 역할을 맡게 되오.",
+  화개살: "예술적 재능과 고독을 함께 품은 기운이오. 창작·음악·종교·철학 등 정신적 깊이가 필요한 분야에서 두각을 나타내오. 혼자만의 시간을 소중히 여기고, 고독 속에서 창조적인 에너지를 끌어내는 기질이 있소. 대중적인 삶보다 자신만의 세계를 깊이 파고드는 쪽에서 더 큰 성취감을 느끼며, 이 기운을 잘 살리면 독보적인 분야를 구축할 수 있소.",
+  홍염살: "이성을 끌어당기는 강한 매력의 기운이오. 풍류와 감성이 넘치며, 연애에 있어 깊고 강렬한 감정의 소용돌이를 경험하기 쉽소. 외모나 분위기에서 자연스럽게 이성의 시선을 받으며, 감각적인 매력이 뛰어나오. 예술·미용·패션 분야에서 빛을 발하며, 이 기운을 창작의 에너지로 승화하면 특출한 감각으로 두각을 나타낼 수 있소.",
+  망신살: "체면과 자존심에 흠이 생기기 쉬운 기운이오. 예상치 못한 상황에서 망신을 당하거나 비밀이 드러나는 경험을 하기도 하오. 그러나 이를 뒤집어보면 주목받는 기질, 즉 존재감이 강하다는 의미이기도 하오. 언행을 신중히 하고 사생활을 잘 관리하면, 이 기운이 오히려 대중의 관심과 인기로 전환될 수 있소.",
+  육해살: "인간관계에서 크고 작은 마찰이 생기기 쉬운 기운이오. 뜻하지 않은 오해, 배신, 갈등을 경험하기도 하며, 가까운 사람과의 관계에서 상처를 받기도 하오. 그러나 이런 경험들이 쌓이면서 세상 이치를 깊이 이해하는 통찰력이 길러지오. 인간관계에 너무 많은 에너지를 쏟기보다 신중하게 사람을 가리는 지혜가 필요하오.",
+  천덕귀인: "하늘의 덕을 받은 기운으로, 큰 재앙을 피해가고 주변의 도움이 끊이지 않는 길한 별이오. 관재구설이나 뜻하지 않은 사고가 닥쳐도 피해가거나 최소화되는 보호막 같은 기운이라오. 어려운 일이 생겨도 반드시 뜻밖의 구원이 따라오며, 선한 마음으로 살수록 이 기운이 더 강하게 발동하오. 덕을 쌓는 삶이 곧 이 기운을 극대화하는 비결이오.",
+  월덕귀인: "달의 덕기운으로, 매사가 원만하고 부드럽게 풀려나가는 기운이오. 삶 속에서 인덕이 두터워 곳곳에서 도움을 받게 되며, 특히 사람들과의 관계에서 마찰 없이 좋은 결과를 이끌어내는 힘이 있소. 강하게 밀어붙이지 않아도 자연스럽게 길이 열리는 편이라오. 이 기운은 조용하지만 꾸준히 삶을 지켜주는 든든한 뒷배와 같소.",
+};
+
+function SinsalTags({ items }: { items: string[] }) {
+  const [openSal, setOpenSal] = useState<string | null>(null);
+  return (
+    <div className="mx-1 mt-2 flex flex-col gap-2">
+      {items.map((sal) => {
+        const open = openSal === sal;
+        const desc = SINSAL_DESC[sal];
+        return (
+          <div key={sal} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}18`, background: "#fff" }}>
+            <div className="flex items-center justify-between px-4 py-3.5">
+              <span className="text-[15px] font-bold" style={{ color: INK }}>{sal}</span>
+              <button
+                onClick={() => setOpenSal(open ? null : sal)}
+                className="text-[12px] font-bold px-3 py-1 rounded-lg transition-all"
+                style={{ background: open ? INK : `${INK}12`, color: open ? CREAM : INK_SOFT }}
+              >
+                {open ? "접기" : "설명보기"}
+              </button>
+            </div>
+            {open && desc && (
+              <div className="px-4 pb-4 pt-1" style={{ borderTop: `1px solid ${INK}10` }}>
+                <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // 일간 오행 + 월지 계절 기반 애니메이션 삽화
 function WongukIllustration({ ilgan, wolji }: { ilgan: string; wolji: string }) {
   // 월지 → 계절
@@ -4063,7 +4112,7 @@ function ReportPreviewInner() {
 
           {/* 인사말 */}
           <section className="px-6 pt-10 pb-6">
-            <P>안녕하시오, <Term>{name.slice(1) || name}{effectiveGender === "female" ? "양" : "군"}</Term>.</P>
+            <P>안녕하시오.</P>
             <P>본격적으로 사주풀이에 들어가기 전에,<br />사주팔자가 무엇인지 먼저 짚고 넘어가겠소.</P>
           </section>
 
@@ -4423,7 +4472,6 @@ function ReportPreviewInner() {
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
               {`"자, 이제 ${name}${effectiveGender === "female" ? "양" : "군"}의\n서사가 담긴 책을 펼쳐보겠소?"`}
             </p>
-            <p className="mt-5 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>홍연(紅緣)</p>
           </div>
 
           {/* 다음 장 네비 */}
@@ -4432,144 +4480,421 @@ function ReportPreviewInner() {
       )}
 
 
-      {/* ═══════════ 제1장 — 기질과 성격 ═══════════ */}
+      {/* ═══════════ 제1장 — 환경 ═══════════ */}
       {ch === "1" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 기질</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>어떤 기질과 성격으로 태어났나</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 환경</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>"나는 어떤 그릇으로 태어났나"</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
-          <Quote>{`${honor}은\n어떤 기질을\n타고났을까요.\n\n사주에서 그 빛을\n찾아보겠소.`}</Quote>
 
-          {(() => {
-            const ps = (jc.personality as {
-              intro?: string; sinDesc?: string; ohaengDesc?: string; ilganDesc?: string;
-              keywords?: string[];
-              cards?: { icon: string; title: string; desc: string }[];
-              traits?: { label: string; score: number }[];
-              traitDesc?: string;
-            } | undefined) ?? {};
+          <Quote>{`${honor}의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${honor}의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${honor}의 사주팔자요.`}</Quote>
 
-            const ilganFull = report?.view?.ilgan ?? "";
-            const ilganHanja = ilganFull[0] ?? "";
-            const ilganLabel = ilganFull.match(/\(([^)]+)\)/)?.[1] ?? "";
-            const ILGAN_META: Record<string, { oh: string; color: string; child: string }> = {
-              甲: { oh: "목(木)", color: "#3a7d44", child: "큰 나무처럼 곧고 당당하게 자라는 기질이오. 주도적이고 독립심이 강하오." },
-              乙: { oh: "목(木)", color: "#3a7d44", child: "덩굴처럼 유연하게 환경에 적응하는 아이이오. 감수성이 풍부하고 눈치가 빠르오." },
-              丙: { oh: "화(火)", color: "#c0392b", child: "태양처럼 밝고 활기차게 빛나는 기질이오. 표현력이 강하고 활동적이오." },
-              丁: { oh: "화(火)", color: "#c0392b", child: "촛불처럼 따뜻하고 섬세한 아이이오. 감정이 깊고 배려심이 넘치오." },
-              戊: { oh: "토(土)", color: "#b07d2a", child: "산처럼 묵직하고 뚝심 있는 기질이오. 인내심이 강하고 책임감이 있소." },
-              己: { oh: "토(土)", color: "#b07d2a", child: "논밭처럼 꼼꼼하고 성실한 아이이오. 세심하고 정이 많소." },
-              庚: { oh: "금(金)", color: "#7a7a7a", child: "바위처럼 원칙이 분명하고 결단력 있는 기질이오. 정의감이 강하오." },
-              辛: { oh: "금(金)", color: "#7a7a7a", child: "보석처럼 예민하고 완벽을 추구하는 아이이오. 심미적 감각이 뛰어나오." },
-              壬: { oh: "수(水)", color: "#1a5fa8", child: "바다처럼 상상력이 풍부하고 자유로운 기질이오. 호기심이 왕성하고 창의적이오." },
-              癸: { oh: "수(水)", color: "#1a5fa8", child: "샘물처럼 직관이 예리하고 감성이 깊은 아이이오. 내면이 풍부하오." },
-            };
-            const meta = ILGAN_META[ilganHanja] ?? { oh: "", color: MAROON, child: "" };
+          {/* 명식표 */}
+          <MyeongsikTable
+            view={report?.view ?? null}
+            name={name}
+            birth={report?.birth ?? null}
+            header={
+              <div className="text-center">
+                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name.slice(1) || name}{effectiveGender === "female" ? "양" : "군"}의 사주팔자</p>
+                {report?.birth?.date && (
+                  <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                    {String(report.birth.date).replace(/^(\d{4})(\d{2})(\d{2})$/, "$1년 $2월 $3일")}{" "}
+                    {report.birth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                    {effectiveGender === "female" ? "여아" : "남아"}
+                  </p>
+                )}
+              </div>
+            }
+          />
 
-            const KW_COLORS = ["#4a7a9b", "#8a5c8a", "#5c8a5c"];
+          <Quote>{`풀이를 읽다 명식이 궁금할 때면\n상단 `}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", position: "relative", top: -2, pointerEvents: "none", userSelect: "none" }}>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "1px 0 3px rgba(0,0,0,0.4)" }} />
+              <span style={{ padding: "4px 8px", background: "linear-gradient(to bottom, #f9f0d8 0%, #edd9a3 40%, #e8d090 60%, #f0e0b0 100%)", borderTop: "1.5px solid #b8892a", borderBottom: "1.5px solid #b8892a", color: "#5a2e14", fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", lineHeight: 1, whiteSpace: "nowrap" }}>나의 명식</span>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "-1px 0 3px rgba(0,0,0,0.4)" }} />
+            </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
-            return (
-              <>
-                {/* ① 명식표 + 신강신약 */}
-                <section className="px-6 pt-2 pb-2">
-                  <Heading>아이의 사주 명식</Heading>
-                </section>
-                <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-                <div className="px-5">
-                  <SinStrengthGauge view={report?.view ?? null} />
+          {/* 원국 분석 */}
+          <section className="pt-6 pb-12">
+            <div className="px-6">
+              <Heading>나란 사람의 본질과 성향</Heading>
+              <P>{c.wonguk.intro}</P>
+            </div>
+            <p className="px-6 mb-3 text-[14px]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{name.slice(1) || name}님의 사주팔자로 한폭의 그림을 그려봤소.</p>
+            {report?.sajuImageUrl ? (
+              <div className="relative overflow-hidden w-full" style={{ aspectRatio: "4/3" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={report.sajuImageUrl} alt="사주 원국 이미지" className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 15%, transparent 80%, ${CREAM} 100%)` }} />
+              </div>
+            ) : (
+              <WongukIllustration
+                ilgan={report?.view?.pillars?.[1]?.gan ?? "甲"}
+                wolji={report?.view?.pillars?.[2]?.ji ?? "子"}
+              />
+            )}
+            <div className="px-6 pt-4">
+              {c.wonguk.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+            </div>
+          </section>
+
+          {/* 오행 분석 + 도넛 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>네 기둥이 품은 인생의 흐름</Heading>
+
+            {/* 네 기둥 인생시기 시각화 */}
+            {(() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: false, stage: "", age: "" },
+                { label: "일주", idx: 1, highlight: false, stage: "", age: "" },
+                { label: "월주", idx: 2, highlight: false, stage: "", age: "" },
+                { label: "년주", idx: 3, highlight: true, stage: "초년기", age: "0~20세" },
+              ];
+              return (
+                <div className="mb-6 mt-2">
+                  <div className="flex gap-4 justify-center">
+                    {cols.map((col) => {
+                      const p = ps[col.idx];
+                      const blurred = !col.highlight;
+                      return (
+                        <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                          <div
+                            style={{
+                              border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                              borderRadius: 12,
+                              background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                              padding: "8px 6px",
+                              filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                              opacity: blurred ? 0.45 : 1,
+                              transition: "all 0.2s",
+                              width: "100%",
+                            }}
+                          >
+                            <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                            {p ? (
+                              <>
+                                <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                              </>
+                            ) : (
+                              <div style={{ height: 120 }} />
+                            )}
+                          </div>
+                          {col.highlight && (
+                            <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                              </svg>
+                              <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                <p className="text-[14px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                {ps.sinDesc && (
-                  <section className="px-6 pt-4 pb-2"><P>{ps.sinDesc}</P></section>
-                )}
+              );
+            })()}
 
-                {/* ② 오행 도넛 */}
-                <section className="px-6 pt-6 pb-2">
-                  <Heading>오행 균형</Heading>
-                </section>
-                <OhaengDonut view={report?.view ?? null} />
-                {ps.ohaengDesc && (
-                  <section className="px-6 pt-4 pb-2"><P>{ps.ohaengDesc}</P></section>
-                )}
+            {c.chonyeongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
 
-                {/* ③ 일간 카드 */}
-                {ilganHanja && (
-                  <section className="px-6 pt-6 pb-2">
-                    <Heading>아이의 일간 — 타고난 기질의 재질</Heading>
-                    <div className="rounded-2xl p-5 flex gap-4 items-center mb-4" style={{ background: WHITE, border: `1.5px solid ${meta.color}30` }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={ganCharImage(ilganHanja)} alt={ilganLabel} style={{ width: 64, height: 64, objectFit: "contain", flexShrink: 0 }} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-[22px] font-black" style={{ color: meta.color, fontFamily: SERIF }}>{ilganHanja}</span>
-                          <span className="text-[13px] font-bold" style={{ color: INK }}>{ilganLabel}</span>
-                          <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${meta.color}18`, color: meta.color }}>{meta.oh}</span>
+            {(() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: false, stage: "", age: "" },
+                { label: "일주", idx: 1, highlight: false, stage: "", age: "" },
+                { label: "월주", idx: 2, highlight: true, stage: "청년기", age: "20~40세" },
+                { label: "년주", idx: 3, highlight: false, stage: "", age: "" },
+              ];
+              return (
+                <div className="mb-6 mt-6">
+                  <div className="flex gap-4 justify-center">
+                    {cols.map((col) => {
+                      const p = ps[col.idx];
+                      const blurred = !col.highlight;
+                      return (
+                        <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                          <div
+                            style={{
+                              border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                              borderRadius: 12,
+                              background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                              padding: "8px 6px",
+                              filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                              opacity: blurred ? 0.45 : 1,
+                              transition: "all 0.2s",
+                              width: "100%",
+                            }}
+                          >
+                            <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                            {p ? (
+                              <>
+                                <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                              </>
+                            ) : (
+                              <div style={{ height: 120 }} />
+                            )}
+                          </div>
+                          {col.highlight && (
+                            <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                              </svg>
+                              <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                <p className="text-[14px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{meta.child}</p>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {c.cheongneongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+
+            {(() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: false, stage: "", age: "" },
+                { label: "일주", idx: 1, highlight: true, stage: "중년기", age: "40~60세" },
+                { label: "월주", idx: 2, highlight: false, stage: "", age: "" },
+                { label: "년주", idx: 3, highlight: false, stage: "", age: "" },
+              ];
+              return (
+                <div className="mb-6 mt-6">
+                  <div className="flex gap-4 justify-center">
+                    {cols.map((col) => {
+                      const p = ps[col.idx];
+                      const blurred = !col.highlight;
+                      return (
+                        <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                          <div
+                            style={{
+                              border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                              borderRadius: 12,
+                              background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                              padding: "8px 6px",
+                              filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                              opacity: blurred ? 0.45 : 1,
+                              transition: "all 0.2s",
+                              width: "100%",
+                            }}
+                          >
+                            <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                            {p ? (
+                              <>
+                                <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                              </>
+                            ) : (
+                              <div style={{ height: 120 }} />
+                            )}
+                          </div>
+                          {col.highlight && (
+                            <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                              </svg>
+                              <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                <p className="text-[14px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {c.jungnyeongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+
+            {report?.birth?.time !== "시간 모름" && (() => {
+              const ps = report?.view?.pillars ?? [];
+              const cols = [
+                { label: "시주", idx: 0, highlight: true, stage: "말년기", age: "60세~" },
+                { label: "일주", idx: 1, highlight: false, stage: "", age: "" },
+                { label: "월주", idx: 2, highlight: false, stage: "", age: "" },
+                { label: "년주", idx: 3, highlight: false, stage: "", age: "" },
+              ];
+              return (
+                <>
+                  <div className="mb-6 mt-6">
+                    <div className="flex gap-4 justify-center">
+                      {cols.map((col) => {
+                        const p = ps[col.idx];
+                        const blurred = !col.highlight;
+                        return (
+                          <div key={col.label} className="flex flex-col items-center" style={{ width: 82 }}>
+                            <div
+                              style={{
+                                border: col.highlight ? `2px solid ${MAROON}` : "2px solid transparent",
+                                borderRadius: 12,
+                                background: col.highlight ? `${MAROON}0a` : "rgba(0,0,0,0.04)",
+                                padding: "8px 6px",
+                                filter: blurred ? "grayscale(1) blur(2.5px)" : "none",
+                                opacity: blurred ? 0.45 : 1,
+                                transition: "all 0.2s",
+                                width: "100%",
+                              }}
+                            >
+                              <p className="text-center text-[14px] font-bold mb-2" style={{ color: col.highlight ? MAROON : MUTE }}>{col.label}</p>
+                              {p ? (
+                                <>
+                                  <p className="text-center text-[13px] font-semibold mb-1" style={{ color: "#444" }}>{p.sipTop || "—"}</p>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: 54, height: 54, objectFit: "contain", display: "block", margin: "0 auto 4px" }} />
+                                  <p className="text-center text-[13px] font-semibold mt-1" style={{ color: "#444" }}>{p.sipBot || "—"}</p>
+                                </>
+                              ) : (
+                                <div style={{ height: 120 }} />
+                              )}
+                            </div>
+                            {col.highlight && (
+                              <div className="flex flex-col items-center mt-1" style={{ width: "100%" }}>
+                                <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                                  <line x1="8" y1="0" x2="8" y2="12" stroke={MAROON} strokeWidth="2" />
+                                  <polygon points="8,18 3,10 13,10" fill={MAROON} />
+                                </svg>
+                                <div className="mt-1 text-center" style={{ background: MAROON, borderRadius: 10, padding: "5px 12px", width: "100%" }}>
+                                  <p className="text-[14px] font-bold" style={{ color: "#fff" }}>{col.stage}</p>
+                                  <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.85)" }}>{col.age}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {c.nonyeongi?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+                </>
+              );
+            })()}
+
+          </section>
+
+          {/* 십성 분석 + 레이더 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>그대의 타고난 능력치</Heading>
+            {(report?.view?.pillars?.length ?? 0) > 0 && (
+              <AbilityRadar pillars={(report!.view.pillars as { sipTop: string; sipBot: string; ganEl: string; jiEl: string }[])} />
+            )}
+            {c.ability?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+
+          {/* 십이운성 분석 */}
+          <section className="px-6 pt-2 pb-4">
+            <Heading>그대에게 숨겨진 기운들</Heading>
+            {report?.view && (() => {
+              const SINSAL_EXCLUDE = new Set(["지살", "재살", "월살", "겁살", "천살", "공망"]);
+              const items = [...new Set(
+                applyLocalSinsal(report.view.pillars)
+                  .flatMap((p) => (p.sinsal ?? "").split(/[,\s·]+/).filter((s) => s && !SINSAL_EXCLUDE.has(s)))
+              )];
+              if (items.length === 0) return null;
+              const SIZES  = [34, 20, 28, 18, 32, 22, 26, 18, 30, 22, 24, 18, 28, 20, 28];
+              const COLORS = ["#39ff14","#ff6fff","#00f0ff","#ffe033","#ff4d4d","#b8ff57","#ff9500","#c77dff","#00ffb3","#ff2d78","#ffffff","#ffec3d","#44d9ff","#ff6b35","#a0ff6f"];
+              const ROTATES = [-2, 1.5, -1, 2.5, -1.5, 1, -2.5, 1.5, -1, 2, -1.5, 1, -2, 1.5, -1];
+              const ALIGNS = ["flex-start", "center", "flex-end", "center", "flex-start", "flex-end"];
+              const rows: string[][] = [];
+              let idx = 0;
+              const rowSizes = [2, 3, 2, 3, 2, 3];
+              for (const sz of rowSizes) {
+                if (idx >= items.length) break;
+                rows.push(items.slice(idx, idx + sz));
+                idx += sz;
+              }
+              if (idx < items.length) rows.push(items.slice(idx));
+              const DURS   = [3.2, 2.6, 3.8, 2.4, 3.5, 2.9, 4.1, 2.7, 3.3, 2.5, 3.9, 2.8, 3.6, 2.3, 4.0];
+              const DELAYS = [0, 0.6, 1.2, 0.3, 0.9, 1.5, 0.2, 0.8, 1.4, 0.5, 1.1, 0.4, 1.0, 0.7, 1.3];
+              const FLOATS = ["floatS0","floatS1","floatS2"];
+              return (
+                <>
+                  <style>{`
+                    @keyframes floatS0 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-4px)} }
+                    @keyframes floatS1 { 0%,100%{transform:translateY(-3px)} 50%{transform:translateY(3px)} }
+                    @keyframes floatS2 { 0%,100%{transform:translateY(2px)} 50%{transform:translateY(-4px)} }
+                  `}</style>
+                  <div className="my-4 mx-1 rounded-2xl" style={{ background: "#0f0f0f", aspectRatio: "16/9", display: "flex", flexDirection: "column", justifyContent: "space-evenly", padding: "20px 20px" }}>
+                    {rows.map((row, ri) => (
+                      <div key={ri} style={{ display: "flex", justifyContent: ALIGNS[ri % ALIGNS.length], alignItems: "center", gap: 14 }}>
+                        {row.map((sal) => {
+                          const i = items.indexOf(sal);
+                          const color = COLORS[i % COLORS.length];
+                          return (
+                            <span key={sal} style={{
+                              fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
+                              fontWeight: 900,
+                              fontSize: SIZES[i % SIZES.length],
+                              color,
+                              display: "inline-block",
+                              lineHeight: 1.1,
+                              letterSpacing: "-0.02em",
+                              whiteSpace: "nowrap",
+                              textShadow: `0 0 16px ${color}88`,
+                              animation: `${FLOATS[i % 3]} ${DURS[i % DURS.length]}s ease-in-out ${DELAYS[i % DELAYS.length]}s infinite`,
+                            }}>
+                              {sal}
+                            </span>
+                          );
+                        })}
                       </div>
-                    </div>
-                    {ps.ilganDesc && <P>{ps.ilganDesc}</P>}
-                  </section>
-                )}
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+            {report?.view && (() => {
+              const SINSAL_EXCLUDE = new Set(["지살", "재살", "월살", "겁살", "천살", "공망"]);
+              const items = [...new Set(
+                applyLocalSinsal(report.view.pillars)
+                  .flatMap((p) => (p.sinsal ?? "").split(/[,\s·]+/).filter((s) => s && !SINSAL_EXCLUDE.has(s)))
+              )].filter((s) => SINSAL_DESC[s]);
+              if (items.length === 0) return null;
+              return <SinsalTags items={items} />;
+            })()}
+          </section>
 
-                {/* ④ 기질 키워드 */}
-                {ps.keywords && ps.keywords.length > 0 && (
-                  <section className="px-6 pt-6 pb-2">
-                    <Heading>기질 키워드</Heading>
-                    <div className="flex gap-2 flex-wrap mt-2">
-                      {ps.keywords.map((kw, i) => (
-                        <span key={i} className="px-4 py-1.5 rounded-full text-[12px] font-bold text-white" style={{ background: KW_COLORS[i % KW_COLORS.length] }}>{kw}</span>
-                      ))}
-                    </div>
-                  </section>
-                )}
+          {/* 삽화 */}
+          <Illust src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" h={360} />
 
-                {/* ⑤ 기질 카드 3개 */}
-                {ps.cards && ps.cards.length > 0 && (
-                  <section className="px-6 pt-6 pb-2">
-                    <Heading>기질 풀이</Heading>
-                    <div className="space-y-3 mt-2">
-                      {ps.cards.map((card, i) => (
-                        <div key={i} className="rounded-2xl p-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{card.icon}</span>
-                            <span className="text-[13px] font-black" style={{ color: INK, fontFamily: SERIF }}>{card.title}</span>
-                          </div>
-                          <p className="text-[12.5px] leading-[1.8]" style={{ color: INK_SOFT }}>{card.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* ⑥ 성향 점수 바 */}
-                {ps.traits && ps.traits.length > 0 && (
-                  <section className="px-6 pt-6 pb-6">
-                    <Heading>성향 분석</Heading>
-                    <div className="space-y-3 mt-3">
-                      {ps.traits.map((t, i) => (
-                        <div key={i}>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-[12px] font-bold" style={{ color: INK }}>{t.label}</span>
-                            <span className="text-[12px] font-bold" style={{ color: MAROON }}>{t.score}</span>
-                          </div>
-                          <div className="rounded-full overflow-hidden" style={{ height: 8, background: `${INK}10` }}>
-                            <div className="h-full rounded-full" style={{ width: `${t.score}%`, background: `linear-gradient(to right, ${MAROON}99, ${MAROON})` }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {ps.traitDesc && <div className="mt-5"><P>{ps.traitDesc}</P></div>}
-                  </section>
-                )}
-              </>
-            );
-          })()}
+          {/* 마무리 인용 */}
+          <Quote>{`"${honor}의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소."`}</Quote>
 
           <ChapterNav cur="1" go={next} />
         </>

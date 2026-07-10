@@ -523,16 +523,17 @@ function StepLoading({ name, date, time, calendar, gender, email, concern, phone
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-  const [msg, setMsg] = useState("그대의 사주팔자를 세우고 있어요...");
-  const doneRef = useRef(false);
-  const suffix = gender === "남성" ? "군" : gender === "여성" ? "양" : "님";
+  const suffix = gender === "남아" ? "군" : gender === "여아" ? "양" : "님";
+  const childName = `${name.slice(1)}${suffix}`;
 
   const MSGS = [
-    "그대의 사주팔자를 세우고 있어요...",
-    "타고난 자녀 인연을 분석하고 있어요...",
-    "자녀운이 오는 시기를 살펴보고 있어요...",
-    "홍연이 자녀운 풀이를 정리하고 있어요...",
+    `${childName}의 사주팔자를 세우고 있어요...`,
+    "타고난 성격과 재능을 살펴보고 있어요...",
+    "아이의 인생 흐름을 분석하고 있어요...",
+    "홍연이 풀이를 정리하고 있어요...",
   ];
+  const [msg, setMsg] = useState(MSGS[0]);
+  const doneRef = useRef(false);
 
   useEffect(() => {
     let p = 0;
@@ -563,7 +564,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern, phone
           style={{ backgroundColor: "rgba(91,191,234,0.15)", border: "2px solid rgba(91,191,234,0.4)" }}>
           <span style={{ fontSize: 28 }}>👶</span>
         </div>
-        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name}{suffix}의 자녀사주</p>
+        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name.slice(1)}{suffix}의 사주</p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
           <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />
