@@ -4756,11 +4756,7 @@ function ReportPreviewInner() {
                     <div className="space-y-3 mt-2">
                       {ct.avoidTypes.map((t, i) => (
                         <div key={i} className="rounded-2xl p-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}25` }}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xl">{t.icon}</span>
-                            <span className="text-[12px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${WARN}18`, color: WARN }}>주의</span>
-                          </div>
-                          <p className="text-[13px] font-bold mb-1" style={{ color: INK }}>{t.typeDesc}</p>
+                          <p className="text-[14px] font-black mb-2 pb-2" style={{ color: WARN, borderBottom: `1px solid ${WARN}25`, fontFamily: SERIF }}>{t.typeDesc}</p>
                           <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
                         </div>
                       ))}
