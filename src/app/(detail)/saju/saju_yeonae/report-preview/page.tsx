@@ -4721,15 +4721,6 @@ function ReportPreviewInner() {
             )}
           </section>
 
-          {/* 나의 시기별 연애 흐름 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나의 시기별 연애 흐름</Heading>
-            <LoveLineChart view={report?.view ?? null} gender={effectiveGender} />
-            {(jc.loveFlow as { paragraphs?: string[] } | undefined)?.paragraphs?.[0] && (
-              <P>{(jc.loveFlow as { paragraphs: string[] }).paragraphs[0]}</P>
-            )}
-          </section>
-
           {/* 나와 찰떡궁합인 이성의 사주 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>나와 찰떡궁합인 이성의 사주</Heading>
