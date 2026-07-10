@@ -1505,19 +1505,6 @@ function CompatibleJujuCards({ items, myPillars, myBirthYear }: { items?: { juju
           </div>
         );
       })}
-      {avoidTti && (
-        <div style={{ background:"#fff8f0", border:"1.5px solid #e53935", borderRadius:10, overflow:"hidden" }}>
-          <div style={{ background:"#fde8d0", padding:"7px 14px", borderBottom:"1px solid #e5393555" }}>
-            <p style={{ fontSize:12, fontWeight:700, color:"#c62828", margin:0 }}>⚠️ 피해야 할 상대방 띠</p>
-          </div>
-          <div style={{ padding:"10px 14px", display:"flex", flexDirection:"column", gap:4 }}>
-            {avoidTti.split(",").map(t => t.trim()).map((t, ti) => {
-              const years = myBirthYear ? getTtiYearsNear(t, myBirthYear) : "";
-              return <span key={ti} style={{ fontSize:13, color:"#7a4020" }}>{TTI_EMOJI[t] ?? ""} <strong>{t}</strong>{years ? ` (${years})` : ""}</span>;
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -4751,7 +4738,7 @@ function ReportPreviewInner() {
                   </section>
                 )}
                 {ct.avoidTypes && ct.avoidTypes.length > 0 && (
-                  <section className="px-6 pt-4 pb-6">
+                  <section className="px-6 pt-4 pb-2">
                     <Heading>피해야 할 유형</Heading>
                     <div className="space-y-3 mt-2">
                       {ct.avoidTypes.map((t, i) => (
@@ -4763,6 +4750,34 @@ function ReportPreviewInner() {
                     </div>
                   </section>
                 )}
+                {(() => {
+                  const avoidTti = (jc.compatibleJuju as { avoidTti?: string }[] | undefined)?.[0]?.avoidTti?.trim() ?? "";
+                  const myBirthYear = report?.birth?.date ? parseInt(String(report.birth.date).slice(0,4)) : undefined;
+                  if (!avoidTti) return null;
+                  return (
+                    <section className="px-6 pt-4 pb-6">
+                      <div style={{ background:"#fff8f0", border:"1.5px solid #e53935", borderRadius:10, overflow:"hidden" }}>
+                        <div style={{ background:"#fde8d0", padding:"7px 14px", borderBottom:"1px solid #e5393555" }}>
+                          <p style={{ fontSize:12, fontWeight:700, color:"#c62828", margin:0 }}>⚠️ 피해야 할 상대방 띠</p>
+                        </div>
+                        <div style={{ padding:"10px 14px", display:"flex", flexDirection:"column", gap:4 }}>
+                          {avoidTti.split(",").map(t => t.trim()).map((t, ti) => {
+                            const TTI_EMOJI: Record<string,string> = { 쥐:"🐭",소:"🐮",호랑이:"🐯",토끼:"🐰",용:"🐲",뱀:"🐍",말:"🐴",양:"🐑",원숭이:"🐵",닭:"🐔",개:"🐶",돼지:"🐷" };
+                            const years = myBirthYear ? (() => {
+                              const TTI_JI: Record<string,number> = { 쥐:0,소:1,호랑이:2,토끼:3,용:4,뱀:5,말:6,양:7,원숭이:8,닭:9,개:10,돼지:11 };
+                              const idx = TTI_JI[t]; if (idx === undefined) return "";
+                              const base = 1900 + ((idx - (myBirthYear - 1900) % 12 + 12) % 12);
+                              const yrs: number[] = [];
+                              for (let y = base - 24; y <= myBirthYear + 24; y += 12) if (y >= myBirthYear - 15 && y <= myBirthYear + 15) yrs.push(y);
+                              return yrs.length ? `${Math.min(...yrs)}년생~${Math.max(...yrs)}년생` : "";
+                            })() : "";
+                            return <span key={ti} style={{ fontSize:13, color:"#7a4020" }}>{TTI_EMOJI[t] ?? ""} <strong>{t}</strong>{years ? ` (${years})` : ""}</span>;
+                          })}
+                        </div>
+                      </div>
+                    </section>
+                  );
+                })()}
               </>
             );
           })()}
