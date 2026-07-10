@@ -71,7 +71,9 @@ const YEONAE_CH_GUIDE: Record<number, string> = {
     ① 신강/신약의 핵심 성향과 장점 — 지배적 십성(비겁·식상 등)과 연결하여 자연 이미지로 서술. 사랑을 받아들이는 그릇의 크기와 연애 방식에 어떻게 발현되는지 포함. (2~3문장)
     ② 그 기운이 과할 때 그림자·단점을 자연 비유로 솔직하게 묘사. (2문장)
     ③ 주의점과 조언. (1~2문장)
-- ohaengDesc: 오행 균형의 특징과 연애에 미치는 영향. 3~4문장. (오행 도넛 아래 표시됨)
+- ohaengDesc: 오행 균형 풀이. 아래 구조로 출력.
+  - intro: 【필수】위 [오행 분포]에서 가장 높은 비율의 오행부터 순서대로 언급하며, 각 오행이 연애와 연결되는 의미(목=성장·포용, 화=표현·열정, 토=안정·헌신, 금=절제·결단, 수=직관·감수성)를 바탕으로 이 사람의 연애 흐름을 설명하오. 비율이 0%인 오행은 '이 기운이 부족하여 연애에서 ~한 면이 채워지지 않을 수 있소' 형식으로 언급하오.
+  - paragraphs: ["강한 오행들이 연애에서 어떻게 드러나는지 2~3문장", "부족한 오행으로 인한 연애 빈자리와 보완 방향 1~2문장"]
 - ilganDesc: 이 사람의 일간({일간한자} {일간명})을 자연물 하나에 빗대어 연애 기질을 풀이하오. 아래 구조를 반드시 따르오.
   ① 첫 문장: "{이름(성씨 제외)}님의 일간인 {일간명}은 [자연물 은유]이오." 로 시작. (예: 이름이 '김선우'이면 '선우님'으로 표기)
   ② 그 자연물의 고유한 움직임·성질을 구체적으로 전개하여 이 일간의 기질을 생생하게 묘사. (2문장 — 각 문장을 충분히 펼쳐 쓰오.)
@@ -218,7 +220,7 @@ const YEONAE_CH_SCHEMA: Record<number, string> = {
   "wonguk": {
     "intro": "~한 사주로, 한 줄 요약 (1문장)",
     "sinStrength": { "intro": "【필수】위 [sinStrength.intro 첫 문장]을 그대로 복사 후 일간·십성 기반 자연 이미지 서술", "paragraphs": ["신강/신약 핵심 성향·장점 (자연 이미지, 연애 그릇과 연결, 2~3문장)", "기운이 과할 때 그림자·단점 (자연 비유, 2문장)", "주의점과 조언 (1~2문장)"] },
-    "ohaengDesc": "오행 균형과 연애의 관계 3~4문장",
+    "ohaengDesc": { "intro": "목이 38%로 가장 높고, 화가 25%, 토와 금, 수가 각각 13%로 연애 흐름을 설명하겠소. 강한 목의 기운은 선우님의 연애에서 포용과 성장으로 나타나, 상대방을 품어주고 함께 발전하려는 성향이 도움이 되오. 화의 기운은 표현과 열정으로 이어져 감정을 솔직하게 전달하고 분위기를 밝히는 데 힘이 되고 있소. 연애의 흐름이 따뜻하고 활발하게 이어질 수 있는 구조를 가지고 있소. 다만 금과 수의 기운이 부족하여 절제와 직관의 면에서 아쉬움이 남을 수 있으니, 이 기운이 부족하여 연애에서 결단과 감수성의 면이 채워지지 않을 수 있소.", "paragraphs": ["강한 오행들이 연애에서 어떻게 드러나는지 2~3문장", "부족한 오행으로 인한 연애 빈자리와 보완 방향 1~2문장"] },
     "ilganDesc": "선우님의 일간인 을목은 담장을 타는 덩굴과 같소. 이 덩굴은 환경에 유연하게 적응하며 주변의 도움을 받아 성장하는 성향을 가지고 있소. 사랑의 흐름은 주로 인연과 소개를 통해 이루어지며, 사람들과의 관계를 통해 감정을 쌓아가는 구조가 나타나고 있소. 한 번 마음이 닿으면 부드럽게 스며들듯 상대에게 깊이 들어가며, 배려와 공감으로 관계를 가꾸어 나가오. 다만 을목의 유연함은 때로 결단력이 부족해져, 감정을 전달해야 하는 결정적 순간에 망설이게 되는 상황으로 이어질 수 있소. 이러한 약점은 소중한 인연을 흘려보내는 결과를 초래할 수 있으니, 보다 솔직하게 감정을 표현하는 연습이 필요하오."
   },
   "geokguk": {
@@ -412,6 +414,19 @@ export function buildYeonaeSajuChapterPrompt(
     }
   }
 
+  // ch1 전용: 오행 분포 계산 → 프롬프트 주입
+  let ohaengTable = "";
+  if (chapter === 1 && input.pillars && input.pillars.length >= 4) {
+    const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+    for (const p of input.pillars) {
+      if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
+      if (p.jiEl  && cnt[p.jiEl]  !== undefined) cnt[p.jiEl]++;
+    }
+    const total = Object.values(cnt).reduce((a, b) => a + b, 0) || 1;
+    const sorted = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
+    ohaengTable = `\n[오행 분포 — ohaengDesc 풀이에서 반드시 이 수치를 기반으로 서술]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n`;
+  }
+
   // ch4 전용: LoveLineChart와 동일한 로직으로 연도별 연애운 점수 계산 → 프롬프트 주입
   let loveScoreBlock = "";
   if (chapter === 4 && input.seun && input.seun.length > 0) {
@@ -483,7 +498,7 @@ export function buildYeonaeSajuChapterPrompt(
 
   const user = `아래는 ${honor}의 사주 명식입니다.
 
-${deungTable}${loveScoreBlock}${input.manseryeokText}
+${deungTable}${ohaengTable}${loveScoreBlock}${input.manseryeokText}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
