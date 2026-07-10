@@ -4082,7 +4082,7 @@ function ReportPreviewInner() {
 
           {/* 인사말 */}
           <section className="px-6 pt-10 pb-6">
-            <P>안녕하시오, <Term>{name.slice(1)}{effectiveGender === "female" ? "양" : "군"}</Term>.</P>
+            <P>안녕하시오, <Term>{name.slice(1)}님</Term>.</P>
             <P>본격적으로 사주풀이에 들어가기 전에,<br />사주팔자가 무엇인지 먼저 짚고 넘어가겠소.</P>
           </section>
 
