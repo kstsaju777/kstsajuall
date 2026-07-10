@@ -104,7 +104,7 @@ function buildSeunTableG(myIlgan: string, ptIlgan: string, myLabel: string, ptLa
 // 한 장 생성 (JSON 모드 + 출력 검증 + 3회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: {
   name: string; gender: "male" | "female"; manseryeokText: string;
-  partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
+  partnerName: string; concern?: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
   ilgan?: string;
   partnerIlgan?: string;
