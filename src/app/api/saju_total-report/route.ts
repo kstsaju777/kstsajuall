@@ -261,7 +261,7 @@ async function createReport(body: unknown) {
 
         const { data: result, error: resultErr } = await service
           .from("saju_results")
-          .insert({ order_id: order.id, myeongsik: { view, name, birth, manseryeokText, gender: g, concern: concern || "" } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
+          .insert({ order_id: order.id, myeongsik: { view, "{이름1}": name, birth, "{명식표1}": manseryeokText, "{고민}": concern || "", gender: g } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
           .select("id").single();
         if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패" }, { status: 500 });
 
@@ -305,9 +305,9 @@ async function generateChapter(body: unknown) {
     return NextResponse.json({ sections });
   }
 
-  let manseryeokText: string | undefined = stored?.manseryeokText;
+  if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
+  let manseryeokText: string | undefined = stored?.["{명식표1}"] || stored?.manseryeokText;
   if (!manseryeokText) {
-    if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
     manseryeokText = (await loadManseryeokFromInputs(service, id)) ?? undefined; // 옛 결과 복원
   }
   if (!manseryeokText) return NextResponse.json({ error: "명식 정보를 찾을 수 없습니다." }, { status: 500 });
@@ -350,12 +350,12 @@ async function generateChapter(body: unknown) {
     }
 
     const { obj } = await genChapterContent(chapter, {
-      name: stored?.name ?? "",
+      name: stored?.["{이름1}"] || stored?.name || "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
       pillars: applyLocalSinsal(pillars),
       birthYear: birthYear || undefined,
-      concern: stored?.concern || undefined,
+      concern: stored?.["{고민}"] || stored?.concern || undefined,
       yongsinEl,
       heusinEl,
       gisinEl,
@@ -390,7 +390,7 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, content });
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.["{이름1}"] || stored?.name || "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, content });
 }
 
 // ── 이미지 재생성 ──

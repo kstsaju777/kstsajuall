@@ -28,14 +28,14 @@ function buildKunghapPillarTable(ilgan: string, pillars: PillarItem[], personLab
 export const GYEOLHON_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   1:  ["myWonguk", "myNature", "myMarriagePattern"],
   2:  ["partnerWonguk", "partnerNature", "partnerMarriagePattern"],
-  3:  ["marriageScore", "marriageReason"],
-  4:  ["coupleStyle", "roleBalance", "dailyLife"],
-  5:  ["strengths", "weaknesses", "balanceTip"],
-  6:  ["hapList", "chungList", "overallScore"],
-  7:  ["wealthFlow", "homeLife", "wealthTips"],
-  8:  ["childCompatibility", "childTiming", "childStyle"],
-  9:  ["crisisPoints", "overcomeTips", "crisisFlow", "recoveryGuide"],
-  10: ["bestTiming", "timingItems", "timingChecks", "timingAdvice"],
+  3:  ["hapList", "chungList", "overallScore"],
+  4:  ["marriageScore", "marriageReason"],
+  5:  ["bestTiming", "timingItems", "timingChecks", "timingAdvice"],
+  6:  ["coupleStyle", "roleBalance", "dailyLife"],
+  7:  ["strengths", "weaknesses", "balanceTip"],
+  8:  ["wealthFlow", "homeLife", "wealthTips"],
+  9:  ["childCompatibility", "childTiming", "childStyle"],
+  10: ["crisisPoints", "overcomeTips", "crisisFlow", "recoveryGuide"],
   11: ["futureVision", "futureFlow", "longTermOutlook", "oldAgeRelation", "finalAdvice"],
   12: ["letter"],
 };
@@ -67,56 +67,65 @@ export function isGyeolhonKunghapChapterReady(
 const CH_THEME: Record<number, string> = {
   1:  "[제1장 나의원국] 나의 사주 원국 — 나는 어떤 사람인가. 일간 오행, 오행 균형, 타고난 기질, 결혼 패턴",
   2:  "[제2장 상대원국] 상대의 사주 원국 — 그/그녀는 어떤 사람인가. 상대의 일간 오행, 기질, 결혼 패턴",
-  3:  "[제3장 결혼가능성] 두 사람, 결혼할 수 있는 인연인가 — 사주로 본 결혼 가능성 점수(0~100)와 그 근거",
-  4:  "[제4장 부부상] 결혼하면 어떤 부부가 될까 — 두 사람이 부부가 되었을 때의 모습, 역할 균형, 일상생활",
-  5:  "[제5장 장단점] 이 결혼의 장점과 단점 — 결혼했을 때의 강점과 약점, 균형 잡는 법",
-  6:  "[제6장 합충] 궁합의 핵심: 합과 충 — 두 사람 사주의 합·충 목록, 강도, 종합 궁합 점수(0~100)",
-  7:  "[제7장 재물·가정] 결혼 후 재물운과 가정운 — 결혼 후 재물과 가정의 흐름",
-  8:  "[제8장 자녀운] 자녀운 — 아이가 들어오는 인연인가. 자녀 궁합 점수(0~100), 자녀 시기, 자녀 특성",
-  9:  "[제9장 위기극복] 이 결혼의 위기와 극복 — 결혼 생활에서 올 수 있는 위기 요소, 극복법, 시기별 흐름",
-  10: "[제10장 시기] 결혼하기 좋은 시기는 언제인가 — 결혼 최적 시기와 조건",
+  3:  "[제3장 합충] 궁합의 핵심: 합과 충 — 두 사람 사주의 합·충 목록, 강도, 종합 궁합 점수(0~100)",
+  4:  "[제4장 결혼가능성] 두 사람, 결혼할 수 있는 인연인가 — 사주로 본 결혼 가능성 점수(0~100)와 그 근거",
+  5:  "[제5장 시기] 결혼하기 좋은 시기는 언제인가 — 결혼 최적 시기와 조건",
+  6:  "[제6장 부부상] 결혼하면 어떤 부부가 될까 — 두 사람이 부부가 되었을 때의 모습, 역할 균형, 일상생활",
+  7:  "[제7장 장단점] 이 결혼의 장점과 단점 — 결혼했을 때의 강점과 약점, 균형 잡는 법",
+  8:  "[제8장 재물·가정] 결혼 후 재물운과 가정운 — 결혼 후 재물과 가정의 흐름",
+  9:  "[제9장 자녀운] 자녀운 — 아이가 들어오는 인연인가. 자녀 궁합 점수(0~100), 자녀 시기, 자녀 특성",
+  10: "[제10장 위기극복] 이 결혼의 위기와 극복 — 결혼 생활에서 올 수 있는 위기 요소, 극복법, 시기별 흐름",
   11: "[제11장 미래] 두 사람의 미래는 어디로 흐르는가 — 장기적인 관계 흐름과 노년의 모습",
   12: "[마무리] 홍연의 서신 — 두 사람의 결혼 인연에 대한 따뜻한 손편지",
 };
 
 // ── 장별 추가 지시 ──
 const CH_GUIDE: Record<number, string> = {
-  1: `[myWonguk 섹션 — 나의 원국]
-⚠️ 반드시 위 【본인】 만세력 텍스트에서 다음 항목을 직접 읽어 풀이에 반영하시오:
-  - 일간(日干): 사주팔자는 년주·월주·일주·시주 순서로 나열되오. 반드시 세 번째 기둥(일주)의 천간이 일간이오. 년주·월주·시주의 천간과 혼동하지 마시오.
-  - 오행 분포: 8글자(천간 4자 + 지지 4자) 전체에서 각 글자의 오행을 아래 기준으로 변환한 뒤, 목·화·토·금·수 각각의 정확한 개수를 세시오.
-    천간: 甲乙=목, 丙丁=화, 戊己=토, 庚辛=금, 壬癸=수
-    지지: 寅卯=목, 巳午=화, 辰戌丑未=토, 申酉=금, 亥子=수
-    반드시 8글자를 하나씩 확인하여 집계하시오. 틀린 개수를 풀이에 쓰는 것은 절대 금지.
+  1: `아래는 {이름1}님의 사주 명식 데이터({명식표1})를 바탕으로 세 개 섹션을 작성하는 지시사항이오.
+
+⚠️ 데이터 사용 원칙:
+- 위 {명식표1}에 포함된 서버 확정값(일간, 오행 분포)을 그대로 사용하시오.
+- 직접 세거나 재계산하는 것은 절대 금지. 확정값과 다른 숫자를 쓰는 것은 절대 금지.
+- 신강·신약: 일간을 생조하는 글자(비겁+인성)가 4개 이상이면 신강, 미만이면 신약.
+
+━━━ [myWonguk] {이름1}님의 원국 ━━━
+{이름1}님의 타고난 사주 기운을 깊이 풀이하시오.
+
+- intro: {이름1}님의 일간 오행을 명시하며 "~한 사주로" 형식 한 문장 요약.
+- callout: 오행 분포 확정값과 신강·신약 판단 근거를 담은 핵심 한 문장.
+- singang: "신강" 또는 "신약"
+- dominantEl: 확정값에서 가장 많은 오행 한 글자 (목/화/토/금/수 중 하나)
+- paragraphs 3개 (각 6~8문장, 260자+, 홍연 말투):
+  ① {이름1}님의 일간 오행(반드시 실제 글자 명시)이 인생에 새긴 기운 — 근본 성질과 삶을 대하는 방식을 깊고 풍부하게.
+  ② 오행 분포 확정값 숫자를 근거로 강한 기운·부족한 기운이 성격과 관계 방식에 드러나는 방식.
+  ③ 신강·신약 판단 근거(비겁·인성 개수 등 확정 데이터)와 결혼·가정에서 드러나는 본바탕 — 감정 처리, 의존성, 자기 표현 방식까지.
+
+━━━ [myNature] {이름1}님의 기질 ━━━
+- keywords: {이름1}님을 대표하는 기질 키워드 4~5개 (예: "추진력", "감수성", "독립심", "직관력").
+- strengthDesc: 이 기질의 강점을 3~5문장으로 서술. 결혼·가정에서 어떤 면모로 작용하는지 구체적으로.
+- shadowDesc: 이 기질의 그림자를 3~5문장으로. 배우자 입장에서 어떻게 느껴질 수 있는지까지.
+
+━━━ [myMarriagePattern] {이름1}님의 결혼 패턴 ━━━
+- intro: {이름1}님의 결혼 패턴 핵심 한 줄 (매력적이고 인상적인 문장으로).
+- patternType: 결혼 유형명 (예: "헌신형 배우자", "독립형 동반자", "주도형 가장", "감성 수호자형").
+- patternIcon: 유형에 맞는 이모지 1개.
+- paragraphs 3개 (홍연 말투):
+  ① 감정 표현 방식과 결혼·가정에서의 사랑 스타일 — {이름1}님이 부부 관계에서 보여주는 행동 패턴을 구체적으로 (6~8문장, 250자+).
+  ② 결혼 생활에서 반복되는 패턴과 배우자에게 기대하는 것 (6~8문장, 250자+).
+  ③ 결혼에서 주의해야 할 점과 이 패턴을 인식했을 때 달라지는 것 (5~7문장, 220자+).`,
+
+  2: `[partnerWonguk 섹션 — 상대 원국 풀이]
+⚠️ 위 【상대방】 데이터 블록에 서버가 사전 계산한 확정값이 제공되오. 반드시 그 값을 그대로 사용하시오. 직접 세거나 재계산하는 것은 절대 금지.
+  - 일간(日干): 데이터 블록의 "상대방 일간(日干) 확정값"을 그대로 사용하시오.
+  - 오행 분포: 데이터 블록의 "상대방 오행 분포 확정값"의 숫자를 그대로 사용하시오. 직접 세지 마시오.
   - 신강·신약: 일간을 생조하는 글자(비겁+인성)가 4개 이상이면 신강, 그 미만이면 신약으로 판단하시오.
   - 이 구체적 데이터를 근거로 intro·callout·singang·dominantEl·paragraphs를 작성하시오. 데이터와 다른 해석 금지.
 
-- intro: 위에서 읽은 일간 오행을 명시하며 "~한 사주로" 형식 한 문장 요약.
+- intro: 위에서 읽은 상대의 일간 오행을 명시하며 "~한 사주로" 형식 한 문장 요약.
 - callout: 실제 오행 분포와 신강·신약 판단 근거를 담은 핵심 한 문장.
 - singang: "신강" 또는 "신약" (만세력 데이터 기반 판단)
 - dominantEl: 8글자에서 가장 많은 오행 한 글자 (예: "목", "화", "토", "금", "수")
-- paragraphs 3개: ①위에서 확인한 일간 오행(반드시 실제 일간 글자 언급)이 인생 전반에 새긴 기운과 타고난 에너지의 결 — 이 사람의 근본 성질과 삶을 대하는 방식을 깊고 풍부하게(6~8문장, 260자+) ②실제 오행 분포 숫자를 근거로 강한 기운·부족한 기운이 성격과 관계 방식에 어떻게 드러나는지(6~8문장, 260자+) ③신강·신약 판단 근거(비겁·인성 개수 등 실제 데이터)와 결혼·가정에서 고스란히 드러나는 본바탕 — 감정 처리 방식, 의존성, 자기 표현 방식까지(6~8문장, 260자+). 홍연 말투(~이오/~하오/~겠소) 사용.
-
-[myNature 섹션 — 나의 기질]
-- keywords: 본인을 대표하는 기질 키워드 4~5개 (예: "추진력", "감수성", "독립심", "직관력").
-- strengthDesc: 이 기질의 강점을 3~5문장으로 풍부하게 서술. 어떤 상황에서 빛나는지, 결혼·가정에서 어떤 면모로 작용하는지 구체적으로.
-- shadowDesc: 이 기질의 그림자(주의점)를 3~5문장으로. 어떤 상황에서 어려움이 생기는지, 배우자 입장에서 어떻게 느껴질 수 있는지까지.
-
-[myMarriagePattern 섹션 — 나의 결혼 패턴]
-- intro: 결혼할 때 나타나는 핵심 패턴 한 줄 (매력적이고 인상적인 문장으로).
-- patternType: 결혼 유형명 (예: "헌신형 배우자", "독립형 동반자", "주도형 가장", "감성 수호자형").
-- patternIcon: 유형에 맞는 이모지 1개.
-- paragraphs 3개: ①감정 표현 방식과 결혼·가정에서의 사랑 스타일 — 이 사람이 부부 관계에서 보여주는 행동 패턴을 구체적으로(6~8문장, 250자+) ②결혼 생활에서 반복되는 패턴과 배우자에게 기대하는 것(6~8문장, 250자+) ③결혼에서 주의해야 할 점과 이 패턴을 인식했을 때 달라지는 것(5~7문장, 220자+). 홍연 말투 사용.`,
-
-  2: `[partnerWonguk 섹션 — 상대 원국 풀이]
-- intro: 상대의 일간 오행을 중심으로 "~한 사주로" 형식 한 문장 요약.
-- callout: 상대의 신강·신약, 오행 균형의 핵심을 담은 인상적인 한 문장. 굵고 짧게.
-- paragraphs 5개: 각 단락 최소 5~7문장, 220자 이상.
-  ①상대의 일간 오행 본질과 타고난 기운 — 상대의 일간이 어떤 오행인지, 그것이 가진 에너지와 삶에 나타나는 방식.
-  ②상대의 오행 균형과 성격적 특징 — 오행 분포를 보며 어떤 기운이 강하고 부족한지, 그로 인한 성격의 결.
-  ③상대의 신강·신약과 삶의 방식 — 신강·신약 판단, 그것이 삶과 관계를 대하는 태도에 미치는 영향.
-  ④상대가 결혼과 가정에서 보이는 본바탕 — 이 사주 구조가 부부 관계, 가정생활에서 드러내는 본연의 태도.
-  ⑤이 사주를 가진 상대에 대한 홍연의 통찰 — 단순 분석을 넘어 이 사주 구조가 상대의 삶과 결혼에 주는 의미.
+- paragraphs 3개: ①위에서 확인한 상대의 일간 오행(반드시 실제 일간 글자 언급)이 인생 전반에 새긴 기운과 타고난 에너지의 결 — 이 사람의 근본 성질과 삶을 대하는 방식을 깊고 풍부하게(6~8문장, 260자+) ②실제 오행 분포 숫자를 근거로 강한 기운·부족한 기운이 성격과 관계 방식에 어떻게 드러나는지(6~8문장, 260자+) ③신강·신약 판단 근거(비겁·인성 개수 등 실제 데이터)와 결혼·가정에서 고스란히 드러나는 본바탕 — 감정 처리 방식, 의존성, 자기 표현 방식까지(6~8문장, 260자+). 홍연 말투(~이오/~하오/~겠소) 사용.
 
 [partnerNature 섹션 — 상대방의 기질]
 - keywords: 상대를 대표하는 기질 키워드 4~5개. (예: "섬세한", "의지 강한", "따뜻한", "현실적인")
@@ -133,7 +142,7 @@ const CH_GUIDE: Record<number, string> = {
   ②결혼 생활에서 반복될 수 있는 패턴 — 장기적으로 반복되는 행동·반응 패턴, 그것이 배우자에게 어떻게 보이는가.
   ③이 패턴을 가진 상대와 행복한 결혼을 만드는 법 — 본인이 상대를 어떻게 이해하고 맞춰가면 좋은지의 방향.`,
 
-  3: `[marriageScore 섹션 — 결혼 가능성 점수]
+  4: `[marriageScore 섹션 — 결혼 가능성 점수]
 - score: 0~100 사이 정수. 오행 상생·상극, 천간·지지 합충, 일지 관계, 용신 보완 여부를 종합한 결혼 궁합 점수.
 - label: 점수에 어울리는 한 줄 라벨. (예: "하늘이 맺어준 결혼 인연이오", "두 사람, 함께라면 빛날 수 있소", "노력으로 만들어가는 인연이오")
 - basis: 이 점수의 핵심 근거를 담은 한 문장. 사주 구조의 어떤 요소가 점수를 결정했는지 명시.
@@ -158,7 +167,7 @@ const CH_GUIDE: Record<number, string> = {
   ②결혼 후 두 사람이 함께 빛날 수 있는 조건.
   ③홍연이 이 두 사람에게 전하는 진심 어린 한마디.`,
 
-  4: `[coupleStyle 섹션 — 부부 유형과 스타일]
+  6: `[coupleStyle 섹션 — 부부 유형과 스타일]
 - coupleType: 이 부부의 유형을 한 단어~짧은 구로 표현. (예: "든든한 동반자 부부", "자유로운 영혼의 부부", "불꽃 같은 열정 부부", "조용한 신뢰의 부부")
 - coupleIcon: 이 부부 유형을 상징하는 이모지 하나.
 - callout: 이 부부 유형의 핵심 특징을 담은 인상적인 한 문장.
@@ -189,7 +198,7 @@ const CH_GUIDE: Record<number, string> = {
   ①결혼 일상의 전체적인 흐름과 분위기 — scenes를 관통하는 공통된 패턴과 이 부부의 일상 색깔.
   ②행복한 결혼 생활을 유지하는 핵심 비결 — 이 두 사람이 오래 행복하려면 무엇을 지켜야 하는가.`,
 
-  5: `[strengths 섹션 — 이 결혼의 강점]
+  7: `[strengths 섹션 — 이 결혼의 강점]
 - items 3~4개: 두 사주가 만나 만들어내는 결혼의 빛나는 강점.
 각 item:
   title: 강점 제목 (8자 이내, 핵심을 담은 명사구)
@@ -215,7 +224,7 @@ const CH_GUIDE: Record<number, string> = {
   ②두 사람이 함께 성장하는 결혼을 만드는 법 — 약점을 숨기지 않고 강점으로 전환하는 구체적 방향.
   ③홍연이 이 두 사람에게 전하는 격려와 조언 — 장단점을 모두 안 뒤 홍연이 진심으로 전하는 한마디.`,
 
-  6: `[hapList 섹션 — 합(合) 목록]
+  3: `[hapList 섹션 — 합(合) 목록]
 - items 2~4개: 두 사람 사주에서 발견되는 합. 실제 사주 글자를 확인하여 있는 합만 기재할 것.
 각 item:
   type: 합의 종류와 해당 글자. (예: "갑기합(甲己合)", "자축합(子丑合)", "인오술삼합(寅午戌三合)")
@@ -243,7 +252,7 @@ const CH_GUIDE: Record<number, string> = {
   ②합은 어떻게 결혼의 힘이 되고, 충은 어떻게 성장의 씨앗이 되는가.
   ③합·충을 알고 이 결혼을 더 단단하게 만드는 법 — 홍연의 실천적 조언.`,
 
-  7: `[wealthFlow 섹션 — 결혼 후 재물운]
+  8: `[wealthFlow 섹션 — 결혼 후 재물운]
 - wealthType: 이 부부의 재물 유형을 한 단어~짧은 구로. (예: "함께 쌓아가는 부부", "한 명이 이끄는 재정", "파도타기형 재물 부부")
 - wealthIcon: 이 재물 유형을 상징하는 이모지.
 - score: 0~100 사이 정수. 결혼 후 두 사람의 합산 재물운 지수.
@@ -274,7 +283,7 @@ const CH_GUIDE: Record<number, string> = {
 - tips 4~5개: 바로 써먹을 수 있는 구체적 실천 조언.
   각 item: icon(이모지) + title(조언 제목, 5자 이내) + desc(설명 2~3문장, 재물·가정 어느 쪽에 해당하는지 명시)`,
 
-  8: `[childCompatibility 섹션 — 자녀 인연 점수]
+  9: `[childCompatibility 섹션 — 자녀 인연 점수]
 - score: 0~100 사이 정수. 자녀궁(子女宮)·식상(食傷)의 강약, 자녀 신살(홍염·천을귀인 등) 유무를 종합.
 - label: 점수에 맞는 한 줄 라벨 (예: "자녀 복이 풍성한 인연이오", "자녀와 인연이 보통인 부부이오", "자녀보다 부부 중심의 인연이오").
 - basis: 점수의 핵심 사주 근거를 한 문장으로 요약. (예: "남명의 식신이 왕성하고 여명의 자녀궁이 길하여 자녀 복이 두텁소.")
@@ -312,7 +321,7 @@ const CH_GUIDE: Record<number, string> = {
   ②자녀와 부모 사이의 오행 상생 흐름 — 어떤 면에서 잘 통하고, 어떤 면에서 보완이 필요한지.
   ③이 부부가 자녀에게 물려줄 가장 큰 기운과, 함께 성장하는 부모·자녀 관계의 전망.`,
 
-  9: `[crisisPoints 섹션 — 위기 유형 도입 + 위기 요인]
+  10: `[crisisPoints 섹션 — 위기 유형 도입 + 위기 요인]
 - crisisType: 이 부부의 위기 유형 한 줄 (예: "감정 표현 방식 충돌형", "자존심 부딪힘형", "가치관 간극형").
 - crisisIcon: 위기 유형을 나타내는 이모지.
 - callout: 이 부부의 위기 성격 핵심 한 문장 (오행·일주 근거 포함).
@@ -353,7 +362,7 @@ const CH_GUIDE: Record<number, string> = {
   ②이 부부에게 위기란 무엇인가 — 파국이 아닌 단단해짐의 과정으로 재해석.
   ③결혼 생활 전반에 걸쳐 두 사람이 함께 붙들어야 할 태도와 지향점.`,
 
-  10: `[bestTiming 섹션 — 최적 결혼 시기 배너]
+  5: `[bestTiming 섹션 — 최적 결혼 시기 배너]
 - bestYear: 최적 결혼 시기 (예: "2026년 하반기 ~ 2027년 상반기", "2027년 乙巳年 가을").
 - bestIcon: 시기 분위기 이모지 (예: 💍, 🌸, ✨).
 - bestGrade: 시기 등급 뱃지 한 마디 (예: "대길 혼인 시기", "최상의 결혼 창").
@@ -488,11 +497,7 @@ const CH_SCHEMA: Record<number, string> = {
   "myMarriagePattern": { "intro": "결혼 패턴 핵심 한 줄", "patternType": "유형명", "patternIcon": "💑", "paragraphs": ["단락1(6~8문장 250자+)", "단락2(6~8문장 250자+)", "단락3(5~7문장 220자+)"] }
 }`,
   2: `{
-  "partnerWonguk": {
-    "intro": "상대 일간 오행 한 문장 요약",
-    "callout": "신강·신약·오행 균형 핵심 한 문장",
-    "paragraphs": ["단락1(5~7문장, 220자+)", "단락2", "단락3", "단락4", "단락5"]
-  },
+  "partnerWonguk": { "intro": "상대 일간 오행 한 문장 요약", "callout": "신강·신약·오행 균형 핵심 한 문장", "singang": "신강", "dominantEl": "목", "paragraphs": ["단락1(6~8문장 260자+)", "단락2(6~8문장 260자+)", "단락3(6~8문장 260자+)"] },
   "partnerNature": {
     "keywords": ["기질키워드1", "기질키워드2", "기질키워드3", "기질키워드4"],
     "strengthDesc": "상대 기질의 빛(강점) 3~5문장, 150자+",
@@ -506,7 +511,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["단락1(5~7문장, 220자+)", "단락2", "단락3"]
   }
 }`,
-  3: `{
+  4: `{
   "marriageScore": {
     "score": 82,
     "label": "하늘이 맺어준 결혼 인연이오",
@@ -524,7 +529,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["단락1(5~6문장, 200자+)", "단락2", "단락3"]
   }
 }`,
-  4: `{
+  6: `{
   "coupleStyle": {
     "coupleType": "부부 유형 명칭",
     "coupleIcon": "💑",
@@ -547,7 +552,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["단락1(4~5문장, 180자+)", "단락2"]
   }
 }`,
-  5: `{
+  7: `{
   "strengths": {
     "items": [
       { "title": "강점 제목", "icon": "✨", "desc": "풀이 4~6문장, 180자+", "basis": "사주 근거 한 문장", "effect": "결혼 생활 효과 한 줄" },
@@ -567,7 +572,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["단락1(5~6문장, 200자+)", "단락2", "단락3"]
   }
 }`,
-  6: `{
+  3: `{
   "hapList": {
     "items": [
       { "type": "갑기합(甲己合)", "hapEl": "토", "strength": "강함", "desc": "풀이 3~5문장, 150자+", "effect": "결혼 생활 효과 한 줄" },
@@ -587,7 +592,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["단락1(5~6문장, 200자+)", "단락2", "단락3"]
   }
 }`,
-  7: `{
+  8: `{
   "wealthFlow": {
     "wealthType": "재물 유형 명칭",
     "wealthIcon": "💰",
@@ -623,7 +628,7 @@ const CH_SCHEMA: Record<number, string> = {
     ]
   }
 }`,
-  8: `{
+  9: `{
   "childCompatibility": {
     "score": 78,
     "label": "자녀 복이 풍성한 인연이오",
@@ -655,7 +660,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["단락1(자녀 기질 전체 그림, 200자+)", "단락2(오행 상생 흐름, 200자+)", "단락3(부모·자녀 관계 전망, 200자+)"]
   }
 }`,
-  9: `{
+  10: `{
   "crisisPoints": {
     "crisisType": "감정 표현 방식 충돌형",
     "crisisIcon": "⚡",
@@ -696,7 +701,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["단락1(위기를 통한 성장 서사, 200자+)", "단락2(위기의 재해석, 200자+)", "단락3(함께 붙들 태도와 지향, 200자+)"]
   }
 }`,
-  10: `{
+  5: `{
   "bestTiming": {
     "bestYear": "2027년 乙巳年 하반기",
     "bestIcon": "💍",
@@ -820,9 +825,10 @@ export function buildGyeolhonKunghapChapterPrompt(
     myPillars?: PillarItem[];
     partnerPillars?: PillarItem[];
     daeunSeunContext?: string;
+    concern?: string;
   }
 ): { system: string; user: string } {
-  const { name, gender, manseryeokText, partnerName, partnerGender, partnerManseryeokText, ilgan, partnerIlgan, ilganFull, partnerIlganFull, ohaengSummary, partnerOhaengSummary, mySipseong, partnerSipseong, myPillars, partnerPillars, daeunSeunContext } = input;
+  const { name, gender, manseryeokText, partnerName, partnerGender, partnerManseryeokText, ilgan, partnerIlgan, ilganFull, partnerIlganFull, ohaengSummary, partnerOhaengSummary, mySipseong, partnerSipseong, myPillars, partnerPillars, daeunSeunContext, concern } = input;
   const myGenderLabel = gender === "female" ? "여성" : "남성";
   const partnerGenderLabel = partnerGender === "female" ? "여성" : "남성";
 
@@ -834,14 +840,14 @@ export function buildGyeolhonKunghapChapterPrompt(
 
   const myDataBlock = [
     ilgan ? `⛔ 일간(日干) 확정값: ${ilganFull || ilgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지.` : "",
-    ohaengSummary ? `오행 분포(서버 사전계산): ${ohaengSummary}` : "",
+    ohaengSummary ? `⛔ 오행 분포 확정값(서버 계산): ${ohaengSummary} — 이 숫자와 다른 개수를 풀이에 쓰는 것 절대 금지. 직접 세지 마시오.` : "",
     myPillarTable,
     mySipseong ? `내 일간 기준 상대방 십성(서버 계산 확정값): ${mySipseong} ← 절대 바꾸지 마시오.` : "",
   ].filter(Boolean).join("\n");
 
   const partnerDataBlock = [
     partnerIlgan ? `⛔ 상대방 일간(日干) 확정값: ${partnerIlganFull || partnerIlgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지.` : "",
-    partnerOhaengSummary ? `상대방 오행 분포(서버 사전계산): ${partnerOhaengSummary}` : "",
+    partnerOhaengSummary ? `⛔ 상대방 오행 분포 확정값(서버 계산): ${partnerOhaengSummary} — 이 숫자와 다른 개수를 풀이에 쓰는 것 절대 금지. 직접 세지 마시오.` : "",
     partnerPillarTable,
     partnerSipseong ? `상대방 일간 기준 내 십성(서버 계산 확정값): ${partnerSipseong} ← 절대 바꾸지 마시오.` : "",
   ].filter(Boolean).join("\n");
@@ -850,32 +856,46 @@ export function buildGyeolhonKunghapChapterPrompt(
   const guide = CH_GUIDE[chapter] ?? "";
   const schema = CH_SCHEMA[chapter] ?? "{}";
 
-  const user = `아래 두 사람의 명식을 바탕으로 결혼궁합 결과지 풀이를 JSON으로 출력하시오.
+  // ── 프롬프트 변수 정의 ──
+  const vars: Record<string, string> = {
+    이름1: name,
+    이름2: partnerName,
+    성별1: myGenderLabel,
+    성별2: partnerGenderLabel,
+    명식표1: [manseryeokText, myDataBlock].filter(Boolean).join("\n\n"),
+    명식표2: [partnerManseryeokText, partnerDataBlock].filter(Boolean).join("\n\n"),
+    고민: concern || "",
+    장주제: theme,
+    장가이드: guide + (daeunSeunContext ? `\n\n${daeunSeunContext}` : ""),
+    스키마: schema,
+  };
+
+  const PROMPT_TEMPLATE = `아래 두 사람의 명식을 바탕으로 결혼궁합 결과지 풀이를 JSON으로 출력하시오.
 ⚠️ 이름 호칭 규칙: 풀이 전체에서 이름을 언급할 때 반드시 성(姓)을 제외한 이름만 사용하고, 이름 뒤에 "님"을 붙이시오. (예: "김선우" → "선우님", "박소현" → "소현님"). 성+이름 전체나 성만 단독으로 쓰는 것은 절대 금지.
 
 【 본인 】
-이름: ${name} (${myGenderLabel})
-${manseryeokText}
-${myDataBlock ? `\n${myDataBlock}` : ""}
+이름: {이름1} ({성별1})
+{명식표1}
 
 【 상대방 】
-이름: ${partnerName} (${partnerGenderLabel})
-${partnerManseryeokText}
-${partnerDataBlock ? `\n${partnerDataBlock}` : ""}
-
+이름: {이름2} ({성별2})
+{명식표2}
+${concern ? `\n【 신청자 고민 】\n{고민}\n` : ""}
 ━━━━━━━━━━━━━━━━━━━━━
-▶ 이번 장 주제: ${theme}
+▶ 이번 장 주제: {장주제}
 ━━━━━━━━━━━━━━━━━━━━━
-${guide}${daeunSeunContext ? `\n\n${daeunSeunContext}` : ""}
+{장가이드}
 
 출력 JSON 형식 (이 형식 그대로, 다른 키 추가 금지):
-${schema}
+{스키마}
 
 주의:
 - 반드시 위 JSON 형식만 출력하시오. 설명·인사말·마크다운 일절 불가.
 - 두 사람의 명식에 근거한 풀이만 하시오. 일반론 금지.
 - 홍연 말투(~이오/~하오/~했소/~겠소)를 유지하시오.
-- 본인은 "${name}", 상대방은 "${partnerName}"으로 지칭하시오.`;
+- 본인은 "{이름1}", 상대방은 "{이름2}"으로 지칭하시오.`;
+
+  const user = PROMPT_TEMPLATE.replace(/\{([^}]+)\}/g, (_, key) => vars[key] ?? `{${key}}`);
 
   return { system: SYSTEM, user };
 }

@@ -103,7 +103,7 @@ async function loadManseryeokFromInputs(service: any, resultId: string): Promise
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   if (body && typeof body.id === "string" && body.content && typeof body.content === "object") {
-    return saveContent(body.id, body.content as Record<string, unknown>);
+    return saveContent(body.id, body.content as Record<string, unknown>, !!body.force);
   }
   if (body && typeof body.id === "string" && typeof body.chapter === "number") {
     return generateChapter(body);
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
-async function saveContent(id: string, content: Record<string, unknown>) {
+async function saveContent(id: string, content: Record<string, unknown>, skipAlimtalk = false) {
   const service = createServiceClient();
   const { data } = await service.from("saju_results").select("interpretation_md, order_id, myeongsik").eq("id", id).maybeSingle();
   let existing: Record<string, unknown> = {};
@@ -124,7 +124,7 @@ async function saveContent(id: string, content: Record<string, unknown>) {
   const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const imageReady = !!storedMyeongsik?.sajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
-  if (allDone && (!needsImage || imageReady) && data?.order_id) {
+  if (!skipAlimtalk && allDone && (!needsImage || imageReady) && data?.order_id) {
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
     if (si?.phone) {
       const reportUrl = `https://www.hongyeondang.com/saju/kunghap_ehon/report-preview?id=${id}`;

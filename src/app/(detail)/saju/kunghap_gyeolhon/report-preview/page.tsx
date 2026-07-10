@@ -4304,15 +4304,15 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 결혼궁합에 대하여",
   "1":  "제1장 · 나는 어떤 사람인가?",
-  "2":  "제2장 · 상대의 사주 원국",
-  "3":  "제3장 · 두 사람, 결혼할 수 있는 인연인가",
-  "4":  "제4장 · 결혼하면 어떤 부부가 될까",
-  "5":  "제5장 · 이 결혼의 장점과 단점",
-  "6":  "제6장 · 궁합의 핵심: 합과 충",
-  "7":  "제7장 · 결혼 후 재물운과 가정운",
-  "8":  "제8장 · 아이가 들어오는 인연일까",
-  "9":  "제9장 · 이 결혼의 위기와 극복",
-  "10": "제10장 · 언제 결혼하면 좋을까",
+  "2":  "제2장 · 상대는 어떤 사람인가?",
+  "3":  "제3장 · 궁합의 핵심: 합과 충",
+  "4":  "제4장 · 두 사람, 결혼할 수 있는 인연인가",
+  "5":  "제5장 · 언제 결혼하면 좋을까",
+  "6":  "제6장 · 결혼하면 어떤 부부가 될까",
+  "7":  "제7장 · 이 결혼의 장점과 단점",
+  "8":  "제8장 · 결혼 후 재물운과 가정운",
+  "9":  "제9장 · 아이가 들어오는 인연일까",
+  "10": "제10장 · 이 결혼의 위기와 극복",
   "11": "제11장 · 두사람 미래의 흐름은",
   "12": "마무리 · 그대들에게 남기는\n홍연의 서신",
 };
@@ -5499,15 +5499,15 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",   title: "결혼궁합에 대하여",                        no: "0" },
   { disp: "제1장",  chip: "나의원국", title: "나는 어떤 사람인가?",                     no: "1" },
-  { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                       no: "2" },
-  { disp: "제3장",  chip: "인연",   title: "두 사람, 결혼할 수 있는 인연인가",          no: "3" },
-  { disp: "제4장",  chip: "부부상",  title: "결혼하면 어떤 부부가 될까",               no: "4" },
-  { disp: "제5장",  chip: "장단점",  title: "이 결혼의 장점과 단점",                   no: "5" },
-  { disp: "제6장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                   no: "6" },
-  { disp: "제7장",  chip: "재물가정", title: "결혼 후 재물운과 가정운",               no: "7" },
-  { disp: "제8장",  chip: "자녀운",  title: "아이가 들어오는 인연일까",       no: "8" },
-  { disp: "제9장",  chip: "위기극복", title: "이 결혼의 위기와 극복",                 no: "9" },
-  { disp: "제10장", chip: "결혼시기", title: "언제 결혼하면 좋을까",                    no: "10" },
+  { disp: "제2장",  chip: "상대원국", title: "상대는 어떤 사람인가?",                   no: "2" },
+  { disp: "제3장",  chip: "합충",   title: "궁합의 핵심: 합과 충",                    no: "3" },
+  { disp: "제4장",  chip: "인연",   title: "두 사람, 결혼할 수 있는 인연인가",          no: "4" },
+  { disp: "제5장",  chip: "결혼시기", title: "언제 결혼하면 좋을까",                    no: "5" },
+  { disp: "제6장",  chip: "부부상",  title: "결혼하면 어떤 부부가 될까",               no: "6" },
+  { disp: "제7장",  chip: "장단점",  title: "이 결혼의 장점과 단점",                   no: "7" },
+  { disp: "제8장",  chip: "재물가정", title: "결혼 후 재물운과 가정운",               no: "8" },
+  { disp: "제9장",  chip: "자녀운",  title: "아이가 들어오는 인연일까",               no: "9" },
+  { disp: "제10장", chip: "위기극복", title: "이 결혼의 위기와 극복",                  no: "10" },
   { disp: "제11장", chip: "미래",    title: "두사람 미래의 흐름은",        no: "11" },
   { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",           no: "12" },
 ];
@@ -6098,11 +6098,11 @@ function ReportPreviewInner() {
   }, [ch]);
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
-  const persist = (mergedContent: Record<string, unknown>) => {
+  const persist = (mergedContent: Record<string, unknown>, skipAlimtalk = false) => {
     fetch("/api/kunghap_gyeolhon-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, content: mergedContent }),
+      body: JSON.stringify({ id, content: mergedContent, force: skipAlimtalk }),
     }).catch(() => {});
   };
 
@@ -6128,7 +6128,7 @@ function ReportPreviewInner() {
         setReport((p) => {
           if (!p) return p;
           const merged = { ...(p.content as Record<string, unknown>), ...sec };
-          persist(merged);
+          persist(merged, force);
           return { ...p, content: merged as ReportContent, sajuImageUrl: d.sajuImageUrl ?? p.sajuImageUrl, partnerView: d.partnerView ?? p.partnerView, partnerSajuImageUrl: d.partnerSajuImageUrl ?? p.partnerSajuImageUrl, partnerName: d.partnerName ?? p.partnerName };
         });
       })
@@ -6160,6 +6160,16 @@ function ReportPreviewInner() {
 
 
   const name = report?.name?.trim() || nameParam.trim() || "고객";
+  const firstName = name.length > 1 ? name.slice(1) : name;
+  const effectivePartnerName = report?.partnerName?.trim() || partnerName || "상대방";
+  const partnerFirstName = effectivePartnerName.length > 1 ? effectivePartnerName.slice(1) : effectivePartnerName;
+  const normName = (text: string) =>
+    text.replace(new RegExp(name + "님", "g"), `${firstName}님`)
+        .replace(new RegExp(name, "g"), `${firstName}님`);
+  const normPartnerName = (text: string) =>
+    text.replace(new RegExp(effectivePartnerName + "님", "g"), `${partnerFirstName}님`)
+        .replace(new RegExp(effectivePartnerName, "g"), `${partnerFirstName}님`);
+  const normText = (text: string) => normPartnerName(normName(text));
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
@@ -6542,11 +6552,7 @@ function ReportPreviewInner() {
         const wonguk = (jc.myWonguk as Record<string,unknown> | undefined) ?? {};
         const nature = (jc.myNature as Record<string, unknown> | undefined) ?? null;
         const marriagePattern = (jc.myMarriagePattern as Record<string, unknown> | undefined) ?? null;
-        const firstName = name.length > 1 ? name.slice(1) : name;
-        const normName = (text: string) =>
-          text.replace(new RegExp(name + "님", "g"), `${firstName}님`)
-              .replace(new RegExp(name, "g"), `${firstName}님`);
-        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normName);
+        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normText);
         return (
           <>
             {/* ── 다크 헤더 ── */}
@@ -6628,15 +6634,10 @@ function ReportPreviewInner() {
 
       {/* ═══════════ 제2장 · 상대는 어떤 사람인가? ═══════════ */}
       {ch === "2" && (() => {
-        const partnerName = report?.partnerName || "상대방";
-        const partnerFirstName = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
         const wonguk = (jc.partnerWonguk as Record<string,unknown> | undefined) ?? {};
         const nature = (jc.partnerNature as Record<string, unknown> | undefined) ?? null;
         const marriagePattern = (jc.partnerMarriagePattern as Record<string, unknown> | undefined) ?? null;
-        const normPartnerName = (text: string) =>
-          text.replace(new RegExp(partnerName + "님", "g"), `${partnerFirstName}님`)
-              .replace(new RegExp(partnerName, "g"), `${partnerFirstName}님`);
-        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normPartnerName);
+        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normText);
         return (
           <>
             {/* ── 다크 헤더 ── */}
@@ -6662,7 +6663,7 @@ function ReportPreviewInner() {
             <section className="pb-4">
               <MyeongsikTable
                 view={report?.partnerView ?? null}
-                name={partnerName}
+                name={effectivePartnerName}
                 birth={report?.partnerBirth ?? null}
                 header={
                   <div className="text-center">
@@ -6709,15 +6710,15 @@ function ReportPreviewInner() {
             </section>
 
             {/* ── 마무리 인용구 ── */}
-            <Quote>{`"두 사람의 기운을 살펴보았으니,\n이제 결혼 궁합 점수를 펼쳐보겠소."`}</Quote>
+            <Quote>{`"두 사람의 기운을 살펴보았으니,\n이제 두 사주의 합과 충을\n살펴보겠소."`}</Quote>
 
             <ChapterNav cur="2" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제3장 · 두 사람, 결혼할 수 있는 인연인가 ═══════════ */}
-      {ch === "3" && (() => {
+      {/* ═══════════ 제4장 · 두 사람, 결혼할 수 있는 인연인가 ═══════════ */}
+      {ch === "4" && (() => {
         const ms   = (jc.marriageScore  as Record<string, unknown> | undefined) ?? null;
         const mr   = (jc.marriageReason as Record<string, unknown> | undefined) ?? null;
         const score     = (ms?.score     as number | undefined) ?? 0;
@@ -6727,7 +6728,7 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 결혼 가능성</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 결혼 가능성</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 결혼할 수 있는 인연인가</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
@@ -6751,7 +6752,7 @@ function ReportPreviewInner() {
 
             {/* 결혼 점수 풀이 단락 */}
             {((ms?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{normText(p)}</p>
             ))}
 
             {/* 결혼 인연의 증거 & 보완점 카드 */}
@@ -6771,14 +6772,14 @@ function ReportPreviewInner() {
             <MarriageVerdictPanel data={mr} />
 
             <Illust src="/media/report/kunghap/kh-3-1.jpg" h={280} />
-            <Quote>{`"결혼 가능성을 살펴보았으니,\n이제 두 사람이 부부가 되면\n어떤 모습일지 보겠소."`}</Quote>
-            <ChapterNav cur="3" go={next} />
+            <Quote>{`"결혼 가능성을 살펴보았으니,\n이제 결혼하기 가장 좋은 시기를\n살펴보겠소."`}</Quote>
+            <ChapterNav cur="4" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제4장 · 결혼하면 어떤 부부가 될까 ═══════════ */}
-      {ch === "4" && (() => {
+      {/* ═══════════ 제6장 · 결혼하면 어떤 부부가 될까 ═══════════ */}
+      {ch === "6" && (() => {
         const cs = (jc.coupleStyle  as Record<string, unknown> | undefined) ?? null;
         const rb = (jc.roleBalance  as Record<string, unknown> | undefined) ?? null;
         const dl = (jc.dailyLife    as Record<string, unknown> | undefined) ?? null;
@@ -6788,7 +6789,7 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 부부상</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 부부상</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼하면 어떤 부부가 될까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
@@ -6828,20 +6829,20 @@ function ReportPreviewInner() {
             {dailyParas.length > 0 && (
               <div className="mx-5 mt-2 mb-4 px-5 py-4 rounded-2xl" style={{ background: GCH4_PALE, border: `1px solid ${GCH4_COLOR}20` }}>
                 {dailyParas.map((p, i) => (
-                  <p key={i} className="text-[14px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+                  <p key={i} className="text-[14px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK, wordBreak: "keep-all" }}>{normText(p)}</p>
                 ))}
               </div>
             )}
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={280} />
             <Quote>{`"부부상을 알았으니,\n이 결혼의 장점과 단점을\n솔직하게 살펴보겠소."`}</Quote>
-            <ChapterNav cur="4" go={next} />
+            <ChapterNav cur="6" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제5장 · 이 결혼의 장점과 단점 ═══════════ */}
-      {ch === "5" && (() => {
+      {/* ═══════════ 제7장 · 이 결혼의 장점과 단점 ═══════════ */}
+      {ch === "7" && (() => {
         const str = (jc.strengths  as Record<string, unknown> | undefined) ?? null;
         const wek = (jc.weaknesses as Record<string, unknown> | undefined) ?? null;
         const bal = (jc.balanceTip as Record<string, unknown> | undefined) ?? null;
@@ -6850,7 +6851,7 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 장단점</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 장단점</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 결혼의 장점과 단점</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
@@ -6887,14 +6888,14 @@ function ReportPreviewInner() {
             <BalanceGuidePanel data={bal} />
 
             <Illust src="/media/report/kunghap/kh-5-1.jpg" h={280} />
-            <Quote>{`"장단점을 알았으니,\n이제 두 사주 사이의\n합·충을 짚어보겠소."`}</Quote>
-            <ChapterNav cur="5" go={next} />
+            <Quote>{`"장단점을 알았으니,\n이제 결혼 후 재물과 가정이\n어떻게 흘러가는지 보겠소."`}</Quote>
+            <ChapterNav cur="7" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제6장 · 궁합의 핵심: 합과 충 ═══════════ */}
-      {ch === "6" && (() => {
+      {/* ═══════════ 제3장 · 궁합의 핵심: 합과 충 ═══════════ */}
+      {ch === "3" && (() => {
         const hapList     = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
         const chungList   = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
         const overallScore= (jc.overallScore as Record<string, unknown> | undefined) ?? null;
@@ -6903,7 +6904,7 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 합·충</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
@@ -6953,21 +6954,21 @@ function ReportPreviewInner() {
             <GHapChungScoreCard data={overallScore} hapCount={hapItems.length} chungCount={chungItems.length} />
 
             <Illust src="/media/report/kunghap/kh-6-1.jpg" h={280} />
-            <Quote>{`"합·충을 파악했으니,\n이제 결혼 후 재물과 가정이\n어떻게 흘러가는지 보겠소."`}</Quote>
-            <ChapterNav cur="6" go={next} />
+            <Quote>{`"합과 충을 살펴보았으니,\n이제 두 사람, 결혼할 수 있는\n인연인지 보겠소."`}</Quote>
+            <ChapterNav cur="3" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제7장 · 결혼 후 재물·가정운 ═══════════ */}
-      {ch === "7" && (() => {
+      {/* ═══════════ 제8장 · 결혼 후 재물·가정운 ═══════════ */}
+      {ch === "8" && (() => {
         const wf = (jc.wealthFlow as Record<string, unknown> | undefined) ?? null;
         const hl = (jc.homeLife   as Record<string, unknown> | undefined) ?? null;
         const wt = (jc.wealthTips as Record<string, unknown> | undefined) ?? null;
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 재물·가정</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 재물·가정</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼 후 재물운과 가정운</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
@@ -7002,20 +7003,20 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-7-1.jpg" h={280} />
             <Quote>{`"재물과 가정을 살펴보았으니,\n이제 자녀 인연을\n살펴보겠소."`}</Quote>
-            <ChapterNav cur="7" go={next} />
+            <ChapterNav cur="8" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제8장 · 자녀운 ═══════════ */}
-      {ch === "8" && (() => {
+      {/* ═══════════ 제9장 · 자녀운 ═══════════ */}
+      {ch === "9" && (() => {
         const cc  = (jc.childCompatibility as Record<string,unknown>|undefined) ?? null;
         const cti = (jc.childTiming        as Record<string,unknown>|undefined) ?? null;
         const cst = (jc.childStyle         as Record<string,unknown>|undefined) ?? null;
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 자녀운</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 자녀운</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이가 들어오는 인연일까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
@@ -7053,13 +7054,13 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
             <Quote>{`"자녀 인연을 살펴보았으니,\n이제 결혼 생활에서 올 위기와\n그 극복법을 보겠소."`}</Quote>
-            <ChapterNav cur="8" go={next} />
+            <ChapterNav cur="9" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제9장 · 위기와 극복 ═══════════ */}
-      {ch === "9" && (() => {
+      {/* ═══════════ 제10장 · 위기와 극복 ═══════════ */}
+      {ch === "10" && (() => {
         const cp  = (jc.crisisPoints  as Record<string,unknown>|undefined) ?? null;
         const ot  = (jc.overcomeTips  as Record<string,unknown>|undefined) ?? null;
         const cf  = (jc.crisisFlow    as Record<string,unknown>|undefined) ?? null;
@@ -7069,7 +7070,7 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기와 극복</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 위기와 극복</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 결혼의 위기와 극복</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
@@ -7115,14 +7116,14 @@ function ReportPreviewInner() {
             <CrisisRecoveryGuide data={rg} />
 
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-            <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 결혼하기 가장 좋은 시기를\n살펴보겠소."`}</Quote>
-            <ChapterNav cur="9" go={next} />
+            <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 두 사람의 먼 미래를\n함께 보겠소."`}</Quote>
+            <ChapterNav cur="10" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제10장 · 언제 결혼하면 좋을까 ═══════════ */}
-      {ch === "10" && (() => {
+      {/* ═══════════ 제5장 · 언제 결혼하면 좋을까 ═══════════ */}
+      {ch === "5" && (() => {
         const bt = (jc.bestTiming   as Record<string,unknown>|undefined) ?? null;
         const ti = (jc.timingItems  as Record<string,unknown>|undefined) ?? null;
         const tc = (jc.timingChecks as Record<string,unknown>|undefined) ?? null;
@@ -7130,7 +7131,7 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 결혼 시기</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 결혼 시기</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>언제 결혼하면 좋을까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
@@ -7169,8 +7170,8 @@ function ReportPreviewInner() {
             <TimingAdvicePanel data={ta} />
 
             <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-            <Quote>{`"결혼 시기를 살펴보았으니,\n이제 두 사람의 먼 미래를\n함께 보겠소."`}</Quote>
-            <ChapterNav cur="10" go={next} />
+            <Quote>{`"결혼 시기를 살펴보았으니,\n이제 두 사람이 부부가 되면\n어떤 모습일지 보겠소."`}</Quote>
+            <ChapterNav cur="5" go={next} />
           </>
         );
       })()}
@@ -7253,7 +7254,7 @@ function ReportPreviewInner() {
 
           <section className="px-7 pt-8 pb-2">
             {(c as unknown as Record<string, {paragraphs?: string[]}>).letter?.paragraphs?.map((p, i) => (
-              <P key={i}>{p}</P>
+              <P key={i}>{normText(p)}</P>
             ))}
             <div className="flex items-center justify-end gap-3 mt-8 mb-2">
               <span className="text-[13.5px] font-bold" style={{ color: INK }}>홍연 올림</span>

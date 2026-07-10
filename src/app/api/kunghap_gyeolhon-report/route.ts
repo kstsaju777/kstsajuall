@@ -43,6 +43,7 @@ const createSchema = z.object({
   partnerTime: z.string().optional().default(""),
   partnerCalendar: z.string().optional().default("양력"),
   partnerGender: z.string().optional().default(""),
+  concerns: z.array(z.string()).optional().default([]),
 });
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
@@ -166,6 +167,28 @@ async function loadManseryeokFromInputs(service: any, resultId: string): Promise
   return formatSajuToManseryeok(analysis, birthInfo);
 }
 
+// 상대방 만세력 미저장 시 stored.partnerBirth / partnerGender 로 재호출
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadPartnerManseryeokFromStored(stored: any): Promise<string | null> {
+  const pb = stored?.partnerBirth;
+  if (!pb?.date) return null;
+  const [y, m, d] = String(pb.date).split(".");
+  const hasTime = pb.time && pb.time !== "시간 모름";
+  const [hh, mm] = hasTime ? String(pb.time).split(":") : ["", ""];
+  const calendarType = pb.calendar === "양력" ? "양력" : pb.calendar === "윤달" ? "윤달" : "음력";
+  const gender: "male" | "female" = stored?.partnerGender === "female" ? "female" : "male";
+  const birthInfo: BirthInfo = {
+    birthYear: y,
+    birthMonth: String(Number(m)),
+    birthDay: String(Number(d)),
+    ...(hasTime ? { birthHour: String(Number(hh)), birthMinute: String(Number(mm)) } : {}),
+    calendarType,
+    gender,
+  };
+  const analysis = await fetchSajuAnalysis(birthInfo, [], { source: "confirm" });
+  return formatSajuToManseryeok(analysis, birthInfo);
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   if (body && typeof body.id === "string" && body.content && typeof body.content === "object") {
@@ -207,7 +230,7 @@ async function createReport(body: unknown) {
   }
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender } = parsed.data;
+  const { name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concerns } = parsed.data;
 
   const pad = (n: number | string) => String(n).padStart(2, "0");
 
@@ -296,10 +319,10 @@ async function createReport(body: unknown) {
       birth_date: `${ymd.year}-${pad(ymd.month)}-${pad(ymd.day)}`,
       birth_time: hasTime ? `${pad(hh)}:${pad(mm)}` : null,
       time_unknown: !hasTime, gender: g,
-      calendar: cal === "solar" ? "solar" : "lunar", concerns: [],
+      calendar: cal === "solar" ? "solar" : "lunar", concerns,
     });
 
-    const storedMyeongsik = { view, name, birth, manseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg };
+    const storedMyeongsik = { view, "{이름1}": name, birth, "{명식표1}": manseryeokText, "{명식표2}": partnerManseryeokText, "{고민}": concerns[0] ?? "", gender: g, partnerView, "{이름2}": partnerName, partnerBirth, partnerGender: pg };
 
     const { data: result, error: resultErr } = await service
       .from("saju_results")
@@ -366,12 +389,19 @@ async function generateChapter(body: unknown) {
     return NextResponse.json({ sections });
   }
 
-  let manseryeokText: string | undefined = stored?.manseryeokText;
+  if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
+
+  let manseryeokText: string | undefined = stored?.["{명식표1}"] || stored?.manseryeokText;
   if (!manseryeokText) {
-    if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
     manseryeokText = (await loadManseryeokFromInputs(service, id)) ?? undefined;
   }
   if (!manseryeokText) return NextResponse.json({ error: "명식 정보를 찾을 수 없습니다." }, { status: 500 });
+
+  let partnerManseryeokText: string | undefined = stored?.["{명식표2}"] || stored?.partnerManseryeokText || undefined;
+  if (!partnerManseryeokText) {
+    partnerManseryeokText = (await loadPartnerManseryeokFromStored(stored)) ?? undefined;
+  }
+  if (!partnerManseryeokText) return NextResponse.json({ error: "상대방 명식 정보를 찾을 수 없습니다." }, { status: 500 });
 
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
@@ -422,8 +452,8 @@ async function generateChapter(body: unknown) {
     })();
 
     // 대운·세운 컨텍스트 (9장·10장에만)
-    const myFirstName = (stored?.name ?? "").slice(1) || (stored?.name ?? "");
-    const ptFirstName = (stored?.partnerName ?? "").slice(1) || (stored?.partnerName ?? "");
+    const myFirstName = (stored?.["{이름1}"] || stored?.name || "").slice(1) || (stored?.["{이름1}"] || stored?.name || "");
+    const ptFirstName = (stored?.["{이름2}"] || stored?.partnerName || "").slice(1) || (stored?.["{이름2}"] || stored?.partnerName || "");
     const REF_YEAR = 2026;
     let daeunSeunContext: string | undefined;
     if ((chapter === 9 || chapter === 10) && ilgan && partnerIlgan) {
@@ -437,12 +467,13 @@ async function generateChapter(body: unknown) {
     }
 
     const { obj } = await genChapterContent(chapter, {
-      name: stored?.name ?? "",
+      name: stored?.["{이름1}"] || stored?.name || "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
-      partnerName: stored?.partnerName ?? "",
+      partnerName: stored?.["{이름2}"] || stored?.partnerName || "",
+      concern: stored?.["{고민}"] || "",
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
-      partnerManseryeokText: stored?.partnerManseryeokText ?? "",
+      partnerManseryeokText,
       birthYear: birthYear || undefined,
       ilgan,
       partnerIlgan,
@@ -478,13 +509,13 @@ export async function GET(request: NextRequest) {
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
   return NextResponse.json({
     view: stored?.view ?? stored,
-    name: stored?.name ?? "",
+    name: stored?.["{이름1}"] || stored?.name || "",
     birth: stored?.birth ?? null,
     gender: stored?.gender ?? "",
     sajuImageUrl: stored?.sajuImageUrl ?? null,
     content,
     partnerView: stored?.partnerView ?? null,
-    partnerName: stored?.partnerName ?? "",
+    partnerName: stored?.["{이름2}"] || stored?.partnerName || "",
     partnerBirth: stored?.partnerBirth ?? null,
     partnerGender: stored?.partnerGender ?? "",
     partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null,

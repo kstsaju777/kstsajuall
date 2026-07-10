@@ -1521,16 +1521,56 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
 
   const compatTagsResult: string[][] | undefined = (chapter === 6 && top3Tags.length > 0) ? top3Tags : undefined;
 
-  const user = `[대상] ${honor} (${input.gender === "male" ? "남성" : "여성"}) — 풀이 전체에서 이름을 부를 때 반드시 '${honor}'로만 호칭하오. '님' 호칭은 절대 사용하지 마오.
+  // ── 프롬프트 변수 정의 ──
+  // CH_GUIDE가 {명식표1}로 시작하는 새 형식이면, 명식표1에 서버 계산값도 포함
+  const isNewStyleGuide = (CH_GUIDE[chapter]?.trimStart() ?? "").startsWith("{명식표1}");
+  const manseryeokFull = isNewStyleGuide
+    ? [pillarTable, input.manseryeokText, ageGuide, deungTable, ohaengTable, wealthTable, healthTable, guiinTable].filter(Boolean).join("\n")
+    : input.manseryeokText;
 
-${pillarTable}[사주 명식]
-${input.manseryeokText}
-${ageGuide}${deungTable}${ohaengTable}${wealthTable}${healthTable}${guiinTable}
-위 명식을 근거로, ${honor}의 ${CH_THEME[chapter] ?? ""} 에 대한 결과지 콘텐츠를 작성하세요.
-${CH_GUIDE[chapter]?.trim() ? `\n[이 장에서 특히 신경 쓸 것]\n${CH_GUIDE[chapter].trim()}\n` : ""}${input.yongsinEl ? `\n[확정 용신·희신·기신 — 전 결과지 통일 필수]\n용신: ${input.yongsinEl}오행 / 희신: ${input.heusinEl || "미정"}오행 / 기신: ${input.gisinEl || "미정"}오행\n이 오행은 이 결과지 전체에서 확정된 값이오. 이 장에서 용신·희신·기신을 언급할 때는 반드시 위 값을 그대로 사용하오. 독자적으로 재산출하거나 다른 오행으로 바꾸는 것은 절대 금지하오.\n` : ""}${chapter === 10 && input.concern?.trim() ? `\n[신청자가 남긴 고민]\n${input.concern.trim()}\n위 고민이 사주팔자와 어떻게 연결되는지, 마무리 서신 안에서 자연스럽게 언급하고 명식에 근거한 조언을 건네오. 고민과 전혀 관련 없는 내용을 억지로 끼워 맞추지는 마오.\n` : ""}
+  const baseVars: Record<string, string> = {
+    이름1: input.name ?? "",
+    성별1: input.gender === "male" ? "남성" : "여성",
+    호칭1: honor,
+    명식표1: manseryeokFull,
+    고민: input.concern?.trim() ?? "",
+  };
+  // CH_GUIDE 안에도 {이름1}, {명식표1} 등 변수가 있을 수 있으므로 먼저 치환
+  const resolvedGuide = (CH_GUIDE[chapter]?.trim() ?? "").replace(/\{([^}]+)\}/g, (_, key) => baseVars[key] ?? `{${key}}`);
+  const vars: Record<string, string> = {
+    ...baseVars,
+    장주제: CH_THEME[chapter] ?? "",
+    장가이드: resolvedGuide,
+    스키마: chapter === 6 ? CH_SCHEMA[6] : (CH_SCHEMA[chapter] ?? "{}"),
+  };
+
+  const concernBlock = (chapter === 10 && vars.고민)
+    ? `\n【 신청자 고민 】\n{고민}\n위 고민이 사주팔자와 어떻게 연결되는지, 마무리 서신 안에서 자연스럽게 언급하고 명식에 근거한 조언을 건네오. 고민과 전혀 관련 없는 내용을 억지로 끼워 맞추지는 마오.\n`
+    : "";
+
+  const yongsinBlock = input.yongsinEl
+    ? `\n[확정 용신·희신·기신 — 전 결과지 통일 필수]\n용신: ${input.yongsinEl}오행 / 희신: ${input.heusinEl || "미정"}오행 / 기신: ${input.gisinEl || "미정"}오행\n이 오행은 이 결과지 전체에서 확정된 값이오. 이 장에서 용신·희신·기신을 언급할 때는 반드시 위 값을 그대로 사용하오. 독자적으로 재산출하거나 다른 오행으로 바꾸는 것은 절대 금지하오.\n`
+    : "";
+
+  // 새 형식(CH_GUIDE가 {명식표1}로 시작): CH_GUIDE가 전체 프롬프트 역할
+  const PROMPT_TEMPLATE = isNewStyleGuide
+    ? `{장가이드}${yongsinBlock}${concernBlock}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
 
-${chapter === 6 ? CH_SCHEMA[6] : (CH_SCHEMA[chapter] ?? "{}")}`;
+{스키마}`
+    : `[대상] {호칭1} ({성별1}) — 풀이 전체에서 이름을 부를 때 반드시 '{호칭1}'로만 호칭하오. '님' 호칭은 절대 사용하지 마오.
+
+${pillarTable}【 사주 명식 】
+{명식표1}
+${ageGuide}${deungTable}${ohaengTable}${wealthTable}${healthTable}${guiinTable}
+위 명식을 근거로, {호칭1}의 {장주제} 에 대한 결과지 콘텐츠를 작성하세요.
+${vars.장가이드 ? `\n[이 장에서 특히 신경 쓸 것]\n{장가이드}\n` : ""}${yongsinBlock}${concernBlock}
+아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
+
+{스키마}`;
+
+  const user = PROMPT_TEMPLATE.replace(/\{([^}]+)\}/g, (_, key) => vars[key] ?? `{${key}}`);
+
   return { system: SYSTEM, user, compatTags: compatTagsResult, ch6RankData: chapter === 6 ? ch6RankData : undefined, ch6Pillars: chapter === 6 ? ch6Pillars : undefined };
 }
 
