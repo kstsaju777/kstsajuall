@@ -65,7 +65,12 @@ const YEONAE_CH_THEME: Record<number, string> = {
 const YEONAE_CH_GUIDE: Record<number, string> = {
   1: `[wonguk 섹션 — 타고난 그릇 분석]
 - intro: "~한 사주로, 한 문장 요약" 형식으로 시작. (1문장)
-- sinDesc: 신강·신약 판단과 사랑을 받아들이는 그릇의 크기. 3~4문장. (명식표 아래 표시됨)
+- sinStrength: 신강·신약 풀이. 아래 구조로 출력.
+  - intro: 【필수】위 [득령·득지·득시·득세 판정] 결과를 그대로 사용하여, 아래 [sinStrength.intro 첫 문장]을 글자 하나도 바꾸지 말고 그대로 복사하오. 이후 일간 오행과 지배적 십성으로 신강/신약의 성향을 자연 이미지로 서술하오.
+  - paragraphs: 아래 3개 단락 배열.
+    ① 신강/신약의 핵심 성향과 장점 — 지배적 십성(비겁·식상 등)과 연결하여 자연 이미지로 서술. 사랑을 받아들이는 그릇의 크기와 연애 방식에 어떻게 발현되는지 포함. (2~3문장)
+    ② 그 기운이 과할 때 그림자·단점을 자연 비유로 솔직하게 묘사. (2문장)
+    ③ 주의점과 조언. (1~2문장)
 - ohaengDesc: 오행 균형의 특징과 연애에 미치는 영향. 3~4문장. (오행 도넛 아래 표시됨)
 - ilganDesc: 이 사람의 일간({일간한자} {일간명})을 자연물 하나에 빗대어 연애 기질을 풀이하오. 아래 구조를 반드시 따르오.
   ① 첫 문장: "{이름(성씨 제외)}님의 일간인 {일간명}은 [자연물 은유]이오." 로 시작. (예: 이름이 '김선우'이면 '선우님'으로 표기)
@@ -212,7 +217,7 @@ const YEONAE_CH_SCHEMA: Record<number, string> = {
   1: `{
   "wonguk": {
     "intro": "~한 사주로, 한 줄 요약 (1문장)",
-    "sinDesc": "신강신약 판단과 사랑 그릇의 크기 3~4문장",
+    "sinStrength": { "intro": "【필수】위 [sinStrength.intro 첫 문장]을 그대로 복사 후 일간·십성 기반 자연 이미지 서술", "paragraphs": ["신강/신약 핵심 성향·장점 (자연 이미지, 연애 그릇과 연결, 2~3문장)", "기운이 과할 때 그림자·단점 (자연 비유, 2문장)", "주의점과 조언 (1~2문장)"] },
     "ohaengDesc": "오행 균형과 연애의 관계 3~4문장",
     "ilganDesc": "선우님의 일간인 을목은 담장을 타는 덩굴과 같소. 이 덩굴은 환경에 유연하게 적응하며 주변의 도움을 받아 성장하는 성향을 가지고 있소. 사랑의 흐름은 주로 인연과 소개를 통해 이루어지며, 사람들과의 관계를 통해 감정을 쌓아가는 구조가 나타나고 있소. 한 번 마음이 닿으면 부드럽게 스며들듯 상대에게 깊이 들어가며, 배려와 공감으로 관계를 가꾸어 나가오. 다만 을목의 유연함은 때로 결단력이 부족해져, 감정을 전달해야 하는 결정적 순간에 망설이게 되는 상황으로 이어질 수 있소. 이러한 약점은 소중한 인연을 흘려보내는 결과를 초래할 수 있으니, 보다 솔직하게 감정을 표현하는 연습이 필요하오."
   },
@@ -380,6 +385,33 @@ export function buildYeonaeSajuChapterPrompt(
     : "그대";
   const currentYear = new Date().getFullYear();
 
+  // ch1 전용: 득령·득지·득시·득세 판정표 생성 → sinStrength.intro 첫 문장 고정
+  let deungTable = "";
+  if (chapter === 1 && input.pillars && input.pillars.length >= 4) {
+    const ps = input.pillars;
+    const byPos: Record<string, typeof ps[0]> = {};
+    for (const p of ps) byPos[p.pos] = p;
+    const siju = byPos["시주"]; const ilju = byPos["일주"]; const wolju = byPos["월주"]; const nyeonju = byPos["년주"];
+    if (siju && ilju && wolju && nyeonju) {
+      const ilganEl = ilju.ganEl;
+      const generates: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+      const helps = (el: string) => el === ilganEl || generates[el] === ilganEl;
+      const seTargets = [siju.ganEl, wolju.ganEl, nyeonju.ganEl, nyeonju.jiEl];
+      const seCount = seTargets.filter(helps).length;
+      const dn = helps(wolju.jiEl), dj = helps(ilju.jiEl), ds = helps(siju.jiEl), dse = seCount >= 2;
+      const successItems = [dn && "득령", dj && "득지", ds && "득시", dse && "득세"].filter(Boolean) as string[];
+      const failItems = [!dn && "득령", !dj && "득지", !ds && "득시", !dse && "득세"].filter(Boolean) as string[];
+      const shingang = successItems.length >= 3 || (successItems.length === 2 && (dn || dse));
+      const sinDesc = shingang ? "신강한 편에 속하오" : "신약한 편에 속하오";
+      const firstSentence = failItems.length === 0
+        ? `득령·득지·득시·득세 모두에 성공했으므로 ${sinDesc}.`
+        : successItems.length === 0
+        ? `득령·득지·득시·득세 모두에 실패했으므로 ${sinDesc}.`
+        : `${successItems.join("·")}에는 성공했지만 ${failItems.join("·")}에는 실패했으므로 ${sinDesc}.`;
+      deungTable = `\n[득령·득지·득시·득세 판정]\n득령(월지 ${wolju.jiEl}): ${dn ? "득" : "실패"}\n득지(일지 ${ilju.jiEl}): ${dj ? "득" : "실패"}\n득시(시지 ${siju.jiEl}): ${ds ? "득" : "실패"}\n득세(시간·월간·년간·년지 중 ${seCount}개 도움): ${dse ? "득" : "실패"}\n\n[sinStrength.intro 첫 문장 — 아래 문장을 글자 하나도 바꾸지 말고 그대로 복사하오]\n"${firstSentence}"\n`;
+    }
+  }
+
   // ch4 전용: LoveLineChart와 동일한 로직으로 연도별 연애운 점수 계산 → 프롬프트 주입
   let loveScoreBlock = "";
   if (chapter === 4 && input.seun && input.seun.length > 0) {
@@ -451,7 +483,7 @@ export function buildYeonaeSajuChapterPrompt(
 
   const user = `아래는 ${honor}의 사주 명식입니다.
 
-${loveScoreBlock}${input.manseryeokText}
+${deungTable}${loveScoreBlock}${input.manseryeokText}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
