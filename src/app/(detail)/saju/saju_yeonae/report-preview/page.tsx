@@ -4711,7 +4711,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`사주 안에는\n내가 끌리는 사람의 특징이\n이미 새겨져 있소.`}</Quote>
+          <Quote>{`"사람은 누구나\n제 운명의 실로 엮인 인연을 만나오.\n\n${name.slice(1) || name}님의 붉은 실,\n지금 풀어보겠소."`}</Quote>
 
           {/* 내 사주가 추구하는 연애관 */}
           <section className="px-6 pt-2 pb-4">
