@@ -3938,11 +3938,11 @@ function ReportPreviewInner() {
   }, [ch]);
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
-  const persist = (mergedContent: Record<string, unknown>) => {
+  const persist = (mergedContent: Record<string, unknown>, force = false) => {
     fetch("/api/saju_yeonae-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, content: mergedContent }),
+      body: JSON.stringify({ id, content: mergedContent, ...(force ? { force: true } : {}) }),
     }).catch(() => {});
   };
 
@@ -3969,7 +3969,7 @@ function ReportPreviewInner() {
         setReport((p) => {
           if (!p) return p;
           const merged = { ...(p.content as Record<string, unknown>), ...sec };
-          persist(merged);
+          persist(merged, force);
           return { ...p, content: merged as ReportContent, sajuImageUrl: d.sajuImageUrl ?? p.sajuImageUrl };
         });
       })
