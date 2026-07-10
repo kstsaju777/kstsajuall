@@ -4709,16 +4709,6 @@ function ReportPreviewInner() {
           </section>
 
           {/* 나와 찰떡궁합인 이성의 사주 */}
-          <section className="px-6 pt-2 pb-4">
-            <Heading>나와 찰떡궁합인 이성의 사주</Heading>
-            <p style={{ fontSize:12, color:"#9a9a9a", margin:"-8px 0 16px", fontStyle:"italic", lineHeight:1 }}>(시주는 비중이 적으니 참고만 하시오.)</p>
-            <CompatibleJujuCards
-              items={jc.compatibleJuju as Parameters<typeof CompatibleJujuCards>[0]["items"]}
-              myPillars={report?.view?.pillars?.map(p => ({ pos: p.pos, gan: p.gan, ji: p.ji }))}
-              myBirthYear={report?.birth?.date ? parseInt(String(report.birth.date).slice(0,4)) : undefined}
-            />
-          </section>
-
           {/* 잘 맞는 유형 / 피해야 할 유형 */}
           {(() => {
             const ct = (jc.compatTypes as { wellTypes?: { icon: string; typeDesc: string; reason: string }[]; avoidTypes?: { icon: string; typeDesc: string; reason: string }[] } | undefined) ?? {};
@@ -4781,6 +4771,17 @@ function ReportPreviewInner() {
               </>
             );
           })()}
+
+          {/* 나와 찰떡궁합인 이성의 사주 */}
+          <section className="px-6 pt-6 pb-4">
+            <Heading>나와 찰떡궁합인 이성의 사주</Heading>
+            <p style={{ fontSize:12, color:"#9a9a9a", margin:"-8px 0 16px", fontStyle:"italic", lineHeight:1 }}>(시주는 비중이 적으니 참고만 하시오.)</p>
+            <CompatibleJujuCards
+              items={jc.compatibleJuju as Parameters<typeof CompatibleJujuCards>[0]["items"]}
+              myPillars={report?.view?.pillars?.map(p => ({ pos: p.pos, gan: p.gan, ji: p.ji }))}
+              myBirthYear={report?.birth?.date ? parseInt(String(report.birth.date).slice(0,4)) : undefined}
+            />
+          </section>
 
           <ChapterNav cur="3" go={next} />
         </>
