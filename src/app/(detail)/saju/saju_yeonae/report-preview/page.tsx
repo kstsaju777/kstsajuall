@@ -4739,7 +4739,7 @@ function ReportPreviewInner() {
               <>
                 {ct.wellTypes && ct.wellTypes.length > 0 && (
                   <section className="px-6 pt-6 pb-2">
-                    <Heading>잘 맞는 유형</Heading>
+                    <Heading>{name.slice(1) || name}님과 잘 맞는 유형</Heading>
                     <div className="space-y-3 mt-2">
                       {ct.wellTypes.map((t, i) => (
                         <div key={i} className="rounded-2xl p-4" style={{ background: `${GREEN}0a`, border: `1px solid ${GREEN}25` }}>
