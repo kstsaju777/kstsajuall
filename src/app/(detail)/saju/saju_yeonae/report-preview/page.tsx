@@ -4618,7 +4618,7 @@ function ReportPreviewInner() {
                 {/* ① 연애 기질 키워드 배지 */}
                 {(ls.keywords?.length ?? 0) > 0 ? (
                   <section className="px-6 pt-6 pb-2">
-                    <Heading>나의 연애 기질</Heading>
+                    <Heading>연애 기질 키워드</Heading>
                     {ls.intro && <P>{ls.intro}</P>}
                     <div className="flex flex-wrap gap-2 mt-3">
                       {ls.keywords!.map((kw, i) => {
@@ -4633,7 +4633,7 @@ function ReportPreviewInner() {
                   </section>
                 ) : ls.intro ? (
                   <section className="px-6 pt-6 pb-2">
-                    <Heading>나의 연애 기질</Heading>
+                    <Heading>연애 기질 키워드</Heading>
                     <P>{ls.intro}</P>
                     {ls.callout && <Callout>{ls.callout}</Callout>}
                   </section>
