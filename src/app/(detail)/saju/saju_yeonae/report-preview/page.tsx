@@ -4472,19 +4472,19 @@ function ReportPreviewInner() {
             const ilganFull = report?.view?.ilgan ?? "";
             const ilganHanja = ilganFull[0] ?? "";
             const ilganLabel = ilganFull.match(/\(([^)]+)\)/)?.[1] ?? "";
-            const ILGAN_META: Record<string, { oh: string; color: string; wealth: string }> = {
-              甲: { oh: "목(木)", color: "#3a7d44", wealth: "큰 나무처럼 뻗어나가는 재물 기질. 성장과 확장 속에서 돈이 쌓이오." },
-              乙: { oh: "목(木)", color: "#3a7d44", wealth: "덩굴처럼 유연하게 환경에 적응하며 재물을 모으오." },
-              丙: { oh: "화(火)", color: "#c0392b", wealth: "태양처럼 드러내고 활동하는 방식으로 재물을 끌어당기오." },
-              丁: { oh: "화(火)", color: "#c0392b", wealth: "촛불처럼 섬세하게 관계를 밝히며 재물과 인연을 맺소." },
-              戊: { oh: "토(土)", color: "#b07d2a", wealth: "산처럼 뚝심 있게 쌓아가는 재물 구조를 타고났소." },
-              己: { oh: "토(土)", color: "#b07d2a", wealth: "논밭처럼 꾸준히 가꾸는 방식으로 재물을 일구오." },
-              庚: { oh: "금(金)", color: "#7a7a7a", wealth: "바위처럼 원칙 있게, 결단력으로 재물 기회를 잡소." },
-              辛: { oh: "금(金)", color: "#7a7a7a", wealth: "보석처럼 정제된 능력으로 고부가가치 재물을 만드오." },
-              壬: { oh: "수(水)", color: "#1a5fa8", wealth: "바다처럼 넓게 흐르며 유연한 방식으로 재물을 끌어오." },
-              癸: { oh: "수(水)", color: "#1a5fa8", wealth: "샘물처럼 직관과 예리함으로 재물의 흐름을 감지하오." },
+            const ILGAN_META: Record<string, { oh: string; color: string; love: string }> = {
+              甲: { oh: "목(木)", color: "#3a7d44", love: "큰 나무처럼 우직하게 사랑을 지키오. 한번 마음을 주면 끝까지 책임지는 기운이오." },
+              乙: { oh: "목(木)", color: "#3a7d44", love: "덩굴처럼 유연하게 상대에게 스며들며 관계를 이어가오." },
+              丙: { oh: "화(火)", color: "#c0392b", love: "태양처럼 밝고 적극적으로 사랑을 표현하오. 열정과 에너지로 상대를 끌어당기오." },
+              丁: { oh: "화(火)", color: "#c0392b", love: "촛불처럼 섬세하고 깊게 타오르는 사랑을 하오. 한 사람을 진심으로 밝혀주는 기운이오." },
+              戊: { oh: "토(土)", color: "#b07d2a", love: "산처럼 묵직하고 안정감 있게 상대를 품어주오. 믿음직한 기운으로 관계를 지켜가오." },
+              己: { oh: "토(土)", color: "#b07d2a", love: "논밭처럼 부드럽고 꾸준하게 사랑을 가꾸오. 현실적인 방식으로 관계를 돌보는 기운이오." },
+              庚: { oh: "금(金)", color: "#7a7a7a", love: "바위처럼 원칙 있고 단호하게 사랑하오. 한 번 정한 인연은 흔들리지 않는 기운이오." },
+              辛: { oh: "금(金)", color: "#7a7a7a", love: "보석처럼 정제된 감각으로 사랑을 느끼오. 높은 기준을 가지고 진짜 인연을 고르는 기운이오." },
+              壬: { oh: "수(水)", color: "#1a5fa8", love: "바다처럼 넓고 깊게 감정을 품는 기운이오. 다양한 인연을 경험하며 진정한 사랑을 찾아가오." },
+              癸: { oh: "수(水)", color: "#1a5fa8", love: "샘물처럼 예리한 직관으로 상대의 마음을 꿰뚫오. 감수성이 풍부해 깊이 공감하며 사랑하오." },
             };
-            const meta = ILGAN_META[ilganHanja] ?? { oh: "", color: MAROON, wealth: "" };
+            const meta = ILGAN_META[ilganHanja] ?? { oh: "", color: MAROON, love: "" };
             const w = (jc.wonguk as { ilganDesc?: string; paragraphs?: string[] } | undefined) ?? {};
             const ilText = w.ilganDesc ?? w.paragraphs?.[0];
             return ilganHanja ? (
@@ -4499,7 +4499,7 @@ function ReportPreviewInner() {
                       <span className="text-[13px] font-bold" style={{ color: INK }}>{ilganLabel}</span>
                       <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${meta.color}18`, color: meta.color }}>{meta.oh}</span>
                     </div>
-                    <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{meta.wealth}</p>
+                    <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{meta.love}</p>
                   </div>
                 </div>
                 {ilText && <P>{ilText}</P>}
