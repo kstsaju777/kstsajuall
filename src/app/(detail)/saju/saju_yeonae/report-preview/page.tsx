@@ -4732,6 +4732,49 @@ function ReportPreviewInner() {
             />
           </section>
 
+          {/* 잘 맞는 유형 / 피해야 할 유형 */}
+          {(() => {
+            const ct = (jc.compatTypes as { wellTypes?: { icon: string; typeDesc: string; reason: string }[]; avoidTypes?: { icon: string; typeDesc: string; reason: string }[] } | undefined) ?? {};
+            return (
+              <>
+                {ct.wellTypes && ct.wellTypes.length > 0 && (
+                  <section className="px-6 pt-6 pb-2">
+                    <Heading>잘 맞는 유형</Heading>
+                    <div className="space-y-3 mt-2">
+                      {ct.wellTypes.map((t, i) => (
+                        <div key={i} className="rounded-2xl p-4" style={{ background: `${GREEN}0a`, border: `1px solid ${GREEN}25` }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">{t.icon}</span>
+                            <span className="text-[12px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${GREEN}18`, color: GREEN }}>잘 맞는</span>
+                          </div>
+                          <p className="text-[13px] font-bold mb-1" style={{ color: INK }}>{t.typeDesc}</p>
+                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+                {ct.avoidTypes && ct.avoidTypes.length > 0 && (
+                  <section className="px-6 pt-4 pb-6">
+                    <Heading>피해야 할 유형</Heading>
+                    <div className="space-y-3 mt-2">
+                      {ct.avoidTypes.map((t, i) => (
+                        <div key={i} className="rounded-2xl p-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}25` }}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">{t.icon}</span>
+                            <span className="text-[12px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${WARN}18`, color: WARN }}>주의</span>
+                          </div>
+                          <p className="text-[13px] font-bold mb-1" style={{ color: INK }}>{t.typeDesc}</p>
+                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{t.reason}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </>
+            );
+          })()}
+
           <ChapterNav cur="3" go={next} />
         </>
       )}

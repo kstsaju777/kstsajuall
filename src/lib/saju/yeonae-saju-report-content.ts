@@ -31,7 +31,7 @@ type CompatPillarObj = {
 export const YEONAE_SAJU_CHAPTER_SECTIONS: Record<number, string[]> = {
   1: ["wonguk", "geokguk", "yeonaeseong"],
   2: ["loveStyle"],
-  3: ["loveStyle", "compatibleJuju"],
+  3: ["loveStyle", "compatibleJuju", "compatTypes"],
   4: ["loveTiming", "loveFlow", "lovePattern"],
   5: ["meetingWay", "meetingFlow"],
   6: ["loveCare", "loveAvoid", "loveSummary"],
@@ -166,7 +166,11 @@ summary: 위 4가지 점검 결과를 종합한 연애성 풀이. 3~4문장. 이
    - 어떤 이성에게 끌리는지 (구체적 분위기·성격)
    - 연애에서 주의할 점 (실제 갈등 패턴과 조언)
 ⑥ 【말투 엄수】 홍연 말투(~이오/~하오/~겠소/~있소). "~ㅂ니다", "~어요" 단 한 문장도 금지.
-⑦ 【글자수 엄수】 700~900자. 짧으면 탈락이오.`,
+⑦ 【글자수 엄수】 700~900자. 짧으면 탈락이오.
+
+[compatTypes 섹션 — 궁합 유형]
+- wellTypes: 잘 맞는 유형 2개. 각 { icon, typeDesc(유형 특징 명사형으로 끝내기, 예: "협력적이고 진취적인 성향의 유형"), reason(사주적 이유 2문장) }
+- avoidTypes: 피해야 할 유형 2개. 각 { icon, typeDesc(유형 특징 명사형으로 끝내기, 예: "감정기복이 크고 의존적인 유형"), reason(왜 충극되는지 2문장) }`,
 
   4: `[loveTiming 섹션 — 인연 시기 방향]
 - timingType: 이 명식의 인연 유형 이름. 2~5글자로 압축. (예: "늦봄 인연형", "불꽃 인연형", "차근차근형")
@@ -332,7 +336,17 @@ const YEONAE_CH_SCHEMA: Record<number, string> = {
       "pillars": { "nyeon":{"gan":"[3순위] nyeon.gan","ji":"nyeon.ji","ganEl":"nyeon.ganEl","jiEl":"nyeon.jiEl"}, "wol":{"gan":"wol.gan","ji":"wol.ji","ganEl":"wol.ganEl","jiEl":"wol.jiEl"}, "il":{"gan":"il.gan","ji":"il.ji","ganEl":"il.ganEl","jiEl":"il.jiEl"}, "si":{"gan":"si.gan","ji":"si.ji","ganEl":"si.ganEl","jiEl":"si.jiEl"} },
       "desc": "▶ 아래 [3순위 DESC 작성 지시] 참조하여 작성"
     }
-  ]
+  ],
+  "compatTypes": {
+    "wellTypes": [
+      { "icon": "💚", "typeDesc": "잘 맞는 유형 특징 명사형", "reason": "사주적 이유 2문장" },
+      { "icon": "💚", "typeDesc": "잘 맞는 유형 특징 명사형", "reason": "사주적 이유 2문장" }
+    ],
+    "avoidTypes": [
+      { "icon": "⚠️", "typeDesc": "피해야 할 유형 특징 명사형", "reason": "충극 이유 2문장" },
+      { "icon": "⚠️", "typeDesc": "피해야 할 유형 특징 명사형", "reason": "충극 이유 2문장" }
+    ]
+  }
 }`,
   4: `{
   "loveTiming": {
