@@ -4679,7 +4679,6 @@ function ReportPreviewInner() {
                 {/* ④ 종합 풀이 */}
                 {(ls.summary ?? ls.paragraphs) && (
                   <section className="px-6 pt-6 pb-4">
-                    <Heading>종합 풀이</Heading>
                     {ls.summary
                       ? <P>{ls.summary}</P>
                       : ls.paragraphs?.map((p, i) => <P key={i}>{p}</P>)
