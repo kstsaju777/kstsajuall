@@ -4593,7 +4593,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`사랑을 대하는 방식은\n사람마다 다르오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}만의\n연애 기질을 살펴보겠소.`}</Quote>
+          <Quote>{`사랑을 대하는 방식은\n사람마다 다르오.\n\n${name.slice(1) || name}님만의\n연애 기질을 살펴보겠소.`}</Quote>
 
           {(() => {
             const ls = (jc.loveStyle as {
