@@ -4562,7 +4562,7 @@ function ReportPreviewInner() {
               </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
             {/* ── ① 소제목 ── */}
-            <section className="px-6 pt-2 pb-2">
+            <section className="px-6 pt-2 pb-0">
               <Heading>타고난 체질과 기운</Heading>
             </section>
 
