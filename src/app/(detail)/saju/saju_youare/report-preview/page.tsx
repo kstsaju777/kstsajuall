@@ -4182,9 +4182,9 @@ function ReportPreviewInner() {
   const name = report?.name?.trim() || nameParam.trim() || "고객";
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
-  const honor = name ? `${name}${effectiveGender === "female" ? "양" : "군"}` : "이 아이";
   const givenName = name.slice(1);
-  const honorShort = givenName ? (effectiveGender === "female" ? `${givenName}양` : `${givenName}군`) : "아이";
+  const honor = givenName ? `${givenName}${effectiveGender === "female" ? "양" : "군"}` : "이 아이";
+  const honorShort = honor;
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
   const c = { ...SAMPLE_CONTENT, ...(report?.content ?? {}) } as ReportContent;
   // 실제 결제자(id 있음)인데 현재 장이 아직 생성 안 됨 → 샘플 대신 로딩/에러 표시
