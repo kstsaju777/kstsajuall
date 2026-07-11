@@ -4565,7 +4565,6 @@ function ReportPreviewInner() {
             <section className="px-6 pt-2 pb-4">
               <Heading>타고난 체질과 기운</Heading>
               {con.intro && <P>{con.intro}</P>}
-              {con.callout && <Callout>{con.callout}</Callout>}
             </section>
 
             {/* ── ② 오행 도넛 ── */}
