@@ -4534,7 +4534,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_1/saju_health_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`몸의 씩씩함도\n사주에 새겨져 있소.\n\n${name}${"님"}의\n타고난 체질을 살펴보겠소.`}</Quote>
+            <Quote>{`${name.slice(1) || name}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 건강의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name.slice(1) || name}님의 건강사주요.`}</Quote>
 
             {/* ── ① 인트로 + 콜아웃 ── */}
             <section className="px-6 pt-2 pb-4">
