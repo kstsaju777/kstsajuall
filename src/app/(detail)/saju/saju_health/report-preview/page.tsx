@@ -4573,6 +4573,9 @@ function ReportPreviewInner() {
             {con.paragraphs?.[0] && <section className="px-6 pb-4"><P>{con.paragraphs[0]}</P></section>}
 
             {/* ── ④ 신강·신약 게이지 ── */}
+            <section className="px-6 pt-6 pb-0">
+              <Heading>{name.slice(1) || name}님의 기운은 강한가 약한가</Heading>
+            </section>
             <section className="px-5">
               <SinStrengthGauge view={report?.view ?? null} />
             </section>
