@@ -4561,10 +4561,9 @@ function ReportPreviewInner() {
                 <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "-1px 0 3px rgba(0,0,0,0.4)" }} />
               </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
-            {/* ── ① 인트로 + 콜아웃 ── */}
-            <section className="px-6 pt-2 pb-4">
+            {/* ── ① 소제목 ── */}
+            <section className="px-6 pt-2 pb-2">
               <Heading>타고난 체질과 기운</Heading>
-              {con.intro && <P>{con.intro}</P>}
             </section>
 
             {/* ── ② 오행 도넛 ── */}
