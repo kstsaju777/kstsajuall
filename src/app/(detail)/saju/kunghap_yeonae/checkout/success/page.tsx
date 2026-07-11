@@ -34,7 +34,8 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
           }} />
         ))}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span style={{ fontSize: 28, filter: "drop-shadow(0 0 8px #ff4499)" }}>✦</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo_128.jpg" alt="홍연당" style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", boxShadow: "0 0 14px 4px #5bbfea66" }} />
         </div>
       </div>
       <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5f5", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #ff449988" }}>

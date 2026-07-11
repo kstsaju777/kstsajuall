@@ -22,6 +22,39 @@ import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
+
+// ── 십성 계산 유틸 (세운·대운용) ──
+const STEM_EL: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+const BRANCH_EL: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+const STEM_YIN: Record<string,boolean> = { 甲:false,乙:true,丙:false,丁:true,戊:false,己:true,庚:false,辛:true,壬:false,癸:true };
+function computeSipseong(ilgan: string, targetGz: string): { sipTop: string; sipBot: string } {
+  const ilEl = STEM_EL[ilgan] ?? "";
+  const ilYin = STEM_YIN[ilgan] ?? false;
+  const stemChar = targetGz[0] ?? "";
+  const branchChar = targetGz[1] ?? "";
+  function toSip(tEl: string, tYin: boolean): string {
+    if (!ilEl || !tEl) return "";
+    if (tEl === ilEl) return tYin !== ilYin ? "겁재" : "비견";
+    if (GEN[ilEl] === tEl) return tYin !== ilYin ? "상관" : "식신";
+    if (CTL[ilEl] === tEl) return tYin !== ilYin ? "편재" : "정재";
+    if (GEN[tEl] === ilEl) return tYin !== ilYin ? "편관" : "정관";
+    if (CTL[tEl] === ilEl) return tYin !== ilYin ? "편인" : "정인";
+    return "";
+  }
+  const stemEl = STEM_EL[stemChar] ?? "";
+  const stemYin = STEM_YIN[stemChar] ?? false;
+  const branchEl = BRANCH_EL[branchChar] ?? "";
+  // 지지 음양: 寅卯辰巳午未는 양, 申酉戌亥子丑은 음 (간략 근사)
+  const branchYin = ["申","酉","戌","亥","子","丑"].includes(branchChar);
+  return { sipTop: toSip(stemEl, stemYin), sipBot: toSip(branchEl, branchYin) };
+}
+const STEM_KR: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+const BRANCH_KR: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+function gzToKr(gz: string): string {
+  return (STEM_KR[gz[0]] ?? gz[0]) + (BRANCH_KR[gz[1]] ?? gz[1]) + "년";
+}
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
 
 export const maxDuration = 300;
@@ -42,7 +75,7 @@ const createSchema = z.object({
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; krName?: string; sipTop?: string; sipBot?: string }[]; daeun?: { label: string; gz: string; krName?: string; yearStart: number; active: boolean; sipTop?: string; sipBot?: string }[] }) {
   const { system, user } = buildJanyeoChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -201,24 +234,6 @@ async function createReport(body: unknown) {
         sendOrderSms({ customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
         if (email) sendOrderEmail({ customerEmail: email, customerName: name || "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl });
 
-        // 3단계: 이미지 백그라운드 시작 (클라이언트 병렬 장 생성 중에 동시 실행)
-        const imagePrompt = buildSajuImagePrompt(view.pillars ?? []);
-        (async () => {
-          for (let attempt = 0; attempt < 3; attempt++) {
-            try {
-              const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-              const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-              const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-              if (uploadErr) throw uploadErr;
-              const sajuImageUrl = service.storage.from("saju-images").getPublicUrl(imgPath).data.publicUrl;
-              await service.from("saju_results").update({ myeongsik: { view, name, birth, manseryeokText, gender: g, sajuImageUrl } as never }).eq("id", result.id);
-              break;
-            } catch (e) {
-              console.error(`[saju_janyeo] 이미지 생성 실패 (시도${attempt + 1}):`, e);
-            }
-          }
-        })();
-
         return NextResponse.json({ resultId: result.id });
       } catch (err) {
         return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
@@ -264,12 +279,20 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? ""; // "yyyy.mm.dd"
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+    const pillars = applyLocalSinsal(stored?.view?.pillars ?? []);
+    const ilgan: string = (stored?.view?.ilgan ?? "").split(" ")[0] ?? "";
+    const rawSeun: { label: string; gz: string; active?: boolean }[] = stored?.view?.seun ?? [];
+    const rawDaeun: { label: string; gz: string; yearStart: number; active: boolean }[] = stored?.view?.daeun ?? [];
+    const seunWithSip = rawSeun.map(s => ({ ...s, ...computeSipseong(ilgan, s.gz), krName: gzToKr(s.gz) }));
+    const daeunWithSip = rawDaeun.map(d => ({ ...d, ...computeSipseong(ilgan, d.gz), krName: gzToKr(d.gz) }));
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
-      pillars: applyLocalSinsal(stored?.view?.pillars ?? []),
+      pillars,
       birthYear: birthYear || undefined,
+      seun: seunWithSip,
+      daeun: daeunWithSip,
     });
 
     return NextResponse.json({ sections: obj });
@@ -318,6 +341,23 @@ export async function PATCH(request: NextRequest) {
     const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
     const sajuImageUrl = pubData.publicUrl;
     await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
+
+    // 이미지 완성 후 알림톡 발송 (모든 챕터가 완료된 경우)
+    const { data: resultData } = await service.from("saju_results").select("interpretation_md, order_id").eq("id", id).maybeSingle();
+    if (resultData?.order_id) {
+      let contentForCheck: Record<string, unknown> = {};
+      try { contentForCheck = JSON.parse(resultData.interpretation_md || "{}") || {}; } catch { contentForCheck = {}; }
+      const totalChapters = Object.keys(JANYEO_CHAPTER_SECTIONS).map(Number);
+      const allDone = totalChapters.every(n => isJanyeoChapterReady(contentForCheck, n));
+      if (allDone) {
+        const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultData.order_id).maybeSingle();
+        if (si?.phone) {
+          const reportUrl = `https://www.hongyeondang.com/saju/saju_janyeo/report-preview?id=${id}`;
+          sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+        }
+      }
+    }
+
     return NextResponse.json({ sajuImageUrl });
   } catch (e) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });

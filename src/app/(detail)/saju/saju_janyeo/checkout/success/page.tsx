@@ -5,12 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 const CHAPTER_TITLES = [
   "제1장 — 타고난 기질과 성격",
-  "제2장 — 학업운과 공부 스타일",
-  "제3장 — 타고난 재능과 적성",
-  "제4장 — 진로와 직업운",
+  "제2장 — 나는 왜 이런 사람인가",
+  "제3장 — 학업운과 공부 스타일",
+  "제4장 — 타고난 재능과 적성",
   "제5장 — 건강에서 주의할 부분",
   "제6장 — 성장 시기별 양육 포인트",
-  "제7장 — 친구운과 인간관계",
+  "제7장 — 교우관계와 사회성",
   "마무리 — 홍연의 서신",
 ];
 const TOTAL = 8;
@@ -38,7 +38,8 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
           }} />
         ))}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span style={{ fontSize: 28, filter: "drop-shadow(0 0 8px #5bbfea)" }}>✦</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo_128.jpg" alt="홍연당" style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", boxShadow: "0 0 14px 4px #5bbfea66" }} />
         </div>
       </div>
       <p className="text-[18px] font-bold mb-1" style={{ color: "#e8f8ff", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #5bbfea88" }}>
@@ -131,6 +132,12 @@ function SuccessInner() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
+
+      // 이미지 생성 완료까지 대기
+      await fetch("/api/saju_janyeo-report", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId }),
+      }).catch(() => {});
 
       router.push(`/saju/saju_janyeo/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });

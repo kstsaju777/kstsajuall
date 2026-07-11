@@ -4,4 +4,5 @@
 // 상품에 이미지 추가 시 여기에 productSlug 추가
 export const WAIT_FOR_IMAGE = new Set<string>([
   "total",
+  "saju_janyeo",
 ]);
