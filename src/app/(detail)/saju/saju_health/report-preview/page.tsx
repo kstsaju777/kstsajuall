@@ -4141,7 +4141,7 @@ function ReportPreviewInner() {
 
           {/* 인사말 */}
           <section className="px-6 pt-10 pb-6">
-            <P>안녕하시오, <Term>{name.slice(1) || name}{effectiveGender === "female" ? "양" : "군"}</Term>.</P>
+            <P>안녕하시오, <Term>{name.slice(1) || name}{"님"}</Term>.</P>
             <P>본격적으로 사주풀이에 들어가기 전에,<br />사주팔자가 무엇인지 먼저 짚고 넘어가겠소.</P>
           </section>
 
@@ -4499,7 +4499,7 @@ function ReportPreviewInner() {
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`"자, 이제 ${name}${effectiveGender === "female" ? "양" : "군"}의\n서사가 담긴 책을 펼쳐보겠소?"`}
+              {`"자, 이제 ${name}${"님"}의\n서사가 담긴 책을 펼쳐보겠소?"`}
             </p>
             <p className="mt-5 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>홍연(紅緣)</p>
           </div>
@@ -4535,7 +4535,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_1/saju_health_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`몸의 씩씩함도\n사주에 새겨져 있소.\n\n${name}${effectiveGender === "female" ? "양" : "군"}의\n타고난 체질을 살펴보겠소.`}</Quote>
+            <Quote>{`몸의 씩씩함도\n사주에 새겨져 있소.\n\n${name}${"님"}의\n타고난 체질을 살펴보겠소.`}</Quote>
 
             {/* ── ① 인트로 + 콜아웃 ── */}
             <section className="px-6 pt-2 pb-4">
@@ -5272,7 +5272,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_6/saju_health_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`부족한 기운을 채우면\n건강의 흐름이 달라지오.\n\n${name}${effectiveGender === "female" ? "양" : "군"}에게\n맞는 개운법이오.`}</Quote>
+            <Quote>{`부족한 기운을 채우면\n건강의 흐름이 달라지오.\n\n${name}${"님"}에게\n맞는 개운법이오.`}</Quote>
 
             {/* ── ① 인트로 + 콜아웃 ── */}
             <section className="px-6 pt-2 pb-4">
