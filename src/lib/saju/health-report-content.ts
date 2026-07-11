@@ -8,11 +8,9 @@ import { SYSTEM } from "./report-prompts";
 export const HEALTH_CHAPTER_SECTIONS: Record<number, string[]> = {
   1: ["constitution"],
   2: ["weakParts"],
-  3: ["diseases"],
-  4: ["lifestyle"],
-  5: ["healthFlow"],
-  6: ["remedy"],
-  7: ["letter"],
+  3: ["lifestyle"],
+  4: ["healthFlow"],
+  5: ["letter"],
 };
 
 // ── 장 완성 여부 확인 ──
@@ -47,12 +45,12 @@ export function isHealthChapterReady(
 const HEALTH_CH_THEME: Record<number, string> = {
   1: "[제1장 체질] 나는 어떤 체질로 태어났나 — 일간 오행, 신강·신약, 타고난 체질과 에너지 특성",
   2: "[제2장 약점] 내 사주에 약한 부위는 어디인가 — 오행 취약점으로 보는 신체 취약 부위와 장기",
-  3: "[제3장 질병] 내가 특히 조심해야 할 질병과 증상 — 사주 오행 불균형에서 비롯되는 질환 경향",
-  4: "[제4장 식습관] 나에게 맞는 식습관과 생활 방식 — 용신 오행 기반 맞는 음식·운동·수면·환경",
-  5: "[제5장 흐름] 내 건강 흐름과 조심해야 할 시기 — 대운·세운 흐름으로 보는 건강 고비 시기",
-  6: "[제6장 개운법] 내 건강을 살릴 개운법 — 부족한 오행을 채우는 생활·환경·마음 개운법",
-  7: "[마무리] 홍연의 서신 — 건강사주 풀이를 마치며 전하는 따뜻한 손편지",
+  3: "[제3장 식습관] 나에게 맞는 식습관과 생활 방식 — 용신 오행 기반 맞는 음식·운동·수면·환경",
+  4: "[제4장 흐름] 내 건강 흐름과 조심해야 할 시기 — 대운·세운 흐름으로 보는 건강 고비 시기",
+  5: "[마무리] 홍연의 서신 — 건강사주 풀이를 마치며 전하는 따뜻한 손편지",
 };
+
+const HEALTH_REMEDY_THEME = "[개운법] 내 건강을 살릴 개운법 — 부족한 오행을 채우는 생활·환경·마음 개운법";
 
 // ── 장별 추가 지시 ──
 const HEALTH_CH_GUIDE: Record<number, string> = {
@@ -66,38 +64,54 @@ const HEALTH_CH_GUIDE: Record<number, string> = {
 - gyeokguk: 이 사주의 격국명 (예: "정관격", "식신격" 등). 격국을 먼저 판단하여 이후 모든 풀이의 기준으로 삼으시오.
 - intro: 한 줄 체질 요약. 일간 오행과 신강·신약을 담아 (1문장)
 - callout: 이 사람의 에너지 특성과 체질 핵심 한 문장.
-- paragraphs 3개: ①일간 오행과 신강·신약, 격국으로 본 체질 ②타고난 에너지 패턴과 몸의 특성 ③이 체질이 주는 강점과 주의 포인트. 각 5~7문장 200자 이상으로 상세하게.
+- paragraphs 3개. 각 단락은 반드시 7~9문장, 300자 이상. 짧은 단락 절대 금지. 홍연 말투(~이오/~하오/~겠소) 유지.
+  ⚠️ 성격·기질·직업·성공 등 일반 인생 풀이는 절대 금지. 오직 '건강'에만 초점을 맞추시오.
+  ①[건강] 일간 오행과 신강신약이 몸에 어떻게 작용하는가 — [사주 실제 구성]의 오행 비율(%) 수치를 그대로 언급(예: "목이 38%…", "토·금·수가 각 13%…")하며, 그 비율이 이 사람의 체력·면역·에너지 흐름에 미치는 영향을 건강 관점으로만 서술.
+  ②[건강] 오행 상생상극으로 보는 취약 장기·계통 — 강한 오행이 과잉될 때 생기는 장기 부하(간·심장·폐 등), 목극토·목생화 등 상생상극으로 눌리는 장기, 실제로 나타나는 건강 증상(두통·소화장애·피로·염증 등)을 구체적으로 서술. 성격 언급 금지.
+  ③[건강] 건강 관리 핵심 방향 — 강한 오행 기운을 발산하는 방법, 약한 오행(비율 낮은 것)을 보완하는 식습관·생활 습관, 주의해야 할 건강 행동 패턴. 성격·커리어 언급 금지, 오직 몸과 건강만.
 - constitutionType: { icon(이모지 1자), name(체질 유형명 4~6자, 예: "목형 체질"), badge(신강/신약 표기), desc(이 체질의 핵심 기운을 2~3문장으로) }
 - constitutionTraits: 4개. 각 trait: { icon(이모지), label(특성명 3~5자), desc(한 줄 설명) } — 이 체질이 타고난 강점·특성 중심으로
-- constitutionCautions: 3개. 각: { num(번호 1~3), title(주의 포인트 5~8자), desc(2~3문장, 왜 이 체질에서 이 점이 중요한지) }`,
+- constitutionCautions: 3개. 각: { num(번호 1~3), title(주의 포인트 5~8자), desc(2~3문장, 왜 이 체질에서 이 점이 중요한지) }
+- sinStrengthHealthParagraphs: 4개 단락. 신강·신약 정도가 건강에 어떻게 작용하는지 건강 중심으로 풀이. ①신강·신약 체질과 전반적인 건강 특성 (이 기운의 강도가 몸에 미치는 영향 5~7문장 200자 이상) ②일간 오행과 연결된 취약 장기·계통과 그 이유 (구체적 장기명, 언제 악화되는지 5~7문장 200자 이상) ③기운 강도에서 비롯되는 체력·피로·스트레스 패턴 (몸이 보내는 신호 포함 5~7문장 200자 이상) ④건강 관리의 핵심 방향 (이 체질에 맞는 발산 또는 보충의 방향 5~7문장 200자 이상). 홍연 말투(~이오/~하오/~겠소) 유지.
+- yongsinHealthParagraphs: 2개 단락. 용신·희신·기신 오행이 이 사람의 건강에 구체적으로 어떻게 작용하는지 풀이. 반드시 7~9문장 300자 이상. 성격·기질 언급 금지, 오직 건강만.
+  ①용신·희신 오행이 몸에 미치는 긍정적 영향 — 이 기운이 충족될 때 몸의 어떤 계통이 강해지고 어떤 증상이 완화되는지 구체적으로. 관련 장기명, 보완 방향 포함.
+  ②기신 오행이 몸에 미치는 부담 — 이 기운이 과잉될 때 어떤 장기·계통에 부하가 걸리고 어떤 증상으로 나타나는지. 피해야 할 생활 습관·식품 포함.`,
 
   2: `[weakParts 섹션 — 약한 신체 부위]
 - intro: 이 사람이 가장 주의해야 할 신체 부위 핵심 한 줄. (1문장)
 - callout: 오행 취약점과 연결된 신체 핵심 한 문장.
-- paragraphs 3개: ①오행 취약점으로 본 약한 장기·부위와 그 사주적 이유를 구체적으로 ②이 부위들이 약해질 때 나타나는 몸의 변화와 신호 ③예방과 보완을 위한 마음가짐과 방향. 각 7~9문장 300자 이상, 홍연의 깊은 통찰이 담기도록 충분히 서술하시오.
-- parts: 취약 부위 3~4개. 각 part: icon(이모지), name(부위명 3~6자), ohaeng(연관 오행 1자, 예: "목"), desc(이 부위가 약한 사주적 이유, 어떤 상황에서 악화되는지, 어떤 증상으로 나타나는지 4~5문장 150자 이상).
+- paragraphs 3개. 각 단락 반드시 7~9문장 300자 이상. 홍연 말투(~이오/~하오/~겠소) 유지.
+  ①첫 문장은 반드시 "오행마다 관장하는 신체 기관이 따로 있소. 취약한 기운이 곧 약해지기 쉬운 부위와 이어지니…" 식으로 오행과 신체 연결의 원리를 먼저 설명하며 시작. 이후 [사주 실제 구성]의 오행 비율(%)을 수치 그대로 언급하며, 부족한 오행이 관장하는 장기와 그 사주적 이유(목극토·금생수 등 상생상극 포함)를 구체적으로 서술.
+  ②부족한 오행의 장기들이 약해질 때 실제로 나타나는 몸의 변화와 초기 신호 — 구체적인 증상(소화장애·호흡기·피로·부종 등), 언제 악화되는지, 어떤 상황에서 더 심해지는지.
+  ③예방과 보완 방향 — 약한 오행을 보충하는 식습관·생활 습관, 강한 오행의 과잉을 조절하는 방법, 마음가짐과 실천 방향.
+- parts: 취약 부위 3~4개. 각 part: icon(이모지), name(부위명 3~6자), ohaeng(연관 오행 1자, 예: "목"), desc(4~5문장 150자 이상).
+  desc 작성 원칙:
+  · 오행 비율(%)이나 "부족하다"는 표현 절대 금지. 대신 상생상극 관계(예: 목극토, 수생목)로 왜 이 장기가 눌리는지 원리를 서술하시오.
+  · 이 장기가 약해질 때 실제로 나타나는 구체적인 증상, 언제·어떤 상황에서 악화되는지 서술.
+  · 홍연 말투(~이오/~하오/~겠소) 유지.
+  ⚠️ parts의 ohaeng은 반드시 [사주 실제 구성]에서 "약한 오행(0~1개)"으로 표시된 오행에서만 선택하시오. 강한 오행(2개 이상)의 장기는 절대 포함 금지.
+  ⚠️ parts의 name은 반드시 아래 오행별 장기 목록에서만 선택하시오 (화면에 표시되는 장기명과 일치해야 함):
+  목(木): 간, 담낭, 눈, 근육, 손발톱 / 화(火): 심장, 소장, 혀, 혈관, 뇌 / 토(土): 비장, 위장, 입, 근육, 살 / 금(金): 폐, 대장, 코, 피부, 기관지 / 수(水): 신장, 방광, 귀, 뼈, 생식기
 - bodySignals: 3~4개. 이 체질이 몸에서 보내는 초기 신호. 각: { icon(이모지), title(신호 제목 5~8자), desc(이 신호가 무엇을 의미하는지, 왜 이 체질에서 이 신호가 나타나는지, 어떻게 대응해야 하는지 4~5문장 150자 이상) }
 - weakAdvice: 이 약점을 안고 살아갈 때 필요한 마음가짐과 실천 방향. 홍연이 직접 당부하듯 따뜻하고 진지하게. 4~5문장 150자 이상.`,
 
-  3: `[diseases 섹션 — 질병과 증상]
-- intro: 이 사람이 특히 조심해야 할 질환 방향 핵심 한 줄. (1문장)
-- callout: 오행 불균형에서 비롯되는 주요 질환 경향 한 문장.
-- paragraphs 3개: ①사주 오행으로 보는 질환 경향과 그 이유를 구체적으로 ②이 질환들이 어떤 상황에서 심해지고 어떻게 나타나는지 ③예방과 조기 대처를 위한 방향. 각 7~9문장 300자 이상.
-- symptoms: 주의 증상·질환 3~4개. 각 symptom: icon(이모지), name(질환/증상명 3~8자), level("주의" 또는 "관찰"), desc(이 질환이 왜 이 사주에서 나타나는지, 어떤 증상으로 발현되는지, 언제 악화되는지 4~5문장 150자 이상).
-- symptomTriggers: 3~4개. 이 체질에서 증상을 악화시키는 상황·패턴. 각: { icon(이모지), trigger(상황 제목 5~8자), desc(이 상황이 왜 이 체질에 특히 해로운지, 어떻게 대응해야 하는지 3~4문장 120자 이상) }
-- preventionTips: 3~4개. 실천 가능한 예방 수칙. 각: { num(번호), title(수칙 제목 5~8자), desc(구체적인 실천 방법과 그 이유 3~4문장 120자 이상) }
-- diseaseAdvice: 홍연이 이 사람에게 전하는 질병 예방 당부. 따뜻하고 진지하게. 4~5문장 150자 이상.`,
-
-  4: `[lifestyle 섹션 — 식습관과 생활]
+  3: `[lifestyle 섹션 — 식습관과 생활]
 - intro: 이 사람에게 맞는 생활 방향 핵심 한 줄. (1문장)
 - callout: 용신 오행과 생활 습관의 연결 핵심 한 문장.
-- paragraphs 3개: ①용신 오행과 식습관의 연결 원리 및 이 사람에게 맞는 음식과 식재료 ②이 체질에 맞는 운동·수면·환경의 방향과 이유 ③일상에서 피해야 할 것들과 주의 사항. 각 7~9문장 300자 이상.
+- paragraphs 3개. 각 단락 반드시 8문장 이상, 350자 이상. 짧으면 절대 안 됨.
+  ①용신 오행이 이 사람의 식습관에 어떻게 연결되는지 원리 설명 → 용신 오행이 주관하는 장기 → 그 장기를 보하는 구체적 식재료(이름 명시) → 왜 그 식재료가 이 사주에 맞는지 이유 → 피해야 할 식재료와 이유까지.
+  ②이 체질에 맞는 운동 종류와 강도·빈도 → 수면 패턴(취침 시간, 환경) → 생활 공간·방향·습도 등 환경 조건 → 각각 왜 이 사주에 맞는지 사주적 이유 포함.
+  ③바로 위 식품 가이드(적극 추천·도움됨·절제)를 풀어서 설명하는 단락. 이 단락은 반드시 세 파트로 구성하시오.
+    [적극 추천] 용신 오행이 주관하는 장기와 그 식재료들을 자주 섭취해야 하는 사주적 이유를 구체적으로.
+    [도움됨] 희신 오행 식재료가 이 사주의 균형에 어떻게 기여하는지.
+    [절제] 기신 오행 식재료를 과다 섭취하면 왜 해로운지, 어떤 증상으로 나타나는지, 어느 정도 빈도로 절제해야 하는지.
 - foodRecs: 4개. 이 체질에 맞는 권장 식품·식재료. 각: { icon(이모지), name(식품명 2~6자), ohaeng(보완하는 오행 1자), category("채소"/"과일"/"곡류"/"육류"/"해산물"/"약재" 중), benefit(이 식품이 왜 이 체질에 좋은지, 어떻게 섭취하면 좋은지 3~4문장 120자 이상) }
+  ⚠️ foodRecs의 ohaeng은 반드시 용신 또는 희신 오행에 해당하는 식품만 선택할 것. 기신·구신 오행을 보완하는 식품은 절대 포함하지 말 것.
 - lifestyleCards: 3개. 운동·수면·환경 각 영역별 루틴 제안. 각: { icon(이모지), area("운동" 또는 "수면" 또는 "환경"), title(루틴 핵심 제목 5~8자), desc(이 체질에 이 루틴이 왜 맞는지, 구체적인 실천 방법 4~5문장 150자 이상) }
 - tips: 실천 팁 4~5개. 각: { icon(이모지), title(팁 제목 5~8자), desc(구체적인 실천 방법과 이유 3~4문장 120자 이상) }
 - lifestyleAdvice: 홍연이 이 사람의 일상을 응원하듯 전하는 당부. 따뜻하고 실용적으로. 4~5문장 150자 이상.`,
 
-  5: `[healthFlow 섹션 — 건강 흐름과 시기]
+  4: `[healthFlow 섹션 — 건강 흐름과 시기]
 - intro: 이 사람의 건강 흐름에서 가장 주의해야 할 시기 핵심 한 줄. (1문장)
 - callout: 대운·세운 흐름과 건강의 연관 핵심 한 문장.
 - paragraphs 3개: ①대운의 원리와 이 사람의 건강 흐름 전반 ②주의 시기에 몸에서 일어나는 변화와 그 사주적 이유 ③건강 흐름을 받아들이는 마음가짐과 장기적 관리 방향. 각 7~9문장 300자 이상.
@@ -105,15 +119,7 @@ const HEALTH_CH_GUIDE: Record<number, string> = {
 - periodTips: 3~4개. 건강 고비 시기를 대비하는 일반 수칙. 각: { icon(이모지), title(수칙 제목 5~8자), desc(이 수칙이 왜 이 사람에게 특히 중요한지, 어떻게 실천하는지 3~4문장 120자 이상) }
 - flowAdvice: 홍연이 건강 흐름 전체를 바라보며 전하는 당부. 건강을 지키며 살아가길 바라는 마음으로. 4~5문장 150자 이상.`,
 
-  6: `[remedy 섹션 — 개운법]
-- intro: 이 사람의 건강 개운법 방향 핵심 한 줄. (1문장)
-- callout: 부족한 오행과 개운의 방향 핵심 한 문장.
-- paragraphs 3개: ①부족한 오행을 채우는 원리와 이 사람의 사주에 맞는 이유를 구체적으로 ②생활·환경·마음 각 영역에서 기운을 보완하는 방향과 그 효과 ③개운법을 꾸준히 실천할 때의 변화와 마음가짐. 각 7~9문장 300자 이상.
-- remedies: 개운법 4~5개. 각 remedy: icon(이모지), category("생활습관"/"환경·공간"/"마음·명상"/"음식·약재"/"색상·방향" 중 하나), title(개운법 이름 4~8자), desc(이 개운법이 왜 이 사주에 효과적인지, 구체적으로 어떻게 실천하는지 4~5문장 150자 이상).
-- remedyCats: 3개. 분야별 실천 항목 묶음. 각: { icon(이모지), category("생활" 또는 "환경" 또는 "마음"), items: 실천 가능한 구체적 항목 3~4개 (각 한 줄, 매우 구체적으로 — 예: "매일 아침 15분 걷기", "침실에 수 오행 계열 파란색 소품 배치") }
-- remedyAdvice: 홍연이 이 사람의 건강 개운을 응원하며 전하는 당부. 따뜻하고 진지하게. 4~5문장 150자 이상.`,
-
-  7: `[letter 섹션 — 홍연의 서신]
+  5: `[letter 섹션 — 홍연의 서신]
 건강사주 풀이를 마치며 홍연이 전하는 따뜻한 손편지.
 - 이 사람의 체질, 약한 부위, 건강 흐름, 식습관, 개운법 — 풀이 전체를 아우르며 건강하게 살아가길 바라는 마음을 담아 쓰시오.
 - 홍연의 말투(~이오/~하오/~겠소/~했소)로 일관되게 쓰시오. "~ㅂ니다/~어요" 금지.
@@ -135,7 +141,7 @@ const HEALTH_CH_SCHEMA: Record<number, string> = {
     "gyeokguk": "정관격",
     "intro": "체질 요약 한 줄 (1문장)",
     "callout": "에너지 특성·체질 핵심 한 문장",
-    "paragraphs": ["단락1 (5~7문장 200자+)", "단락2 (5~7문장 200자+)", "단락3 (5~7문장 200자+)"],
+    "paragraphs": ["단락1 — 반드시 7~9문장 300자 이상. 오행 비율(%) 수치를 직접 언급하며 일간·신강신약·격국으로 본 체질 서술", "단락2 — 반드시 7~9문장 300자 이상. 오행 상생상극에서 비롯되는 에너지 패턴과 취약 장부·계통·증상 서술", "단락3 — 반드시 7~9문장 300자 이상. 약한 오행 보완 방향과 건강 관리 핵심 방향 서술"],
     "constitutionType": {
       "icon": "🌿",
       "name": "목형 체질",
@@ -152,14 +158,15 @@ const HEALTH_CH_SCHEMA: Record<number, string> = {
       { "num": 1, "title": "주의 포인트 제목", "desc": "2~3문장 설명" },
       { "num": 2, "title": "주의 포인트 제목", "desc": "2~3문장 설명" },
       { "num": 3, "title": "주의 포인트 제목", "desc": "2~3문장 설명" }
-    ]
+    ],
+"sinStrengthHealthParagraphs": ["단락1 (5~7문장 200자+)", "단락2 (5~7문장 200자+)", "단락3 (5~7문장 200자+)", "단락4 (5~7문장 200자+)"],
+    "yongsinHealthParagraphs": ["단락1 — 반드시 7~9문장 300자 이상. 용신·희신 오행이 건강에 미치는 긍정적 영향, 관련 장기·계통, 보완 방향", "단락2 — 반드시 7~9문장 300자 이상. 기신 오행이 건강에 미치는 부담, 취약 장기·증상, 피해야 할 생활 습관"]
   }
 }`,
   2: `{
   "weakParts": {
     "intro": "취약 부위 핵심 한 줄 (1문장)",
     "callout": "오행 취약점·신체 핵심 한 문장",
-    "paragraphs": ["단락1 (5~7문장 200자+)", "단락2 (5~7문장 200자+)", "단락3 (5~7문장 200자+)"],
     "parts": [
       { "icon": "🫁", "name": "부위명", "ohaeng": "목", "desc": "사주적 이유와 증상 2~3문장" },
       { "icon": "❤️", "name": "부위명", "ohaeng": "화", "desc": "사주적 이유와 증상 2~3문장" },
@@ -174,33 +181,10 @@ const HEALTH_CH_SCHEMA: Record<number, string> = {
   }
 }`,
   3: `{
-  "diseases": {
-    "intro": "질환 방향 핵심 한 줄 (1문장)",
-    "callout": "오행 불균형·질환 경향 핵심 한 문장",
-    "paragraphs": ["단락1 (7~9문장 300자+)", "단락2 (7~9문장 300자+)", "단락3 (7~9문장 300자+)"],
-    "symptoms": [
-      { "icon": "🫁", "name": "질환/증상명", "level": "주의", "desc": "사주적 이유 + 증상 + 악화 상황 4~5문장" },
-      { "icon": "❤️", "name": "질환/증상명", "level": "관찰", "desc": "4~5문장" },
-      { "icon": "🦴", "name": "질환/증상명", "level": "주의", "desc": "4~5문장" }
-    ],
-    "symptomTriggers": [
-      { "icon": "😓", "trigger": "상황 제목", "desc": "3~4문장 120자+" },
-      { "icon": "🌙", "trigger": "상황 제목", "desc": "3~4문장 120자+" },
-      { "icon": "🍷", "trigger": "상황 제목", "desc": "3~4문장 120자+" }
-    ],
-    "preventionTips": [
-      { "num": 1, "title": "수칙 제목", "desc": "3~4문장 120자+" },
-      { "num": 2, "title": "수칙 제목", "desc": "3~4문장 120자+" },
-      { "num": 3, "title": "수칙 제목", "desc": "3~4문장 120자+" }
-    ],
-    "diseaseAdvice": "홍연의 따뜻한 당부 4~5문장"
-  }
-}`,
-  4: `{
   "lifestyle": {
     "intro": "생활 방향 핵심 한 줄 (1문장)",
     "callout": "용신 오행·생활 연결 핵심 한 문장",
-    "paragraphs": ["단락1 (7~9문장 300자+)", "단락2 (7~9문장 300자+)", "단락3 (7~9문장 300자+)"],
+    "paragraphs": ["단락1 — 용신 오행·장기·식재료 원리 (8문장 이상 350자 이상)", "단락2 — 운동·수면·환경 방향과 이유 (8문장 이상 350자 이상)", "단락3 — 피해야 할 것들과 오행 원리 기반 경고 (8문장 이상 350자 이상)"],
     "foodRecs": [
       { "icon": "🥦", "name": "식품명", "ohaeng": "목", "category": "채소", "benefit": "3~4문장 120자+" },
       { "icon": "🫐", "name": "식품명", "ohaeng": "수", "category": "과일", "benefit": "3~4문장 120자+" },
@@ -221,7 +205,7 @@ const HEALTH_CH_SCHEMA: Record<number, string> = {
     "lifestyleAdvice": "홍연의 따뜻한 응원 당부 4~5문장"
   }
 }`,
-  5: `{
+  4: `{
   "healthFlow": {
     "intro": "건강 흐름 핵심 한 줄 (1문장)",
     "callout": "대운·세운과 건강 연관 핵심 한 문장",
@@ -240,26 +224,7 @@ const HEALTH_CH_SCHEMA: Record<number, string> = {
     "flowAdvice": "홍연의 따뜻한 당부 4~5문장"
   }
 }`,
-  6: `{
-  "remedy": {
-    "intro": "개운법 방향 핵심 한 줄 (1문장)",
-    "callout": "부족 오행·개운 방향 핵심 한 문장",
-    "paragraphs": ["단락1 (7~9문장 300자+)", "단락2 (7~9문장 300자+)", "단락3 (7~9문장 300자+)"],
-    "remedies": [
-      { "icon": "🌿", "category": "생활습관", "title": "개운법 이름", "desc": "4~5문장 150자+" },
-      { "icon": "🎵", "category": "마음·명상", "title": "개운법 이름", "desc": "4~5문장 150자+" },
-      { "icon": "🌅", "category": "환경·공간", "title": "개운법 이름", "desc": "4~5문장 150자+" },
-      { "icon": "💧", "category": "음식·약재", "title": "개운법 이름", "desc": "4~5문장 150자+" }
-    ],
-    "remedyCats": [
-      { "icon": "🏃", "category": "생활", "items": ["구체적 실천 항목 1", "구체적 실천 항목 2", "구체적 실천 항목 3"] },
-      { "icon": "🏠", "category": "환경", "items": ["구체적 실천 항목 1", "구체적 실천 항목 2", "구체적 실천 항목 3"] },
-      { "icon": "🧘", "category": "마음", "items": ["구체적 실천 항목 1", "구체적 실천 항목 2", "구체적 실천 항목 3"] }
-    ],
-    "remedyAdvice": "홍연의 따뜻한 당부 4~5문장"
-  }
-}`,
-  7: `{
+  5: `{
   "letter": {
     "paragraphs": ["단락1-사주와 체질 (12~15문장 500자+)", "단락2-몸의 신호와 취약 부위 (12~15문장 500자+)", "단락3-건강 굴곡기 대응 (12~15문장 500자+)", "단락4-식습관과 일상 실천 (12~15문장 500자+)", "단락5-개운과 자기돌봄 (12~15문장 500자+)", "단락6-응원과 당부 (12~15문장 500자+)"]
   }
@@ -360,18 +325,22 @@ export function buildHealthChapterPrompt(
     yongsinNote = `\n[확정 오행 및 격국 — 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}${input.gyeokguk ? ` / 격국: ${input.gyeokguk}` : ""}\n`;
   }
 
-  // ch5: 대운 건강 흐름 데이터 주입
+  // ch4: 대운 건강 흐름 데이터 주입
   let healthFlowInject = "";
-  if (chapter === 5 && input.ilganChar && input.daeun && input.daeun.length > 0) {
+  if (chapter === 4 && input.ilganChar && input.daeun && input.daeun.length > 0) {
     const flowData = computeHealthFlowData(input.ilganChar, input.daeun);
     healthFlowInject = `\n[건강 흐름 그래프 데이터 — 이 데이터에 맞춰 periods의 tone과 풀이를 작성하시오]\n${flowData}\n`;
   }
+
+  const ilganNote = input.ilganChar ? `\n[일간 — 절대 변경 금지]\n일간: ${input.ilganChar} (${({ 갑:"목", 을:"목", 병:"화", 정:"화", 무:"토", 기:"토", 경:"금", 신:"금", 임:"수", 계:"수" }[input.ilganChar] ?? "?") } 오행)\n모든 풀이는 반드시 이 일간을 기준으로 작성하시오.\n` : "";
+
+  const lengthWarning = (chapter === 1 || chapter === 2) ? `\n⚠️ [분량 최우선 원칙 — 절대 준수]\nparagraphs 배열의 각 항목은 반드시 7문장 이상, 300자 이상으로 서술하시오.\n짧은 단락(5문장 미만 또는 200자 미만)은 오류로 간주합니다.\n${chapter === 1 ? "다른 필드(constitutionType·constitutionTraits 등)는 간결하게 쓰고,\n오직 paragraphs와 sinStrengthHealthParagraphs에만 충분한 분량을 투자하시오.\n" : ""}` : "";
 
   const user = `아래는 ${honorific}의 사주 명식입니다.
 
 ${input.manseryeokText}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
-${ohaengCountNote}${yongsinNote}${healthFlowInject}
+${ilganNote}${ohaengCountNote}${yongsinNote}${healthFlowInject}${lengthWarning}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 이번 장의 주제: ${theme}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -382,6 +351,140 @@ ${guide ? `\n작성 지침:\n${guide}\n` : ""}
 풀이 대상은 본인이 읽는 건강 결과지임을 염두에 두고, 따뜻하고 실용적으로 서술하시오.
 
 ${schema}`;
+
+  return { system: SYSTEM, user };
+}
+
+// ── ch2 paragraphs 전용 프롬프트 (오직 글쓰기에만 집중) ──
+export function buildHealthCh2ParagraphsPrompt(
+  input: Parameters<typeof buildHealthChapterPrompt>[1]
+): { system: string; user: string } {
+  const honorific = input.name ? `${input.name} 님` : "그대";
+  const currentYear = new Date().getFullYear();
+
+  let ohaengCountNote = "";
+  if (input.pillars && input.pillars.length > 0) {
+    const elCnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+    for (const p of input.pillars) {
+      if (p.ganEl && elCnt[p.ganEl] !== undefined) elCnt[p.ganEl]++;
+      if (p.jiEl  && elCnt[p.jiEl]  !== undefined) elCnt[p.jiEl]++;
+    }
+    const elTotal = Object.values(elCnt).reduce((a, b) => a + b, 0) || 1;
+    const elSorted = Object.entries(elCnt).sort((a, b) => b[1] - a[1]);
+    const strong = elSorted.filter(([, v]) => v >= 2).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    const weak   = elSorted.filter(([, v]) => v <= 1).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n`;
+  }
+
+  const ilganNote = input.ilganChar ? `\n[일간 — 절대 변경 금지]\n일간: ${input.ilganChar} (${({ 갑:"목", 을:"목", 병:"화", 정:"화", 무:"토", 기:"토", 경:"금", 신:"금", 임:"수", 계:"수" }[input.ilganChar] ?? "?")} 오행)\n모든 풀이는 반드시 이 일간을 기준으로 작성하시오.\n` : "";
+
+  let yongsinNote = "";
+  if (input.yongsinEl && input.heusinEl && input.gisinEl) {
+    yongsinNote = `\n[확정 오행 — 반드시 그대로 사용]\n용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}${input.gyeokguk ? ` / 격국: ${input.gyeokguk}` : ""}\n`;
+  }
+
+  const user = `아래는 ${honorific}의 사주 명식입니다.
+
+${input.manseryeokText}
+${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
+${ilganNote}${ohaengCountNote}${yongsinNote}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+이번 장의 주제: [제2장 약점] 오행 취약점으로 보는 신체 취약 부위와 장기
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ [오직 아래 JSON 하나만 출력하시오 — 다른 필드 없음]
+paragraphs 3개를 아래 주제에 맞게 작성하시오.
+각 단락은 반드시 8문장 이상, 350자 이상. 짧으면 오류입니다. 홍연 말투(~이오/~하오/~겠소) 유지.
+⚠️ 성격·기질·직업·성공 관련 풀이 절대 금지. 오직 신체·건강·장기에만 초점.
+
+①첫 문장은 반드시 "오행마다 관장하는 신체 기관이 따로 있소. 취약한 기운이 곧 약해지기 쉬운 부위와 이어지니…" 식으로 시작. 이후 이 명식의 오행 비율(%)을 수치 그대로 언급하며, 부족한 오행이 관장하는 장기와 그 사주적 이유(상생상극 포함)를 구체적으로 서술.
+②부족한 오행의 장기들이 약해질 때 실제로 나타나는 몸의 변화·초기 신호·악화 상황을 구체적으로 서술(증상명, 언제 심해지는지).
+③약한 오행을 보충하는 식습관·생활 습관, 강한 오행의 과잉을 조절하는 방법, 마음가짐과 실천 방향.
+
+반드시 유효한 JSON만 출력하시오. 코드펜스(\`\`\`)나 설명 문장은 절대 쓰지 마시오.
+
+{
+  "weakParts": {
+    "paragraphs": [
+      "단락1 — 반드시 8문장 이상 350자 이상. 오행 비율(%) 수치 직접 언급, 부족한 오행·관장 장기·상생상극 구체 서술.",
+      "단락2 — 반드시 8문장 이상 350자 이상. 약해질 때 몸의 변화·초기 신호·악화 상황 구체 서술.",
+      "단락3 — 반드시 8문장 이상 350자 이상. 보완 식습관·생활 습관·과잉 조절·마음가짐 서술."
+    ]
+  }
+}`;
+
+  return { system: SYSTEM, user };
+}
+
+// ── remedy(개운법) 전용 프롬프트 빌더 (ch3 페이지 내 개운법 카드용) ──
+export function buildHealthRemedyPrompt(
+  input: Parameters<typeof buildHealthChapterPrompt>[1]
+): { system: string; user: string } {
+  const honorific = input.name ? `${input.name} 님` : "그대";
+  const currentYear = new Date().getFullYear();
+
+  let ohaengCountNote = "";
+  if (input.pillars && input.pillars.length > 0) {
+    const elCnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+    const sipCnt: Record<string, number> = {};
+    for (const p of input.pillars) {
+      if (p.ganEl && elCnt[p.ganEl] !== undefined) elCnt[p.ganEl]++;
+      if (p.jiEl  && elCnt[p.jiEl]  !== undefined) elCnt[p.jiEl]++;
+      for (const s of [p.sipTop, p.sipBot]) if (s) sipCnt[s] = (sipCnt[s] ?? 0) + 1;
+    }
+    const elTotal = Object.values(elCnt).reduce((a, b) => a + b, 0) || 1;
+    const elSorted = Object.entries(elCnt).sort((a, b) => b[1] - a[1]);
+    const strong = elSorted.filter(([, v]) => v >= 2).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    const weak   = elSorted.filter(([, v]) => v <= 1).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    const sipLines = Object.entries(sipCnt).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}×${v}`).join(" / ");
+    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성: ${sipLines || "없음"}\n`;
+  }
+
+  let yongsinNote = "";
+  if (input.yongsinEl && input.heusinEl && input.gisinEl) {
+    yongsinNote = `\n[확정 오행 및 격국 — 반드시 아래 값을 그대로 사용하시오]\n용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}${input.gyeokguk ? ` / 격국: ${input.gyeokguk}` : ""}\n`;
+  }
+
+  const ilganNote = input.ilganChar ? `\n[일간 — 절대 변경 금지]\n일간: ${input.ilganChar} (${({ 갑:"목", 을:"목", 병:"화", 정:"화", 무:"토", 기:"토", 경:"금", 신:"금", 임:"수", 계:"수" }[input.ilganChar] ?? "?")} 오행)\n` : "";
+
+  const user = `아래는 ${honorific}의 사주 명식입니다.
+
+${input.manseryeokText}
+${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
+${ilganNote}${ohaengCountNote}${yongsinNote}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+이번 장의 주제: ${HEALTH_REMEDY_THEME}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[remedy 섹션 — 개운법]
+- intro: 이 사람의 건강 개운법 방향 핵심 한 줄. (1문장)
+- callout: 부족한 오행과 개운의 방향 핵심 한 문장.
+- paragraphs 3개: ①부족한 오행을 채우는 원리와 이 사람의 사주에 맞는 이유를 구체적으로 ②생활·환경·마음 각 영역에서 기운을 보완하는 방향과 그 효과 ③개운법을 꾸준히 실천할 때의 변화와 마음가짐. 각 7~9문장 300자 이상.
+- remedies: 개운법 4~5개. 반드시 용신·희신 오행을 보강하는 방향으로만 선택하시오. 각 remedy: icon(이모지), category("생활습관"/"환경·공간"/"마음·명상"/"음식·약재"/"색상·방향" 중 하나), title(개운법 이름 4~8자), desc는 반드시 7문장 이상 300자 이상.
+- remedyCats: 3개. 분야별 실천 항목 묶음. 각: { icon(이모지), category("생활" 또는 "환경" 또는 "마음"), items: 실천 가능한 구체적 항목 3~4개 }
+- remedyAdvice: 홍연이 이 사람의 건강 개운을 응원하며 전하는 당부. 따뜻하고 진지하게. 4~5문장 150자 이상.
+
+반드시 유효한 JSON만 출력하시오. 코드펜스(\`\`\`)나 설명 문장은 절대 쓰지 마시오.
+
+{
+  "remedy": {
+    "intro": "개운법 방향 핵심 한 줄 (1문장)",
+    "callout": "부족 오행·개운 방향 핵심 한 문장",
+    "paragraphs": ["단락1 (7~9문장 300자+)", "단락2 (7~9문장 300자+)", "단락3 (7~9문장 300자+)"],
+    "remedies": [
+      { "icon": "🌿", "category": "생활습관", "title": "개운법 이름", "desc": "7문장 이상 300자+" },
+      { "icon": "🎵", "category": "마음·명상", "title": "개운법 이름", "desc": "7문장 이상 300자+" },
+      { "icon": "🌅", "category": "환경·공간", "title": "개운법 이름", "desc": "7문장 이상 300자+" },
+      { "icon": "💧", "category": "음식·약재", "title": "개운법 이름", "desc": "7문장 이상 300자+" }
+    ],
+    "remedyCats": [
+      { "icon": "🏃", "category": "생활", "items": ["구체적 실천 항목 1", "구체적 실천 항목 2", "구체적 실천 항목 3"] },
+      { "icon": "🏠", "category": "환경", "items": ["구체적 실천 항목 1", "구체적 실천 항목 2", "구체적 실천 항목 3"] },
+      { "icon": "🧘", "category": "마음", "items": ["구체적 실천 항목 1", "구체적 실천 항목 2", "구체적 실천 항목 3"] }
+    ],
+    "remedyAdvice": "홍연의 따뜻한 당부 4~5문장"
+  }
+}`;
 
   return { system: SYSTEM, user };
 }

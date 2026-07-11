@@ -17,7 +17,7 @@ import {
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
-import { buildHealthChapterPrompt, isHealthChapterReady, HEALTH_CHAPTER_SECTIONS } from "@/lib/saju/health-report-content";
+import { buildHealthChapterPrompt, buildHealthCh2ParagraphsPrompt, buildHealthRemedyPrompt, isHealthChapterReady, HEALTH_CHAPTER_SECTIONS } from "@/lib/saju/health-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -54,7 +54,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
         obj = parseContentJson(llm.text);
       } catch (parseErr) {
         console.error(`[saju_health] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
-        if (chapter === 7) {
+        if (chapter === 5) {
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else {
@@ -272,9 +272,9 @@ async function generateChapter(body: unknown) {
     const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
     const gyeokguk: string | undefined = (stored?.gyeokguk as string | undefined) || undefined;
 
-    const { obj } = await genChapterContent(chapter, {
+    const chapterInput = {
       name: stored?.name ?? "",
-      gender: stored?.gender === "female" ? "female" : "male",
+      gender: (stored?.gender === "female" ? "female" : "male") as "male" | "female",
       manseryeokText,
       pillars,
       birthYear: birthYear || undefined,
@@ -284,7 +284,49 @@ async function generateChapter(body: unknown) {
       heusinEl,
       gisinEl,
       gyeokguk,
-    });
+    };
+
+    const { obj } = await genChapterContent(chapter, chapterInput);
+
+    // ch2: paragraphs 전용 2차 호출 후 병합
+    if (chapter === 2) {
+      try {
+        const { system: ps, user: pu } = buildHealthCh2ParagraphsPrompt(chapterInput);
+        const paraLlm = await generateInterpretation({ system: ps, user: pu, json: true });
+        const paraObj = parseContentJson(paraLlm.text) as Record<string, unknown>;
+        const paraParagraphs = (paraObj?.weakParts as Record<string, unknown> | undefined)?.paragraphs;
+        if (Array.isArray(paraParagraphs) && paraParagraphs.length > 0) {
+          const wp = obj.weakParts as Record<string, unknown> | undefined;
+          if (wp) wp.paragraphs = paraParagraphs;
+        }
+      } catch (e) {
+        console.error("[saju_health] ch2 paragraphs 2차 호출 실패:", e);
+      }
+    }
+
+    // ch3: foodRecs에서 기신 오행 식품만 제거 (용신·희신 외 중립 오행은 허용)
+    if (chapter === 3 && chapterInput.gisinEl) {
+      const lif = (obj as Record<string, unknown>).lifestyle as Record<string, unknown> | undefined;
+      if (lif && Array.isArray(lif.foodRecs)) {
+        lif.foodRecs = (lif.foodRecs as { ohaeng?: string }[]).filter(f => f.ohaeng !== chapterInput.gisinEl);
+      }
+    }
+
+    // ch3: remedy(개운법)도 함께 생성하여 병합 (ch3 페이지에서 개운법 카드 표시용)
+    if (chapter === 3) {
+      try {
+        const { system: rs, user: ru } = buildHealthRemedyPrompt(chapterInput);
+        for (let i = 0; i < 3; i++) {
+          try {
+            const rllm = await generateInterpretation({ system: rs, user: ru, json: true });
+            const rObj = parseContentJson(rllm.text) as Record<string, unknown>;
+            if (rObj?.remedy) { Object.assign(obj, rObj); break; }
+          } catch { /* 재시도 */ }
+        }
+      } catch (e) {
+        console.error("[saju_health] ch3 내 remedy 생성 실패 (무시):", e);
+      }
+    }
 
     // ch1: constitution 용신/희신/기신 십성→오행 변환 후 myeongsik에 저장
     if (chapter === 1) {

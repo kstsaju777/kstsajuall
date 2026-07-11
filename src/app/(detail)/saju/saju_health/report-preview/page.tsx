@@ -292,7 +292,8 @@ function RecoGrid() {
 }
 
 // 대운 기반 건강 흐름 꺾은선 그래프
-function HealthFlowChart({ view }: { view: MyeongsikView | null }) {
+function HealthFlowChart({ view, name }: { view: MyeongsikView | null; name?: string }) {
+  const [expanded, setExpanded] = useState(false);
   const STEM_EL_C: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
   const BRANCH_EL_C: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
   const GEN_C: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
@@ -324,93 +325,366 @@ function HealthFlowChart({ view }: { view: MyeongsikView | null }) {
     return { label: d.label, gz: d.gz, active: d.active, score: Math.round(sS * 0.6 + bS * 0.4) };
   });
 
+  // +/- 없이 절대 높낮이로 정규화 (min=바닥, max=천장)
   const scores = scored.map(s => s.score);
-  const mid = (Math.max(...scores) + Math.min(...scores)) / 2;
-  const amp = (Math.max(...scores) - Math.min(...scores)) / 2 || 1;
-  const normalized = scores.map(v => (v - mid) / amp);
+  const minS = Math.min(...scores), maxS = Math.max(...scores);
+  const rangeS = maxS - minS || 1;
 
-  const W = 320, H = 190, padX = 32, padTop = 24, padBot = 36;
+  const W = 320, H = 190, padX = 32, padTop = 16, padBot = 48;
   const innerH = H - padTop - padBot;
-  const zeroY = padTop + innerH / 2;
   const n = scored.length;
   const cx = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
-  const cy = (v: number) => zeroY - v * (innerH / 2 - 4);
-  const coords = normalized.map((v, i) => ({ x: cx(i), y: cy(v) }));
+  // 점수 높을수록 위
+  const cy = (v: number) => padTop + innerH * (1 - (v - minS) / rangeS) * 0.92 + innerH * 0.04;
+  const coords = scored.map((d, i) => ({ x: cx(i), y: cy(d.score) }));
 
   let path = `M ${coords[0].x} ${coords[0].y}`;
   for (let i = 1; i < coords.length; i++) {
-    const prev = coords[i - 1], cur = coords[i];
+    const prev = coords[i-1], cur = coords[i];
     const cpx = (prev.x + cur.x) / 2;
     path += ` C ${cpx} ${prev.y} ${cpx} ${cur.y} ${cur.x} ${cur.y}`;
   }
-  const areaClose = ` L ${coords[n-1].x} ${zeroY} L ${coords[0].x} ${zeroY} Z`;
-  const worstI = normalized.reduce((m, v, i) => v < normalized[m] ? i : m, 0);
-  const bestI  = normalized.reduce((m, v, i) => v > normalized[m] ? i : m, 0);
-  const GOOD_C = "#2d6a4f"; const WARN_C = "#9b3535";
+  const botY = padTop + innerH;
+  const areaClose = ` L ${coords[n-1].x} ${botY} L ${coords[0].x} ${botY} Z`;
+  const worstI = scores.reduce((m, v, i) => v < scores[m] ? i : m, 0);
+  const bestI  = scores.reduce((m, v, i) => v > scores[m] ? i : m, 0);
+  const LINE_C = "#3d6fa8"; // 파란 계열 단색
 
   return (
-    <div className="rounded-2xl p-4 mt-2 mb-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: GOOD_C }} />
-          <span style={{ fontSize: 10, color: GOOD_C, fontWeight: 600 }}>건강 안정</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: WARN_C }} />
-          <span style={{ fontSize: 10, color: WARN_C, fontWeight: 600 }}>건강 주의</span>
-        </div>
+    <div className="rounded-2xl mt-2 mb-4 overflow-hidden" style={{ background: WHITE, border: "2px solid #c5d5ef", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 py-2.5" style={{ background: "#e8f0fb", borderBottom: "1px solid #c5d5ef" }}>
+        <p className="text-[13px] font-bold" style={{ color: "#111" }}>전체 대운별 건강 흐름</p>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
+      <div className="p-4">
+      <svg viewBox={`14 2 292 176`} className="w-full" style={{ overflow: "visible" }}>
         <defs>
-          <clipPath id="hClipTop">
-            <rect x={padX} y={padTop} width={W - padX * 2} height={innerH / 2} />
-          </clipPath>
-          <clipPath id="hClipBot">
-            <rect x={padX} y={zeroY} width={W - padX * 2} height={innerH / 2} />
-          </clipPath>
-          <linearGradient id="hGradTop" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={GOOD_C} stopOpacity="0.3" />
-            <stop offset="100%" stopColor={GOOD_C} stopOpacity="0.03" />
+          <linearGradient id="hGradFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={LINE_C} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={LINE_C} stopOpacity="0.02" />
           </linearGradient>
-          <linearGradient id="hGradBot" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={WARN_C} stopOpacity="0.03" />
-            <stop offset="100%" stopColor={WARN_C} stopOpacity="0.25" />
-          </linearGradient>
+          <clipPath id="hClipArea">
+            <rect x={padX} y={padTop} width={W - padX*2} height={innerH} />
+          </clipPath>
         </defs>
+        {/* 상단/하단 가이드선 */}
         <line x1={padX} x2={W-padX} y1={padTop} y2={padTop} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
-        <line x1={padX} x2={W-padX} y1={H-padBot} y2={H-padBot} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
-        <line x1={padX} x2={W-padX} y1={zeroY} y2={zeroY} stroke={`${INK}30`} strokeWidth="1.5"/>
-        <text x={padX - 4} y={zeroY + 4} fontSize="8" fill={MUTE} textAnchor="end">0</text>
-        <text x={padX - 4} y={padTop + 4} fontSize="8" fill={GOOD_C} textAnchor="end">+</text>
-        <text x={padX - 4} y={H - padBot + 4} fontSize="8" fill={WARN_C} textAnchor="end">−</text>
-        <path d={path + areaClose} fill="url(#hGradTop)" clipPath="url(#hClipTop)" />
-        <path d={path + areaClose} fill="url(#hGradBot)" clipPath="url(#hClipBot)" />
-        <path d={path} fill="none" stroke={GOOD_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#hClipTop)" />
-        <path d={path} fill="none" stroke={WARN_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#hClipBot)" />
+        <line x1={padX} x2={W-padX} y1={botY} y2={botY} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
+        {/* 채움 영역 */}
+        <path d={path + areaClose} fill="url(#hGradFill)" clipPath="url(#hClipArea)" />
+        {/* 선 */}
+        <path d={path} fill="none" stroke={LINE_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* 점 + 라벨 */}
         {coords.map((c, i) => {
           const isWorst = i === worstI, isBest = i === bestI;
           const isActive = scored[i].active;
-          const dotColor = normalized[i] >= 0 ? GOOD_C : WARN_C;
           return (
             <g key={i}>
               {isActive && (
-                <circle cx={c.x} cy={c.y} r={8} fill="none" stroke="#2d4a7a" strokeWidth="1.5" strokeDasharray="3 2" />
+                <>
+                  <circle cx={c.x} cy={c.y} r={8} fill="none" stroke="#2d4a7a" strokeWidth="1.5" strokeDasharray="3 2" />
+                  <text x={c.x} y={c.y - 14} fontSize="11" fill="#2d4a7a" textAnchor="middle" fontWeight="700">현재 대운</text>
+                </>
               )}
-              {(isWorst || isBest) && (
-                <circle cx={c.x} cy={c.y} r={5} fill={isWorst ? WARN_C : GOOD_C} stroke={isWorst ? WARN_C : GOOD_C} strokeWidth="2" />
-              )}
-              {!isWorst && !isBest && (
-                <circle cx={c.x} cy={c.y} r={isActive ? 4 : 2.5} fill={isActive ? "#2d4a7a" : WHITE} stroke={isActive ? "#2d4a7a" : dotColor} strokeWidth="1.5" />
-              )}
-              {isWorst && <text x={c.x} y={c.y + 14} fontSize="8" fill={WARN_C} textAnchor="middle" fontWeight="700">주의</text>}
-              {isBest  && <text x={c.x} y={c.y - 8}  fontSize="8" fill={GOOD_C} textAnchor="middle" fontWeight="700">안정</text>}
-              <text x={c.x} y={H - 6} fontSize="11" fill={isActive ? "#2d4a7a" : INK_SOFT} textAnchor="middle" fontWeight={isActive ? "700" : "400"}>{scored[i].label}세</text>
-              <line x1={c.x} y1={H - padBot + 2} x2={c.x} y2={H - padBot + 6} stroke={`${INK}30`} strokeWidth="1" />
+              <circle cx={c.x} cy={c.y}
+                r={isActive ? 4 : 2.5}
+                fill={isActive ? "#2d4a7a" : WHITE}
+                stroke={isActive ? "#2d4a7a" : LINE_C}
+                strokeWidth="1.8" />
+              {(() => { const bw=26, bh=30, bx=c.x-bw/2, by=botY+4; return (<><rect x={bx} y={by} width={bw} height={bh} rx="4" ry="4" fill={isActive ? "#2d4a7a18" : `${INK}08`} stroke={isActive ? "#2d4a7a80" : `${INK}40`} strokeWidth="1.1"/><text x={c.x} y={by+13} fontSize="11" fill={isActive ? "#2d4a7a" : INK_SOFT} textAnchor="middle" fontWeight={isActive ? "700" : "400"}>{scored[i].label}세</text><text x={c.x} y={by+26} fontSize="10" fill={MUTE} textAnchor="middle">{scored[i].gz}</text></>); })()}
+              <line x1={c.x} y1={c.y + (isActive ? 9 : 4)} x2={c.x} y2={botY} stroke={`${INK}20`} strokeWidth="1" strokeDasharray="3 3"/>
             </g>
           );
         })}
       </svg>
-      <p className="text-[10px] text-center mt-1" style={{ color: MUTE }}>대운별 건강 흐름 · 파란 원이 현재 대운</p>
+      </div>
+      {scored.length > 0 && (() => {
+        const activeItem = scored.find(s => s.active) ?? scored[0];
+        const bestItem  = scored.reduce((a, b) => b.score > a.score ? b : a);
+        const worstItem = scored.reduce((a, b) => b.score < a.score ? b : a);
+        const mid = (Math.max(...scores) + Math.min(...scores)) / 2;
+        const activeTone = activeItem.score >= mid ? "비교적 안정된" : "다소 주의가 필요한";
+        const honorific = name ? `${name}님` : "이 명식";
+        return (
+          <div className="px-4 pb-4" style={{ borderTop: "1px solid #e8e8e8", paddingTop: 14, marginTop: 2 }}>
+            <div style={{ overflow: "hidden", maxHeight: expanded ? "none" : "2.6em", transition: "max-height 0.3s ease" }}>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF }}>
+                현재 {honorific}은 <strong>{activeItem.label}세 대운</strong>을 지나고 있소.
+                이 시기는 전체 흐름에서 보면 체력이 뒷받침되는 {activeTone} 구간으로,
+                지금의 생활 습관이 이후 건강 흐름의 토대가 되오.
+              </p>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF, marginTop: 10 }}>
+                전체 생애 대운의 흐름을 살펴보면, <strong>{bestItem.label}세 대운</strong> 전후가
+                기운이 가장 고르게 충만한 시기로 나타나오.
+                인생의 이 구간에 건강이 가장 순탄하게 흐르니, 지금부터 체력의 기반을 잘 다져두는 것이
+                그 시기를 더욱 풍요롭게 만들어 줄 것이오.
+              </p>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF, marginTop: 10 }}>
+                반면 <strong>{worstItem.label}세 대운</strong> 전후는 이 명식에서 가장 주의가 필요한
+                건강 고비 구간이오. 이 무렵에는 체력이 눈에 띄게 소진되기 쉽고, 그간 쌓아온 피로와
+                부담이 몸에 신호를 보내기 시작하오. 해당 시기가 오기 전부터 수면·식습관·정기검진을
+                꾸준히 챙기는 것이 무엇보다 중요하오.
+              </p>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF, marginTop: 10 }}>
+                대운은 흐름을 보여줄 뿐이오. 어떻게 준비하고 맞이하느냐에 따라 그 고비를 훨씬
+                가볍게 넘길 수 있소. 지금 이 시기를 건강의 씨앗을 심는 때로 삼으시길 바라오.
+              </p>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+              <button
+                onClick={() => setExpanded(v => !v)}
+                style={{ fontSize: 12, color: "#2d4a7a", background: "#e8f0fb", border: "1px solid #c5d5ef", borderRadius: 20, padding: "5px 18px", cursor: "pointer", fontFamily: SERIF, display: "flex", alignItems: "center", gap: 4 }}
+              >
+                {expanded ? "접기" : "더보기"} <span style={{ fontSize: 10 }}>{expanded ? "▲" : "▼"}</span>
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+// 대운 배경 밴드 + 세운 선 통합 차트 (현재 연도 기준 10년)
+function HealthCombinedChart({ view, name }: { view: MyeongsikView | null; name?: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const currentYear = 2026;
+  const TARGET_YEARS = Array.from({ length: 10 }, (_, i) => currentYear + i);
+  const HEALTH_SCORE: Record<string, number> = {
+    인성:82, 정인:85, 편인:76,
+    비겁:72, 비견:74, 겁재:65,
+    식상:50, 식신:54, 상관:44,
+    재성:28, 정재:32, 편재:24,
+    관성:18, 정관:22, 편관:14,
+  };
+  const STEM_EL: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+  const BRANCH_EL: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+  const GEN: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+  const CTL: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+  function toSip(a: string, b: string) {
+    if (a === b) return "비겁";
+    if (GEN[a] === b) return "식상";
+    if (CTL[a] === b) return "재성";
+    if (CTL[b] === a) return "관성";
+    if (GEN[b] === a) return "인성";
+    return "비겁";
+  }
+  const ilEl = (() => { const il = (view?.ilgan ?? "")[0]; return STEM_EL[il] ?? "목"; })();
+
+  // 세운 맵
+  const seunMap: Record<number,string> = {};
+  (view?.seun ?? []).forEach((s: { label: string; gz: string }) => { const y = Number(s.label); if (y >= currentYear && y <= currentYear + 9) seunMap[y] = s.gz; });
+  const GANJIS = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+  TARGET_YEARS.forEach(y => { if (!seunMap[y]) seunMap[y] = GANJIS[((40 + (y - 2024)) % 60 + 60) % 60]; });
+
+  // 대운 데이터 및 전체 점수 기준
+  const daeunList = (view?.daeun ?? []) as Array<{label: string; gz: string; active?: boolean; yearStart?: number}>;
+  const rawScore = (gz: string) => {
+    const sEl = STEM_EL[gz?.[0]]; const bEl = BRANCH_EL[gz?.[1]];
+    return Math.round(((sEl ? HEALTH_SCORE[toSip(ilEl, sEl)] ?? 50 : 50) * 0.6) + ((bEl ? HEALTH_SCORE[toSip(ilEl, bEl)] ?? 50 : 50) * 0.4));
+  };
+  const allDS = daeunList.map(d => rawScore(d.gz));
+  const dMid = allDS.length ? (Math.max(...allDS) + Math.min(...allDS)) / 2 : 50;
+  const dAmp = allDS.length ? (Math.max(...allDS) - Math.min(...allDS)) / 2 || 1 : 1;
+
+  // 연도별 해당 대운 찾기 (yearStart 우선, fallback: active 나이 기반 추정)
+  const hasYS = daeunList.some(d => (d.yearStart ?? 0) > 1900);
+  function getDaeunForYear(year: number) {
+    let m: typeof daeunList[0] | null = null;
+    if (hasYS) {
+      for (const d of daeunList) {
+        const ys = d.yearStart ?? 0;
+        if (ys > 1900 && year >= ys) m = d; else if (ys > 1900) break;
+      }
+    } else {
+      const act = daeunList.find(d => d.active);
+      if (act) {
+        const estBirth = currentYear - Number(act.label);
+        for (const d of daeunList) { if (year - estBirth >= Number(d.label)) m = d; else break; }
+      }
+    }
+    return m ?? daeunList.find(d => d.active) ?? daeunList[0] ?? null;
+  }
+
+  // 세운 점수 전체 범위 (독립 정규화용)
+  const allSeunScores = TARGET_YEARS.map(y => rawScore(seunMap[y] ?? ""));
+  const sMid = (Math.max(...allSeunScores) + Math.min(...allSeunScores)) / 2;
+  const sAmp = (Math.max(...allSeunScores) - Math.min(...allSeunScores)) / 2 || 1;
+
+  // 연도별 데이터: 대운·세운 각각 독립 정규화 후 합산 → 대운이 부호를 결정
+  const yearData = TARGET_YEARS.map(y => {
+    const daeun = getDaeunForYear(y);
+    const ds = daeun ? rawScore(daeun.gz) : dMid;
+    const gz = seunMap[y] ?? "";
+    const ss = rawScore(gz);
+    const normD = (ds - dMid) / dAmp;   // 대운 정규화 (-1~+1)
+    const normS = (ss - sMid) / sAmp;   // 세운 정규화 (-1~+1)
+    const norm = normD * 0.7 + normS * 0.3; // 대운 70% 지배
+    return { year: y, gz, daeunLabel: daeun?.label ?? "", daeunScore: ds, seunScore: ss, norm, normDaeun: normD };
+  });
+
+  // 대운 구간 그룹화 (배경 밴드용)
+  const bands: Array<{startI: number; endI: number; label: string; normScore: number}> = [];
+  let bi = 0;
+  while (bi < yearData.length) {
+    let ei = bi;
+    while (ei + 1 < yearData.length && yearData[ei + 1].daeunLabel === yearData[bi].daeunLabel) ei++;
+    bands.push({ startI: bi, endI: ei, label: yearData[bi].daeunLabel ? `${yearData[bi].daeunLabel}세 대운` : "", normScore: yearData[bi].normDaeun });
+    bi = ei + 1;
+  }
+
+  const W = 320, H = 230, padX = 30, padTop = 36, padBot = 44;
+  const innerH = H - padTop - padBot;
+  const zeroY = padTop + innerH / 2;
+  const n = TARGET_YEARS.length;
+  const cx = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
+  const cy = (v: number) => zeroY - v * (innerH / 2 - 4);
+  const coords = yearData.map((d, i) => ({ x: cx(i), y: cy(d.norm) }));
+
+  let linePath = `M ${coords[0].x} ${coords[0].y}`;
+  for (let i = 1; i < coords.length; i++) {
+    const p = coords[i-1], c = coords[i], mx = (p.x + c.x) / 2;
+    linePath += ` C ${mx} ${p.y} ${mx} ${c.y} ${c.x} ${c.y}`;
+  }
+  const areaClose = ` L ${coords[n-1].x} ${zeroY} L ${coords[0].x} ${zeroY} Z`;
+  const worstI = yearData.reduce((m, _, i) => yearData[i].norm < yearData[m].norm ? i : m, 0);
+  const bestI  = yearData.reduce((m, _, i) => yearData[i].norm > yearData[m].norm ? i : m, 0);
+  const GOOD_C = "#2d6a4f"; const WARN_C = "#9b3535";
+
+  // 대운 밴드 x 좌표 계산
+  function bandX(idx: number, isStart: boolean) {
+    if (isStart && idx === 0) return padX;
+    if (!isStart && idx === n - 1) return W - padX;
+    const base = cx(idx);
+    const adj = isStart ? -(cx(1) - cx(0)) / 2 : (cx(1) - cx(0)) / 2;
+    return base + adj;
+  }
+
+  return (
+    <div className="rounded-2xl mt-2 mb-4 overflow-hidden" style={{ background: WHITE, border: "2px solid #b8dfc8", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 py-2.5" style={{ background: "#e8f5ee", borderBottom: "1px solid #b8dfc8" }}>
+        <p className="text-[13px] font-bold" style={{ color: "#111" }}>향후 10년간 건강 흐름</p>
+      </div>
+      <div className="p-4">
+      <svg viewBox={`12 16 296 208`} className="w-full" style={{ overflow: "visible" }}>
+        <defs>
+          <clipPath id="ycTop"><rect x={padX} y={padTop} width={W - padX*2} height={innerH/2} /></clipPath>
+          <clipPath id="ycBot"><rect x={padX} y={zeroY} width={W - padX*2} height={innerH/2} /></clipPath>
+          <linearGradient id="ycGT" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GOOD_C} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={GOOD_C} stopOpacity="0.04" />
+          </linearGradient>
+          <linearGradient id="ycGB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={WARN_C} stopOpacity="0.04" />
+            <stop offset="100%" stopColor={WARN_C} stopOpacity="0.3" />
+          </linearGradient>
+        </defs>
+
+        {/* 대운 배경 밴드 */}
+        {bands.map((band, bi2) => {
+          const x1 = bandX(band.startI, true);
+          const x2 = bandX(band.endI, false);
+          const good = band.normScore >= 0;
+          const intensity = Math.min(Math.abs(band.normScore) * 0.18 + 0.06, 0.22);
+          return (
+            <g key={bi2}>
+              <rect x={x1} y={padTop} width={x2-x1} height={innerH}
+                fill={good ? GOOD_C : WARN_C} opacity={intensity} rx={3} />
+              {band.label && (
+                <text x={(x1+x2)/2} y={padTop - 6} fontSize="12"
+                  fill={good ? "#2d6a4f" : "#9b3535"} textAnchor="middle" fontWeight="700">
+                  {band.label}
+                </text>
+              )}
+              {bi2 > 0 && (
+                <line x1={x1} x2={x1} y1={padTop-4} y2={H-padBot+2}
+                  stroke={INK} strokeWidth="1.2" strokeDasharray="3 2" opacity="0.25" />
+              )}
+            </g>
+          );
+        })}
+
+        {/* 가이드선 */}
+        <line x1={padX} x2={W-padX} y1={padTop} y2={padTop} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
+        <line x1={padX} x2={W-padX} y1={H-padBot} y2={H-padBot} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
+        <line x1={padX} x2={W-padX} y1={zeroY} y2={zeroY} stroke={`${INK}35`} strokeWidth="1.5"/>
+        <text x={padX-4} y={zeroY+4} fontSize="8" fill={MUTE} textAnchor="end">0</text>
+        <text x={padX-4} y={padTop+4} fontSize="8" fill={GOOD_C} textAnchor="end">+</text>
+        <text x={padX-4} y={H-padBot+4} fontSize="8" fill={WARN_C} textAnchor="end">−</text>
+
+        {/* 세운 채움 영역 */}
+        <path d={linePath + areaClose} fill="url(#ycGT)" clipPath="url(#ycTop)" />
+        <path d={linePath + areaClose} fill="url(#ycGB)" clipPath="url(#ycBot)" />
+        {/* 세운 선 */}
+        <path d={linePath} fill="none" stroke={GOOD_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#ycTop)" />
+        <path d={linePath} fill="none" stroke={WARN_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#ycBot)" />
+
+        {/* 점 + X축 라벨 */}
+        {coords.map((c, i) => {
+          const isWorst = i === worstI, isBest = i === bestI;
+          const v = yearData[i].norm;
+          const dc = v >= 0 ? GOOD_C : WARN_C;
+          return (
+            <g key={i}>
+              <circle cx={c.x} cy={c.y}
+                r={isWorst || isBest ? 5 : 3}
+                fill={isWorst ? WARN_C : isBest ? GOOD_C : WHITE}
+                stroke={dc} strokeWidth="2" />
+              {(() => { const bw=28, bh=30, bx=c.x-bw/2, by=H-padBot+4; return (<><rect x={bx} y={by} width={bw} height={bh} rx="4" ry="4" fill={`${INK}08`} stroke={`${INK}40`} strokeWidth="1.1"/><text x={c.x} y={by+13} fontSize="11" fill={INK} textAnchor="middle" opacity="0.85">{String(TARGET_YEARS[i]).slice(2)}년</text><text x={c.x} y={by+26} fontSize="10" fill={MUTE} textAnchor="middle">{seunMap[TARGET_YEARS[i]]}</text></>); })()}
+              <line x1={c.x} y1={c.y + 4} x2={c.x} y2={H-padBot} stroke={`${INK}20`} strokeWidth="1" strokeDasharray="3 3"/>
+            </g>
+          );
+        })}
+      </svg>
+      <div style={{ display: "flex", gap: 14, marginTop: 8, flexWrap: "wrap", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: GOOD_C }} />
+          <span style={{ fontSize: 10, color: GOOD_C, fontWeight: 600 }}>건강 안정</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <div style={{ width: 12, height: 12, borderRadius: "50%", background: WARN_C }} />
+          <span style={{ fontSize: 10, color: WARN_C, fontWeight: 600 }}>건강 주의</span>
+        </div>
+      </div>
+      </div>
+      {yearData.length > 0 && (() => {
+        const bestYear  = yearData[bestI];
+        const worstYear = yearData[worstI];
+        const honorific = name ? `${name}님` : "이 명식";
+        const overallTrend = yearData[yearData.length - 1].norm < yearData[0].norm ? "점차 하강하는" : "비교적 안정된";
+        const currentBand = bands[0];
+        return (
+          <div className="px-4 pb-4" style={{ borderTop: "1px solid #e8e8e8", paddingTop: 14, marginTop: 2 }}>
+            <div style={{ overflow: "hidden", maxHeight: expanded ? "none" : "2.6em", transition: "max-height 0.3s ease" }}>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF }}>
+                향후 10년간 {honorific}의 건강 흐름은 전반적으로 <strong>{overallTrend}</strong> 양상을 보이오.
+                {currentBand?.label ? ` 현재 ${currentBand.label}의 기운이 이 시기 전체에 걸쳐 기반을 이루고 있소.` : ""}
+              </p>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF, marginTop: 10 }}>
+                이 10년 가운데 <strong>{bestYear.year}년</strong>이 건강 기운이 가장 고조되는 해로 나타나오.
+                이 무렵에는 체력이 충실하고 회복력이 좋으니, 평소 하지 못한 건강 검진이나
+                체력 단련을 시작하기에 더없이 좋은 때이오.
+              </p>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF, marginTop: 10 }}>
+                반면 <strong>{worstYear.year}년</strong> 전후는 가장 조심이 필요한 시기이오.
+                세운의 기운이 명식과 부딪히며 체력 소모가 커지기 쉬우니, 이 해에는
+                무리한 일정이나 과로를 피하고 수면과 식이를 각별히 살피시길 바라오.
+              </p>
+              <p style={{ fontSize: 13, lineHeight: 1.95, color: INK_SOFT, fontFamily: SERIF, marginTop: 10 }}>
+                해마다의 흐름은 대비에 따라 달라지오. 좋은 해에 체력을 비축해두면,
+                어려운 해를 훨씬 수월하게 넘길 수 있소.
+              </p>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+              <button
+                onClick={() => setExpanded(v => !v)}
+                style={{ fontSize: 12, color: "#2d6a4f", background: "#e8f5ee", border: "1px solid #b8dfc8", borderRadius: 20, padding: "5px 18px", cursor: "pointer", fontFamily: SERIF, display: "flex", alignItems: "center", gap: 4 }}
+              >
+                {expanded ? "접기" : "더보기"} <span style={{ fontSize: 10 }}>{expanded ? "▲" : "▼"}</span>
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -433,7 +707,7 @@ function OhaengDonut({ view }: { view: MyeongsikView | null }) {
   const R = 54, C = 2 * Math.PI * R;
   let acc = 0;
   return (
-    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
+    <div className="mx-6 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${dom.color}30` }}>
       {/* 헤더 */}
       <div className="px-5 pt-5 pb-3 flex items-center justify-between">
         <div>
@@ -988,7 +1262,6 @@ function HealthLineChart({ view }: { view: MyeongsikView | null }) {
             <g key={i}>
               <circle cx={c.x} cy={c.y} r={isWorst || isBest ? 5 : 3} fill={isWorst ? "#E24B4A" : isBest ? "#5b9e6a" : WHITE} stroke={dotColor} strokeWidth="2" />
               {isWorst && <text x={c.x} y={c.y + 14} fontSize="8" fill="#E24B4A" textAnchor="middle" fontWeight="700">주의</text>}
-              {isBest  && <text x={c.x} y={c.y - 8}  fontSize="8" fill="#5b9e6a" textAnchor="middle" fontWeight="700">최고</text>}
               <text x={c.x} y={H - 14} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(TARGET_YEARS[i]).slice(2)}년</text>
               <text x={c.x} y={H - 4}  fontSize="7" fill={MUTE} textAnchor="middle">{seunMap[TARGET_YEARS[i]]}</text>
             </g>
@@ -2367,15 +2640,13 @@ const CHAPTER_TITLES: Record<string, string> = {
   "0": "인트로 · 건강사주에 대하여",
   "1": "제1장 · 나는 어떤 체질로 태어났나",
   "2": "제2장 · 내 사주에 약한 부위는 어디인가",
-  "3": "제3장 · 내가 특히 조심해야 할 질병과 증상",
-  "4": "제4장 · 나에게 맞는 식습관과 생활 방식",
-  "5": "제5장 · 내 건강 흐름과 조심해야 할 시기",
-  "6": "제6장 · 내 건강을 살릴 개운법",
-  "7": "마무리 · 그대에게 남기는 홍연의 서신",
+  "3": "제3장 · 건강을 살릴 생활방식과 개운법",
+  "4": "제4장 · 내 건강 흐름과 조심해야 할 시기",
+  "5": "마무리 · 그대에게 남기는 홍연의 서신",
 };
 
 // A안 읽기 순서
-const A_ORDER = ["0", "1", "2", "3", "4", "5", "6", "7"];
+const A_ORDER = ["0", "1", "2", "3", "4", "5"];
 
 // 개발용 장 재생성 플로팅 버튼 (배포 전 제거 예정)
 function RegenButton({ chapter, onRegen }: { chapter: number; onRegen: (n: number) => void }) {
@@ -3413,11 +3684,9 @@ const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",   title: "건강사주에 대하여",              no: "0" },
   { disp: "제1장",  chip: "체질",   title: "나는 어떤 체질로 태어났나",      no: "1" },
   { disp: "제2장",  chip: "약점",   title: "내 사주에 약한 부위는 어디인가", no: "2" },
-  { disp: "제3장",  chip: "질병",   title: "조심해야 할 질병과 증상",        no: "3" },
-  { disp: "제4장",  chip: "식습관", title: "맞는 식습관과 생활 방식",        no: "4" },
-  { disp: "제5장",  chip: "흐름",   title: "건강 흐름과 조심해야 할 시기",   no: "5" },
-  { disp: "제6장",  chip: "개운법", title: "내 건강을 살릴 개운법",          no: "6" },
-  { disp: "마무리", chip: "결론",   title: "그대에게 남기는 홍연의 서신",    no: "7" },
+  { disp: "제3장",  chip: "개운법", title: "건강을 살릴 생활방식과 개운법",   no: "3" },
+  { disp: "제4장",  chip: "흐름",   title: "건강 흐름과 조심해야 할 시기",   no: "4" },
+  { disp: "마무리", chip: "결론",   title: "그대에게 남기는 홍연의 서신",    no: "5" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -3597,6 +3866,212 @@ function Heading({ children }: { children: React.ReactNode }) {
     <h2 className="text-[19px] font-black mb-4" style={{ color: INK }}>
       {children}
     </h2>
+  );
+}
+
+// 오행별 식품 하드코딩
+const OHAENG_FOODS: Record<string, { icon: string; name: string }[]> = {
+  목: [
+    { icon: "🥬", name: "부추" }, { icon: "🌿", name: "깻잎" }, { icon: "🥦", name: "시금치" },
+    { icon: "🥦", name: "브로콜리" }, { icon: "🌿", name: "미나리" }, { icon: "🌿", name: "셀러리" },
+    { icon: "🍵", name: "녹차" }, { icon: "🥝", name: "키위" }, { icon: "🍇", name: "포도" },
+    { icon: "🍶", name: "식초" }, { icon: "🍗", name: "닭고기" }, { icon: "🌿", name: "쑥" },
+    { icon: "🌰", name: "참깨" }, { icon: "🥒", name: "오이" }, { icon: "🌿", name: "취나물" },
+    { icon: "🌿", name: "냉이" }, { icon: "🌿", name: "달래" }, { icon: "🌿", name: "두릅" },
+    { icon: "🥬", name: "아욱" }, { icon: "🥬", name: "상추" }, { icon: "🥬", name: "케일" },
+    { icon: "🫘", name: "완두콩" }, { icon: "🌶️", name: "풋고추" }, { icon: "🫘", name: "녹두" },
+    { icon: "🥑", name: "아보카도" }, { icon: "🌿", name: "파슬리" }, { icon: "🥬", name: "청경채" },
+    { icon: "🌿", name: "들깨" }, { icon: "🐟", name: "멸치" }, { icon: "🍋", name: "라임" },
+  ],
+  화: [
+    { icon: "🍅", name: "토마토" }, { icon: "🌿", name: "홍삼" }, { icon: "🍉", name: "수박" },
+    { icon: "🍓", name: "딸기" }, { icon: "🍎", name: "석류" }, { icon: "🫐", name: "구기자" },
+    { icon: "🫘", name: "팥" }, { icon: "🥕", name: "당근" }, { icon: "🫑", name: "파프리카" },
+    { icon: "🥩", name: "양고기" }, { icon: "🌸", name: "연꽃씨" }, { icon: "🍒", name: "체리" },
+    { icon: "🍒", name: "산딸기" }, { icon: "🫐", name: "크랜베리" }, { icon: "🍑", name: "자두" },
+    { icon: "🍑", name: "살구" }, { icon: "🌿", name: "오미자" }, { icon: "🍇", name: "복분자" },
+    { icon: "🫘", name: "붉은강낭콩" }, { icon: "🧅", name: "적양파" }, { icon: "🌶️", name: "붉은피망" },
+    { icon: "🌿", name: "계피" }, { icon: "🌸", name: "샤프란" }, { icon: "🥩", name: "오리고기" },
+    { icon: "🍖", name: "칠면조" }, { icon: "🥬", name: "비트" }, { icon: "🍵", name: "루이보스" },
+    { icon: "🌿", name: "강황" }, { icon: "🍫", name: "카카오" }, { icon: "🫚", name: "들기름" },
+  ],
+  토: [
+    { icon: "🍠", name: "고구마" }, { icon: "🥔", name: "감자" }, { icon: "🎃", name: "단호박" },
+    { icon: "🌿", name: "대추" }, { icon: "🌾", name: "현미" }, { icon: "🌾", name: "조" },
+    { icon: "🌿", name: "황기" }, { icon: "🌽", name: "옥수수" }, { icon: "🍌", name: "바나나" },
+    { icon: "🌿", name: "인삼" }, { icon: "🍯", name: "꿀" }, { icon: "🥩", name: "소고기" },
+    { icon: "🍚", name: "찹쌀" }, { icon: "🍄", name: "표고버섯" }, { icon: "🍄", name: "느타리버섯" },
+    { icon: "🍄", name: "양송이버섯" }, { icon: "🌿", name: "당귀" }, { icon: "🥜", name: "땅콩" },
+    { icon: "🍋", name: "레몬" }, { icon: "🍍", name: "파인애플" }, { icon: "🥭", name: "망고" },
+    { icon: "🌿", name: "연자육" }, { icon: "🍚", name: "누룽지" }, { icon: "🌾", name: "귀리" },
+    { icon: "🌾", name: "보리" }, { icon: "🌿", name: "마(참마)" }, { icon: "🧀", name: "두부" },
+    { icon: "🫘", name: "된장" }, { icon: "🌿", name: "생강" }, { icon: "🐔", name: "메추리" },
+  ],
+  금: [
+    { icon: "🍐", name: "배" }, { icon: "🥬", name: "무" }, { icon: "🌿", name: "도라지" },
+    { icon: "🌿", name: "연근" }, { icon: "🥔", name: "마" }, { icon: "🌿", name: "더덕" },
+    { icon: "🧅", name: "양파" }, { icon: "🧄", name: "마늘" }, { icon: "🌿", name: "생강" },
+    { icon: "🌾", name: "율무" }, { icon: "🍎", name: "사과" }, { icon: "🍚", name: "흰쌀" },
+    { icon: "🌱", name: "콩나물" }, { icon: "🥩", name: "돼지고기" }, { icon: "🌸", name: "백합" },
+    { icon: "🌰", name: "은행" }, { icon: "🌰", name: "아몬드" }, { icon: "🌰", name: "잣" },
+    { icon: "🧀", name: "두부" }, { icon: "🥬", name: "순무" }, { icon: "🥦", name: "콜리플라워" },
+    { icon: "🌿", name: "우엉" }, { icon: "🥚", name: "달걀흰자" }, { icon: "🫘", name: "흰콩" },
+    { icon: "🐟", name: "삼치" }, { icon: "🐟", name: "고등어" }, { icon: "🌿", name: "마늘종" },
+    { icon: "🧅", name: "대파" }, { icon: "🍵", name: "페퍼민트차" }, { icon: "🥛", name: "두유" },
+  ],
+  수: [
+    { icon: "🫘", name: "검은콩" }, { icon: "🌿", name: "미역" }, { icon: "🌿", name: "다시마" },
+    { icon: "🦪", name: "굴" }, { icon: "🫐", name: "블루베리" }, { icon: "🌰", name: "검은깨" },
+    { icon: "🌰", name: "밤" }, { icon: "🌰", name: "호두" }, { icon: "🦐", name: "새우" },
+    { icon: "🌿", name: "해삼" }, { icon: "🦪", name: "전복" }, { icon: "🦆", name: "오리고기" },
+    { icon: "🧀", name: "두부" }, { icon: "🌿", name: "아스파라거스" }, { icon: "🍆", name: "가지" },
+    { icon: "🍇", name: "검은포도" }, { icon: "🍚", name: "흑미" }, { icon: "🦑", name: "오징어" },
+    { icon: "🐙", name: "문어" }, { icon: "🦑", name: "낙지" }, { icon: "🦪", name: "홍합" },
+    { icon: "🦪", name: "바지락" }, { icon: "🍄", name: "검은목이버섯" }, { icon: "🌿", name: "흑임자" },
+    { icon: "🌿", name: "청국장" }, { icon: "🐚", name: "우렁이" }, { icon: "🌿", name: "김" },
+    { icon: "🦪", name: "조개" }, { icon: "🌾", name: "메밀" }, { icon: "🫐", name: "아사이베리" },
+  ],
+};
+
+// 오행별 섭취 등급 계산 (용희기신 우선, 중립은 오행비율로 판단)
+function calcFoodGrade(key: string, elPct: Record<string, number>, yongsinEl?: string, heusinEl?: string, gisinEl?: string): { grade: "best" | "good" | "helpful" | "normal" | "caution"; label: string; bg: string; color: string } {
+  const pct = elPct[key] ?? 0;
+  if (key === gisinEl)   return { grade: "caution",  label: "절제",      bg: "#ffeaea", color: "#c0392b" };
+  if (key === yongsinEl) return { grade: "best",     label: "적극 추천", bg: "#e8f5e9", color: "#2e7d32" };
+  if (key === heusinEl)  return { grade: "good",     label: "추천",      bg: "#e3f2fd", color: "#1565c0" };
+  if (pct < 25)          return { grade: "helpful",  label: "도움됨",    bg: "#f3e8ff", color: "#7b1fa2" };
+  return                        { grade: "normal",   label: "보통",      bg: "#f5f5f5", color: "#757575" };
+}
+
+// 제3장 식품 가이드 — 3단 구조 (적극추천/도움됨/절제)
+function OhaengFoodSection({ elPct, MUTE, INK, SERIF, yongsinEl, heusinEl, gisinEl }: {
+  elPct: Record<string, number>; MUTE: string; INK: string; SERIF: string;
+  yongsinEl?: string; heusinEl?: string; gisinEl?: string;
+}) {
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  // 각 구간 식품 수집 (용신=적극추천, 희신=도움됨, 기신=절제)
+  const best   = yongsinEl ? (OHAENG_FOODS[yongsinEl] ?? []) : [];
+  const good   = heusinEl  ? (OHAENG_FOODS[heusinEl]  ?? []) : [];
+  const avoid  = gisinEl   ? (OHAENG_FOODS[gisinEl]   ?? []) : [];
+
+  const SECTIONS = [
+    { key: "best",  label: "✅ 적극 추천",  sub: "이 사주에 가장 잘 맞는 식재료이오. 자주 챙겨 드시오.",        bg: "#e8f5e9", border: "#2e7d32", color: "#2e7d32", tagBg: "#e8f5e9", tagBorder: "#a5d6a7", foods: best },
+    { key: "good",  label: "👍 도움됨",     sub: "균형을 보완하는 식재료이오. 꾸준히 섭취하면 좋소.",          bg: "#e3f2fd", border: "#1565c0", color: "#1565c0", tagBg: "#e3f2fd", tagBorder: "#90caf9", foods: good },
+  ];
+
+  return (
+    <section className="px-6 pb-6">
+      <h2 className="text-[19px] font-black mb-4" style={{ color: INK }}>내 사주에 맞는 음식들</h2>
+      <div className="flex flex-col gap-3">
+        {SECTIONS.map(sec => {
+          if (!sec.foods.length) return null;
+          const isOpen = open[sec.key] ?? false;
+          const preview = sec.foods.slice(0, 6);
+          const rest    = sec.foods.slice(6);
+          return (
+            <div key={sec.key} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${sec.border}40` }}>
+              {/* 헤더 */}
+              <button className="w-full text-left" onClick={() => setOpen(prev => ({ ...prev, [sec.key]: !isOpen }))}>
+                <div style={{ background: sec.bg }}>
+                  <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: 20, lineHeight: 1 }}>{sec.label.split(" ")[0]}</span>
+                      <span className="text-[13px] font-black" style={{ color: sec.color }}>{sec.label.split(" ").slice(1).join(" ")}</span>
+                    </div>
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: isOpen ? `${sec.border}22` : "#f0ebe5", color: isOpen ? sec.color : MUTE, border: `1px solid ${isOpen ? sec.border + "55" : "#e0d8d0"}` }}>
+                      {isOpen ? "닫기" : "자세히"}
+                    </span>
+                  </div>
+                  <div className="px-4 pb-3" style={{ borderTop: `1px solid ${sec.border}20` }}>
+                    <p className="text-[11px] pt-2" style={{ color: sec.color + "99" }}>{sec.sub}</p>
+                  </div>
+                </div>
+              </button>
+              {isOpen && (
+                <div className="px-4 pt-3 pb-3" style={{ background: "#fff" }}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sec.foods.map((f, i) => (
+                      <span key={i} className="text-[12px] px-2.5 py-1 rounded-full flex items-center gap-1"
+                        style={{ background: sec.tagBg, color: INK, border: `1px solid ${sec.tagBorder}` }}>
+                        {f.icon} {f.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// 오행-신체 연결 + 자세히 토글
+function OhaengBodySection({ weakSet, vulMap, elPct, BURG, MUTE, INK, INK_SOFT, OHAENG_BODY, ORGAN_BIAS }: {
+  weakSet: Set<string>; vulMap: Record<string, number>; elPct: Record<string, number>;
+  BURG: string; MUTE: string; INK: string; INK_SOFT: string;
+  OHAENG_BODY: { key: string; hanja: string; color: string; organs: string[] }[];
+  ORGAN_BIAS: number[];
+}) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const OHAENG_IMG: Record<string, string> = { 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" };
+  return (
+    <section className="px-6 pb-6">
+      <div className="flex flex-col gap-0 rounded-2xl overflow-hidden" style={{ border: "1px solid #e8e0d8" }}>
+        {OHAENG_BODY.map((ob, idx) => {
+          const isWeak = weakSet.has(ob.key);
+          const isOpen = expanded === ob.key;
+          const baseVul = vulMap[ob.key] ?? 50;
+          const isLast = idx === OHAENG_BODY.length - 1;
+          return (
+            <div key={ob.key}>
+              <button className="w-full text-left" onClick={() => setExpanded(isOpen ? null : ob.key)}>
+                <div className="flex items-center gap-3 px-4 py-3" style={{
+                  background: isOpen ? `${ob.color}10` : "#fff",
+                  borderLeft: `4px solid ${ob.color}`,
+                  borderBottom: isLast && !isOpen ? "none" : `1px solid #f0e8e0`,
+                }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/media/ohaeng/${OHAENG_IMG[ob.key]}.png`} alt={ob.key} className="flex-shrink-0" style={{ width: 40, height: 40, objectFit: "contain" }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[14px] font-black" style={{ color: isWeak ? INK : INK_SOFT }}>{ob.key}</span>
+                      <span className="text-[12px] font-bold" style={{ color: ob.color }}>{elPct[ob.key] ?? 0}%</span>
+                      {isWeak && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm" style={{ background: `${ob.color}22`, color: ob.color, border: `1px solid ${ob.color}55` }}>취약</span>
+                      )}
+                    </div>
+                    <p className="text-[12px]" style={{ color: MUTE }}>{ob.organs.join(" · ")}</p>
+                  </div>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0" style={{ background: isOpen ? `${ob.color}22` : "#f0ebe5", color: isOpen ? ob.color : MUTE, border: `1px solid ${isOpen ? ob.color + "55" : "#e0d8d0"}` }}>
+                    {isOpen ? "닫기" : "자세히"}
+                  </span>
+                </div>
+              </button>
+              {isOpen && (
+                <div className="px-5 pt-3 pb-4 flex flex-col gap-2.5" style={{ background: "#faf7f4", borderBottom: isLast ? "none" : "1px solid #f0e8e0", borderLeft: `4px solid ${ob.color}` }}>
+                  {ob.organs.map((org, i) => {
+                    const score = Math.min(95, Math.max(5, baseVul + ORGAN_BIAS[i % ORGAN_BIAS.length]));
+                    const barColor = score >= 70 ? BURG : score >= 40 ? "#e07b39" : "#43a047";
+                    const label = score >= 70 ? "취약" : score >= 40 ? "주의" : "양호";
+                    return (
+                      <div key={org} className="flex items-center gap-3">
+                        <span className="text-[12px] font-bold shrink-0" style={{ color: INK, width: 44 }}>{org}</span>
+                        <div className="flex-1 h-1.5 rounded-full" style={{ background: "#e8e0d8" }}>
+                          <div className="h-1.5 rounded-full" style={{ width: `${score}%`, background: barColor }} />
+                        </div>
+                        <span className="text-[11px] font-black shrink-0" style={{ color: barColor, width: 28, textAlign: "right" }}>{label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -3969,7 +4444,7 @@ function ReportPreviewInner() {
   }, []);
 
   useEffect(() => {
-    if (ch === "7" && !localStorage.getItem("hy_health_event_hide")) setEventOpen(true);
+    if (ch === "5" && !localStorage.getItem("hy_health_event_hide")) setEventOpen(true);
   }, [ch]);
 
   // id 있으면 저장된 결과 조회(재생성 X), 입력만 있으면 생성+저장 후 id 주소로 교체
@@ -4515,6 +4990,10 @@ function ReportPreviewInner() {
         const TEAL_WARN = "#7a4a2a";
         const con = (jc.constitution as {
           intro?: string; callout?: string; paragraphs?: string[];
+          yongsinEl?: string; heusinEl?: string; gisinEl?: string;
+          yongsinReason?: string; heusinReason?: string; gisinReason?: string;
+          sinStrengthHealthParagraphs?: string[];
+          yongsinHealthParagraphs?: string[];
           constitutionType?: { icon?: string; name?: string; badge?: string; desc?: string };
           constitutionTraits?: { icon?: string; label?: string; desc?: string }[];
           constitutionCautions?: { num?: number; title?: string; desc?: string }[];
@@ -4561,16 +5040,6 @@ function ReportPreviewInner() {
                 <span style={{ width: 7, height: 24, flexShrink: 0, background: "linear-gradient(to right, #5a2e00, #a05a10, #d4903a, #f0c060, #d4903a, #a05a10, #5a2e00)", borderRadius: 4, boxShadow: "-1px 0 3px rgba(0,0,0,0.4)" }} />
               </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
-            {/* ── ① 소제목 ── */}
-            <section className="px-6 pt-2 pb-0">
-              <Heading>타고난 체질과 기운</Heading>
-            </section>
-
-            {/* ── ② 오행 도넛 ── */}
-            <OhaengDonut view={report?.view ?? null} />
-
-            {/* ── ③ 단락 1 ── */}
-            {con.paragraphs?.[0] && <section className="px-6 pb-4"><P>{con.paragraphs[0]}</P></section>}
 
             {/* ── ④ 신강·신약 게이지 ── */}
             <section className="px-6 pt-6 pb-0">
@@ -4580,81 +5049,89 @@ function ReportPreviewInner() {
               <SinStrengthGauge view={report?.view ?? null} />
             </section>
 
+            {/* ── 신강신약 건강 풀이 ── */}
+            {con.sinStrengthHealthParagraphs && con.sinStrengthHealthParagraphs.length > 0 && (
+              <section className="px-6 pt-4 pb-2">
+                {con.sinStrengthHealthParagraphs.map((p, i) => (
+                  <P key={i}>{p}</P>
+                ))}
+              </section>
+            )}
+
+            {/* ── 필요한 기운과 피해야 할 기운 ── */}
+            {(con.yongsinEl || con.heusinEl || con.gisinEl) && (
+              <section className="px-6 pt-6 pb-4">
+                <Heading>필요한 기운과 피해야 할 기운</Heading>
+                {(() => {
+                  const OHAENG_META: Record<string, { hanja: string; color: string; bg: string; desc: string }> = {
+                    목: { hanja: "木", color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
+                    화: { hanja: "火", color: "#222", bg: "#ffebee", desc: "열정·표현" },
+                    토: { hanja: "土", color: "#222", bg: "#efebe9", desc: "안정·신뢰" },
+                    금: { hanja: "金", color: "#222", bg: "#fffde7", desc: "절제·결단" },
+                    수: { hanja: "水", color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
+                  };
+                  const rows = [
+                    { role: "용신", el: con.yongsinEl ?? "", reason: con.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
+                    { role: "희신", el: con.heusinEl  ?? "", reason: con.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★" } },
+                    { role: "기신", el: con.gisinEl   ?? "", reason: con.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕" } },
+                  ];
+                  return (
+                    <div className="my-4 rounded-2xl overflow-hidden" style={{ border: "1px solid #e0d8cc" }}>
+                      {rows.map((r, i) => {
+                        const m = OHAENG_META[r.el] ?? { hanja: r.el, color: "#888", bg: "#f5f5f5", desc: "" };
+                        const isGisin = r.role === "기신";
+                        return (
+                          <div key={r.role} className="flex items-center gap-3 px-4 py-3" style={{ background: isGisin ? "#fff5f5" : i === 0 ? "#fffcf0" : "#f6faf6", borderBottom: i < 2 ? "1px solid #e8dfd0" : "none" }}>
+                            <div className="shrink-0 flex flex-col items-center gap-1" style={{ width: 52 }}>
+                              <div className="rounded-full px-2 py-0.5 text-[10px] font-black tracking-wide" style={{ background: r.badge.bg, border: `1.5px solid ${r.badge.border}`, color: r.badge.text }}>
+                                {r.badge.label}
+                              </div>
+                              <div className="text-[15px] font-black" style={{ color: r.badge.text }}>{r.role}</div>
+                            </div>
+                            {r.el && { 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" }[r.el] && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={`/media/ohaeng/${{ 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" }[r.el]}.png`} alt={r.el} className="shrink-0" style={{ width: 54, height: 54, objectFit: "contain" }} />
+                            )}
+                            <div className="flex flex-col gap-1">
+                              <div className="text-[14px] font-black" style={{ color: m.color }}>{m.desc}</div>
+                              {r.reason && (
+                                <div className="text-[11px] leading-snug" style={{ color: "#555" }}>{r.reason}</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </section>
+            )}
+
+            {/* ── 용신·기신 건강 풀이 ── */}
+            {con.yongsinHealthParagraphs && con.yongsinHealthParagraphs.length > 0 && (
+              <section className="px-6 pt-4 pb-2">
+                {con.yongsinHealthParagraphs.map((p, i) => (
+                  <P key={i}>{p}</P>
+                ))}
+              </section>
+            )}
+
             {/* ── ⑤ 단락 2 ── */}
             {con.paragraphs?.[1] && <section className="px-6 pt-4 pb-4"><P>{con.paragraphs[1]}</P></section>}
 
             {/* ── ⑥ 체질 유형 카드 ── */}
-            {con.constitutionType && (
-              <section className="px-6 pb-6">
-                <Heading>타고난 체질 유형</Heading>
-                <div className="rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${TEAL} 0%, #1a5c51 100%)` }}>
-                  <div className="flex items-start gap-4 px-5 pt-5 pb-4">
-                    <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-3xl" style={{ background: "rgba(255,255,255,0.18)" }}>
-                      {con.constitutionType.icon ?? "🌿"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[18px] font-black" style={{ color: "#fff", fontFamily: SERIF }}>{con.constitutionType.name}</span>
-                        {con.constitutionType.badge && (
-                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.22)", color: "#fff" }}>
-                            {con.constitutionType.badge}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {con.constitutionType.desc && (
-                    <div className="px-5 pb-5">
-                      <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>{con.constitutionType.desc}</p>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
             {/* ── ⑦ 단락 3 ── */}
             {con.paragraphs?.[2] && <section className="px-6 pb-4"><P>{con.paragraphs[2]}</P></section>}
 
-            {/* ── ⑧ 체질 특성 2-col 카드 ── */}
-            {con.constitutionTraits && con.constitutionTraits.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>이 체질의 타고난 특성</Heading>
-                <div className="grid grid-cols-2 gap-3">
-                  {con.constitutionTraits.map((tr, i) => (
-                    <div key={i} className="rounded-xl px-4 py-4 flex flex-col gap-1" style={{ background: TEAL_LIGHT }}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[22px]">{tr.icon}</span>
-                        <span className="text-[13px] font-bold" style={{ color: TEAL, fontFamily: SERIF }}>{tr.label}</span>
-                      </div>
-                      <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{tr.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* ── 하단 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_1/saju_health_1_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(253,248,244,1) 0%, transparent 25%, transparent 75%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-            {/* ── ⑨ 체질 주의 포인트 divider 테이블 ── */}
-            {con.constitutionCautions && con.constitutionCautions.length > 0 && (
-              <section className="px-6 pb-8">
-                <Heading>체질별 건강 주의 포인트</Heading>
-                <div className="flex flex-col gap-0">
-                  {con.constitutionCautions.map((c, i) => (
-                    <div key={i}>
-                      {i > 0 && <div style={{ height: 1, background: "#e8e0d8", margin: "0 4px" }} />}
-                      <div className="flex gap-4 py-4">
-                        <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-black" style={{ background: TEAL, color: "#fff" }}>
-                          {c.num ?? i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold mb-1" style={{ color: TEAL_WARN, fontFamily: SERIF }}>{c.title}</p>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{c.desc}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* ── 하단멘트 ── */}
+            <Quote>{`체질을 알았으니,\n이제, ${name.slice(1) || name}님 신체 어느 부위가\n약한지 알아보겠소.`}</Quote>
 
             <ChapterNav cur="1" go={next} />
           </>
@@ -4666,6 +5143,8 @@ function ReportPreviewInner() {
         const BURG = "#7a3030";
         const BURG_LIGHT = "#fdf3f3";
         const BURG_MID = "#c97070";
+        const TEAL = "#2a7a6a";
+        const TEAL_LIGHT = "#f0faf7";
         // 오행-신체 연결 정적 데이터
         const OHAENG_BODY: { key: string; hanja: string; color: string; organs: string[] }[] = [
           { key: "목", hanja: "木", color: "#7cc47f", organs: ["간", "담낭", "눈", "근육", "손발톱"] },
@@ -4680,6 +5159,14 @@ function ReportPreviewInner() {
           bodySignals?: { icon?: string; title?: string; desc?: string }[];
           weakAdvice?: string;
         } | undefined) ?? {};
+        const con2 = ((jc["1"] as Record<string, unknown>)?.constitution as {
+          constitutionType?: { icon?: string; name?: string; badge?: string; desc?: string };
+          constitutionTraits?: { icon?: string; label?: string; desc?: string }[];
+          yongsinEl?: string; heusinEl?: string; gisinEl?: string;
+        } | undefined) ?? {};
+        const yongsinEl2 = con2.yongsinEl;
+        const heusinEl2 = con2.heusinEl;
+        const gisinEl2 = con2.gisinEl;
         // 취약 오행 집합 (parts[].ohaeng 기준)
         const weakSet = new Set((wp.parts ?? []).map(p => p.ohaeng?.trim().slice(0, 1) ?? ""));
         return (
@@ -4699,48 +5186,92 @@ function ReportPreviewInner() {
             </div>
             <Quote>{`오행의 균형이\n신체 건강과 이어지오.\n\n약한 곳을 알면\n미리 지킬 수 있소.`}</Quote>
 
-            {/* ── ① 인트로 + 콜아웃 ── */}
-            <section className="px-6 pt-2 pb-4">
-              <Heading>약한 신체 부위</Heading>
-              {wp.intro && <P>{wp.intro}</P>}
-              {wp.callout && <Callout>{wp.callout}</Callout>}
-            </section>
-
-            {/* ── ② 오행-신체 연결 맵 ── */}
-            <section className="px-6 pb-6">
-              <Heading>오행과 신체 연결</Heading>
-              <p className="text-[12px] mb-3" style={{ color: MUTE }}>오행마다 관장하는 신체 기관이 있소. 취약한 기운이 곧 약한 부위와 이어지오.</p>
-              <div className="flex flex-col gap-2">
-                {OHAENG_BODY.map((ob) => {
-                  const isWeak = weakSet.has(ob.key);
-                  return (
-                    <div key={ob.key} className="flex items-center gap-3 rounded-xl px-4 py-3 transition-all"
-                      style={{ background: isWeak ? `${ob.color}18` : `${ob.color}08`, border: `1.5px solid ${isWeak ? ob.color : ob.color + "40"}` }}>
-                      <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black"
-                        style={{ background: isWeak ? ob.color : `${ob.color}30`, color: isWeak ? "#fff" : ob.color, fontFamily: SERIF }}>
-                        {ob.hanja}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-[13px] font-black" style={{ color: isWeak ? INK : INK_SOFT }}>{ob.key}</span>
-                          {isWeak && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: BURG, color: "#fff" }}>취약</span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {ob.organs.map((org) => (
-                            <span key={org} className="text-[11px] px-2 py-0.5 rounded-full"
-                              style={{ background: isWeak ? `${ob.color}30` : `${ob.color}14`, color: isWeak ? INK : MUTE, fontWeight: isWeak ? 700 : 400 }}>
-                              {org}
-                            </span>
-                          ))}
-                        </div>
+            {/* ── 타고난 체질 유형 (ch1에서 이동) ── */}
+            {con2.constitutionType && (
+              <section className="px-6 pt-2 pb-6">
+                <Heading>타고난 체질 유형</Heading>
+                <div className="rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${TEAL} 0%, #1a5c51 100%)` }}>
+                  <div className="flex items-start gap-4 px-5 pt-5 pb-4">
+                    <div className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center text-3xl" style={{ background: "rgba(255,255,255,0.18)" }}>
+                      {con2.constitutionType.icon ?? "🌿"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[18px] font-black" style={{ color: "#fff", fontFamily: SERIF }}>{con2.constitutionType.name}</span>
+                        {con2.constitutionType.badge && (
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.22)", color: "#fff" }}>
+                            {con2.constitutionType.badge}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                  {con2.constitutionType.desc && (
+                    <div className="px-5 pb-5">
+                      <p className="text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>{con2.constitutionType.desc}</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* ── 이 체질의 타고난 특성 (ch1에서 이동) ── */}
+            {con2.constitutionTraits && con2.constitutionTraits.length > 0 && (
+              <section className="px-6 pb-6">
+                <Heading>이 체질의 타고난 특성</Heading>
+                <div className="grid grid-cols-2 gap-3">
+                  {con2.constitutionTraits.map((tr, i) => (
+                    <div key={i} className="rounded-xl px-4 py-4 flex flex-col gap-1" style={{ background: TEAL_LIGHT }}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[22px]">{tr.icon}</span>
+                        <span className="text-[13px] font-bold" style={{ color: TEAL, fontFamily: SERIF }}>{tr.label}</span>
+                      </div>
+                      <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{tr.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+
+            {/* ── 오행과 신체 연결 소제목 + 도넛 ── */}
+            <section className="px-6 pt-2 pb-0">
+              <Heading>오행과 신체 연결</Heading>
             </section>
+            <OhaengDonut view={report?.view ?? null} />
+
+            {/* ── ② 오행-신체 연결 맵 ── */}
+            {(() => {
+              // 오행 비율 계산
+              const pillars = report?.view?.pillars ?? [];
+              const elCnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+              for (const p of pillars) {
+                if (p.ganEl && elCnt[p.ganEl] !== undefined) elCnt[p.ganEl]++;
+                if (p.jiEl  && elCnt[p.jiEl]  !== undefined) elCnt[p.jiEl]++;
+              }
+              const elTotal = Object.values(elCnt).reduce((a, b) => a + b, 0) || 8;
+              const elPct: Record<string, number> = {};
+              for (const k of Object.keys(elCnt)) elPct[k] = Math.round(elCnt[k] / elTotal * 100);
+              // 취약 게이지: 오행 비율 낮을수록 높음. 0개=90%, 1개=65%, 2개=40%, 3개+=15%
+              const vulMap: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+              for (const k of Object.keys(elCnt)) {
+                const cnt = elCnt[k];
+                vulMap[k] = cnt === 0 ? 90 : cnt === 1 ? 65 : cnt === 2 ? 40 : cnt === 3 ? 20 : 10;
+              }
+              // 신체 부위별 미세 편차 (index 기반)
+              const ORGAN_BIAS = [0, -5, 5, -8, 8, -3, 3, -6];
+              return (
+                <OhaengBodySection
+                  weakSet={weakSet}
+                  vulMap={vulMap}
+                  elPct={elPct}
+                  BURG={BURG} MUTE={MUTE} INK={INK} INK_SOFT={INK_SOFT}
+                  OHAENG_BODY={OHAENG_BODY}
+                  ORGAN_BIAS={ORGAN_BIAS}
+                />
+              );
+            })()}
+
 
             {/* ── ③ 단락 1 ── */}
             {wp.paragraphs?.[0] && <section className="px-6 pb-4"><P>{wp.paragraphs[0]}</P></section>}
@@ -4782,193 +5313,50 @@ function ReportPreviewInner() {
             {wp.paragraphs?.[1] && <section className="px-6 pb-4"><P>{wp.paragraphs[1]}</P></section>}
 
             {/* ── ⑥ 신체 신호 divider 리스트 ── */}
-            {wp.bodySignals && wp.bodySignals.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>몸이 보내는 초기 신호</Heading>
-                <p className="text-[12px] mb-3" style={{ color: MUTE }}>이 체질은 약해질 때 아래와 같은 신호를 먼저 보내오. 신호를 알아채면 더 빨리 지킬 수 있소.</p>
-                <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${BURG}20`, background: BURG_LIGHT }}>
-                  {wp.bodySignals.map((sig, i) => (
-                    <div key={i}>
-                      {i > 0 && <div style={{ height: 1, background: `${BURG}18`, margin: "0 16px" }} />}
-                      <div className="flex gap-4 px-4 py-4">
-                        <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]"
-                          style={{ background: WHITE }}>
-                          {sig.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold mb-1" style={{ color: BURG, fontFamily: SERIF }}>{sig.title}</p>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{sig.desc}</p>
+            {/* bodySignals → 제3장 하단으로 이동 */}
+
+            {/* ── ⑦ 단락 3 — 개운법 내용으로 뒷 목차와 중복되어 삭제 ── */}
+
+            {/* ── ⑧ 몸이 보내는 초기 신호 ── */}
+            {(() => {
+              const wp2 = ((jc["2"] as Record<string, unknown>)?.weakParts as { bodySignals?: { icon?: string; title?: string; desc?: string }[] } | undefined);
+              if (!wp2?.bodySignals?.length) return null;
+              const RUST = "#b54a2a";
+              const RUST_LIGHT = "#fdf4f1";
+              return (
+                <section className="px-6 pb-6">
+                  <Heading>몸이 보내는 초기 신호</Heading>
+                  <p className="text-[12px] mb-3" style={{ color: MUTE }}>이 체질은 약해질 때 아래와 같은 신호를 먼저 보내오. 신호를 알아채면 더 빨리 지킬 수 있소.</p>
+                  <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${RUST}20`, background: RUST_LIGHT }}>
+                    {wp2.bodySignals.map((sig, i) => (
+                      <div key={i}>
+                        {i > 0 && <div style={{ height: 1, background: `${RUST}18`, margin: "0 16px" }} />}
+                        <div className="flex gap-4 px-4 py-4">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]" style={{ background: WHITE }}>
+                            {sig.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-bold mb-1" style={{ color: RUST, fontFamily: SERIF }}>{sig.title}</p>
+                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{sig.desc}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
 
-            {/* ── ⑦ 단락 3 ── */}
-            {wp.paragraphs?.[2] && <section className="px-6 pb-4"><P>{wp.paragraphs[2]}</P></section>}
-
-            {/* ── ⑧ 조언 gradient box ── */}
-            {wp.weakAdvice && (
-              <section className="px-6 pb-8">
-                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${BURG} 0%, #4a1a1a 100%)` }}>
-                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
-                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{wp.weakAdvice}</p>
-                </div>
-              </section>
-            )}
+            {/* ── ⑨ 하단멘트 ── */}
+            <Quote>{`약한 부위를 알았으니,\n이제 건강을 살릴\n생활방식과 개운법을 살펴보겠소.`}</Quote>
 
             <ChapterNav cur="2" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제3장 — 질병·증상 ═══════════ */}
+      {/* ═══════════ 제3장 — 식습관·생활 ═══════════ */}
       {ch === "3" && (() => {
-        const RUST = "#b54a2a";
-        const RUST_LIGHT = "#fdf4f1";
-        const RUST_WARN = "#c0622a";
-        const AMBER = "#b07d2a";
-        const AMBER_LIGHT = "#fdf8ee";
-        const dis = (jc.diseases as {
-          intro?: string; callout?: string; paragraphs?: string[];
-          symptoms?: { icon?: string; name?: string; level?: string; desc?: string }[];
-          symptomTriggers?: { icon?: string; trigger?: string; desc?: string }[];
-          preventionTips?: { num?: number; title?: string; desc?: string }[];
-          diseaseAdvice?: string;
-        } | undefined) ?? {};
-        return (
-          <>
-            {/* ── 다크 헤더 ── */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 질병</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                조심해야 할<br />질병과 증상
-              </h1>
-            </div>
-            {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 320 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/saju_health/saju_health_3/saju_health_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`사주는 질병을\n미리 알려주는 지도이오.\n\n조심할 때를 알면\n건강을 지킬 수 있소.`}</Quote>
-
-            {/* ── ① 인트로 + 콜아웃 ── */}
-            <section className="px-6 pt-2 pb-4">
-              <Heading>질환 경향 분석</Heading>
-              {dis.intro && <P>{dis.intro}</P>}
-              {dis.callout && <Callout>{dis.callout}</Callout>}
-            </section>
-
-            {/* ── ② 단락 1 ── */}
-            {dis.paragraphs?.[0] && <section className="px-6 pb-4"><P>{dis.paragraphs[0]}</P></section>}
-
-            {/* ── ③ 증상·질환 상세 카드 ── */}
-            {dis.symptoms && dis.symptoms.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>주의해야 할 질환</Heading>
-                <div className="flex flex-col gap-3">
-                  {dis.symptoms.map((sym, i) => {
-                    const isWarn = sym.level === "주의";
-                    const headerBg = isWarn ? RUST : AMBER;
-                    const bodyBg = isWarn ? RUST_LIGHT : AMBER_LIGHT;
-                    const levelBg = isWarn ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.28)";
-                    return (
-                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${headerBg}30` }}>
-                        {/* 카드 헤더 */}
-                        <div className="flex items-center gap-3 px-4 py-3" style={{ background: headerBg }}>
-                          <span className="text-[26px] flex-shrink-0">{sym.icon ?? "🩺"}</span>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-[16px] font-black" style={{ color: "#fff", fontFamily: SERIF }}>{sym.name}</span>
-                          </div>
-                          <span className="flex-shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full"
-                            style={{ background: levelBg, color: "#fff" }}>{sym.level ?? "관찰"}</span>
-                        </div>
-                        {/* 카드 본문 */}
-                        <div className="px-4 py-4" style={{ background: bodyBg }}>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{sym.desc}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* ── ④ 단락 2 ── */}
-            {dis.paragraphs?.[1] && <section className="px-6 pb-4"><P>{dis.paragraphs[1]}</P></section>}
-
-            {/* ── ⑤ 증상 악화 트리거 ── */}
-            {dis.symptomTriggers && dis.symptomTriggers.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>증상이 심해지는 상황</Heading>
-                <p className="text-[12px] mb-3" style={{ color: MUTE }}>이 체질은 아래 상황에서 특히 몸이 반응하오. 미리 알고 피하는 것이 최선이오.</p>
-                <div className="flex flex-col gap-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${RUST}20` }}>
-                  {dis.symptomTriggers.map((tr, i) => (
-                    <div key={i}>
-                      {i > 0 && <div style={{ height: 1, background: `${RUST}15` }} />}
-                      <div className="flex gap-4 px-4 py-4" style={{ background: i % 2 === 0 ? RUST_LIGHT : WHITE }}>
-                        <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]"
-                          style={{ background: `${RUST}12` }}>
-                          {tr.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold mb-1.5" style={{ color: RUST_WARN, fontFamily: SERIF }}>{tr.trigger}</p>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tr.desc}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* ── ⑥ 단락 3 ── */}
-            {dis.paragraphs?.[2] && <section className="px-6 pb-4"><P>{dis.paragraphs[2]}</P></section>}
-
-            {/* ── ⑦ 예방 수칙 divider ── */}
-            {dis.preventionTips && dis.preventionTips.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>예방 수칙</Heading>
-                <div className="flex flex-col gap-0">
-                  {dis.preventionTips.map((tip, i) => (
-                    <div key={i}>
-                      {i > 0 && <div style={{ height: 1, background: "#e8e0d8", margin: "0 4px" }} />}
-                      <div className="flex gap-4 py-4">
-                        <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-black"
-                          style={{ background: RUST, color: "#fff" }}>
-                          {tip.num ?? i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold mb-1.5" style={{ color: INK, fontFamily: SERIF }}>{tip.title}</p>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* ── ⑧ 홍연의 당부 gradient box ── */}
-            {dis.diseaseAdvice && (
-              <section className="px-6 pb-8">
-                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${RUST} 0%, #7a2a10 100%)` }}>
-                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
-                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{dis.diseaseAdvice}</p>
-                </div>
-              </section>
-            )}
-
-            <ChapterNav cur="3" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제4장 — 식습관·생활 ═══════════ */}
-      {ch === "4" && (() => {
         const FOREST = "#2d6a4f";
         const FOREST_LIGHT = "#eef7f2";
         const FOREST_MID = "#52a17a";
@@ -4986,63 +5374,50 @@ function ReportPreviewInner() {
           <>
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 식습관</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 생활방식과 개운법</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                맞는 식습관과<br />생활 방식
+                건강을 살릴<br />생활방식과 개운법
               </h1>
             </div>
             {/* ── 커버 이미지 ── */}
             <div className="relative overflow-hidden" style={{ height: 320 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/saju_health/saju_health_4/saju_health_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/saju_health/saju_health_3/saju_health_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`몸에 맞는 음식과\n생활 방식이 따로 있소.\n\n사주가 알려주는\n최적의 루틴을 찾겠소.`}</Quote>
+            <Quote>{`몸에 맞는 음식과\n생활 방식이 따로 있소.\n\n사주가 알려주는\n최적의 루틴을 말해주겠소.`}</Quote>
 
-            {/* ── ① 인트로 + 콜아웃 ── */}
+            {/* ── ① 인트로 + 단락 1 합쳐서 하나의 단락 ── */}
             <section className="px-6 pt-2 pb-4">
               <Heading>나에게 맞는 생활 방식</Heading>
-              {lif.intro && <P>{lif.intro}</P>}
-              {lif.callout && <Callout>{lif.callout}</Callout>}
+              {(lif.intro || lif.paragraphs?.[0]) && (
+                <P>{[lif.intro, lif.paragraphs?.[0]].filter(Boolean).join(" ")}</P>
+              )}
             </section>
 
-            {/* ── ② 단락 1 ── */}
-            {lif.paragraphs?.[0] && <section className="px-6 pb-4"><P>{lif.paragraphs[0]}</P></section>}
+            {/* ── ③ 오행별 식품 가이드 ── */}
+            {(() => {
+              const con1 = (jc.constitution as { yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined) ?? {};
+              const pillars1 = report?.view?.pillars ?? [];
+              const elCnt1: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+              for (const p of pillars1) {
+                if (p.ganEl && elCnt1[p.ganEl] !== undefined) elCnt1[p.ganEl]++;
+                if (p.jiEl  && elCnt1[p.jiEl]  !== undefined) elCnt1[p.jiEl]++;
+              }
+              const elTotal1 = Object.values(elCnt1).reduce((a, b) => a + b, 0) || 8;
+              const elPct1: Record<string, number> = {};
+              for (const k of Object.keys(elCnt1)) elPct1[k] = Math.round(elCnt1[k] / elTotal1 * 100);
+              return (
+                <OhaengFoodSection
+                  elPct={elPct1}
+                  MUTE={MUTE} INK={INK} SERIF={SERIF}
+                  yongsinEl={con1.yongsinEl}
+                  heusinEl={con1.heusinEl}
+                  gisinEl={con1.gisinEl}
+                />
+              );
+            })()}
 
-            {/* ── ③ 권장 식품 2-col 카드 ── */}
-            {lif.foodRecs && lif.foodRecs.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>이 체질에 맞는 식품</Heading>
-                <p className="text-[12px] mb-3" style={{ color: MUTE }}>용신 오행을 보완하는 식재료이오. 일상에서 자주 챙겨 드시오.</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {lif.foodRecs.map((food, i) => {
-                    const oCol = OHAENG_COLOR[food.ohaeng ?? ""] ?? FOREST_MID;
-                    return (
-                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${oCol}30` }}>
-                        {/* 카드 헤더 */}
-                        <div className="flex items-center gap-2 px-3 py-2.5" style={{ background: `${oCol}18` }}>
-                          <span className="text-[24px]">{food.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[14px] font-black leading-tight" style={{ color: INK, fontFamily: SERIF }}>{food.name}</p>
-                            <div className="flex items-center gap-1 mt-0.5">
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: oCol, color: "#fff" }}>{food.ohaeng}</span>
-                              <span className="text-[10px]" style={{ color: MUTE }}>{food.category}</span>
-                            </div>
-                          </div>
-                        </div>
-                        {/* 카드 본문 */}
-                        <div className="px-3 py-3" style={{ background: WHITE }}>
-                          <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{food.benefit}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* ── ④ 단락 2 ── */}
-            {lif.paragraphs?.[1] && <section className="px-6 pb-4"><P>{lif.paragraphs[1]}</P></section>}
 
             {/* ── ⑤ 생활 루틴 카드 (운동·수면·환경) ── */}
             {lif.lifestyleCards && lif.lifestyleCards.length > 0 && (
@@ -5076,8 +5451,8 @@ function ReportPreviewInner() {
               </section>
             )}
 
-            {/* ── ⑥ 단락 3 ── */}
-            {lif.paragraphs?.[2] && <section className="px-6 pb-4"><P>{lif.paragraphs[2]}</P></section>}
+            {/* ── ⑥ 단락 2 (운동·수면·환경) ── */}
+            {lif.paragraphs?.[1] && <section className="px-6 pb-4"><P>{lif.paragraphs[1]}</P></section>}
 
             {/* ── ⑦ 실천 팁 divider ── */}
             {lif.tips && lif.tips.length > 0 && (
@@ -5109,23 +5484,95 @@ function ReportPreviewInner() {
               </section>
             )}
 
-            {/* ── ⑧ 홍연의 당부 gradient box ── */}
-            {lif.lifestyleAdvice && (
-              <section className="px-6 pb-8">
-                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${FOREST} 0%, #1a3d2d 100%)` }}>
-                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
-                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{lif.lifestyleAdvice}</p>
-                </div>
-              </section>
-            )}
+            {/* ── ⑧ 나에게 맞는 개운법 (ch4 remedy 데이터 참조) ── */}
+            {(() => {
+              const PURP = "#5a3d7a";
+              const PURP_LIGHT = "#f5f0fa";
+              const CAT_COLOR: Record<string, string> = {
+                "생활습관": "#2d6a4f", "환경·공간": "#3d4f7c", "마음·명상": "#7a3d6a",
+                "음식·약재": "#6a5a2d", "색상·방향": "#5a3d7a",
+              };
+              const CAT_BG: Record<string, string> = {
+                "생활습관": "#eef7f2", "환경·공간": "#eef0f9", "마음·명상": "#f9eef6",
+                "음식·약재": "#f7f4ee", "색상·방향": "#f5f0fa",
+              };
+              const rem3 = (jc.remedy as { remedies?: { icon?: string; category?: string; title?: string; desc?: string }[] } | undefined) ?? {};
+              if (!rem3.remedies || rem3.remedies.length === 0) return null;
+              return (
+                <section className="px-6 pb-6">
+                  <Heading>나에게 맞는 개운법</Heading>
+                  <div className="flex flex-col gap-3">
+                    {rem3.remedies.map((r, i) => {
+                      const cat = r.category ?? "생활습관";
+                      const cColor = CAT_COLOR[cat] ?? PURP;
+                      const cBg = CAT_BG[cat] ?? PURP_LIGHT;
+                      return (
+                        <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${cColor}25` }}>
+                          <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${cColor}12` }}>
+                            <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-[24px]"
+                              style={{ background: `${cColor}18` }}>{r.icon}</div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 inline-block"
+                                style={{ background: cColor, color: "#fff" }}>{cat}</span>
+                              <p className="text-[15px] font-black leading-tight" style={{ color: INK, fontFamily: SERIF }}>{r.title}</p>
+                            </div>
+                          </div>
+                          <div className="px-4 py-3" style={{ background: cBg }}>
+                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{r.desc}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })()}
 
-            <ChapterNav cur="4" go={next} />
+            {/* ── ⑩ 분야별 실천 체크리스트 (ch4 데이터 참조) ── */}
+            {(() => {
+              const PURP = "#5a3d7a";
+              const PURP_LIGHT = "#f5f0fa";
+              const rem3c = (jc.remedy as { remedyCats?: { icon?: string; category?: string; items?: string[] }[] } | undefined) ?? {};
+              if (!rem3c.remedyCats || rem3c.remedyCats.length === 0) return null;
+              return (
+                <section className="px-6 pb-6">
+                  <Heading>분야별 실천 체크리스트</Heading>
+                  <p className="text-[12px] mb-3" style={{ color: MUTE }}>매일 조금씩 실천하는 것이 개운의 시작이오. 작은 것부터 몸에 익히시오.</p>
+                  <div className="flex flex-col gap-3">
+                    {rem3c.remedyCats.map((cat, i) => (
+                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${PURP}20` }}>
+                        <div className="flex items-center gap-2 px-4 py-3" style={{ background: PURP_LIGHT }}>
+                          <span className="text-[20px]">{cat.icon}</span>
+                          <span className="text-[14px] font-black" style={{ color: PURP, fontFamily: SERIF }}>{cat.category} 개운</span>
+                        </div>
+                        <div className="px-4 py-3" style={{ background: WHITE }}>
+                          {(cat.items ?? []).map((item, j) => (
+                            <div key={j} className="flex items-start gap-3 py-2">
+                              <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center"
+                                style={{ borderColor: `${PURP}40` }}>
+                                <div className="w-2 h-2 rounded-sm" style={{ background: `${PURP}30` }} />
+                              </div>
+                              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })()}
+
+            {/* ── ⑪ 하단멘트 ── */}
+            <Quote>{`생활방식과 개운법을 알았으니,\n이제 내 건강 흐름과\n조심해야 할 시기를 살펴보겠소.`}</Quote>
+
+            <ChapterNav cur="3" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제5장 — 건강 흐름·시기 ═══════════ */}
-      {ch === "5" && (() => {
+      {/* ═══════════ 제4장 — 건강 흐름·시기 ═══════════ */}
+      {ch === "4" && (() => {
         const DBLUE = "#2d4a7a";
         const DBLUE_LIGHT = "#eef2fa";
         const WARN_C = "#9b3535";
@@ -5142,7 +5589,7 @@ function ReportPreviewInner() {
           <>
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 흐름</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 흐름</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
                 건강 흐름과<br />조심해야 할 시기
               </h1>
@@ -5156,88 +5603,39 @@ function ReportPreviewInner() {
             <Quote>{`건강의 물결도\n대운을 따라 흐르오.\n\n조심해야 할 시기를\n미리 알고 대비하시오.`}</Quote>
 
             {/* ── ① 인트로 + 콜아웃 ── */}
-            <section className="px-6 pt-2 pb-2">
-              <Heading>건강 흐름 분석</Heading>
-              {hf.intro && <P>{hf.intro}</P>}
-              {hf.callout && <Callout>{hf.callout}</Callout>}
+            <section className="px-6 pt-2 pb-0">
+              <Heading>{name}님의 시기별 건강흐름</Heading>
             </section>
 
-            {/* ── ② 건강 흐름 꺾은선 그래프 ── */}
+            {/* ── ② 대운별 건강 흐름 그래프 ── */}
+            <section className="px-6 pb-2" style={{ marginTop: -2 }}>
+              <HealthFlowChart view={report?.view ?? null} name={name} />
+            </section>
+
+            {/* ── ③ 대운+세운 통합 건강 흐름 ── */}
             <section className="px-6 pb-2">
-              <HealthFlowChart view={report?.view ?? null} />
+              <HealthCombinedChart view={report?.view ?? null} name={name} />
             </section>
 
             {/* ── ④ 단락 1 ── */}
-            {hf.paragraphs?.[0] && <section className="px-6 pb-4"><P>{hf.paragraphs[0]}</P></section>}
 
-            {/* ── ⑤ 건강 흐름 세로 타임라인 ── */}
-            {hf.periods && hf.periods.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>시기별 건강 흐름</Heading>
-                <div className="relative pl-10">
-                  {/* 세로 연결선 */}
-                  <div className="absolute left-4 top-2 bottom-2 w-0.5" style={{ background: `${DBLUE}20` }} />
-                  <div className="flex flex-col gap-4">
-                    {hf.periods.map((period, i) => {
-                      const isWarn = period.tone === "warn";
-                      const dotColor = isWarn ? WARN_C : GOOD_C;
-                      const cardBg = isWarn ? WARN_BG : GOOD_BG;
-                      const borderColor = isWarn ? `${WARN_C}30` : `${GOOD_C}30`;
-                      return (
-                        <div key={i} className="relative">
-                          {/* 타임라인 점 */}
-                          <div className="absolute -left-10 top-4 w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                            style={{ background: dotColor, borderColor: dotColor, transform: "translateX(2px)" }}>
-                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#fff" }} />
-                          </div>
-                          {/* 카드 */}
-                          <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${borderColor}` }}>
-                            {/* 카드 헤더 */}
-                            <div className="flex items-center justify-between px-4 py-2.5" style={{ background: `${dotColor}12` }}>
-                              <span className="text-[14px] font-black" style={{ color: dotColor, fontFamily: SERIF }}>{period.label}</span>
-                              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full"
-                                style={{ background: dotColor, color: "#fff" }}>
-                                {isWarn ? "⚠ 주의" : "✓ 안정"}
-                              </span>
-                            </div>
-                            {/* 카드 본문 */}
-                            <div className="px-4 py-3" style={{ background: cardBg }}>
-                              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{period.text}</p>
-                              {period.advice && (
-                                <div className="flex items-start gap-2 pt-2" style={{ borderTop: `1px dashed ${dotColor}30` }}>
-                                  <span className="text-[11px] font-black flex-shrink-0 mt-0.5" style={{ color: dotColor }}>→</span>
-                                  <p className="text-[12px] font-bold leading-relaxed" style={{ color: dotColor }}>{period.advice}</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </section>
-            )}
 
-            {/* ── ⑤ 단락 2 ── */}
-            {hf.paragraphs?.[1] && <section className="px-6 pb-4"><P>{hf.paragraphs[1]}</P></section>}
 
             {/* ── ⑥ 시기별 대비 수칙 divider ── */}
             {hf.periodTips && hf.periodTips.length > 0 && (
-              <section className="px-6 pb-6">
+              <section className="px-6 pb-6" style={{ marginTop: 16 }}>
                 <Heading>건강 고비를 대비하는 수칙</Heading>
-                <p className="text-[12px] mb-3" style={{ color: MUTE }}>어느 시기가 오더라도 준비된 자는 두렵지 않소. 아래 수칙을 몸에 익히시오.</p>
-                <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${DBLUE}20`, background: DBLUE_LIGHT }}>
+                <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #e8c84020", background: "#fffdf0", marginTop: 12 }}>
                   {hf.periodTips.map((tip, i) => (
                     <div key={i}>
-                      {i > 0 && <div style={{ height: 1, background: `${DBLUE}15` }} />}
+                      {i > 0 && <div style={{ height: 1, background: "#e8c84030" }} />}
                       <div className="flex gap-4 px-4 py-4">
                         <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-[22px]"
                           style={{ background: WHITE }}>
                           {tip.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold mb-1.5" style={{ color: DBLUE, fontFamily: SERIF }}>{tip.title}</p>
+                          <p className="text-[13px] font-bold mb-1.5" style={{ color: "#8a6a00", fontFamily: SERIF }}>{tip.title}</p>
                           <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
                         </div>
                       </div>
@@ -5250,158 +5648,16 @@ function ReportPreviewInner() {
             {/* ── ⑦ 단락 3 ── */}
             {hf.paragraphs?.[2] && <section className="px-6 pb-4"><P>{hf.paragraphs[2]}</P></section>}
 
-            {/* ── ⑧ 홍연의 당부 gradient box ── */}
-            {hf.flowAdvice && (
-              <section className="px-6 pb-8">
-                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${DBLUE} 0%, #1a2d50 100%)` }}>
-                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
-                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{hf.flowAdvice}</p>
-                </div>
-              </section>
-            )}
+            {/* ── ⑧ 하단멘트 ── */}
+            <Quote>{`이로써\n${name}님의 건강을\n모두 살펴보았소.\n\n마지막으로 그대에게\n전하고 싶은 말이 남아있소.`}</Quote>
 
-            <ChapterNav cur="5" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제6장 — 개운법 ═══════════ */}
-      {ch === "6" && (() => {
-        const PURP = "#5a3d7a";
-        const PURP_LIGHT = "#f5f0fa";
-        const PURP_MID = "#8a6aaa";
-        const CAT_COLOR: Record<string, string> = {
-          "생활습관": "#2d6a4f", "환경·공간": "#3d4f7c", "마음·명상": "#7a3d6a",
-          "음식·약재": "#6a5a2d", "색상·방향": "#5a3d7a",
-        };
-        const CAT_BG: Record<string, string> = {
-          "생활습관": "#eef7f2", "환경·공간": "#eef0f9", "마음·명상": "#f9eef6",
-          "음식·약재": "#f7f4ee", "색상·방향": "#f5f0fa",
-        };
-        const rem = (jc.remedy as {
-          intro?: string; callout?: string; paragraphs?: string[];
-          remedies?: { icon?: string; category?: string; title?: string; desc?: string }[];
-          remedyCats?: { icon?: string; category?: string; items?: string[] }[];
-          remedyAdvice?: string;
-        } | undefined) ?? {};
-        return (
-          <>
-            {/* ── 다크 헤더 ── */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 개운법</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                내 건강을<br />살릴 개운법
-              </h1>
-            </div>
-            {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 320 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/saju_health/saju_health_6/saju_health_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`부족한 기운을 채우면\n건강의 흐름이 달라지오.\n\n${name}${"님"}에게\n맞는 개운법이오.`}</Quote>
-
-            {/* ── ① 인트로 + 콜아웃 ── */}
-            <section className="px-6 pt-2 pb-4">
-              <Heading>개운법 방향</Heading>
-              {rem.intro && <P>{rem.intro}</P>}
-              {rem.callout && <Callout>{rem.callout}</Callout>}
-            </section>
-
-            {/* ── ② 단락 1 ── */}
-            {rem.paragraphs?.[0] && <section className="px-6 pb-4"><P>{rem.paragraphs[0]}</P></section>}
-
-            {/* ── ③ 개운법 상세 카드 ── */}
-            {rem.remedies && rem.remedies.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>나에게 맞는 개운법</Heading>
-                <div className="flex flex-col gap-3">
-                  {rem.remedies.map((r, i) => {
-                    const cat = r.category ?? "생활습관";
-                    const cColor = CAT_COLOR[cat] ?? PURP;
-                    const cBg = CAT_BG[cat] ?? PURP_LIGHT;
-                    return (
-                      <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${cColor}25` }}>
-                        {/* 카드 헤더 */}
-                        <div className="flex items-center gap-3 px-4 py-3" style={{ background: `${cColor}12` }}>
-                          <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-[24px]"
-                            style={{ background: `${cColor}18` }}>
-                            {r.icon}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 inline-block"
-                              style={{ background: cColor, color: "#fff" }}>{cat}</span>
-                            <p className="text-[15px] font-black leading-tight" style={{ color: INK, fontFamily: SERIF }}>{r.title}</p>
-                          </div>
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black"
-                            style={{ background: PURP, color: "#fff" }}>{i + 1}</div>
-                        </div>
-                        {/* 카드 본문 */}
-                        <div className="px-4 py-3" style={{ background: cBg }}>
-                          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{r.desc}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* ── ④ 단락 2 ── */}
-            {rem.paragraphs?.[1] && <section className="px-6 pb-4"><P>{rem.paragraphs[1]}</P></section>}
-
-            {/* ── ⑤ 분야별 실천 체크리스트 ── */}
-            {rem.remedyCats && rem.remedyCats.length > 0 && (
-              <section className="px-6 pb-6">
-                <Heading>분야별 실천 체크리스트</Heading>
-                <p className="text-[12px] mb-3" style={{ color: MUTE }}>매일 조금씩 실천하는 것이 개운의 시작이오. 작은 것부터 몸에 익히시오.</p>
-                <div className="flex flex-col gap-3">
-                  {rem.remedyCats.map((cat, i) => (
-                    <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${PURP}20` }}>
-                      {/* 카테고리 헤더 */}
-                      <div className="flex items-center gap-2 px-4 py-3" style={{ background: PURP_LIGHT }}>
-                        <span className="text-[20px]">{cat.icon}</span>
-                        <span className="text-[14px] font-black" style={{ color: PURP, fontFamily: SERIF }}>{cat.category} 개운</span>
-                      </div>
-                      {/* 체크 항목 */}
-                      <div className="px-4 py-3" style={{ background: WHITE }}>
-                        {(cat.items ?? []).map((item, j) => (
-                          <div key={j} className="flex items-start gap-3 py-2">
-                            {j > 0 && <div className="absolute" style={{ top: 0, height: 1, background: `${PURP}10` }} />}
-                            <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center"
-                              style={{ borderColor: `${PURP}40` }}>
-                              <div className="w-2 h-2 rounded-sm" style={{ background: `${PURP}30` }} />
-                            </div>
-                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* ── ⑥ 단락 3 ── */}
-            {rem.paragraphs?.[2] && <section className="px-6 pb-4"><P>{rem.paragraphs[2]}</P></section>}
-
-            {/* ── ⑦ 홍연의 당부 gradient box ── */}
-            {rem.remedyAdvice && (
-              <section className="px-6 pb-8">
-                <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${PURP} 0%, #2d1a40 100%)` }}>
-                  <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>홍 연 의 당 부</p>
-                  <p className="text-[14px] leading-relaxed" style={{ color: "#fff" }}>{rem.remedyAdvice}</p>
-                </div>
-              </section>
-            )}
-
-            <ChapterNav cur="6" go={next} />
+            <ChapterNav cur="4" go={next} />
           </>
         );
       })()}
 
       {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
-      {ch === "7" && (
+      {ch === "5" && (
         <>
           <div style={{ filter: eventOpen ? "blur(5px)" : "none", pointerEvents: eventOpen ? "none" : "auto", transition: "filter 0.2s" }}>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -5412,25 +5668,22 @@ function ReportPreviewInner() {
             </div>
             <div className="relative overflow-hidden" style={{ height: 320 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/saju_health/saju_health_7/saju_health_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/saju_health/saju_health_6/saju_health_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <section className="px-6 pt-10 pb-8">
-              <div className="text-center mb-8">
-                <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
-                  <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
-                </div>
-              </div>
               {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
                 <P key={i}>{p}</P>
               ))}
-              <p className="text-right mt-6 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>— 홍연 드림</p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/dojang.png" alt="홍연 도장" className="block mx-auto mt-4" style={{ width: 56, opacity: 0.85 }} />
+              <div className="flex items-center justify-end gap-3 mt-8 mb-2">
+                <span className="text-[13.5px] font-bold" style={{ color: INK }}>홍연 드림</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/dojang.png" alt="도장" style={{ width: 56, height: 56, objectFit: "contain" }} />
+              </div>
             </section>
             <ReviewBox />
             <RecoGrid />
-            <ChapterNav cur="7" go={next} />
+            <ChapterNav cur="5" go={next} />
           </div>
           {eventOpen && <EventPopup onClose={(hide) => { if (hide) localStorage.setItem("hy_health_event_hide", "1"); setEventOpen(false); }} />}
         </>

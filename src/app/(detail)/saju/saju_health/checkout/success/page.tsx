@@ -6,13 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 const CHAPTER_TITLES = [
   "제1장 — 나는 어떤 체질로 태어났나",
   "제2장 — 내 사주에 약한 부위는 어디인가",
-  "제3장 — 특히 조심해야 할 질병과 증상",
-  "제4장 — 나에게 맞는 식습관과 생활 방식",
-  "제5장 — 내 건강 흐름과 조심해야 할 시기",
-  "제6장 — 내 건강을 살릴 개운법",
+  "제3장 — 건강을 살릴 생활방식과 개운법",
+  "제4장 — 내 건강 흐름과 조심해야 할 시기",
   "마무리 — 홍연의 서신",
 ];
-const TOTAL = 7;
+const TOTAL = 5;
 
 function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; currentChapter: number }) {
   const pct = Math.round((doneCount / TOTAL) * 100);
@@ -109,11 +107,24 @@ function SuccessInner() {
       }
       const { resultId, name, gender } = await confirmRes.json();
 
-      const chapters = [1,2,3,4,5,6,7];
       let done = 0;
       const allContent: Record<string, unknown> = {};
 
-      await Promise.all(chapters.map(async (ch) => {
+      // ch1 먼저 실행 — 용신/희신/기신을 DB에 저장한 뒤 나머지 장에서 참조
+      try {
+        const r = await fetch("/api/saju_health-report", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: resultId, chapter: 1 }),
+        });
+        const data = await r.json();
+        if (data.sections) Object.assign(allContent, data.sections);
+      } catch { /* 실패해도 계속 */ }
+      done++;
+      setDoneCount(done);
+      setCurrentChapter(Math.min(done + 1, TOTAL));
+
+      // ch2~5 병렬 실행
+      await Promise.all([2,3,4,5].map(async (ch) => {
         try {
           const r = await fetch("/api/saju_health-report", {
             method: "POST", headers: { "Content-Type": "application/json" },
