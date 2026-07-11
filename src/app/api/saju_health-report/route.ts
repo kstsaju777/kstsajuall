@@ -42,7 +42,7 @@ const createSchema = z.object({
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; daeun?: { label: string; gz: string }[]; ilganChar?: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; daeun?: { label: string; gz: string }[]; ilganChar?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; gyeokguk?: string }) {
   const { system, user } = buildHealthChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -264,15 +264,73 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? ""; // "yyyy.mm.dd"
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+    const pillars = applyLocalSinsal(stored?.view?.pillars ?? []);
+
+    // 1장 생성 후 저장된 용신/희신/기신/격국 읽기 (2장~에 주입)
+    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
+    const gyeokguk: string | undefined = (stored?.gyeokguk as string | undefined) || undefined;
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
-      pillars: applyLocalSinsal(stored?.view?.pillars ?? []),
+      pillars,
       birthYear: birthYear || undefined,
       daeun: stored?.view?.daeun ?? [],
       ilganChar: (stored?.view?.ilgan ?? "")[0] ?? undefined,
+      yongsinEl,
+      heusinEl,
+      gisinEl,
+      gyeokguk,
     });
+
+    // ch1: constitution 용신/희신/기신 십성→오행 변환 후 myeongsik에 저장
+    if (chapter === 1) {
+      const cs = (obj as Record<string, unknown>).constitution as Record<string, unknown> | undefined;
+      if (cs) {
+        const OHAENG = ["금", "목", "화", "토", "수"] as const;
+        const ilganEl = (pillars.find((p: { pos: string }) => p.pos === "일주")?.ganEl) ?? "";
+        const GEN: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+        const CTL: Record<string, string> = { 목: "토", 화: "금", 토: "수", 금: "목", 수: "화" };
+        const CLASHED_BY: Record<string, string> = { 목: "금", 화: "수", 토: "목", 금: "화", 수: "토" };
+        const GENERATED_BY: Record<string, string> = { 목: "수", 화: "목", 토: "화", 금: "토", 수: "금" };
+        function sipToEl(sip: string): string {
+          if (["비견", "겁재"].some(s => sip.includes(s))) return ilganEl;
+          if (["식신", "상관"].some(s => sip.includes(s))) return GEN[ilganEl] ?? "";
+          if (["편재", "정재", "재성"].some(s => sip.includes(s))) return CTL[ilganEl] ?? "";
+          if (["편관", "정관", "관성"].some(s => sip.includes(s))) return CLASHED_BY[ilganEl] ?? "";
+          if (["편인", "정인", "인성"].some(s => sip.includes(s))) return GENERATED_BY[ilganEl] ?? "";
+          return "";
+        }
+        function resolveEl(fieldVal: unknown, keyword: string, allText: string): string {
+          const v = String(fieldVal ?? "").trim();
+          if ((OHAENG as readonly string[]).includes(v)) return v;
+          const sipMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*[''""]?([가-힣]{2,3})[''""]?`));
+          if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; if ((OHAENG as readonly string[]).includes(sipMatch[1])) return sipMatch[1]; }
+          const elMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+          if (elMatch) return elMatch[1];
+          return "";
+        }
+        const allText = [cs.intro, cs.callout, ...((cs.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
+        cs.yongsinEl = resolveEl(cs.yongsinEl, "용신", allText);
+        cs.heusinEl  = resolveEl(cs.heusinEl,  "희신", allText);
+        cs.gisinEl   = resolveEl(cs.gisinEl,   "기신", allText);
+
+        // myeongsik에 저장 (이후 장에서 참조)
+        if (cs.yongsinEl) {
+          const updatedMyeongsik = {
+            ...stored,
+            yongsinEl: cs.yongsinEl,
+            heusinEl: cs.heusinEl ?? "",
+            gisinEl: cs.gisinEl ?? "",
+            gyeokguk: String(cs.gyeokguk ?? ""),
+          };
+          await service.from("saju_results").update({ myeongsik: updatedMyeongsik as never }).eq("id", id);
+        }
+      }
+    }
 
     return NextResponse.json({ sections: obj });
   } catch (err) {

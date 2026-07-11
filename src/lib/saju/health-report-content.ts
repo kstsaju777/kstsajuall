@@ -57,9 +57,16 @@ const HEALTH_CH_THEME: Record<number, string> = {
 // ── 장별 추가 지시 ──
 const HEALTH_CH_GUIDE: Record<number, string> = {
   1: `[constitution 섹션 — 체질]
+- yongsinEl: 용신 오행 1글자 (예: "화", "목", "수", "금", "토")
+- heusinEl: 희신 오행 1글자
+- gisinEl: 기신 오행 1글자
+- yongsinReason: 용신 오행이 왜 이 사람에게 필요한지 1~2문장.
+- heusinReason: 희신 오행이 왜 보조 역할을 하는지 1~2문장.
+- gisinReason: 기신 오행이 왜 이 사람에게 부담이 되는지 1~2문장.
+- gyeokguk: 이 사주의 격국명 (예: "정관격", "식신격" 등). 격국을 먼저 판단하여 이후 모든 풀이의 기준으로 삼으시오.
 - intro: 한 줄 체질 요약. 일간 오행과 신강·신약을 담아 (1문장)
 - callout: 이 사람의 에너지 특성과 체질 핵심 한 문장.
-- paragraphs 3개: ①일간 오행과 신강·신약으로 본 체질 ②타고난 에너지 패턴과 몸의 특성 ③이 체질이 주는 강점과 주의 포인트. 각 5~7문장 200자 이상으로 상세하게.
+- paragraphs 3개: ①일간 오행과 신강·신약, 격국으로 본 체질 ②타고난 에너지 패턴과 몸의 특성 ③이 체질이 주는 강점과 주의 포인트. 각 5~7문장 200자 이상으로 상세하게.
 - constitutionType: { icon(이모지 1자), name(체질 유형명 4~6자, 예: "목형 체질"), badge(신강/신약 표기), desc(이 체질의 핵심 기운을 2~3문장으로) }
 - constitutionTraits: 4개. 각 trait: { icon(이모지), label(특성명 3~5자), desc(한 줄 설명) } — 이 체질이 타고난 강점·특성 중심으로
 - constitutionCautions: 3개. 각: { num(번호 1~3), title(주의 포인트 5~8자), desc(2~3문장, 왜 이 체질에서 이 점이 중요한지) }`,
@@ -119,6 +126,13 @@ const HEALTH_CH_GUIDE: Record<number, string> = {
 const HEALTH_CH_SCHEMA: Record<number, string> = {
   1: `{
   "constitution": {
+    "yongsinEl": "화",
+    "heusinEl": "목",
+    "gisinEl": "금",
+    "yongsinReason": "용신 오행이 이 사람에게 필요한 이유 1~2문장",
+    "heusinReason": "희신 오행이 보조 역할을 하는 이유 1~2문장",
+    "gisinReason": "기신 오행이 이 사람에게 부담이 되는 이유 1~2문장",
+    "gyeokguk": "정관격",
     "intro": "체질 요약 한 줄 (1문장)",
     "callout": "에너지 특성·체질 핵심 한 문장",
     "paragraphs": ["단락1 (5~7문장 200자+)", "단락2 (5~7문장 200자+)", "단락3 (5~7문장 200자+)"],
@@ -310,6 +324,10 @@ export function buildHealthChapterPrompt(
     birthYear?: number;
     daeun?: { label: string; gz: string }[];
     ilganChar?: string;
+    yongsinEl?: string;
+    heusinEl?: string;
+    gisinEl?: string;
+    gyeokguk?: string;
   }
 ): { system: string; user: string } {
   const theme = HEALTH_CH_THEME[chapter] ?? `[제${chapter}장]`;
@@ -317,6 +335,30 @@ export function buildHealthChapterPrompt(
   const schema = HEALTH_CH_SCHEMA[chapter] ?? "{}";
   const honorific = input.name ? `${input.name} 님` : "그대";
   const currentYear = new Date().getFullYear();
+
+  // 오행 카운트 + 십성 분포 주입 (전 장 공통)
+  let ohaengCountNote = "";
+  if (input.pillars && input.pillars.length > 0) {
+    const elCnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+    const sipCnt: Record<string, number> = {};
+    for (const p of input.pillars) {
+      if (p.ganEl && elCnt[p.ganEl] !== undefined) elCnt[p.ganEl]++;
+      if (p.jiEl  && elCnt[p.jiEl]  !== undefined) elCnt[p.jiEl]++;
+      for (const s of [p.sipTop, p.sipBot]) if (s) sipCnt[s] = (sipCnt[s] ?? 0) + 1;
+    }
+    const elTotal = Object.values(elCnt).reduce((a, b) => a + b, 0) || 1;
+    const elSorted = Object.entries(elCnt).sort((a, b) => b[1] - a[1]);
+    const strong = elSorted.filter(([, v]) => v >= 2).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    const weak   = elSorted.filter(([, v]) => v <= 1).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    const sipLines = Object.entries(sipCnt).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}×${v}`).join(" / ");
+    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성: ${sipLines || "없음"}\n`;
+  }
+
+  // 확정된 용신/희신/기신/격국 주입 (1장 생성 후 myeongsik에 저장된 값)
+  let yongsinNote = "";
+  if (chapter !== 1 && input.yongsinEl && input.heusinEl && input.gisinEl) {
+    yongsinNote = `\n[확정 오행 및 격국 — 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}${input.gyeokguk ? ` / 격국: ${input.gyeokguk}` : ""}\n`;
+  }
 
   // ch5: 대운 건강 흐름 데이터 주입
   let healthFlowInject = "";
@@ -329,7 +371,7 @@ export function buildHealthChapterPrompt(
 
 ${input.manseryeokText}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
-${healthFlowInject}
+${ohaengCountNote}${yongsinNote}${healthFlowInject}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 이번 장의 주제: ${theme}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
