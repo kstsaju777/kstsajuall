@@ -4501,7 +4501,6 @@ function ReportPreviewInner() {
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
               {`"자, 이제 ${name}${"님"}의\n서사가 담긴 책을 펼쳐보겠소?"`}
             </p>
-            <p className="mt-5 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>홍연(紅緣)</p>
           </div>
 
           {/* 다음 장 네비 */}
