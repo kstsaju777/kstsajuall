@@ -5547,7 +5547,7 @@ function ReportPreviewInner() {
 
           {/* 2. 신강·신약 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>{name.slice(1) || name}님의 기운은 얼마나 강한가</Heading>
+            <Heading>{name.slice(1) || name}님의 기운은 강한가 약한가</Heading>
             <SinStrengthGauge view={report?.view ?? null} />
             <div className="mt-4" />
             <P>{`${name}님은 '${report?.view?.sinStrength?.strength ?? "중화"}'한 편에 속하오.\n\n우선, 신강신약을 판단하는\n기준에 대해 자세하게 알려주겠소.\n\n사주팔자를 구성하는 글자들 중에서\n일간을 기준으로 다른 위치에 있는 글자들이\n일간과 같거나 돕는 오행일 경우 '득'이라 하오.\n그렇지 않으면 실패를 했다고 하는 것이오.\n\n일간은 곧 '나 자신'이므로,\n나와 같거나 돕는 오행이 많을수록\n신강한 상태에 가까워지는 것이오.`}</P>
