@@ -126,7 +126,10 @@ ability 섹션을 작성하세요.
 80점 이상은 강점으로, 60점 미만은 솔직하게 보완이 필요한 부분으로 서술하세요.
 가장 높은 능력치 2~3개와 가장 낮은 능력치 1~2개를 구체적으로 언급하세요.
 단순 나열이 아니라 이 조합이 실제 삶에서 어떻게 드러나는지 입체적으로 풀이하세요.
-500자 내외로 paragraphs[0] 하나에 담아 작성하세요.
+paragraphs 3개로 나누어 작성하세요. 전체 530자 내외(공백 포함).
+①단락(210~220자): 가장 높은 능력치 2~3개가 이 아이의 삶에서 어떻게 드러나는지 구체적으로 풀이. 단순 나열 말고 조합의 시너지를 입체적으로.
+②단락(230~250자): 상대적으로 낮은 능력치 1~2개를 솔직하게 짚고, 부모가 어떻게 도와줄 수 있는지 실용적 조언 포함.
+③단락(65~75자): 강점을 바탕으로 이 아이가 어떻게 꽃필지 따뜻하게 마무리.
 
 [파트4: 그대에게 숨겨진 기운들]
 sipseong, unseong, sinsalReading, pyori 섹션을 작성하세요.
@@ -374,7 +377,7 @@ const JANYEO_CH_SCHEMA: Record<number, string> = {
   "cheongneongi": { "paragraphs": ["청년기 풀이. 월주 천간·지지 십성 기반. 직장인/사업 기질 언급. 300자 내외. 홍연 말투."] },
   "jungnyeongi": { "paragraphs": ["중년기 풀이. 일주 천간(일간)·지지 십성 기반. 배우자·결혼생활·중년 전성기. 300자 내외. 홍연 말투."] },
   "nonyeongi": { "paragraphs": ["말년기 풀이. 시주 천간·지지 십성 기반. 자녀·노후 재물·건강·결실. 300자 내외. 홍연 말투."] },
-  "ability": { "paragraphs": ["타고난 능력치 풀이. 점수 수치 언급 금지. 80점 이상=강점, 60점 미만=보완 필요. 가장 높은 2~3개·낮은 1~2개 구체 언급. 500자 내외. 홍연 말투."] },
+  "ability": { "paragraphs": ["①강한 능력치 2~3개 조합 시너지 풀이. 210~220자. 홍연 말투.", "②낮은 능력치 1~2개 솔직하게 짚기 + 부모 실용 조언 포함. 230~250자. 홍연 말투.", "③강점 기반 마무리 격려. 65~75자. 홍연 말투."] },
   "sipseong": { "intro": "[이름]님의 명식에는 [십성명]의 기운이 강하게 자리 잡고 있소. 형식으로 시작", "callout": "그 십성이 삶에서 드러나는 방식 한 문장", "paragraphs": ["주된 십성 성향과 삶의 패턴", "보조 십성과의 상호작용", "십성이 없거나 과할 때의 영향"] },
   "unseong": { "intro": "일지 운성부터 언급하며 시작", "callout": "이 운성이 나타내는 삶의 리듬 핵심 한 문장", "paragraphs": ["일지 운성의 기운과 삶의 리듬", "다른 기둥 운성들과의 조합이 만드는 전체 흐름", "이 운성 조합 활용 조언"] },
   "sinsalReading": { "paragraphs": ["신살 풀이 1 — 귀인살 중심", "신살 풀이 2 — 살의 기운과 긍정적 면", "신살 풀이 3 — 통합 기운과 활용 조언. 전체 560자 내외."] },
@@ -516,19 +519,51 @@ export function buildJanyeoChapterPrompt(
     : "이 아이";
   const currentYear = new Date().getFullYear();
 
-  // 3장·5장: 오행 카운트 사전 계산
+  // 전 장 공통: 오행 개수 + 십성 카운트 주입 (LLM 해석 오류 방지)
   let ohaengCountNote = "";
-  if ((chapter === 3 || chapter === 5) && input.pillars && input.pillars.length > 0) {
-    const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  if (input.pillars && input.pillars.length > 0) {
+    const elCnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+    const sipCnt: Record<string, number> = {};
     for (const p of input.pillars) {
-      if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
-      if (p.jiEl  && cnt[p.jiEl]  !== undefined) cnt[p.jiEl]++;
+      if (p.ganEl && elCnt[p.ganEl] !== undefined) elCnt[p.ganEl]++;
+      if (p.jiEl  && elCnt[p.jiEl]  !== undefined) elCnt[p.jiEl]++;
+      for (const s of [p.sipTop, p.sipBot]) if (s) sipCnt[s] = (sipCnt[s] ?? 0) + 1;
     }
-    const total = Object.values(cnt).reduce((a, b) => a + b, 0) || 1;
-    const sorted = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
-    const strong = sorted.filter(([, v]) => v >= 2).map(([k, v]) => `${k}(${v}개, ${Math.round(v/total*100)}%)`).join("·");
-    const weak   = sorted.filter(([, v]) => v <= 1).map(([k, v]) => `${k}(${v}개, ${Math.round(v/total*100)}%)`).join("·");
-    ohaengCountNote = `\n[오행 실제 개수 — 반드시 이 값 그대로 사용하시오]\n강한 오행(2개 이상): ${strong || "없음"}\n약한 오행(0~1개): ${weak || "없음"}\n이 수치와 다르게 서술하는 것은 절대 금지.\n`;
+    const elTotal = Object.values(elCnt).reduce((a, b) => a + b, 0) || 1;
+    const elSorted = Object.entries(elCnt).sort((a, b) => b[1] - a[1]);
+    const strong = elSorted.filter(([, v]) => v >= 2).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    const weak   = elSorted.filter(([, v]) => v <= 1).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
+    const sipLines = Object.entries(sipCnt).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}×${v}`).join(" / ");
+    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오. 다르게 서술하는 것은 절대 금지]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성: ${sipLines || "없음"}\n`;
+  }
+
+  // 1장: 능력치 점수 주입 (차트와 풀이 일치)
+  let abilityData = "";
+  if (chapter === 1 && input.pillars && input.pillars.length > 0) {
+    const sip: Record<string, number> = {};
+    const el: Record<string, number> = {};
+    for (const p of input.pillars) {
+      for (const s of [p.sipTop, p.sipBot]) if (s) sip[s] = (sip[s] ?? 0) + 1;
+      for (const e of [p.ganEl, p.jiEl]) if (e) el[e] = (el[e] ?? 0) + 1;
+    }
+    const g = (keys: string[]) => keys.reduce((a, k) => a + (sip[k] ?? 0), 0);
+    const e = (keys: string[]) => keys.reduce((a, k) => a + (el[k] ?? 0), 0);
+    const sc = (raw: number) => Math.min(98, Math.max(28, 42 + raw * 13));
+    const scores = [
+      { label: "추진력", value: sc(g(["겁재","편관"]) + e(["목","금"]) * 0.5) },
+      { label: "리더십", value: sc(g(["편관","정관","겁재"]) + e(["금"]) * 0.6) },
+      { label: "창의력", value: sc(g(["상관","편인"]) + e(["화","수"]) * 0.5) },
+      { label: "재물운", value: sc(g(["편재","정재"]) + e(["토"]) * 0.6) },
+      { label: "지속력", value: sc(g(["식신","정재","정관"]) + e(["토","목"]) * 0.4) },
+      { label: "사교력", value: sc(g(["비견","식신","상관"]) + e(["화"]) * 0.6) },
+      { label: "감수성", value: sc(g(["정인","편인"]) + e(["수"]) * 0.6) },
+      { label: "직관력", value: sc(g(["편인","상관"]) + e(["수","화"]) * 0.5) },
+    ];
+    const sorted = [...scores].sort((a, b) => b.value - a.value);
+    abilityData = `\n[타고난 능력치 — 차트에 표시되는 실제 계산값]\n` +
+      scores.map(s => `${s.label}: ${s.value}점`).join(" / ") + "\n" +
+      `높은 순: ${sorted.map(s => `${s.label}(${s.value}점)`).join(" > ")}\n` +
+      `(80점 이상=강점, 60점 미만=보완 필요. 풀이는 반드시 이 점수를 기준으로 작성하시오.)\n`;
   }
 
   // 6장: 세운(2025~2034) + 대운 + 십성 주입
@@ -556,7 +591,7 @@ export function buildJanyeoChapterPrompt(
 【호칭 규칙】 풀이 본문에서 이 아이를 지칭할 때는 반드시 "${honor}"라는 호칭을 사용하시오. "그", "그녀", "그대", "당신"은 절대 쓰지 마시오. 호칭이 반복되어 어색하면 "이 아이"로 대체하시오.
 
 ${input.manseryeokText}
-${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}${ohaengCountNote}${seunDaeunNote}
+${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}${abilityData}${ohaengCountNote}${seunDaeunNote}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 이번 장의 주제: ${theme}

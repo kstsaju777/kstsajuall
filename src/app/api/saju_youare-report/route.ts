@@ -42,7 +42,7 @@ const createSchema = z.object({
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string }[]; ilganChar?: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string }[]; ilganChar?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string }) {
   const { system, user } = buildYouareChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -264,15 +264,65 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? ""; // "yyyy.mm.dd"
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+    const pillars = applyLocalSinsal(stored?.view?.pillars ?? []);
+
+    // 6장에서 확정된 용신 오행 읽기 (재생성 시 일관성 유지)
+    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
-      pillars: applyLocalSinsal(stored?.view?.pillars ?? []),
+      pillars,
       birthYear: birthYear || undefined,
       seun: stored?.view?.seun ?? [],
       ilganChar: (stored?.view?.ilgan ?? "")[0] ?? undefined,
+      yongsinEl,
+      heusinEl,
+      gisinEl,
     });
+
+    // ch6: remedy 용신/희신/기신 십성→오행 변환
+    if (chapter === 6) {
+      const rd = (obj as Record<string, unknown>).remedy as Record<string, unknown> | undefined;
+      if (rd) {
+        const OHAENG = ["금", "목", "화", "토", "수"] as const;
+        const ilganEl = (pillars.find((p: { pos: string }) => p.pos === "일주")?.ganEl) ?? "";
+        const GEN: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+        const CTL: Record<string, string> = { 목: "토", 화: "금", 토: "수", 금: "목", 수: "화" };
+        const CLASHED_BY: Record<string, string> = { 목: "금", 화: "수", 토: "목", 금: "화", 수: "토" };
+        const GENERATED_BY: Record<string, string> = { 목: "수", 화: "목", 토: "화", 금: "토", 수: "금" };
+        function sipToEl(sip: string): string {
+          if (["비견", "겁재"].some(s => sip.includes(s))) return ilganEl;
+          if (["식신", "상관"].some(s => sip.includes(s))) return GEN[ilganEl] ?? "";
+          if (["편재", "정재", "재성"].some(s => sip.includes(s))) return CTL[ilganEl] ?? "";
+          if (["편관", "정관", "관성"].some(s => sip.includes(s))) return CLASHED_BY[ilganEl] ?? "";
+          if (["편인", "정인", "인성"].some(s => sip.includes(s))) return GENERATED_BY[ilganEl] ?? "";
+          return "";
+        }
+        function resolveEl(fieldVal: unknown, keyword: string, allText: string): string {
+          const v = String(fieldVal ?? "").trim();
+          if ((OHAENG as readonly string[]).includes(v)) return v;
+          const sipMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*[''""]?([가-힣]{2,3})[''""]?`));
+          if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; if ((OHAENG as readonly string[]).includes(sipMatch[1])) return sipMatch[1]; }
+          const elMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+          if (elMatch) return elMatch[1];
+          return "";
+        }
+        const allText = [rd.intro, ...((rd.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
+        rd.yongsinEl = resolveEl(rd.yongsinEl, "용신", allText);
+        rd.heusinEl  = resolveEl(rd.heusinEl,  "희신", allText);
+        rd.gisinEl   = resolveEl(rd.gisinEl,   "기신", allText);
+
+        // 확정된 오행을 myeongsik에 저장 (재생성 시 일관성 유지)
+        if (rd.yongsinEl) {
+          const updatedMyeongsik = { ...stored, yongsinEl: rd.yongsinEl, heusinEl: rd.heusinEl ?? "", gisinEl: rd.gisinEl ?? "" };
+          await service.from("saju_results").update({ myeongsik: updatedMyeongsik as never }).eq("id", id);
+        }
+      }
+    }
 
     return NextResponse.json({ sections: obj });
   } catch (err) {
