@@ -4578,7 +4578,7 @@ function ReportPreviewInner() {
             </section>
 
             {/* ── ⑤ 단락 2 ── */}
-            {con.paragraphs?.[1] && <section className="px-6 pb-4"><P>{con.paragraphs[1]}</P></section>}
+            {con.paragraphs?.[1] && <section className="px-6 pt-4 pb-4"><P>{con.paragraphs[1]}</P></section>}
 
             {/* ── ⑥ 체질 유형 카드 ── */}
             {con.constitutionType && (
