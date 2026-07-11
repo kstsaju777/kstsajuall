@@ -133,6 +133,12 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
+      // 이미지 생성 완료까지 대기 (알림톡은 PATCH 완료 후 서버에서 발송)
+      await fetch("/api/saju_youare-report", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId }),
+      }).catch(() => {});
+
       router.push(`/saju/saju_youare/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });
   // eslint-disable-next-line react-hooks/exhaustive-deps
