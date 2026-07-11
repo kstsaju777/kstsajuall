@@ -4536,6 +4536,25 @@ function ReportPreviewInner() {
             </div>
             <Quote>{`${name.slice(1) || name}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 건강의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name.slice(1) || name}님의 건강사주요.`}</Quote>
 
+            {/* 명식표 */}
+            <MyeongsikTable
+              view={report?.view ?? null}
+              name={name}
+              birth={report?.birth ?? null}
+              header={
+                <div className="text-center">
+                  <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name.slice(1) || name}님의 사주팔자</p>
+                  {report?.birth?.date && (
+                    <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                      {String(report.birth.date).replace(/^(\d{4})(\d{2})(\d{2})$/, "$1년 $2월 $3일")}{" "}
+                      {report.birth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                      {effectiveGender === "female" ? "여자" : "남자"}
+                    </p>
+                  )}
+                </div>
+              }
+            />
+
             {/* ── ① 인트로 + 콜아웃 ── */}
             <section className="px-6 pt-2 pb-4">
               <Heading>타고난 체질과 기운</Heading>
