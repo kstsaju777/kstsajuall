@@ -6471,10 +6471,7 @@ function ReportPreviewInner() {
                     boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
                   }}>
                     <div style={{
-                      padding: "10px",
-                      background: "#f9f6ef",
                       boxShadow: "inset 0 2px 8px rgba(0,0,0,0.2)",
-                      border: "1px solid #c8a04060",
                     }}>
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6596,10 +6593,7 @@ function ReportPreviewInner() {
                     boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
                   }}>
                     <div style={{
-                      padding: "10px",
-                      background: "#f9f6ef",
                       boxShadow: "inset 0 2px 8px rgba(0,0,0,0.2)",
-                      border: "1px solid #c8a04060",
                     }}>
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
