@@ -6536,7 +6536,7 @@ function ReportPreviewInner() {
             {/* ── 일간 에너지 카드 ── */}
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
               <OhaengDonutCh1 view={report?.view ?? null} />
               {/* 원국 풀이 단락 */}
@@ -6550,7 +6550,7 @@ function ReportPreviewInner() {
             {/* ── 기질 카드 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
               <NatureCard data={nature} />
             </section>
@@ -6558,7 +6558,7 @@ function ReportPreviewInner() {
             {/* ── 연애 패턴 ── */}
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>사랑할 때 나는 어떤 사람인가</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>사랑할 때 나는 어떤 사람인가</h2>
               </div>
               <LovePatternCard data={lovePattern} />
             </section>
@@ -6707,7 +6707,7 @@ function ReportPreviewInner() {
             {/* ── 일간 에너지 카드 ── */}
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
               <OhaengDonutCh2 view={report?.partnerView ?? null} />
               {/* 원국 풀이 단락 */}
@@ -6721,7 +6721,7 @@ function ReportPreviewInner() {
             {/* ── 기질 카드 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
               <NatureCard data={partnerNature} color={CH2_COLOR} />
             </section>
@@ -6729,7 +6729,7 @@ function ReportPreviewInner() {
             {/* ── 연애 패턴 ── */}
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>사랑할 때 {partnerFirstName}님은 어떤 사람인가</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>사랑할 때 {partnerFirstName}님은 어떤 사람인가</h2>
               </div>
               <LovePatternCard data={partnerLovePattern} color={CH2_COLOR} pale={CH2_PALE} />
             </section>
@@ -6772,7 +6772,7 @@ function ReportPreviewInner() {
             {/* ── 끌림의 이유 ── */}
             <section className="pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>끌림의 이유</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>끌림의 이유</h2>
               </div>
               <AttractionGauge
                 score={hasScore ? (chemistryScore.score as number) : 72}
@@ -6788,7 +6788,7 @@ function ReportPreviewInner() {
             {/* ── 두 사람의 첫인상 ── */}
             <section className="pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>두 사람의 첫인상</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>두 사람의 첫인상</h2>
               </div>
               <FirstImpressionDuelCard data={firstImpression} myName={myFirstName} partnerName={partnerFirstName} myGender={report?.gender} partnerGender={report?.partnerGender} />
             </section>
