@@ -6488,6 +6488,19 @@ function ReportPreviewInner() {
                       </div>
                     </div>
                   </div>
+                  {/* 명패 */}
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                    <div style={{
+                      background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)",
+                      padding: "5px 22px",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)",
+                      border: "1px solid #7a5808",
+                    }}>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>
+                        {name.slice(1) || name} 사주 원국도
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <WongukIllustration
@@ -6620,6 +6633,19 @@ function ReportPreviewInner() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} />
                       </div>
+                    </div>
+                  </div>
+                  {/* 명패 */}
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                    <div style={{
+                      background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)",
+                      padding: "5px 22px",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)",
+                      border: "1px solid #7a5808",
+                    }}>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>
+                        {partnerFirstName} 사주 원국도
+                      </p>
                     </div>
                   </div>
                 </div>
