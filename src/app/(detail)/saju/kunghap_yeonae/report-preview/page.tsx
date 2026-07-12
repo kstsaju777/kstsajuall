@@ -6468,7 +6468,7 @@ function ReportPreviewInner() {
                 : "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)";
               const textColor = isFem ? "#6b0030" : "#0d2b5e";
               const shadowColor = isFem ? "rgba(176,32,90,0.4)" : "rgba(26,74,158,0.4)";
-              const btnText = `명식(${name.slice(1) || name})`;
+              const btnText = `명식(${name})`;
               return (
                 <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", gap: 0 }}>
                   <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `1px 0 3px ${shadowColor}` }} />
