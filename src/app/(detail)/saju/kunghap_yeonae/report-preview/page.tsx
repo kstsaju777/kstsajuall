@@ -6479,6 +6479,8 @@ function ReportPreviewInner() {
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 10, right: 10, width: 52, height: 52, objectFit: "contain", opacity: 0.88 }} />
                       </div>
                     </div>
                   </div>
