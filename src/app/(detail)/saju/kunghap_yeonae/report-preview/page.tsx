@@ -6470,11 +6470,8 @@ function ReportPreviewInner() {
                     background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
                     boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
                   }}>
-                    <div style={{
-                      border: "3px solid #1a1208",
-                      boxShadow: "inset 0 0 0 1px rgba(255,200,60,0.2)",
-                    }}>
-                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3", boxShadow: "inset 0 3px 14px rgba(0,0,0,0.55), inset 0 0 6px rgba(0,0,0,0.3)" }}>
+                    <div>
+                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3", boxShadow: "inset 0 6px 18px rgba(0,0,0,0.5), inset 0 -4px 12px rgba(0,0,0,0.3), inset 6px 0 14px rgba(0,0,0,0.3), inset -6px 0 14px rgba(0,0,0,0.3)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6593,11 +6590,8 @@ function ReportPreviewInner() {
                     background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
                     boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
                   }}>
-                    <div style={{
-                      border: "3px solid #1a1208",
-                      boxShadow: "inset 0 0 0 1px rgba(255,200,60,0.2)",
-                    }}>
-                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3", boxShadow: "inset 0 3px 14px rgba(0,0,0,0.55), inset 0 0 6px rgba(0,0,0,0.3)" }}>
+                    <div>
+                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3", boxShadow: "inset 0 6px 18px rgba(0,0,0,0.5), inset 0 -4px 12px rgba(0,0,0,0.3), inset 6px 0 14px rgba(0,0,0,0.3), inset -6px 0 14px rgba(0,0,0,0.3)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.partnerSajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                       </div>
