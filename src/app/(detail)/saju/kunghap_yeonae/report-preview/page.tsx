@@ -6476,7 +6476,7 @@ function ReportPreviewInner() {
                       "inset -3px 0 0 rgba(0,0,0,0.45)",
                     ].join(", "),
                   }}>
-                    <div style={{ boxShadow: "inset 0 0 0 2px rgba(25,12,0,0.85)" }}>
+                    <div>
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
