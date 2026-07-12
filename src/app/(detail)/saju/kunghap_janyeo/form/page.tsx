@@ -811,7 +811,7 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
             <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{isPartner ? "자녀의" : "보호자의"} 사주팔자</p>
             <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
               <span className="font-bold" style={{ color: TEXT_CLR }}>{name}{isPartner ? (gender === "남아" ? "군" : gender === "여아" ? "양" : "님") : "님"}의</span>
-              <span className="font-bold">사주팔자이오</span>
+              <span className="font-bold"> 사주팔자이오.</span>
             </h2>
             <div className="grid grid-cols-4 gap-2 rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
               {(pillars ?? Array(4).fill(null)).map((p, i) => (
@@ -1113,7 +1113,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,12,15,0.5), rgba(8,12,15,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
         <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
-          {name}님 👶 {partnerName}님
+          {name}님 👶 {partnerName}{partnerGender === "남아" ? "군" : partnerGender === "여아" ? "양" : "님"}
         </p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 자녀 궁합을 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>

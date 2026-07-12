@@ -125,7 +125,7 @@ function MyeongsikSection({
           rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
           header={
             <div className="text-center">
-              <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{partnerName}님의 사주팔자</p>
+              <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{partnerName}{partnerGender === "남아" ? "군" : partnerGender === "여아" ? "양" : "님"}의 사주팔자</p>
               {formatDateLabel(partnerDate, partnerCalendar, partnerGender) && <p className="text-[13px]" style={{ color: "#5b504a" }}>{formatDateLabel(partnerDate, partnerCalendar, partnerGender)}</p>}
             </div>
           }
@@ -229,7 +229,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>자녀궁합</span>
-                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 두 사람의 자녀 궁합 이야기</p>
+                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 자녀와의 궁합이야기</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-[11px]" style={{ color: DSTRIKE }}>

@@ -4068,7 +4068,7 @@ function ParentRoleCard({ roles, closing, myName, childName }: {
 // 장번호 → 표시 제목 (자녀궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 자녀궁합에 대하여",
-  "1":  "제1장 · 나의 사주 원국",
+  "1":  "제1장 · 보호자의 사주원국",
   "2":  "제2장 · 자녀의 사주 원국",
   "3":  "제3장 · 부모와 자녀, 어떤 인연으로 만났는가",
   "4":  "제4장 · 이 아이는 어떤 기질을 타고났는가",
@@ -5205,10 +5205,11 @@ const SAMPLE_CONTENT = {
 function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasPartner, myGender, partnerGender, myName, partnerName }: { progress: number; title: string; onMenu: () => void; onMyeongsik: () => void; onPartnerMyeongsik?: () => void; hasPartner?: boolean; myGender?: string; partnerGender?: string; myName?: string; partnerName?: string }) {
   const [label, subtitle] = title.includes("·") ? title.split(" · ") : [title, ""];
   const isFemale = (g?: string) => g === "female" || g === "여성" || g === "여자" || g === "여아";
-  const ScrollBtn = ({ onClick, text, color }: { onClick: () => void; text: string; color: "blue" | "pink" }) => {
+  const ScrollBtn = ({ onClick, text, color }: { onClick: () => void; text: string; color: "blue" | "pink" | "green" }) => {
     const themes = {
       blue:  { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
       pink:  { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
+      green: { rod: "linear-gradient(to right, #0a3d1f, #1a6e38, #2fa855, #6dd48a, #2fa855, #1a6e38, #0a3d1f)", border: "#1a6e38", bg: "linear-gradient(to bottom, #e8f8ee 0%, #b8e8c8 40%, #a0ddb8 60%, #d0f0dc 100%)", text: "#0a3d1f", shadow: "rgba(26,110,56,0.4)" },
     };
     const t = themes[color];
     return (
@@ -5239,7 +5240,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
           <div className="flex flex-col gap-1.5" style={{ width: 96 }}>
             <ScrollBtn onClick={onMyeongsik} text={`명식(${myName ?? "나"})`} color={isFemale(myGender) ? "pink" : "blue"} />
             {hasPartner && onPartnerMyeongsik && (
-              <ScrollBtn onClick={onPartnerMyeongsik} text={`명식(${partnerName ?? "상대방"})`} color={isFemale(partnerGender) ? "pink" : "blue"} />
+              <ScrollBtn onClick={onPartnerMyeongsik} text={`명식(${partnerName ?? "상대방"})`} color="green" />
             )}
           </div>
           {/* 목차 버튼 */}
@@ -5264,7 +5265,7 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "자녀궁합에 대하여",                        no: "0" },
-  { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                          no: "1" },
+  { disp: "제1장",  chip: "나의원국", title: "보호자의 사주원국",                          no: "1" },
   { disp: "제2장",  chip: "자녀원국", title: "자녀의 사주 원국",                        no: "2" },
   { disp: "제3장",  chip: "인연",    title: "부모와 자녀, 어떤 인연으로 만났는가",       no: "3" },
   { disp: "제4장",  chip: "기질",    title: "이 아이는 어떤 기질을 타고났는가",          no: "4" },
@@ -6295,7 +6296,6 @@ function ReportPreviewInner() {
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
               {`"자, 이제 두 사람의 인연을\n낱낱이 풀어보겠소."`}
             </p>
-            <p className="mt-5 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>홍연(紅緣)</p>
           </div>
 
           {/* 다음 장 네비 */}
@@ -6303,7 +6303,7 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
+      {/* ═══════════ 제1장 · 보호자의 사주원국 ═══════════ */}
       {ch === "1" && (() => {
         const myWonguk      = (jc.myWonguk      as Record<string, unknown> | undefined) ?? null;
         const myNature      = (jc.myNature      as Record<string, unknown> | undefined) ?? null;
@@ -6313,7 +6313,7 @@ function ReportPreviewInner() {
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>보호자의 사주원국</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6328,8 +6328,52 @@ function ReportPreviewInner() {
               <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
             </section>
 
+            {(() => {
+              const isFem = (report?.gender || gender) === "female" || (report?.gender || gender) === "여성" || (report?.gender || gender) === "여자";
+              const color = isFem ? "pink" : "blue";
+              const themes = {
+                blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
+                pink: { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
+              };
+              const t = themes[color];
+              return (
+                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
+                  <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `1px 0 3px ${t.shadow}` }} />
+                    <span style={{ padding: "4px 9px", background: t.bg, borderTop: `1.5px solid ${t.border}`, borderBottom: `1.5px solid ${t.border}`, color: t.text, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${name})`}</span>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `-1px 0 3px ${t.shadow}` }} />
+                  </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}
+                </Quote>
+              );
+            })()}
+            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+              <div style={{ width: 1, height: 40, background: "#ccc" }} />
+            </div>
+            {report?.sajuImageUrl && (
+              <div>
+                <div className="px-6 text-center mb-3">
+                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+                </div>
+                <div className="px-5">
+                  <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
+                    <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={report.sajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/dojang.png" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} alt="" />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                    <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{name.slice(1) || name}님의 사주화</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 오행 분포 */}
-            <section className="px-6 pt-6 pb-2">
+            <section className="px-6 pt-12 pb-2">
               <Heading>나의 오행 분포</Heading>
               <P>목·화·토·금·수 다섯 기운이 내 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 부모로서의 양육 방식과 자녀와의 관계 방향을 결정하오.</P>
             </section>
@@ -6403,8 +6447,46 @@ function ReportPreviewInner() {
               )}
             </section>
 
+            {(() => {
+              const t = { rod: "linear-gradient(to right, #0a3d1f, #1a6e38, #2fa855, #6dd48a, #2fa855, #1a6e38, #0a3d1f)", border: "#1a6e38", bg: "linear-gradient(to bottom, #e8f8ee 0%, #b8e8c8 40%, #a0ddb8 60%, #d0f0dc 100%)", text: "#0a3d1f", shadow: "rgba(26,110,56,0.4)" };
+              return (
+                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
+                  <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `1px 0 3px ${t.shadow}` }} />
+                    <span style={{ padding: "4px 9px", background: t.bg, borderTop: `1.5px solid ${t.border}`, borderBottom: `1.5px solid ${t.border}`, color: t.text, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${childName})`}</span>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `-1px 0 3px ${t.shadow}` }} />
+                  </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}
+                </Quote>
+              );
+            })()}
+            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+              <div style={{ width: 1, height: 40, background: "#ccc" }} />
+            </div>
+            {report?.partnerSajuImageUrl && (
+              <div>
+                <div className="px-6 text-center mb-3">
+                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${childName.slice(1) || childName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+                </div>
+                <div className="px-5">
+                  <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
+                    <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={report.partnerSajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/dojang.png" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} alt="" />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                    <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{childName.slice(1) || childName}님의 사주화</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 자녀 오행 분포 */}
-            <section className="px-6 pt-6 pb-2">
+            <section className="px-6 pt-12 pb-2">
               <Heading>{childName}의 오행 분포</Heading>
               <P>목·화·토·금·수 다섯 기운이 {childName}의 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 아이의 기질과 성격, 그리고 부모와의 관계 방향을 결정하오.</P>
             </section>
