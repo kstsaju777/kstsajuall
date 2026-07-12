@@ -6476,18 +6476,12 @@ function ReportPreviewInner() {
                       "inset -3px 0 0 rgba(0,0,0,0.45)",
                     ].join(", "),
                   }}>
-                    {/* 내부 리바트 — 이미지가 끼워지는 홈 */}
-                    <div style={{
-                      boxShadow: [
-                        "inset 0 3px 6px rgba(0,0,0,0.55)",
-                        "inset 3px 0 6px rgba(0,0,0,0.35)",
-                        "inset 0 -2px 4px rgba(0,0,0,0.25)",
-                        "inset -2px 0 4px rgba(0,0,0,0.25)",
-                      ].join(", "),
-                    }}>
+                    <div style={{ boxShadow: "inset 0 0 0 2px rgba(25,12,0,0.85)" }}>
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        {/* 비네팅 — 가장자리를 어둡게 해 액자와 자연스럽게 연결 */}
+                        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0,0,0,0.45) 100%)", pointerEvents: "none" }} />
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} />
                       </div>
