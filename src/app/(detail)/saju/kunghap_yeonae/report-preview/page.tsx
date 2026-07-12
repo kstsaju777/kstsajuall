@@ -1482,7 +1482,7 @@ function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
               <div className="flex justify-around mb-3 px-2">
                 {sns.map((s, i) => (
                   <div key={i} className="flex flex-col items-center gap-1.5">
-                    <span className="flex items-center justify-center rounded-2xl font-black text-[18px]" style={{ width: 52, height: 52, background: s.color, color: (s as {tc?: string}).tc ?? "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>{s.t}</span>
+                    <span className="flex items-center justify-center rounded-2xl font-black text-[18px]" style={{ width: 34, height: 34, background: s.color, color: (s as {tc?: string}).tc ?? "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>{s.t}</span>
                     <span className="text-[11px] font-bold" style={{ color: "#5a4a3a" }}>{s.label}</span>
                   </div>
                 ))}
@@ -6480,7 +6480,7 @@ function ReportPreviewInner() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 10, right: 10, width: 52, height: 52, objectFit: "contain", opacity: 0.88 }} />
+                        <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 10, right: 10, width: 34, height: 34, objectFit: "contain", opacity: 0.88 }} />
                       </div>
                     </div>
                   </div>
