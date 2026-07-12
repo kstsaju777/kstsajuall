@@ -6466,12 +6466,26 @@ function ReportPreviewInner() {
               {report?.sajuImageUrl ? (
                 <div className="px-5">
                   <div style={{
-                    padding: "14px",
-                    background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
-                    boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
+                    padding: "16px",
+                    background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
+                    boxShadow: [
+                      "0 14px 44px rgba(0,0,0,0.6)",
+                      "inset 0 3px 0 rgba(255,245,130,0.85)",
+                      "inset 3px 0 0 rgba(255,240,110,0.5)",
+                      "inset 0 -3px 0 rgba(0,0,0,0.65)",
+                      "inset -3px 0 0 rgba(0,0,0,0.45)",
+                    ].join(", "),
                   }}>
-                    <div>
-                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3", boxShadow: "inset 0 6px 18px rgba(0,0,0,0.5), inset 0 -4px 12px rgba(0,0,0,0.3), inset 6px 0 14px rgba(0,0,0,0.3), inset -6px 0 14px rgba(0,0,0,0.3)" }}>
+                    {/* 내부 리바트 — 이미지가 끼워지는 홈 */}
+                    <div style={{
+                      boxShadow: [
+                        "inset 0 3px 6px rgba(0,0,0,0.55)",
+                        "inset 3px 0 6px rgba(0,0,0,0.35)",
+                        "inset 0 -2px 4px rgba(0,0,0,0.25)",
+                        "inset -2px 0 4px rgba(0,0,0,0.25)",
+                      ].join(", "),
+                    }}>
+                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6586,12 +6600,26 @@ function ReportPreviewInner() {
               {report?.partnerSajuImageUrl ? (
                 <div className="px-5">
                   <div style={{
-                    padding: "14px",
-                    background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
-                    boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
+                    padding: "16px",
+                    background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
+                    boxShadow: [
+                      "0 14px 44px rgba(0,0,0,0.6)",
+                      "inset 0 3px 0 rgba(255,245,130,0.85)",
+                      "inset 3px 0 0 rgba(255,240,110,0.5)",
+                      "inset 0 -3px 0 rgba(0,0,0,0.65)",
+                      "inset -3px 0 0 rgba(0,0,0,0.45)",
+                    ].join(", "),
                   }}>
-                    <div>
-                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3", boxShadow: "inset 0 6px 18px rgba(0,0,0,0.5), inset 0 -4px 12px rgba(0,0,0,0.3), inset 6px 0 14px rgba(0,0,0,0.3), inset -6px 0 14px rgba(0,0,0,0.3)" }}>
+                    {/* 내부 리바트 — 이미지가 끼워지는 홈 */}
+                    <div style={{
+                      boxShadow: [
+                        "inset 0 3px 6px rgba(0,0,0,0.55)",
+                        "inset 3px 0 6px rgba(0,0,0,0.35)",
+                        "inset 0 -2px 4px rgba(0,0,0,0.25)",
+                        "inset -2px 0 4px rgba(0,0,0,0.25)",
+                      ].join(", "),
+                    }}>
+                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.partnerSajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                       </div>
