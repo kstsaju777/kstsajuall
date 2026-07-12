@@ -6466,7 +6466,6 @@ function ReportPreviewInner() {
               {report?.sajuImageUrl ? (
                 <div className="px-5">
                   <div style={{
-                    border: "2px solid #3a2800",
                     padding: "14px",
                     background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
                     boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
@@ -6590,7 +6589,6 @@ function ReportPreviewInner() {
               {report?.partnerSajuImageUrl ? (
                 <div className="px-5">
                   <div style={{
-                    border: "2px solid #3a2800",
                     padding: "14px",
                     background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
                     boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
