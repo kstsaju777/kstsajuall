@@ -5559,7 +5559,7 @@ function Illust({ src, h = 480 }: { src: string; h?: number }) {
 // 본문 섹션 제목
 function Heading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-[17px] font-black mb-3" style={{ color: INK }}>
+    <h2 className="text-[19px] font-black mb-4" style={{ color: INK }}>
       {children}
     </h2>
   );
