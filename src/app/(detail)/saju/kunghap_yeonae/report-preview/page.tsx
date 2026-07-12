@@ -6469,7 +6469,6 @@ function ReportPreviewInner() {
                     padding: "16px",
                     background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
                     boxShadow: [
-                      "0 14px 44px rgba(0,0,0,0.6)",
                       "inset 0 3px 0 rgba(255,245,130,0.85)",
                       "inset 3px 0 0 rgba(255,240,110,0.5)",
                       "inset 0 -3px 0 rgba(0,0,0,0.65)",
@@ -6596,7 +6595,6 @@ function ReportPreviewInner() {
                     padding: "16px",
                     background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
                     boxShadow: [
-                      "0 14px 44px rgba(0,0,0,0.6)",
                       "inset 0 3px 0 rgba(255,245,130,0.85)",
                       "inset 3px 0 0 rgba(255,240,110,0.5)",
                       "inset 0 -3px 0 rgba(0,0,0,0.65)",
