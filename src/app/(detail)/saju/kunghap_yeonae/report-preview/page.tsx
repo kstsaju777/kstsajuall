@@ -6469,6 +6469,7 @@ function ReportPreviewInner() {
                     padding: "16px",
                     background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
                     boxShadow: [
+                      "0 6px 16px rgba(0,0,0,0.3)",
                       "inset 0 3px 0 rgba(255,245,130,0.85)",
                       "inset 3px 0 0 rgba(255,240,110,0.5)",
                       "inset 0 -3px 0 rgba(0,0,0,0.65)",
@@ -6479,7 +6480,6 @@ function ReportPreviewInner() {
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0,0,0,0.45) 100%)", pointerEvents: "none" }} />
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} />
                       </div>
@@ -6595,6 +6595,7 @@ function ReportPreviewInner() {
                     padding: "16px",
                     background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
                     boxShadow: [
+                      "0 6px 16px rgba(0,0,0,0.3)",
                       "inset 0 3px 0 rgba(255,245,130,0.85)",
                       "inset 3px 0 0 rgba(255,240,110,0.5)",
                       "inset 0 -3px 0 rgba(0,0,0,0.65)",
