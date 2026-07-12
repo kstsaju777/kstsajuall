@@ -6478,6 +6478,11 @@ function ReportPreviewInner() {
               );
             })()}
 
+            {/* 섹션 구분선 */}
+            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+              <div style={{ width: 1, height: 40, background: "#ccc" }} />
+            </div>
+
             {/* ── 나란 사람의 본질과 성향 ── */}
             <section className="pt-6 pb-10">
               <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
