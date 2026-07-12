@@ -245,7 +245,7 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
   const totalChapters = Object.keys(YEONAE_KUNGHAP_CHAPTER_SECTIONS).map(Number);
   const allDone = totalChapters.every(n => isYeonaeKunghapChapterReady(merged, n));
   const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const imageReady = !!storedMyeongsik?.sajuImageUrl;
+  const imageReady = !!storedMyeongsik?.sajuImageUrl && !!storedMyeongsik?.partnerSajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
   if (!skipAlimtalk && allDone && (!needsImage || imageReady) && data?.order_id) {
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
@@ -765,18 +765,29 @@ export async function PATCH(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
   const pillars = stored?.view?.pillars ?? [];
+  const partnerPillars = stored?.partnerView?.pillars ?? [];
 
   try {
-    const imagePrompt = buildSajuImagePrompt(pillars);
-    const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-    const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-    const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-    if (uploadErr) throw uploadErr;
-    const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
-    const sajuImageUrl = pubData.publicUrl;
-    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
+    const ts = Date.now();
 
-    // 이미지 완료 후 알림톡 발송
+    // 나 + 상대방 이미지 병렬 생성
+    const [r1, r2] = [Math.random().toString(36).slice(2, 8), Math.random().toString(36).slice(2, 8)];
+    const [imgBuffer1, imgBuffer2] = await Promise.all([
+      generateSajuImage(buildSajuImagePrompt(pillars), process.env.OPENAI_API_KEY!),
+      generateSajuImage(buildSajuImagePrompt(partnerPillars), process.env.OPENAI_API_KEY!),
+    ]);
+
+    const [up1, up2] = await Promise.all([
+      service.storage.from("saju-images").upload(`wonguk/${ts}-${r1}.png`, imgBuffer1, { contentType: "image/png", upsert: false }),
+      service.storage.from("saju-images").upload(`wonguk/${ts}-${r2}.png`, imgBuffer2, { contentType: "image/png", upsert: false }),
+    ]);
+
+    const sajuImageUrl = up1.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r1}.png`).data.publicUrl;
+    const partnerSajuImageUrl = up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r2}.png`).data.publicUrl;
+
+    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl, partnerSajuImageUrl } }).eq("id", id);
+
+    // 두 이미지 모두 완료 후 알림톡 발송
     const { data: resultData } = await service.from("saju_results").select("order_id").eq("id", id).maybeSingle();
     if (resultData?.order_id) {
       const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultData.order_id).maybeSingle();
@@ -786,7 +797,7 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ sajuImageUrl });
+    return NextResponse.json({ sajuImageUrl, partnerSajuImageUrl });
   } catch (e) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
   }
