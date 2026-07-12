@@ -4557,12 +4557,30 @@ function ReportPreviewInner() {
               <Heading>아이의 타고난 성향과 기질</Heading>
               <P>{c.wonguk.intro}</P>
             </div>
-            <p className="px-6 mb-3 text-[14px]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{honorShort}의 사주팔자로 한폭의 그림을 그려봤소.</p>
+            <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${honorShort}의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
             {report?.sajuImageUrl ? (
-              <div className="relative overflow-hidden w-full" style={{ aspectRatio: "4/3" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={report.sajuImageUrl} alt="사주 원국 이미지" className="w-full h-full object-cover" />
-                <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 15%, transparent 80%, ${CREAM} 100%)` }} />
+              <div className="px-5">
+                <div style={{
+                  position: "relative",
+                  padding: "16px",
+                  background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
+                  boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", "),
+                }}>
+                  <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 15%, transparent 68%)", pointerEvents: "none" }} />
+                  <div>
+                    <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={report.sajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} />
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                  <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
+                    <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{honorShort}의 사주화</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <WongukIllustration
