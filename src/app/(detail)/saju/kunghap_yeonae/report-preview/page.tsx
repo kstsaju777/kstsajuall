@@ -6655,13 +6655,6 @@ function ReportPreviewInner() {
                   wolji={report?.partnerView?.pillars?.[2]?.ji ?? "子"}
                 />
               )}
-              {partnerWongukParas.length > 0 && (
-                <div className="px-5 mt-4">
-                  {partnerWongukParas.map((p, i) => (
-                    <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
-                  ))}
-                </div>
-              )}
             </section>
 
             {/* ── 일간 에너지 카드 ── */}
