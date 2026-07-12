@@ -6456,6 +6456,28 @@ function ReportPreviewInner() {
               />
             </section>
 
+            {/* ── 명식 버튼 안내 ── */}
+            {(() => {
+              const isFem = gender === "female" || gender === "여성" || gender === "여자";
+              const rodColor = isFem
+                ? "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)"
+                : "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)";
+              const borderColor = isFem ? "#c0306a" : "#1a4a9e";
+              const bgColor = isFem
+                ? "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)"
+                : "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)";
+              const textColor = isFem ? "#6b0030" : "#0d2b5e";
+              const shadowColor = isFem ? "rgba(176,32,90,0.4)" : "rgba(26,74,158,0.4)";
+              const btnText = `명식(${name.slice(1) || name})`;
+              return (
+                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", gap: 0 }}>
+                  <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `1px 0 3px ${shadowColor}` }} />
+                  <span style={{ padding: "3px 8px", background: bgColor, borderTop: `1.5px solid ${borderColor}`, borderBottom: `1.5px solid ${borderColor}`, color: textColor, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{btnText}</span>
+                  <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `-1px 0 3px ${shadowColor}` }} />
+                </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}</Quote>
+              );
+            })()}
+
             {/* ── 나란 사람의 본질과 성향 ── */}
             <section className="pt-6 pb-10">
               <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
