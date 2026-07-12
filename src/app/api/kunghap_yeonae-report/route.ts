@@ -775,6 +775,17 @@ export async function PATCH(request: NextRequest) {
     const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
     const sajuImageUrl = pubData.publicUrl;
     await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
+
+    // 이미지 완료 후 알림톡 발송
+    const { data: resultData } = await service.from("saju_results").select("order_id").eq("id", id).maybeSingle();
+    if (resultData?.order_id) {
+      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultData.order_id).maybeSingle();
+      if (si?.phone) {
+        const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${id}`;
+        sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+      }
+    }
+
     return NextResponse.json({ sajuImageUrl });
   } catch (e) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });

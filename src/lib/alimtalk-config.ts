@@ -6,4 +6,5 @@ export const WAIT_FOR_IMAGE = new Set<string>([
   "total",
   "saju_janyeo",
   "saju_youare",
+  "kunghap_yeonae",
 ]);

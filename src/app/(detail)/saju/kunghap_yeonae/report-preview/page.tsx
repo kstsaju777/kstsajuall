@@ -6456,6 +6456,34 @@ function ReportPreviewInner() {
               />
             </section>
 
+            {/* ── 나란 사람의 본질과 성향 ── */}
+            <section className="pt-6 pb-10">
+              <div className="px-5">
+                <h2 className="text-[17px] font-black mb-1" style={{ color: INK }}>나란 사람의 본질과 성향</h2>
+                {wonguk.intro && <p className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK_SOFT, fontFamily: SERIF }}>{wonguk.intro as string}</p>}
+              </div>
+              <p className="px-5 mb-3 text-[14px]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{name.slice(1) || name}님의 사주팔자로 한폭의 그림을 그려봤소.</p>
+              {report?.sajuImageUrl ? (
+                <div className="relative overflow-hidden w-full" style={{ aspectRatio: "4/3" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={report.sajuImageUrl} alt="사주 원국 이미지" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, transparent 15%, transparent 80%, ${CREAM} 100%)` }} />
+                </div>
+              ) : (
+                <WongukIllustration
+                  ilgan={report?.view?.pillars?.[1]?.gan ?? "甲"}
+                  wolji={report?.view?.pillars?.[2]?.ji ?? "子"}
+                />
+              )}
+              {wongukParas.length > 0 && (
+                <div className="px-5 mt-4">
+                  {wongukParas.map((p, i) => (
+                    <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+                  ))}
+                </div>
+              )}
+            </section>
+
             {/* ── 일간 에너지 카드 ── */}
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">

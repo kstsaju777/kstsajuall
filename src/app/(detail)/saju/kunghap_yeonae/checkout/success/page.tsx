@@ -129,6 +129,12 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
+      // AI 이미지 생성 완료 후 결과 페이지 이동 (카카오 알림톡도 이미지 완료 후 발송됨)
+      await fetch("/api/kunghap_yeonae-report", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId }),
+      }).catch(() => {});
+
       router.push(`/saju/kunghap_yeonae/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName ?? "")}&partnerGender=${encodeURIComponent(partnerGender ?? "")}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });
   // eslint-disable-next-line react-hooks/exhaustive-deps
