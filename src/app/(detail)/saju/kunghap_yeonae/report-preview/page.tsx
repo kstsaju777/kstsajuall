@@ -6466,6 +6466,7 @@ function ReportPreviewInner() {
               {report?.sajuImageUrl ? (
                 <div className="px-5">
                   <div style={{
+                    position: "relative",
                     padding: "16px",
                     background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
                     boxShadow: [
@@ -6476,6 +6477,8 @@ function ReportPreviewInner() {
                       "inset -3px 0 0 rgba(0,0,0,0.45)",
                     ].join(", "),
                   }}>
+                    {/* 안쪽 방향 입체감 — 이미지 개구부 쪽으로 어두워지는 방사형 그라데이션 */}
+                    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 15%, transparent 68%)", pointerEvents: "none" }} />
                     <div>
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
