@@ -6497,7 +6497,7 @@ function ReportPreviewInner() {
                       border: "1px solid #7a5808",
                     }}>
                       <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>
-                        {name.slice(1) || name} 사주 원국도
+                        {name.slice(1) || name}님의 사주화
                       </p>
                     </div>
                   </div>
@@ -6644,7 +6644,7 @@ function ReportPreviewInner() {
                       border: "1px solid #7a5808",
                     }}>
                       <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>
-                        {partnerFirstName} 사주 원국도
+                        {partnerFirstName}님의 사주화
                       </p>
                     </div>
                   </div>
