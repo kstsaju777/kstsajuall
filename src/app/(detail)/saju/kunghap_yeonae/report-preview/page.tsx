@@ -6472,7 +6472,7 @@ function ReportPreviewInner() {
               return (
                 <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", gap: 0 }}>
                   <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `1px 0 3px ${shadowColor}` }} />
-                  <span style={{ padding: "6px 8px", background: bgColor, borderTop: `1.5px solid ${borderColor}`, borderBottom: `1.5px solid ${borderColor}`, color: textColor, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{btnText}</span>
+                  <span style={{ padding: "4px 8px", background: bgColor, borderTop: `1.5px solid ${borderColor}`, borderBottom: `1.5px solid ${borderColor}`, color: textColor, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{btnText}</span>
                   <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `-1px 0 3px ${shadowColor}` }} />
                 </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}</Quote>
               );
@@ -6638,7 +6638,7 @@ function ReportPreviewInner() {
               return (
                 <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", gap: 0 }}>
                   <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `1px 0 3px ${shadowColor}` }} />
-                  <span style={{ padding: "6px 8px", background: bgColor, borderTop: `1.5px solid ${borderColor}`, borderBottom: `1.5px solid ${borderColor}`, color: textColor, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{btnText}</span>
+                  <span style={{ padding: "4px 8px", background: bgColor, borderTop: `1.5px solid ${borderColor}`, borderBottom: `1.5px solid ${borderColor}`, color: textColor, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{btnText}</span>
                   <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `-1px 0 3px ${shadowColor}` }} />
                 </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}</Quote>
               );
