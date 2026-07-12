@@ -6475,13 +6475,6 @@ function ReportPreviewInner() {
                   wolji={report?.view?.pillars?.[2]?.ji ?? "子"}
                 />
               )}
-              {wongukParas.length > 0 && (
-                <div className="px-5 mt-4">
-                  {wongukParas.map((p, i) => (
-                    <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
-                  ))}
-                </div>
-              )}
             </section>
 
             {/* ── 일간 에너지 카드 ── */}
