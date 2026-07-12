@@ -6604,7 +6604,7 @@ function ReportPreviewInner() {
                 <h2 className="text-[17px] font-black mb-1" style={{ color: INK }}>상대방의 본질과 성향</h2>
                 {partnerWonguk.intro && <p className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerWonguk.intro as string}</p>}
               </div>
-              <p className="px-5 mb-3 text-[14px]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerFirstName}님의 사주팔자로 한폭의 그림을 그려봤소.</p>
+              <p className="px-8 mb-5 text-[16px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${partnerFirstName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
               {report?.partnerSajuImageUrl ? (
                 <div className="px-5">
                   <div style={{
