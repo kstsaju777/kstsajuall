@@ -6623,7 +6623,8 @@ function ReportPreviewInner() {
 
             {/* ── 상대 명식 버튼 안내 ── */}
             {(() => {
-              const isFem = partnerGender === "female" || partnerGender === "여성" || partnerGender === "여자";
+              const pg = report?.partnerGender ?? "";
+              const isFem = pg === "female" || pg === "여성" || pg === "여자";
               const rodColor = isFem
                 ? "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)"
                 : "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)";
