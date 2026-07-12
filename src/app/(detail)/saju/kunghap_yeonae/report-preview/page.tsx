@@ -6458,11 +6458,7 @@ function ReportPreviewInner() {
 
             {/* ── 나란 사람의 본질과 성향 ── */}
             <section className="pt-6 pb-10">
-              <div className="px-5">
-                <h2 className="text-[17px] font-black mb-1" style={{ color: INK }}>나란 사람의 본질과 성향</h2>
-                {wonguk.intro && <p className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK_SOFT, fontFamily: SERIF }}>{wonguk.intro as string}</p>}
-              </div>
-              <p className="px-5 mb-3 text-[14px]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{name.slice(1) || name}님의 사주팔자로 한폭의 그림을 그려봤소.</p>
+              <p className="px-8 mb-5 text-[16px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
               {report?.sajuImageUrl ? (
                 <div className="px-5">
                   <div style={{
