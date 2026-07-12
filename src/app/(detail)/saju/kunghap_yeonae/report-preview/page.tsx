@@ -6464,18 +6464,18 @@ function ReportPreviewInner() {
               </div>
               <p className="px-5 mb-3 text-[14px]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{name.slice(1) || name}님의 사주팔자로 한폭의 그림을 그려봤소.</p>
               {report?.sajuImageUrl ? (
-                <div className="px-4">
-                  {/* 황금 액자 외곽 */}
+                <div className="px-5">
                   <div style={{
-                    padding: "18px",
-                    background: "linear-gradient(145deg, #f7e47a 0%, #b8720c 18%, #f0d040 36%, #986010 52%, #ecc830 67%, #a86018 82%, #f5e070 100%)",
-                    boxShadow: "0 10px 36px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,240,120,0.5), inset 0 -2px 3px rgba(60,30,0,0.35)",
+                    border: "2px solid #3a2800",
+                    padding: "14px",
+                    background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
                   }}>
-                    {/* 내부 음각 + 매트 */}
                     <div style={{
-                      padding: "10px",
-                      background: "#f4efe3",
-                      boxShadow: "inset 0 3px 10px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(100,60,0,0.15)",
+                      padding: "20px",
+                      background: "#f9f6ef",
+                      boxShadow: "inset 0 2px 8px rgba(0,0,0,0.2)",
+                      border: "1px solid #c8a04060",
                     }}>
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6588,18 +6588,18 @@ function ReportPreviewInner() {
               </div>
               <p className="px-5 mb-3 text-[14px]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerFirstName}님의 사주팔자로 한폭의 그림을 그려봤소.</p>
               {report?.partnerSajuImageUrl ? (
-                <div className="px-4">
-                  {/* 황금 액자 외곽 */}
+                <div className="px-5">
                   <div style={{
-                    padding: "18px",
-                    background: "linear-gradient(145deg, #f7e47a 0%, #b8720c 18%, #f0d040 36%, #986010 52%, #ecc830 67%, #a86018 82%, #f5e070 100%)",
-                    boxShadow: "0 10px 36px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,240,120,0.5), inset 0 -2px 3px rgba(60,30,0,0.35)",
+                    border: "2px solid #3a2800",
+                    padding: "14px",
+                    background: "linear-gradient(160deg, #c8a040 0%, #7a5008 25%, #b89030 50%, #6a4408 75%, #c0982c 100%)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.55), inset 0 1px 2px rgba(220,180,60,0.25), inset 0 -1px 2px rgba(0,0,0,0.4)",
                   }}>
-                    {/* 내부 음각 + 매트 */}
                     <div style={{
-                      padding: "10px",
-                      background: "#f4efe3",
-                      boxShadow: "inset 0 3px 10px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(100,60,0,0.15)",
+                      padding: "20px",
+                      background: "#f9f6ef",
+                      boxShadow: "inset 0 2px 8px rgba(0,0,0,0.2)",
+                      border: "1px solid #c8a04060",
                     }}>
                       <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
