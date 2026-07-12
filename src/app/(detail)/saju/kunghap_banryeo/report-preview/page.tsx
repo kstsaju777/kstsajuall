@@ -5904,7 +5904,7 @@ function ReportPreviewInner() {
             <section className="pb-4">
               <div className="px-5 mb-2">
                 <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>나의 명식</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>사주 원국 기둥</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>사주 원국 기둥</h2>
               </div>
               <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
             </section>
@@ -5913,7 +5913,7 @@ function ReportPreviewInner() {
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>일간과 오행</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
               <OhaengDonutBr1 view={report?.view ?? null} />
               {callout && (
@@ -5932,7 +5932,7 @@ function ReportPreviewInner() {
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>나의 기질</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
               <MyNatureBr1Card data={nature} />
             </section>
@@ -5941,7 +5941,7 @@ function ReportPreviewInner() {
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR1_COLOR }}>나의 돌봄 스타일</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>반려동물을 대하는 나는 어떤 사람인가</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>반려동물을 대하는 나는 어떤 사람인가</h2>
               </div>
               <PetStyleCard data={petStyle} />
             </section>
@@ -5988,7 +5988,7 @@ function ReportPreviewInner() {
             <section className="pb-4">
               <div className="px-5 mb-2">
                 <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>{petName}의 명식</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>사주 원국 기둥</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>사주 원국 기둥</h2>
               </div>
               {report?.partnerView ? (
                 <MyeongsikTable view={report.partnerView} name={petName} birth={report.partnerBirth ?? null} />
@@ -6001,7 +6001,7 @@ function ReportPreviewInner() {
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>일간과 오행</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>이 아이가 타고난 기운</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>이 아이가 타고난 기운</h2>
               </div>
               <OhaengDonutBr2 view={report?.partnerView ?? null} />
               {petCallout && (
@@ -6020,7 +6020,7 @@ function ReportPreviewInner() {
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>{petName}의 기질</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>사랑스러운 면과 이해해야 할 부분</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>사랑스러운 면과 이해해야 할 부분</h2>
               </div>
               <PetNatureBr2Card data={petNature} />
             </section>
@@ -6029,7 +6029,7 @@ function ReportPreviewInner() {
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR2_COLOR }}>{petName}의 성격 유형</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>이 아이는 어떻게 세상을 대하는가</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>이 아이는 어떻게 세상을 대하는가</h2>
               </div>
               <PetPersonalityCard data={petPersonality} petName={petName} />
             </section>
@@ -6078,7 +6078,7 @@ function ReportPreviewInner() {
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR3_COLOR }}>반려 인연 점수</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>두 사람의 사주가 빚어낸 인연</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>두 사람의 사주가 빚어낸 인연</h2>
               </div>
               <BondGaugeBr3 score={score} label={scoreLabel} />
             </section>
@@ -6088,7 +6088,7 @@ function ReportPreviewInner() {
               <section className="pt-1 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR3_COLOR }}>이 인연을 나타내는 키워드</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>두 사람 사이에 흐르는 기운</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>두 사람 사이에 흐르는 기운</h2>
                 </div>
                 <BondKeywordsBr3 keywords={keywords} />
               </section>
@@ -6107,7 +6107,7 @@ function ReportPreviewInner() {
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR3_COLOR }}>인연의 사주 근거</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>이 만남이 우연이 아닌 이유</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>이 만남이 우연이 아닌 이유</h2>
               </div>
               <BondReasonCard data={bondReason} />
             </section>
@@ -6159,7 +6159,7 @@ function ReportPreviewInner() {
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR4_MY }}>보호자의 눈</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>{name}님이 {petName}을(를) 보는 방식</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>{name}님이 {petName}을(를) 보는 방식</h2>
               </div>
               <ViewBannerBr4
                 viewType={myViewType} viewIcon={myViewIcon} intro={myViewIntro}
@@ -6173,7 +6173,7 @@ function ReportPreviewInner() {
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
                 <p className="text-[11px] font-bold" style={{ color: BR4_PET }}>{petName}의 느낌</p>
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}이(가) 보호자를 느끼는 방식</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}이(가) 보호자를 느끼는 방식</h2>
               </div>
               <ViewBannerBr4
                 viewType={petViewType} viewIcon={petViewIcon} intro={petViewIntro}
@@ -6188,7 +6188,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-4">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: MUTE }}>두 시선의 교차</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>서로가 서로에게 비치는 모습</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>서로가 서로에게 비치는 모습</h2>
                 </div>
                 <ViewMirrorBr4
                   mySummary={myViewSummary} petSummary={petViewSummary}
@@ -6246,7 +6246,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR5_COLOR }}>타고난 기질</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}의 사주가 품은 기질</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}의 사주가 품은 기질</h2>
                 </div>
                 <PetTemperBr5Card
                   keywords={temperKws}
@@ -6262,7 +6262,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR5_COLOR }}>행동 패턴</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>이 아이가 보이는 주요 습관</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>이 아이가 보이는 주요 습관</h2>
                 </div>
                 <PetHabitsBr5Card items={habitItems} />
               </section>
@@ -6273,7 +6273,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-4">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR5_COLOR }}>맞춤 돌봄</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}에게 필요한 것들</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}에게 필요한 것들</h2>
                 </div>
                 <PetCareTipsBr5Card tips={careTips} petName={petName} />
               </section>
@@ -6330,7 +6330,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR6_COLOR }}>이상적인 환경</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}이 편안함을 느끼는 공간</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}이 편안함을 느끼는 공간</h2>
                 </div>
                 <PetEnvBr6Card
                   envType={envType}
@@ -6348,7 +6348,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR6_COLOR }}>일상의 리듬</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}이 즐기는 생활 패턴</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}이 즐기는 생활 패턴</h2>
                 </div>
                 <PetLifeStyleBr6Card items={lifeItems} />
               </section>
@@ -6359,7 +6359,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-4">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR6_COLOR }}>보호자 실천 가이드</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}을 위한 환경 만들기</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}을 위한 환경 만들기</h2>
                 </div>
                 <PetEnvTipsBr6Card tips={tipItems} petName={petName} />
               </section>
@@ -6413,7 +6413,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR7_COLOR }}>긴장이 생기는 지점</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{name}님과 {petName} 사이의 마찰 포인트</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{name}님과 {petName} 사이의 마찰 포인트</h2>
                 </div>
                 <ConflictPointBr7Card items={conflictItems} />
               </section>
@@ -6424,7 +6424,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR7_COLOR }}>갈등의 뿌리</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>왜 이런 순간이 찾아오는가</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>왜 이런 순간이 찾아오는가</h2>
                 </div>
                 <ConflictRootBr7Card callout={rootCallout} paragraphs={rootParas} />
               </section>
@@ -6435,7 +6435,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-4">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR7_COLOR }}>공존의 지혜</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>갈등을 넘어 조화로 가는 길</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>갈등을 넘어 조화로 가는 길</h2>
                 </div>
                 <ReconcileTipsBr7Card tips={reconcileItems} name={name} petName={petName} />
               </section>
@@ -6492,7 +6492,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR8_COLOR }}>개운 실천법</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}의 기운을 여는 방법</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}의 기운을 여는 방법</h2>
                 </div>
                 <GaeunMethodBr8Card
                   intro={methodIntro}
@@ -6508,7 +6508,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR8_COLOR }}>행운 요소</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}에게 맞는 기운의 색과 방향</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}에게 맞는 기운의 색과 방향</h2>
                 </div>
                 <LuckyElementBr8Card items={luckyItems} />
               </section>
@@ -6519,7 +6519,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-4">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR8_COLOR }}>기운의 흐름</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>개운에 좋은 시기와 주의할 시기</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>개운에 좋은 시기와 주의할 시기</h2>
                 </div>
                 <GaeunTimingBr8Card callout={timingCallout} items={timingItems} />
               </section>
@@ -6575,7 +6575,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR9_COLOR }}>인연의 깊이</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>사주로 본 이 인연의 무게</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>사주로 본 이 인연의 무게</h2>
                 </div>
                 <BondDepthBr9Card
                   score={depthScore}
@@ -6591,7 +6591,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-2">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR9_COLOR }}>인연의 흐름</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}과 함께하는 시간의 흐름</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}과 함께하는 시간의 흐름</h2>
                 </div>
                 <TogetherPhasesBr9Card items={phaseItems} />
               </section>
@@ -6602,7 +6602,7 @@ function ReportPreviewInner() {
               <section className="pt-2 pb-4">
                 <div className="px-5 mb-3">
                   <p className="text-[11px] font-bold" style={{ color: BR9_COLOR }}>더 깊은 인연으로</p>
-                  <h2 className="text-[17px] font-black" style={{ color: INK }}>{petName}과의 시간을 더 소중히 하는 법</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}과의 시간을 더 소중히 하는 법</h2>
                 </div>
                 <BondKeepTipsBr9Card tips={keepTips} petName={petName} />
               </section>

@@ -6598,7 +6598,7 @@ function ReportPreviewInner() {
             {/* ── 타고난 기운의 뿌리 ── */}
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
               <OhaengDonut view={report?.view ?? null} />
               <div className="px-5 mt-4">
@@ -6611,7 +6611,7 @@ function ReportPreviewInner() {
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
               <GNatureCard data={nature} color={GCH1_COLOR} label="나를 대표하는 기질" />
             </section>
@@ -6619,7 +6619,7 @@ function ReportPreviewInner() {
             {/* ── 결혼할 때 나는 어떤 사람인가 ── */}
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>결혼할 때 나는 어떤 사람인가</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>결혼할 때 나는 어떤 사람인가</h2>
               </div>
               <MarriagePatternCard data={marriagePattern} color={GCH1_COLOR} pale={GCH1_PALE} />
             </section>
@@ -6683,7 +6683,7 @@ function ReportPreviewInner() {
             {/* ── 타고난 기운의 뿌리 ── */}
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
               <OhaengDonutPartner view={report?.partnerView ?? null} />
               <div className="px-5 mt-4">
@@ -6696,7 +6696,7 @@ function ReportPreviewInner() {
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
               <GNatureCard data={nature} color={GCH2_COLOR} label={`${partnerFirstName}님을 대표하는 기질`} />
             </section>
@@ -6704,7 +6704,7 @@ function ReportPreviewInner() {
             {/* ── 결혼할 때 상대는 어떤 사람인가 ── */}
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[17px] font-black" style={{ color: INK }}>결혼할 때 상대는 어떤 사람인가</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>결혼할 때 상대는 어떤 사람인가</h2>
               </div>
               <MarriagePatternCard data={marriagePattern} color={GCH2_COLOR} pale={GCH2_PALE} />
             </section>
