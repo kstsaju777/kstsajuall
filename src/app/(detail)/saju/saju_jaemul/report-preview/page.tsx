@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -4653,7 +4653,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -4792,6 +4794,7 @@ function ReportPreviewInner() {
                 {`"자, 다음 장에서는\n${name}님이 돈을 대하는\n방식에 대해서 살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </div>
         </>
@@ -4914,6 +4917,7 @@ function ReportPreviewInner() {
               </>
             );
           })()}
+          <div className="pb-10" />
           <ChapterNav cur="2" go={next} />
         </>
       )}
@@ -5114,6 +5118,7 @@ function ReportPreviewInner() {
                 {`"자, 다음 장에서는\n${name}님의 천직과\n돈이 따르는 일의 방향을\n살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </div>
         </>
@@ -5191,6 +5196,7 @@ function ReportPreviewInner() {
                 {`"자, 다음 장에서는\n${name.slice(1)}님의 시기별 재물 흐름과\n언제가 기회이고 위기인지\n살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </div>
         </>
@@ -5358,6 +5364,7 @@ function ReportPreviewInner() {
                 {`"자, 다음 장에서는\n${name.slice(1)}님의 재물운을 높이는\n개운법과 피해야 할 것들을\n살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </div>
         </>
@@ -5512,6 +5519,7 @@ function ReportPreviewInner() {
                 {`"마지막으로\n${name.slice(1)}님께 전하는\n홍연의 서신을\n살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </div>
         </>
@@ -5550,6 +5558,7 @@ function ReportPreviewInner() {
             {/* 추천 상품 */}
             <RecoGrid />
 
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </div>
         </>

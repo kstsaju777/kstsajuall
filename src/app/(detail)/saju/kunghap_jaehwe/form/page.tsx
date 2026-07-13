@@ -167,7 +167,7 @@ function StepBreakupReason({ onNext, initial }: { onNext: (v: string) => void; i
             return (
               <button
                 key={reason}
-                onClick={() => setSelected(reason)}
+                onClick={() => { setSelected(reason); onNext(reason); }}
                 className="w-full py-2.5 rounded-xl text-[14px] font-semibold transition-all"
                 style={{
                   backgroundColor: active ? "rgba(155,35,53,0.18)" : "rgba(255,255,255,0.04)",
@@ -204,7 +204,7 @@ function StepWhoEnded({ onPrev, onNext, initial }: { onPrev: () => void; onNext:
             return (
               <button
                 key={opt}
-                onClick={() => setSelected(opt)}
+                onClick={() => { setSelected(opt); onNext(opt); }}
                 className="w-full py-4 rounded-2xl text-[16px] font-semibold transition-all"
                 style={{
                   backgroundColor: active ? "rgba(255,107,157,0.18)" : "rgba(255,255,255,0.04)",

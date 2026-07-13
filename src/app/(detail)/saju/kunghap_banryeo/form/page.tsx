@@ -843,7 +843,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(15,10,5,0.5), rgba(15,10,5,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
         <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
-          {name}님 🐾 {partnerName}님
+          {name}님 🐾 {partnerName}
         </p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 반려 궁합을 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>

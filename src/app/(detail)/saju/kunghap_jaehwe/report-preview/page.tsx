@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -6248,7 +6248,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -6351,6 +6353,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
             <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </>
         );
@@ -6462,6 +6465,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
             <Quote>{`"두 사람의 원국을 보았으니,\n이제 두 사람이 왜 헤어졌는지\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
@@ -6520,6 +6524,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
             <Quote>{`"이별의 원인을 알았으니,\n재회의 가능성을\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
         );
@@ -6581,6 +6586,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
             <Quote>{`"나의 마음을 알았으니,\n상대의 마음도\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
         );
@@ -6642,6 +6648,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
             <Quote>{`"두 사람의 마음을 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
         );
@@ -6721,6 +6728,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
             <Quote>{`"합·충을 알았으니,\n헤어진 후 두 사람의\n감정 흐름을 보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
         );
@@ -6779,6 +6787,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
             <Quote>{`"감정 흐름을 알았으니,\n재회할 수 있는 인연인지\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </>
         );
@@ -6840,6 +6849,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
             <Quote>{`"인연의 판단을 내렸으니,\n재회한다면 어떻게 될지\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="8" go={next} />
           </>
         );
@@ -6895,6 +6905,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
             <Quote>{`"재회 후의 모습을 알았으니,\n가장 좋은 재회 시기를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="9" go={next} />
           </>
         );
@@ -6953,6 +6964,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
             <Quote>{`"시기를 알았으니,\n재회 후 두 사람의 미래를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="10" go={next} />
           </>
         );
@@ -7015,6 +7027,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
             <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="11" go={next} />
           </>
         );
@@ -7047,6 +7060,7 @@ function ReportPreviewInner() {
 
           <ReviewBox />
           <RecoGrid />
+          <div className="pb-10" />
           <ChapterNav cur="12" go={next} />
         </div>
         {eventOpen && (

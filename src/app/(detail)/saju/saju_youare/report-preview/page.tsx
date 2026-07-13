@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -4644,7 +4644,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -5082,6 +5084,7 @@ function ReportPreviewInner() {
           {/* 마무리 인용 */}
           <Quote>{`"${honor}의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소."`}</Quote>
 
+          <div className="pb-10" />
           <ChapterNav cur="1" go={next} />
         </>
       )}
@@ -5218,6 +5221,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`아이의 건강을 알았으니\n이제 양육 이야기를 하겠소.\n\n${honor}에게\n맞는 양육 방식을\n살펴보겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="2" go={next} />
         </>
       )}
@@ -5304,6 +5308,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`양육 방향을 알았으니\n이제 재능 이야기를 하겠소.\n\n타고난 재능은\n사주에 이미 새겨져 있소.\n\n${honor}의\n타고난 재능을 살펴보겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="3" go={next} />
         </>
       )}
@@ -5396,6 +5401,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`아이의 성장에도\n파고가 있소.\n\n${honor}의 성장 시기별\n주의할 때를 알려드리겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="4" go={next} />
         </>
       )}
@@ -5616,6 +5622,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`아이의 기운을 살리는\n또 하나의 방법이 있소.\n\n부족한 오행을 채우는\n개운법을 알려드리겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="5" go={next} />
         </>
       )}
@@ -5763,6 +5770,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`마지막으로,\n${honor}의 부모님께\n홍연이 전하는\n서신을 남기겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="6" go={next} />
         </>
       )}
@@ -5793,6 +5801,7 @@ function ReportPreviewInner() {
             </section>
             <ReviewBox />
             <RecoGrid excludeSlug="saju_youare" />
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </div>
           {eventOpen && (

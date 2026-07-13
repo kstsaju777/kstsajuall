@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -5080,7 +5080,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -5552,6 +5554,7 @@ function ReportPreviewInner() {
           <Quote>{`"${name}님의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="1" go={next} />
         </>
       )}
@@ -5708,6 +5711,7 @@ function ReportPreviewInner() {
           <Quote>{`"다음으로는, ${name}님이\n세상과 어떤 방식으로\n조우하게 되는지\n알려주겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="2" go={next} />
         </>
       )}
@@ -5755,6 +5759,7 @@ function ReportPreviewInner() {
           <Quote>{`"지금까지의 분석결과들로\n${name}님의 실제 인생에 대하여\n\n더 깊이 알아보는 시간을\n함께 가져보겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="4" go={next} />
         </>
       )}
@@ -5985,6 +5990,7 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="3" go={next} />
         </>
       )}
@@ -6046,6 +6052,7 @@ function ReportPreviewInner() {
           <Quote>{`"흐름을 알았다면, 이제\n조심해야 할 시기도 알아야 하오.\n다음 장에서 살펴보겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="8" go={next} />
         </>
       )}
@@ -6154,6 +6161,7 @@ function ReportPreviewInner() {
           <Quote>{`"재물의 그릇을 살폈으니,\n이제는 인연의 실을 따라가 보겠소.\n\n${name}님에게\n붉은 실이 닿는 때는 언제인가 —"`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="5" go={next} />
         </>
       )}
@@ -6203,6 +6211,7 @@ function ReportPreviewInner() {
           <Quote>{`"돈도, 사랑도...\n결국 건강해야 지킬 수 있는것.\n\n${name.slice(1) || name}님의 사주팔자에 나오는\n건강을 진단해주겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="6" go={next} />
         </>
       )}
@@ -6251,6 +6260,7 @@ function ReportPreviewInner() {
           <Quote>{`"${name.slice(1) || name}님에게 앞으로의 대운은\n어떻게 흐르는지 살펴보겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="7" go={next} />
         </>
       )}
@@ -6321,6 +6331,7 @@ function ReportPreviewInner() {
           <Quote>{`"이로써 ${name}님의 사주를\n모두 살펴보았소.\n\n마지막으로,\n소인이 그대에게 전하는\n서신을 남겨드리겠소."`}</Quote>
 
           {/* 다음 장 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="9" go={next} />
         </>
       )}
@@ -6364,6 +6375,7 @@ function ReportPreviewInner() {
           <RecoGrid />
 
           {/* 네비 */}
+          <div className="pb-10" />
           <ChapterNav cur="10" go={next} />
         </div>
         {eventOpen && (

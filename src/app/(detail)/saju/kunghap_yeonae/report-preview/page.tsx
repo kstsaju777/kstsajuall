@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -4128,7 +4128,7 @@ function LightShadowBalanceCard({ data }: { data: Record<string, unknown> | null
             {tips.map((tip, i) => (
               <div key={i} className="flex items-start gap-2.5">
                 <span className="text-[13px] font-black flex-shrink-0 mt-0.5" style={{ color: CH8_COLOR }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
               </div>
             ))}
           </div>
@@ -6401,7 +6401,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -6566,6 +6568,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{'"나의 기운을 살펴보았으니,\n이제 상대방의 사주를 펼쳐보겠소."'}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </>
         );
@@ -6737,6 +6740,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{`"${partnerFirstName}님의 사주도 살펴보았으니,\n이제 두 사람 사이의 끌림을\n이야기 해보겠소."`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
@@ -6796,6 +6800,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{`"끌림의 이유를 알았으니,\n이제 내 눈에 ${partnerFirstName}님이\n어떻게 보이는지 살펴보겠소."`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
         );
@@ -6872,6 +6877,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{`"반대로, ${partnerFirstName}님의 눈에는\n내가 어떻게 보이는지\n살펴보겠소."`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
         );
@@ -6948,6 +6954,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{`"두 시각을 모두 살펴보았소.\n이제 두 사주 사이의\n합·충을 짚어보겠소."`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
         );
@@ -7036,6 +7043,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{"\"합·충을 파악했으니,\n이제 연애 스타일이\n얼마나 맞는지 살펴보겠소.\""}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
         );
@@ -7118,6 +7126,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{"\"스타일의 차이를 알았으니,\n이 관계의 빛과 그림자를\n살펴보겠소.\""}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </>
         );
@@ -7186,6 +7195,7 @@ function ReportPreviewInner() {
             {/* ── 마무리 인용구 ── */}
             <Quote>{"\"빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소.\""}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="8" go={next} />
           </>
         );
@@ -7217,6 +7227,21 @@ function ReportPreviewInner() {
             </div>
             <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
 
+            {/* 시기별 흐름 */}
+            {flowItems.length > 0 && (
+              <section className="pt-2 pb-4">
+                <div className="px-5">
+                  <Heading>시기별 관계의 흐름</Heading>
+                  <p className="text-[13px] leading-[1.85] mb-5" style={{ color: INK_SOFT, fontFamily: SERIF }}>
+                    위기와 회복은 계절처럼 교차하오. 현재부터 앞으로 수년간 두 사람의 관계 기운이 어떻게 흐르는지, 그 파고와 봄날을 미리 알면 서로를 더 너그럽게 대할 수 있소. 기운이 거칠 때는 숨을 고르고, 기운이 좋을 때 더 많이 나누시오.
+                  </p>
+                </div>
+                <LoveFlowLineChart items={flowItems as Array<{ label: string; tone: string; score?: number; text: string; tip?: string }>} />
+              </section>
+            )}
+
+            {/* 구분선 */}
+            <div className="mx-5 my-5" style={{ borderTop: `1px dashed ${CH9_COLOR}20` }} />
 
             {/* 위기 요소 */}
             {crisisItems.length > 0 && (
@@ -7247,21 +7272,9 @@ function ReportPreviewInner() {
               </section>
             )}
 
-            {/* 시기별 흐름 */}
-            {flowItems.length > 0 && (
-              <section className="pt-2 pb-4">
-                <div className="px-5">
-                  <Heading>시기별 관계의 흐름</Heading>
-                  <p className="text-[13px] leading-[1.85] mb-5" style={{ color: INK_SOFT, fontFamily: SERIF }}>
-                    위기와 회복은 계절처럼 교차하오. 현재부터 앞으로 수년간 두 사람의 관계 기운이 어떻게 흐르는지, 그 파고와 봄날을 미리 알면 서로를 더 너그럽게 대할 수 있소. 기운이 거칠 때는 숨을 고르고, 기운이 좋을 때 더 많이 나누시오.
-                  </p>
-                </div>
-                <LoveFlowLineChart items={flowItems as Array<{ label: string; tone: string; score?: number; text: string; tip?: string }>} />
-              </section>
-            )}
-
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
             <Quote>{`"위기를 알고 극복법을 알았으니,\n이제 두 사람이 함께하는\n미래를 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="9" go={next} />
           </>
         );
@@ -7354,6 +7367,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
             <Quote>{`"이것으로\n두 사람의 인연에 대한\n모든 풀이가 끝났소.\n\n마지막으로,\n그대들에게 들려줄\n서신을 남겨드리겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="10" go={next} />
           </>
         );
@@ -7386,6 +7400,7 @@ function ReportPreviewInner() {
 
           <ReviewBox />
           <RecoGrid />
+          <div className="pb-10" />
           <ChapterNav cur="11" go={next} />
         </div>
         {eventOpen && (

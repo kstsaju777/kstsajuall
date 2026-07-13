@@ -120,7 +120,7 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
   const totalChapters = Object.keys(JANYEO_KUNGHAP_CHAPTER_SECTIONS).map(Number);
   const allDone = totalChapters.every(n => isJanyeoKunghapChapterReady(merged, n));
   const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const imageReady = !!storedMyeongsik?.sajuImageUrl;
+  const imageReady = !!storedMyeongsik?.sajuImageUrl && !!storedMyeongsik?.partnerSajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
   if (!skipAlimtalk && allDone && (!needsImage || imageReady) && data?.order_id) {
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
@@ -355,27 +355,41 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const { id } = await request.json().catch(() => ({}));
   if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
-
   if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: "OpenAI 키 없음" }, { status: 503 });
-
   const service = createServiceClient();
   const { data, error } = await service.from("saju_results").select("myeongsik").eq("id", id).maybeSingle();
   if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stored = data.myeongsik as any;
+  const stored = data.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const pillars = stored?.view?.pillars ?? [];
-
+  const partnerPillars = stored?.partnerView?.pillars ?? [];
   try {
-    const imagePrompt = buildSajuImagePrompt(pillars);
-    const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-    const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-    const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-    if (uploadErr) throw uploadErr;
-    const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
-    const sajuImageUrl = pubData.publicUrl;
-    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
-    return NextResponse.json({ sajuImageUrl });
+    const ts = Date.now();
+    const [imgBuffer1, imgBuffer2] = await Promise.all([
+      generateSajuImage(buildSajuImagePrompt(pillars), process.env.OPENAI_API_KEY!),
+      generateSajuImage(buildSajuImagePrompt(partnerPillars), process.env.OPENAI_API_KEY!),
+    ]);
+    const r1 = Math.random().toString(36).slice(2, 8);
+    const r2 = Math.random().toString(36).slice(2, 8);
+    const up1 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r1}.png`, imgBuffer1, { contentType: "image/png", upsert: false });
+    const up2 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r2}.png`, imgBuffer2, { contentType: "image/png", upsert: false });
+    const sajuImageUrl = up1.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r1}.png`).data.publicUrl;
+    const partnerSajuImageUrl = up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r2}.png`).data.publicUrl;
+    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl, partnerSajuImageUrl } }).eq("id", id);
+    const { data: resultRow } = await service.from("saju_results").select("interpretation_md, order_id").eq("id", id).maybeSingle();
+    if (resultRow?.order_id && sajuImageUrl && partnerSajuImageUrl) {
+      let content: Record<string, unknown> = {};
+      try { content = JSON.parse(resultRow.interpretation_md) || {}; } catch { content = {}; }
+      const totalChapters = Object.keys(JANYEO_KUNGHAP_CHAPTER_SECTIONS).map(Number);
+      const allDone = totalChapters.every(n => isJanyeoKunghapChapterReady(content, n));
+      if (allDone) {
+        const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultRow.order_id).maybeSingle();
+        if (si?.phone) {
+          const reportUrl = `https://www.hongyeondang.com/saju/kunghap_janyeo/report-preview?id=${id}`;
+          sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+        }
+      }
+    }
+    return NextResponse.json({ sajuImageUrl, partnerSajuImageUrl });
   } catch (e) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
   }

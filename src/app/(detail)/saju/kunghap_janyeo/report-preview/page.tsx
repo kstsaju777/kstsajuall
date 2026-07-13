@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -6299,7 +6299,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -6412,6 +6414,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
             <Quote>{`"나의 기운을 살펴보았으니,\n이제 자녀의 사주를\n펼쳐보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </>
         );
@@ -6525,6 +6528,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
             <Quote>{`"두 사람의 원국을 보았으니,\n이제 부모와 자녀의\n인연을 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
@@ -6578,6 +6582,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
             <Quote>{`"인연의 깊이와 유형을 알았으니,\n이제 서로를 어떻게 바라보는지\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
         );
@@ -6627,6 +6632,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
             <Quote>{`"서로의 시각 차이를 알았으니,\n이제 자녀의 기질을\n더 깊이 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
         );
@@ -6678,6 +6684,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
             <Quote>{`"이 아이의 기질을 깊이 알았으니,\n이제 두 사주의 합과 충으로\n관계의 구조를 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
         );
@@ -6743,6 +6750,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
             <Quote>{`"합과 충의 구조를 알았으니,\n이제 함께하는 일상의 패턴을\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
         );
@@ -6795,6 +6803,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
             <Quote>{`"함께하는 삶의 패턴을 알았으니,\n이제 이 아이에게 맞는\n교육 방향을 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </>
         );
@@ -6846,6 +6855,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
             <Quote>{`"이 아이에게 맞는 교육 방향을 알았으니,\n이제 두 사람의 관계에서\n주의해야 할 시기를 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="8" go={next} />
           </>
         );
@@ -6902,6 +6912,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
             <Quote>{`"위기의 시기를 알고 준비했으니,\n이제 두 사람이 함께 빛나는\n좋은 시기를 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="9" go={next} />
           </>
         );
@@ -6974,6 +6985,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap_janyeo/kunghap_janyeo_10/kunghap_janyeo_10_cover.jpg" h={280} />
             <Quote>{`"좋은 시기를 알았으니,\n두 사람의 미래를\n함께 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="10" go={next} />
           </>
         );
@@ -7047,6 +7059,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap_janyeo/kunghap_janyeo_11/kunghap_janyeo_11_cover.jpg" h={280} />
             <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="11" go={next} />
           </>
         );
@@ -7084,6 +7097,7 @@ function ReportPreviewInner() {
 
           <ReviewBox />
           <RecoGrid />
+          <div className="pb-10" />
           <ChapterNav cur="12" go={next} />
         </div>
         {eventOpen && (

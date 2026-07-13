@@ -62,7 +62,7 @@ export function TossWidget({ orderId, amount, customerKey, productName, customer
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-8">
       <div id="payment-methods" ref={paymentMethodsRef} />
       <div id="agreement" ref={agreementRef} />
       <Button onClick={handlePay} disabled={!ready || paying} size="lg" className="w-full">

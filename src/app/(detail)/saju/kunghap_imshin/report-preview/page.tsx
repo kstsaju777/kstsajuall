@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -5809,7 +5809,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -5839,8 +5841,53 @@ function ReportPreviewInner() {
               <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
             </section>
 
+            {/* ── 명식 버튼 안내 ── */}
+            {(() => {
+              const isFem = (report?.gender || gender) === "female" || (report?.gender || gender) === "여성" || (report?.gender || gender) === "여자";
+              const color = isFem ? "pink" : "blue";
+              const themes = {
+                blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
+                pink: { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
+              };
+              const t = themes[color];
+              return (
+                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
+                  <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `1px 0 3px ${t.shadow}` }} />
+                    <span style={{ padding: "4px 9px", background: t.bg, borderTop: `1.5px solid ${t.border}`, borderBottom: `1.5px solid ${t.border}`, color: t.text, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${name})`}</span>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `-1px 0 3px ${t.shadow}` }} />
+                  </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}
+                </Quote>
+              );
+            })()}
+            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+              <div style={{ width: 1, height: 40, background: "#ccc" }} />
+            </div>
+            {report?.sajuImageUrl && (
+              <div>
+                <div className="px-6 text-center mb-3">
+                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+                </div>
+                <div className="px-5">
+                  <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
+                    <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={report.sajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/dojang.png" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} alt="" />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                    <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{name.slice(1) || name}님의 사주화</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ── 오행 분포 (리치 도넛 + 바차트) ── */}
-            <section className="px-6 pt-6 pb-2">
+            <section className="px-6 pt-12 pb-2">
               <Heading>나의 오행 분포</Heading>
               <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>목·화·토·금·수 다섯 기운이 내 사주 안에서 어떻게 분포되어 있는지 보겠소. 임신과 출산을 앞둔 시기에 내 안에 흐르는 기운의 중심이 어디에 있는지를 먼저 파악하는 것이 중요하오.</p>
             </section>
@@ -5878,6 +5925,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap_imshin/kunghap_imshin_1/kunghap_imshin_1_cover.jpg" h={240} />
             <Quote>{`"나의 기운을 살펴보았으니,\n이제 배우자의 사주를\n펼쳐보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </>
         );
@@ -5914,8 +5962,53 @@ function ReportPreviewInner() {
               )}
             </section>
 
+            {/* ── 명식 버튼 안내 (배우자) ── */}
+            {(() => {
+              const isFem = report?.partnerGender === "female" || report?.partnerGender === "여성" || report?.partnerGender === "여자";
+              const color = isFem ? "pink" : "blue";
+              const themes = {
+                blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
+                pink: { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
+              };
+              const t = themes[color];
+              return (
+                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
+                  <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `1px 0 3px ${t.shadow}` }} />
+                    <span style={{ padding: "4px 9px", background: t.bg, borderTop: `1.5px solid ${t.border}`, borderBottom: `1.5px solid ${t.border}`, color: t.text, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${partnerName})`}</span>
+                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `-1px 0 3px ${t.shadow}` }} />
+                  </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}
+                </Quote>
+              );
+            })()}
+            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+              <div style={{ width: 1, height: 40, background: "#ccc" }} />
+            </div>
+            {report?.partnerSajuImageUrl && (
+              <div>
+                <div className="px-6 text-center mb-3">
+                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${partnerName.slice(1) || partnerName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+                </div>
+                <div className="px-5">
+                  <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
+                    <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={report.partnerSajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/dojang.png" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} alt="" />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
+                    <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{partnerName.slice(1) || partnerName}님의 사주화</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ── 배우자 오행 분포 (리치 도넛 + 바차트) ── */}
-            <section className="px-6 pt-6 pb-2">
+            <section className="px-6 pt-12 pb-2">
               <Heading>{partnerName}의 오행 분포</Heading>
               <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>목·화·토·금·수 다섯 기운이 {partnerName}의 사주 안에서 어떻게 분포되어 있는지 보겠소. 배우자의 기운 중심을 파악하면 두 사람의 기운이 어떻게 어우러지는지 이해하는 데 도움이 되오.</p>
             </section>
@@ -5953,6 +6046,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap_imshin/kunghap_imshin_2/kunghap_imshin_2_cover.jpg" h={240} />
             <Quote>{`"두 사람의 원국을 보았으니,\n임신 궁합 점수를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
@@ -6007,6 +6101,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" h={300} />
             <Quote>{`"자녀운을 살펴보았으니,\n태어날 아이의 기운을\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
         );
@@ -6086,6 +6181,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
             <Quote>{`"자녀 기운을 알았으니,\n임신에 좋은 시기를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
         );
@@ -6168,6 +6264,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
             <Quote>{`"시기를 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
         );
@@ -6257,6 +6354,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
             <Quote>{`"합·충을 알았으니,\n건강 관리를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
         );
@@ -6342,6 +6440,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
             <Quote>{`"건강을 알았으니,\n감정적 유대를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </>
         );
@@ -6432,6 +6531,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
             <Quote>{`"유대를 알았으니,\n임신 과정의 어려움을\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="8" go={next} />
           </>
         );
@@ -6506,6 +6606,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
             <Quote>{`"어려움을 알았으니,\n가장 좋은 시기를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="9" go={next} />
           </>
         );
@@ -6579,6 +6680,7 @@ function ReportPreviewInner() {
 
             <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
             <Quote>{`"좋은 시기를 알았으니,\n두 사람의 미래를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
             <ChapterNav cur="10" go={next} />
           </>
         );
@@ -6611,6 +6713,7 @@ function ReportPreviewInner() {
 
           <ReviewBox />
           <RecoGrid />
+          <div className="pb-10" />
           <ChapterNav cur="11" go={next} />
         </div>
         {eventOpen && (

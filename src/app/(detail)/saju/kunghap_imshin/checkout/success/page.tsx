@@ -129,6 +129,7 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
+      await fetch("/api/kunghap_imshin-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resultId }) }).catch(() => {});
       router.push(`/saju/kunghap_imshin/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName ?? "")}&partnerGender=${encodeURIComponent(partnerGender ?? "")}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -954,9 +954,10 @@ function LoveLineChart({ view, gender }: { view: MyeongsikView | null; gender?: 
         <polyline points={pts} fill="none" stroke="#e8547a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         {data.map((d, i) => (
           <g key={i}>
+            <line x1={x(i)} y1={y(d.score) + 6} x2={x(i)} y2={H - padBot + 2} stroke="#e8547a" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.35" />
             <circle cx={x(i)} cy={y(d.score)} r={3} fill={WHITE} stroke="#e8547a" strokeWidth="2" />
-            <text x={x(i)} y={H - 12} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
-            <text x={x(i)} y={H - 3} fontSize="7" fill={MUTE} textAnchor="middle">{d.gz}</text>
+            <text x={x(i)} y={H - 12} fontSize="12" fill={INK_SOFT} textAnchor="middle" fontWeight="700">{String(d.year).slice(2)}</text>
+            <text x={x(i)} y={H - 1} fontSize="10.5" fill={MUTE} textAnchor="middle">{d.gz}</text>
           </g>
         ))}
       </svg>
@@ -3829,7 +3830,7 @@ function RunFlowChart({ flow }: { flow: ReportFlowItem[] }) {
         ))}
         {/* x축 라벨 */}
         {data.map((d, i) => (
-          <text key={i} x={x(i)} y={H - 14} fontSize="8.5" fill={INK_SOFT} textAnchor="middle">{d.label}</text>
+          <text key={i} x={x(i)} y={H - 14} fontSize="10" fill={INK_SOFT} textAnchor="middle">{d.label}</text>
         ))}
       </svg>
       {/* 시기별 타임라인 */}
@@ -4453,7 +4454,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -4592,6 +4595,7 @@ function ReportPreviewInner() {
                 {`"자, 다음 장에서는\n${name}님이 사랑을 대하는\n방식에 대해서 살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </div>
         </>
@@ -4717,6 +4721,7 @@ function ReportPreviewInner() {
                 {`"연애 기질을 알았으니,\n이제 어떤 사람이 잘 맞는지\n다음 장에서 살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </div>
         </>
@@ -4821,6 +4826,7 @@ function ReportPreviewInner() {
                 {`"인연의 모습은 알았소.\n이제 그 인연이 언제 오는지\n다음 장에서 살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </div>
         </>
@@ -4972,6 +4978,7 @@ function ReportPreviewInner() {
                 {`"시기를 알았으니,\n이제 어디서 어떻게 만나게 될지\n다음 장에서 살펴보겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </div>
         </>
@@ -5072,6 +5079,7 @@ function ReportPreviewInner() {
                 {`"${name.slice(1) || name}님의 인연,\n충분히 가까이 있소.\n\n다음 장에서 그 기운을\n직접 끌어오는 법을 알려드리겠소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </div>
         </>
@@ -5224,6 +5232,7 @@ function ReportPreviewInner() {
                 {`"마지막으로,\n홍연이 ${name.slice(1) || name}님께\n직접 전하고 싶은 말이 있소."`}
               </p>
             </div>
+            <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </div>
         </>
@@ -5258,6 +5267,7 @@ function ReportPreviewInner() {
             <ReviewBox />
             <RecoGrid />
 
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </div>
           {eventOpen && (

@@ -23,6 +23,7 @@ import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-mansery
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
+import { calcCrossRelations, calcKunghapScore, buildBreakdownText, HAP_KINDS } from "@/lib/saju/kunghap-cross-relations";
 
 export const maxDuration = 300;
 
@@ -101,6 +102,88 @@ function buildSeunTableG(myIlgan: string, ptIlgan: string, myLabel: string, ptLa
   return `[${startYear}~${endYear}년 세운 십성 — 서버 계산 확정값. 임의 변경 절대 금지]\n${rows.join("\n")}`;
 }
 
+// ── 결혼 시기 에너지 점수 계산 ──
+function sipseongMarriageWeight(sip: string, gender: "male" | "female"): number {
+  if (gender === "male") {
+    if (sip === "정재") return 20;
+    if (sip === "편재") return 12;
+    if (sip === "정관") return 8;
+    if (sip === "편관") return 5;
+    if (sip === "식신") return 8;
+    if (sip === "상관") return 6;
+    if (sip === "정인" || sip === "편인") return -8;
+    if (sip === "비견" || sip === "겁재") return -10;
+  } else {
+    if (sip === "정관") return 20;
+    if (sip === "편관") return 12;
+    if (sip === "정재") return 8;
+    if (sip === "편재") return 5;
+    if (sip === "식신") return 8;
+    if (sip === "상관") return 6;
+    if (sip === "정인" || sip === "편인") return -8;
+    if (sip === "비견" || sip === "겁재") return -10;
+  }
+  return 0;
+}
+
+function getActiveDaeunSips(daeunList: DaeunItemG[], ilgan: string, year: number): { ganSip: string; jiSip: string } {
+  const active = daeunList.find(d => d.yearStart <= year && year < d.yearStart + 10);
+  if (!active) return { ganSip: "", jiSip: "" };
+  const gz = active.gz ?? "";
+  const gan = gz[0] ?? "";
+  const ji  = gz[1] ?? "";
+  return {
+    ganSip: gan ? sipseongOfStem(ilgan, gan)   : "",
+    jiSip:  ji  ? sipseongOfBranch(ilgan, ji)  : "",
+  };
+}
+
+function calcSeunMarriageScores(
+  myIlgan: string, ptIlgan: string,
+  myGender: "male" | "female", ptGender: "male" | "female",
+  myDaeun: DaeunItemG[], ptDaeun: DaeunItemG[],
+  startYear: number, endYear: number
+): Array<{ year: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }> {
+  const results = [];
+  for (let y = startYear; y <= endYear; y++) {
+    const { gan, ji } = seunGanJiG(y);
+    const myGanSip = sipseongOfStem(myIlgan, gan);
+    const myJiSip  = sipseongOfBranch(myIlgan, ji);
+    const ptGanSip = sipseongOfStem(ptIlgan, gan);
+    const ptJiSip  = sipseongOfBranch(ptIlgan, ji);
+
+    let myScore = 50
+      + sipseongMarriageWeight(myGanSip, myGender)
+      + sipseongMarriageWeight(myJiSip,  myGender);
+    let ptScore = 50
+      + sipseongMarriageWeight(ptGanSip, ptGender)
+      + sipseongMarriageWeight(ptJiSip,  ptGender);
+
+    // 대운 보정 ±5/±3
+    const myDs = getActiveDaeunSips(myDaeun, myIlgan, y);
+    const ptDs = getActiveDaeunSips(ptDaeun, ptIlgan, y);
+    myScore += Math.sign(sipseongMarriageWeight(myDs.ganSip, myGender)) * 5
+             + Math.sign(sipseongMarriageWeight(myDs.jiSip,  myGender)) * 3;
+    ptScore += Math.sign(sipseongMarriageWeight(ptDs.ganSip, ptGender)) * 5
+             + Math.sign(sipseongMarriageWeight(ptDs.jiSip,  ptGender)) * 3;
+
+    myScore = Math.min(100, Math.max(0, myScore));
+    ptScore = Math.min(100, Math.max(0, ptScore));
+
+    let combined = (myScore + ptScore) / 2;
+    if (myScore >= 65 && ptScore >= 65) combined += 8;  // 양쪽 동시 활성 보너스
+    if (myScore <= 45 || ptScore <= 45) combined -= 5;  // 한쪽 약할 때 페널티
+
+    const score = Math.min(100, Math.max(5, Math.round(combined)));
+    const tone  = score >= 80 ? "best" : score >= 65 ? "good" : score >= 50 ? "normal" : "caution";
+    const ganKor = GAN_KOR_60[gan] ?? gan;
+    const jiKor  = JI_KOR_60[ji]  ?? ji;
+
+    results.push({ year: y, score, tone, label: `${y}년 ${ganKor}${jiKor}년`, myGanSip, myJiSip, ptGanSip, ptJiSip });
+  }
+  return results;
+}
+
 // 한 장 생성 (JSON 모드 + 출력 검증 + 3회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: {
   name: string; gender: "male" | "female"; manseryeokText: string;
@@ -117,6 +200,12 @@ async function genChapterContent(chapter: number, input: {
   myPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
   partnerPillars?: Array<{ pos?: string; gan?: string; ji?: string }>;
   daeunSeunContext?: string;
+  marriageScore?: number;
+  marriageLabel?: string;
+  hapCount?: number;
+  chungCount?: number;
+  hapChungBreakdown?: string;
+  timingScores?: Array<{ year: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }>;
 }) {
   const { system, user } = buildGyeolhonKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -129,7 +218,7 @@ async function genChapterContent(chapter: number, input: {
         obj = parseContentJson(llm.text);
       } catch (parseErr) {
         console.error(`[kunghap_gyeolhon] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
-        if (chapter === 12) {
+        if (chapter === 11) {
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else {
@@ -211,7 +300,7 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
   const totalChapters = Object.keys(GYEOLHON_KUNGHAP_CHAPTER_SECTIONS).map(Number);
   const allDone = totalChapters.every(n => isGyeolhonKunghapChapterReady(merged, n));
   const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  const imageReady = !!storedMyeongsik?.sajuImageUrl;
+  const imageReady = !!storedMyeongsik?.sajuImageUrl && !!storedMyeongsik?.partnerSajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
   if (!skipAlimtalk && allDone && (!needsImage || imageReady) && data?.order_id) {
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
@@ -451,19 +540,61 @@ async function generateChapter(body: unknown) {
       }).join(", ");
     })();
 
-    // 대운·세운 컨텍스트 (9장·10장에만)
+    // 대운·세운 컨텍스트 (전 장 공통)
     const myFirstName = (stored?.["{이름1}"] || stored?.name || "").slice(1) || (stored?.["{이름1}"] || stored?.name || "");
     const ptFirstName = (stored?.["{이름2}"] || stored?.partnerName || "").slice(1) || (stored?.["{이름2}"] || stored?.partnerName || "");
     const REF_YEAR = 2026;
     let daeunSeunContext: string | undefined;
-    if ((chapter === 9 || chapter === 10) && ilgan && partnerIlgan) {
-      const myDaeunTable = buildFullDaeunTableG(stored?.view?.daeun ?? [], ilgan, `${myFirstName}님`, REF_YEAR);
-      const ptDaeunTable = buildFullDaeunTableG(stored?.partnerView?.daeun ?? [], partnerIlgan, `${ptFirstName}님`, REF_YEAR);
-      const seunTable    = buildSeunTableG(ilgan, partnerIlgan, `${myFirstName}님`, `${ptFirstName}님`, REF_YEAR, REF_YEAR + 8);
+    if (ilgan && partnerIlgan) {
+      // view.ilgan is "庚 (경금)" format — extract only the Chinese character for sipseong calc
+      const ilganC  = ilgan[0];
+      const ptIlganC = partnerIlgan[0];
+      const myDaeunTable = buildFullDaeunTableG(stored?.view?.daeun ?? [], ilganC, `${myFirstName}님`, REF_YEAR);
+      const ptDaeunTable = buildFullDaeunTableG(stored?.partnerView?.daeun ?? [], ptIlganC, `${ptFirstName}님`, REF_YEAR);
+      const seunTable    = buildSeunTableG(ilganC, ptIlganC, `${myFirstName}님`, `${ptFirstName}님`, REF_YEAR, REF_YEAR + 9);
       const parts = [myDaeunTable, ptDaeunTable, seunTable].filter(Boolean);
       if (parts.length) {
         daeunSeunContext = `\n⚠️ [대운·세운 서버 계산 확정값 — 반드시 이 값만 사용. 임의 추론·재계산 절대 금지]\n${parts.join("\n\n")}\n위 확정값을 근거로 시기별 기운을 서술하시오.`;
       }
+    }
+
+    // 결혼 시기 에너지 점수 서버 계산 (ch5)
+    let timingScores: Array<{ year: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }> | undefined;
+    if (chapter === 5 && ilgan && partnerIlgan) {
+      const myGender = stored?.gender === "female" ? "female" : "male";
+      const ptGender = stored?.partnerGender === "female" ? "female" : "male";
+      // view.ilgan is "庚 (경금)" format — extract only the Chinese character
+      const ilganChar = ilgan[0];
+      const ptIlganChar = partnerIlgan[0];
+      timingScores = calcSeunMarriageScores(
+        ilganChar, ptIlganChar,
+        myGender, ptGender,
+        stored?.view?.daeun ?? [],
+        stored?.partnerView?.daeun ?? [],
+        REF_YEAR, REF_YEAR + 9
+      );
+    }
+
+    // 결혼 가능성 점수 서버 계산 (ch4)
+    let marriageScore: number | undefined;
+    let marriageLabel: string | undefined;
+    let hapCount: number | undefined;
+    let chungCount: number | undefined;
+    let hapChungBreakdown: string | undefined;
+    if (chapter === 4 && stored?.view && stored?.partnerView) {
+      const rels = calcCrossRelations(stored.view, stored.partnerView);
+      const hapRels = rels.filter(r => HAP_KINDS.includes(r.kind));
+      const negRels = rels.filter(r => !HAP_KINDS.includes(r.kind));
+      marriageScore = calcKunghapScore(rels).score;
+      hapCount = hapRels.length;
+      chungCount = negRels.length;
+      hapChungBreakdown = buildBreakdownText(rels);
+      marriageLabel = marriageScore >= 85 ? "천생연분에 가까운 인연이오"
+        : marriageScore >= 70 ? "결혼을 권하는 인연이오"
+        : marriageScore >= 60 ? "노력하면 충분히 가능한 인연이오"
+        : marriageScore >= 50 ? "결혼을 서두르기엔 아직 이른 인연이오"
+        : marriageScore >= 40 ? "많은 준비가 필요한 인연이오"
+        : "더 깊이 이해하는 시간이 필요한 인연이오";
     }
 
     const { obj } = await genChapterContent(chapter, {
@@ -486,6 +617,12 @@ async function generateChapter(body: unknown) {
       myPillars: stored?.view?.pillars ?? [],
       partnerPillars: stored?.partnerView?.pillars ?? [],
       daeunSeunContext,
+      marriageScore,
+      marriageLabel,
+      hapCount,
+      chungCount,
+      hapChungBreakdown,
+      timingScores,
     });
 
     return NextResponse.json({ sections: obj });
@@ -536,17 +673,39 @@ export async function PATCH(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
   const pillars = stored?.view?.pillars ?? [];
+  const partnerPillars = stored?.partnerView?.pillars ?? [];
 
   try {
-    const imagePrompt = buildSajuImagePrompt(pillars);
-    const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-    const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-    const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-    if (uploadErr) throw uploadErr;
-    const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
-    const sajuImageUrl = pubData.publicUrl;
-    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
-    return NextResponse.json({ sajuImageUrl });
+    const ts = Date.now();
+    const [imgBuffer1, imgBuffer2] = await Promise.all([
+      generateSajuImage(buildSajuImagePrompt(pillars), process.env.OPENAI_API_KEY!),
+      generateSajuImage(buildSajuImagePrompt(partnerPillars), process.env.OPENAI_API_KEY!),
+    ]);
+    const r1 = Math.random().toString(36).slice(2, 8);
+    const r2 = Math.random().toString(36).slice(2, 8);
+    const up1 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r1}.png`, imgBuffer1, { contentType: "image/png", upsert: false });
+    const up2 = await service.storage.from("saju-images").upload(`wonguk/${ts}-${r2}.png`, imgBuffer2, { contentType: "image/png", upsert: false });
+    const sajuImageUrl = up1.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r1}.png`).data.publicUrl;
+    const partnerSajuImageUrl = up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r2}.png`).data.publicUrl;
+    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl, partnerSajuImageUrl } }).eq("id", id);
+
+    // 이미지 저장 후 알림톡 발송 (챕터가 모두 완료된 경우)
+    const { data: resultRow } = await service.from("saju_results").select("interpretation_md, order_id").eq("id", id).maybeSingle();
+    if (resultRow?.order_id && sajuImageUrl && partnerSajuImageUrl) {
+      let content: Record<string, unknown> = {};
+      try { content = JSON.parse(resultRow.interpretation_md) || {}; } catch { content = {}; }
+      const totalChapters = Object.keys(GYEOLHON_KUNGHAP_CHAPTER_SECTIONS).map(Number);
+      const allDone = totalChapters.every(n => isGyeolhonKunghapChapterReady(content, n));
+      if (allDone) {
+        const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultRow.order_id).maybeSingle();
+        if (si?.phone) {
+          const reportUrl = `https://www.hongyeondang.com/saju/kunghap_gyeolhon/report-preview?id=${id}`;
+          sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+        }
+      }
+    }
+
+    return NextResponse.json({ sajuImageUrl, partnerSajuImageUrl });
   } catch (e) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
   }

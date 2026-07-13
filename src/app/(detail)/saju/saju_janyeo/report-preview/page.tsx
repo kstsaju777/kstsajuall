@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -4506,7 +4506,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -4945,6 +4947,7 @@ function ReportPreviewInner() {
           {/* 마무리 인용 */}
           <Quote>{`"${honor}의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소."`}</Quote>
 
+          <div className="pb-10" />
           <ChapterNav cur="1" go={next} />
         </>
       )}
@@ -5093,6 +5096,7 @@ function ReportPreviewInner() {
           {/* 마무리 인용 */}
           <Quote>{`타고난 성격을 알았으니\n이제 공부 이야기를 하겠소.\n\n${honor}의\n학업 스타일을 살펴보겠소.`}</Quote>
 
+          <div className="pb-10" />
           <ChapterNav cur="2" go={next} />
         </>
       )}
@@ -5241,6 +5245,7 @@ function ReportPreviewInner() {
 
           <Quote>{`공부 스타일이 다르듯\n타고난 재능도 다르오.\n\n${honor}의\n재능과 적성을 살펴보겠소.`}</Quote>
 
+          <div className="pb-10" />
           <ChapterNav cur="3" go={next} />
         </>
       )}
@@ -5334,6 +5339,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`아이의 재능만큼이나\n건강도 사주에 다 나와있소.\n\n다음장에서는,\n${honor}이 주의해야 할\n신체부위에 대해 알려주겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="4" go={next} />
         </>
       )}
@@ -5486,6 +5492,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`아이를 키우는 시기마다\n알아야 할 것이 다르오.\n${honor}의 성장 시기별\n양육법을 살펴보겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="5" go={next} />
         </>
       )}
@@ -5707,6 +5714,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`다음으로는,\n${honor}의 교우관계와\n사회성에 대해\n알려드리겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="6" go={next} />
         </>
       )}
@@ -6028,6 +6036,7 @@ function ReportPreviewInner() {
           })()}
 
           <Quote>{`마지막으로,\n${honor}의 부모님께\n홍연이 전하는\n서신을 남기겠소.`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="7" go={next} />
         </>
       )}
@@ -6065,6 +6074,7 @@ function ReportPreviewInner() {
             {/* 추천 상품 */}
             <RecoGrid />
 
+            <div className="pb-10" />
             <ChapterNav cur="8" go={next} />
           </div>
           {eventOpen && (

@@ -78,7 +78,7 @@ function localSajuToMsView(saju: LocalSajuResult): MyeongsikView {
 function formatDateLabel(date: string, calendar: string, gender: string): string {
   if (!date) return "";
   const calLabel = calendar === "음력" ? "음력" : calendar === "윤달" ? "음력(윤달)" : "양력";
-  const parts = date.split("-");
+  const parts = date.split(/[-\.]/);
   if (parts.length < 3) return "";
   const formatted = `${parts[0]}년 ${parts[1]}월 ${parts[2]}일`;
   const genderLabel = gender === "female" || gender === "여자" ? "여성" : gender === "male" || gender === "남자" ? "남성" : gender;

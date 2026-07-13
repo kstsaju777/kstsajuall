@@ -7,4 +7,10 @@ export const WAIT_FOR_IMAGE = new Set<string>([
   "saju_janyeo",
   "saju_youare",
   "kunghap_yeonae",
+  "kunghap_gyeolhon",
+  "kunghap_business",
+  "kunghap_imshin",
+  "kunghap_janyeo",
+  "kunghap_jaehwe",
+  "kunghap_ehon",
 ]);

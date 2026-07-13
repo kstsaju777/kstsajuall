@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -5872,7 +5872,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -5954,6 +5956,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </>
         );
@@ -6042,6 +6045,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
@@ -6120,6 +6124,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
         );
@@ -6206,6 +6211,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
         );
@@ -6288,6 +6294,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
         );
@@ -6374,6 +6381,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
         );
@@ -6450,6 +6458,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </>
         );
@@ -6534,6 +6543,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="8" go={next} />
           </>
         );
@@ -6617,6 +6627,7 @@ function ReportPreviewInner() {
               <p className="text-[11px] mt-1.5 font-bold" style={{ color: MUTE }}>— 홍연</p>
             </div>
 
+            <div className="pb-10" />
             <ChapterNav cur="9" go={next} />
           </>
         );
@@ -6654,6 +6665,7 @@ function ReportPreviewInner() {
 
             <ReviewBox />
             <RecoGrid />
+            <div className="pb-10" />
             <ChapterNav cur="10" go={next} />
           </div>
           {eventOpen && (
@@ -6696,6 +6708,7 @@ function ReportPreviewInner() {
           </section>
           <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
           <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
+          <div className="pb-10" />
           <ChapterNav cur="11" go={next} />
         </>
       )}
@@ -6727,6 +6740,7 @@ function ReportPreviewInner() {
 
           <ReviewBox />
           <RecoGrid />
+          <div className="pb-10" />
           <ChapterNav cur="12" go={next} />
         </div>
         {eventOpen && (

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -4979,7 +4979,9 @@ function ReportPreviewInner() {
           </div>
 
           {/* 다음 장 네비 */}
-          <ChapterNav cur="0" go={next} />
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="0" go={next} />
+          </div>
         </>
       )}
 
@@ -5133,6 +5135,7 @@ function ReportPreviewInner() {
             {/* ── 하단멘트 ── */}
             <Quote>{`체질을 알았으니,\n이제, ${name.slice(1) || name}님 신체 어느 부위가\n약한지 알아보겠소.`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
           </>
         );
@@ -5350,6 +5353,7 @@ function ReportPreviewInner() {
             {/* ── ⑨ 하단멘트 ── */}
             <Quote>{`약한 부위를 알았으니,\n이제 건강을 살릴\n생활방식과 개운법을 살펴보겠소.`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
@@ -5566,6 +5570,7 @@ function ReportPreviewInner() {
             {/* ── ⑪ 하단멘트 ── */}
             <Quote>{`생활방식과 개운법을 알았으니,\n이제 내 건강 흐름과\n조심해야 할 시기를 살펴보겠소.`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
         );
@@ -5651,6 +5656,7 @@ function ReportPreviewInner() {
             {/* ── ⑧ 하단멘트 ── */}
             <Quote>{`이로써\n${name}님의 건강을\n모두 살펴보았소.\n\n마지막으로 그대에게\n전하고 싶은 말이 남아있소.`}</Quote>
 
+            <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
         );
@@ -5683,6 +5689,7 @@ function ReportPreviewInner() {
             </section>
             <ReviewBox />
             <RecoGrid />
+            <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </div>
           {eventOpen && <EventPopup onClose={(hide) => { if (hide) localStorage.setItem("hy_health_event_hide", "1"); setEventOpen(false); }} />}
