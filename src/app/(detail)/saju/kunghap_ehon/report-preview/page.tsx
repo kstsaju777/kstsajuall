@@ -6303,7 +6303,7 @@ function ReportPreviewInner() {
             </section>
 
             {(() => {
-              const isFem = (report?.partnerGender || partnerGender) === "female" || (report?.partnerGender || partnerGender) === "여성" || (report?.partnerGender || partnerGender) === "여자";
+              const isFem = report?.partnerGender === "female" || report?.partnerGender === "여성" || report?.partnerGender === "여자";
               const color = isFem ? "pink" : "blue";
               const themes = {
                 blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
