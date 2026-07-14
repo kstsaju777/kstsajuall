@@ -906,7 +906,7 @@ function CrisisBanner({ data }: { data: Record<string, unknown> | null }) {
           <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH9_CRISIS }}>{callout}</p>
         </div>
       )}
-      {intro && <p className="text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      {intro && <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
     </div>
   );
 }
@@ -927,7 +927,7 @@ function CrisisCard({ item }: { item: Record<string, unknown> }) {
       </div>
       {/* 본문 */}
       <div className="px-4 py-3.5" style={{ background: WHITE }}>
-        <p className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[14.5px] leading-[1.95] mb-3 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
         {/* 사주 근거 */}
         {basis && (
           <div className="mb-2.5 px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${GCH9_CRISIS}08` }}>
@@ -981,60 +981,6 @@ function OvercomeCard({ item, idx }: { item: Record<string, unknown>; idx: numbe
   );
 }
 
-// 위기·안정 흐름 타임라인 — 시기별 결혼 생활 기운 흐름
-function CrisisFlowTimeline({ data }: { data: Record<string, unknown> | null }) {
-  if (!data) return null;
-  const intro   = (data.intro   as string | undefined) ?? "";
-  const periods = (data.periods as Record<string, unknown>[] | undefined) ?? [];
-  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
-  const TONE_MAP: Record<string, { color: string; label: string; bg: string }> = {
-    good:    { color: GCH9_SOLVE,  label: "안정",  bg: GCH9_SOLVE_P  },
-    stable:  { color: "#2a5a7a",   label: "평온",  bg: "#eef4f9"     },
-    caution: { color: GOLD,        label: "주의",  bg: "#fdf8ec"     },
-    warn:    { color: GCH9_CRISIS, label: "위기",  bg: GCH9_CRISIS_P },
-  };
-  return (
-    <div className="mx-5 mb-5">
-      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
-      {periods.length > 0 && (
-        <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH9_COLOR}18` }}>
-          <div className="px-4 py-2.5" style={{ background: `${GCH9_COLOR}0e` }}>
-            <p className="text-[11px] font-black" style={{ color: GCH9_COLOR }}>시기별 결혼 기운 흐름</p>
-          </div>
-          {periods.map((pd, i) => {
-            const tone    = (pd.tone  as string | undefined) ?? "stable";
-            const meta    = TONE_MAP[tone] ?? TONE_MAP.stable;
-            const label   = (pd.label as string | undefined) ?? "";
-            const heading = (pd.heading as string | undefined) ?? "";
-            const text    = (pd.text  as string | undefined) ?? "";
-            return (
-              <div key={i} className="flex items-stretch" style={{ borderTop: i > 0 ? `1px solid ${GCH9_COLOR}0c` : "none" }}>
-                {/* 왼쪽 컬러 바 + 도트 */}
-                <div className="flex flex-col items-center py-4 px-3" style={{ background: `${meta.color}08`, borderRight: `2px solid ${meta.color}20` }}>
-                  <div className="w-3 h-3 rounded-full mb-1" style={{ background: meta.color }} />
-                  {i < periods.length - 1 && <div style={{ width: 2, flex: 1, background: `${meta.color}30` }} />}
-                </div>
-                {/* 본문 */}
-                <div className="flex-1 px-4 py-3" style={{ background: WHITE }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[12px] font-black" style={{ color: meta.color }}>{label}</p>
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${meta.color}16`, color: meta.color }}>{meta.label}</span>
-                    {heading && <p className="text-[11px] font-bold" style={{ color: INK_SOFT }}>— {heading}</p>}
-                  </div>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{text}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {paragraphs.map((p, i) => (
-        <p key={i} className="mt-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
-      ))}
-    </div>
-  );
-}
-
 // 위기 종합 극복 가이드 — 핵심 원칙 + 마무리 문단
 function CrisisRecoveryGuide({ data }: { data: Record<string, unknown> | null }) {
   if (!data) return null;
@@ -1062,7 +1008,7 @@ function CrisisRecoveryGuide({ data }: { data: Record<string, unknown> | null })
                 <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-black" style={{ background: GCH9_SOLVE, color: WHITE }}>{num}</div>
                 <div>
                   <p className="text-[12.5px] font-black mb-0.5" style={{ color: GCH9_SOLVE }}>{ptitle}</p>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{pdesc}</p>
+                  <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{pdesc}</p>
                 </div>
               </div>
             );
@@ -1070,8 +1016,44 @@ function CrisisRecoveryGuide({ data }: { data: Record<string, unknown> | null })
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
       ))}
+    </div>
+  );
+}
+
+// ─── 제9장 추가 컴포넌트 ────────────────────────────────────────────────────────
+
+// 위기 극복 팁 패널
+function OvercomeTipPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const items = (data.items as Record<string, unknown>[] | undefined) ?? [];
+  if (items.length === 0) return null;
+  return (
+    <div className="mx-5 mb-4 space-y-3">
+      {items.map((item, i) => {
+        const icon  = (item.icon  as string | undefined) ?? "💚";
+        const title = (item.title as string | undefined) ?? "";
+        const desc  = (item.desc  as string | undefined) ?? "";
+        const tip   = (item.tip   as string | undefined) ?? "";
+        return (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${GCH9_SOLVE}22` }}>
+            <div className="px-4 py-2.5 flex items-center gap-2.5" style={{ background: `${GCH9_SOLVE}0e` }}>
+              <span className="text-[22px] leading-none shrink-0">{icon}</span>
+              <p className="text-[14px] font-black" style={{ color: GCH9_SOLVE }}>{title}</p>
+            </div>
+            <div className="px-4 py-3" style={{ background: WHITE }}>
+              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+              {tip && (
+                <div className="px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${GCH9_SOLVE}0a`, border: `1px solid ${GCH9_SOLVE}18` }}>
+                  <span className="text-[13px] shrink-0">✅</span>
+                  <p className="text-[12.5px] leading-relaxed font-bold" style={{ color: GCH9_SOLVE }}>{tip}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1326,7 +1308,6 @@ function WealthFlowGraph({ data, myName, partnerName }: { data: Record<string, u
   }, "");
   const fillPath = `${linePath} L ${coords[coords.length - 1].x} ${PT + CH} L ${coords[0].x} ${PT + CH} Z`;
 
-  const gridScores = [25, 50, 75];
   const labelYears = [2025, 2030, 2035, 2040, 2045, 2050, 2055, 2060, 2065, 2070];
 
   return (
@@ -1342,10 +1323,6 @@ function WealthFlowGraph({ data, myName, partnerName }: { data: Record<string, u
             <stop offset="100%" stopColor={GCH7_WLT} stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        {/* grid */}
-        {gridScores.map(s => (
-          <line key={s} x1={PL} y1={yOf(s)} x2={W - PR} y2={yOf(s)} stroke="rgba(0,0,0,0.07)" strokeWidth="1" strokeDasharray="3 3" />
-        ))}
         {/* fill */}
         <path d={fillPath} fill="url(#wfg)" />
         {/* line */}
@@ -1617,7 +1594,6 @@ function ChildFlowGraph({ data, myName, partnerName }: { data: Record<string, un
   }, "");
   const fillPath = `${linePath} L ${coords[coords.length - 1].x} ${PT + CH} L ${coords[0].x} ${PT + CH} Z`;
 
-  const gridScores = [25, 50, 75];
   const labelYears = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
 
   return (
@@ -1633,9 +1609,6 @@ function ChildFlowGraph({ data, myName, partnerName }: { data: Record<string, un
             <stop offset="100%" stopColor={GCH8_COLOR} stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        {gridScores.map(s => (
-          <line key={s} x1={PL} y1={yOf(s)} x2={W - PR} y2={yOf(s)} stroke="rgba(0,0,0,0.07)" strokeWidth="1" strokeDasharray="3 3" />
-        ))}
         <path d={fillPath} fill="url(#cfg)" />
         <path d={linePath} fill="none" stroke={GCH8_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
         {coords.map((c, i) => (
@@ -2267,7 +2240,7 @@ function ConflictPatternCard({ data }: { data: Record<string, unknown> | null })
                 <span className="text-[14px]">{icon}</span>
                 <p className="text-[12.5px] font-black" style={{ color: CONFLICT_RED }}>{title}</p>
               </div>
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
+              <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
             </div>
           );
         })}
@@ -2276,7 +2249,7 @@ function ConflictPatternCard({ data }: { data: Record<string, unknown> | null })
       {reconcile && (
         <div className="mx-4 mb-3 px-3.5 py-3 rounded-xl" style={{ background: `${CONFLICT_RED}08`, border: `1px solid ${CONFLICT_RED}20` }}>
           <p className="text-[11px] font-black mb-1" style={{ color: CONFLICT_RED }}>💞 화해 방식</p>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{reconcile}</p>
+          <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{reconcile}</p>
           {growthTip && (
             <div className="flex items-start gap-1.5 mt-2 pt-2" style={{ borderTop: `1px dashed ${CONFLICT_RED}20` }}>
               <span className="text-[11px] mt-0.5">🌱</span>
@@ -7015,7 +6988,7 @@ function ReportPreviewInner() {
         loading={false}
         meta={report?.partnerName ? { name: report.partnerName, gender: report.partnerGender ?? "", date: report.partnerBirth?.date ?? "", calendar: report.partnerBirth?.calendar ?? "", time: report.partnerBirth?.time ?? "" } : undefined}
       />
-      {isAdmin && Number(ch) >= 1 && Number(ch) <= 11 && (
+      {isAdmin && Number(ch) >= 1 && Number(ch) <= 10 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
           {generating ? (
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-[13px] shadow-xl" style={{ background: "#555", color: "#fff" }}>
@@ -7970,11 +7943,9 @@ function ReportPreviewInner() {
       {ch === "9" && (() => {
         const cp  = (jc.crisisPoints    as Record<string,unknown>|undefined) ?? null;
         const ot  = (jc.overcomeTips    as Record<string,unknown>|undefined) ?? null;
-        const cf  = (jc.crisisFlow      as Record<string,unknown>|undefined) ?? null;
         const rg  = (jc.recoveryGuide   as Record<string,unknown>|undefined) ?? null;
         const conflictPat = (jc.conflictPattern as Record<string,unknown>|undefined) ?? null;
         const cpItems = (cp?.items as Record<string,unknown>[]|undefined) ?? [];
-        const otItems = (ot?.items as Record<string,unknown>[]|undefined) ?? [];
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -7988,12 +7959,12 @@ function ReportPreviewInner() {
             </div>
             <Quote>{`"어떤 인연도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
 
-            {/* 위기 유형 도입 */}
+            {/* 갈등 패턴 */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>이 부부의 위기 유형</Heading>
-              <P>두 분의 사주 구조가 맞닿는 지점에서 어떤 갈등과 긴장이 생겨날 수 있는지, 오행의 충·극 관계와 일주의 기질 차이를 통해 살펴보았소.</P>
+              <Heading>두 사람의 갈등 패턴</Heading>
+              <P>싸울 때 어떤 모습인지, 어떻게 화해하는지도 사주에 담겨 있소. 이를 알면 갈등을 다스리는 길이 보이오.</P>
             </section>
-            <CrisisBanner data={cp} />
+            <ConflictPatternCard data={conflictPat} />
 
             {/* 위기 요인 카드 */}
             <section className="px-6 pt-2 pb-2">
@@ -8007,14 +7978,7 @@ function ReportPreviewInner() {
               <Heading>위기를 넘는 방법</Heading>
               <P>위기를 아는 것만으로는 부족하오. 두 사람이 함께 써내려갈 극복의 방법들을 사주의 상생 기운에서 찾아 정리하였소.</P>
             </section>
-            {otItems.map((item, i) => <OvercomeCard key={i} item={item} idx={i} />)}
-
-            {/* 시기별 흐름 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>시기별 결혼 기운 흐름</Heading>
-              <P>위기가 집중되는 시기와 안정이 찾아오는 시기가 있소. 대운과 세운의 흐름 속에서 이 부부의 결혼 생활이 어떻게 펼쳐지는지 살펴보겠소.</P>
-            </section>
-            <CrisisFlowTimeline data={cf} />
+            <OvercomeTipPanel data={ot} />
 
             {/* 종합 극복 가이드 */}
             <section className="px-6 pt-4 pb-2">
@@ -8022,13 +7986,6 @@ function ReportPreviewInner() {
               <P>위기를 함께 넘기 위해 이 두 사람이 붙들어야 할 핵심 원칙들이오. 사주의 기운이 가리키는 이 부부만의 화해와 성장의 방향이오.</P>
             </section>
             <CrisisRecoveryGuide data={rg} />
-
-            {/* 갈등 패턴 */}
-            <section className="px-6 pt-6 pb-2">
-              <Heading>두 사람의 갈등 패턴</Heading>
-              <P>싸울 때 어떤 모습인지, 어떻게 화해하는지도 사주에 담겨 있소. 이를 알면 갈등을 다스리는 길이 보이오.</P>
-            </section>
-            <ConflictPatternCard data={conflictPat} />
 
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
             <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 홍연의 마지막 서신을\n받아보시오."`}</Quote>
@@ -8097,7 +8054,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_11/kunghap_gyeolhon_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_10/kunghap_gyeolhon_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -8124,7 +8081,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 알 수 없는 장 — 준비 중 ═══════════ */}
-      {!["0","1","2","3","4","5","6","7","8","9","10","11"].includes(ch) && (
+      {!["0","1","2","3","4","5","6","7","8","9","10"].includes(ch) && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중이오.</p>
