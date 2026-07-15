@@ -200,8 +200,12 @@ async function genChapterContent(chapter: number, input: {
   partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
   ch3Summary?: Record<string, unknown>;
-  timingScores?: Array<{ year: number; score: number; tone: string; label: string }>;
+  timingScores?: Array<{ year: number; score: number; tone: string; label: string; myGanSip?: string; myJiSip?: string; ptGanSip?: string; ptJiSip?: string; myDaeunGanSip?: string; myDaeunJiSip?: string; ptDaeunGanSip?: string; ptDaeunJiSip?: string }>;
   wealthScores?: { my: Array<{ year: number; score: number; tone: string; label: string }>; pt: Array<{ year: number; score: number; tone: string; label: string }> };
+  mySiju?: { gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string };
+  partnerSiju?: { gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string };
+  myProfile7?: { pillars: Array<{ pos: string; gan: string; ganEl: string; sipTop: string; ji: string; jiEl: string; sipBot: string }>; currentDaeun: { label: string; gz: string; sipTop: string; sipBot: string; yearStart: number } | null };
+  partnerProfile7?: { pillars: Array<{ pos: string; gan: string; ganEl: string; sipTop: string; ji: string; jiEl: string; sipBot: string }>; currentDaeun: { label: string; gz: string; sipTop: string; sipBot: string; yearStart: number } | null };
   reconcileScore?: number;
   reconcileEnablers?: Array<{ kind: string; label: string; meaning: string }>;
   reconcileBarriers?: Array<{ kind: string; label: string; meaning: string }>;
