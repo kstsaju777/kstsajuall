@@ -336,9 +336,16 @@ export function buildHealthChapterPrompt(
 
   const lengthWarning = (chapter === 1 || chapter === 2) ? `\n⚠️ [분량 최우선 원칙 — 절대 준수]\nparagraphs 배열의 각 항목은 반드시 7문장 이상, 300자 이상으로 서술하시오.\n짧은 단락(5문장 미만 또는 200자 미만)은 오류로 간주합니다.\n${chapter === 1 ? "다른 필드(constitutionType·constitutionTraits 등)는 간결하게 쓰고,\n오직 paragraphs와 sinStrengthHealthParagraphs에만 충분한 분량을 투자하시오.\n" : ""}` : "";
 
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${input.name}님은"  "${input.name}님이"  "${input.name}님을"  "${input.name}님과"  "${input.name}님에게"  "${input.name}님으로"  "${input.name}님의"  "${input.name}님"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+
   const user = `아래는 ${honorific}의 사주 명식입니다.
 
-${input.manseryeokText}
+${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 ${ilganNote}${ohaengCountNote}${yongsinNote}${healthFlowInject}${lengthWarning}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -383,9 +390,16 @@ export function buildHealthCh2ParagraphsPrompt(
     yongsinNote = `\n[확정 오행 — 반드시 그대로 사용]\n용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}${input.gyeokguk ? ` / 격국: ${input.gyeokguk}` : ""}\n`;
   }
 
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${input.name}님은"  "${input.name}님이"  "${input.name}님을"  "${input.name}님과"  "${input.name}님에게"  "${input.name}님으로"  "${input.name}님의"  "${input.name}님"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+
   const user = `아래는 ${honorific}의 사주 명식입니다.
 
-${input.manseryeokText}
+${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 ${ilganNote}${ohaengCountNote}${yongsinNote}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -447,9 +461,16 @@ export function buildHealthRemedyPrompt(
 
   const ilganNote = input.ilganChar ? `\n[일간 — 절대 변경 금지]\n일간: ${input.ilganChar} (${({ 갑:"목", 을:"목", 병:"화", 정:"화", 무:"토", 기:"토", 경:"금", 신:"금", 임:"수", 계:"수" }[input.ilganChar] ?? "?")} 오행)\n` : "";
 
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${input.name}님은"  "${input.name}님이"  "${input.name}님을"  "${input.name}님과"  "${input.name}님에게"  "${input.name}님으로"  "${input.name}님의"  "${input.name}님"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+
   const user = `아래는 ${honorific}의 사주 명식입니다.
 
-${input.manseryeokText}
+${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 ${ilganNote}${ohaengCountNote}${yongsinNote}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -586,11 +586,18 @@ export function buildJanyeoChapterPrompt(
     seunDaeunNote += `\n【중요】 ${phaseField} 5개의 yearStart/yearEnd는 2025~2034를 균등하게 나누시오. score·tone은 위 세운 십성을 근거로 산출하시오. desc 첫 문장은 반드시 "[yearStart]년 [간지독음]년과 [yearEnd]년 [간지독음]년은~" 형식으로 시작하시오. 한자 사용 금지.\n`;
   }
 
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+아이를 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${honor}은"  "${honor}이"  "${honor}을"  "${honor}과"  "${honor}에게"  "${honor}으로"  "${honor}의"  "${honor}"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+
   const user = `아래는 ${honor}의 사주 명식입니다.
 
 【호칭 규칙】 풀이 본문에서 이 아이를 지칭할 때는 반드시 "${honor}"라는 호칭을 사용하시오. "그", "그녀", "그대", "당신"은 절대 쓰지 마시오. 호칭이 반복되어 어색하면 "이 아이"로 대체하시오.
 
-${input.manseryeokText}
+${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}${abilityData}${ohaengCountNote}${seunDaeunNote}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

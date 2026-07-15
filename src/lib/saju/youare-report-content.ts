@@ -576,9 +576,16 @@ export function buildYouareChapterPrompt(
     yongsinNote = `\n[확정 오행 — 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}\n`;
   }
 
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+아이를 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${honor}은"  "${honor}이"  "${honor}을"  "${honor}과"  "${honor}에게"  "${honor}으로"  "${honor}의"  "${honor}"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+
   const user = `아래는 ${childLabel}의 사주 명식입니다.
 
-${input.manseryeokText}
+${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 ${graphData}${ohaengCountNote}${abilityData}${yongsinNote}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

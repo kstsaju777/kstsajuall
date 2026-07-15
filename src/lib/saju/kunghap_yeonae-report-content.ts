@@ -501,6 +501,15 @@ export function buildYeonaeKunghapChapterPrompt(
   const { name, gender, manseryeokText, partnerName, partnerGender, partnerManseryeokText, ohaengSummary, partnerOhaengSummary, ilgan, partnerIlgan, mySipseong, partnerSipseong, hapChungScore, bestTimingPeriod, worstTimingPeriod, worstTimingText, timingContext, prevChapterSummary, ilganFull, partnerIlganFull, myPillars, partnerPillars, daeunSeunContext, marriageScore, marriageLabel } = input;
   const firstName = name.slice(1) || name;
   const partnerFirstName = partnerName.slice(1) || partnerName;
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${firstName}님은"  "${firstName}님이"  "${firstName}님을"  "${firstName}님과"  "${firstName}님에게"  "${firstName}님으로"  "${firstName}님의"  "${firstName}님"
+
+상대방을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${partnerFirstName}님은"  "${partnerFirstName}님이"  "${partnerFirstName}님을"  "${partnerFirstName}님과"  "${partnerFirstName}님에게"  "${partnerFirstName}님으로"  "${partnerFirstName}님의"  "${partnerFirstName}님"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
   const myGenderLabel = gender === "female" ? "여성" : "남성";
   const partnerGenderLabel = partnerGender === "female" ? "여성" : "남성";
 
@@ -608,6 +617,8 @@ ${ilganRelLine ? `\n${ilganRelLine}\n` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━
 아래 두 사람의 명식을 바탕으로 연애궁합 결과지 풀이를 JSON으로 출력하시오.
+
+${honorificBlock}
 
 【 본인 】
 이름: ${firstName}님 (${myGenderLabel})

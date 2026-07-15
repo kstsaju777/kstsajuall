@@ -7640,7 +7640,7 @@ function ReportPreviewInner() {
 
             {/* 결혼 가능성 점수 게이지 */}
             <section className="px-6 pt-2 pb-2">
-              <Heading>두사람의 결혼궁합 점수</Heading>
+              <Heading>두 사람의 결혼궁합 점수</Heading>
               <p className="text-[13px] leading-[1.85] mb-0" style={{ color: INK_SOFT, fontFamily: SERIF }}>사주 원국의 구조와 오행의 상생·상극, 천간·지지의 합충(合沖)을 종합하여 두 사람의 결혼 인연을 수치로 나타낸 것이오.</p>
             </section>
             <MarriageScoreGauge

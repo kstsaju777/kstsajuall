@@ -1059,9 +1059,16 @@ export function buildYeonaeSajuChapterPrompt(
     }
   }
 
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${baseName}님은"  "${baseName}님이"  "${baseName}님을"  "${baseName}님과"  "${baseName}님에게"  "${baseName}님으로"  "${baseName}님의"  "${baseName}님"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+
   const user = `아래는 ${honor}의 사주 명식입니다.
 
-${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.manseryeokText}
+${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

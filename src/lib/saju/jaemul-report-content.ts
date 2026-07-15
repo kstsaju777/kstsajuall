@@ -677,6 +677,13 @@ export function buildJaemulChapterPrompt(
       groupRows.join("\n") + "\n";
   }
 
+  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
+의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
+  "${firstName}님은"  "${firstName}님이"  "${firstName}님을"  "${firstName}님과"  "${firstName}님에게"  "${firstName}님으로"  "${firstName}님의"  "${firstName}님"
+
+⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+
   const user = `아래는 ${honor}의 사주 명식입니다.
 ${pillarSipseong}
 ${deungTable}
@@ -684,7 +691,7 @@ ${ohaengTable}
 ${siksangJaeFlow}
 ${jaemulScoreBlock}
 ${wealthScoreBlock}
-${input.manseryeokText}
+${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
