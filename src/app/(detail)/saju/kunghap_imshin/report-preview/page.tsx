@@ -2571,7 +2571,7 @@ function ParentStyleCard({ data, color, pale }: {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
@@ -2638,7 +2638,7 @@ function PregnancyScoreCard({ score, tier, label, paragraphs }: {
       <p className="text-center text-[14px] font-black pb-2" style={{ color: arcColor, fontFamily: SERIF }}>{label}</p>
       <div className="px-5 pb-5 pt-2" style={{ borderTop: `1px solid ${IM3_COLOR}15` }}>
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13.5px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+          <p key={i} className="text-[13.5px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
         ))}
       </div>
     </div>
@@ -2686,7 +2686,7 @@ function PregnancyReasonCard({ intro, callout, reasons, paragraphs }: {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
@@ -5906,7 +5906,7 @@ function ReportPreviewInner() {
               <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>&#8220;{myWonguk.intro as string}&#8221;</p>
             )}
             {((myWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+              <p key={i} className="mx-5 mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
             ))}
 
             {/* ── 기질 카드 ── */}
@@ -6027,7 +6027,7 @@ function ReportPreviewInner() {
               <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>&#8220;{partnerWonguk.intro as string}&#8221;</p>
             )}
             {((partnerWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+              <p key={i} className="mx-5 mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
             ))}
 
             {/* ── 배우자 기질 카드 ── */}
