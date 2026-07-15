@@ -51,6 +51,34 @@ async function genChapterContent(chapter: number, input: {
   partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
 }) {
+  const fullName   = input.name        ?? "";
+  const ptFullName = input.partnerName ?? "";
+  const myLabel    = fullName.length  > 1 ? fullName.slice(1)   : fullName;
+  const ptLabel    = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
+
+  const fixNames = (s: string): string => {
+    let r = s;
+    r = r.replace(/__MY__/g, `${myLabel}님`).replace(/__PT__/g, `${ptLabel}`);
+    for (const label of [myLabel, ptLabel]) {
+      if (label.length < 2) continue;
+      const stem = label.slice(0, -1);
+      const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      r = r
+        .replace(new RegExp(`${esc}는님`, "g"), `${label}님`)
+        .replace(new RegExp(`${esc}가님`, "g"), `${label}님`);
+    }
+    return r;
+  };
+
+  const fixKoreanWords = (val: unknown): unknown => {
+    if (typeof val === "string") return fixNames(val
+      .replace(/(?<![가-힣])가[를름]/g, "가을")
+      .replace(/(?<![가-힣])여[를름]/g, "여름"));
+    if (Array.isArray(val)) return val.map(fixKoreanWords);
+    if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fixKoreanWords(v)]));
+    return val;
+  };
+
   const { system, user } = buildJanyeoKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -67,6 +95,7 @@ async function genChapterContent(chapter: number, input: {
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else { continue; }
       }
+      obj = fixKoreanWords(obj) as Record<string, unknown>;
       if (isJanyeoKunghapChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[kunghap_janyeo] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
     } catch (e) {
