@@ -51,6 +51,37 @@ async function genChapterContent(chapter: number, input: {
   partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
 }) {
+  const fullName   = input.name        ?? "";
+  const ptFullName = input.partnerName ?? "";
+  const myLabel    = fullName.length  > 1 ? fullName.slice(1)   : fullName;
+  const ptLabel    = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
+
+  const fixNames = (s: string): string => {
+    let r = s;
+    r = r.replace(/__MY__/g, `${myLabel}님`).replace(/__PT__/g, `${ptLabel}님`);
+    for (const label of [myLabel, ptLabel]) {
+      if (label.length < 2) continue;
+      const stem = label.slice(0, -1);
+      const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      r = r
+        .replace(new RegExp(`${esc}는님`, "g"), `${label}님`)
+        .replace(new RegExp(`${esc}가님`, "g"), `${label}님`)
+        .replace(new RegExp(`${esc}는(?!님)`, "g"), `${label}님은`)
+        .replace(new RegExp(`${esc}가(?!님)`, "g"), `${label}님이`)
+        .replace(new RegExp(`${esc}를(?!님)`, "g"), `${label}님을`);
+    }
+    return r;
+  };
+
+  const fixKoreanWords = (val: unknown): unknown => {
+    if (typeof val === "string") return fixNames(val
+      .replace(/(?<![가-힣])가[를름]/g, "가을")
+      .replace(/(?<![가-힣])여[를름]/g, "여름"));
+    if (Array.isArray(val)) return val.map(fixKoreanWords);
+    if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fixKoreanWords(v)]));
+    return val;
+  };
+
   const { system, user } = buildBanryeoKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -59,7 +90,7 @@ async function genChapterContent(chapter: number, input: {
       meta = { provider: llm.provider, model: llm.model };
       let obj: Record<string, unknown>;
       try {
-        obj = parseContentJson(llm.text);
+        obj = fixKoreanWords(parseContentJson(llm.text)) as Record<string, unknown>;
       } catch (parseErr) {
         console.error(`[kunghap_banryeo] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         if (chapter === 12) {

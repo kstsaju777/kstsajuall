@@ -2560,7 +2560,7 @@ function PetStyleCard({ data }: { data: Record<string, unknown> | null }) {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
@@ -2736,7 +2736,7 @@ function PetPersonalityCard({ data, petName }: { data: Record<string, unknown> |
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
       {!paragraphs.length && !personalityType && (
         <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>{petName}의 성격 분석이 준비 중이오.</p>
@@ -2870,7 +2870,7 @@ function BondReasonCard({ data }: { data: Record<string, unknown> | null }) {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
@@ -2940,7 +2940,7 @@ function ViewDetailBr4({ data, color, pale }: { data: Record<string, unknown> | 
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
@@ -5925,7 +5925,7 @@ function ReportPreviewInner() {
               )}
               <div className="px-5">
                 {wongukParas.map((p, i) => (
-                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
                 ))}
               </div>
             </section>
@@ -6014,7 +6014,7 @@ function ReportPreviewInner() {
               )}
               <div className="px-5">
                 {petWongukParas.map((p, i) => (
-                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
                 ))}
               </div>
             </section>
@@ -6102,7 +6102,7 @@ function ReportPreviewInner() {
             {scoreParas.length > 0 && (
               <div className="px-5 pb-2">
                 {scoreParas.map((p, i) => (
-                  <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
                 ))}
               </div>
             )}
