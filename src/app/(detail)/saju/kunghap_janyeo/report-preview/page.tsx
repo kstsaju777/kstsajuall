@@ -2518,14 +2518,15 @@ function ParentStyleCard({ data, color, pale }: { data: Record<string, unknown> 
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
 }
 
 // 오행 균형 도넛 + 바차트 — 자녀용 (JN2_COLOR 팔레트)
-function OhaengDonutPartner({ view }: { view: MyeongsikView | null }) {
+function OhaengDonutPartner({ view, gender }: { view: MyeongsikView | null; gender?: string }) {
+  const CHILD_GENDER_COLOR = gender === "female" ? "#c0306a" : "#3f63c4";
   const counts: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
   if (view) {
     for (const p of view.pillars) {
@@ -2541,7 +2542,7 @@ function OhaengDonutPartner({ view }: { view: MyeongsikView | null }) {
   const R = 54, C = 2 * Math.PI * R;
   let acc = 0;
   return (
-    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${dom.color}10 0%, ${WHITE} 55%)`, border: `1.5px solid ${JN2_COLOR}25` }}>
+    <div className="mx-5 my-2 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(135deg, ${CHILD_GENDER_COLOR}12 0%, ${dom.color}08 50%, ${WHITE} 100%)`, border: `1.5px solid ${CHILD_GENDER_COLOR}30` }}>
       <div className="px-5 pt-5 pb-3 flex items-center justify-between">
         <div>
           <h3 className="text-[16px] font-black" style={{ color: INK }}>오행 균형</h3>
@@ -2636,7 +2637,7 @@ function ChildPersonalityCard({ data, color, pale, childName }: {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
@@ -2698,7 +2699,7 @@ function BondScoreCard({ score, label, tier, paragraphs }: {
       {paragraphs.length > 0 && (
         <div className="px-5 pt-2 pb-5 space-y-3">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
       )}
@@ -2740,7 +2741,7 @@ function BondTypeCard({ data, myName, childName }: {
         )}
         <div className="space-y-3">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
       </div>
@@ -2786,7 +2787,7 @@ function BondReasonCard({ data, color, pale }: {
         )}
         <div className="space-y-3">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
       </div>
@@ -2867,7 +2868,7 @@ function ViewCard({ data, fromName, toName, color, pale }: {
         )}
         <div className="space-y-3">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
       </div>
@@ -3028,7 +3029,7 @@ function ChildHabitsCard({ items, childName }: {
             <span className="text-[24px] shrink-0 mt-0.5">{item.icon}</span>
             <div>
               <p className="text-[13.5px] font-bold mb-1.5" style={{ color: JN5_COLOR }}>{item.title}</p>
-              <p className="text-[13px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+              <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
             </div>
           </div>
         ))}
@@ -3064,7 +3065,7 @@ function ChildNeedsCard({ items, tip, childName }: {
               <span className="text-[22px] shrink-0">{item.icon}</span>
               <div>
                 <p className="text-[13px] font-bold mb-1" style={{ color: JN5_COLOR }}>{item.title}</p>
-                <p className="text-[13px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
               </div>
             </div>
           ))}
@@ -3134,7 +3135,7 @@ function HapListCard({ items, myName, childName }: {
               {item.effect && (
                 <p className="text-[12px] font-bold mb-2" style={{ color: JN6_HAP }}>✦ {item.effect}</p>
               )}
-              <p className="text-[13px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+              <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
             </div>
           </div>
         ))}
@@ -3194,7 +3195,7 @@ function ChungListCard({ items, myName, childName }: {
               {item.impact && (
                 <p className="text-[12px] font-bold mb-2" style={{ color: JN6_CHUNG }}>⚡ {item.impact}</p>
               )}
-              <p className="text-[13px] leading-[1.8] mb-3" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+              <p className="text-[13px] leading-[1.8] mb-3" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
               {/* 극복 조언 */}
               {item.resolve && (
                 <div className="px-3 py-2.5 rounded-lg" style={{ background: `${JN6_HAP}0c`, borderLeft: `2px solid ${JN6_HAP}` }}>
@@ -3264,7 +3265,7 @@ function HapChungScoreCard({ score, label, tier, note, paragraphs }: {
           </div>
         )}
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+          <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
         ))}
       </div>
     </div>
@@ -3320,7 +3321,7 @@ function LifePatternCard({ data, myName, childName }: {
         )}
         <div className="space-y-3 mb-4">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
         {/* 함께하는 장면 스냅샷 */}
@@ -3374,7 +3375,7 @@ function DailyRhythmCard({ items, childName }: {
             </div>
             {/* 설명 + tip */}
             <div className="px-4 pt-0 pb-3.5" style={{ background: `${JN7_WARM}06` }}>
-              <p className="text-[13px] leading-[1.8] mb-2" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+              <p className="text-[13px] leading-[1.8] mb-2" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
               {item.tip && (
                 <p className="text-[12px] leading-[1.7] pl-3" style={{ color: JN7_WARM, borderLeft: `2px solid ${JN7_WARM}50`, fontStyle: "italic" }}>
                   {item.tip}
@@ -3423,7 +3424,7 @@ function LivingTipsCard({ items, closing, myName, childName }: {
                   <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0" style={{ background: JN7_TIP, color: "#fff" }}>{i + 1}</span>
                   <p className="text-[13px] font-bold" style={{ color: JN7_TIP }}>{item.title}</p>
                 </div>
-                <p className="text-[13px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
               </div>
             </div>
           ))}
@@ -3488,7 +3489,7 @@ function EducationStyleCard({ data, childName }: {
         )}
         <div className="space-y-3 mb-5">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
         {/* Do / Don't 두 컬럼 */}
@@ -3560,7 +3561,7 @@ function LearningTraitsCard({ items, childName }: {
             </div>
             {/* 설명 */}
             <div className="px-4 py-3" style={{ background: `${JN8_GOLD}07` }}>
-              <p className="text-[13px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+              <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
             </div>
           </div>
         ))}
@@ -3600,7 +3601,7 @@ function EducationTipsCard({ items, caution, childName }: {
                   <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0" style={{ background: JN8_COLOR, color: "#fff" }}>{i + 1}</span>
                   <p className="text-[13px] font-bold" style={{ color: JN8_COLOR }}>{item.title}</p>
                 </div>
-                <p className="text-[13px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
               </div>
             </div>
           ))}
@@ -3692,7 +3693,7 @@ function CrisisScoreCard({ score, level, label, crisisWindows, paragraphs }: {
       {paragraphs.length > 0 && (
         <div className="px-5 pb-5 space-y-3">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
       )}
@@ -3753,7 +3754,7 @@ function CrisisReasonCard({ data, myName, childName }: {
         )}
         <div className="space-y-3">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
       </div>
@@ -3795,7 +3796,7 @@ function CrisisTipsCard({ items, healing, myName, childName }: {
                   <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0" style={{ background: JN9_CALM, color: "#fff" }}>{i + 1}</span>
                   <p className="text-[13px] font-bold" style={{ color: JN9_CALM }}>{item.title}</p>
                 </div>
-                <p className="text-[13px] leading-[1.8]" style={{ color: INK, wordBreak: "keep-all" }}>{item.desc}</p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{item.desc}</p>
               </div>
             </div>
           ))}
@@ -6395,7 +6396,7 @@ function ReportPreviewInner() {
               <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{myWonguk.intro as string}"</p>
             )}
             {((myWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+              <p key={i} className="mx-5 mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
             ))}
 
             {/* 기질 카드 */}
@@ -6493,7 +6494,7 @@ function ReportPreviewInner() {
               <Heading>{childName}의 오행 분포</Heading>
               <P>목·화·토·금·수 다섯 기운이 {childName}의 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 아이의 기질과 성격, 그리고 부모와의 관계 방향을 결정하오.</P>
             </section>
-            <OhaengDonutPartner view={report?.partnerView ?? null} />
+            <OhaengDonutPartner view={report?.partnerView ?? null} gender={report?.partnerGender} />
 
             {/* 자녀 원국 풀이 */}
             <section className="px-6 pt-6 pb-2">
@@ -6509,7 +6510,7 @@ function ReportPreviewInner() {
               <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{childWonguk.intro as string}"</p>
             )}
             {((childWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+              <p key={i} className="mx-5 mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
             ))}
 
             {/* 자녀 기질 카드 */}
