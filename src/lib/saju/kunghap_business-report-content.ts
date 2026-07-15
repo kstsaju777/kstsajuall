@@ -63,15 +63,17 @@ export function buildBusinessKunghapChapterPrompt(
   const partnerGenderLabel = input.partnerGender === "male" ? "남성" : "여성";
   const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
   const partnerLabel = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
-  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
-의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
-  "${myLabel}님은"  "${myLabel}님이"  "${myLabel}님을"  "${myLabel}님과"  "${myLabel}님에게"  "${myLabel}님으로"  "${myLabel}님의"  "${myLabel}님"
+  const honorificBlock = `\n\n[호칭 토큰 규칙 — 반드시 준수]
+풀이 본문에서 이름을 쓸 때 아래 토큰만 사용하오. 절대 실제 이름을 직접 쓰지 마오.
+  의뢰인 → __MY__ 사용
+  상대방 → __PT__ 사용
 
-상대방을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
-  "${partnerLabel}님은"  "${partnerLabel}님이"  "${partnerLabel}님을"  "${partnerLabel}님과"  "${partnerLabel}님에게"  "${partnerLabel}님으로"  "${partnerLabel}님의"  "${partnerLabel}님"
+토큰 뒤 조사는 반드시 아래 중 하나만 사용하오 (님 받침 ㅁ 기준):
+  __MY__은  __MY__이  __MY__을  __MY__과  __MY__에게  __MY__으로  __MY__의  __MY__이라
+  __PT__은  __PT__이  __PT__을  __PT__과  __PT__에게  __PT__으로  __PT__의  __PT__이라
 
-⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
-⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+예시: "__MY__은 사업에서 재능을 발휘할 것이오. __PT__과의 비즈니스는..."
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.`;
   const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）\n${input.manseryeokText}\n\n파트너 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
@@ -90,8 +92,8 @@ export function buildBusinessKunghapChapterPrompt(
   };
 
   const questions: Record<number, string> = {
-    1: `${input.name}님의 사주 원국과 비즈니스 스타일을 풀어주시오. myWonguk: 원국 요약, myNature: 기질(키워드3개+설명), myBusinessStyle: 비즈니스 성향`,
-    2: `${input.partnerName}님의 사주 원국과 비즈니스 스타일을 풀어주시오. partnerWonguk: 원국 요약, partnerNature: 기질(키워드3개+설명), partnerBusinessStyle: 비즈니스 성향`,
+    1: `__MY__의 사주 원국과 비즈니스 스타일을 풀어주시오. myWonguk: 원국 요약, myNature: 기질(키워드3개+설명), myBusinessStyle: 비즈니스 성향`,
+    2: `__PT__의 사주 원국과 비즈니스 스타일을 풀어주시오. partnerWonguk: 원국 요약, partnerNature: 기질(키워드3개+설명), partnerBusinessStyle: 비즈니스 성향`,
     3: `두 사람의 비즈니스 궁합 점수(0-100)와 근거를 풀어주시오. compatScore: 점수+라벨+설명단락, compatReason: 근거 상세`,
     4: `두 사람이 협력할 때의 강점과 약점, 균형 방법을 풀어주시오. strengthList: 강점(3개), weaknessList: 약점(3개), balanceDesc: 균형 조언`,
     5: `두 사람의 역할 분담과 역할 충돌 가능성을 풀어주시오. rolesDesc: 역할 분담 방향, roleConflict: 충돌 요소(2-3개), roleTips: 조언(3-4개)`,
@@ -101,7 +103,7 @@ export function buildBusinessKunghapChapterPrompt(
     9: `두 사람의 비즈니스 위기 가능성과 대처 방법을 풀어주시오. crisisScore: 위기 점수(0-100)+설명, crisisReason: 위기 원인, crisisTips: 대처 조언(3-4개)`,
     10: `두 사람에게 찾아올 비즈니스 호기(好機)를 풀어주시오. goodTimeFlow: 좋은 시기 흐름(3-5개), goodTimeItems: 이유(2-3개), timingAdvice: 한 줄 조언`,
     11: `두 사람의 비즈니스 미래 흐름과 비전을 풀어주시오. futureFlow: 미래 단계(3-5개), businessVision: 비전(2-3단락), finalAdvice: 마지막 한 줄`,
-    12: `${input.name}님과 ${input.partnerName}님에게 홍연의 따뜻한 편지를 써주시오(3-5단락, ~이오/~하오 말투)`,
+    12: `__MY__과 __PT__에게 홍연의 따뜻한 편지를 써주시오(3-5단락, ~이오/~하오 말투)`,
   };
 
   const user = `${intro}${honorificBlock}\n\n비즈니스궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
