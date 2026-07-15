@@ -297,6 +297,37 @@ async function generateChapter(body: unknown) {
     return NextResponse.json({ sections });
   }
 
+  const fullName   = stored?.name        ?? "";
+  const ptFullName = stored?.partnerName ?? "";
+  const myLabel    = fullName.length  > 1 ? fullName.slice(1)   : fullName;
+  const ptLabel    = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
+
+  const fixNames = (s: string): string => {
+    let r = s;
+    r = r.replace(/__MY__/g, `${myLabel}님`).replace(/__PT__/g, `${ptLabel}님`);
+    for (const label of [myLabel, ptLabel]) {
+      if (label.length < 2) continue;
+      const stem = label.slice(0, -1);
+      const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      r = r
+        .replace(new RegExp(`${esc}는님`, "g"), `${label}님`)
+        .replace(new RegExp(`${esc}가님`, "g"), `${label}님`)
+        .replace(new RegExp(`${esc}는(?!님)`, "g"), `${label}님은`)
+        .replace(new RegExp(`${esc}가(?!님)`, "g"), `${label}님이`)
+        .replace(new RegExp(`${esc}를(?!님)`, "g"), `${label}님을`);
+    }
+    return r;
+  };
+
+  const fixKoreanWords = (val: unknown): unknown => {
+    if (typeof val === "string") return fixNames(val
+      .replace(/(?<![가-힣])가[를름]/g, "가을")
+      .replace(/(?<![가-힣])여[를름]/g, "여름"));
+    if (Array.isArray(val)) return val.map(fixKoreanWords);
+    if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fixKoreanWords(v)]));
+    return val;
+  };
+
   let manseryeokText: string | undefined = stored?.manseryeokText;
   if (!manseryeokText) {
     if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다." }, { status: 503 });
@@ -307,7 +338,7 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
-    const { obj } = await genChapterContent(chapter, {
+    const { obj: rawObj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
@@ -316,6 +347,7 @@ async function generateChapter(body: unknown) {
       partnerManseryeokText: stored?.partnerManseryeokText ?? manseryeokText,
       birthYear: birthYear || undefined,
     });
+    const obj = fixKoreanWords(rawObj) as typeof rawObj;
 
     return NextResponse.json({ sections: obj });
   } catch (err) {

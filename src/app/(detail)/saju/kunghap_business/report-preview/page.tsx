@@ -2301,7 +2301,7 @@ function GanjiRelation({ view }: { view: MyeongsikView | null }) {
 // 강조 문단 (끝에 하이라이트 문장)
 function HiP({ children, hi }: { children: React.ReactNode; hi: string }) {
   return (
-    <p className="text-[14.5px] leading-[1.95] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>
+    <p className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>
       {children}{" "}
       <span style={{ color: INK_SOFT }}>{hi}</span>
     </p>
@@ -3909,7 +3909,7 @@ function GuiinP({ children }: { children: string }) {
 function P({ children }: { children: React.ReactNode }) {
   const content = typeof children === "string" ? boldYears(children) : children;
   return (
-    <p className="text-[14.5px] leading-[1.95] mb-4 whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>
+    <p className="text-[13.5px] leading-[1.85] mb-4 whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>
       {content}
     </p>
   );
@@ -3919,7 +3919,7 @@ function P({ children }: { children: React.ReactNode }) {
 function Callout({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-xl px-4 py-3.5 mb-4" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-      <p className="text-[14px] leading-[1.85]" style={{ color: INK, fontFamily: SERIF }}>
+      <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
         {children}
       </p>
     </div>
