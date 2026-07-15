@@ -71,15 +71,17 @@ export function buildJaehweKunghapChapterPrompt(
   const partnerGenderLabel = input.partnerGender === "male" ? "남성" : "여성";
   const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
   const partnerLabel = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
-  const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
-의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
-  "${myLabel}님은"  "${myLabel}님이"  "${myLabel}님을"  "${myLabel}님과"  "${myLabel}님에게"  "${myLabel}님으로"  "${myLabel}님의"  "${myLabel}님"
+  const honorificBlock = `\n\n[호칭 토큰 규칙 — 반드시 준수]
+풀이 본문에서 이름을 쓸 때 아래 토큰만 사용하오. 절대 실제 이름을 직접 쓰지 마오.
+  의뢰인 → __MY__ 사용
+  상대방 → __PT__ 사용
 
-상대방을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
-  "${partnerLabel}님은"  "${partnerLabel}님이"  "${partnerLabel}님을"  "${partnerLabel}님과"  "${partnerLabel}님에게"  "${partnerLabel}님으로"  "${partnerLabel}님의"  "${partnerLabel}님"
+토큰 뒤 조사는 반드시 아래 중 하나만 사용하오 (님 받침 ㅁ 기준):
+  __MY__은  __MY__이  __MY__을  __MY__과  __MY__에게  __MY__으로  __MY__의  __MY__이라
+  __PT__은  __PT__이  __PT__을  __PT__과  __PT__에게  __PT__으로  __PT__의  __PT__이라
 
-⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
-⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
+예시: "__MY__은 재회 후 새로운 인연을 만날 것이오. __PT__과의 관계는..."
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.`;
   const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）\n${input.manseryeokText}\n\n상대방 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
