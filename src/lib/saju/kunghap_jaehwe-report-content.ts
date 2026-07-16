@@ -97,8 +97,8 @@ export function buildJaehweKunghapChapterPrompt(
   },
   "myNature": {
     "keywords": ["기질키워드1", "기질키워드2", "기질키워드3"],
-    "strengthDesc": "이 기질이 관계에서 발휘하는 긍정적 면 1~2문장",
-    "shadowDesc": "헤어진 후·갈등 상황에서 드러나는 그림자 1~2문장"
+    "strengthDesc": "이 기질이 관계에서 발휘하는 긍정적 면 3~4문장",
+    "shadowDesc": "헤어진 후·갈등 상황에서 드러나는 그림자 3~4문장"
   },
   "myRelationStyle": {
     "styleType": "관계 스타일 유형명 (예: '헌신형', '거리두기형', '열정형')",
@@ -123,8 +123,8 @@ export function buildJaehweKunghapChapterPrompt(
   },
   "partnerNature": {
     "keywords": ["기질키워드1", "기질키워드2", "기질키워드3"],
-    "strengthDesc": "이 기질이 관계에서 발휘하는 긍정적 면 1~2문장",
-    "shadowDesc": "헤어진 후·갈등 상황에서 드러나는 그림자 1~2문장"
+    "strengthDesc": "이 기질이 관계에서 발휘하는 긍정적 면 3~4문장",
+    "shadowDesc": "헤어진 후·갈등 상황에서 드러나는 그림자 3~4문장"
   },
   "partnerRelationStyle": {
     "styleType": "관계 스타일 유형명 (예: '헌신형', '거리두기형', '열정형')",
@@ -455,8 +455,8 @@ export function buildJaehweKunghapChapterPrompt(
 
 [myNature 섹션 — 나의 기질]
 - keywords: 본인 기질을 대표하는 단어 3~4개. 연애·관계 맥락 반영.
-- strengthDesc: 이 기질이 관계에서 발휘하는 긍정적 면 1~2문장.
-- shadowDesc: 헤어진 후·갈등 상황에서 이 기질이 드러내는 그림자 1~2문장. 재회를 어렵게 만드는 요인 포함.
+- strengthDesc: 이 기질이 관계에서 발휘하는 긍정적 면 — 상대방과의 관계에서 빛나는 강점. 3~4문장.
+- shadowDesc: 헤어진 후·갈등 상황에서 이 기질이 드러내는 그림자 — 재회를 어렵게 만드는 구체적인 성향과 상황. 3~4문장.
 
 [myRelationStyle 섹션 — 나의 관계 스타일]
 - styleType: 이 사람의 연애·관계 방식을 대표하는 유형명 2~4자 (예: "헌신형", "거리두기형", "열정형", "안정 추구형").
@@ -480,8 +480,8 @@ export function buildJaehweKunghapChapterPrompt(
 
 [partnerNature 섹션 — 상대방 기질]
 - keywords: 상대방 기질을 대표하는 단어 3~4개. 연애·관계 맥락 반영.
-- strengthDesc: 이 기질이 관계에서 발휘하는 긍정적 면 1~2문장.
-- shadowDesc: 헤어진 후·갈등 상황에서 이 기질이 드러내는 그림자 1~2문장. 재회를 어렵게 만드는 요인 포함.
+- strengthDesc: 이 기질이 관계에서 발휘하는 긍정적 면 — 상대방과의 관계에서 빛나는 강점. 3~4문장.
+- shadowDesc: 헤어진 후·갈등 상황에서 이 기질이 드러내는 그림자 — 재회를 어렵게 만드는 구체적인 성향과 상황. 3~4문장.
 
 [partnerRelationStyle 섹션 — 상대방 관계 스타일]
 - styleType: 상대방의 연애·관계 방식을 대표하는 유형명 2~4자 (예: "헌신형", "거리두기형", "열정형", "안정 추구형").
