@@ -6960,7 +6960,7 @@ function ReportPreviewInner() {
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>{name.slice(1) || name}님 사주의 빛과 그림자</h2>
               </div>
               <ENatureCard data={myNature} color={ECH1_COLOR} label="나를 대표하는 기질" />
             </section>
@@ -7099,7 +7099,7 @@ function ReportPreviewInner() {
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>{(partnerName.length > 1 ? partnerName.slice(1) : partnerName)}님 사주의 빛과 그림자</h2>
               </div>
               <ENatureCard data={partnerNature} color={ECH2_COLOR} label="" />
             </section>
