@@ -6541,7 +6541,7 @@ function ReportPreviewInner() {
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_6/kunghap_jaehwe_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
@@ -6594,7 +6594,7 @@ function ReportPreviewInner() {
             </section>
             <HapChungSummaryCard data={overallScore} />
 
-            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
+            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
             <Quote>{`"합·충을 알았으니,\n두 사람, 왜 헤어졌는지\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
@@ -6619,7 +6619,7 @@ function ReportPreviewInner() {
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"이별은 우연이 아니오.\n두 사람의 사주가\n왜 갈라서게 했는지 풀어보겠소."`}</Quote>
@@ -6653,7 +6653,7 @@ function ReportPreviewInner() {
             </section>
             <HealingPathCard data={hd} />
 
-            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
             <Quote>{`"이별의 원인을 알았으니,\n나의 마음을\n들여다보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
@@ -6681,7 +6681,7 @@ function ReportPreviewInner() {
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_5/kunghap_jaehwe_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"헤어진 후에도\n그 사람이 마음에 남아있다면\n사주가 그 이유를 말해주겠소."`}</Quote>
@@ -6715,7 +6715,7 @@ function ReportPreviewInner() {
             </section>
             <MyHeartDescCard data={myHeartDesc} myName={myName} partnerName={partnerName} />
 
-            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
+            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
             <Quote>{`"나의 마음을 알았으니,\n상대의 마음도\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
@@ -6743,7 +6743,7 @@ function ReportPreviewInner() {
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_5/kunghap_jaehwe_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_6/kunghap_jaehwe_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"재회를 원할 때\n가장 궁금한 것은\n상대의 마음이오."`}</Quote>
@@ -6777,7 +6777,7 @@ function ReportPreviewInner() {
             </section>
             <PartnerHeartDescCard data={partnerHeartDesc} myName={myName} partnerName={partnerName} />
 
-            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
+            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
             <Quote>{`"두 사람의 마음을 알았으니,\n헤어진 후 감정의 흐름을\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
