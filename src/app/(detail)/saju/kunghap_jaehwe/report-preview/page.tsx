@@ -2595,7 +2595,7 @@ function RelationStyleCard({ data, color, pale }: { data: Record<string, unknown
       )}
       {/* 풀이 단락 — 이 스타일이 재회를 앞두고 어떻게 작동하는지 상세 분석 */}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
       ))}
     </div>
   );
