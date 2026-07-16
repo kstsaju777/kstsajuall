@@ -6370,7 +6370,7 @@ function ReportPreviewInner() {
             {/* ── 나의 관계 스타일 ── */}
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>나의 관계 스타일</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>나는 관계에서 어떤 사람인가?</h2>
               </div>
               <RelationStyleCard data={myRelationStyle} color={JCH1_COLOR} pale={JCH1_PALE} />
             </section>
