@@ -460,6 +460,9 @@ function CheckoutContent() {
   const partnerTime     = searchParams.get("partnerTime")     ?? "시간 모름";
   const partnerCalendar = searchParams.get("partnerCalendar") ?? "양력";
   const partnerGender   = searchParams.get("partnerGender")   ?? "";
+  const breakupReason   = searchParams.get("breakupReason")   ?? "";
+  const whoEnded        = searchParams.get("whoEnded")        ?? "";
+  const breakupDate     = searchParams.get("breakupDate")     ?? "";
 
   const saju        = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
   const partnerSaju = useMemo(() => calcSaju(partnerDate, partnerTime, partnerCalendar), [partnerDate, partnerTime, partnerCalendar]);
@@ -485,8 +488,8 @@ function CheckoutContent() {
     const partnerTimeUnknown = !partnerBirthTime;
     const partnerCalApi = partnerCalendar === "음력" ? "lunar" : "solar";
     const partnerGenderApi: "male" | "female" = partnerGender === "여자" || partnerGender === "여성" || partnerGender === "female" ? "female" : "male";
-    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [], phone: phone || undefined, partnerName, partnerBirthDate, partnerBirthTime, partnerTimeUnknown, partnerGender: partnerGenderApi, partnerCalendar: partnerCalApi };
-  }, [name, date, time, calendar, gender, email, phone, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender]);
+    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [], phone: phone || undefined, partnerName, partnerBirthDate, partnerBirthTime, partnerTimeUnknown, partnerGender: partnerGenderApi, partnerCalendar: partnerCalApi, breakupReason: breakupReason || undefined, whoEnded: whoEnded || undefined, breakupDate: breakupDate || undefined };
+  }, [name, date, time, calendar, gender, email, phone, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, breakupReason, whoEnded, breakupDate]);
 
   useEffect(() => {
     if (orderCreating.current) return;

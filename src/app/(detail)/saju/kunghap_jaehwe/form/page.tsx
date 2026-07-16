@@ -946,9 +946,10 @@ function StepEmail({ onPrev, onNext, initial, initialPhone }: { onPrev: () => vo
 }
 
 // ─── Step 7: 로딩 ─────────────────────────────────────────────────────────────
-function StepLoading({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern, phone }: {
+function StepLoading({ name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern, phone, breakupReason, whoEnded, breakupDate }: {
   name: string; date: string; time: string; calendar: string; gender?: string; email: string;
   partnerName?: string; partnerDate?: string; partnerTime?: string; partnerCalendar?: string; partnerGender?: string; concern?: string; phone: string;
+  breakupReason?: string; whoEnded?: string; breakupDate?: string;
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
@@ -982,6 +983,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
       name, date, time, calendar, gender: gender ?? "", email, concern: concern ?? "", phone,
       partnerName: partnerName ?? "", partnerDate: partnerDate ?? "", partnerTime: partnerTime ?? "",
       partnerCalendar: partnerCalendar ?? "", partnerGender: partnerGender ?? "",
+      breakupReason: breakupReason ?? "", whoEnded: whoEnded ?? "", breakupDate: breakupDate ?? "",
     });
     router.push(`/saju/kunghap_jaehwe/checkout?${params.toString()}`);
   };
@@ -1063,6 +1065,7 @@ export default function JaehweFormPage() {
           partnerName={form.partnerName ?? ""} partnerDate={form.partnerDate ?? ""} partnerTime={form.partnerTime ?? "시간 모름"}
           partnerCalendar={form.partnerCalendar ?? "양력"} partnerGender={form.partnerGender ?? ""}
           phone={form.phone ?? ""}
+          breakupReason={form.breakupReason ?? ""} whoEnded={form.whoEnded ?? ""} breakupDate={form.breakupDate ?? ""}
         />
       )}
     </>

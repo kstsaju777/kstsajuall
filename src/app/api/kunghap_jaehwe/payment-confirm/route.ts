@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
   try {
     const partnerDataRaw = (input.concerns as string[] | null)?.[0] ?? "{}";
     const partnerData = JSON.parse(partnerDataRaw);
-    const { partnerName: pName, partnerBirthDate, partnerBirthTime, partnerGender: pGenderRaw, partnerCalendar: pCalendar } = partnerData;
+    const { partnerName: pName, partnerBirthDate, partnerBirthTime, partnerGender: pGenderRaw, partnerCalendar: pCalendar, breakupReason, whoEnded, breakupDate } = partnerData;
 
     const pad = (n: string | number) => String(n).padStart(2, "0");
     const [y, m, d] = String(input.birth_date).split("-");
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     const { data: result, error: resultErr } = await service.from("saju_results").insert({
       order_id: order.id,
-      myeongsik: { view, name: input.name ?? "", birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName: pName ?? "", partnerBirth, partnerGender: pg } as never,
+      myeongsik: { view, name: input.name ?? "", birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName: pName ?? "", partnerBirth, partnerGender: pg, breakupReason: breakupReason || undefined, whoEnded: whoEnded || undefined, breakupDate: breakupDate || undefined } as never,
       interpretation_md: JSON.stringify({}),
       llm_provider: llmMeta.provider,
       llm_model: llmMeta.model,

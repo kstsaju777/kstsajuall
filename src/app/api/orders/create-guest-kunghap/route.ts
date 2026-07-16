@@ -20,6 +20,9 @@ const bodySchema = z.object({
   partnerTimeUnknown: z.boolean().optional(),
   partnerGender: z.enum(["male", "female"]).optional(),
   partnerCalendar: z.enum(["solar", "lunar"]).optional(),
+  breakupReason: z.string().max(100).optional(),
+  whoEnded: z.string().max(20).optional(),
+  breakupDate: z.string().max(50).optional(),
 });
 
 function toHHMM(raw: string | null | undefined): string | null {
@@ -81,6 +84,9 @@ export async function POST(request: NextRequest) {
     partnerTimeUnknown: body.partnerTimeUnknown ?? false,
     partnerGender: body.partnerGender ?? "male",
     partnerCalendar: body.partnerCalendar ?? "solar",
+    breakupReason: body.breakupReason ?? "",
+    whoEnded: body.whoEnded ?? "",
+    breakupDate: body.breakupDate ?? "",
   });
   const concerns = [...(body.concerns ?? []), partnerData];
 

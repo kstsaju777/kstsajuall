@@ -17,6 +17,8 @@ import {
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
 import { buildJaehweKunghapChapterPrompt, isJaehweKunghapChapterReady, JAEHWE_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_jaehwe-report-content";
+import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
+import { monthGanji } from "@/lib/saju/ganji-calc";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -42,14 +44,88 @@ const createSchema = z.object({
   partnerTime: z.string().optional().default(""),
   partnerCalendar: z.string().optional().default("양력"),
   partnerGender: z.string().optional().default(""),
+  breakupReason: z.string().optional().default(""),
+  whoEnded: z.string().optional().default(""),
+  breakupDate: z.string().optional().default(""),
 });
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
+// ── 재회 시기 에너지 점수 계산 (월운 기반, 12개월) ──
+const KOR_MONTHS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+
+function sipseongReunionWeight(sip: string, gender: "male" | "female"): number {
+  if (gender === "male") {
+    if (sip === "정재") return 20;
+    if (sip === "편재") return 12;
+    if (sip === "정관") return 8;
+    if (sip === "편관") return 5;
+    if (sip === "식신") return 6;
+    if (sip === "상관") return 8;
+    if (sip === "정인" || sip === "편인") return 4;
+    if (sip === "비견" || sip === "겁재") return -10;
+  } else {
+    if (sip === "정관") return 20;
+    if (sip === "편관") return 12;
+    if (sip === "정재") return 8;
+    if (sip === "편재") return 5;
+    if (sip === "식신") return 6;
+    if (sip === "상관") return 8;
+    if (sip === "정인" || sip === "편인") return 4;
+    if (sip === "비견" || sip === "겁재") return -10;
+  }
+  return 0;
+}
+
+function calcMonthlyReunionScores(
+  myIlgan: string, ptIlgan: string,
+  myGender: "male" | "female", ptGender: "male" | "female",
+  startYear: number, startMonth: number
+): Array<{ year: number; month: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }> {
+  const results = [];
+  for (let i = 0; i < 12; i++) {
+    const totalMonth = startMonth + i;
+    const y = startYear + Math.floor((totalMonth - 1) / 12);
+    const m = ((totalMonth - 1) % 12) + 1;
+    const gz = monthGanji(y, m);
+    const gan = gz[0] ?? "";
+    const ji  = gz[1] ?? "";
+    const myGanSip = gan ? sipseongOfStem(myIlgan, gan)  : "";
+    const myJiSip  = ji  ? sipseongOfBranch(myIlgan, ji) : "";
+    const ptGanSip = gan ? sipseongOfStem(ptIlgan, gan)  : "";
+    const ptJiSip  = ji  ? sipseongOfBranch(ptIlgan, ji) : "";
+
+    let myScore = 50 + sipseongReunionWeight(myGanSip, myGender) + sipseongReunionWeight(myJiSip, myGender);
+    let ptScore = 50 + sipseongReunionWeight(ptGanSip, ptGender) + sipseongReunionWeight(ptJiSip, ptGender);
+    myScore = Math.min(100, Math.max(0, myScore));
+    ptScore = Math.min(100, Math.max(0, ptScore));
+
+    let combined = (myScore + ptScore) / 2;
+    if (myScore >= 65 && ptScore >= 65) combined += 8;
+    if (myScore <= 45 || ptScore <= 45) combined -= 5;
+
+    const score = Math.min(100, Math.max(5, Math.round(combined)));
+    const tone  = score >= 80 ? "best" : score >= 65 ? "good" : score >= 50 ? "normal" : "caution";
+    const label = `${y}년 ${KOR_MONTHS[m - 1]}`;
+
+    results.push({ year: y, month: m, score, tone, label, myGanSip, myJiSip, ptGanSip, ptJiSip });
+  }
+  return results;
+}
+
 // ── AI 이름 오류 수정: __MY__ / __PT__ 토큰 치환 ──
-function makeFixNames(myLabel: string, ptLabel: string) {
+function makeFixNames(myLabel: string, ptLabel: string, myFullName?: string, ptFullName?: string) {
   return function fixNames(s: string): string {
     let r = s;
     r = r.replace(/__MY__/g, `${myLabel}님`).replace(/__PT__/g, `${ptLabel}님`);
+    // 풀네임(성+이름)을 이름만으로 치환 (AI가 토큰 대신 직접 이름을 쓴 경우)
+    if (myFullName && myFullName !== myLabel) {
+      const esc = myFullName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      r = r.replace(new RegExp(`${esc}님`, "g"), `${myLabel}님`).replace(new RegExp(esc, "g"), myLabel);
+    }
+    if (ptFullName && ptFullName !== ptLabel) {
+      const esc = ptFullName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      r = r.replace(new RegExp(`${esc}님`, "g"), `${ptLabel}님`).replace(new RegExp(esc, "g"), ptLabel);
+    }
     for (const label of [myLabel, ptLabel]) {
       if (label.length < 2) continue;
       const stem = label.slice(0, -1);
@@ -71,8 +147,13 @@ function makeFixKoreanWords(fixNames: (s: string) => string): (val: unknown) => 
       .replace(/(?<![가-힣])가[를름]/g, "가을")
       .replace(/(?<![가-힣])여[를름]/g, "여름")
       // AI가 합성어 내 '과'를 조사규칙 혼용으로 '와'로 잘못 쓰는 경우 교정
-      .replace(/효와/g, "효과")   // 효과적 → 효와적
-      .replace(/교와/g, "교과"));
+      .replace(/효와/g, "효과")
+      .replace(/교와/g, "교과")
+      // 님(받침 ㅁ) 뒤 잘못된 조사 교정
+      .replace(/님는/g, "님은")
+      .replace(/님가/g, "님이")
+      .replace(/님를/g, "님을")
+      .replace(/님와/g, "님과"));
     if (Array.isArray(val)) return val.map(fix);
     if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fix(v)]));
     return val;
@@ -85,10 +166,14 @@ async function genChapterContent(chapter: number, input: {
   name: string; gender: "male" | "female"; manseryeokText: string;
   partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
+  breakupReason?: string; whoEnded?: string; breakupDate?: string;
+  overallScore?: Record<string, unknown>;
+  calculatedReconnectScore?: number;
+  timingScores?: Array<{ year: number; month: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }>;
 }) {
   const myLabel    = input.name.length        > 1 ? input.name.slice(1)        : input.name;
   const ptLabel    = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
-  const fixNames   = makeFixNames(myLabel, ptLabel);
+  const fixNames   = makeFixNames(myLabel, ptLabel, input.name, input.partnerName);
   const fixKoreanWords = makeFixKoreanWords(fixNames);
 
   const { system, user } = buildJaehweKunghapChapterPrompt(chapter, input);
@@ -180,7 +265,7 @@ async function createReport(body: unknown) {
   }
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender } = parsed.data;
+  const { name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, breakupReason, whoEnded, breakupDate } = parsed.data;
 
   const pad = (n: number | string) => String(n).padStart(2, "0");
 
@@ -271,7 +356,7 @@ async function createReport(body: unknown) {
       calendar: cal === "solar" ? "solar" : "lunar", concerns: [],
     });
 
-    const storedMyeongsik = { view, name, birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg };
+    const storedMyeongsik = { view, name, birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg, breakupReason: breakupReason || undefined, whoEnded: whoEnded || undefined, breakupDate: breakupDate || undefined };
 
     const { data: result, error: resultErr } = await service
       .from("saju_results")
@@ -348,6 +433,44 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+    const overallScore = (content?.overallScore as Record<string, unknown> | undefined) ?? undefined;
+
+    // 제7장: 재회 가능성 점수를 수식으로 사전 계산해서 AI에게 고정값으로 전달
+    let calculatedReconnectScore: number | undefined;
+    if (chapter === 7) {
+      const hapScore   = Math.max(0, Math.min(100, (overallScore?.score as number | undefined) ?? 50));
+      const myScore    = Math.max(0, Math.min(100, ((content?.myLonging as Record<string, unknown>)?.score as number | undefined) ?? 50));
+      const ptScore    = Math.max(0, Math.min(100, ((content?.partnerLonging as Record<string, unknown>)?.score as number | undefined) ?? 50));
+      const whoEnded   = stored?.whoEnded ?? "";
+      // 가중 합산: 합충 35% + 신청자 미련 25% + 상대방 미련 30% = 90%
+      let base = hapScore * 0.50 + myScore * 0.20 + ptScore * 0.30;
+      // whoEnded 보정 10%: 상대가 찼으면 -8, 신청자가 찼으면 +5, 합의면 중립
+      const myName = stored?.name ?? "";
+      const ptName = stored?.partnerName ?? "";
+      if (whoEnded && whoEnded === ptName) base -= 8;
+      else if (whoEnded && whoEnded === myName) base += 5;
+      calculatedReconnectScore = Math.round(Math.max(5, Math.min(95, base)));
+    }
+
+    // 제8장: 월별 재회 에너지 점수 서버 계산 (신청월 기준 12개월)
+    let timingScores: Array<{ year: number; month: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }> | undefined;
+    if (chapter === 8) {
+      const ilgan = stored?.view?.ilgan as string | undefined;
+      const partnerIlgan = stored?.partnerView?.ilgan as string | undefined;
+      if (ilgan && partnerIlgan) {
+        const myGender: "male" | "female" = stored?.gender === "female" ? "female" : "male";
+        const ptGender: "male" | "female" = stored?.partnerGender === "female" ? "female" : "male";
+        const ilganChar = ilgan[0];
+        const ptIlganChar = partnerIlgan[0];
+        const now = new Date();
+        timingScores = calcMonthlyReunionScores(
+          ilganChar, ptIlganChar,
+          myGender, ptGender,
+          now.getFullYear(), now.getMonth() + 1
+        );
+      }
+    }
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -356,6 +479,12 @@ async function generateChapter(body: unknown) {
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
       partnerManseryeokText: stored?.partnerManseryeokText ?? "",
       birthYear: birthYear || undefined,
+      breakupReason: stored?.breakupReason || undefined,
+      whoEnded: stored?.whoEnded || undefined,
+      breakupDate: stored?.breakupDate || undefined,
+      overallScore,
+      calculatedReconnectScore,
+      timingScores,
     });
 
     return NextResponse.json({ sections: obj });
@@ -389,6 +518,9 @@ export async function GET(request: NextRequest) {
     partnerBirth: stored?.partnerBirth ?? null,
     partnerGender: stored?.partnerGender ?? "",
     partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null,
+    breakupReason: stored?.breakupReason ?? null,
+    whoEnded: stored?.whoEnded ?? null,
+    breakupDate: stored?.breakupDate ?? null,
   });
 }
 
