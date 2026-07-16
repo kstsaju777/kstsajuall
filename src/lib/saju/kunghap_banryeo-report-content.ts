@@ -1,4 +1,4 @@
-// =====================================================
+﻿// =====================================================
 // 반려궁합 결과지 — 장별 콘텐츠 타입 / 프롬프트 빌더
 // =====================================================
 
@@ -79,7 +79,8 @@ export function buildBanryeoKunghapChapterPrompt(
   __PT__은  __PT__이  __PT__을  __PT__과  __PT__에게  __PT__으로  __PT__의  __PT__이라
 
 예시: "__MY__은 반려자와의 인연이 깊소. __PT__과의 결합은..."
-⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.`;
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.
+⚠️ 한국어 합성어의 글자를 절대 변형하지 마오. 조사 규칙(와/과, 이/가)을 단어 내부에 적용하면 절대 안 되오. 예: "효과적"을 "효와적"으로, "결과"를 "결와"로 쓰지 마오. 단어 자체의 철자는 그대로 유지하오.`;
   const intro = `보호자 정보:\n이름: ${input.name}（${genderLabel}）\n${input.manseryeokText}\n\n반려동물 정보:\n이름: ${input.partnerName}（${petGenderLabel}）\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
@@ -528,3 +529,4 @@ ${schemas[chapter]}`;
 
   return { system: SYSTEM, user };
 }
+

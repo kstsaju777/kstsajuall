@@ -1,4 +1,4 @@
-// =====================================================
+﻿// =====================================================
 // 임신궁합 결과지 — 장별 콘텐츠 타입 / 프롬프트 빌더
 // =====================================================
 
@@ -83,7 +83,8 @@ export function buildImshinKunghapChapterPrompt(
   __PT__은  __PT__이  __PT__을  __PT__과  __PT__에게  __PT__으로  __PT__의  __PT__이라
 
 예시: "__MY__은 임신 가능성이 높은 시기를 맞이하고 있소. __PT__과의 합은..."
-⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.`;
+⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.
+⚠️ 한국어 합성어의 글자를 절대 변형하지 마오. 조사 규칙(와/과, 이/가)을 단어 내부에 적용하면 절대 안 되오. 예: "효과적"을 "효와적"으로, "결과"를 "결와"로 쓰지 마오. 단어 자체의 철자는 그대로 유지하오.`;
   const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）\n${input.manseryeokText}\n\n배우자 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
@@ -700,3 +701,4 @@ export function buildImshinKunghapChapterPrompt(
   const user = `${intro}${honorificBlock}\n\n임신궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
   return { system: SYSTEM, user };
 }
+
