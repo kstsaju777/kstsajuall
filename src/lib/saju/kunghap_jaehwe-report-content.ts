@@ -10,10 +10,10 @@ export { SYSTEM };
 export const JAEHWE_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   1:  ["myWonguk", "myNature", "myRelationStyle"],
   2:  ["partnerWonguk", "partnerNature", "partnerRelationStyle"],
-  3:  ["breakupCause", "breakupPattern", "healingDesc"],
-  4:  ["myLonging", "myHeartDesc", "myEmotions"],
-  5:  ["partnerLonging", "partnerHeartDesc", "partnerEmotions"],
-  6:  ["hapList", "chungList", "overallScore"],
+  3:  ["hapList", "chungList", "overallScore"],
+  4:  ["breakupCause", "breakupPattern", "healingDesc"],
+  5:  ["myLonging", "myHeartDesc", "myEmotions"],
+  6:  ["partnerLonging", "partnerHeartDesc", "partnerEmotions"],
   7:  ["emotionFlow", "trustRebuild", "reconcileGuide"],
   8:  ["reconnectScore", "reconnectSigns", "reunionVerdict"],
   9:  ["reunionScene", "reunionDynamic", "reunionOutlook"],
@@ -138,7 +138,7 @@ export function buildJaehweKunghapChapterPrompt(
     ]
   }
 }`,
-    3: `{
+    4: `{
   "breakupCause": {
     "items": [
       {
@@ -171,7 +171,7 @@ export function buildJaehweKunghapChapterPrompt(
     ]
   }
 }`,
-    4: `{
+    5: `{
   "myLonging": {
     "score": 68,
     "label": "미련·그리움 상태를 한 줄로 요약",
@@ -201,7 +201,7 @@ export function buildJaehweKunghapChapterPrompt(
     ]
   }
 }`,
-    5: `{
+    6: `{
   "partnerLonging": {
     "score": 62,
     "label": "상대방 미련·그리움 상태를 한 줄로 요약",
@@ -231,7 +231,7 @@ export function buildJaehweKunghapChapterPrompt(
     ]
   }
 }`,
-    6: `{
+    3: `{
   "hapList": {
     "items": [
       {
@@ -494,7 +494,7 @@ export function buildJaehweKunghapChapterPrompt(
   ③재회를 원한다면 상대방의 이 스타일을 어떻게 이해하고 대응해야 하는가 — 사주 오행에 기반한 구체적인 접근 조언. 내가 상대방에게 재회를 시도할 때 알아야 할 핵심. 6~8문장.
 
 홍연 말투(~이오/~하오/~겠소) 유지.`,
-    3: `[제3장 — 두 사람, 왜 헤어졌는가] ${input.name}님과 ${input.partnerName}님의 이별 원인·패턴·치유 방향을 사주로 풀어주시오.
+    4: `[제4장 — 두 사람, 왜 헤어졌는가] ${input.name}님과 ${input.partnerName}님의 이별 원인·패턴·치유 방향을 사주로 풀어주시오.
 
 [breakupCause 섹션 — 이별의 근본 원인]
 - items: 2~3개. 각 항목:
@@ -523,7 +523,7 @@ export function buildJaehweKunghapChapterPrompt(
   ②치유 이후 두 사람이 맞이할 수 있는 변화와 재회 가능성. 홍연의 응원 포함. 4~5문장.
 
 홍연 말투(~이오/~하오/~겠소) 유지.`,
-    4: `[제4장 — 나는 이 사람을 아직 어떻게 보는가] ${input.name}님이 ${input.partnerName}님을 바라보는 내면의 시각과 감정을 사주로 풀어주시오.
+    5: `[제5장 — 나는 이 사람을 아직 어떻게 보는가] ${input.name}님이 ${input.partnerName}님을 바라보는 내면의 시각과 감정을 사주로 풀어주시오.
 
 [myLonging 섹션 — 미련·그리움 지수]
 - score: 0~100. ${input.name}님 사주에서 ${input.partnerName}님에 대한 미련·집착 경향의 강도. 일간 오행, 정재·편재·정관·편관 강약, 도화살 유무 등을 종합.
@@ -549,7 +549,7 @@ export function buildJaehweKunghapChapterPrompt(
   ③지금 이 마음이 재회에 주는 의미 — 이 감정이 재회의 동력이 될 수 있는지, 아니면 걸림돌인지. 홍연의 따뜻한 조언. 4~5문장.
 
 홍연 말투(~이오/~하오/~겠소) 유지.`,
-    5: `[제5장 — 상대는 나를 아직 어떻게 보는가] ${input.partnerName}님이 ${input.name}님을 바라보는 내면의 시각과 감정을 사주로 풀어주시오.
+    6: `[제6장 — 상대는 나를 아직 어떻게 보는가] ${input.partnerName}님이 ${input.name}님을 바라보는 내면의 시각과 감정을 사주로 풀어주시오.
 
 [partnerLonging 섹션 — 상대방 미련·그리움 지수]
 - score: 0~100. ${input.partnerName}님 사주에서 ${input.name}님에 대한 미련·집착 경향의 강도. 상대방의 일간 오행, 관성·재성 강약, 도화살 유무, 공망 등을 종합.
@@ -575,7 +575,7 @@ export function buildJaehweKunghapChapterPrompt(
   ③재회 접근 가이드 — 이 마음 구조를 알았다면 어떤 방식·타이밍·언어로 접근해야 하는지. 상대방이 움직이는 조건. 홍연의 따뜻한 조언. 4~5문장.
 
 홍연 말투(~이오/~하오/~겠소) 유지.`,
-    6: `[제6장 — 궁합의 핵심: 합과 충] ${input.name}님과 ${input.partnerName}님의 사주 합·충 관계를 재회 맥락에서 풀어주시오.
+    3: `[제3장 — 궁합의 핵심: 합과 충] ${input.name}님과 ${input.partnerName}님의 사주 합·충 관계를 재회 맥락에서 풀어주시오.
 
 [hapList 섹션 — 합(合) 목록]
 - items: 두 사주 사이의 합. 없으면 빈 배열. 있는 것만 정확히 기재.

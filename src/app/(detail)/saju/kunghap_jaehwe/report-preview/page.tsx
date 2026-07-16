@@ -4014,10 +4014,10 @@ const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 재회궁합에 대하여",
   "1":  "제1장 · 나는 어떤 사람인가?",
   "2":  "제2장 · 상대는 어떤 사람인가?",
-  "3":  "제3장 · 두 사람, 왜 헤어졌는가",
-  "4":  "제4장 · 나는 이 사람을 아직 어떻게 보는가",
-  "5":  "제5장 · 상대는 나를 아직 어떻게 보는가",
-  "6":  "제6장 · 궁합의 핵심: 합과 충",
+  "3":  "제3장 · 궁합의 핵심: 합과 충",
+  "4":  "제4장 · 두 사람, 왜 헤어졌는가",
+  "5":  "제5장 · 나는 이 사람을 아직 어떻게 보는가",
+  "6":  "제6장 · 상대는 나를 아직 어떻게 보는가",
   "7":  "제7장 · 헤어진 후 두 사람의 감정 흐름",
   "8":  "제8장 · 재회할 수 있는 인연인가",
   "9":  "제9장 · 재회한다면 우린 어떻게 될까",
@@ -5210,10 +5210,10 @@ const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "재회궁합에 대하여",                          no: "0" },
   { disp: "제1장",  chip: "나의원국", title: "나는 어떤 사람인가?",                       no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "상대는 어떤 사람인가?",                     no: "2" },
-  { disp: "제3장",  chip: "이별원인", title: "두 사람, 왜 헤어졌는가",                    no: "3" },
-  { disp: "제4장",  chip: "내시각",  title: "나는 이 사람을 아직 어떻게 보는가",          no: "4" },
-  { disp: "제5장",  chip: "상대시각", title: "상대는 나를 아직 어떻게 보는가",            no: "5" },
-  { disp: "제6장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                      no: "6" },
+  { disp: "제3장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                      no: "3" },
+  { disp: "제4장",  chip: "이별원인", title: "두 사람, 왜 헤어졌는가",                    no: "4" },
+  { disp: "제5장",  chip: "내시각",  title: "나는 이 사람을 아직 어떻게 보는가",          no: "5" },
+  { disp: "제6장",  chip: "상대시각", title: "상대는 나를 아직 어떻게 보는가",            no: "6" },
   { disp: "제7장",  chip: "감정흐름", title: "헤어진 후 두 사람의 감정 흐름",             no: "7" },
   { disp: "제8장",  chip: "재회가능", title: "재회할 수 있는 인연인가",                   no: "8" },
   { disp: "제9장",  chip: "변화",    title: "재회한다면 우린 어떻게 될까",               no: "9" },
@@ -6522,191 +6522,8 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제3장 · 재회 가능성 ═══════════ */}
+      {/* ═══════════ 제3장 · 합·충 ═══════════ */}
       {ch === "3" && (() => {
-        const myName      = name || "나";
-        const partnerName = report?.partnerName || "상대방";
-        const bc = (jc.breakupCause   as Record<string, unknown> | undefined) ?? null;
-        const bp = (jc.breakupPattern as Record<string, unknown> | undefined) ?? null;
-        const hd = (jc.healingDesc    as Record<string, unknown> | undefined) ?? null;
-        const causeItems = (bc?.items as Array<Record<string, unknown>> | undefined) ?? [];
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 이별 원인</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 왜 헤어졌는가</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"이별은 우연이 아니오.\n두 사람의 사주가\n왜 갈라서게 했는지 풀어보겠소."`}</Quote>
-
-            {/* 이별의 근본 원인 */}
-            <section className="px-6 pt-2 pb-2">
-              <Heading>이별의 근본 원인</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                사주는 이별을 운명이라 하지 않소. 두 사람의 오행·합충이 빚어낸 구조적 원인을 들여다보겠소.
-              </p>
-            </section>
-            {causeItems.map((item, i) => (
-              <BreakupCauseCard key={i} item={item} index={i} />
-            ))}
-
-            {/* 반복되는 이별 패턴 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>반복되는 이별 패턴</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                한 번의 이별이 아닌, {myName}님과 {partnerName}님이 왜 이런 방식으로 헤어지게 됐는지 — 그 구조를 사주로 풀어보겠소.
-              </p>
-            </section>
-            <BreakupPatternCard data={bp} />
-
-            {/* 치유와 회복의 경로 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>치유와 회복의 경로</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                이별의 상처를 치유하지 않고 재회한다면, 같은 이별을 반복하게 되오. 두 사람 각각, 그리고 함께 걸어야 할 치유의 길을 안내하겠소.
-              </p>
-            </section>
-            <HealingPathCard data={hd} />
-
-            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-            <Quote>{`"이별의 원인을 알았으니,\n재회의 가능성을\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="3" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제4장 · 재회 가능성 ═══════════ */}
-      {ch === "4" && (() => {
-        const myName      = name || "나";
-        const partnerName = report?.partnerName || "상대방";
-        const myLonging    = (jc.myLonging   as Record<string, unknown> | undefined) ?? null;
-        const myHeartDesc  = (jc.myHeartDesc as Record<string, unknown> | undefined) ?? null;
-        const myEmotions   = (jc.myEmotions  as Record<string, unknown> | undefined) ?? null;
-        const emotionItems = (myEmotions?.items as Array<Record<string, unknown>> | undefined) ?? [];
-        const longingScore = (myLonging?.score as number | undefined) ?? 65;
-        const longingLabel = (myLonging?.label as string | undefined) ?? "";
-        const longingPara  = (myLonging?.paragraphs as string[] | undefined) ?? [];
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 내 시각</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 이 사람을 아직 어떻게 보는가</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"헤어진 후에도\n그 사람이 마음에 남아있다면\n사주가 그 이유를 말해주겠소."`}</Quote>
-
-            {/* 미련·그리움 지수 */}
-            <section className="px-6 pt-2 pb-2">
-              <Heading>미련·그리움 지수</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                {myName}님의 사주가 말하는 {partnerName}에 대한 미련과 그리움의 깊이요. 이 수치는 단순한 감정이 아니라, 사주 오행이 만들어내는 마음의 구조이오.
-              </p>
-            </section>
-            <MyLongingGauge score={longingScore} label={longingLabel} paragraphs={longingPara} />
-
-            {/* 마음속에 남은 감정들 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>마음속에 남은 감정들</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                이별 후 한 가지 감정만 남는 사람은 없소. {myName}님의 마음에 뒤엉켜 있는 감정들을 사주로 하나씩 살펴보겠소.
-              </p>
-            </section>
-            {emotionItems.map((item, i) => (
-              <MyEmotionCard key={i} item={item} index={i} />
-            ))}
-
-            {/* 내 마음의 구조 — 종합 풀이 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>내 마음의 구조</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                사주는 {myName}님이 {partnerName}를 어떤 시각으로 바라보는지 — 그 마음의 근본 구조를 드러내오. 지금 느끼는 감정이 어디서 비롯된 것인지 풀어보겠소.
-              </p>
-            </section>
-            <MyHeartDescCard data={myHeartDesc} myName={myName} partnerName={partnerName} />
-
-            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-            <Quote>{`"나의 마음을 알았으니,\n상대의 마음도\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="4" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제5장 · 변화와 성장 ═══════════ */}
-      {ch === "5" && (() => {
-        const myName           = name || "나";
-        const partnerName      = report?.partnerName || "상대방";
-        const partnerLonging   = (jc.partnerLonging   as Record<string, unknown> | undefined) ?? null;
-        const partnerHeartDesc = (jc.partnerHeartDesc as Record<string, unknown> | undefined) ?? null;
-        const partnerEmotions  = (jc.partnerEmotions  as Record<string, unknown> | undefined) ?? null;
-        const emotionItems     = (partnerEmotions?.items as Array<Record<string, unknown>> | undefined) ?? [];
-        const longingScore     = (partnerLonging?.score as number | undefined) ?? 60;
-        const longingLabel     = (partnerLonging?.label as string | undefined) ?? "";
-        const longingPara      = (partnerLonging?.paragraphs as string[] | undefined) ?? [];
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 상대 시각</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대는 나를 아직 어떻게 보는가</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_5/kunghap_jaehwe_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"재회를 원할 때\n가장 궁금한 것은\n상대의 마음이오."`}</Quote>
-
-            {/* 상대방 미련·그리움 지수 */}
-            <section className="px-6 pt-2 pb-2">
-              <Heading>상대방 미련·그리움 지수</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                {partnerName}님의 사주가 말하는 {myName}님에 대한 미련과 그리움의 깊이요. 상대방 스스로도 설명하지 못하는 마음을 사주가 드러내주겠소.
-              </p>
-            </section>
-            <PartnerLongingGauge score={longingScore} label={longingLabel} paragraphs={longingPara} />
-
-            {/* 상대방 마음속 감정들 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>상대방 마음속 감정들</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                {partnerName}님의 마음에 {myName}님에 대한 어떤 감정들이 남아있는지 하나씩 살펴보겠소. 이 감정들을 알면 재회 접근 방식이 달라지오.
-              </p>
-            </section>
-            {emotionItems.map((item, i) => (
-              <PartnerEmotionCard key={i} item={item} index={i} />
-            ))}
-
-            {/* 상대방 마음의 구조 — 종합 풀이 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>상대방 마음의 구조</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                {partnerName}님이 {myName}님을 바라보는 시각의 근본 구조요. 사주가 드러내는 이 마음을 이해하는 것이 재회의 첫걸음이오.
-              </p>
-            </section>
-            <PartnerHeartDescCard data={partnerHeartDesc} myName={myName} partnerName={partnerName} />
-
-            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-            <Quote>{`"두 사람의 마음을 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="5" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제6장 · 합과 충 ═══════════ */}
-      {ch === "6" && (() => {
         const myName      = name || "나";
         const partnerName = report?.partnerName || "상대방";
         const hapList     = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
@@ -6719,7 +6536,7 @@ function ReportPreviewInner() {
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 합·충</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
@@ -6778,7 +6595,190 @@ function ReportPreviewInner() {
             <HapChungSummaryCard data={overallScore} />
 
             <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-            <Quote>{`"합·충을 알았으니,\n헤어진 후 두 사람의\n감정 흐름을 보겠소."`}</Quote>
+            <Quote>{`"합·충을 알았으니,\n두 사람, 왜 헤어졌는지\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제4장 · 이별 원인 ═══════════ */}
+      {ch === "4" && (() => {
+        const myName      = name || "나";
+        const partnerName = report?.partnerName || "상대방";
+        const bc = (jc.breakupCause   as Record<string, unknown> | undefined) ?? null;
+        const bp = (jc.breakupPattern as Record<string, unknown> | undefined) ?? null;
+        const hd = (jc.healingDesc    as Record<string, unknown> | undefined) ?? null;
+        const causeItems = (bc?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 이별 원인</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 왜 헤어졌는가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"이별은 우연이 아니오.\n두 사람의 사주가\n왜 갈라서게 했는지 풀어보겠소."`}</Quote>
+
+            {/* 이별의 근본 원인 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>이별의 근본 원인</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                사주는 이별을 운명이라 하지 않소. 두 사람의 오행·합충이 빚어낸 구조적 원인을 들여다보겠소.
+              </p>
+            </section>
+            {causeItems.map((item, i) => (
+              <BreakupCauseCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 반복되는 이별 패턴 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>반복되는 이별 패턴</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                한 번의 이별이 아닌, {myName}님과 {partnerName}님이 왜 이런 방식으로 헤어지게 됐는지 — 그 구조를 사주로 풀어보겠소.
+              </p>
+            </section>
+            <BreakupPatternCard data={bp} />
+
+            {/* 치유와 회복의 경로 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>치유와 회복의 경로</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                이별의 상처를 치유하지 않고 재회한다면, 같은 이별을 반복하게 되오. 두 사람 각각, 그리고 함께 걸어야 할 치유의 길을 안내하겠소.
+              </p>
+            </section>
+            <HealingPathCard data={hd} />
+
+            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
+            <Quote>{`"이별의 원인을 알았으니,\n나의 마음을\n들여다보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제5장 · 내 시각 ═══════════ */}
+      {ch === "5" && (() => {
+        const myName      = name || "나";
+        const partnerName = report?.partnerName || "상대방";
+        const myLonging    = (jc.myLonging   as Record<string, unknown> | undefined) ?? null;
+        const myHeartDesc  = (jc.myHeartDesc as Record<string, unknown> | undefined) ?? null;
+        const myEmotions   = (jc.myEmotions  as Record<string, unknown> | undefined) ?? null;
+        const emotionItems = (myEmotions?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        const longingScore = (myLonging?.score as number | undefined) ?? 65;
+        const longingLabel = (myLonging?.label as string | undefined) ?? "";
+        const longingPara  = (myLonging?.paragraphs as string[] | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 내 시각</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 이 사람을 아직 어떻게 보는가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"헤어진 후에도\n그 사람이 마음에 남아있다면\n사주가 그 이유를 말해주겠소."`}</Quote>
+
+            {/* 미련·그리움 지수 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>미련·그리움 지수</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                {myName}님의 사주가 말하는 {partnerName}에 대한 미련과 그리움의 깊이요. 이 수치는 단순한 감정이 아니라, 사주 오행이 만들어내는 마음의 구조이오.
+              </p>
+            </section>
+            <MyLongingGauge score={longingScore} label={longingLabel} paragraphs={longingPara} />
+
+            {/* 마음속에 남은 감정들 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>마음속에 남은 감정들</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                이별 후 한 가지 감정만 남는 사람은 없소. {myName}님의 마음에 뒤엉켜 있는 감정들을 사주로 하나씩 살펴보겠소.
+              </p>
+            </section>
+            {emotionItems.map((item, i) => (
+              <MyEmotionCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 내 마음의 구조 — 종합 풀이 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>내 마음의 구조</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                사주는 {myName}님이 {partnerName}를 어떤 시각으로 바라보는지 — 그 마음의 근본 구조를 드러내오. 지금 느끼는 감정이 어디서 비롯된 것인지 풀어보겠소.
+              </p>
+            </section>
+            <MyHeartDescCard data={myHeartDesc} myName={myName} partnerName={partnerName} />
+
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
+            <Quote>{`"나의 마음을 알았으니,\n상대의 마음도\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="5" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제6장 · 상대 시각 ═══════════ */}
+      {ch === "6" && (() => {
+        const myName           = name || "나";
+        const partnerName      = report?.partnerName || "상대방";
+        const partnerLonging   = (jc.partnerLonging   as Record<string, unknown> | undefined) ?? null;
+        const partnerHeartDesc = (jc.partnerHeartDesc as Record<string, unknown> | undefined) ?? null;
+        const partnerEmotions  = (jc.partnerEmotions  as Record<string, unknown> | undefined) ?? null;
+        const emotionItems     = (partnerEmotions?.items as Array<Record<string, unknown>> | undefined) ?? [];
+        const longingScore     = (partnerLonging?.score as number | undefined) ?? 60;
+        const longingLabel     = (partnerLonging?.label as string | undefined) ?? "";
+        const longingPara      = (partnerLonging?.paragraphs as string[] | undefined) ?? [];
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 상대 시각</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대는 나를 아직 어떻게 보는가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_5/kunghap_jaehwe_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"재회를 원할 때\n가장 궁금한 것은\n상대의 마음이오."`}</Quote>
+
+            {/* 상대방 미련·그리움 지수 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>상대방 미련·그리움 지수</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                {partnerName}님의 사주가 말하는 {myName}님에 대한 미련과 그리움의 깊이요. 상대방 스스로도 설명하지 못하는 마음을 사주가 드러내주겠소.
+              </p>
+            </section>
+            <PartnerLongingGauge score={longingScore} label={longingLabel} paragraphs={longingPara} />
+
+            {/* 상대방 마음속 감정들 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>상대방 마음속 감정들</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                {partnerName}님의 마음에 {myName}님에 대한 어떤 감정들이 남아있는지 하나씩 살펴보겠소. 이 감정들을 알면 재회 접근 방식이 달라지오.
+              </p>
+            </section>
+            {emotionItems.map((item, i) => (
+              <PartnerEmotionCard key={i} item={item} index={i} />
+            ))}
+
+            {/* 상대방 마음의 구조 — 종합 풀이 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>상대방 마음의 구조</Heading>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+                {partnerName}님이 {myName}님을 바라보는 시각의 근본 구조요. 사주가 드러내는 이 마음을 이해하는 것이 재회의 첫걸음이오.
+              </p>
+            </section>
+            <PartnerHeartDescCard data={partnerHeartDesc} myName={myName} partnerName={partnerName} />
+
+            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
+            <Quote>{`"두 사람의 마음을 알았으니,\n헤어진 후 감정의 흐름을\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
