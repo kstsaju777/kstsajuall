@@ -7148,7 +7148,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"이혼은 사주에도 흔적이 있소.\n두 사람의 사주가\n이혼으로 흐르는 인연인지\n솔직하게 살펴보겠소."`}</Quote>
+            <Quote>{`이혼은 사주에도 흔적이 있소.\n두 사람의 사주가\n이혼으로 흐르는 인연인지\n솔직하게 살펴보겠소.`}</Quote>
 
             {/* ① 이혼 가능성 점수 */}
             <section className="px-6 pt-2 pb-2">
