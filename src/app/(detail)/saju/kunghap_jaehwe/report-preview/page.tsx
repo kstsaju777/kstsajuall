@@ -6370,7 +6370,7 @@ function ReportPreviewInner() {
               <div className="px-5 mb-3">
                 <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
-              <JNatureCard data={myNature} color={JCH1_COLOR} label="나를 대표하는 기질" />
+              <JNatureCard data={myNature} color={JCH1_COLOR} label="" />
             </section>
 
             {/* ── 나의 관계 스타일 ── */}
