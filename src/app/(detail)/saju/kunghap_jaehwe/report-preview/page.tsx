@@ -6382,40 +6382,64 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
+      {/* ═══════════ 제2장 · 상대는 어떤 사람인가 ═══════════ */}
       {ch === "2" && (() => {
-        const partnerName        = report?.partnerName || "상대방";
-        const partnerWonguk      = (jc.partnerWonguk      as Record<string, unknown> | undefined) ?? null;
-        const partnerNature      = (jc.partnerNature      as Record<string, unknown> | undefined) ?? null;
+        const partnerName          = report?.partnerName || "상대방";
+        const pLabel               = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+        const partnerWonguk        = (jc.partnerWonguk        as Record<string, unknown> | undefined) ?? {};
+        const partnerNature        = (jc.partnerNature        as Record<string, unknown> | undefined) ?? null;
         const partnerRelationStyle = (jc.partnerRelationStyle as Record<string, unknown> | undefined) ?? null;
+        const wongukParas = (partnerWonguk.paragraphs as string[] | undefined) ?? [];
         return (
           <>
+            {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대는 어떤 사람인가?</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 300 }}>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_2/kunghap_jaehwe_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"이번엔 그 사람의 사주를 살펴보겠소.\n재회를 고민한다면, 상대가 어떤 기운의\n사람인지 먼저 아는 것이 중요하오."`}</Quote>
+            {/* ── 사주팔자 소개 텍스트 ── */}
+            <div className="px-8 py-12 text-center">
+              <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`이번에는 ${pLabel}님의\n사주를 펼쳐보겠소.`}
+              </p>
+            </div>
 
-            {/* 상대방 명식 표 */}
-            {report?.partnerView ? (
-              <section className="pb-2">
-                <div className="px-6"><Heading>{partnerName}의 명식</Heading></div>
-                <MyeongsikTable view={report.partnerView} name={partnerName} birth={report.partnerBirth ?? null} />
-              </section>
-            ) : (
-              <section className="px-6 pt-6 pb-4">
-                <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
-              </section>
-            )}
+            {/* ── 상대방 명식표 ── */}
+            <section className="pb-4">
+              {report?.partnerView ? (
+                <MyeongsikTable
+                  view={report.partnerView}
+                  name={partnerName}
+                  birth={report.partnerBirth ?? null}
+                  header={
+                    <div className="text-center">
+                      <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{pLabel}님의 사주팔자</p>
+                      {report.partnerBirth?.date && (
+                        <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                          {report.partnerBirth.date}{" "}
+                          {report.partnerBirth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                          {report.partnerGender === "female" ? "여자" : "남자"}
+                        </p>
+                      )}
+                    </div>
+                  }
+                />
+              ) : (
+                <p className="mx-6 text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
+              )}
+            </section>
 
+            {/* ── 명식 버튼 안내 ── */}
             {(() => {
-              const isFem = (report?.partnerGender) === "female" || (report?.partnerGender) === "여성" || (report?.partnerGender) === "여자";
+              const isFem = report?.partnerGender === "female" || report?.partnerGender === "여성" || report?.partnerGender === "여자";
               const color = isFem ? "pink" : "blue";
               const themes = {
                 blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
@@ -6432,13 +6456,17 @@ function ReportPreviewInner() {
                 </Quote>
               );
             })()}
+
+            {/* ── 구분선 ── */}
             <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
               <div style={{ width: 1, height: 40, background: "#ccc" }} />
             </div>
+
+            {/* ── AI 사주화 ── */}
             {report?.partnerSajuImageUrl && (
               <div>
                 <div className="px-6 text-center mb-3">
-                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${partnerName.slice(1) || partnerName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${pLabel}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
                 </div>
                 <div className="px-5">
                   <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
@@ -6451,42 +6479,42 @@ function ReportPreviewInner() {
                   </div>
                   <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
                     <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
-                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{partnerName.slice(1) || partnerName}님의 사주화</p>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{pLabel}님의 사주화</p>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* 상대방 오행 분포 */}
-            <section className="px-6 pt-12 pb-2">
-              <Heading>{partnerName}의 오행 분포</Heading>
-              <P>목·화·토·금·수 다섯 기운이 상대방의 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 그 사람이 관계를 맺고 유지하는 방식, 그리고 이별 후 감정을 처리하는 방향을 결정하오.</P>
+            {/* ── 타고난 기운의 뿌리 ── */}
+            <section className="pt-12 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+              </div>
+              <OhaengDonutPartner view={report?.partnerView ?? null} />
+              <div className="px-5 mt-4">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
+                ))}
+              </div>
             </section>
-            <OhaengDonutPartner view={report?.partnerView ?? null} />
 
-            {/* 상대방 원국 풀이 카드 */}
-            <section className="px-6 pt-6 pb-2">
-              <Heading>{partnerName}의 사주 풀이</Heading>
-              <P>일간(日干)을 중심으로 상대방의 오행 기운과 신강·신약의 흐름을 살펴보겠소. 이 풀이는 그 사람이 어떤 에너지로 관계에 임하는지, 이별 이후 어떤 심리적 흐름을 타는지를 이해하는 출발점이 되오.</P>
+            {/* ── 빛과 그림자 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>{pLabel}님 사주의 빛과 그림자</h2>
+              </div>
+              <JNatureCard data={partnerNature} color={JCH2_COLOR} label="" />
             </section>
-            <JWongukCard data={partnerWonguk} color={JCH2_COLOR} pale={JCH2_PALE} />
 
-            {/* 상대방 기질 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{partnerName}의 기질</Heading>
-              <P>상대방의 사주 원국에 깃든 본연의 성품이오. 이 기질이 평소 관계에서 어떻게 빛나는지, 그리고 헤어진 이후 어떤 그림자를 드리우는지 함께 살펴보겠소. 재회를 원한다면, 상대방의 기질을 먼저 이해해야 하오.</P>
+            {/* ── 상대는 관계에서 어떤 사람인가 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>상대는 관계에서 어떤 사람인가?</h2>
+              </div>
+              <RelationStyleCard data={partnerRelationStyle} color={JCH2_COLOR} pale={JCH2_PALE} />
             </section>
-            <JNatureCard data={partnerNature} color={JCH2_COLOR} label={`${partnerName}을(를) 대표하는 기질`} />
 
-            {/* 상대방 관계 스타일 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{partnerName}의 관계 스타일</Heading>
-              <P>사주가 보여주는 상대방의 연애·관계 방식이오. 그 사람이 어떻게 사랑을 표현하고, 갈등이 생겼을 때 어떻게 반응하며, 이별 후 어떤 방식으로 마음을 닫거나 여는지 — 이 스타일을 알아야 재회의 접근법도 달라지오.</P>
-            </section>
-            <RelationStyleCard data={partnerRelationStyle} color={JCH2_COLOR} pale={JCH2_PALE} />
-
-            <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
             <Quote>{`"두 사람의 원국을 보았으니,\n이제 두 사람이 왜 헤어졌는지\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
