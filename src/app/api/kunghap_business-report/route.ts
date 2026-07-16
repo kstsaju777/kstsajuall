@@ -322,7 +322,10 @@ async function generateChapter(body: unknown) {
   const fixKoreanWords = (val: unknown): unknown => {
     if (typeof val === "string") return fixNames(val
       .replace(/(?<![가-힣])가[를름]/g, "가을")
-      .replace(/(?<![가-힣])여[를름]/g, "여름"));
+      .replace(/(?<![가-힣])여[를름]/g, "여름")
+      // AI가 합성어 내 '과'를 조사규칙 혼용으로 '와'로 잘못 쓰는 경우 교정
+      .replace(/효와/g, "효과")   // 효과적 → 효와적
+      .replace(/교와/g, "교과"));
     if (Array.isArray(val)) return val.map(fixKoreanWords);
     if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fixKoreanWords(v)]));
     return val;
@@ -433,3 +436,4 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
   }
 }
+
