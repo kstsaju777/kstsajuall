@@ -21,6 +21,7 @@ import { isJaehweKunghapChapterReady, JAEHWE_KUNGHAP_CHAPTER_SECTIONS } from "@/
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
+import { calcCrossRelations as calcCrossRelationsShared } from "@/lib/saju/kunghap-cross-relations";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
 const CREAM = "#fdf8f4";
@@ -51,6 +52,9 @@ const JCH5_COLOR = "#1a3d6a"; const JCH5_PALE  = "#eef4fb";
 const JCH5_WARM  = "#1a5a4a"; const JCH5_WARM_P = "#eef7f3";
 const JCH6_COLOR = "#2a5a2a"; const JCH6_PALE  = "#eef7ee";
 const JCH6_CHUN  = "#7a4010"; const JCH6_CHUN_P = "#fdf3ee";
+const HAP_COLOR   = "#2d6a4f";
+const CHUNG_COLOR = "#b05020";
+const CH6_COLOR   = "#1a5c8a";
 const JCH7_COLOR = "#1a4a5a"; const JCH7_PALE  = "#eef6f8";
 const JCH7_MY    = "#3d2a6a"; const JCH7_PT    = "#1a3d6a";
 const JCH8_COLOR = "#7a5a10"; const JCH8_PALE  = "#fdf8ee";
@@ -2365,6 +2369,332 @@ function RelationBadges({ view }: { view: MyeongsikView | null }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ── 두 사주 교차 합·충 상세 설명 (결혼궁합 ch3 공유) ──────────────────────────
+const CROSS_DESC: Record<string, string> = {
+  "천간합_갑기": "갑목(甲)과 기토(己)가 만나 토(土)로 합화되오. 갑목은 앞을 향해 거침없이 뻗어나가는 기운이고, 기토는 그 기운을 품어 안아 안정시키는 기운이오. 두 사람이 만나면 한쪽이 방향을 제시하고 다른 쪽이 든든하게 뒷받침하는 조화가 자연스럽게 이루어지오. 함께할 때 현실적인 기반과 안정감이 커지는 토 기운이 관계 전반에 깔리게 되오. 다만 갑목이 너무 앞서 나가면 기토가 버거워하고, 기토가 너무 붙잡으면 갑목이 답답해질 수 있으니 속도를 맞추는 것이 중요하오.",
+  "천간합_기갑": "갑목(甲)과 기토(己)가 만나 토(土)로 합화되오. 갑목은 앞을 향해 거침없이 뻗어나가는 기운이고, 기토는 그 기운을 품어 안아 안정시키는 기운이오. 두 사람이 만나면 한쪽이 방향을 제시하고 다른 쪽이 든든하게 뒷받침하는 조화가 자연스럽게 이루어지오. 함께할 때 현실적인 기반과 안정감이 커지는 토 기운이 관계 전반에 깔리게 되오. 다만 갑목이 너무 앞서 나가면 기토가 버거워하고, 기토가 너무 붙잡으면 갑목이 답답해질 수 있으니 속도를 맞추는 것이 중요하오.",
+  "천간합_을경": "을목(乙)과 경금(庚)이 만나 금(金)으로 합화되오. 을목의 부드럽고 유연한 감수성이 경금의 날카롭고 결단력 있는 기운과 만나 정밀하고 세련된 에너지로 변화하오. 두 사람은 서로의 성격이 꽤 달라 보이지만, 오히려 그 차이가 맞물려 함께 있을 때 완성도 높은 결과물을 만들어내오. 서로에게 배울 것이 많은 관계이오. 다만 을목의 유연함이 경금의 원칙에 눌리거나, 경금의 직선적인 표현이 을목에게 날카롭게 느껴질 수 있으니 표현 방식에 주의하오.",
+  "천간합_경을": "을목(乙)과 경금(庚)이 만나 금(金)으로 합화되오. 을목의 부드럽고 유연한 감수성이 경금의 날카롭고 결단력 있는 기운과 만나 정밀하고 세련된 에너지로 변화하오. 두 사람은 서로의 성격이 꽤 달라 보이지만, 오히려 그 차이가 맞물려 함께 있을 때 완성도 높은 결과물을 만들어내오. 서로에게 배울 것이 많은 관계이오. 다만 을목의 유연함이 경금의 원칙에 눌리거나, 경금의 직선적인 표현이 을목에게 날카롭게 느껴질 수 있으니 표현 방식에 주의하오.",
+  "천간합_병신": "병화(丙)와 신금(辛)이 만나 수(水)로 합화되오. 병화의 뜨겁고 개방적인 에너지와 신금의 섬세하고 내밀한 기운이 만나, 깊이 있는 감성과 직관의 수 기운으로 변화하오. 겉으로는 전혀 달라 보이는 두 사람이지만, 함께 있을 때 서로의 내면을 꺼내놓게 만드는 묘한 끌림이 있소. 병화가 분위기를 띄우고 신금이 깊이를 더하는 방식으로 조화를 이루오. 병화가 너무 뜨겁게 달아오르면 신금이 버거워할 수 있으니 감정 온도를 조율하는 것이 필요하오.",
+  "천간합_신병": "병화(丙)와 신금(辛)이 만나 수(Water)로 합화되오. 병화의 뜨겁고 개방적인 에너지와 신금의 섬세하고 내밀한 기운이 만나, 깊이 있는 감성과 직관의 수 기운으로 변화하오. 겉으로는 전혀 달라 보이는 두 사람이지만, 함께 있을 때 서로의 내면을 꺼내놓게 만드는 묘한 끌림이 있소. 병화가 분위기를 띄우고 신금이 깊이를 더하는 방식으로 조화를 이루오. 병화가 너무 뜨겁게 달아오르면 신금이 버거워할 수 있으니 감정 온도를 조율하는 것이 필요하오.",
+  "천간합_정임": "정화(丁)와 임수(壬)가 만나 목(木)으로 합화되오. 정화의 따뜻하고 섬세한 감성과 임수의 넓고 포용력 있는 기운이 합쳐져, 새로운 생명력과 성장의 목 기운으로 변화하오. 두 사람이 함께하면 서로를 향한 진심 어린 배려가 자연스럽게 흘러나오고, 관계 안에서 계속 성장하는 느낌을 받게 되오. 감정적으로 가장 깊은 합 중 하나로, 오랜 시간이 흘러도 정이 식지 않는 특징이 있소. 다만 서로에게 너무 깊이 기대면 의존이 될 수 있으니 각자의 중심도 지켜나가시오.",
+  "천간합_임정": "정화(丁)와 임수(壬)가 만나 목(木)으로 합화되오. 정화의 따뜻하고 섬세한 감성과 임수의 넓고 포용력 있는 기운이 합쳐져, 새로운 생명력과 성장의 목 기운으로 변화하오. 두 사람이 함께하면 서로를 향한 진심 어린 배려가 자연스럽게 흘러나오고, 관계 안에서 계속 성장하는 느낌을 받게 되오. 감정적으로 가장 깊은 합 중 하나로, 오랜 시간이 흘러도 정이 식지 않는 특징이 있소. 다만 서로에게 너무 깊이 기대면 의존이 될 수 있으니 각자의 중심도 지켜나가시오.",
+  "천간합_무계": "무토(戊)와 계수(癸)가 만나 화(火)로 합화되오. 무토의 묵직하고 넓은 대지 기운과 계수의 섬세하고 맑은 물 기운이 합쳐지면 강렬한 화 기운이 생겨나오. 두 사람 사이에 열정과 감정의 불꽃이 쉽게 일어나며, 함께 있을 때 상대방을 강하게 의식하게 만드는 에너지가 있소. 서로에 대한 느낌이 뜨겁고 분명한 관계이오. 그 불이 온기가 될지 소진이 될지는 두 사람이 감정을 어떻게 다루느냐에 달려 있소. 열정 못지않게 안정을 함께 가꾸어 나가는 것이 중요하오.",
+  "천간합_계무": "무토(戊)와 계수(癸)가 만나 화(Fire)로 합화되오. 무토의 묵직하고 넓은 대지 기운과 계수의 섬세하고 맑은 물 기운이 합쳐지면 강렬한 화 기운이 생겨나오. 두 사람 사이에 열정과 감정의 불꽃이 쉽게 일어나며, 함께 있을 때 상대방을 강하게 의식하게 만드는 에너지가 있소. 서로에 대한 느낌이 뜨겁고 분명한 관계이오. 그 불이 온기가 될지 소진이 될지는 두 사람이 감정을 어떻게 다루느냐에 달려 있소. 열정 못지않게 안정을 함께 가꾸어 나가는 것이 중요하오.",
+  "천간충_갑경": "갑목(甲)과 경금(庚)의 충이오. 목이 성장하고 뻗어나가려는 기운과 금이 자르고 제한하는 기운이 정면으로 맞부딪히는 구조이오. 한 사람이 새로운 것을 시도하고 확장하려 할 때, 다른 사람이 현실적 이유를 들어 제동을 거는 패턴이 반복될 수 있소. 서로의 의지가 강한 만큼 충돌의 강도도 세지만, 동시에 서로를 강하게 단련시키는 힘도 있소. 갑목의 방향성과 경금의 판단력이 협력으로 전환되면, 두 사람은 서로가 없었다면 만들지 못했을 결실을 이루어낼 수 있소.",
+  "천간충_경갑": "갑목(甲)과 경금(庚)의 충이오. 목이 성장하고 뻗어나가려는 기운과 금이 자르고 제한하는 기운이 정면으로 맞부딪히는 구조이오. 한 사람이 새로운 것을 시도하고 확장하려 할 때, 다른 사람이 현실적 이유를 들어 제동을 거는 패턴이 반복될 수 있소. 서로의 의지가 강한 만큼 충돌의 강도도 세지만, 동시에 서로를 강하게 단련시키는 힘도 있소. 갑목의 방향성과 경금의 판단력이 협력으로 전환되면, 두 사람은 서로가 없었다면 만들지 못했을 결실을 이루어낼 수 있소.",
+  "천간충_을신": "을목(乙)과 신금(辛)의 충이오. 을목의 유연하고 섬세한 기운이 신금의 날카롭고 원칙적인 기운과 충돌하오. 을목은 상황에 따라 부드럽게 방향을 바꾸려 하고, 신금은 한번 정한 기준을 굽히려 하지 않아 갈등이 생기기 쉽소. 특히 감정적인 표현 방식에서 차이가 크게 느껴질 수 있소. 을목이 신금의 원칙을 무심하다고 느끼고, 신금이 을목의 유연함을 일관성 없다고 느끼는 패턴이 나타나기도 하오. 서로의 스타일을 이해하고 존중하는 것이 이 충을 다스리는 핵심이오.",
+  "천간충_신을": "을목(乙)과 신금(辛)의 충이오. 을목의 유연하고 섬세한 기운이 신금의 날카롭고 원칙적인 기운과 충돌하오. 을목은 상황에 따라 부드럽게 방향을 바꾸려 하고, 신금은 한번 정한 기준을 굽히려 하지 않아 갈등이 생기기 쉽소. 특히 감정적인 표현 방식에서 차이가 크게 느껴질 수 있소. 을목이 신금의 원칙을 무심하다고 느끼고, 신금이 을목의 유연함을 일관성 없다고 느끼는 패턴이 나타나기도 하오. 서로의 스타일을 이해하고 존중하는 것이 이 충을 다스리는 핵심이오.",
+  "천간충_병임": "병화(丙)와 임수(壬)의 충이오. 불과 물이 정면으로 부딪히는 가장 극적인 천간충 중 하나이오. 병화는 밖으로 드러내고 표현하려는 기운이 강하고, 임수는 안으로 담아 깊이 흘러가는 기운이오. 한 사람은 감정을 바로 표현해야 하고, 다른 사람은 충분히 생각하고 정리한 뒤에 말하는 스타일이어서 서로의 템포가 자주 어긋날 수 있소. 그러나 이 두 기운이 조화를 이루면 열정과 깊이가 함께하는 관계가 되오. 서로의 표현 방식을 억누르지 않고 교대로 존중해주는 것이 열쇠이오.",
+  "천간충_임병": "병화(丙)와 임수(壬)의 충이오. 불과 물이 정면으로 부딪히는 가장 극적인 천간충 중 하나이오. 병화는 밖으로 드러내고 표현하려는 기운이 강하고, 임수는 안으로 담아 깊이 흘러가는 기운이오. 한 사람은 감정을 바로 표현해야 하고, 다른 사람은 충분히 생각하고 정리한 뒤에 말하는 스타일이어서 서로의 템포가 자주 어긋날 수 있소. 그러나 이 두 기운이 조화를 이루면 열정과 깊이가 함께하는 관계가 되오. 서로의 표현 방식을 억누르지 않고 교대로 존중해주는 것이 열쇠이오.",
+  "천간충_정계": "정화(丁)와 계수(癸)의 충이오. 정화의 따뜻하고 감성적인 불꽃이 계수의 맑고 냉정한 물 기운과 충돌하오. 정화는 감정으로 먼저 반응하고, 계수는 논리와 이성으로 접근하는 경향이 있어 대화가 엇갈리기 쉽소. 한 사람이 마음을 나누고 싶을 때 다른 사람이 분석적으로 반응하면 상처가 될 수 있소. 반면 이 두 기운이 잘 조율되면 감성과 이성 모두를 갖춘 균형 잡힌 관계가 되오. 상대방의 반응 방식이 내 방식과 다를 뿐임을 인식하는 것이 이 충을 부드럽게 하는 첫걸음이오.",
+  "천간충_계정": "정화(丁)와 계수(癸)의 충이오. 정화의 따뜻하고 감성적인 불꽃이 계수의 맑고 냉정한 물 기운과 충돌하오. 정화는 감정으로 먼저 반응하고, 계수는 논리와 이성으로 접근하는 경향이 있어 대화가 엇갈리기 쉽소. 한 사람이 마음을 나누고 싶을 때 다른 사람이 분석적으로 반응하면 상처가 될 수 있소. 반면 이 두 기운이 잘 조율되면 감성과 이성 모두를 갖춘 균형 잡힌 관계가 되오. 상대방의 반응 방식이 내 방식과 다를 뿐임을 인식하는 것이 이 충을 부드럽게 하는 첫걸음이오.",
+  "천간충_무임": "무토(戊)와 임수(壬)의 충이오. 무토는 넓고 묵직하게 자리를 지키려는 안정의 기운이고, 임수는 어디로든 흘러가려는 변화의 기운이오. 한 사람은 현재의 자리와 관계를 단단히 지키고 싶어하고, 다른 사람은 끊임없이 새로운 것을 향해 흐르고 싶어하는 구조이오. 안정 vs 변화의 욕구 차이가 관계 안에서 자주 마찰을 만들어낼 수 있소. 서로의 필요를 억지로 바꾸려 하기보다, 각자에게 필요한 것을 존중하며 조율하는 방식이 이 충을 다스리는 길이오.",
+  "천간충_임무": "무토(戊)와 임수(壬)의 충이오. 무토는 넓고 묵직하게 자리를 지키려는 안정의 기운이고, 임수는 어디로든 흘러가려는 변화의 기운이오. 한 사람은 현재의 자리와 관계를 단단히 지키고 싶어하고, 다른 사람은 끊임없이 새로운 것을 향해 흐르고 싶어하는 구조이오. 안정 vs 변화의 욕구 차이가 관계 안에서 자주 마찰을 만들어낼 수 있소. 서로의 필요를 억지로 바꾸려 하기보다, 각자에게 필요한 것을 존중하며 조율하는 방식이 이 충을 다스리는 길이오.",
+  "육합_자축": "자(子)와 축(丑)이 만나 토(土)로 합화되오. 자수의 깊고 감성적인 기운과 축토의 조용하고 실질적인 기운이 만나 안정감 있는 토 기운을 이루오. 두 사람 사이에 별다른 설명 없이도 통하는 편안함이 있고, 가까이 있으면 자연스럽게 서로를 의지하게 되오. 화려하게 드러나는 합은 아니지만, 오래 함께할수록 더욱 깊어지는 조용한 신뢰의 관계이오.",
+  "육합_축자": "자(子)와 축(丑)이 만나 토(土)로 합화되오. 자수의 깊고 감성적인 기운과 축토의 조용하고 실질적인 기운이 만나 안정감 있는 토 기운을 이루오. 두 사람 사이에 별다른 설명 없이도 통하는 편안함이 있고, 가까이 있으면 자연스럽게 서로를 의지하게 되오. 화려하게 드러나는 합은 아니지만, 오래 함께할수록 더욱 깊어지는 조용한 신뢰의 관계이오.",
+  "육합_인해": "인(寅)과 해(亥)가 만나 목(木)으로 합화되오. 인목의 강한 추진력과 해수의 포용적인 기운이 합쳐져 생명력 넘치는 목 기운을 이루오. 두 사람이 함께하면 서로를 성장시키는 에너지가 강하게 흐르오. 무언가를 함께 시작하고 키워나가는 데 잘 맞는 조합이며, 서로에게서 새로운 가능성을 발견하게 하는 관계이오.",
+  "육합_해인": "인(寅)과 해(亥)가 만나 목(木)으로 합화되오. 인목의 강한 추진력과 해수의 포용적인 기운이 합쳐져 생명력 넘치는 목 기운을 이루오. 두 사람이 함께하면 서로를 성장시키는 에너지가 강하게 흐르오. 무언가를 함께 시작하고 키워나가는 데 잘 맞는 조합이며, 서로에게서 새로운 가능성을 발견하게 하는 관계이오.",
+  "육합_묘술": "묘(卯)와 술(戌)이 만나 화(火)로 합화되오. 묘목의 섬세하고 따뜻한 기운과 술토의 열정적이고 깊은 기운이 만나 화 기운의 열정과 표현력을 이루오. 두 사람 사이에 감정적인 연결이 강하고, 함께 있으면 서로에 대한 감정이 더욱 뜨겁게 달아오르는 경향이 있소. 감성적으로 깊이 통하는 관계이오.",
+  "육합_술묘": "묘(卯)와 술(戌)이 만나 화(Fire)로 합화되오. 묘목의 섬세하고 따뜻한 기운과 술토의 열정적이고 깊은 기운이 만나 화 기운의 열정과 표현력을 이루오. 두 사람 사이에 감정적인 연결이 강하고, 함께 있으면 서로에 대한 감정이 더욱 뜨겁게 달아오르는 경향이 있소. 감성적으로 깊이 통하는 관계이오.",
+  "육합_진유": "진(辰)과 유(酉)가 만나 금(金)으로 합화되오. 진토의 창의적이고 다재다능한 기운과 유금의 세련되고 정교한 기운이 합쳐져 완성도 높은 금 기운을 이루오. 두 사람이 함께하면 서로의 장점이 더욱 선명하게 빛나고, 상대방을 통해 자신의 잠재력을 발견하게 되는 경우가 많소. 품격 있는 관계를 만들어내는 조합이오.",
+  "육합_유진": "진(辰)과 유(酉)가 만나 금(Gold)으로 합화되오. 진토의 창의적이고 다재다능한 기운과 유금의 세련되고 정교한 기운이 합쳐져 완성도 높은 금 기운을 이루오. 두 사람이 함께하면 서로의 장점이 더욱 선명하게 빛나고, 상대방을 통해 자신의 잠재력을 발견하게 되는 경우가 많소. 품격 있는 관계를 만들어내는 조합이오.",
+  "육합_사신": "사(巳)와 신(申)이 만나 수(水)로 합화되오. 사화의 열정과 지혜로운 기운이 신금의 결단력과 만나 깊고 유연한 수 기운을 이루오. 두 사람 사이에 서로를 날카롭게 파악하는 통찰이 오가고, 함께 있을 때 깊이 있는 대화가 자연스럽게 이어지는 관계이오. 감정보다 이해와 신뢰를 쌓아가는 방식으로 깊어지는 인연이오.",
+  "육합_신사": "사(巳)와 신(申)이 만나 수(Water)로 합화되오. 사화의 열정과 지혜로운 기운이 신금의 결단력과 만나 깊고 유연한 수 기운을 이루오. 두 사람 사이에 서로를 날카롭게 파악하는 통찰이 오가고, 함께 있을 때 깊이 있는 대화가 자연스럽게 이어지는 관계이오. 감정보다 이해와 신뢰를 쌓아가는 방식으로 깊어지는 인연이오.",
+  "육합_오미": "오(午)와 미(未)가 만나 화(Fire)로 합화되오. 오화의 뜨겁고 활발한 기운과 미토의 따뜻하고 온화한 기운이 합쳐져 풍요로운 화 기운을 이루오. 두 사람이 함께하면 분위기가 밝고 따뜻해지며, 서로에 대한 호감과 애정 표현이 자연스럽게 흘러나오오. 관계 안에 온기와 즐거움이 가득한 조합이오.",
+  "육합_미오": "오(午)와 미(未)가 만나 화(Fire)로 합화되오. 오화의 뜨겁고 활발한 기운과 미토의 따뜻하고 온화한 기운이 합쳐져 풍요로운 화 기운을 이루오. 두 사람이 함께하면 분위기가 밝고 따뜻해지며, 서로에 대한 호감과 애정 표현이 자연스럽게 흘러나오오. 관계 안에 온기와 즐거움이 가득한 조합이오.",
+  "삼합_인오술": "인(寅)·오(午)·술(戌)이 모여 화국(火局)을 이루오. 이 삼합은 두 사람의 사주에서 화 기운이 강하게 불타오르는 구조를 만들어내오. 함께하면 열정·표현력·사교성이 두드러지며, 두 사람 모두 생기 넘치고 적극적인 에너지를 발휘하게 되오. 무언가를 함께 시작하거나 사람들 사이에서 빛을 발하는 활동을 할 때 시너지가 강하오. 다만 화 기운이 지나치면 서로 감정이 과하게 달아오르거나 소진될 수 있으니, 함께 충분히 쉬는 시간도 만들어 가시오.",
+  "삼합_신자진": "신(申)·자(子)·진(辰)이 모여 수국(水局)을 이루오. 두 사람의 사주에서 수 기운이 강하게 결집되오. 수는 지혜·감수성·유연함의 기운이오. 함께하면 서로를 깊이 이해하고 내면을 나누는 대화가 자연스럽게 이루어지며, 감정적 교류가 풍부한 관계가 되오. 또한 수 기운은 흘러가는 특성이 있어 두 사람 모두 변화와 이동을 즐기거나, 감정의 기복이 함께 움직이는 경향이 나타날 수 있소. 안정된 공간을 함께 만들어두면 이 기운이 더욱 빛을 발하오.",
+  "삼합_해묘미": "해(亥)·묘(卯)·미(未)가 모여 목국(木局)을 이루오. 두 사람의 사주에서 목 기운이 강하게 모이오. 목은 성장·생명력·진취성의 기운이오. 함께하면 서로를 향해 자연스럽게 발전하고 싶은 마음이 생기며, 새로운 일을 시작하거나 함께 무언가를 키워나갈 때 강한 시너지가 발휘되오. 두 사람이 만났을 때 관계 자체가 생동감 있게 자라나는 느낌이 있소. 목 기운의 과잉으로 서로에게 너무 많은 기대와 성장을 요구하게 될 수 있으니 각자의 속도도 존중하시오.",
+  "삼합_사유축": "사(巳)·유(酉)·축(丑)이 모여 금국(金局)을 이루오. 두 사람의 사주에서 금 기운이 강하게 결집되오. 금은 결단력·완성도·집중력의 기운이오. 함께하면 서로에게 엄격한 기준을 요구하게 되기도 하지만, 그만큼 두 사람이 함께 이루어내는 결과물의 완성도가 높아지오. 관계 안에서 원칙과 신뢰를 중시하는 구조가 자연스럽게 형성되오. 금 기운이 강하면 서로에게 딱딱하게 굴거나 유연함이 부족해질 수 있으니, 가끔은 완벽함보다 편안함을 우선하는 여유도 가져보시오.",
+  "충_자오": "자(子)와 오(午)가 충하오. 수(Water)와 화(Fire)가 정면으로 부딪히는 자오충이오. 자수는 깊이 담아두고 내면으로 흘러가는 기운이고, 오화는 밖으로 터뜨리고 표현하려는 기운이오. 한 사람은 감정을 충분히 삭힌 뒤 말하고 싶고, 다른 사람은 즉각적으로 표현하고 반응받고 싶어하는 구조가 충돌을 만들어내오. 서로의 표현 시간표가 다름을 인식하고, 상대방의 방식이 틀린 것이 아님을 받아들이는 것이 이 충을 다스리는 핵심이오.",
+  "충_오자": "자(子)와 오(午)가 충하오. 수(Water)와 화(Fire)가 정면으로 부딪히는 자오충이오. 자수는 깊이 담아두고 내면으로 흘러가는 기운이고, 오화는 밖으로 터뜨리고 표현하려는 기운이오. 한 사람은 감정을 충분히 삭힌 뒤 말하고 싶고, 다른 사람은 즉각적으로 표현하고 반응받고 싶어하는 구조가 충돌을 만들어내오. 서로의 표현 시간표가 다름을 인식하고, 상대방의 방식이 틀린 것이 아님을 받아들이는 것이 이 충을 다스리는 핵심이오.",
+  "충_축미": "축(丑)과 미(未)가 충하오. 같은 토(土)끼리의 충이지만 한쪽은 겨울 토(축)이고 다른 쪽은 여름 토(미)로 기질이 전혀 다르오. 둘 다 자신의 자리를 굳건히 지키려는 성질이 강해, 서로 상대방의 방식에 맞추는 것을 불편하게 느끼기 쉽소. 서로의 다름이 틀림이 아님을 인식하고, 공유하는 공간과 개인 공간의 경계를 명확히 해두는 것이 도움이 되오.",
+  "충_미축": "축(丑)과 미(未)가 충하오. 같은 토(土)끼리의 충이지만 한쪽은 겨울 토(축)이고 다른 쪽은 여름 토(미)로 기질이 전혀 다르오. 둘 다 자신의 자리를 굳건히 지키려는 성질이 강해, 서로 상대방의 방식에 맞추는 것을 불편하게 느끼기 쉽소. 서로의 다름이 틀림이 아님을 인식하고, 공유하는 공간과 개인 공간의 경계를 명확히 해두는 것이 도움이 되오.",
+  "충_인신": "인(寅)과 신(申)이 충하오. 목(木)과 금(金)의 충으로, 인목의 뻗어나가는 추진력과 신금의 자르고 다듬는 기운이 부딪히오. 한 사람은 직관적으로 빠르게 움직이려 하고, 다른 사람은 논리적으로 따져보고 결정하려 해 함께 무언가를 진행할 때 속도가 맞지 않는 경우가 많소. 각자의 결정 방식을 존중하고 중요한 선택에서는 충분히 이야기 나누는 시간을 갖는 것이 필요하오.",
+  "충_신인": "인(寅)과 신(申)이 충하오. 목(木)과 금(金)의 충으로, 인목의 뻗어나가는 추진력과 신금의 자르고 다듬는 기운이 부딪히오. 한 사람은 직관적으로 빠르게 움직이려 하고, 다른 사람은 논리적으로 따져보고 결정하려 해 함께 무언가를 진행할 때 속도가 맞지 않는 경우가 많소. 각자의 결정 방식을 존중하고 중요한 선택에서는 충분히 이야기 나누는 시간을 갖는 것이 필요하오.",
+  "충_묘유": "묘(卯)와 유(酉)가 충하오. 목(木)과 금(金)의 충이오. 묘목의 부드럽고 섬세한 감수성과 유금의 날카롭고 정갈한 기운이 충돌하오. 한 사람은 관계 안에서 자유롭고 유연하게 흐르고 싶어하고, 다른 사람은 질서와 원칙 안에서 안정감을 찾으려 하오. 상대방의 방식을 변화시키려 하기보다 다름을 인정하고 균형점을 찾는 것이 이 관계를 단단하게 만드오.",
+  "충_유묘": "묘(卯)와 유(酉)가 충하오. 목(Wood)과 금(Gold)의 충이오. 묘목의 부드럽고 섬세한 감수성과 유금의 날카롭고 정갈한 기운이 충돌하오. 한 사람은 관계 안에서 자유롭고 유연하게 흐르고 싶어하고, 다른 사람은 질서와 원칙 안에서 안정감을 찾으려 하오. 상대방의 방식을 변화시키려 하기보다 다름을 인정하고 균형점을 찾는 것이 이 관계를 단단하게 만드오.",
+  "충_진술": "진(辰)과 술(戌)이 충하오. 같은 토(土)끼리의 충으로, 둘 다 강한 자기 기반과 주관을 가지고 있소. 진토는 창의적이고 다변적인 기질, 술토는 열정적이고 집중력 강한 기질을 지니고 있어 방향이 다를 때 서로 좀처럼 물러서지 않으려 하오. 서로 옳고 그름으로 판단하기보다, 두 가지 관점을 모두 고려한 제3의 길을 함께 만들어가는 접근이 필요하오.",
+  "충_술진": "진(辰)과 술(戌)이 충하오. 같은 토(土)끼리의 충으로, 둘 다 강한 자기 기반과 주관을 가지고 있소. 진토는 창의적이고 다변적인 기질, 술토는 열정적이고 집중력 강한 기질을 지니고 있어 방향이 다를 때 서로 좀처럼 물러서지 않으려 하오. 서로 옳고 그름으로 판단하기보다, 두 가지 관점을 모두 고려한 제3의 길을 함께 만들어가는 접근이 필요하오.",
+  "충_사해": "사(巳)와 해(亥)가 충하오. 화(Fire)와 수(Water)의 충이오. 사화는 집중적이고 목적 지향적인 기운, 해수는 포용적이고 방향이 자유로운 기운이오. 한 사람은 목표를 향해 직선으로 나아가려 하고, 다른 사람은 다양한 가능성을 탐색하며 넓게 흘러가려 해 속도와 방향이 자주 어긋날 수 있소. 서로의 방식이 상호 보완적일 수 있음을 인식하고, 함께할 수 있는 교차점을 꾸준히 찾아가는 것이 중요하오.",
+  "충_해사": "사(巳)와 해(亥)가 충하오. 화(Fire)와 수(Water)의 충이오. 사화는 집중적이고 목적 지향적인 기운, 해수는 포용적이고 방향이 자유로운 기운이오. 한 사람은 목표를 향해 직선으로 나아가려 하고, 다른 사람은 다양한 가능성을 탐색하며 넓게 흘러가려 해 속도와 방향이 자주 어긋날 수 있소. 서로의 방식이 상호 보완적일 수 있음을 인식하고, 함께할 수 있는 교차점을 꾸준히 찾아가는 것이 중요하오.",
+  "천간충_갑무": "갑목(甲)과 무토(戊)의 충이오. 갑목은 끊임없이 위로 뻗어나가려는 생장의 기운이고, 무토는 넓게 자리를 잡고 중심을 지키려는 안정의 기운이오. 한 사람은 새로운 것을 향해 빠르게 전진하려 하고, 다른 사람은 충분히 다져지기 전에는 움직이지 않으려 하는 구조이오. 이 차이는 함께 무언가를 결정하거나 방향을 정할 때 자주 마찰로 드러나오. 갑목이 너무 앞서 나가면 무토는 버팀목이 아닌 장벽처럼 느껴지고, 무토가 너무 단단히 자리를 지키면 갑목은 가로막힌 느낌을 받게 되오. 서로의 속도와 방식을 인정하고, 갑목의 방향성과 무토의 안정감이 협력으로 맞물릴 때 이 충은 오히려 강한 추진력이 되오.",
+  "천간충_무갑": "갑목(甲)과 무토(戊)의 충이오. 갑목은 끊임없이 위로 뻗어나가려는 생장의 기운이고, 무토는 넓게 자리를 잡고 중심을 지키려는 안정의 기운이오. 한 사람은 새로운 것을 향해 빠르게 전진하려 하고, 다른 사람은 충분히 다져지기 전에는 움직이지 않으려 하는 구조이오. 이 차이는 함께 무언가를 결정하거나 방향을 정할 때 자주 마찰로 드러나오. 갑목이 너무 앞서 나가면 무토는 버팀목이 아닌 장벽처럼 느껴지고, 무토가 너무 단단히 자리를 지키면 갑목은 가로막힌 느낌을 받게 되오. 서로의 속도와 방식을 인정하고, 갑목의 방향성과 무토의 안정감이 협력으로 맞물릴 때 이 충은 오히려 강한 추진력이 되오.",
+  "천간충_기을": "을목(乙)과 기토(己)의 충이오. 을목은 유연하고 감수성 풍부하게 흘러가려는 기운이고, 기토는 조용하고 현실적으로 자리를 지키려는 기운이오. 서로 정면으로 맞서는 충은 아니나 방향이 달라 관계 안에서 미묘한 긴장이 쌓이기 쉽소. 을목은 감정과 분위기를 따라 움직이고 싶어하고, 기토는 실질적인 안정을 우선시하는 경향이 있어 가치관과 행동 방식에서 어긋남이 생기오. 서로가 틀린 것이 아니라 다른 방식으로 세상을 바라보고 있음을 받아들이는 것이 이 충을 부드럽게 하는 첫걸음이오. 을목의 유연함과 기토의 현실감이 균형을 이루면 두 사람은 감성과 안정을 모두 갖춘 관계를 만들어낼 수 있소.",
+  "천간충_을기": "을목(乙)과 기토(己)의 충이오. 을목은 유연하고 감수성 풍부하게 흘러가려는 기운이고, 기토는 조용하고 현실적으로 자리를 지키려는 기운이오. 서로 정면으로 맞서는 충은 아니나 방향이 달라 관계 안에서 미묘한 긴장이 쌓이기 쉽소. 을목은 감정과 분위기를 따라 움직이고 싶어하고, 기토는 실질적인 안정을 우선시하는 경향이 있어 가치관과 행동 방식에서 어긋남이 생기오. 서로가 틀린 것이 아니라 다른 방식으로 세상을 바라보고 있음을 받아들이는 것이 이 충을 부드럽게 하는 첫걸음이오. 을목의 유연함과 기토의 현실감이 균형을 이루면 두 사람은 감성과 안정을 모두 갖춘 관계를 만들어낼 수 있소.",
+  "천간충_병경": "병화(丙)와 경금(庚)의 충이오. 병화는 활발하고 개방적으로 드러내려는 기운, 경금은 원칙과 기준을 세워 정밀하게 다스리려는 기운이오. 병화는 분위기와 감정으로 상황을 이끌어가려 하고, 경금은 이성적 판단과 효율로 접근하려 해 대화할 때 방향이 자주 어긋나오. 한 사람이 열정적으로 마음을 쏟을 때 다른 사람이 냉정하게 따지는 반응을 보이면 상처가 될 수 있소. 그러나 이 두 기운이 협력으로 전환되면 열정과 실력이 함께하는 강한 팀을 이루게 되오. 서로의 다른 접근 방식이 경쟁이 아닌 보완임을 인식하는 것이 이 관계의 핵심이오.",
+  "천간충_경병": "병화(丙)와 경금(庚)의 충이오. 병화는 활발하고 개방적으로 드러내려는 기운, 경금은 원칙과 기준을 세워 정밀하게 다스리려는 기운이오. 병화는 분위기와 감정으로 상황을 이끌어가려 하고, 경금은 이성적 판단과 효율로 접근하려 해 대화할 때 방향이 자주 어긋나오. 한 사람이 열정적으로 마음을 쏟을 때 다른 사람이 냉정하게 따지는 반응을 보이면 상처가 될 수 있소. 그러나 이 두 기운이 협력으로 전환되면 열정과 실력이 함께하는 강한 팀을 이루게 되오. 서로의 다른 접근 방식이 경쟁이 아닌 보완임을 인식하는 것이 이 관계의 핵심이오.",
+  "천간충_정신": "정화(丁)와 신금(辛)의 충이오. 정화는 따뜻하고 섬세한 감성으로 마음을 나누려는 기운이고, 신금은 날카롭고 원칙적으로 상황을 정리하려는 기운이오. 한 사람은 감정적 교감을 원하고, 다른 사람은 논리적으로 명확히 하려 해 대화가 어긋나기 쉽소. 정화가 감정을 꺼낼 때 신금이 분석적으로 반응하면 정화는 이해받지 못한다는 느낌을 받게 되오. 그러나 신금의 명확함이 정화의 감성에 방향을 주고, 정화의 따뜻함이 신금의 날카로움을 부드럽게 할 수 있소. 서로의 다른 표현 방식을 존중하며 교대로 방식을 맞춰가는 노력이 이 충을 다스리는 핵심이오.",
+  "천간충_신정": "정화(丁)와 신금(辛)의 충이오. 정화는 따뜻하고 섬세한 감성으로 마음을 나누려는 기운이고, 신금은 날카롭고 원칙적으로 상황을 정리하려는 기운이오. 한 사람은 감정적 교감을 원하고, 다른 사람은 논리적으로 명확히 하려 해 대화가 어긋나기 쉽소. 정화가 감정을 꺼낼 때 신금이 분석적으로 반응하면 정화는 이해받지 못한다는 느낌을 받게 되오. 그러나 신금의 명확함이 정화의 감성에 방향을 주고, 정화의 따뜻함이 신금의 날카로움을 부드럽게 할 수 있소. 서로의 다른 표현 방식을 존중하며 교대로 방식을 맞춰가는 노력이 이 충을 다스리는 핵심이오.",
+  "천간충_무계": "무토(戊)와 계수(癸)의 충이오. 무토는 묵직하고 넓게 자리를 지키려는 대지의 기운이고, 계수는 섬세하고 내면 깊이 흐르는 물의 기운이오. 무토는 현실적인 안정을 중시하고, 계수는 감성적이고 내밀한 흐름을 따라 움직이려 해 서로 다른 차원에서 생각하고 느끼는 구조이오. 무토가 결과와 실질을 강조할 때 계수는 감정과 분위기를 더 중요하게 여기는 엇갈림이 반복될 수 있소. 그러나 무토의 안정감 위에 계수의 감성이 더해지면 깊이 있는 관계의 토대가 만들어지오. 서로의 우선순위가 다름을 인정하고 교류할 때 이 충은 풍요로운 조화로 전환되오.",
+  "천간충_계무": "무토(戊)와 계수(癸)의 충이오. 무토는 묵직하고 넓게 자리를 지키려는 대지의 기운이고, 계수는 섬세하고 내면 깊이 흐르는 물의 기운이오. 무토는 현실적인 안정을 중시하고, 계수는 감성적이고 내밀한 흐름을 따라 움직이려 해 서로 다른 차원에서 생각하고 느끼는 구조이오. 무토가 결과와 실질을 강조할 때 계수는 감정과 분위기를 더 중요하게 여기는 엇갈림이 반복될 수 있소. 그러나 무토의 안정감 위에 계수의 감성이 더해지면 깊이 있는 관계의 토대가 만들어지오. 서로의 우선순위가 다름을 인정하고 교류할 때 이 충은 풍요로운 조화로 전환되오.",
+  "형_인사신": "인(寅)·사(巳)·신(申)이 삼형(三刑)을 이루오. 세 기운 모두 강하게 자기 방향을 고집하는 성질이 있어, 함께 있으면 보이지 않는 긴장과 마찰이 쌓이기 쉽소. 각자가 옳다고 여기는 방향이 달라 대화에서 충돌이 생기거나, 서로의 방식을 이해하지 못해 답답함이 반복될 수 있소. 이 형은 겉으로는 잘 보이지 않다가 어느 순간 한꺼번에 표출되는 경향이 있으니, 평소 솔직한 대화로 감정을 풀어두는 것이 중요하오. 강한 의지를 가진 두 사람이 서로의 방향을 맞춰가면, 이 긴장은 오히려 각자를 단련시키는 힘이 되오.",
+  "형_사인신": "인(寅)·사(巳)·신(申)이 삼형(三刑)을 이루오. 세 기운 모두 강하게 자기 방향을 고집하는 성질이 있어, 함께 있으면 보이지 않는 긴장과 마찰이 쌓이기 쉽소. 각자가 옳다고 여기는 방향이 달라 대화에서 충돌이 생기거나, 서로의 방식을 이해하지 못해 답답함이 반복될 수 있소. 이 형은 겉으로는 잘 보이지 않다가 어느 순간 한꺼번에 표출되는 경향이 있으니, 평소 솔직한 대화로 감정을 풀어두는 것이 중요하오. 강한 의지를 가진 두 사람이 서로의 방향을 맞춰가면, 이 긴장은 오히려 각자를 단련시키는 힘이 되오.",
+  "형_신인사": "인(寅)·사(巳)·신(申)이 삼형(三刑)을 이루오. 세 기운 모두 강하게 자기 방향을 고집하는 성질이 있어, 함께 있으면 보이지 않는 긴장과 마찰이 쌓이기 쉽소. 각자가 옳다고 여기는 방향이 달라 대화에서 충돌이 생기거나, 서로의 방식을 이해하지 못해 답답함이 반복될 수 있소. 이 형은 겉으로는 잘 보이지 않다가 어느 순간 한꺼번에 표출되는 경향이 있으니, 평소 솔직한 대화로 감정을 풀어두는 것이 중요하오. 강한 의지를 가진 두 사람이 서로의 방향을 맞춰가면, 이 긴장은 오히려 각자를 단련시키는 힘이 되오.",
+  "형_축술미": "축(丑)·술(戌)·미(未)가 삼형을 이루오. 모두 토(土) 기운이지만 계절이 달라 서로 잘 맞지 않는 구조이오. 각자 자기 자리를 지키려는 고집이 강해 양보나 타협이 쉽지 않고, 관계 안에서 주도권이나 역할을 놓고 암묵적인 긴장이 흐를 수 있소. 이 형은 큰 갈등으로 폭발하기보다 일상적인 불편함으로 쌓이는 경향이 있소. 서로의 영역을 명확히 정하고 존중하는 것이 이 형을 다스리는 핵심이오.",
+  "형_술축미": "축(丑)·술(戌)·미(未)가 삼형을 이루오. 모두 토(土) 기운이지만 계절이 달라 서로 잘 맞지 않는 구조이오. 각자 자기 자리를 지키려는 고집이 강해 양보나 타협이 쉽지 않고, 관계 안에서 주도권이나 역할을 놓고 암묵적인 긴장이 흐를 수 있소. 이 형은 큰 갈등으로 폭발하기보다 일상적인 불편함으로 쌓이는 경향이 있소. 서로의 영역을 명확히 정하고 존중하는 것이 이 형을 다스리는 핵심이오.",
+  "형_미축술": "축(丑)·술(戌)·미(未)가 삼형을 이루오. 모두 토(土) 기운이지만 계절이 달라 서로 잘 맞지 않는 구조이오. 각자 자기 자리를 지키려는 고집이 강해 양보나 타협이 쉽지 않고, 관계 안에서 주도권이나 역할을 놓고 암묵적인 긴장이 흐를 수 있소. 이 형은 큰 갈등으로 폭발하기보다 일상적인 불편함으로 쌓이는 경향이 있소. 서로의 영역을 명확히 정하고 존중하는 것이 이 형을 다스리는 핵심이오.",
+  "형_자묘": "자(子)와 묘(卯)가 형을 이루오. 수(Water)와 목(木)의 관계이지만 상생이 아닌 형으로 작용하오. 자수는 내면으로 담아두려 하고, 묘목은 감수성과 표현을 통해 밖으로 드러내려 하는 기질이라 서로의 에너지 방향이 어긋나오. 보이지 않는 곳에서 오해나 감정의 엇갈림이 생기기 쉽고, 말하지 않아도 알아주기를 바라는 마음이 갈등의 씨앗이 되기도 하오. 솔직하게 마음을 표현하고 상대방의 감정 신호에 주의를 기울이는 것이 이 형을 부드럽게 만드는 방법이오.",
+  "형_묘자": "자(子)와 묘(卯)가 형을 이루오. 수(Water)와 목(Wood)의 관계이지만 상생이 아닌 형으로 작용하오. 자수는 내면으로 담아두려 하고, 묘목은 감수성과 표현을 통해 밖으로 드러내려 하는 기질이라 서로의 에너지 방향이 어긋나오. 보이지 않는 곳에서 오해나 감정의 엇갈림이 생기기 쉽고, 말하지 않아도 알아주기를 바라는 마음이 갈등의 씨앗이 되기도 하오. 솔직하게 마음을 표현하고 상대방의 감정 신호에 주의를 기울이는 것이 이 형을 부드럽게 만드는 방법이오.",
+  "해_자미": "자(子)와 미(未)가 해(害)를 이루오. 자수의 깊고 내밀한 기운과 미토의 따뜻하고 감성적인 기운이 보이지 않는 곳에서 서로를 방해하는 구조이오. 두 사람 사이에 직접적인 갈등은 적지만, 서로의 의도가 상대방에게 다르게 전달되거나 작은 오해가 쌓이는 경향이 있소. 자수는 진지한 마음으로 다가가는데 미토가 가볍게 받아들이거나, 반대로 미토의 배려가 자수에게 부담이 되는 상황이 생길 수 있소. 서로의 진심을 자주 말과 행동으로 확인하고, 오해가 생겼을 때 빨리 풀어내는 것이 이 관계를 지켜주오.",
+  "해_미자": "자(子)와 미(未)가 해(害)를 이루오. 자수의 깊고 내밀한 기운과 미토의 따뜻하고 감성적인 기운이 보이지 않는 곳에서 서로를 방해하는 구조이오. 두 사람 사이에 직접적인 갈등은 적지만, 서로의 의도가 상대방에게 다르게 전달되거나 작은 오해가 쌓이는 경향이 있소. 자수는 진지한 마음으로 다가가는데 미토가 가볍게 받아들이거나, 반대로 미토의 배려가 자수에게 부담이 되는 상황이 생길 수 있소. 서로의 진심을 자주 말과 행동으로 확인하고, 오해가 생겼을 때 빨리 풀어내는 것이 이 관계를 지켜주오.",
+  "해_축오": "축(丑)과 오(午)가 해를 이루오. 축토의 조용하고 실질적인 기운과 오화의 활발하고 표현력 강한 기운이 서로 맞지 않아 갈등이 생기오. 오화가 활기차게 에너지를 쏟을 때 축토는 피곤하고 버겁게 느끼고, 축토가 조용히 자기 방식으로 있을 때 오화는 답답하게 느끼는 구조이오. 서로의 에너지 수준과 속도가 달라 함께하는 시간의 방식을 조율하는 것이 중요하오. 때로는 각자의 공간과 시간을 확보하면서 서로를 충전시켜주는 것이 이 관계를 지속시키는 방법이오.",
+  "해_오축": "축(丑)과 오(午)가 해를 이루오. 축토의 조용하고 실질적인 기운과 오화의 활발하고 표현력 강한 기운이 서로 맞지 않아 갈등이 생기오. 오화가 활기차게 에너지를 쏟을 때 축토는 피곤하고 버겁게 느끼고, 축토가 조용히 자기 방식으로 있을 때 오화는 답답하게 느끼는 구조이오. 서로의 에너지 수준과 속도가 달라 함께하는 시간의 방식을 조율하는 것이 중요하오. 때로는 각자의 공간과 시간을 확보하면서 서로를 충전시켜주는 것이 이 관계를 지속시키는 방법이오.",
+  "해_인사": "인(寅)과 사(巳)가 해를 이루오. 인목의 강한 추진력과 사화의 집중적이고 목적 지향적인 기운이 보이지 않게 서로를 방해하는 구조이오. 두 기운 모두 강하게 자기 방향으로 나아가려 해 함께 움직일 때 방향이 어긋나거나 한 사람이 다른 사람의 발목을 잡는 상황이 생길 수 있소. 뚜렷한 갈등보다는 미묘하게 엇갈리는 타이밍과 방향이 반복되는 경향이 있소. 서로의 목표와 방향을 미리 공유하고 맞춰가는 것이 이 해를 넘어가는 핵심이오.",
+  "해_사인": "인(寅)과 사(巳)가 해를 이루오. 인목의 강한 추진력과 사화의 집중적이고 목적 지향적인 기운이 보이지 않게 서로를 방해하는 구조이오. 두 기운 모두 강하게 자기 방향으로 나아가려 해 함께 움직일 때 방향이 어긋나거나 한 사람이 다른 사람의 발목을 잡는 상황이 생길 수 있소. 뚜렷한 갈등보다는 미묘하게 엇갈리는 타이밍과 방향이 반복되는 경향이 있소. 서로의 목표와 방향을 미리 공유하고 맞춰가는 것이 이 해를 넘어가는 핵심이오.",
+  "해_묘진": "묘(卯)와 진(辰)이 해를 이루오. 묘목의 섬세하고 자유로운 기운과 진토의 창의적이고 다재다능한 기운이 가장 가까운 자리에서 서로를 방해하는 구조이오. 두 사람이 가까울수록 오히려 작은 마찰이 잦아지고, 친밀함 속에서 오히려 상처받기 쉬운 상황이 생길 수 있소. 지나친 친밀함이 경계선을 흐려 서로에게 상처를 주기도 하오. 가까울수록 서로의 공간을 존중하고, 작은 배려를 잊지 않는 것이 이 해를 다스리는 방법이오.",
+  "해_진묘": "묘(卯)와 진(辰)이 해를 이루오. 묘목의 섬세하고 자유로운 기운과 진토의 창의적이고 다재다능한 기운이 가장 가까운 자리에서 서로를 방해하는 구조이오. 두 사람이 가까울수록 오히려 작은 마찰이 잦아지고, 친밀함 속에서 오히려 상처받기 쉬운 상황이 생길 수 있소. 지나친 친밀함이 경계선을 흐려 서로에게 상처를 주기도 하오. 가까울수록 서로의 공간을 존중하고, 작은 배려를 잊지 않는 것이 이 해를 다스리는 방법이오.",
+  "해_신해": "신(申)과 해(亥)가 해를 이루오. 신금의 결단력 있고 현실적인 기운과 해수의 포용적이고 자유로운 기운이 보이지 않는 곳에서 서로를 방해하오. 신금은 계획대로 명확하게 처리하려 하고, 해수는 상황에 따라 유연하게 흘러가려 해 함께 일을 진행할 때 방식이 맞지 않는 경우가 많소. 신금이 답답함을 느끼고, 해수가 통제받는 느낌을 받는 패턴이 반복될 수 있소. 서로의 방식이 틀린 것이 아님을 인식하고, 역할을 나누어 각자의 장점을 살리는 방향으로 접근하시오.",
+  "해_해신": "신(申)과 해(亥)가 해를 이루오. 신금의 결단력 있고 현실적인 기운과 해수의 포용적이고 자유로운 기운이 보이지 않는 곳에서 서로를 방해하오. 신금은 계획대로 명확하게 처리하려 하고, 해수는 상황에 따라 유연하게 흘러가려 해 함께 일을 진행할 때 방식이 맞지 않는 경우가 많소. 신금이 답답함을 느끼고, 해수가 통제받는 느낌을 받는 패턴이 반복될 수 있소. 서로의 방식이 틀린 것이 아님을 인식하고, 역할을 나누어 각자의 장점을 살리는 방향으로 접근하시오.",
+  "해_유술": "유(酉)와 술(戌)이 해를 이루오. 유금의 세련되고 정교한 기운과 술토의 열정적이고 집중력 강한 기운이 가장 가까운 자리에서 서로를 방해하는 구조이오. 둘 다 자기 기준과 방식에 대한 자부심이 강해 서로의 방식을 쉽게 받아들이지 않으려 하오. 가까울수록 상대방의 방식이 거슬리거나 기대에 못 미친다고 느끼는 상황이 반복될 수 있소. 완벽함을 추구하는 마음을 잠시 내려놓고 상대방의 방식도 존중할 때 이 해는 조화로 바뀌오.",
+  "해_술유": "유(酉)와 술(戌)이 해를 이루오. 유금의 세련되고 정교한 기운과 술토의 열정적이고 집중력 강한 기운이 가장 가까운 자리에서 서로를 방해하는 구조이오. 둘 다 자기 기준과 방식에 대한 자부심이 강해 서로의 방식을 쉽게 받아들이지 않으려 하오. 가까울수록 상대방의 방식이 거슬리거나 기대에 못 미친다고 느끼는 상황이 반복될 수 있소. 완벽함을 추구하는 마음을 잠시 내려놓고 상대방의 방식도 존중할 때 이 해는 조화로 바뀌오.",
+};
+
+function buildCrossRelDesc2(r: { kind: string; chars: string[] }): string {
+  const key = `${r.kind}_${r.chars.join("")}`;
+  const reverseKey = `${r.kind}_${[...r.chars].reverse().join("")}`;
+  return CROSS_DESC[key] ?? CROSS_DESC[reverseKey] ?? (KIND_MEANING[r.kind as keyof typeof KIND_MEANING]?.effect ?? "");
+}
+
+const REL_SCORE_G: Record<string, number> = {
+  "삼합":   +12, "천간합": +8, "육합":   +7,
+  "천간충": -8,  "원진":   -7, "충":     -6,
+  "형":     -5,  "해":     -4, "파":     -3,
+};
+const SCORE_LABELS_G: [number, string][] = [
+  [90, "천생연분"], [80, "빛나는 인연"], [70, "좋은 조화"],
+  [60, "무난한 궁합"], [50, "노력이 필요한 궁합"], [0, "극과 극의 만남"],
+];
+
+function calcKunghapScoreG(rels: { kind: string }[]): { score: number; label: string } {
+  const raw = rels.reduce((acc, r) => acc + (REL_SCORE_G[r.kind] ?? 0), 70);
+  const score = Math.min(100, Math.max(0, raw));
+  const label = (SCORE_LABELS_G.find(([min]) => score >= min) ?? SCORE_LABELS_G[SCORE_LABELS_G.length - 1])[1];
+  return { score, label };
+}
+
+function calcCrossRelationsG(myView: MyeongsikView, ptView: MyeongsikView): { kind: string; chars: string[]; label: string }[] {
+  return calcCrossRelationsShared(myView, ptView);
+}
+
+function buildHapChungDescG(rels: { kind: string }[], score: number): string {
+  const HAP_KINDS_LOCAL = ["천간합", "육합", "삼합"];
+  const hapRels   = rels.filter(r => HAP_KINDS_LOCAL.includes(r.kind));
+  const chungRels = rels.filter(r => !HAP_KINDS_LOCAL.includes(r.kind));
+  const hapCount  = hapRels.length;
+  const chungCount = chungRels.length;
+  const parts: string[] = [];
+  const countLine = (() => {
+    if (hapCount === 0 && chungCount === 0)
+      return `두 사람의 사주 사이에서 합(合)과 충(沖) 모두 발견되지 않았소. 기운의 충돌도 없지만 강한 연결도 없는, 비교적 중립적인 구조이오. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+    if (hapCount === 0)
+      return `두 사람의 사주 사이에서 합(合)은 발견되지 않았고, 마찰의 기운이 ${chungCount}개 작용하고 있소. 서로를 끌어당기는 기운 없이 충돌 구조만 있는 셈이오. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+    if (chungCount === 0)
+      return `두 사람의 사주 사이에서 합(合)이 ${hapCount}개 형성되어 있고, 충(沖)이나 형·파·해·원진은 발견되지 않았소. 마찰 없이 조화의 기운만 흐르는 드문 구조이오. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+    return `두 사람의 사주 사이에서 합(合)이 ${hapCount}개, 충·형·파·해·원진 등 마찰의 기운이 ${chungCount}개 발견되었소. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+  })();
+  parts.push(countLine);
+  if (hapCount > 0) {
+    const hasSamhap = hapRels.some(r => r.kind === "삼합");
+    const hasGanhap = hapRels.some(r => r.kind === "천간합");
+    const hasYukhap = hapRels.some(r => r.kind === "육합");
+    const roles: string[] = [];
+    if (hasGanhap) roles.push("생각과 의지의 방향이 자연스럽게 맞아드는 천간합");
+    if (hasYukhap) roles.push("감정과 일상의 결이 편안하게 어우러지는 육합");
+    if (hasSamhap) roles.push("두 사람의 에너지가 하나의 강한 방향으로 결집되는 삼합");
+    if (roles.length > 0)
+      parts.push(`합(合)은 두 사람 사이에서 ${roles.join(", ")}의 기운으로 작용하오. 이 합이 있는 영역에서 두 사람은 억지로 맞추지 않아도 자연스럽게 통하게 되며, 함께 있을 때 편안함과 연결감의 근원이 되오.`);
+  }
+  if (chungCount > 0) {
+    const hasWonjin = chungRels.some(r => r.kind === "원진");
+    const hasHyeong = chungRels.some(r => r.kind === "형");
+    const hasChung  = chungRels.some(r => r.kind === "충" || r.kind === "천간충");
+    const hasPa     = chungRels.some(r => r.kind === "파");
+    const hasHae    = chungRels.some(r => r.kind === "해");
+    const chungRoles: string[] = [];
+    if (hasChung)  chungRoles.push("의견과 방향이 부딪히는 직접적인 충돌");
+    if (hasHyeong) chungRoles.push("겉으로 드러나지 않고 내면에서 쌓이는 마찰");
+    if (hasWonjin) chungRoles.push("설명하기 어려운 내면의 거리감");
+    if (hasPa)     chungRoles.push("시작은 좋지만 중간에 어긋나는 어색함");
+    if (hasHae)    chungRoles.push("선의가 오해로 전달되는 뜻밖의 갈등");
+    const chungStr = chungRoles.length > 0 ? chungRoles.join(", ") + "의 기운" : "마찰과 긴장의 기운";
+    parts.push(`충(沖)·형·파·해·원진은 두 사람 사이에서 ${chungStr}으로 작용하오. 이 기운들이 반드시 관계를 해치는 것은 아니오. 충돌이 있는 자리에서 서로를 더 깊이 이해하게 되고, 마찰이 있어야 성장도 있는 법이오.`);
+  }
+  const conclusion = (() => {
+    if (score >= 90) return `총평하자면, 이 관계는 사주 궁합상 매우 드문 강한 조화를 이루고 있소. 기운의 연결이 여러 겹으로 탄탄하게 쌓여 있어, 함께할수록 서로에게 힘이 되고 안정이 되는 인연이오.`;
+    if (score >= 80) return `총평하자면, 이 관계는 조화로운 기운이 마찰보다 더 강하게 흐르고 있소. 함께할 때 자연스러운 편안함이 있고, 서로를 이해하려는 마음이 있다면 마찰도 충분히 소화해낼 수 있는 구조이오.`;
+    if (score >= 70) return `총평하자면, 이 관계는 맞는 부분과 어긋나는 부분이 공존하는 현실적인 궁합이오. 무조건 잘 맞는 것도, 무조건 힘든 것도 아니오. 서로의 다름을 인정하고 조율하는 노력 위에서 이 관계는 단단해질 수 있소.`;
+    if (score >= 60) return `총평하자면, 이 관계는 조화보다 마찰의 기운이 더 강하게 작용하고 있소. 자연스럽게 흐르기 위해서는 의식적인 소통과 배려가 꾸준히 필요하오.`;
+    if (score >= 50) return `총평하자면, 이 관계는 여러 층위에서 충돌하는 기운이 강하오. 쉽게 흐르는 관계는 아니지만, 가장 어려운 궁합이 가장 강렬한 성장을 이끌기도 하오.`;
+    return `총평하자면, 이 관계는 사주 궁합상 매우 도전적인 구조이오. 서로를 끌어당기는 기운보다 부딪히는 기운이 훨씬 강하여, 자연스럽게 흐르기 어려운 관계이오.`;
+  })();
+  parts.push(conclusion);
+  return parts.join("\n\n");
+}
+
+// 합·충 인터랙티브 카드 (두 명식 나란히 + 관계 버튼)
+function KunghapRelationCardG({ myView, partnerView, myName, partnerName, myColor, partnerColor }: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myName: string; partnerName: string;
+  myColor: string; partnerColor: string;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const rels = calcCrossRelationsG(myView, partnerView);
+  const activeChars: Set<string> = new Set(selected !== null ? rels[selected].chars : []);
+  const isActive = (kor: string) => selected === null || activeChars.has(kor);
+
+  const PillarCol = ({ p }: { p: MyeongsikView["pillars"][0] }) => (
+    <div className="flex flex-col items-center gap-0.5">
+      <span className="text-[9px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.gan)) ? 1 : 0.2 }}>
+        {p.sipTop.replace("(나)", "") || "—"}
+      </span>
+      <div className="w-full" style={{ aspectRatio: "1", transition: "filter 0.2s, opacity 0.2s", filter: isActive(toKor(p.gan)) ? "none" : "blur(1px)", opacity: isActive(toKor(p.gan)) ? 1 : 0.18 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
+      <div className="w-full" style={{ aspectRatio: "1", transition: "filter 0.2s, opacity 0.2s", filter: isActive(toKor(p.ji)) ? "none" : "blur(1px)", opacity: isActive(toKor(p.ji)) ? 1 : 0.18 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
+      <span className="text-[9px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.ji)) ? 1 : 0.2 }}>
+        {p.sipBot || "—"}
+      </span>
+    </div>
+  );
+
+  const renderSide = (view: MyeongsikView, name: string, color: string) => (
+    <div className="flex-1">
+      <p className="text-[12px] font-bold mb-1.5 text-center" style={{ color }}>{name}님</p>
+      <div className="rounded-xl p-2" style={{ background: WHITE, border: `1.5px solid ${color}30` }}>
+        <div className="grid grid-cols-4 gap-1">
+          {view.pillars.map((p, i) => <PillarCol key={i} p={p} />)}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="mx-5 mb-4 rounded-2xl p-3.5" style={{ background: CREAM, border: `1px solid ${INK}12` }}>
+      <div className="flex gap-2 mb-4">
+        {renderSide(myView, myName, myColor)}
+        <div style={{ width: 1, background: `${INK}10`, flexShrink: 0 }} />
+        {renderSide(partnerView, partnerName, partnerColor)}
+      </div>
+      {rels.length === 0 ? (
+        <p className="text-[12px] text-center py-2" style={{ color: MUTE }}>두 사주 사이에 특별한 합·충·형·파·해·원진이 없소.</p>
+      ) : (() => {
+        const HAP_KINDS_LOCAL = ["천간합", "육합", "삼합"];
+        const CHUNG_KINDS = ["천간충", "충", "형", "파", "해", "원진"];
+        const hapRels  = rels.map((r, i) => ({ r, i })).filter(({ r }) => HAP_KINDS_LOCAL.includes(r.kind));
+        const chungRels = rels.map((r, i) => ({ r, i })).filter(({ r }) => CHUNG_KINDS.includes(r.kind));
+        const HAP_GROUP_COLOR = "#2563eb";
+        const CHUNG_GROUP_COLOR = "#dc2626";
+        const renderBtn = ({ r, i }: { r: { kind: string; chars: string[]; label: string }; i: number }) => {
+          const m = KIND_META[r.kind as keyof typeof KIND_META];
+          const isSelected = selected === i;
+          return (
+            <button
+              key={i}
+              onClick={() => setSelected(isSelected ? null : i)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold"
+              style={{ background: isSelected ? m.color : m.bg, color: isSelected ? "#fff" : m.color, border: `1px solid ${m.color}`, transition: "all 0.15s" }}
+            >
+              <span className="text-[11px] font-medium opacity-80">{r.kind}</span>
+              <span>{r.chars.join(HAP_KINDS_LOCAL.includes(r.kind) ? " + " : " ↔ ")}</span>
+            </button>
+          );
+        };
+        return (
+          <>
+            {hapRels.length > 0 && (
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: `${HAP_GROUP_COLOR}12`, color: HAP_GROUP_COLOR }}>합(合)</span>
+                  <div className="flex-1 h-px" style={{ background: `${HAP_GROUP_COLOR}20` }} />
+                </div>
+                <div className="flex flex-wrap gap-2">{hapRels.map(renderBtn)}</div>
+              </div>
+            )}
+            {chungRels.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: `${CHUNG_GROUP_COLOR}12`, color: CHUNG_GROUP_COLOR }}>충(沖)</span>
+                  <div className="flex-1 h-px" style={{ background: `${CHUNG_GROUP_COLOR}20` }} />
+                </div>
+                <div className="flex flex-wrap gap-2">{chungRels.map(renderBtn)}</div>
+              </div>
+            )}
+            {selected !== null && (() => {
+              const r = rels[selected];
+              const m = KIND_META[r.kind as keyof typeof KIND_META];
+              return (
+                <div className="rounded-xl px-4 py-3 mt-2" style={{ background: `${m.color}10`, borderLeft: `3px solid ${m.color}` }}>
+                  <p className="text-[12px] font-bold mb-1.5" style={{ color: m.color }}>
+                    {r.kind} · {r.chars.join(HAP_KINDS_LOCAL.includes(r.kind) ? " + " : " ↔ ")}
+                  </p>
+                  <p className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{buildCrossRelDesc2(r)}</p>
+                </div>
+              );
+            })()}
+          </>
+        );
+      })()}
+    </div>
+  );
+}
+
+// 합·충 종합 스코어 카드
+function HapChungScoreCardG({ data, hapCount, chungCount }: { data: Record<string, unknown> | null; hapCount: number; chungCount: number }) {
+  if (!data) return null;
+  const score = (data.score as number | undefined) ?? 75;
+  const label = (data.label as string | undefined) ?? "";
+  const s = Math.min(100, Math.max(0, score));
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 110, cy = 100, r = 72;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? HAP_COLOR : s >= 60 ? CH6_COLOR : s >= 40 ? CHUNG_COLOR : MUTE;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+      <div className="px-5 pt-4 pb-2">
+        <svg viewBox="0 10 220 100" style={{ width: "100%", maxHeight: 120 }}>
+          <defs>
+            <linearGradient id="gaugeGradE3" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={CHUNG_COLOR} />
+              <stop offset="50%" stopColor={CH6_COLOR} />
+              <stop offset="100%" stopColor={HAP_COLOR} />
+            </linearGradient>
+          </defs>
+          <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#eee" strokeWidth="18" strokeLinecap="round" />
+          <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#gaugeGradE3)" strokeWidth="18" strokeLinecap="round" strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+          <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx={cx} cy={cy} r="5" fill={INK} />
+          <text x={cx} y={cy - 12} textAnchor="middle" fontSize="24" fontWeight="900" fill={COLOR}>{s}</text>
+        </svg>
+        <p className="text-center text-[13px] font-bold mb-1" style={{ color: COLOR }}>{label}</p>
+      </div>
+      <div className="flex gap-3 px-5 pb-4">
+        <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl" style={{ background: `${HAP_COLOR}10`, border: `1px solid ${HAP_COLOR}20` }}>
+          <span className="text-[18px]">🌿</span>
+          <div>
+            <p className="text-[16px] font-black leading-none" style={{ color: HAP_COLOR }}>{hapCount}</p>
+            <p className="text-[10px]" style={{ color: MUTE }}>합(合)</p>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl" style={{ background: `${CHUNG_COLOR}10`, border: `1px solid ${CHUNG_COLOR}20` }}>
+          <span className="text-[18px]">⚡</span>
+          <div>
+            <p className="text-[16px] font-black leading-none" style={{ color: CHUNG_COLOR }}>{chungCount}</p>
+            <p className="text-[10px]" style={{ color: MUTE }}>충(沖)</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -6522,80 +6852,87 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제3장 · 합·충 ═══════════ */}
+      {/* ═══════════ 제3장 · 합과 충 ═══════════ */}
       {ch === "3" && (() => {
-        const myName      = name || "나";
-        const partnerName = report?.partnerName || "상대방";
-        const hapList     = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
-        const chungList   = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
-        const overallScore = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
-        const hapItems    = (hapList?.items   as Array<Record<string, unknown>> | undefined) ?? [];
-        const chungItems  = (chungList?.items as Array<Record<string, unknown>> | undefined) ?? [];
-        void myName; void partnerName;
+        const myName3 = report?.name || "나";
+        const myFirstName3 = myName3.slice(1) || myName3;
+        const partnerName3 = report?.partnerName || "상대방";
+        const partnerFirstName3 = partnerName3.slice(1) || partnerName3;
+        const overallScoreLlm = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
+        const crossRels = (report?.view && report?.partnerView) ? calcCrossRelationsG(report.view, report.partnerView) : [];
+        const { score: computedScore, label: computedLabel } = calcKunghapScoreG(crossRels);
+        const computedDesc = buildHapChungDescG(crossRels, computedScore);
+        const overallScore = overallScoreLlm
+          ? { ...overallScoreLlm, score: computedScore, label: computedLabel, desc: computedDesc }
+          : { score: computedScore, label: computedLabel, desc: computedDesc };
         return (
           <>
-            {/* 커버 */}
+            {/* 다크 헤더 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 합·충</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+
+            {/* 커버 이미지 */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+
             <Quote>{`두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오.`}</Quote>
 
-            {/* 두 명식 합충 시각화 — 기존 GanjiRelation 컴포넌트 활용 */}
-            <section className="px-6 pt-2 pb-4">
-              <Heading>두 명식을 합쳐서 보면</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                두 사람의 천간·지지 글자들이 서로 어떻게 반응하는지 한눈에 보이오. 선으로 연결된 글자들이 합이나 충 관계에 있소.
-              </p>
-              <GanjiRelation view={report?.view ?? null} />
-            </section>
-
-            {/* 합(合) 목록 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>합(合) — 끌어당기는 힘</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                합은 두 글자가 서로를 끌어당기는 힘이오. 이 인력이 강할수록 헤어졌어도 다시 만나게 되는 힘이 작용하오.
-              </p>
-            </section>
-            {hapItems.length > 0 ? hapItems.map((item, i) => (
-              <JHapCard key={i} item={item} index={i} />
-            )) : (
-              <div className="mx-5 mb-4 px-5 py-4 rounded-2xl" style={{ background: `${JCH6_COLOR}08`, border: `1px solid ${JCH6_COLOR}18` }}>
-                <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 뚜렷한 합이 없소. 끌어당기는 힘보다 각자의 독립성이 강한 관계이오.</p>
+            {/* 합·충 개념 안내 배너 */}
+            <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${CH6_COLOR}15` }}>
+              <div className="flex">
+                <div className="flex-1 px-4 py-4" style={{ background: `${HAP_COLOR}08`, borderRight: `1px solid ${INK}06` }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[16px]">🌿</span>
+                    <p className="text-[12px] font-black" style={{ color: HAP_COLOR }}>합(合)</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 서로 끌어당겨 하나가 되는 것. 관계를 깊게 하고 안정감을 주오. 합이 많을수록 두 사람은 자연스럽게 가까워지오.</p>
+                </div>
+                <div className="flex-1 px-4 py-4" style={{ background: `${CHUNG_COLOR}08` }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[16px]">⚡</span>
+                    <p className="text-[12px] font-black" style={{ color: CHUNG_COLOR }}>충(沖)</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 정면으로 충돌하는 것. 갈등과 자극을 동시에 주오. 충이 있다고 나쁜 것만은 아니니 서로를 깨어나게 하는 힘이오.</p>
+                </div>
               </div>
+            </div>
+
+            {/* 두 명식 + 합충 인터랙티브 */}
+            {report?.view && report?.partnerView && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람 글자들과의 관계</Heading></div>
+                <KunghapRelationCardG
+                  myView={report.view} partnerView={report.partnerView}
+                  myName={myFirstName3} partnerName={partnerFirstName3}
+                  myColor={JCH1_COLOR} partnerColor={JCH2_COLOR}
+                />
+              </section>
             )}
 
-            {/* 충(沖) 목록 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>충(沖) — 부딪히는 힘</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                충은 두 글자가 서로 부딪히는 힘이오. 충이 있다고 인연이 아닌 것이 아니오 — 이 충돌을 어떻게 다루느냐가 재회의 열쇠이오.
-              </p>
+            {/* 종합 궁합 점수 카드 */}
+            <section className="pb-4">
+              <div className="px-5"><Heading>두 사람의 합충 점수는?</Heading></div>
+              <HapChungScoreCardG data={overallScore} hapCount={crossRels.filter(r => ["천간합","육합","삼합"].includes(r.kind)).length} chungCount={crossRels.filter(r => !["천간합","육합","삼합"].includes(r.kind)).length} />
             </section>
-            {chungItems.length > 0 ? chungItems.map((item, i) => (
-              <JChungCard key={i} item={item} index={i} />
-            )) : (
-              <div className="mx-5 mb-4 px-5 py-4 rounded-2xl" style={{ background: `${JCH6_CHUN}08`, border: `1px solid ${JCH6_CHUN}18` }}>
-                <p className="text-[13px]" style={{ color: MUTE }}>두 사주 사이에 강한 충이 없소. 크게 부딪히지 않는 편안한 관계이오.</p>
-              </div>
+
+            {/* 합·충 종합 분석 */}
+            {computedDesc && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>합·충 종합 분석</Heading></div>
+                <div className="mx-5 rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                  <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{computedDesc}</p>
+                </div>
+              </section>
             )}
 
-            {/* 종합 궁합 점수 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>종합 궁합 점수</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
-                합과 충을 모두 종합한 두 사람의 사주 궁합 총점이오. 이 점수가 재회의 가능성과 방향에 어떤 의미인지 풀어보겠소.
-              </p>
-            </section>
-            <HapChungSummaryCard data={overallScore} />
+            {/* ── 마무리 인용구 ── */}
+            <Quote>{`합·충을 알았으니,\n두 사람, 왜 헤어졌는지\n살펴보겠소.`}</Quote>
 
-            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-            <Quote>{`"합·충을 알았으니,\n두 사람, 왜 헤어졌는지\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
