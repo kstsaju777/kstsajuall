@@ -6544,7 +6544,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
+            <Quote>{`두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오.`}</Quote>
 
             {/* 두 명식 합충 시각화 — 기존 GanjiRelation 컴포넌트 활용 */}
             <section className="px-6 pt-2 pb-4">
