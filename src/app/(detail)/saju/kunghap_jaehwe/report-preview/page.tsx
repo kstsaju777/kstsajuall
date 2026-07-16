@@ -4018,8 +4018,8 @@ function FinalMessageCard({ data, myName, partnerName }: { data: Record<string, 
 // 장번호 → 표시 제목 (재회궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 재회궁합에 대하여",
-  "1":  "제1장 · 나의 사주 원국",
-  "2":  "제2장 · 상대의 사주 원국",
+  "1":  "제1장 · 나는 어떤 사람인가?",
+  "2":  "제2장 · 상대는 어떤 사람인가?",
   "3":  "제3장 · 두 사람, 왜 헤어졌는가",
   "4":  "제4장 · 나는 이 사람을 아직 어떻게 보는가",
   "5":  "제5장 · 상대는 나를 아직 어떻게 보는가",
@@ -5214,8 +5214,8 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "재회궁합에 대하여",                          no: "0" },
-  { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                            no: "1" },
-  { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                          no: "2" },
+  { disp: "제1장",  chip: "나의원국", title: "나는 어떤 사람인가?",                       no: "1" },
+  { disp: "제2장",  chip: "상대원국", title: "상대는 어떤 사람인가?",                     no: "2" },
   { disp: "제3장",  chip: "이별원인", title: "두 사람, 왜 헤어졌는가",                    no: "3" },
   { disp: "제4장",  chip: "내시각",  title: "나는 이 사람을 아직 어떻게 보는가",          no: "4" },
   { disp: "제5장",  chip: "상대시각", title: "상대는 나를 아직 어떻게 보는가",            no: "5" },
@@ -6254,31 +6254,56 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
+      {/* ═══════════ 제1장 · 나는 어떤 사람인가 ═══════════ */}
       {ch === "1" && (() => {
-        const myWonguk       = (jc.myWonguk       as Record<string, unknown> | undefined) ?? null;
-        const myNature       = (jc.myNature       as Record<string, unknown> | undefined) ?? null;
+        const myWonguk        = (jc.myWonguk        as Record<string, unknown> | undefined) ?? {};
+        const myNature        = (jc.myNature        as Record<string, unknown> | undefined) ?? null;
         const myRelationStyle = (jc.myRelationStyle as Record<string, unknown> | undefined) ?? null;
+        const wongukParas = (myWonguk.paragraphs as string[] | undefined) ?? [];
         return (
           <>
+            {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 어떤 사람인가?</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 300 }}>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_1/kunghap_jaehwe_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"재회를 논하기 전,\n먼저 나의 사주를 살펴보겠소.\n내가 어떤 기운의 사람인지 아는 것이 먼저이오."`}</Quote>
+            {/* ── 사주팔자 소개 텍스트 ── */}
+            <div className="px-8 py-12 text-center">
+              <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`${name.slice(1) || name}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name.slice(1) || name}님의 사주팔자요.`}
+              </p>
+            </div>
 
-            {/* 명식 표 */}
-            <section className="pb-2">
-              <div className="px-6"><Heading>나의 명식</Heading></div>
-              <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <MyeongsikTable
+                view={report?.view ?? null}
+                name={name}
+                birth={report?.birth ?? null}
+                header={
+                  <div className="text-center">
+                    <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name.slice(1) || name}님의 사주팔자</p>
+                    {report?.birth?.date && (
+                      <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                        {report.birth.date}{" "}
+                        {report.birth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                        {(report.birth.gender || gender) === "female" ? "여자" : "남자"}
+                      </p>
+                    )}
+                  </div>
+                }
+              />
             </section>
 
+            {/* ── 명식 버튼 안내 ── */}
             {(() => {
               const isFem = (report?.gender || gender) === "female" || (report?.gender || gender) === "여성" || (report?.gender || gender) === "여자";
               const color = isFem ? "pink" : "blue";
@@ -6297,9 +6322,13 @@ function ReportPreviewInner() {
                 </Quote>
               );
             })()}
+
+            {/* ── 구분선 ── */}
             <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
               <div style={{ width: 1, height: 40, background: "#ccc" }} />
             </div>
+
+            {/* ── AI 사주화 ── */}
             {report?.sajuImageUrl && (
               <div>
                 <div className="px-6 text-center mb-3">
@@ -6323,35 +6352,35 @@ function ReportPreviewInner() {
               </div>
             )}
 
-            {/* 오행 분포 */}
-            <section className="px-6 pt-12 pb-2">
-              <Heading>나의 오행 분포</Heading>
-              <P>목·화·토·금·수 다섯 기운이 내 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 관계를 맺고 유지하는 방식, 그리고 이별 후 감정을 처리하는 방향을 결정하오.</P>
+            {/* ── 타고난 기운의 뿌리 ── */}
+            <section className="pt-12 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+              </div>
+              <OhaengDonut view={report?.view ?? null} />
+              <div className="px-5 mt-4">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
+                ))}
+              </div>
             </section>
-            <OhaengDonut view={report?.view ?? null} />
 
-            {/* 원국 풀이 카드 */}
-            <section className="px-6 pt-6 pb-2">
-              <Heading>나의 사주 풀이</Heading>
-              <P>일간(日干)을 중심으로 내 사주의 오행 기운과 신강·신약의 흐름을 살펴보겠소. 이 풀이는 내가 어떤 에너지로 관계에 임하는지, 이별 이후 어떤 심리적 흐름을 타는지를 이해하는 출발점이 되오.</P>
+            {/* ── 빛과 그림자 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <JNatureCard data={myNature} color={JCH1_COLOR} label="나를 대표하는 기질" />
             </section>
-            <JWongukCard data={myWonguk} color={JCH1_COLOR} pale={JCH1_PALE} />
 
-            {/* 기질 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>나의 기질</Heading>
-              <P>사주 원국에 깃든 본연의 성품이오. 이 기질이 평소 관계에서 어떻게 빛나는지, 그리고 헤어진 이후 어떤 그림자를 드리우는지 함께 살펴보겠소. 재회를 고민할 때 가장 먼저 이해해야 하는 것이 바로 자신의 기질이오.</P>
+            {/* ── 나의 관계 스타일 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>나의 관계 스타일</h2>
+              </div>
+              <RelationStyleCard data={myRelationStyle} color={JCH1_COLOR} pale={JCH1_PALE} />
             </section>
-            <JNatureCard data={myNature} color={JCH1_COLOR} label="나를 대표하는 기질" />
 
-            {/* 관계 스타일 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>나의 관계 스타일</Heading>
-              <P>사주가 보여주는 나의 연애·관계 방식이오. 어떻게 사랑을 표현하고, 갈등이 생겼을 때 어떻게 반응하며, 이별 후 어떤 방식으로 마음을 닫거나 여는지 — 이 스타일을 알아야 재회의 가능성도 가늠할 수 있소.</P>
-            </section>
-            <RelationStyleCard data={myRelationStyle} color={JCH1_COLOR} pale={JCH1_PALE} />
-
-            <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
             <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
@@ -6368,8 +6397,8 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대는 어떤 사람인가?</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
