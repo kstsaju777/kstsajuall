@@ -6368,7 +6368,7 @@ function ReportPreviewInner() {
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>{name.slice(1) || name}님 사주의 빛과 그림자</h2>
               </div>
               <JNatureCard data={myNature} color={JCH1_COLOR} label="" />
             </section>
