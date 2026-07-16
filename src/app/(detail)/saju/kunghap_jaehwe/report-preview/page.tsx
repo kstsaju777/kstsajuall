@@ -2593,12 +2593,6 @@ function RelationStyleCard({ data, color, pale }: { data: Record<string, unknown
           {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>&ldquo;{intro}&rdquo;</p>}
         </div>
       )}
-      {/* callout — 재회 맥락에서 이 관계 스타일이 갖는 핵심 함의 */}
-      {callout && (
-        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${color}0c`, borderLeft: `3px solid ${color}` }}>
-          <p className="text-[13.5px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
-        </div>
-      )}
       {/* 풀이 단락 — 이 스타일이 재회를 앞두고 어떻게 작동하는지 상세 분석 */}
       {paragraphs.map((p, i) => (
         <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all" }}>{p}</p>
