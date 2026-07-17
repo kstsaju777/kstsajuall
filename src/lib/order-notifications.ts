@@ -35,7 +35,7 @@ export function sendAlimtalk({
         from: "01096768847",
         kakaoOptions: {
           pfId: "KA01PF260705184430144ZqSBMiZSdjb",
-          templateId: "KA01TP260705185306355QVmxcJYJwzX",
+          templateId: "KA01TP260708140516358jWYsx9PkJ8n",
           variables: {
             "#{이름}": customerName,
             "#{결과링크}": resultUrl,
