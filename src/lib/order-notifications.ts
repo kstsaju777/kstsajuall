@@ -14,10 +14,12 @@ export function sendAlimtalk({
   customerPhone,
   customerName,
   resultUrl,
+  productName,
 }: {
   customerPhone: string;
   customerName: string;
   resultUrl: string;
+  productName: string;
 }) {
   const phone = customerPhone.replace(/\D/g, "");
   if (!phone) return Promise.resolve();
@@ -38,6 +40,7 @@ export function sendAlimtalk({
           templateId: "KA01TP260708140516358jWYsx9PkJ8n",
           variables: {
             "#{이름}": customerName,
+            "#{상품명}": productName,
             "#{결과링크}": resultUrl,
           },
         },
