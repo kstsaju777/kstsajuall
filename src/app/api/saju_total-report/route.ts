@@ -189,7 +189,7 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
     const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
     if (si?.phone) {
       const reportUrl = `https://www.hongyeondang.com/saju/saju_total/report-preview?id=${id}`;
-      sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+      await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
     }
   }
   return NextResponse.json({ ok: true });
@@ -429,7 +429,7 @@ export async function PATCH(request: NextRequest) {
         const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultData.order_id).maybeSingle();
         if (si?.phone) {
           const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${id}`;
-          sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
+          await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", resultUrl: reportUrl });
         }
       }
     }
