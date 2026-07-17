@@ -412,14 +412,7 @@ export async function PATCH(request: NextRequest) {
       let content: Record<string, unknown> = {};
       try { content = JSON.parse(resultRow.interpretation_md) || {}; } catch { content = {}; }
       const totalChapters = Object.keys(JANYEO_KUNGHAP_CHAPTER_SECTIONS).map(Number);
-      const allDone = totalChapters.every(n => isJanyeoKunghapChapterReady(content, n));
-      if (allDone) {
-        const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultRow.order_id).maybeSingle();
-        if (si?.phone) {
-          const reportUrl = `https://www.hongyeondang.com/saju/kunghap_janyeo/report-preview?id=${id}`;
-          await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
-        }
-      }
+      // 재생성 시에는 알림톡 미발송
     }
     return NextResponse.json({ sajuImageUrl, partnerSajuImageUrl });
   } catch (e) {
