@@ -141,18 +141,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "결과 레코드 저장 실패", detail: resultErr?.message }, { status: 500 });
     }
 
-    // 알림 발송 (fire-and-forget)
     const reportUrl = `https://www.hongyeondang.com/${REPORT_PATH}?id=${result.id}`;
-    sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE });
-    if (order.guest_email) {
-      sendOrderEmail({
-        customerEmail: order.guest_email,
-        customerName: input.name ?? "고객",
-        productName: PRODUCT_NAME,
-        price: PRODUCT_PRICE,
-        reportUrl,
-      });
-    }
+    await Promise.all([
+      sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE }),
+      order.guest_email ? sendOrderEmail({ customerEmail: order.guest_email, customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl }) : Promise.resolve(),
+    ]);
 
     return NextResponse.json({
       resultId: result.id,
