@@ -5,7 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 
 const bodySchema = z.object({
   productSlug: z.string(),
-  email: z.string().email().or(z.literal("")).optional(),
+  email: z.string().optional(),
   phone: z.string().max(20).optional(),
   name: z.string().max(50),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
