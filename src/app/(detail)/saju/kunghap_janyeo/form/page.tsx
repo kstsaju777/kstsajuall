@@ -602,9 +602,9 @@ function StepGender({ onPrev, onNext, initial, isPartner }: { onPrev: () => void
                 </>
               )}
             </h2>
-            {/* 양력/음력/윤달 — 항상 노출 (자녀는 윤달 제외) */}
+            {/* 양력/음력 — 항상 노출 */}
             <div className="flex gap-2 mb-3">
-              {(isPartner ? ["양력", "음력"] : ["양력", "음력", "윤달"]).map((c) => (
+              {["양력", "음력"].map((c) => (
                 <button key={c} onClick={() => setCalendar(c)}
                   className="flex-1 py-2 rounded-xl text-[13px] font-bold transition-all"
                   style={{
