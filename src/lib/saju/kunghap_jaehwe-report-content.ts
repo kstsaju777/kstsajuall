@@ -59,9 +59,11 @@ export function buildJaehweKunghapChapterPrompt(
     name: string;
     gender: "male" | "female";
     manseryeokText: string;
+    ilgan?: string;
     partnerName: string;
     partnerGender: "male" | "female";
     partnerManseryeokText: string;
+    partnerIlgan?: string;
     birthYear?: number;
     breakupReason?: string;
     whoEnded?: string;
@@ -97,7 +99,9 @@ export function buildJaehweKunghapChapterPrompt(
           : "",
       ].join("")
     : "";
-  const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）\n${input.manseryeokText}\n\n상대방 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）\n${input.partnerManseryeokText}${overallScoreBlock}`;
+  const myIlganNote = input.ilgan ? `\n⚑ 본인 일간(일주 천간): ${input.ilgan}` : "";
+  const ptIlganNote = input.partnerIlgan ? `\n⚑ 상대방 일간(일주 천간): ${input.partnerIlgan}` : "";
+  const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}\n${input.manseryeokText}\n\n상대방 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）${ptIlganNote}\n${input.partnerManseryeokText}${overallScoreBlock}`;
 
   const schemas: Record<number, string> = {
     1: `{

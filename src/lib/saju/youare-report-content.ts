@@ -585,7 +585,7 @@ export function buildYouareChapterPrompt(
 
   const user = `아래는 ${childLabel}의 사주 명식입니다.
 
-${input.manseryeokText}${honorificBlock}
+${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 ${graphData}${ohaengCountNote}${abilityData}${yongsinNote}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

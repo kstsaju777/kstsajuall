@@ -76,7 +76,7 @@ const createSchema = z.object({
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; krName?: string; sipTop?: string; sipBot?: string }[]; daeun?: { label: string; gz: string; krName?: string; yearStart: number; active: boolean; sipTop?: string; sipBot?: string }[] }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; krName?: string; sipTop?: string; sipBot?: string }[]; daeun?: { label: string; gz: string; krName?: string; yearStart: number; active: boolean; sipTop?: string; sipBot?: string }[]; ilganChar?: string }) {
   const { system, user } = buildJanyeoChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -294,6 +294,7 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
       seun: seunWithSip,
       daeun: daeunWithSip,
+      ilganChar: ilgan || undefined,
     });
     const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
     const myGender: "male" | "female" = stored?.gender === "female" ? "female" : "male";

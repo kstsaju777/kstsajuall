@@ -603,6 +603,8 @@ export function buildEhonKunghapChapterPrompt(
     reconcileScore?: number;
     reconcileEnablers?: Array<{ kind: string; label: string; meaning: string }>;
     reconcileBarriers?: Array<{ kind: string; label: string; meaning: string }>;
+    ilgan?: string;
+    partnerIlgan?: string;
   }
 ): { system: string; user: string } {
   const myLabel = input.name ? (input.name.length > 1 ? input.name.slice(1) : input.name) : "의뢰인";
@@ -696,13 +698,16 @@ ${input.reconcileBarriers && input.reconcileBarriers.length > 0
 ⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.
 ⚠️ 한국어 합성어의 글자를 절대 변형하지 마오. 조사 규칙(와/과, 이/가)을 단어 내부에 적용하면 절대 안 되오. 예: "효과적"을 "효와적"으로, "결과"를 "결와"로 쓰지 마오. 단어 자체의 철자는 그대로 유지하오.`;
 
+  const myIlganNote = input.ilgan ? `\n⚑ 본인 일간(일주 천간): ${input.ilgan}` : "";
+  const ptIlganNote = input.partnerIlgan ? `\n⚑ 상대방 일간(일주 천간): ${input.partnerIlgan}` : "";
+
   const contextBlock = `
 [의뢰인 정보]
-이름: ${myLabel} (${myGenderLabel})
+이름: ${myLabel} (${myGenderLabel})${myIlganNote}
 ${input.manseryeokText}
 
 [상대방 정보]
-이름: ${partnerLabel} (${partnerGenderLabel})
+이름: ${partnerLabel} (${partnerGenderLabel})${ptIlganNote}
 ${input.partnerManseryeokText}${honorificBlock}${ch3Block}${profile7Block}${flow7Block}${sijuBlock}${wealthBlock}${timingBlock}${reconcileScoreBlock}${reconcileRelBlock}
 `.trim();
 

@@ -508,6 +508,7 @@ export function buildJanyeoChapterPrompt(
     birthYear?: number;
     seun?: { label: string; gz: string }[];
     daeun?: { label: string; gz: string; yearStart: number; active: boolean }[];
+    ilganChar?: string;
   }
 ): { system: string; user: string } {
   const theme = JANYEO_CH_THEME[chapter] ?? `[제${chapter}장]`;
@@ -597,7 +598,7 @@ export function buildJanyeoChapterPrompt(
 
 【호칭 규칙】 풀이 본문에서 이 아이를 지칭할 때는 반드시 "${honor}"라는 호칭을 사용하시오. "그", "그녀", "그대", "당신"은 절대 쓰지 마시오. 호칭이 반복되어 어색하면 "이 아이"로 대체하시오.
 
-${input.manseryeokText}${honorificBlock}
+${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}${abilityData}${ohaengCountNote}${seunDaeunNote}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

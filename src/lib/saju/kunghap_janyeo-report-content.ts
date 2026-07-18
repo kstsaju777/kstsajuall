@@ -80,6 +80,8 @@ export function buildJanyeoKunghapChapterPrompt(
     partnerGender: "male" | "female";
     partnerManseryeokText: string;
     birthYear?: number;
+    ilgan?: string;
+    partnerIlgan?: string;
   },
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
@@ -102,7 +104,9 @@ export function buildJanyeoKunghapChapterPrompt(
 ⚠️ 절대 이름을 직접 쓰거나 변형하지 마오. 반드시 위 토큰만 사용하오.
 ⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.
 ⚠️ 한국어 합성어의 글자를 절대 변형하지 마오. 조사 규칙(와/과, 이/가)을 단어 내부에 적용하면 절대 안 되오. 예: "효과적"을 "효와적"으로, "결과"를 "결와"로 쓰지 마오. 단어 자체의 철자는 그대로 유지하오.`;
-  const intro = `부모 정보:\n이름: __MY__（${genderLabel}）\n${input.manseryeokText}\n\n자녀 정보:\n이름: __PT__（${childGenderLabel}）\n${input.partnerManseryeokText}`;
+  const myIlganNote = input.ilgan ? `\n⚑ 일간(일주 천간): ${input.ilgan}` : "";
+  const ptIlganNote = input.partnerIlgan ? `\n⚑ 일간(일주 천간): ${input.partnerIlgan}` : "";
+  const intro = `부모 정보:\n이름: __MY__（${genderLabel}）${myIlganNote}\n${input.manseryeokText}\n\n자녀 정보:\n이름: __PT__（${childGenderLabel}）${ptIlganNote}\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
     1: `{

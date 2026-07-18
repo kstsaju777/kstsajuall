@@ -51,6 +51,8 @@ async function genChapterContent(chapter: number, input: {
   name: string; gender: "male" | "female"; manseryeokText: string;
   partnerName: string; partnerGender: "male" | "female"; partnerManseryeokText: string;
   birthYear?: number;
+  ilgan?: string;
+  partnerIlgan?: string;
 }) {
   const { system, user } = buildBusinessKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -314,6 +316,8 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
+    const ilgan: string | undefined = (stored?.view?.ilgan as string | undefined)?.split(" ")[0];
+    const partnerIlgan: string | undefined = (stored?.partnerView?.ilgan as string | undefined)?.split(" ")[0];
     const { obj: rawObj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -322,6 +326,8 @@ async function generateChapter(body: unknown) {
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
       partnerManseryeokText: stored?.partnerManseryeokText ?? manseryeokText,
       birthYear: birthYear || undefined,
+      ilgan,
+      partnerIlgan,
     });
     const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;
 

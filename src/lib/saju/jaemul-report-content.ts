@@ -444,6 +444,7 @@ export function buildJaemulChapterPrompt(
     pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[];
     birthYear?: number;
     seun?: { label: string; gz: string; active?: boolean }[];
+    ilganChar?: string;
   }
 ): { system: string; user: string } {
   const theme = JAEMUL_CH_THEME[chapter] ?? `[제${chapter}장]`;
@@ -691,7 +692,7 @@ ${ohaengTable}
 ${siksangJaeFlow}
 ${jaemulScoreBlock}
 ${wealthScoreBlock}
-${input.manseryeokText}${honorificBlock}
+${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

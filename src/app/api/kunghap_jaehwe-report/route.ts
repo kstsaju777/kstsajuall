@@ -123,6 +123,8 @@ async function genChapterContent(chapter: number, input: {
   overallScore?: Record<string, unknown>;
   calculatedReconnectScore?: number;
   timingScores?: Array<{ year: number; month: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }>;
+  ilgan?: string;
+  partnerIlgan?: string;
 }) {
   const myLabel    = input.name.length        > 1 ? input.name.slice(1)        : input.name;
   const ptLabel    = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
@@ -422,13 +424,18 @@ async function generateChapter(body: unknown) {
       }
     }
 
+    const ilgan: string | undefined = (stored?.view?.ilgan as string | undefined)?.split(" ")[0];
+    const partnerIlgan: string | undefined = (stored?.partnerView?.ilgan as string | undefined)?.split(" ")[0];
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
+      ilgan,
       partnerName: stored?.partnerName ?? "",
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
       partnerManseryeokText: stored?.partnerManseryeokText ?? "",
+      partnerIlgan,
       birthYear: birthYear || undefined,
       breakupReason: stored?.breakupReason || undefined,
       whoEnded: stored?.whoEnded || undefined,

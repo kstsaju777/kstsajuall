@@ -210,6 +210,8 @@ async function genChapterContent(chapter: number, input: {
   reconcileScore?: number;
   reconcileEnablers?: Array<{ kind: string; label: string; meaning: string }>;
   reconcileBarriers?: Array<{ kind: string; label: string; meaning: string }>;
+  ilgan?: string;
+  partnerIlgan?: string;
 }) {
   const { system, user } = buildEhonKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -590,6 +592,8 @@ async function generateChapter(body: unknown) {
     const myLabel   = fullName.length  > 1 ? fullName.slice(1)   : fullName;
     const ptLabel   = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
 
+    const ilgan: string | undefined = (stored?.view?.ilgan as string | undefined)?.split(" ")[0];
+    const partnerIlgan: string | undefined = (stored?.partnerView?.ilgan as string | undefined)?.split(" ")[0];
 
     const { obj: rawObj } = await genChapterContent(chapter, {
       name: fullName,
@@ -609,6 +613,8 @@ async function generateChapter(body: unknown) {
       reconcileScore,
       reconcileEnablers,
       reconcileBarriers,
+      ilgan,
+      partnerIlgan,
     });
 
     const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;

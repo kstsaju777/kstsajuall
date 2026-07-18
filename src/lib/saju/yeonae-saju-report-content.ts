@@ -489,6 +489,7 @@ export function buildYeonaeSajuChapterPrompt(
     pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[];
     birthYear?: number;
     seun?: { label: string; gz: string; active?: boolean }[];
+    ilganChar?: string;
   }
 ): { system: string; user: string; ch3Pillars?: CompatPillarObj[]; ch3RankData?: DescRankDataLocal[] } {
   const theme = YEONAE_CH_THEME[chapter] ?? `[제${chapter}장]`;
@@ -1068,7 +1069,7 @@ export function buildYeonaeSajuChapterPrompt(
 
   const user = `아래는 ${honor}의 사주 명식입니다.
 
-${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.manseryeokText}${honorificBlock}
+${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -161,6 +161,7 @@ export type ReportPromptInput = {
     deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean;
     ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number;
   };
+  ilganChar?: string; // 일간 한자 (LLM 오독 방지용)
 };
 
 // 6장 desc 지시 — JSON 바깥 plaintext로 추가 (이스케이프 문제 방지)
@@ -1524,9 +1525,10 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
   // ── 프롬프트 변수 정의 ──
   // CH_GUIDE가 {명식표1}로 시작하는 새 형식이면, 명식표1에 서버 계산값도 포함
   const isNewStyleGuide = (CH_GUIDE[chapter]?.trimStart() ?? "").startsWith("{명식표1}");
+  const ilganNote = input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}` : "";
   const manseryeokFull = isNewStyleGuide
-    ? [pillarTable, input.manseryeokText, ageGuide, deungTable, ohaengTable, wealthTable, healthTable, guiinTable].filter(Boolean).join("\n")
-    : input.manseryeokText;
+    ? [pillarTable, ilganNote, input.manseryeokText, ageGuide, deungTable, ohaengTable, wealthTable, healthTable, guiinTable].filter(Boolean).join("\n")
+    : [ilganNote, input.manseryeokText].filter(Boolean).join("\n");
 
   const baseVars: Record<string, string> = {
     이름1: input.name ?? "",
