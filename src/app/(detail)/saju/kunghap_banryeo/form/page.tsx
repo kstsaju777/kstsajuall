@@ -280,7 +280,7 @@ function StepGender({ onPrev, onNext, initial, isPartner, petType, initialName, 
             )}
             {!isPartner && <div className="mb-3" />}
             <div className="flex gap-2 mb-3">
-              {["양력", "음력", "윤달"].map((c) => (
+              {["양력", "음력"].map((c) => (
                 <button key={c} onClick={() => setCalendar(c)}
                   className="flex-1 py-2 rounded-xl text-[13px] font-bold transition-all"
                   style={{
