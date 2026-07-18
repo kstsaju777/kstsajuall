@@ -4,13 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const MENU_ITEMS = [
-  { label: "사주풀이", href: "/products?category=사주" },
-  { label: "자미두수", href: "/products?category=자미두수" },
-  { label: "타로", href: "/products?category=타로" },
-  { label: "작명", href: "/products?category=작명" },
-  { label: "기타 운세", href: "/products?category=기타" },
-];
 
 export function DetailHeader() {
   const router = useRouter();
@@ -100,22 +93,7 @@ export function DetailHeader() {
           </svg>
         </Link>
 
-        {/* 메뉴 */}
-        <nav className="flex-1 overflow-y-auto py-2">
-          {MENU_ITEMS.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="flex items-center justify-between px-6 py-4 border-b border-gray-50 hover:bg-gray-50 transition-colors"
-            >
-              <span className="text-[16px] font-semibold text-black">{item.label}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </Link>
-          ))}
-        </nav>
+        <div className="flex-1" />
 
         {/* 카카오 문의 */}
         <div className="border-t border-gray-100 px-6 py-5 flex flex-col items-center gap-2">

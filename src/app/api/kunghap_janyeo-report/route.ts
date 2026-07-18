@@ -21,6 +21,8 @@ import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { fixNamesInValue } from "@/lib/saju/fix-names";
+import { calcCrossRelations } from "@/lib/saju/kunghap-cross-relations";
+import { sipseongOfStem } from "@/lib/saju/sipseong-calc";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
 
@@ -53,6 +55,10 @@ async function genChapterContent(chapter: number, input: {
   birthYear?: number;
   ilgan?: string;
   partnerIlgan?: string;
+  crossRels?: { kind: string; chars: string[]; label: string }[];
+  hapChungBase?: number;
+  mySipseong?: string;
+  partnerSipseong?: string;
 }) {
   const fullName   = input.name        ?? "";
   const ptFullName = input.partnerName ?? "";
@@ -321,6 +327,21 @@ async function generateChapter(body: unknown) {
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
     const ilgan: string | undefined = (stored?.view?.ilgan as string | undefined)?.split(" ")[0];
     const partnerIlgan: string | undefined = (stored?.partnerView?.ilgan as string | undefined)?.split(" ")[0];
+    const crossRels = (stored?.view && stored?.partnerView)
+      ? calcCrossRelations(stored.view, stored.partnerView)
+      : undefined;
+    const REL_SCORE: Record<string, number> = {
+      "삼합": 12, "천간합": 8, "육합": 7,
+      "천간충": -8, "원진": -7, "충": -6, "형": -5, "해": -4, "파": -3,
+    };
+    const hapChungRaw = crossRels
+      ? Math.min(100, Math.max(0, crossRels.reduce((acc, r) => acc + (REL_SCORE[r.kind] ?? 0), 70)))
+      : undefined;
+    const hapChungBase = hapChungRaw !== undefined
+      ? Math.round(Math.min(100, 50 + hapChungRaw * 0.5))
+      : undefined;
+    const mySipseong = (ilgan && partnerIlgan) ? sipseongOfStem(ilgan, partnerIlgan) : undefined;
+    const partnerSipseong = (partnerIlgan && ilgan) ? sipseongOfStem(partnerIlgan, ilgan) : undefined;
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -331,6 +352,10 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
       ilgan,
       partnerIlgan,
+      crossRels,
+      hapChungBase,
+      mySipseong,
+      partnerSipseong,
     });
 
     return NextResponse.json({ sections: obj });

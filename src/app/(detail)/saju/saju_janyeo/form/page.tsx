@@ -169,7 +169,7 @@ function StepBirthDate({ onPrev, onNext, gender, initial, initialCalendar }: {
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>{greeting}</p>
         <h2 className="text-[20px] font-bold mb-6" style={{ color: TEXT_CLR }}>아이가 태어난 날짜를 알려주시오</h2>
         <div className="flex gap-2 mb-5">
-          {["양력", "음력", "윤달"].map((c) => (
+          {["양력", "음력"].map((c) => (
             <button key={c} onClick={() => setCalendar(c)}
               className="flex-1 py-2 rounded-xl text-[13px] font-bold transition-all"
               style={{

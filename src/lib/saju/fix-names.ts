@@ -58,7 +58,18 @@ export function fixNamesInText(
     }
   }
 
-  // 6. 님 뒤 잘못된 조사 교정
+  // 6. 이름+호칭 뒤 중복 호칭 제거 (예: 채은양양 → 채은양, 채은양군 → 채은양)
+  if (ptFull) {
+    for (const hon of ["님", "양", "군"]) {
+      r = r.replace(new RegExp(`${ptFull.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${hon}`, "g"), ptFull);
+    }
+  }
+  const myFull = `${myLabel}${myHonorific}`;
+  for (const hon of ["님", "양", "군"]) {
+    r = r.replace(new RegExp(`${myFull.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${hon}`, "g"), myFull);
+  }
+
+  // 7. 님 뒤 잘못된 조사 교정
   r = r
     .replace(/님는/g, "님은")
     .replace(/님가/g, "님이")

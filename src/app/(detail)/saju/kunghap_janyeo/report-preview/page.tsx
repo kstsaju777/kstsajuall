@@ -21,6 +21,7 @@ import { isJanyeoKunghapChapterReady, JANYEO_KUNGHAP_CHAPTER_SECTIONS } from "@/
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
+import { yearGanji } from "@/lib/saju/ganji-calc";
 import { calcCrossRelations as calcCrossRelationsShared } from "@/lib/saju/kunghap-cross-relations";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
@@ -2786,25 +2787,32 @@ function ChildPersonalityCard({ data, color, pale, childName }: {
 
 // ── Ch3 전용 컴포넌트 ─────────────────────────────────────────────
 
-/** 인연 점수 게이지 카드 — 아크형 SVG 게이지 + 등급 배지 + 설명 단락 */
-function BondScoreCard({ score, label, tier, paragraphs }: {
+const BOND_SCORE_LABELS: [number, string][] = [
+  [96, "하늘이 이어준 인연이오"],
+  [91, "깊이 뿌리내린 인연이오"],
+  [86, "서로에게 스며든 인연이오"],
+  [81, "깊이 연결된 인연이오"],
+  [76, "서로를 채워주는 인연이오"],
+  [71, "따뜻하게 이어진 인연이오"],
+  [66, "함께 성장하는 인연이오"],
+  [61, "서로를 일깨우는 인연이오"],
+  [56, "노력으로 가꾸는 인연이오"],
+  [0,  "서로를 단련시키는 인연이오"],
+];
+function getBondScoreLabel(score: number): string {
+  return (BOND_SCORE_LABELS.find(([min]) => score >= min) ?? BOND_SCORE_LABELS[BOND_SCORE_LABELS.length - 1])[1];
+}
+
+/** 인연 점수 게이지 카드 — 아크형 SVG 게이지 + 설명 단락 */
+function BondScoreCard({ score, paragraphs }: {
   score: number;
-  label: string;
-  tier: string;
   paragraphs: string[];
 }) {
   const clamp = Math.min(100, Math.max(0, score));
-  // 아크: 반원형 (180°), strokeDasharray 계산
+  const label = getBondScoreLabel(clamp);
   const R = 60; const CX = 90; const CY = 80;
-  const ARC = Math.PI * R; // 반원 둘레
+  const ARC = Math.PI * R;
   const filled = (clamp / 100) * ARC;
-  const tierColors: Record<string, { bg: string; text: string; border: string }> = {
-    "깊은 인연":    { bg: JN3_PALE,  text: JN3_COLOR, border: JN3_COLOR },
-    "이어진 인연":  { bg: JN3_GOLD_P, text: JN3_GOLD,  border: JN3_GOLD  },
-    "성장의 인연":  { bg: "#eef6ea",  text: "#3a6a2a",  border: "#3a6a2a" },
-    "과제의 인연":  { bg: "#fdf6ee",  text: "#6a3a1a",  border: "#6a3a1a" },
-  };
-  const tc = tierColors[tier] ?? { bg: JN3_PALE, text: JN3_COLOR, border: JN3_COLOR };
   return (
     <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(145deg, ${JN3_PALE} 0%, #fff 60%)`, border: `1.5px solid ${JN3_COLOR}25` }}>
       {/* 아크 게이지 */}
@@ -2816,25 +2824,12 @@ function BondScoreCard({ score, label, tier, paragraphs }: {
               <stop offset="100%" stopColor={JN3_COLOR} />
             </linearGradient>
           </defs>
-          {/* 배경 트랙 */}
-          <path
-            d={`M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`}
-            fill="none" stroke={`${JN3_COLOR}18`} strokeWidth={14} strokeLinecap="round"
-          />
-          {/* 채움 트랙 */}
-          <path
-            d={`M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`}
-            fill="none" stroke="url(#bondArcGrad)" strokeWidth={14} strokeLinecap="round"
-            strokeDasharray={`${filled} ${ARC}`}
-          />
-          {/* 점수 텍스트 */}
+          <path d={`M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`} fill="none" stroke={`${JN3_COLOR}18`} strokeWidth={14} strokeLinecap="round" />
+          <path d={`M ${CX - R} ${CY} A ${R} ${R} 0 0 1 ${CX + R} ${CY}`} fill="none" stroke="url(#bondArcGrad)" strokeWidth={14} strokeLinecap="round" strokeDasharray={`${filled} ${ARC}`} />
           <text x={CX} y={CY - 6} textAnchor="middle" fontSize={30} fontWeight={800} fill={JN3_COLOR}>{clamp}</text>
           <text x={CX} y={CY + 10} textAnchor="middle" fontSize={11} fill={`${JN3_COLOR}90`}>/ 100</text>
         </svg>
-        {/* 등급 배지 */}
-        <span className="mt-1 mb-1 px-4 py-1 rounded-full text-[12px] font-bold tracking-wide" style={{ background: tc.bg, color: tc.text, border: `1px solid ${tc.border}40` }}>{tier}</span>
-        {/* 라벨 */}
-        {label && <p className="mt-1 text-[13px] font-semibold text-center px-4" style={{ color: JN3_COLOR }}>{label}</p>}
+        <p className="mt-2 text-[13px] font-semibold text-center px-4" style={{ color: JN3_COLOR }}>{label}</p>
       </div>
       {/* 설명 단락 */}
       {paragraphs.length > 0 && (
@@ -2861,28 +2856,21 @@ function BondTypeCard({ data, myName, childName }: {
   const callout    = (data.callout    as string | undefined) ?? "";
   const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
   return (
-    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${JN3_COLOR}20` }}>
-      {/* 유형 배너 */}
-      <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${JN3_COLOR} 0%, #7a4a9a 100%)` }}>
-        <div className="flex items-center gap-3">
-          <span className="text-[28px]">{bondIcon}</span>
-          <div>
-            <p className="text-[10px] tracking-widest mb-0.5" style={{ color: "rgba(255,255,255,0.65)" }}>{myName} × {childName}의 인연 유형</p>
-            <p className="text-[17px] font-black" style={{ color: "#fff" }}>{bondType}</p>
-          </div>
-        </div>
-        {intro && <p className="mt-3 text-[12.5px] leading-relaxed italic" style={{ color: "rgba(255,255,255,0.85)" }}>"{intro}"</p>}
+    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ background: "var(--surface-2,#fff)", border: `0.5px solid ${JN3_COLOR}25` }}>
+      {/* 유형명 헤더 */}
+      <div className="px-5 pt-5 pb-4" style={{ borderBottom: `0.5px solid ${JN3_COLOR}15` }}>
+        <p className="text-[20px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{bondType}</p>
       </div>
       {/* 내용 */}
-      <div className="px-5 pt-4 pb-5" style={{ background: "#fff" }}>
+      <div className="px-5 pt-4 pb-5">
         {callout && (
           <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: JN3_PALE, borderLeft: `3px solid ${JN3_COLOR}` }}>
-            <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JN3_COLOR }}>{callout}</p>
+            <p className="text-[13px] font-semibold leading-relaxed" style={{ color: JN3_COLOR, fontFamily: SERIF }}>{callout}</p>
           </div>
         )}
         <div className="space-y-3">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
           ))}
         </div>
       </div>
@@ -2938,11 +2926,100 @@ function BondReasonCard({ data, color, pale }: {
 
 // ── Ch4 전용 컴포넌트 ─────────────────────────────────────────────
 
+const JY_SIPSEONG_COLOR_MAP: Record<string, string> = {
+  비견: "#2d3a8c", 겁재: "#9b2335", 식신: "#2d6a4f", 상관: "#c26080",
+  편재: "#b07d2a", 정재: "#7d6020", 편관: "#b05020", 정관: "#1a5c8a",
+  편인: "#7a3a8a", 정인: "#3a5a8a",
+};
+
+function JYSipseongCard({ myIlgan, partnerIlgan, myName, partnerName, myGender, partnerGender, desc, viewData, color }: {
+  myIlgan?: string; partnerIlgan?: string;
+  myName?: string; partnerName?: string;
+  myGender?: string; partnerGender?: string;
+  desc?: string; viewData?: Record<string, unknown> | null; color: string;
+}) {
+  const BLUE = "#4a7cc9"; const PINK = "#c9607a";
+  const isFemaleG = (g?: string) => g === "female" || g === "여성" || g === "여아" || g === "여자";
+  const myGenderColor = isFemaleG(myGender) ? PINK : BLUE;
+  const partnerGenderColor = isFemaleG(partnerGender) ? PINK : BLUE;
+  const GAN_OHAENG: Record<string, string> = {
+    甲: "목", 乙: "목", 丙: "화", 丁: "화", 戊: "토",
+    己: "토", 庚: "금", 辛: "금", 壬: "수", 癸: "수",
+  };
+  const GAN_KOR: Record<string, string> = {
+    甲: "갑", 乙: "을", 丙: "병", 丁: "정", 戊: "무",
+    己: "기", 庚: "경", 辛: "신", 壬: "임", 癸: "계",
+  };
+  const ilganLabel = (gan?: string) => gan ? `${GAN_KOR[gan] ?? gan}${GAN_OHAENG[gan] ?? ""}일간` : "";
+  const sipseong = (myIlgan && partnerIlgan) ? sipseongOfStem(myIlgan, partnerIlgan) : "";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: "var(--surface-2,#fff)", border: `1px solid ${color}20`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-5 py-5" style={{ background: `linear-gradient(135deg, ${color}10 0%, ${color}04 100%)`, borderBottom: `1px solid ${color}15` }}>
+        <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-[13px] font-bold mb-1" style={{ color: myGenderColor }}>{myName ?? "나"}님</p>
+            <div className="w-12 h-12 flex items-center justify-center">
+              {myIlgan
+                ? <img src={ganCharImage(myIlgan)} alt={myIlgan} className="w-full h-full object-contain" />
+                : <span className="text-[26px] font-black" style={{ color: myGenderColor, fontFamily: SERIF }}>?</span>}
+            </div>
+            <div className="mt-1 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: `${myGenderColor}12`, color: myGenderColor, border: `1px solid ${myGenderColor}30` }}>
+              {ilganLabel(myIlgan)}
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-1 flex-1">
+            {sipseong && (
+              <div className="px-2 py-1 rounded-full text-[10px] font-black" style={{ background: `${color}15`, color, border: `1.5px solid ${color}40` }}>
+                {sipseong}
+              </div>
+            )}
+            <div className="w-full flex items-center">
+              <div className="flex-1 h-px" style={{ background: `${color}40` }} />
+              <svg width="8" height="10" viewBox="0 0 8 10" fill="none">
+                <path d="M0 0L8 5L0 10V0Z" fill={color} fillOpacity="0.5" />
+              </svg>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-[13px] font-bold mb-1" style={{ color: partnerGenderColor }}>{partnerName ?? "자녀"}</p>
+            <div className="w-12 h-12 flex items-center justify-center">
+              {partnerIlgan
+                ? <img src={ganCharImage(partnerIlgan)} alt={partnerIlgan} className="w-full h-full object-contain" />
+                : <span className="text-[26px] font-black" style={{ color: partnerGenderColor, fontFamily: SERIF }}>?</span>}
+            </div>
+            <div className="mt-1 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: `${partnerGenderColor}12`, color: partnerGenderColor, border: `1px solid ${partnerGenderColor}30` }}>
+              {ilganLabel(partnerIlgan)}
+            </div>
+          </div>
+        </div>
+      </div>
+      {(desc || viewData) && (
+        <div className="px-5 py-4 space-y-3">
+          {desc && <p className="text-[13px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>}
+          {viewData && (() => {
+            const intro = (viewData.intro as string | undefined) ?? "";
+            const paragraphs = (viewData.paragraphs as string[] | undefined) ?? [];
+            return (
+              <>
+                {intro && (
+                  <div className="px-4 py-3 rounded-xl mb-1" style={{ backgroundColor: `${color}18` }}>
+                    <p className="text-[14px] leading-[1.85] font-medium" style={{ color, fontFamily: SERIF }}>{intro}</p>
+                  </div>
+                )}
+                {paragraphs.map((p, i) => (
+                  <p key={i} className="text-[14px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+                ))}
+              </>
+            );
+          })()}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * ViewCard — 한 방향의 시각 카드
- * fromName이 toName을 어떻게 바라보는지 보여주는 카드.
- * 상단에 color 배너(fromName → toName 방향 표시 + viewType + viewIcon),
- * 내부에 intro 이탤릭 인용 → callout → paragraphs 구조.
  */
 function ViewCard({ data, fromName, toName, color, pale }: {
   data: Record<string, unknown> | null;
@@ -2952,66 +3029,21 @@ function ViewCard({ data, fromName, toName, color, pale }: {
   pale: string;
 }) {
   if (!data) return null;
-  const viewType   = (data.viewType   as string   | undefined) ?? "";
-  const viewIcon   = (data.viewIcon   as string   | undefined) ?? "👁";
   const intro      = (data.intro      as string   | undefined) ?? "";
   const callout    = (data.callout    as string   | undefined) ?? "";
   const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
   const feelings   = (data.feelings   as Array<{ emoji: string; label: string; desc: string }> | undefined) ?? [];
   return (
-    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${color}25` }}>
-      {/* 방향 배너 */}
-      <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)` }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[26px]">{viewIcon}</span>
-            <div>
-              <p className="text-[10px] tracking-widest mb-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>
-                {fromName} → {toName}
-              </p>
-              <p className="text-[16px] font-black" style={{ color: "#fff" }}>
-                {fromName}이 {toName}를 보는 시각
-              </p>
-            </div>
-          </div>
-          {viewType && (
-            <span className="px-3 py-1 rounded-full text-[11px] font-bold" style={{ background: "rgba(255,255,255,0.2)", color: "#fff" }}>
-              {viewType}
-            </span>
-          )}
+    <div className="mb-2">
+      {intro && (
+        <div className="mx-6 mb-4 px-4 py-3 rounded-xl" style={{ backgroundColor: `${color}18` }}>
+          <p className="text-[14px] leading-[1.85] font-medium" style={{ color, fontFamily: SERIF }}>{intro}</p>
         </div>
-        {intro && (
-          <p className="mt-3 text-[12.5px] leading-relaxed italic" style={{ color: "rgba(255,255,255,0.85)" }}>
-            "{intro}"
-          </p>
-        )}
-      </div>
-      {/* 본문 */}
-      <div className="px-5 pt-4 pb-5" style={{ background: pale }}>
-        {callout && (
-          <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: "#fff", borderLeft: `3px solid ${color}` }}>
-            <p className="text-[13.5px] font-bold leading-relaxed" style={{ color }}>{callout}</p>
-          </div>
-        )}
-        {/* 감정 키워드 칩 */}
-        {feelings.length > 0 && (
-          <div className="mb-4 space-y-2">
-            {feelings.map((f, i) => (
-              <div key={i} className="flex gap-3 items-start px-3 py-2.5 rounded-xl" style={{ background: "#fff" }}>
-                <span className="text-[18px] shrink-0">{f.emoji}</span>
-                <div>
-                  <p className="text-[12px] font-bold mb-0.5" style={{ color }}>{f.label}</p>
-                  <p className="text-[12.5px] leading-[1.75]" style={{ color: INK_SOFT }}>{f.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="space-y-3">
-          {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
-          ))}
-        </div>
+      )}
+      <div className="px-6">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+        ))}
       </div>
     </div>
   );
@@ -3034,46 +3066,43 @@ function ViewGapCard({ data, myName, childName }: {
   const bridgePoints = (data.bridgePoints as Array<{ title: string; desc: string }> | undefined) ?? [];
   const tip          = (data.tip          as string   | undefined) ?? "";
   return (
-    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${JN4_GAP}20` }}>
-      {/* 차이 요약 배너 */}
-      <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${JN4_GAP} 0%, #3a5a8a 100%)` }}>
-        <p className="text-[10px] tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
-          {myName} × {childName} — 시각의 간극
-        </p>
-        <p className="text-[15px] font-black leading-snug" style={{ color: "#fff" }}>두 사람이 서로를 이해하는 방식</p>
-        {gapDesc && (
-          <p className="mt-2 text-[12.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.85)" }}>{gapDesc}</p>
-        )}
-      </div>
-      <div className="px-5 pt-4 pb-5" style={{ background: JN4_GAP_P }}>
-        {gapCallout && (
-          <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: "#fff", borderLeft: `3px solid ${JN4_GAP}` }}>
-            <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JN4_GAP }}>{gapCallout}</p>
-          </div>
-        )}
-        {/* 연결 포인트 */}
-        {bridgePoints.length > 0 && (
-          <div className="mb-4 space-y-2">
-            <p className="text-[11px] font-bold tracking-widest mb-2" style={{ color: `${JN4_GAP}80` }}>연결 포인트</p>
+    <div className="mx-5 my-3">
+      {/* gapDesc — callout 박스 */}
+      {gapDesc && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ backgroundColor: `${JN4_GAP}12` }}>
+          <p className="text-[14px] leading-[1.85] font-medium" style={{ color: JN4_GAP, fontFamily: SERIF }}>{gapDesc}</p>
+        </div>
+      )}
+      {/* gapCallout — 인용 블록 */}
+      {gapCallout && (
+        <div className="mb-5 pl-4 py-1" style={{ borderLeft: `3px solid ${JN4_GAP}50` }}>
+          <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{gapCallout}</p>
+        </div>
+      )}
+      {/* 연결 포인트 */}
+      {bridgePoints.length > 0 && (
+        <div className="mb-4">
+          <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: `${JN4_GAP}70` }}>연결 포인트</p>
+          <div className="space-y-2">
             {bridgePoints.map((b, i) => (
-              <div key={i} className="flex gap-3 items-start px-3 py-3 rounded-xl" style={{ background: "#fff" }}>
+              <div key={i} className="flex gap-3 items-start px-4 py-3 rounded-xl" style={{ background: `${JN4_GAP}08`, border: `1px solid ${JN4_GAP}15` }}>
                 <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black mt-0.5" style={{ background: JN4_GAP, color: "#fff" }}>{i + 1}</span>
                 <div>
                   <p className="text-[12.5px] font-bold mb-1" style={{ color: JN4_GAP }}>{b.title}</p>
-                  <p className="text-[13px] leading-[1.8]" style={{ color: INK }}>{b.desc}</p>
+                  <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{b.desc}</p>
                 </div>
               </div>
             ))}
           </div>
-        )}
-        {/* 핵심 조언 */}
-        {tip && (
-          <div className="px-4 py-3 rounded-xl" style={{ background: `${JN4_GAP}10`, border: `1px dashed ${JN4_GAP}40` }}>
-            <p className="text-[12px] font-bold mb-1" style={{ color: JN4_GAP }}>홍연의 한마디</p>
-            <p className="text-[13px] leading-[1.8]" style={{ color: INK }}>{tip}</p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+      {/* 홍연의 한마디 */}
+      {tip && (
+        <div className="px-4 py-3 rounded-xl" style={{ background: `${JN4_GAP}08`, border: `1px dashed ${JN4_GAP}35` }}>
+          <p className="text-[11px] font-bold tracking-widest mb-1" style={{ color: `${JN4_GAP}80` }}>홍연의 한마디</p>
+          <p className="text-[13px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{tip}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -3740,54 +3769,46 @@ function LifePatternCard({ data, myName, childName }: {
   const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
   const harmony     = (data.harmony     as Array<{ scene: string; desc: string }> | undefined) ?? [];
   return (
-    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${JN7_COLOR}22` }}>
-      {/* 유형 배너 */}
-      <div className="px-5 py-4" style={{ background: `linear-gradient(135deg, ${JN7_COLOR} 0%, #2a8a78 100%)` }}>
-        <div className="flex items-center gap-3">
-          <span className="text-[28px]">{patternIcon}</span>
-          <div>
-            <p className="text-[10px] tracking-widest mb-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>
-              {myName} × {childName}의 생활 패턴 유형
-            </p>
-            <p className="text-[17px] font-black" style={{ color: "#fff" }}>{patternType}</p>
-          </div>
-        </div>
-        {intro && (
-          <p className="mt-3 text-[12.5px] leading-relaxed italic" style={{ color: "rgba(255,255,255,0.85)" }}>
-            "{intro}"
-          </p>
-        )}
+    <div className="mx-5 my-3">
+      {/* 유형명 헤더 */}
+      <div className="mb-3">
+        <p className="text-[17px] font-black" style={{ color: JN7_COLOR, fontFamily: SERIF }}>{patternType}</p>
       </div>
-      {/* 본문 */}
-      <div className="px-5 pt-4 pb-5" style={{ background: JN7_PALE }}>
-        {callout && (
-          <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: "#fff", borderLeft: `3px solid ${JN7_COLOR}` }}>
-            <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JN7_COLOR }}>{callout}</p>
-          </div>
-        )}
-        <div className="space-y-3 mb-4">
-          {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
-          ))}
+      {/* intro — callout 박스 */}
+      {intro && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ backgroundColor: `${JN7_COLOR}12` }}>
+          <p className="text-[14px] leading-[1.85] font-medium" style={{ color: JN7_COLOR, fontFamily: SERIF }}>{intro}</p>
         </div>
-        {/* 함께하는 장면 스냅샷 */}
-        {harmony.length > 0 && (
-          <>
-            <p className="text-[11px] font-bold tracking-widest mb-2" style={{ color: `${JN7_COLOR}80` }}>함께하는 장면들</p>
-            <div className="space-y-2">
-              {harmony.map((h, i) => (
-                <div key={i} className="flex gap-3 items-start px-3 py-2.5 rounded-xl" style={{ background: "#fff" }}>
-                  <span className="text-[18px] shrink-0">🌿</span>
-                  <div>
-                    <p className="text-[12px] font-bold mb-0.5" style={{ color: JN7_COLOR }}>{h.scene}</p>
-                    <p className="text-[12.5px] leading-[1.75]" style={{ color: INK_SOFT }}>{h.desc}</p>
-                  </div>
+      )}
+      {/* callout */}
+      {callout && (
+        <div className="mb-4 pl-4 py-1" style={{ borderLeft: `3px solid ${JN7_COLOR}50` }}>
+          <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{callout}</p>
+        </div>
+      )}
+      {/* 단락 */}
+      <div className="space-y-3 mb-4">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[14px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+        ))}
+      </div>
+      {/* 함께하는 장면들 */}
+      {harmony.length > 0 && (
+        <div>
+          <p className="text-[11px] font-bold tracking-widest mb-3" style={{ color: `${JN7_COLOR}70` }}>함께하는 장면들</p>
+          <div className="space-y-2">
+            {harmony.map((h, i) => (
+              <div key={i} className="flex gap-3 items-start px-4 py-3 rounded-xl" style={{ background: `${JN7_COLOR}08`, border: `1px solid ${JN7_COLOR}15` }}>
+                <span className="text-[18px] shrink-0">🌿</span>
+                <div>
+                  <p className="text-[12.5px] font-bold mb-0.5" style={{ color: JN7_COLOR }}>{h.scene}</p>
+                  <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{h.desc}</p>
                 </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -4069,10 +4090,34 @@ function EducationTipsCard({ items, caution, childName }: {
 
 // ── Ch9 전용 컴포넌트 ─────────────────────────────────────────────
 
-/**
- * CrisisScoreCard — 위기 강도 스코어 카드
- * 두 사주 구조에서 예상되는 갈등·위기의 전반적 강도를 게이지로 표현.
- * 점수가 높을수록 주의해야 할 위기 강도가 높음 (역방향 해석).
+function GrowthPhaseCard({ tone, toneLabel, toneColor, yearStart, yearEnd, title, desc }: {
+  tone: string; toneLabel: string; toneColor: string; toneBg?: string;
+  yearStart: number; yearEnd: number; title: string; desc: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${toneColor}40`, background: "#fff" }}>
+      <button onClick={() => setOpen(v => !v)} style={{ width:"100%", display:"flex", alignItems:"center", background:"none", border:"none", cursor:"pointer", textAlign:"left", padding:"10px 12px 10px 12px" }}>
+        <span className="text-[10px] font-black flex items-center justify-center flex-shrink-0" style={{ background: toneColor, color: "#fff", width: 34, height: 34, borderRadius: 6 }}>{toneLabel}</span>
+        <div style={{ flex: 1, paddingLeft: 8 }}>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px] font-bold" style={{ color: toneColor }}>{yearStart}</span>
+            <span className="text-[11px]" style={{ color: "#9a9a9a" }}>~{yearEnd}</span>
+          </div>
+          <p className="text-[13px] font-black" style={{ color: "#3a3028", marginTop: 2 }}>{title}</p>
+        </div>
+        <span className="text-[11px] flex-shrink-0 font-semibold" style={{ color: open ? toneColor : "#9a9a9a", background: open ? `${toneColor}15` : "#f5f5f5", border: `1px solid ${open ? toneColor + "40" : "#e0e0e0"}`, borderRadius: 8, padding: "4px 8px", whiteSpace: "nowrap" }}>{open ? "접기 ▲" : "자세히 ▼"}</span>
+      </button>
+      {open && (
+        <div className="px-3 pb-3" style={{ borderTop: `1px solid ${toneColor}20` }}>
+          <p className="text-[12px] leading-relaxed pt-2.5" style={{ color: "#5a4e46" }}>{desc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/*
  * 레드 아크 게이지 + 위기 등급 배지 + 구체적 위기 시기 목록(crisisWindows) + 설명 단락.
  * crisisWindows: 아이의 성장 시기별로 특히 주의가 필요한 구간 목록.
  */
@@ -4520,9 +4565,9 @@ const CHAPTER_TITLES: Record<string, string> = {
   "3":  "제3장 · 부모와 자녀 사이, 합과 충",
   "4":  "제4장 · 우리는 어떤 인연일까",
   "5":  "제5장 · 서로를 어떻게 바라보는가",
-  "6":  "제6장 · 함께하는 삶과 교육 방향",
-  "7":  "제7장 · 주의할 시기와 좋은 시기",
-  "8":  "제8장 · 자녀의 미래와 부모의 역할",
+  "6":  "제6장 · 자녀의 교육과 양육방향",
+  "7":  "제7장 · 자녀의 미래와 부모의 역할",
+  "8":  "제8장 · 시기별 양육 포인트",
   "9":  "마무리 · 그대들에게 남기는 홍연의 서신",
 };
 
@@ -5712,11 +5757,11 @@ const TOC_A: TocEntry[] = [
   { disp: "제1장",  chip: "나의원국", title: "부모인 나는 어떤 사람인가?",                  no: "1" },
   { disp: "제2장",  chip: "자녀원국", title: "자녀는 어떤 아이인가?",                    no: "2" },
   { disp: "제3장",  chip: "합·충",   title: "부모와 자녀 사이, 합과 충",               no: "3" },
-  { disp: "제4장",  chip: "인연",    title: "우리는 어떤 인연일까",                     no: "4" },
+  { disp: "제4장",  chip: "인연",    title: "우리는 어떤 인연일까",       no: "4" },
   { disp: "제5장",  chip: "서로의 시각", title: "서로를 어떻게 바라보는가",              no: "5" },
-  { disp: "제6장",  chip: "삶·교육",  title: "함께하는 삶과 교육 방향",                no: "6" },
-  { disp: "제7장",  chip: "주의·좋은시기", title: "주의할 시기와 좋은 시기",           no: "7" },
-  { disp: "제8장",  chip: "미래역할",     title: "자녀의 미래와 부모의 역할",          no: "8" },
+  { disp: "제6장",  chip: "삶·교육",  title: "자녀의 교육과 양육방향",                no: "6" },
+  { disp: "제7장",  chip: "미래역할",     title: "자녀의 미래와 부모의 역할",          no: "7" },
+  { disp: "제8장",  chip: "양육포인트",    title: "시기별 양육 포인트",               no: "8" },
   { disp: "마무리", chip: "당부",         title: "그대들에게 남기는 홍연의 서신",      no: "9" },
 ];
 
@@ -6262,6 +6307,7 @@ function ReportPreviewInner() {
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
   const [eventOpen, setEventOpen] = useState(false); // 마무리 장 진입 시 SNS 리뷰 이벤트 팝업
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedSeun7, setSelectedSeun7] = useState<number | null>(1);
   const startedRef = useRef(false);
   const generatedRef = useRef(false); // 일괄 생성 1회만
   const chNum = Number(ch);
@@ -6332,7 +6378,7 @@ function ReportPreviewInner() {
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
         const sec = d?.sections;
-        if (!sec || !isYeonaeChapterReady(sec, toApiChapter(n))) return;
+        if (!sec || !isJanyeoKunghapChapterReady(sec, toApiChapter(n))) return;
         setReport((p) => {
           if (!p) return p;
           const merged = { ...(p.content as Record<string, unknown>), ...sec };
@@ -6404,6 +6450,7 @@ function ReportPreviewInner() {
         loading={false}
         meta={report?.partnerName ? { name: report.partnerName, gender: report.partnerGender ?? "", date: report.partnerBirth?.date ?? "", calendar: report.partnerBirth?.calendar ?? "", time: report.partnerBirth?.time ?? "" } : undefined}
         genderOverride={(g) => g === "여성" ? "여아" : g === "남성" ? "남아" : g}
+        nameHonorific={report?.partnerGender === "female" || report?.partnerGender === "여성" || report?.partnerGender === "여아" ? "양" : report?.partnerGender === "male" || report?.partnerGender === "남성" || report?.partnerGender === "남아" ? "군" : "님"}
       />
       {isAdmin && Number(ch) >= 1 && Number(ch) <= 11 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
@@ -6865,6 +6912,61 @@ function ReportPreviewInner() {
               </div>
             </section>
 
+            {/* ── 용신/희신/기신 (나) ── */}
+            {jc.myYongsin && (() => { // ch1-yongsin
+              const YS = jc.myYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; intro?: string; desc?: string };
+              const OHAENG_META: Record<string, { hanja: string; color: string; bg: string; desc: string }> = {
+                목: { hanja: "木", color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
+                화: { hanja: "火", color: "#222", bg: "#ffebee", desc: "열정·표현" },
+                토: { hanja: "土", color: "#222", bg: "#efebe9", desc: "안정·신뢰" },
+                금: { hanja: "金", color: "#222", bg: "#fffde7", desc: "절제·결단" },
+                수: { hanja: "水", color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
+              };
+              const _OLIST = ["금","목","화","토","수"] as const;
+              const _yTxt1 = [YS.intro, YS.desc].filter(Boolean).join(" ");
+              const _exEl1 = (role: string, t: string) => t.match(new RegExp(`${role}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`))?.[1] ?? "";
+              const _pick1 = (n: number) => { const f: string[] = []; for (const ch of _yTxt1) { if ((_OLIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length > n) return f[n]; } return ""; };
+              const yongsinEl1 = YS.yongsinEl || _exEl1("용신", _yTxt1) || _pick1(0);
+              const heusinEl1  = YS.heusinEl  || _exEl1("희신", _yTxt1) || _pick1(1);
+              const gisinEl1   = YS.gisinEl   || _exEl1("기신", _yTxt1) || _pick1(2);
+              const rows = [
+                { role: "용신", el: yongsinEl1, reason: YS.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
+                { role: "희신", el: heusinEl1,  reason: YS.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★" } },
+                { role: "기신", el: gisinEl1,   reason: YS.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕" } },
+              ];
+              return (
+                <section className="px-6 pt-2 pb-4">
+                  <Heading>필요한 기운과 피해야 할 기운</Heading>
+                  <div className="my-4 rounded-2xl overflow-hidden" style={{ border: "1px solid #e0d8cc" }}>
+                    {rows.map((r, i) => {
+                      const m = OHAENG_META[r.el] ?? { hanja: r.el, color: "#888", bg: "#f5f5f5", desc: "" };
+                      const isGisin = r.role === "기신";
+                      const imgKey = ({ 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" } as Record<string, string>)[r.el];
+                      return (
+                        <div key={r.role} className="flex items-center gap-3 px-4 py-3" style={{ background: isGisin ? "#fff5f5" : i === 0 ? "#fffcf0" : "#f6faf6", borderBottom: i < 2 ? "1px solid #e8dfd0" : "none" }}>
+                          <div className="shrink-0 flex flex-col items-center gap-1" style={{ width: 52 }}>
+                            <div className="rounded-full px-2 py-0.5 text-[10px] font-black tracking-wide" style={{ background: r.badge.bg, border: `1.5px solid ${r.badge.border}`, color: r.badge.text }}>
+                              {r.badge.label}
+                            </div>
+                            <div className="text-[15px] font-black" style={{ color: r.badge.text }}>{r.role}</div>
+                          </div>
+                          {imgKey && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={`/media/ohaeng/${imgKey}.png`} alt={r.el} className="shrink-0" style={{ width: 54, height: 54, objectFit: "contain" }} />
+                          )}
+                          <div className="flex flex-col gap-1">
+                            <div className="text-[14px] font-black" style={{ color: m.color }}>{m.desc}</div>
+                            {r.reason && <div className="text-[11px] leading-snug" style={{ color: "#555" }}>{r.reason}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {YS.desc && <P>{YS.desc}</P>}
+                </section>
+              );
+            })()}
+
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
@@ -6931,7 +7033,7 @@ function ReportPreviewInner() {
 
             <div className="px-8 py-12 text-center">
               <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-                {`이제 ${childFirstName}${childHonorific}의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${childFirstName}${childHonorific}의 기질과 타고난 기운이\n모두 담겨 있소.\n\n이게 바로 ${childFirstName}${childHonorific}의 사주팔자요.`}
+                {`이제 자녀분인 ${childFirstName}${childHonorific}의\n사주팔자를 보겠소.\n\n이게 바로 ${childFirstName}${childHonorific}의 사주팔자요.`}
               </p>
             </div>
 
@@ -7011,6 +7113,61 @@ function ReportPreviewInner() {
               </div>
             </section>
 
+            {/* ── 용신/희신/기신 (자녀) ── */}
+            {jc.childYongsin && (() => {
+              const YS = jc.childYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; intro?: string; desc?: string };
+              const OHAENG_META: Record<string, { hanja: string; color: string; bg: string; desc: string }> = {
+                목: { hanja: "木", color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
+                화: { hanja: "火", color: "#222", bg: "#ffebee", desc: "열정·표현" },
+                토: { hanja: "土", color: "#222", bg: "#efebe9", desc: "안정·신뢰" },
+                금: { hanja: "金", color: "#222", bg: "#fffde7", desc: "절제·결단" },
+                수: { hanja: "水", color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
+              };
+              const _OLIST2 = ["금","목","화","토","수"] as const;
+              const _yTxt2 = [YS.intro, YS.desc].filter(Boolean).join(" ");
+              const _exEl2 = (role: string, t: string) => t.match(new RegExp(`${role}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`))?.[1] ?? "";
+              const _pick2 = (n: number) => { const f: string[] = []; for (const ch of _yTxt2) { if ((_OLIST2 as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length > n) return f[n]; } return ""; };
+              const yongsinEl2 = YS.yongsinEl || _exEl2("용신", _yTxt2) || _pick2(0);
+              const heusinEl2  = YS.heusinEl  || _exEl2("희신", _yTxt2) || _pick2(1);
+              const gisinEl2   = YS.gisinEl   || _exEl2("기신", _yTxt2) || _pick2(2);
+              const rows = [
+                { role: "용신", el: yongsinEl2, reason: YS.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
+                { role: "희신", el: heusinEl2,  reason: YS.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★" } },
+                { role: "기신", el: gisinEl2,   reason: YS.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕" } },
+              ];
+              return (
+                <section className="px-6 pt-2 pb-4">
+                  <Heading>필요한 기운과 피해야 할 기운</Heading>
+                  <div className="my-4 rounded-2xl overflow-hidden" style={{ border: "1px solid #e0d8cc" }}>
+                    {rows.map((r, i) => {
+                      const m = OHAENG_META[r.el] ?? { hanja: r.el, color: "#888", bg: "#f5f5f5", desc: "" };
+                      const isGisin = r.role === "기신";
+                      const imgKey = ({ 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" } as Record<string, string>)[r.el];
+                      return (
+                        <div key={r.role} className="flex items-center gap-3 px-4 py-3" style={{ background: isGisin ? "#fff5f5" : i === 0 ? "#fffcf0" : "#f6faf6", borderBottom: i < 2 ? "1px solid #e8dfd0" : "none" }}>
+                          <div className="shrink-0 flex flex-col items-center gap-1" style={{ width: 52 }}>
+                            <div className="rounded-full px-2 py-0.5 text-[10px] font-black tracking-wide" style={{ background: r.badge.bg, border: `1.5px solid ${r.badge.border}`, color: r.badge.text }}>
+                              {r.badge.label}
+                            </div>
+                            <div className="text-[15px] font-black" style={{ color: r.badge.text }}>{r.role}</div>
+                          </div>
+                          {imgKey && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={`/media/ohaeng/${imgKey}.png`} alt={r.el} className="shrink-0" style={{ width: 54, height: 54, objectFit: "contain" }} />
+                          )}
+                          <div className="flex flex-col gap-1">
+                            <div className="text-[14px] font-black" style={{ color: m.color }}>{m.desc}</div>
+                            {r.reason && <div className="text-[11px] leading-snug" style={{ color: "#555" }}>{r.reason}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {YS.desc && <P>{YS.desc}</P>}
+                </section>
+              );
+            })()}
+
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">
@@ -7064,7 +7221,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오."`}</Quote>
+            <Quote>{`두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오.`}</Quote>
 
             {/* 합·충 개념 안내 배너 */}
             <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${CH6_COLOR}15` }}>
@@ -7117,16 +7274,17 @@ function ReportPreviewInner() {
             {/* 잘 맞는 점 */}
             {hapList && (
               <section className="pb-4">
-                <div className="px-5"><Heading>잘 맞는 점</Heading></div>
+                <div className="px-5"><Heading>아이와 잘 맞는 점은</Heading></div>
                 {(hapList.items as Array<{glyph:string;type:string;strength:string;effect:string;desc:string}> ?? []).map((item, i) => (
-                  <div key={i} className="mx-5 mb-3 rounded-2xl px-5 py-4" style={{ background: `${HAP_COLOR}08`, border: `1px solid ${HAP_COLOR}20` }}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-[14px]">🌿</span>
-                      <p className="text-[12px] font-black" style={{ color: HAP_COLOR }}>{item.type}</p>
-                      {item.strength && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: `${HAP_COLOR}15`, color: HAP_COLOR }}>{item.strength}</span>}
+                  <div key={i} className="mx-5 mb-3 px-5 py-4" style={{ background: "var(--surface-2, #fff)", border: `0.5px solid ${HAP_COLOR}30`, borderLeft: `3px solid ${HAP_COLOR}`, borderRadius: "0 12px 12px 0" }}>
+                    {item.effect && <p className="text-[15px] font-medium leading-[1.6] mb-1" style={{ color: INK, fontFamily: SERIF }}>{item.effect}</p>}
+                    <div className="flex items-center gap-1.5 mb-2.5">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${HAP_COLOR}15`, color: HAP_COLOR, border: `0.5px solid ${HAP_COLOR}40` }}>{item.type}</span>
+                      {item.strength && <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: "var(--surface-1,#f5f4f0)", color: INK_SOFT, border: "0.5px solid var(--border)" }}>{item.strength}</span>}
                     </div>
-                    {item.effect && <p className="text-[11px] mb-1.5 font-semibold" style={{ color: HAP_COLOR, fontFamily: SERIF }}>{item.effect}</p>}
-                    <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                    <div style={{ borderTop: `0.5px solid ${HAP_COLOR}20`, paddingTop: 10 }}>
+                      <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                    </div>
                   </div>
                 ))}
               </section>
@@ -7135,18 +7293,19 @@ function ReportPreviewInner() {
             {/* 안 맞는 점 */}
             {chungList && (
               <section className="pb-4">
-                <div className="px-5"><Heading>안 맞는 점</Heading></div>
+                <div className="px-5"><Heading>아이와 안 맞는 점은</Heading></div>
                 {(chungList.items as Array<{glyph:string;type:string;strength:string;impact:string;desc:string;resolve:string}> ?? []).map((item, i) => (
-                  <div key={i} className="mx-5 mb-3 rounded-2xl px-5 py-4" style={{ background: `${CHUNG_COLOR}08`, border: `1px solid ${CHUNG_COLOR}20` }}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-[14px]">⚡</span>
-                      <p className="text-[12px] font-black" style={{ color: CHUNG_COLOR }}>{item.type}</p>
-                      {item.strength && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: `${CHUNG_COLOR}15`, color: CHUNG_COLOR }}>{item.strength}</span>}
+                  <div key={i} className="mx-5 mb-3 px-5 py-4" style={{ background: "var(--surface-2, #fff)", border: `0.5px solid ${CHUNG_COLOR}30`, borderLeft: `3px solid ${CHUNG_COLOR}`, borderRadius: "0 12px 12px 0" }}>
+                    {item.impact && <p className="text-[15px] font-medium leading-[1.6] mb-1" style={{ color: INK, fontFamily: SERIF }}>{item.impact}</p>}
+                    <div className="flex items-center gap-1.5 mb-2.5">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${CHUNG_COLOR}15`, color: CHUNG_COLOR, border: `0.5px solid ${CHUNG_COLOR}40` }}>{item.type}</span>
+                      {item.strength && <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: "var(--surface-1,#f5f4f0)", color: INK_SOFT, border: "0.5px solid var(--border)" }}>{item.strength}</span>}
                     </div>
-                    {item.impact && <p className="text-[11px] mb-1.5 font-semibold" style={{ color: CHUNG_COLOR, fontFamily: SERIF }}>{item.impact}</p>}
-                    <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                    <div style={{ borderTop: `0.5px solid ${CHUNG_COLOR}20`, paddingTop: 10 }}>
+                      <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                    </div>
                     {item.resolve && (
-                      <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${CHUNG_COLOR}20` }}>
+                      <div className="mt-2 pt-2" style={{ borderTop: `0.5px solid ${CHUNG_COLOR}20` }}>
                         <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF, opacity: 0.85 }}>💡 {item.resolve}</p>
                       </div>
                     )}
@@ -7164,7 +7323,7 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제4장 · 부모와 자녀, 어떤 인연으로 만났는가 ═══════════ */}
+      {/* ═══════════ 제4장 · 우리는 어떤 인연일까 ═══════════ */}
       {ch === "4" && (() => {
         const myName    = name || "나";
         const childName = report?.partnerName || "자녀";
@@ -7180,38 +7339,37 @@ function ReportPreviewInner() {
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 인연</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>부모와 자녀, 어떤 인연으로 만났는가</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>우리는 어떤 인연일까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"부모와 자녀 사이에도\n인연의 깊고 얕음이 있소.\n사주로 두 사람이 어떤 인연으로 만났는지 풀어보겠소."`}</Quote>
+            <Quote>{`세상 모든 만남에는\n이유가 있소.\n\n부모와 자녀,\n어떤 인연으로 이어진 것인지\n지금부터 살펴보겠소.`}</Quote>
 
             {/* 인연 점수 섹션 */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>인연 점수</Heading>
+              <Heading>우리 사이의 인연 점수</Heading>
               <P>사주 여덟 글자가 빚어내는 두 사람의 인연 깊이를 수치로 나타냈소. 점수는 단순한 좋고 나쁨이 아니오. 높은 점수는 서로에게 강한 영향을 주고받는 관계임을, 낮은 점수는 서로 독립적인 에너지를 가진 관계임을 뜻하오. 어떤 숫자든, 그 안에 담긴 의미를 읽는 것이 중요하오.</P>
             </section>
-            <BondScoreCard score={score} label={label} tier={tier} paragraphs={scorePara} />
+            <BondScoreCard score={score} paragraphs={scorePara} />
 
             {/* 인연 유형 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>인연의 유형</Heading>
-              <P>모든 부모-자녀 사이에는 고유한 인연의 색깔이 있소. 사주가 말해주는 두 사람의 인연 유형을 살펴보면, 지금 이 관계에서 왜 그런 감정이 오가는지, 왜 어떤 순간이 특히 어렵거나 특히 따뜻한지 이해하게 되오.</P>
+            <section className="px-6 pt-8 pb-0">
+              <Heading>우리는 어떤 인연인가</Heading>
             </section>
             <BondTypeCard data={bondType} myName={myName} childName={childName} />
 
             {/* 인연의 사주 근거 섹션 */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>인연의 사주적 근거</Heading>
-              <P>이 인연 점수와 유형이 어떤 사주적 원리에서 비롯되었는지 살펴보겠소. 일간 오행의 상생·상극 관계, 지지의 합·충 구조, 그리고 천간의 작용이 두 사람의 관계 패턴을 만들어내오. 이 근거를 이해하면 관계에서 반복되는 흐름의 이유가 보이오.</P>
+              <Heading>두 사람 인연의 사주적 근거</Heading>
+              <P>두 사람의 인연 점수와 유형이 어떤 사주적 원리에서 비롯되었는지 살펴보겠소. 일간 오행의 상생·상극 관계, 지지의 합·충 구조, 그리고 천간의 작용이 두 사람의 관계 패턴을 만들어내오. 이 근거를 이해하면 관계에서 반복되는 흐름의 이유가 보이오.</P>
             </section>
             <BondReasonCard data={bondReason} color={JN3_COLOR} pale={JN3_PALE} />
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-            <Quote>{`"인연의 깊이와 유형을 알았으니,\n이제 서로를 어떻게 바라보는지\n살펴보겠소."`}</Quote>
+            <Quote>{`인연의 깊이와 유형을 알았으니,\n이제 서로를 어떻게 바라보는지\n살펴보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
@@ -7222,6 +7380,12 @@ function ReportPreviewInner() {
       {ch === "5" && (() => {
         const myName      = name || "나";
         const childName   = report?.partnerName || "자녀";
+        const childGender = report?.partnerGender ?? "";
+        const myFirstName5    = myName.length > 1 ? myName.slice(1) : myName;
+        const childFirstName5 = childName.length > 1 ? childName.slice(1) : childName;
+        const childHon5 = childGender === "female" || childGender === "여성" || childGender === "여아" ? "양" : childGender === "male" || childGender === "남성" || childGender === "남아" ? "군" : "님";
+        const myFull5    = `${myFirstName5}님`;
+        const childFull5 = `${childFirstName5}${childHon5}`;
         const myView      = (jc.myView      as Record<string, unknown> | undefined) ?? null;
         const childViewDesc = (jc.childViewDesc as Record<string, unknown> | undefined) ?? null;
         const viewGap     = (jc.viewGap     as Record<string, unknown> | undefined) ?? null;
@@ -7237,31 +7401,43 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_5/kunghap_janyeo_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"같은 하늘 아래 살아도\n부모 눈에 비친 자녀와\n자녀 눈에 비친 부모는 다르오."`}</Quote>
+            <Quote>{`부모와 자녀는\n서로를 다르게 바라보오.\n\n그 시선 차이를 아는 것이\n진정한 이해의 시작이오.`}</Quote>
 
             {/* 부모 시각 섹션 */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>{myName}이 {childName}를 바라보는 시각</Heading>
-              <P>부모의 사주 원국이 자녀를 어떤 눈으로 바라보게 만드는지 살펴보겠소. 부모의 일간 오행과 오행 분포는 자녀를 볼 때 어떤 측면을 먼저 보게 되는지, 어떤 모습을 좋아하고 어떤 모습이 불편하게 느껴지는지를 결정하오. 이 시각을 이해하면 나의 기대와 불안이 어디서 오는지 알게 되오.</P>
+              <Heading>{myFull5}이 {childFull5}을 바라보는 시각</Heading>
             </section>
-            <ViewCard data={myView} fromName={myName} toName={childName} color={JN4_MY} pale={JN4_MY_P} />
+            <JYSipseongCard
+              myIlgan={report?.view?.pillars?.[1]?.gan}
+              partnerIlgan={report?.partnerView?.pillars?.[1]?.gan}
+              myName={myFirstName5} partnerName={childFirstName5}
+              myGender={report?.gender} partnerGender={childGender}
+              viewData={myView}
+              color={(() => { const ss = (report?.view?.pillars?.[1]?.gan && report?.partnerView?.pillars?.[1]?.gan) ? sipseongOfStem(report.view.pillars[1].gan, report.partnerView.pillars[1].gan) : ""; return JY_SIPSEONG_COLOR_MAP[ss] ?? JN4_MY; })()}
+            />
 
             {/* 자녀 시각 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}이 {myName}를 바라보는 시각</Heading>
-              <P>자녀의 사주가 부모를 어떻게 경험하게 만드는지 살펴보겠소. 아이는 부모에게 어떤 감정을 느끼는지, 부모의 어떤 행동에 안정감을 느끼고 어떤 행동에 상처를 받는지 — 이것은 아이의 의지가 아니라 사주에서 비롯된 감수성이오. 아이의 시각을 이해하면 훨씬 더 깊은 공감이 가능해지오.</P>
+            <section className="px-6 pt-8 pb-2">
+              <Heading>{childFull5}이 {myFull5}을 바라보는 시각</Heading>
             </section>
-            <ViewCard data={childViewDesc} fromName={childName} toName={myName} color={JN4_CH} pale={JN4_CH_P} />
+            <JYSipseongCard
+              myIlgan={report?.partnerView?.pillars?.[1]?.gan}
+              partnerIlgan={report?.view?.pillars?.[1]?.gan}
+              myName={childFirstName5} partnerName={myFirstName5}
+              myGender={childGender} partnerGender={report?.gender}
+              viewData={childViewDesc}
+              color={(() => { const ss = (report?.partnerView?.pillars?.[1]?.gan && report?.view?.pillars?.[1]?.gan) ? sipseongOfStem(report.partnerView.pillars[1].gan, report.view.pillars[1].gan) : ""; return JY_SIPSEONG_COLOR_MAP[ss] ?? JN4_CH; })()}
+            />
 
             {/* 시각 차이 & 연결 포인트 섹션 */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>두 시각의 간극과 연결 포인트</Heading>
+              <Heading>두 사람이 서로를 이해하는 방식</Heading>
               <P>부모와 자녀가 서로를 바라보는 방식이 다르다는 것, 그 자체가 갈등의 씨앗이 되기도 하오. 하지만 차이를 알면 오해는 줄어들고 공감의 가능성이 커지오. 두 시각의 차이가 어디서 비롯되는지, 그리고 어떤 지점에서 만날 수 있는지 살펴보겠소.</P>
             </section>
-            <ViewGapCard data={viewGap} myName={myName} childName={childName} />
+            <ViewGapCard data={viewGap} myName={myFull5} childName={childFull5} />
 
             <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-            <Quote>{`"서로의 시각 차이를 알았으니,\n이제 자녀의 기질을\n더 깊이 살펴보겠소."`}</Quote>
+            <Quote>{`서로를 바라보는 눈을 알았으니,\n이제 그 눈으로 아이를\n어떻게 키울지 살펴보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
@@ -7272,189 +7448,430 @@ function ReportPreviewInner() {
       {ch === "6" && (() => {
         const myName      = name || "나";
         const childName   = report?.partnerName || "자녀";
-        const lifePattern    = (jc.lifePattern    as Record<string, unknown> | undefined) ?? null;
-        const dailyRhythm   = (jc.dailyRhythm   as Record<string, unknown> | undefined) ?? null;
-        const livingTips    = (jc.livingTips     as Record<string, unknown> | undefined) ?? null;
-        const educationStyle = (jc.educationStyle as Record<string, unknown> | undefined) ?? null;
-        const learningTraits = (jc.learningTraits as Record<string, unknown> | undefined) ?? null;
-        const educationTips  = (jc.educationTips  as Record<string, unknown> | undefined) ?? null;
-        const rhythmItems   = (dailyRhythm?.items as Array<{ icon: string; title: string; desc: string; tip?: string }> | undefined) ?? [];
-        const tipItems      = (livingTips?.items  as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
-        const closing       = (livingTips?.closing as string | undefined) ?? "";
-        const traitItems    = (learningTraits?.items as Array<{ icon: string; title: string; desc: string; level?: string }> | undefined) ?? [];
-        const eduTipItems   = (educationTips?.items  as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
-        const caution       = (educationTips?.caution as string | undefined) ?? "";
+        const childGender6 = report?.partnerGender ?? "";
+        const childFirstName6 = childName.length > 1 ? childName.slice(1) : childName;
+        const childHon6 = childGender6 === "female" || childGender6 === "여성" || childGender6 === "여아" ? "양" : childGender6 === "male" || childGender6 === "남성" || childGender6 === "남아" ? "군" : "님";
+        const childHeading6 = `${childFirstName6}${childHon6}`;
+        const honorShort6 = childHeading6;
+        const ELS6 = [
+          { key: "목", file: "mok",  color: "#43a047" },
+          { key: "화", file: "hwa",  color: "#e53935" },
+          { key: "토", file: "to",   color: "#e6a817" },
+          { key: "금", file: "geum", color: "#aaaaaa" },
+          { key: "수", file: "su",   color: "#222222" },
+        ];
+        const cnt6: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+        if (report?.partnerView) {
+          for (const p of report.partnerView.pillars) {
+            if (p.ganEl && cnt6[p.ganEl] !== undefined) cnt6[p.ganEl]++;
+            if (p.jiEl  && cnt6[p.jiEl]  !== undefined) cnt6[p.jiEl]++;
+          }
+        }
+        const total6 = Object.values(cnt6).reduce((a, b) => a + b, 0) || 1;
+        const max6 = Math.max(...Object.values(cnt6)) || 1;
+        const BAR_H6 = 100;
+        const ss6 = (jc.studyStyle as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          styleCards?: { icon: string; title: string; desc: string }[];
+          tipCards?: { icon: string; title: string; desc: string }[];
+          ohaengDesc?: { intro?: string; paragraphs?: string[] };
+        } | undefined) ?? {};
+        const NUM_LABELS6 = ["01", "02", "03"];
         return (
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 함께하는 삶과 교육</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께하는 삶과 교육 방향</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 학업</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이의 학업운과 공부 스타일</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_6/kunghap_janyeo_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"사주는 관계의 틀만 아니라\n함께 살아가는 일상의 리듬도 만들어내오.\n두 사람의 생활 패턴을 들여다보겠소."`}</Quote>
+            <Quote>{`공부를 잘하는 방법도\n타고난 것이오.\n\n${honorShort6}의\n학업 스타일을 살펴보겠소.`}</Quote>
 
-            {/* 생활 패턴 유형 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>생활 패턴 유형</Heading>
-              <P>부모와 자녀의 사주가 만날 때, 두 사람이 함께 만들어내는 일상의 구조가 있소. 이 구조는 의식하지 못하는 사이에 반복되오. 아침 루틴, 식사 시간, 대화의 방식, 갈등이 생기는 순간들 — 모두 사주에서 비롯된 패턴이오. 두 사람의 생활 패턴 유형을 먼저 살펴보겠소.</P>
+            {/* ① 오행 분포 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>{honorShort6}이 가진 오행의 분포</Heading>
             </section>
-            <LifePatternCard data={lifePattern} myName={myName} childName={childName} />
+            <div className="mx-6 mb-4 rounded-2xl px-4 py-5" style={{ background: "#fff", border: "1.5px solid #e8dfd0" }}>
+              <div className="flex justify-around items-end gap-2">
+                {ELS6.map(({ key, file, color }) => {
+                  const pct = Math.round((cnt6[key] / total6) * 100);
+                  const barH = Math.round((cnt6[key] / max6) * BAR_H6);
+                  return (
+                    <div key={key} className="flex flex-col items-center gap-1" style={{ flex: 1 }}>
+                      <span className="text-[12px] font-black" style={{ color }}>{pct}%</span>
+                      <div style={{ width: 10, height: BAR_H6, display: "flex", alignItems: "flex-end", borderRadius: 6, overflow: "hidden", background: "#f0ece6" }}>
+                        <div style={{ width: "100%", height: barH, background: color, borderRadius: 6, transition: "height 0.4s" }} />
+                      </div>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`/media/ohaeng/${file}.png`} alt={key} style={{ width: 32, height: 32, objectFit: "contain" }} />
+                      <span className="text-[12px] font-bold" style={{ color }}>{key}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            {ss6.ohaengDesc?.intro && (
+              <div className="px-6 pb-6">
+                <P>{[ss6.ohaengDesc.intro, ...(ss6.ohaengDesc.paragraphs ?? [])].filter(Boolean).join("\n")}</P>
+              </div>
+            )}
 
-            {/* 일상 리듬 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>함께하는 일상의 리듬</Heading>
-              <P>구체적인 일상 장면에서 두 사람의 사주 에너지가 어떻게 어우러지는지 살펴보겠소. 어떤 시간대에 잘 맞고, 어떤 상황에서 어긋나기 시작하는지 — 이것을 알면 일상의 마찰을 크게 줄일 수 있소. 이 아이와 함께하는 하루하루가 더 자연스러워지는 단서들이오.</P>
+            {/* ② 학업스타일 */}
+            <section className="px-6 pt-6 pb-4">
+              <Heading>{honorShort6}의 학업스타일</Heading>
+              {ss6.intro && <P>{ss6.intro}</P>}
+              {ss6.paragraphs?.[0] && <P>{ss6.paragraphs[0]}</P>}
             </section>
-            <DailyRhythmCard items={rhythmItems} childName={childName} />
 
-            {/* 생활 조언 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>함께 잘 살기 위한 실천 조언</Heading>
-              <P>두 사람의 사주 구조를 알고 나면, 일상에서 무엇을 신경 써야 하는지가 보이오. 거창한 변화가 아니오. 작은 생활 습관 하나, 말 한마디의 타이밍, 공간을 나누는 방식 — 이런 것들이 관계의 온도를 바꾸오. 사주가 알려주는 이 부모-자녀만의 실천 포인트를 살펴보겠소.</P>
-            </section>
-            <LivingTipsCard items={tipItems} closing={closing} myName={myName} childName={childName} />
+            {/* ③ 학습 특성 */}
+            {ss6.styleCards && ss6.styleCards.length > 0 && (
+              <section className="px-6 pt-0 pb-2">
+                <Heading>이 아이의 학습 특성</Heading>
+                <div className="mt-3 space-y-2.5">
+                  {ss6.styleCards.map((card, i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden flex" style={{ border: `1.5px solid ${"#3f7d6b"}30` }}>
+                      <div className="flex-shrink-0 w-12 flex flex-col items-center justify-center" style={{ background: "#3f7d6b" }}>
+                        <span className="text-[10px] font-black text-white opacity-70 leading-none">{NUM_LABELS6[i] ?? `0${i+1}`}</span>
+                        <span className="text-[20px] mt-1">{card.icon}</span>
+                      </div>
+                      <div className="flex-1 p-3" style={{ background: "#3f7d6b08" }}>
+                        <p className="text-[12.5px] font-black mb-1" style={{ color: "#3f7d6b" }}>{card.title}</p>
+                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-            {/* 교육 스타일 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}에게 맞는 교육 스타일</Heading>
-              <P>사주는 이 아이가 어떤 방식으로 배울 때 가장 잘 흡수하는지를 보여주오. 같은 내용도 어떤 방식으로 전달하느냐에 따라 아이의 반응이 전혀 달라지오. 억지로 주입하는 교육이 아니라, 이 아이의 기운에 맞는 방식으로 배움의 문을 열어주는 것이 핵심이오. 먼저 이 아이만의 교육 스타일 유형을 살펴보겠소.</P>
-            </section>
-            <EducationStyleCard data={educationStyle} childName={childName} />
+            {ss6.paragraphs?.[1] && (
+              <section className="px-6 pt-5 pb-2">
+                <P>{ss6.paragraphs[1]}</P>
+              </section>
+            )}
 
-            {/* 학습 특성 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}의 타고난 학습 특성</Heading>
-              <P>학습 스타일은 습관이 아니라 사주에서 비롯된 타고난 성향이오. 어떤 환경에서 집중이 잘 되는지, 어떤 방식의 설명이 잘 통하는지, 어떤 분야에서 두각을 나타낼 가능성이 높은지 — 이것들이 사주에 담겨 있소. 이 아이의 학습 특성을 알면 불필요한 압박을 줄이고, 강점을 살리는 교육이 가능해지오.</P>
-            </section>
-            <LearningTraitsCard items={traitItems} childName={childName} />
+            {/* ④ 공부 팁 */}
+            {ss6.tipCards && ss6.tipCards.length > 0 && (
+              <section className="px-6 pt-0 pb-8">
+                <Heading>{honorShort6}에게 맞는 공부법</Heading>
+                <div className="mt-3 space-y-2.5">
+                  {ss6.tipCards.map((card, i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden flex" style={{ border: "1.5px solid #2563eb30" }}>
+                      <div className="flex-shrink-0 w-12 flex flex-col items-center justify-center" style={{ background: "#2563eb" }}>
+                        <span className="text-[10px] font-black text-white opacity-70 leading-none">{NUM_LABELS6[i] ?? `0${i+1}`}</span>
+                        <span className="text-[20px] mt-1">{card.icon}</span>
+                      </div>
+                      <div className="flex-1 p-3" style={{ background: "#2563eb08" }}>
+                        <p className="text-[12.5px] font-black mb-1" style={{ color: "#2563eb" }}>{card.title}</p>
+                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-            {/* 교육 조언 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>부모가 실천해야 할 교육 조언</Heading>
-              <P>이 아이의 사주와 교육 스타일을 알고 나면, 부모로서 무엇을 해주어야 하는지가 보이오. 좋은 부모는 많이 가르치는 부모가 아니오. 이 아이가 배울 수 있는 환경을 만들어주는 부모이오. 지금 당장 실천할 수 있는 것들을 살펴보겠소.</P>
-            </section>
-            <EducationTipsCard items={eduTipItems} caution={caution} childName={childName} />
+            {/* ⑤ 타고난 재능 */}
+            {(() => {
+              const tl6 = (jc.talent as {
+                intro?: string;
+                paragraphs?: string[];
+                fields?: { icon: string; name: string; subFields?: string[]; desc: string }[];
+                talentTipCards?: { icon: string; title: string; desc: string }[];
+              } | undefined) ?? {};
+              const AMBER = "#b07d2a";
+              const NUM_TL = ["01","02","03","04"];
+              if (!tl6.intro && !tl6.fields?.length && !tl6.talentTipCards?.length) return null;
+              return (
+                <>
+                  {/* 인트로 + 첫 단락 */}
+                  <section className="px-6 pt-6 pb-4">
+                    <Heading>{honorShort6}의 타고난 재능</Heading>
+                    {tl6.intro && <P>{tl6.intro}</P>}
+                    {tl6.paragraphs?.[0] && <P>{tl6.paragraphs[0]}</P>}
+                  </section>
 
-            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-            <Quote>{`"함께하는 삶의 패턴과 교육 방향을 알았으니,\n이제 두 사람의 관계에서\n주의해야 할 시기를 살펴보겠소."`}</Quote>
+                  {/* 재능 분야 */}
+                  {tl6.fields && tl6.fields.length > 0 && (
+                    <section className="px-6 pt-0 pb-2">
+                      <Heading>{honorShort6}의 재능있는 분야</Heading>
+                      <div className="mt-3 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${AMBER}30` }}>
+                        {tl6.fields.map((f, i) => (
+                          <div key={i} className="flex gap-4 items-start px-4 py-4" style={{ borderBottom: i < tl6.fields!.length - 1 ? `1px solid ${AMBER}20` : "none", background: i % 2 === 0 ? `${AMBER}06` : WHITE }}>
+                            <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-[28px]" style={{ background: `${AMBER}15` }}>{f.icon}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-black mb-1.5" style={{ color: AMBER }}>{f.name}</p>
+                              {f.subFields && f.subFields.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                  {f.subFields.map((sf, si) => (
+                                    <span key={si} className="px-2 py-0.5 rounded-full text-[10.5px] font-bold" style={{ background: `${AMBER}18`, color: AMBER, border: `1px solid ${AMBER}40` }}>{sf}</span>
+                                  ))}
+                                </div>
+                              )}
+                              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{f.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* 두 번째 단락 */}
+                  {tl6.paragraphs?.[1] && (
+                    <section className="px-6 pt-5 pb-2">
+                      <P>{tl6.paragraphs[1]}</P>
+                    </section>
+                  )}
+
+                  {/* 재능 키우는 방법 */}
+                  {tl6.talentTipCards && tl6.talentTipCards.length > 0 && (
+                    <section className="px-6 pt-0 pb-8">
+                      <Heading>재능을 키우는 방법</Heading>
+                      <div className="mt-3 space-y-2.5">
+                        {tl6.talentTipCards.map((card, i) => (
+                          <div key={i} className="rounded-2xl overflow-hidden flex" style={{ border: "1.5px solid #ffd35730" }}>
+                            <div className="flex-shrink-0 w-12 flex flex-col items-center justify-center" style={{ background: "#ffd357" }}>
+                              <span className="text-[10px] font-black opacity-70 leading-none" style={{ color: "#6b4e00" }}>{NUM_TL[i] ?? `0${i+1}`}</span>
+                              <span className="text-[20px] mt-1">{card.icon}</span>
+                            </div>
+                            <div className="flex-1 p-3" style={{ background: "#ffd35708" }}>
+                              <p className="text-[12.5px] font-black mb-1" style={{ color: "#b8860b" }}>{card.title}</p>
+                              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </>
+              );
+            })()}
+
+            <Quote>{`부모의 눈이\n재능의 씨앗을 알아볼 때\n\n아이는 비로소\n자신을 믿기 시작하오.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제7장 · 주의할 시기와 좋은 시기 ═══════════ */}
-      {ch === "7" && (() => {
-        const myName      = name || "나";
-        const childName   = report?.partnerName || "자녀";
-        const crisisScore  = (jc.crisisScore  as Record<string, unknown> | undefined) ?? null;
-        const crisisReason = (jc.crisisReason as Record<string, unknown> | undefined) ?? null;
-        const crisisTips   = (jc.crisisTips   as Record<string, unknown> | undefined) ?? null;
-        const score        = (crisisScore?.score   as number   | undefined) ?? 40;
-        const level        = (crisisScore?.level   as string   | undefined) ?? "보통 위기";
-        const label        = (crisisScore?.label   as string   | undefined) ?? "";
-        const windows      = (crisisScore?.crisisWindows as Array<{ period: string; risk: string; desc: string }> | undefined) ?? [];
-        const scorePara    = (crisisScore?.paragraphs   as string[] | undefined) ?? [];
-        const tipItems     = (crisisTips?.items    as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
-        const healing      = (crisisTips?.healing  as string   | undefined) ?? "";
-        const flow  = (jc.goodTimeFlow  as Record<string, unknown> | undefined) ?? null;
-        const goodItems = (jc.goodTimeItems as Record<string, unknown> | undefined) ?? null;
-        const timing = (jc.timingAdvice as Record<string, unknown> | undefined) ?? null;
-        const flowIntro   = typeof flow?.intro  === "string" ? flow.intro  : "";
-        const flowItems   = Array.isArray(flow?.items)  ? (flow.items as Array<{ period: string; icon: string; peak?: boolean; label: string; desc: string }>) : [];
-        const reasonIntro = typeof goodItems?.intro === "string" ? goodItems.intro : "";
-        const reasonItems = Array.isArray(goodItems?.items) ? (goodItems.items as Array<{ icon: string; title: string; desc: string }>) : [];
-        const adviceItems = Array.isArray(timing?.advice) ? (timing.advice as Array<{ icon: string; title: string; desc: string }>) : [];
-        const blessing    = typeof timing?.blessing === "string" ? timing.blessing : "";
+      {/* ═══════════ 제8장 · 시기별 양육 포인트 ═══════════ */}
+      {ch === "8" && (() => {
+        const childName8 = report?.partnerName || "자녀";
+        const childGender8 = report?.partnerGender ?? "";
+        const childFirstName8 = childName8.length > 1 ? childName8.slice(1) : childName8;
+        const childHon8 = childGender8 === "female" || childGender8 === "여성" || childGender8 === "여아" ? "양" : childGender8 === "male" || childGender8 === "남성" || childGender8 === "남아" ? "군" : "님";
+        const honor8 = `${childFirstName8}${childHon8}`;
+        const pf8 = (jc.parentingFlow as {
+          intro?: string; callout?: string; paragraphs?: string[];
+          growthPhases?: { yearStart: number; yearEnd: number; label: string; score: number; tone: string; title: string; desc: string }[];
+          parentingTipCards?: { icon: string; title: string; desc: string }[];
+        } | undefined) ?? {};
+        const TEAL8 = "#2d7d6f";
+        const toneColor8 = (t: string) => t === "warn" ? WARN : t === "caution" ? "#d97706" : TEAL8;
+        const toneBg8 = (t: string) => t === "warn" ? "#fff0f0" : t === "caution" ? "#fffbeb" : "#eef6f3";
+        const toneLabel8 = (t: string) => t === "warn" ? "주의" : t === "caution" ? "보통" : "순탄";
+
+        const TARGET_YEARS8 = [2025,2026,2027,2028,2029,2030,2031,2032,2033,2034];
+        const STEM_EL8: Record<string,string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
+        const BRANCH_EL8: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
+        const GEN8: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+        const CTL8: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+        function toSip8(ilE: string, tE: string) {
+          if (ilE === tE) return "비겁";
+          if (GEN8[ilE] === tE) return "식상";
+          if (CTL8[ilE] === tE) return "재성";
+          if (CTL8[tE] === ilE) return "관성";
+          if (GEN8[tE] === ilE) return "인성";
+          return "비겁";
+        }
+        const CAUTION8: Record<string,number> = { 인성:25,비겁:45,겁재:55,식상:50,식신:47,상관:58,재성:65,정재:60,편재:72,관성:80,정관:75,편관:85 };
+        const ilEl8 = (() => { const il = (report?.partnerView?.ilgan ?? "")[0]; return STEM_EL8[il] ?? "목"; })();
+        const seunMap8: Record<number,string> = {};
+        (report?.partnerView?.seun ?? []).forEach((s: { label: string; gz: string }) => { const y = Number(s.label); if (y >= 2025 && y <= 2034) seunMap8[y] = s.gz; });
+        const GANJIS8 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+        const baseIdx8 = GANJIS8.indexOf("甲辰");
+        TARGET_YEARS8.forEach(y => { if (!seunMap8[y]) seunMap8[y] = GANJIS8[(baseIdx8 + (y - 2024)) % 60]; });
+        const seunScores8: Record<number,number> = {};
+        TARGET_YEARS8.forEach(y => {
+          const gz = seunMap8[y] ?? "";
+          const sEl = STEM_EL8[gz[0]]; const bEl = BRANCH_EL8[gz[1]];
+          const sS = sEl ? (CAUTION8[toSip8(ilEl8, sEl)] ?? 50) : 50;
+          const bS = bEl ? (CAUTION8[toSip8(ilEl8, bEl)] ?? 50) : 50;
+          seunScores8[y] = Math.min(90, Math.max(20, Math.round(sS * 0.6 + bS * 0.4)));
+        });
+        const chartData8 = TARGET_YEARS8.map(y => ({ year: y, gz: seunMap8[y] ?? "", score: seunScores8[y] }));
+        const CHART_START8 = TARGET_YEARS8[0]; const CHART_END8 = TARGET_YEARS8[TARGET_YEARS8.length - 1];
+        function phaseYearRange8(idx: number, total: number): [number,number] {
+          const span = CHART_END8 - CHART_START8 + 1;
+          const seg = Math.ceil(span / total);
+          const s = CHART_START8 + idx * seg;
+          return [s, Math.min(s + seg - 1, CHART_END8)];
+        }
+        function phaseSeunTone8(idx: number, total: number): string {
+          const [s, e] = phaseYearRange8(idx, total);
+          const overlap = TARGET_YEARS8.filter(y => y >= s && y <= e);
+          if (!overlap.length) return "caution";
+          const avg = Math.round(overlap.reduce((sum, y) => sum + (seunScores8[y] ?? 50), 0) / overlap.length);
+          return avg >= 60 ? "warn" : avg >= 40 ? "caution" : "good";
+        }
+
         return (
           <>
-            {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>주의할 시기와 좋은 시기</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 양육</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>시기별 양육 포인트</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_8/kunghap_janyeo_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"부모자녀 사이에도\n갈등이 깊어지는 시기가 있소.\n미리 알고 마음을 준비하면 훨씬 잘 넘길 수 있소."`}</Quote>
+            <Quote>{`아이가 자라는 시기마다\n양육할 때 조언이 다르오.\n\n${honor8}의 시기별로\n양육 시 알아야 할 것들이오.`}</Quote>
 
-            {/* 위기 강도 점수 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>위기 강도와 주의할 시기</Heading>
-              <P>두 사주의 구조가 어느 시기에, 어느 정도 강도로 갈등을 만들어내는지 살펴보겠소. 위기 강도 점수는 높을수록 그 시기에 더 많은 주의와 노력이 필요하다는 뜻이오. 갈등이 생긴다는 것이 나쁜 게 아니오. 미리 알고 준비하면 오히려 관계가 한 단계 깊어지는 기회가 되오.</P>
-            </section>
-            <CrisisScoreCard score={score} level={level} label={label} crisisWindows={windows} paragraphs={scorePara} />
+            {/* 세운 기반 양육 주의도 차트 */}
+            {(() => {
+              const data = chartData8;
+              const W = 320, H = 175, padX = 20, padTop = 20, padBot = 45;
+              const n = data.length;
+              const minS = Math.min(...data.map(d => d.score));
+              const maxS = Math.max(...data.map(d => d.score));
+              const range = maxS - minS || 1;
+              const xf = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
+              const yf = (v: number) => padTop + (H - padTop - padBot) * (1 - (v - minS) / range);
+              const pts = data.map((d, i) => `${xf(i)},${yf(d.score)}`).join(" ");
+              const area = `${xf(0)},${yf(minS - range * 0.1)} ${pts} ${xf(n-1)},${yf(minS - range * 0.1)}`;
+              const peakI = data.reduce((m, d, i) => d.score > data[m].score ? i : m, 0);
+              const mid = (minS + maxS) / 2;
+              return (
+                <section className="px-6 pt-0 pb-4">
+                  <Heading>시기별 양육 주의도</Heading>
+                  <div className="rounded-2xl p-4 mt-3" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+                    <div style={{ display:"flex", gap:16, marginBottom:8 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                        <div style={{ width:10, height:10, borderRadius:"50%", background:"#5b9e6a" }} />
+                        <span style={{ fontSize:10, color:"#5b9e6a", fontWeight:600 }}>순탄 구간</span>
+                      </div>
+                      <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                        <div style={{ width:10, height:10, borderRadius:"50%", background:"#E24B4A" }} />
+                        <span style={{ fontSize:10, color:"#E24B4A", fontWeight:600 }}>주의 구간</span>
+                      </div>
+                    </div>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow:"visible" }}>
+                      <defs>
+                        <linearGradient id="cautionAreaTop8" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#E24B4A" stopOpacity="0.18" />
+                          <stop offset="100%" stopColor="#E24B4A" stopOpacity="0.02" />
+                        </linearGradient>
+                        <clipPath id="cautionClipTop8">
+                          <rect x={padX} y={padTop} width={W - padX * 2} height={(H - padTop - padBot) / 2} />
+                        </clipPath>
+                        <clipPath id="cautionClipBot8">
+                          <rect x={padX} y={padTop + (H - padTop - padBot) / 2} width={W - padX * 2} height={(H - padTop - padBot) / 2} />
+                        </clipPath>
+                      </defs>
+                      {[0,1,2,3].map(i => {
+                        const yy = padTop + ((H - padTop - padBot) * i) / 3;
+                        return <line key={i} x1={padX} x2={W - padX} y1={yy} y2={yy} stroke={`${INK}0d`} strokeWidth="1" />;
+                      })}
+                      <line x1={padX} x2={W - padX} y1={yf(mid)} y2={yf(mid)} stroke={`${INK}18`} strokeWidth="1" strokeDasharray="4 3" />
+                      <polygon points={area} fill="url(#cautionAreaTop8)" clipPath="url(#cautionClipTop8)" />
+                      <polygon points={area} fill="rgba(91,158,106,0.12)" clipPath="url(#cautionClipBot8)" />
+                      <polyline points={pts} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      {data.map((d, i) => {
+                        const isHigh = d.score > mid;
+                        const dotColor = isHigh ? "#E24B4A" : "#5b9e6a";
+                        const bw = 26, bh = 28, bx = xf(i) - bw / 2, by = H - bh - 2;
+                        return (
+                          <g key={i}>
+                            <circle cx={xf(i)} cy={yf(d.score)} r={i === peakI ? 5 : 3} fill={i === peakI ? dotColor : WHITE} stroke={dotColor} strokeWidth="2" />
+                            {i === peakI && <text x={xf(i)} y={yf(d.score) - 9} fontSize="8" fill={dotColor} textAnchor="middle" fontWeight="700">최고</text>}
+                            <line x1={xf(i)} y1={yf(d.score) + 5} x2={xf(i)} y2={by - 2} stroke={`${INK}30`} strokeWidth="1" strokeDasharray="3 3" />
+                            <rect x={bx} y={by} width={bw} height={bh} rx="4" ry="4" fill={`${INK}08`} stroke={`${INK}50`} strokeWidth="1.2" />
+                            <text x={xf(i)} y={by + 13} fontSize="11" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}년</text>
+                            <text x={xf(i)} y={by + 25} fontSize="10" fill={MUTE} textAnchor="middle">{d.gz}</text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                </section>
+              );
+            })()}
 
-            {/* 위기 원인 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>위기가 반복되는 사주적 원인</Heading>
-              <P>위기는 우연히 오지 않소. 두 사주의 에너지 구조가 특정 상황에서 반복적으로 충돌하는 패턴이 있소. 이 패턴을 먼저 이해해야 하오. 왜 같은 상황에서 늘 같은 방식으로 부딪히는지, 그 뿌리를 알면 훨씬 빨리 관계를 회복할 수 있소.</P>
-            </section>
-            <CrisisReasonCard data={crisisReason} myName={myName} childName={childName} />
+            {/* 시기별 카드 */}
+            {pf8.growthPhases && pf8.growthPhases.length > 0 && (
+              <section className="px-6 pt-2 pb-4">
+                <Heading>시기별 양육 포인트</Heading>
+                <div className="space-y-2.5 mt-3">
+                  {pf8.growthPhases.map((p, i) => {
+                    const total = pf8.growthPhases!.length;
+                    const tone = phaseSeunTone8(i, total);
+                    const [dispStart, dispEnd] = phaseYearRange8(i, total);
+                    return (
+                      <GrowthPhaseCard
+                        key={i}
+                        tone={tone}
+                        toneLabel={toneLabel8(tone)}
+                        toneColor={toneColor8(tone)}
+                        toneBg={toneBg8(tone)}
+                        yearStart={dispStart}
+                        yearEnd={dispEnd}
+                        title={p.title}
+                        desc={p.desc}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
-            {/* 위기 대처 조언 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>위기를 넘기는 실천 조언</Heading>
-              <P>위기가 왔을 때 어떻게 대처하느냐가 관계의 방향을 결정하오. 잘못된 대처는 상처를 남기고, 잘 넘긴 위기는 오히려 서로를 더 깊이 이해하는 계기가 되오. 이 두 사람의 사주 구조에서 가장 효과적인 위기 대처 방법을 살펴보겠소.</P>
-            </section>
-            <CrisisTipsCard items={tipItems} healing={healing} myName={myName} childName={childName} />
+            {/* 두 번째 단락 */}
+            {pf8.paragraphs?.[1] && (
+              <section className="px-6 pt-3 pb-4">
+                <P>{pf8.paragraphs[1]}</P>
+              </section>
+            )}
 
-            <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-            <Quote>{`"위기의 시기를 알고 준비했으니,\n이제 두 사람이 함께 빛나는\n좋은 시기를 살펴보겠소."`}</Quote>
+            {/* 양육 팁 */}
+            {pf8.parentingTipCards && pf8.parentingTipCards.length > 0 && (
+              <section className="px-6 pt-2 pb-8">
+                <Heading>부모에게 들려줄 TIP</Heading>
+                <div className="mt-3 space-y-2.5">
+                  {pf8.parentingTipCards.map((card, i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden flex" style={{ border: `1.5px solid ${TEAL8}30` }}>
+                      <div className="flex-shrink-0 w-12 flex flex-col items-center justify-center" style={{ background: TEAL8 }}>
+                        <span className="text-[10px] font-black opacity-70 leading-none" style={{ color: "#e0f2ee" }}>{["01","02","03","04"][i] ?? `0${i+1}`}</span>
+                        <span className="text-[20px] mt-1">{card.icon}</span>
+                      </div>
+                      <div className="flex-1 p-3" style={{ background: `${TEAL8}08` }}>
+                        <p className="text-[12.5px] font-black mb-1" style={{ color: TEAL8 }}>{card.title}</p>
+                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-            {/* ── 좋은 시기 흐름 타임라인 ── */}
-            <section className="pt-2 pb-2">
-              <Heading>좋은 시기 흐름</Heading>
-              <p className="px-6 text-[12px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                부모와 자녀가 사주의 기운이 조화롭게 맞물리는 시기는 따로 있소. 그 흐름을 미리 알아두면, 중요한 순간에 더 깊이 함께할 수 있소. 아래는 {myName}과 {childName}의 사주가 특히 잘 어우러지는 시기의 흐름이오.
-              </p>
-              {flowItems.length > 0
-                ? <GoodTimeFlowCard intro={flowIntro} items={flowItems} myName={myName} childName={childName} />
-                : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>시기 흐름을 불러오는 중이오...</p>
-              }
-            </section>
-
-            {/* ── 좋은 시기의 사주 근거 ── */}
-            <section className="pt-2 pb-2">
-              <Heading>좋은 시기의 이유</Heading>
-              <p className="px-6 text-[12px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                이 시기가 특히 좋은 데는 사주 원리상의 이유가 있소. 단순한 감각이 아니라 오행의 흐름과 합충의 구조가 그 이면에 있으니, 아래 근거를 찬찬히 살펴보시오.
-              </p>
-              {reasonItems.length > 0
-                ? <GoodTimeReasonCard intro={reasonIntro} items={reasonItems} myName={myName} childName={childName} />
-                : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>이유를 불러오는 중이오...</p>
-              }
-            </section>
-
-            {/* ── 활용 조언 & 홍연의 축복 ── */}
-            <section className="pt-2 pb-2">
-              <Heading>이 시기를 어떻게 활용할까</Heading>
-              <p className="px-6 text-[12px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                좋은 시기를 아는 것보다 그 시기를 잘 누리는 것이 중요하오. {myName}이 {childName}과 함께 이 기운을 온전히 활용할 수 있도록 홍연이 조언을 건네겠소.
-              </p>
-              {adviceItems.length > 0
-                ? <TimingAdviceCard advice={adviceItems} blessing={blessing} myName={myName} childName={childName} />
-                : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>조언을 불러오는 중이오...</p>
-              }
-            </section>
-
+            <Quote>{`마지막으로,\n${honor8}의 부모님께\n홍연이 전하는\n서신을 남기겠소.`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="7" go={next} />
+            <ChapterNav cur="8" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제8장 · 자녀의 미래와 부모의 역할 ═══════════ */}
-      {ch === "8" && (() => {
+      {/* ═══════════ 제7장 · 자녀의 미래와 부모의 역할 ═══════════ */}
+      {ch === "7" && (() => {
         const myName    = name || "나";
         const childName = report?.partnerName || "자녀";
+        const childGender7 = report?.partnerGender ?? "";
+        const childFirstName7 = childName.length > 1 ? childName.slice(1) : childName;
+        const childHon7 = childGender7 === "female" || childGender7 === "여성" || childGender7 === "여아" ? "양" : childGender7 === "male" || childGender7 === "남성" || childGender7 === "남아" ? "군" : "님";
+        const honorShort7 = `${childFirstName7}${childHon7}`;
         const future = (jc.futureFlow    as Record<string, unknown> | undefined) ?? null;
         const vision = (jc.childVision   as Record<string, unknown> | undefined) ?? null;
         const final  = (jc.finalMessage  as Record<string, unknown> | undefined) ?? null;
@@ -7471,50 +7888,294 @@ function ReportPreviewInner() {
           <>
             {/* ── 커버 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 미래 흐름</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 미래 흐름</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀의 미래와 부모의 역할</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_8/kunghap_janyeo_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"자녀가 어떤 미래를 걸어갈지,\n부모는 어떤 역할을 해야 하는지\n홍연이 보여드리겠소."`}</Quote>
+            <Quote>{`자녀의 미래가\n어떻게 펼쳐질지\n\n부모는 어떤 역할을 해야할지\n하나씩 말해주겠소.`}</Quote>
 
             {/* ── 자녀의 미래 흐름 타임라인 ── */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>자녀의 미래 흐름</Heading>
+              <Heading>{honorShort7}의 미래흐름</Heading>
               <P>사주는 아이가 걸어갈 인생의 굵직한 흐름을 보여주오. 어느 시기에 어떤 기운이 찾아오는지를 미리 알아두면, 부모로서 더 지혜롭게 곁을 지킬 수 있소.</P>
             </section>
             {futureItems.length > 0
               ? <ChildFutureFlowCard intro={futureIntro} items={futureItems} childName={childName} />
-              : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>미래 흐름을 불러오는 중이오...</p>
+              : null
             }
+
+            {/* ── 세운 십성 타임라인 (생년 0세~) ── */}
+            {(() => {
+              const pv7 = report?.partnerView;
+              const ilgan7 = pv7?.pillars?.[1]?.gan ?? "";
+              const birthDate7 = report?.partnerBirth?.date ?? "";
+              const birthYear7 = birthDate7 ? Number(birthDate7.split(/[-\.]/)[0]) : 0;
+              if (!ilgan7 || !birthYear7) return null;
+
+              // 대운 경계: daeun[0].label = 대운수(몇 살부터 시작)
+              const daeunList7 = (pv7?.daeun ?? []) as Array<{ label: string; gz: string; yearStart?: number }>;
+              const GAN_KR7: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+              const JI_KR7: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+              const gzToKr7 = (gz: string) => `${GAN_KR7[gz[0]] ?? gz[0]}${JI_KR7[gz[1]] ?? gz[1]}`;
+              // 대운 시작 나이(대운수) - label이 나이
+              const daeunStartAge7 = daeunList7.length > 0 ? Number(daeunList7[0].label) : null;
+
+              // ── 세운 풀이 상수 ──
+              const _SE7_STEM_EL: Record<string,string> = {
+                甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수",
+              };
+              const _SE7_BRANCH_MAIN: Record<string,string> = {
+                子:"癸",丑:"己",寅:"甲",卯:"乙",辰:"戊",巳:"丙",午:"丁",未:"己",申:"庚",酉:"辛",戌:"戊",亥:"壬",
+              };
+              const _SE7_SIP_INFO: Record<string,{kw:string;good:string}> = {
+                비견:{kw:"독립·주체",good:"자신만의 뚜렷한 개성이 살아나고 스스로 해내려는 의지가 강해지는 시기요. 이 아이 안에서 '나'라는 중심이 단단해지오."},
+                겁재:{kw:"경쟁·도전",good:"경쟁심과 도전 욕구가 높아지는 때요. 에너지가 넘치며 또래 사이에서 존재감이 커질 수 있소."},
+                식신:{kw:"표현·복덕",good:"재능이 자연스럽게 드러나고 하는 일마다 즐거움이 따르는 넉넉한 시기요. 이 아이의 창의성과 표현력이 꽃을 피울 때이오."},
+                상관:{kw:"창의·변화",good:"틀을 깨고 싶은 에너지와 아이디어가 넘쳐흐르는 시기요. 호기심이 폭발하고 새로운 것을 배우고 싶어 하오."},
+                편재:{kw:"활동·기회",good:"활발하게 움직이며 다양한 경험을 쌓는 역동적인 시기요. 새로운 친구와 환경이 이 아이에게 귀한 자산이 되오."},
+                정재:{kw:"안정·성실",good:"꾸준함이 빛을 발하는 때요. 작은 노력들이 차곡차곡 쌓여 눈에 보이는 성과로 돌아오는 안정적인 흐름이오."},
+                편관:{kw:"도전·성장",good:"책임감이 커지고 새로운 도전이 찾아오는 시기요. 이 아이가 한 단계 더 성장하는 계기가 되오."},
+                정관:{kw:"규범·명예",good:"원칙을 지키고 질서를 존중하는 기운이 흐르는 시기요. 이 아이가 신뢰를 받고 인정받는 흐름이오."},
+                편인:{kw:"직관·탐구",good:"혼자만의 세계에서 내공을 쌓는 시기요. 독특한 관점과 직관이 깊어지며 전문성이 자라나오."},
+                정인:{kw:"학습·귀인",good:"배움의 기운이 흘러들고 주변의 도움이 따르는 시기요. 공부와 기술을 쌓기에 좋은 때이오."},
+              };
+              const _SE7_UNS_INFO: Record<string,string> = {
+                장생:"새로운 시작의 생명력이 막 움트는 기운으로, 이 아이에게 신선한 가능성이 열리는 때요.",
+                목욕:"감정의 파고가 높아지고 내면을 들여다보는 정리의 시기요.",
+                관대:"세상을 향해 당당히 발걸음을 내딛으며 성장의 날개를 펼치는 때이오.",
+                건록:"이 아이 안에서 능력이 마음껏 발휘되는 활기찬 기운이 흐르오.",
+                제왕:"기운이 정점에 달해 무엇이든 해낼 것 같은 강한 에너지가 생기오.",
+                쇠:"한바탕 달려온 후 서서히 속도를 늦추며 내려놓는 법을 배우는 때요.",
+                병:"기운이 다소 약해지는 시기인 만큼, 건강과 체력을 각별히 돌봐야 하오.",
+                사:"한 챕터가 마무리되고 새로운 방향으로 전환이 이루어지는 변화의 시기요.",
+                묘:"안으로 에너지를 비축하고 내실을 다지는 때요.",
+                절:"익숙한 것과 단절이 생기지만 그 빈자리에 새로운 방향이 열리는 시기요.",
+                태:"보이지 않는 곳에서 씨앗이 조용히 싹을 틔울 준비를 하는 때요.",
+                양:"가라앉았던 기운이 서서히 회복되며 재도약의 동력이 쌓이는 때요.",
+              };
+              const _SE7_EL_MSG: Record<string,string> = {
+                목:"목의 기운은 위로 뻗어나가는 성장과 추진의 에너지로, 이 아이의 도전에 힘을 더하오.",
+                화:"화의 기운은 뜨겁게 타오르는 열정과 표현력으로, 이 아이가 주변을 밝히오.",
+                토:"토의 기운은 중심을 잡아주는 안정과 신뢰의 힘으로, 이 아이를 든든하게 다져주오.",
+                금:"금의 기운은 날을 세워주는 절제와 결단력으로, 이 아이의 집중력을 도와주오.",
+                수:"수의 기운은 낮은 곳으로 흐르는 지혜와 유연성으로, 이 아이의 막힌 곳을 뚫어주오.",
+              };
+              const childYs7 = (jc.childYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined);
+              const yongsinEl7 = childYs7?.yongsinEl ?? "";
+              const heusinEl7  = childYs7?.heusinEl  ?? "";
+              const gisinEl7   = childYs7?.gisinEl   ?? "";
+              const scoreEl7 = (el: string) => el === yongsinEl7 ? 2 : el === heusinEl7 ? 1 : el === gisinEl7 ? -2 : 0;
+              const clsEl7   = (el: string) => el === yongsinEl7 ? "yong" : el === heusinEl7 ? "heu" : el === gisinEl7 ? "gi" : "neu";
+              const tierOf7  = (gz: string): "good" | "caution" | "neutral" => {
+                const ge = _SE7_STEM_EL[gz[0]] ?? "";
+                const je = _SE7_STEM_EL[_SE7_BRANCH_MAIN[gz[1]] ?? ""] ?? "";
+                const t = scoreEl7(ge) + scoreEl7(je);
+                return t >= 2 ? "good" : t <= -1 ? "caution" : "neutral";
+              };
+              const TIER7_COLOR: Record<"good"|"caution"|"neutral", string> = { good: "#2e7d32", caution: "#c62828", neutral: "#5a5a7a" };
+              const TIER7_BG: Record<"good"|"caution"|"neutral", string>    = { good: "#e8f5e9", caution: "#ffebee", neutral: "#f3f4f6" };
+              const TIER7_LABEL: Record<"good"|"caution"|"neutral", string> = { good: "길운", caution: "주의", neutral: "보통" };
+
+              // 0세~29세 세운 카드 생성
+              const SHOW_YEARS = 20;
+              const seunCards7 = Array.from({ length: SHOW_YEARS }, (_, i) => {
+                const age = i + 1;
+                const year = birthYear7 + i;
+                const gz = yearGanji(year);
+                const sipTop = ilgan7 ? sipseongOfStem(ilgan7, gz[0]) : "";
+                const sipBot = ilgan7 ? sipseongOfBranch(ilgan7, gz[1]) : "";
+                // 어느 대운 구간인지
+                let daeunLabel = "";
+                for (let d = daeunList7.length - 1; d >= 0; d--) {
+                  const dAge = Number(daeunList7[d].label);
+                  if (age >= dAge) { daeunLabel = daeunList7[d].gz; break; }
+                }
+                // 대운 시작 경계 여부
+                const isDaeunBoundary = daeunStartAge7 !== null && age > 0 &&
+                  daeunList7.some(d => Number(d.label) === age);
+                const tier7 = tierOf7(gz);
+                return { age, year, gz, sipTop, sipBot, daeunLabel, isDaeunBoundary, tier7 };
+              });
+
+              const CARD_W = 52;
+              return (
+                <section className="px-6 pt-2 pb-0">
+                  <div className="overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+                    <div className="flex gap-1.5" style={{ width: `${SHOW_YEARS * (CARD_W + 6)}px` }}>
+                      {seunCards7.map(({ age, year, gz, sipTop, sipBot, daeunLabel, isDaeunBoundary, tier7 }) => {
+                        const isSelected7 = selectedSeun7 === age;
+                        return (
+                        <div key={age} className="flex-shrink-0 flex flex-col" style={{ width: CARD_W }}>
+                          {/* 대운 레이블 행 — 모든 카드 동일 높이 유지 */}
+                          <div style={{ height: 28, display: "flex", alignItems: "center", justifyContent: "flex-start", paddingLeft: 2 }}>
+                            {isDaeunBoundary && (
+                              <span style={{ fontSize: 11, color: "#fff", fontWeight: 700, background: JN11_NAVY, borderRadius: 6, padding: "2px 7px", boxShadow: `0 0 5px ${JN11_NAVY}88`, whiteSpace: "nowrap", filter: `drop-shadow(0 0 3px ${JN11_NAVY}bb)` }}>
+                                {gzToKr7(daeunLabel)}대운
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              borderLeft: isDaeunBoundary ? `3px solid ${JN11_NAVY}` : "none",
+                              filter: isDaeunBoundary ? `drop-shadow(-2px 0 4px ${JN11_NAVY}55)` : undefined,
+                            }}
+                          >
+                          <div
+                            className="flex flex-col items-center rounded-xl px-1.5 py-1.5"
+                            onClick={() => setSelectedSeun7(isSelected7 ? null : age)}
+                            style={{
+                              width: CARD_W,
+                              cursor: "pointer",
+                              background: isSelected7 ? `${JN11_NAVY}22` : "#f6efea",
+                              border: `1px solid ${isSelected7 ? JN11_NAVY : INK + "0d"}`,
+                              boxShadow: isSelected7 ? `0 0 0 2px ${JN11_NAVY}55` : undefined,
+                            }}
+                          >
+                            <span className="text-[12px] font-bold" style={{ color: isSelected7 ? JN11_NAVY : age === 0 ? MAROON : INK }}>{age}세</span>
+                            <span className="text-[11px]" style={{ color: MUTE }}>{year}</span>
+                            <span className="text-[12px] mt-0.5" style={{ color: MUTE }}>{sipTop}</span>
+                            <div className="flex flex-col items-center" style={{ marginTop: 2, gap: 4 }}>
+                              {gz.length >= 2 && (
+                                <>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={ganCharImage(gz[0])} alt={gz[0]} style={{ width: 32, height: 32, objectFit: "contain" }} onError={e => { (e.target as HTMLImageElement).style.display="none"; }} />
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={jiCharImage(gz[1])} alt={gz[1]} style={{ width: 32, height: 32, objectFit: "contain" }} onError={e => { (e.target as HTMLImageElement).style.display="none"; }} />
+                                </>
+                              )}
+                            </div>
+                            <span className="text-[12px] mt-0.5" style={{ color: MUTE }}>{sipBot}</span>
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full mt-0.5" style={{ background: TIER7_BG[tier7], color: TIER7_COLOR[tier7], border: `1px solid ${TIER7_COLOR[tier7]}55` }}>{TIER7_LABEL[tier7]}</span>
+                          </div>
+                          </div>
+                        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* ── 세운 클릭 풀이 ── */}
+                  {selectedSeun7 !== null && (() => {
+                    const card = seunCards7.find(c => c.age === selectedSeun7);
+                    if (!card) return null;
+                    const { age, year, gz, sipTop, sipBot, tier7 } = card;
+                    const ganChar7 = gz[0] ?? "";
+                    const jiChar7  = gz[1] ?? "";
+                    const ganEl7b  = _SE7_STEM_EL[ganChar7] ?? "";
+                    const jiEl7b   = _SE7_STEM_EL[_SE7_BRANCH_MAIN[jiChar7] ?? ""] ?? "";
+                    const ganSip7  = sipTop;
+                    const jiSip7   = sipBot;
+                    const uns7     = unseongOf(ilgan7, jiChar7);
+                    const ganCls7  = clsEl7(ganEl7b);
+                    const jiCls7   = clsEl7(jiEl7b);
+
+                    const elMsg7 = (el: string, c: string) => {
+                      if (!el) return "";
+                      if (c === "yong") return `특히 이 오행은 용신(${el})에 해당하니, 그 에너지가 이 아이의 사주에 활력을 불어넣어 살아나오.`;
+                      if (c === "heu")  return `이 오행은 희신(${el})으로 용신을 보좌하니, 이 아이의 기운 흐름이 한결 부드러워지오.`;
+                      if (c === "gi")   return `다만 이 오행은 기신(${el})에 해당하여 이 아이의 사주 균형이 다소 흔들릴 수 있으니, 이 점만큼은 마음에 새겨두는 것이 필요하오.`;
+                      return _SE7_EL_MSG[el] ?? "";
+                    };
+
+                    const ganInfo7 = _SE7_SIP_INFO[ganSip7] ?? { kw: ganSip7, good: "" };
+                    const jiInfo7  = _SE7_SIP_INFO[jiSip7]  ?? { kw: jiSip7,  good: "" };
+                    const uns7Info = _SE7_UNS_INFO[uns7] ?? "";
+
+                    const para1 = `${year}년(${age}세), 천간에는 ${ganInfo7.kw}을 품은 ${ganSip7}의 기운이 흐르는 한 해요. ${ganInfo7.good}`;
+                    const para2 = elMsg7(ganEl7b, ganCls7);
+                    const para3 = `지지에는 ${jiInfo7.kw}의 결을 지닌 ${jiSip7}이 자리하며${uns7 ? `, 운성으로는 '${uns7}'에 해당하오.` : "."} ${uns7Info} ${jiInfo7.good}`;
+                    const para4 = elMsg7(jiEl7b, jiCls7);
+                    const para5 = tier7 === "good"
+                      ? `이 한 해를 종합해보면, 용신·희신의 기운이 든든하게 뒷받침해주는 길운의 해요. ${childName}의 기운이 살아나고 활동성이 높아지는 흐름이니, 이 시기 아이를 잘 지지해주시오.`
+                      : tier7 === "caution"
+                      ? `이 한 해를 종합해보면, 기신의 기운이 섞여 들어와 ${childName}의 사주 균형이 흔들릴 수 있는 때요. 무리한 자극보다는 안정과 내실을 다지도록 곁에서 지켜봐 주시오.`
+                      : `이 한 해를 종합해보면, 용신과 기신이 뒤섞인 평온한 흐름의 시기요. 극적인 변화보다는 꾸준한 성장이 중심이 되는 해이니, ${childName}만의 속도를 믿고 기다려주시오.`;
+                    const paras7 = [para1, para2, para3, para4, para5].filter(Boolean);
+
+                    const CLS7_STYLE: Record<string,{bg:string;border:string;text:string;label:string}> = {
+                      yong: { bg: "#fff8e1", border: "#f9a825", text: "#7a4f00", label: "용신" },
+                      heu:  { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "희신" },
+                      gi:   { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "기신" },
+                      neu:  { bg: "#f3f4f6", border: "#d1d5db", text: "#555",    label: "" },
+                    };
+                    const tier7Style = tier7 === "good"
+                      ? { label: "길운", bg: "#e8f5e9", color: "#2e7d32", border: "#a5d6a7" }
+                      : tier7 === "caution"
+                      ? { label: "주의", bg: "#fff3e0", color: "#e65100", border: "#ffcc80" }
+                      : { label: "보통", bg: "#fafafa", color: "#555",    border: "#d1d5db" };
+
+                    return (
+                      <div style={{ marginTop: 16, borderRadius: 16, overflow: "hidden", border: `1px solid ${INK}12`, background: "#fff" }}>
+                        {/* 헤더 */}
+                        <div style={{ padding: "12px 16px 8px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `2px solid ${MAROON}30` }}>
+                          <div>
+                            <span style={{ fontSize: 15, fontWeight: 900, color: INK, fontFamily: SERIF }}>{ganChar7}{jiChar7}년 세운</span>
+                            <span style={{ marginLeft: 8, fontSize: 11, color: MUTE }}>{year}년 · {age}세</span>
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 900, padding: "3px 10px", borderRadius: 99, background: tier7Style.bg, color: tier7Style.color, border: `1px solid ${tier7Style.border}` }}>
+                            {tier7Style.label}
+                          </span>
+                        </div>
+                        {/* 천간/지지/운성 칩 */}
+                        <div style={{ padding: "10px 16px 8px", display: "flex", gap: 8, flexWrap: "wrap" as const }}>
+                          {[
+                            { label: `천간 ${ganChar7}`, sip: ganSip7, el: ganEl7b, c: ganCls7 },
+                            { label: `지지 ${jiChar7}`, sip: jiSip7,  el: jiEl7b,  c: jiCls7 },
+                            ...(uns7 ? [{ label: "운성", sip: uns7, el: "", c: "neu" as const }] : []),
+                          ].map((chip, ci) => {
+                            const st = CLS7_STYLE[chip.c] ?? CLS7_STYLE.neu;
+                            return (
+                              <div key={ci} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 12, background: st.bg, border: `1px solid ${st.border}` }}>
+                                <span style={{ fontSize: 10, color: "#888" }}>{chip.label}</span>
+                                <span style={{ fontSize: 12, fontWeight: 900, color: st.text }}>{chip.sip}</span>
+                                {chip.el && <span style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, fontWeight: 700, background: st.border + "55", color: st.text }}>{chip.el}(氣)</span>}
+                                {chip.c !== "neu" && chip.c !== "" && <span style={{ fontSize: 9, fontWeight: 900, color: st.text }}>{st.label}</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {/* 풀이 본문 */}
+                        <div style={{ padding: "4px 16px 16px", borderTop: `1px solid ${INK}0c`, display: "flex", flexDirection: "column" as const, gap: 10 }}>
+                          <div style={{ paddingTop: 12 }} />
+                          {paras7.map((p, i) => (
+                            <p key={i} style={{ fontSize: 13.5, lineHeight: 1.85, color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </section>
+              );
+            })()}
 
             {/* ── 자녀의 비전·재능·방향 ── */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>자녀의 비전과 가능성</Heading>
-              <P>{childName}의 사주 원국에는 고유한 재능과 가능성이 깃들어 있소. 그 빛이 어떤 방향으로 뻗어나갈지, 홍연이 살펴드리겠소.</P>
+              <Heading>{honorShort7}의 비전과 가능성</Heading>
+              <P>{honorShort7}의 사주 원국에는 고유한 재능과 가능성이 깃들어 있소. 그 빛이 어떤 방향으로 뻗어나갈지, 홍연이 살펴드리겠소.</P>
             </section>
             {visions.length > 0
               ? <ChildVisionCard intro={visionIntro} visions={visions} closing={visionClose} childName={childName} />
-              : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>자녀의 비전을 불러오는 중이오...</p>
+              : null
             }
+
 
             {/* ── 부모의 역할 & 홍연의 마지막 당부 ── */}
             <section className="px-6 pt-4 pb-2">
               <Heading>부모로서의 역할</Heading>
-              <P>{childName}에게 {myName}은 단순한 보호자가 아니라 사주가 정한 인연의 동반자이오. 이 인연을 잘 살리려면 어떤 역할이 필요한지 홍연이 일러드리겠소.</P>
+              <P>{honorShort7}에게 {myName}님은 단순한 보호자가 아니라 사주가 정한 인연의 동반자이오. 이 인연을 잘 살리려면 어떤 역할이 필요한지 홍연이 일러드리겠소.</P>
             </section>
             {roles.length > 0
               ? <ParentRoleCard roles={roles} closing={finalClose} myName={myName} childName={childName} />
-              : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>역할 조언을 불러오는 중이오...</p>
+              : null
             }
 
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={280} />
-            <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
+            <Quote>{`아이의 미래를 보았으니,\n이제 양육의 방향에 대해\n짚어드리겠소.`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="8" go={next} />
+            <ChapterNav cur="7" go={next} />
           </>
         );
       })()}
