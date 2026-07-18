@@ -170,7 +170,7 @@ function StepChildInfo({ onPrev, onNext, initial, isPartner }: {
               <span className="font-bold">태어난 날짜는?</span>
             </h2>
             <div className="flex gap-2 mb-3">
-              {["양력", "음력", "윤달"].map((c) => (
+              {["양력", "음력"].map((c) => (
                 <button key={c} onClick={() => setCalendar(c)}
                   className="flex-1 py-2 rounded-xl text-[13px] font-bold transition-all"
                   style={{
