@@ -6914,7 +6914,7 @@ function ReportPreviewInner() {
 
             {/* ── 용신/희신/기신 (나) ── */}
             {jc.myYongsin && (() => { // ch1-yongsin
-              const YS = jc.myYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; intro?: string; desc?: string };
+              const YS = jc.myYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; yongsinReason?: string; heusinReason?: string; gisinReason?: string; intro?: string; desc?: string };
               const OHAENG_META: Record<string, { hanja: string; color: string; bg: string; desc: string }> = {
                 목: { hanja: "木", color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
                 화: { hanja: "火", color: "#222", bg: "#ffebee", desc: "열정·표현" },
@@ -7115,7 +7115,7 @@ function ReportPreviewInner() {
 
             {/* ── 용신/희신/기신 (자녀) ── */}
             {jc.childYongsin && (() => {
-              const YS = jc.childYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; intro?: string; desc?: string };
+              const YS = jc.childYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; yongsinReason?: string; heusinReason?: string; gisinReason?: string; intro?: string; desc?: string };
               const OHAENG_META: Record<string, { hanja: string; color: string; bg: string; desc: string }> = {
                 목: { hanja: "木", color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
                 화: { hanja: "火", color: "#222", bg: "#ffebee", desc: "열정·표현" },
