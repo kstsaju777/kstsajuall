@@ -102,7 +102,10 @@ function MyeongsikSection({
 
   const calLabel = calendar === "음력" ? "음력" : calendar === "윤달" ? "음력(윤달)" : "양력";
   const dateFormatted = date ? date.replace(/\./g, "년 ").replace(/\.$/, "").split("년 ").map((v, i) => i === 0 ? v + "년" : i === 1 ? v + "월" : v + "일").join(" ") : "";
-  const genderLabel = gender === "female" || gender === "여자" ? "여성" : gender === "male" || gender === "남자" ? "남성" : gender;
+  const isFemale = gender === "female" || gender === "여자" || gender === "여성" || gender === "여아";
+  const genderLabel = isFemale ? "여아" : "남아";
+  const honorific = isFemale ? "양" : "군";
+  const displayName = name.length > 1 ? name.slice(1) : name;
   const dateLabel = dateFormatted ? `${calLabel} ${dateFormatted}${genderLabel ? ` (${genderLabel})` : ""}` : "";
 
   return (
@@ -116,7 +119,7 @@ function MyeongsikSection({
             rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
             header={
               <div className="text-center">
-                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}님의 사주팔자</p>
+                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{displayName}{honorific}의 사주팔자</p>
                 {dateLabel && <p className="text-[13px]" style={{ color: "#5b504a" }}>{dateLabel}</p>}
               </div>
             }

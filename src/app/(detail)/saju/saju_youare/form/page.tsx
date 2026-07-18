@@ -526,7 +526,8 @@ function StepLoading({ name, date, time, calendar, gender, email, concern, phone
   const [progress, setProgress] = useState(0);
   const [msg, setMsg] = useState("그대의 사주팔자를 세우고 있어요...");
   const doneRef = useRef(false);
-  const suffix = gender === "남성" ? "군" : gender === "여성" ? "양" : "님";
+  const suffix = gender === "남성" || gender === "남아" || gender === "male" ? "군" : gender === "여성" || gender === "여아" || gender === "female" ? "양" : "님";
+  const displayName = name.length > 1 ? name.slice(1) : name;
 
   const MSGS = [
     "그대의 사주팔자를 세우고 있어요...",
@@ -564,7 +565,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern, phone
           style={{ backgroundColor: "rgba(228,209,178,0.15)", border: "2px solid rgba(228,209,178,0.4)" }}>
           <span style={{ fontSize: 28 }}>✨</span>
         </div>
-        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{name}{suffix}의 유아사주</p>
+        <p className="text-[22px] font-black mb-1" style={{ color: "#fff" }}>{displayName}{suffix}의 유아사주</p>
         <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
           <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: PINK }} />

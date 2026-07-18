@@ -7,6 +7,7 @@ import { calcSaju, ohaengMap } from "@/lib/saju/local-manseryeok";
 import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { YEONAE_CHAPTER_SECTIONS, isYeonaeChapterReady } from "@/lib/saju/yeonae-report-content";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -249,11 +250,14 @@ async function generateChapter(body: unknown) {
   }
 
   try {
-    const sections = await genChapterContent(chapter, {
+    const rawSections = await genChapterContent(chapter, {
       name: stored.name ?? "", gender: stored.gender ?? "", mySajuText: stored.mySajuText ?? "",
       partnerName: stored.partnerName ?? "", partnerGender: stored.partnerGender ?? "", partnerSajuText: stored.partnerSajuText ?? "",
       concern: stored.concern ?? "",
     });
+    const myLabel = (stored.name ?? "").length > 1 ? (stored.name ?? "").slice(1) : (stored.name ?? "");
+    const ptLabel = (stored.partnerName ?? "").length > 1 ? (stored.partnerName ?? "").slice(1) : (stored.partnerName ?? "");
+    const sections = fixNamesInValue(rawSections, myLabel, ptLabel || null, "님") as typeof rawSections;
     return NextResponse.json({ sections });
   } catch (err) {
     return NextResponse.json({ error: "챕터 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });

@@ -12,6 +12,7 @@ import { calcSaju, ohaengMap } from "@/lib/saju/local-manseryeok";
 import type { LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
 import { CHILD_CHAPTER_SECTIONS, isChildChapterReady } from "@/lib/saju/child-report-content";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -250,12 +251,14 @@ async function generateChapter(body: unknown) {
   }
 
   try {
-    const sections = await genChapterContent(chapter, {
+    const rawSections = await genChapterContent(chapter, {
       name:     stored.name ?? "",
       gender:   stored.gender ?? "",
       sajuText: stored.sajuText ?? "",
       concern:  stored.concern ?? "",
     });
+    const myLabel = (stored.name ?? "").length > 1 ? (stored.name ?? "").slice(1) : (stored.name ?? "");
+    const sections = fixNamesInValue(rawSections, myLabel, null, "님") as typeof rawSections;
     return NextResponse.json({ sections });
   } catch (err) {
     return NextResponse.json({ error: "챕터 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });

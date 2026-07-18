@@ -23,6 +23,7 @@ import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-mansery
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -296,8 +297,9 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
       seun: stored?.view?.seun ?? [],
     });
-
-    return NextResponse.json({ sections: obj });
+    const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
+    const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;
+    return NextResponse.json({ sections });
   } catch (err) {
     return NextResponse.json({ error: "장 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }

@@ -21,6 +21,7 @@ import { isJanyeoKunghapChapterReady, JANYEO_KUNGHAP_CHAPTER_SECTIONS } from "@/
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
+import { calcCrossRelations as calcCrossRelationsShared } from "@/lib/saju/kunghap-cross-relations";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
 const CREAM = "#fdf8f4";
@@ -2414,6 +2415,9 @@ const JN5_SHDW  = "#5a2020"; const JN5_SHDW_P = "#fdf0f0";  // 그림자 — 레
 const JN6_HAP   = "#1a5a2a"; const JN6_HAP_P  = "#edf7f0";  // 합 — 초록
 const JN6_CHUNG = "#6a1a1a"; const JN6_CHUNG_P = "#fdf0f0"; // 충 — 레드
 const JN6_SCORE = "#3a2a6a"; const JN6_SCORE_P = "#f0eeff"; // 종합 — 보라
+const HAP_COLOR   = "#2d6a4f"; // 합(合) — 초록 계열
+const CHUNG_COLOR = "#b05020"; // 충(沖) — 오렌지-레드 계열
+const CH6_COLOR   = "#1a5c8a"; // 합·충 섹션 기본 색 (인디고 블루)
 // ── Ch7 색상 토큰 ────────────────────────────────────────────────
 const JN7_COLOR = "#1a6a5a"; const JN7_PALE  = "#edf7f4";   // 생활 패턴 — 세이지 틸
 const JN7_WARM  = "#5a3a1a"; const JN7_WARM_P = "#fdf6ee";  // 일상 리듬 — 따뜻한 갈색
@@ -3409,6 +3413,311 @@ function HapChungScoreCard({ score, label, tier, note, paragraphs }: {
   );
 }
 
+// ── 합·충 교차 관계 상세 설명 (G버전 — 두 명식 크로스) ─────────────────────
+const CROSS_DESC: Record<string, string> = {
+  "천간합_갑기": "갑목(甲)과 기토(己)가 만나 토(土)로 합화되오. 갑목은 앞을 향해 거침없이 뻗어나가는 기운이고, 기토는 그 기운을 품어 안아 안정시키는 기운이오. 두 사람이 만나면 한쪽이 방향을 제시하고 다른 쪽이 든든하게 뒷받침하는 조화가 자연스럽게 이루어지오. 함께할 때 현실적인 기반과 안정감이 커지는 토 기운이 관계 전반에 깔리게 되오. 다만 갑목이 너무 앞서 나가면 기토가 버거워하고, 기토가 너무 붙잡으면 갑목이 답답해질 수 있으니 속도를 맞추는 것이 중요하오.",
+  "천간합_기갑": "갑목(甲)과 기토(己)가 만나 토(土)로 합화되오. 갑목은 앞을 향해 거침없이 뻗어나가는 기운이고, 기토는 그 기운을 품어 안아 안정시키는 기운이오. 두 사람이 만나면 한쪽이 방향을 제시하고 다른 쪽이 든든하게 뒷받침하는 조화가 자연스럽게 이루어지오. 함께할 때 현실적인 기반과 안정감이 커지는 토 기운이 관계 전반에 깔리게 되오. 다만 갑목이 너무 앞서 나가면 기토가 버거워하고, 기토가 너무 붙잡으면 갑목이 답답해질 수 있으니 속도를 맞추는 것이 중요하오.",
+  "천간합_을경": "을목(乙)과 경금(庚)이 만나 금(金)으로 합화되오. 을목의 부드럽고 유연한 감수성이 경금의 날카롭고 결단력 있는 기운과 만나 정밀하고 세련된 에너지로 변화하오. 두 사람은 서로의 성격이 꽤 달라 보이지만, 오히려 그 차이가 맞물려 함께 있을 때 완성도 높은 결과물을 만들어내오. 서로에게 배울 것이 많은 관계이오. 다만 을목의 유연함이 경금의 원칙에 눌리거나, 경금의 직선적인 표현이 을목에게 날카롭게 느껴질 수 있으니 표현 방식에 주의하오.",
+  "천간합_경을": "을목(乙)과 경금(庚)이 만나 금(金)으로 합화되오. 을목의 부드럽고 유연한 감수성이 경금의 날카롭고 결단력 있는 기운과 만나 정밀하고 세련된 에너지로 변화하오. 두 사람은 서로의 성격이 꽤 달라 보이지만, 오히려 그 차이가 맞물려 함께 있을 때 완성도 높은 결과물을 만들어내오. 서로에게 배울 것이 많은 관계이오. 다만 을목의 유연함이 경금의 원칙에 눌리거나, 경금의 직선적인 표현이 을목에게 날카롭게 느껴질 수 있으니 표현 방식에 주의하오.",
+  "천간합_병신": "병화(丙)와 신금(辛)이 만나 수(水)로 합화되오. 병화의 뜨겁고 개방적인 에너지와 신금의 섬세하고 내밀한 기운이 만나, 깊이 있는 감성과 직관의 수 기운으로 변화하오. 겉으로는 전혀 달라 보이는 두 사람이지만, 함께 있을 때 서로의 내면을 꺼내놓게 만드는 묘한 끌림이 있소. 병화가 분위기를 띄우고 신금이 깊이를 더하는 방식으로 조화를 이루오. 병화가 너무 뜨겁게 달아오르면 신금이 버거워할 수 있으니 감정 온도를 조율하는 것이 필요하오.",
+  "천간합_신병": "병화(丙)와 신금(辛)이 만나 수(Water)로 합화되오. 병화의 뜨겁고 개방적인 에너지와 신금의 섬세하고 내밀한 기운이 만나, 깊이 있는 감성과 직관의 수 기운으로 변화하오. 겉으로는 전혀 달라 보이는 두 사람이지만, 함께 있을 때 서로의 내면을 꺼내놓게 만드는 묘한 끌림이 있소. 병화가 분위기를 띄우고 신금이 깊이를 더하는 방식으로 조화를 이루오. 병화가 너무 뜨겁게 달아오르면 신금이 버거워할 수 있으니 감정 온도를 조율하는 것이 필요하오.",
+  "천간합_정임": "정화(丁)와 임수(壬)가 만나 목(木)으로 합화되오. 정화의 따뜻하고 섬세한 감성과 임수의 넓고 포용력 있는 기운이 합쳐져, 새로운 생명력과 성장의 목 기운으로 변화하오. 두 사람이 함께하면 서로를 향한 진심 어린 배려가 자연스럽게 흘러나오고, 관계 안에서 계속 성장하는 느낌을 받게 되오. 감정적으로 가장 깊은 합 중 하나로, 오랜 시간이 흘러도 정이 식지 않는 특징이 있소. 다만 서로에게 너무 깊이 기대면 의존이 될 수 있으니 각자의 중심도 지켜나가시오.",
+  "천간합_임정": "정화(丁)와 임수(壬)가 만나 목(木)으로 합화되오. 정화의 따뜻하고 섬세한 감성과 임수의 넓고 포용력 있는 기운이 합쳐져, 새로운 생명력과 성장의 목 기운으로 변화하오. 두 사람이 함께하면 서로를 향한 진심 어린 배려가 자연스럽게 흘러나오고, 관계 안에서 계속 성장하는 느낌을 받게 되오. 감정적으로 가장 깊은 합 중 하나로, 오랜 시간이 흘러도 정이 식지 않는 특징이 있소. 다만 서로에게 너무 깊이 기대면 의존이 될 수 있으니 각자의 중심도 지켜나가시오.",
+  "천간합_무계": "무토(戊)와 계수(癸)가 만나 화(火)로 합화되오. 무토의 묵직하고 넓은 대지 기운과 계수의 섬세하고 맑은 물 기운이 합쳐지면 강렬한 화 기운이 생겨나오. 두 사람 사이에 열정과 감정의 불꽃이 쉽게 일어나며, 함께 있을 때 상대방을 강하게 의식하게 만드는 에너지가 있소. 서로에 대한 느낌이 뜨겁고 분명한 관계이오. 그 불이 온기가 될지 소진이 될지는 두 사람이 감정을 어떻게 다루느냐에 달려 있소. 열정 못지않게 안정을 함께 가꾸어 나가는 것이 중요하오.",
+  "천간합_계무": "무토(戊)와 계수(癸)가 만나 화(火)로 합화되오. 무토의 묵직하고 넓은 대지 기운과 계수의 섬세하고 맑은 물 기운이 합쳐지면 강렬한 화 기운이 생겨나오. 두 사람 사이에 열정과 감정의 불꽃이 쉽게 일어나며, 함께 있을 때 상대방을 강하게 의식하게 만드는 에너지가 있소. 서로에 대한 느낌이 뜨겁고 분명한 관계이오. 그 불이 온기가 될지 소진이 될지는 두 사람이 감정을 어떻게 다루느냐에 달려 있소. 열정 못지않게 안정을 함께 가꾸어 나가는 것이 중요하오.",
+  "천간충_갑경": "갑목(甲)과 경금(庚)의 충이오. 목이 성장하고 뻗어나가려는 기운과 금이 자르고 제한하는 기운이 정면으로 맞부딪히는 구조이오. 한 사람이 새로운 것을 시도하고 확장하려 할 때, 다른 사람이 현실적 이유를 들어 제동을 거는 패턴이 반복될 수 있소. 서로의 의지가 강한 만큼 충돌의 강도도 세지만, 동시에 서로를 강하게 단련시키는 힘도 있소. 갑목의 방향성과 경금의 판단력이 협력으로 전환되면, 두 사람은 서로가 없었다면 만들지 못했을 결실을 이루어낼 수 있소.",
+  "천간충_경갑": "갑목(甲)과 경금(庚)의 충이오. 목이 성장하고 뻗어나가려는 기운과 금이 자르고 제한하는 기운이 정면으로 맞부딪히는 구조이오. 한 사람이 새로운 것을 시도하고 확장하려 할 때, 다른 사람이 현실적 이유를 들어 제동을 거는 패턴이 반복될 수 있소. 서로의 의지가 강한 만큼 충돌의 강도도 세지만, 동시에 서로를 강하게 단련시키는 힘도 있소. 갑목의 방향성과 경금의 판단력이 협력으로 전환되면, 두 사람은 서로가 없었다면 만들지 못했을 결실을 이루어낼 수 있소.",
+  "천간충_을신": "을목(乙)과 신금(辛)의 충이오. 을목의 유연하고 섬세한 기운이 신금의 날카롭고 원칙적인 기운과 충돌하오. 을목은 상황에 따라 부드럽게 방향을 바꾸려 하고, 신금은 한번 정한 기준을 굽히려 하지 않아 갈등이 생기기 쉽소. 서로의 스타일을 이해하고 존중하는 것이 이 충을 다스리는 핵심이오.",
+  "천간충_신을": "을목(乙)과 신금(辛)의 충이오. 을목의 유연하고 섬세한 기운이 신금의 날카롭고 원칙적인 기운과 충돌하오. 을목은 상황에 따라 부드럽게 방향을 바꾸려 하고, 신금은 한번 정한 기준을 굽히려 하지 않아 갈등이 생기기 쉽소. 서로의 스타일을 이해하고 존중하는 것이 이 충을 다스리는 핵심이오.",
+  "천간충_병임": "병화(丙)와 임수(壬)의 충이오. 불과 물이 정면으로 부딪히는 가장 극적인 천간충 중 하나이오. 한 사람은 감정을 바로 표현해야 하고, 다른 사람은 충분히 생각하고 정리한 뒤에 말하는 스타일이어서 서로의 템포가 자주 어긋날 수 있소. 서로의 표현 방식을 억누르지 않고 교대로 존중해주는 것이 열쇠이오.",
+  "천간충_임병": "병화(丙)와 임수(壬)의 충이오. 불과 물이 정면으로 부딪히는 가장 극적인 천간충 중 하나이오. 한 사람은 감정을 바로 표현해야 하고, 다른 사람은 충분히 생각하고 정리한 뒤에 말하는 스타일이어서 서로의 템포가 자주 어긋날 수 있소. 서로의 표현 방식을 억누르지 않고 교대로 존중해주는 것이 열쇠이오.",
+  "천간충_정계": "정화(丁)와 계수(癸)의 충이오. 정화는 감정으로 먼저 반응하고, 계수는 논리와 이성으로 접근하는 경향이 있어 대화가 엇갈리기 쉽소. 상대방의 반응 방식이 내 방식과 다를 뿐임을 인식하는 것이 이 충을 부드럽게 하는 첫걸음이오.",
+  "천간충_계정": "정화(丁)와 계수(癸)의 충이오. 정화는 감정으로 먼저 반응하고, 계수는 논리와 이성으로 접근하는 경향이 있어 대화가 엇갈리기 쉽소. 상대방의 반응 방식이 내 방식과 다를 뿐임을 인식하는 것이 이 충을 부드럽게 하는 첫걸음이오.",
+  "천간충_무임": "무토(戊)와 임수(壬)의 충이오. 안정 vs 변화의 욕구 차이가 관계 안에서 자주 마찰을 만들어낼 수 있소. 서로의 필요를 억지로 바꾸려 하기보다, 각자에게 필요한 것을 존중하며 조율하는 방식이 이 충을 다스리는 길이오.",
+  "천간충_임무": "무토(戊)와 임수(壬)의 충이오. 안정 vs 변화의 욕구 차이가 관계 안에서 자주 마찰을 만들어낼 수 있소. 서로의 필요를 억지로 바꾸려 하기보다, 각자에게 필요한 것을 존중하며 조율하는 방식이 이 충을 다스리는 길이오.",
+  "육합_자축": "자(子)와 축(丑)이 만나 토(土)로 합화되오. 가까이 있으면 자연스럽게 서로를 의지하게 되오. 화려하게 드러나는 합은 아니지만, 오래 함께할수록 더욱 깊어지는 조용한 신뢰의 관계이오.",
+  "육합_축자": "자(子)와 축(丑)이 만나 토(土)로 합화되오. 가까이 있으면 자연스럽게 서로를 의지하게 되오. 화려하게 드러나는 합은 아니지만, 오래 함께할수록 더욱 깊어지는 조용한 신뢰의 관계이오.",
+  "육합_인해": "인(寅)과 해(亥)가 만나 목(木)으로 합화되오. 두 사람이 함께하면 서로를 성장시키는 에너지가 강하게 흐르오. 무언가를 함께 시작하고 키워나가는 데 잘 맞는 조합이며, 서로에게서 새로운 가능성을 발견하게 하는 관계이오.",
+  "육합_해인": "인(寅)과 해(亥)가 만나 목(木)으로 합화되오. 두 사람이 함께하면 서로를 성장시키는 에너지가 강하게 흐르오. 무언가를 함께 시작하고 키워나가는 데 잘 맞는 조합이며, 서로에게서 새로운 가능성을 발견하게 하는 관계이오.",
+  "육합_묘술": "묘(卯)와 술(戌)이 만나 화(火)로 합화되오. 두 사람 사이에 감정적인 연결이 강하고, 함께 있으면 서로에 대한 감정이 더욱 뜨겁게 달아오르는 경향이 있소. 감성적으로 깊이 통하는 관계이오.",
+  "육합_술묘": "묘(卯)와 술(戌)이 만나 화(火)로 합화되오. 두 사람 사이에 감정적인 연결이 강하고, 함께 있으면 서로에 대한 감정이 더욱 뜨겁게 달아오르는 경향이 있소. 감성적으로 깊이 통하는 관계이오.",
+  "육합_진유": "진(辰)과 유(酉)가 만나 금(金)으로 합화되오. 두 사람이 함께하면 서로의 장점이 더욱 선명하게 빛나고, 상대방을 통해 자신의 잠재력을 발견하게 되는 경우가 많소. 품격 있는 관계를 만들어내는 조합이오.",
+  "육합_유진": "진(辰)과 유(酉)가 만나 금(金)으로 합화되오. 두 사람이 함께하면 서로의 장점이 더욱 선명하게 빛나고, 상대방을 통해 자신의 잠재력을 발견하게 되는 경우가 많소. 품격 있는 관계를 만들어내는 조합이오.",
+  "육합_사신": "사(巳)와 신(申)이 만나 수(水)로 합화되오. 두 사람 사이에 서로를 날카롭게 파악하는 통찰이 오가고, 함께 있을 때 깊이 있는 대화가 자연스럽게 이어지는 관계이오.",
+  "육합_신사": "사(巳)와 신(申)이 만나 수(Water)로 합화되오. 두 사람 사이에 서로를 날카롭게 파악하는 통찰이 오가고, 함께 있을 때 깊이 있는 대화가 자연스럽게 이어지는 관계이오.",
+  "육합_오미": "오(午)와 미(未)가 만나 화(Fire)로 합화되오. 두 사람이 함께하면 분위기가 밝고 따뜻해지며, 서로에 대한 호감과 애정 표현이 자연스럽게 흘러나오오. 관계 안에 온기와 즐거움이 가득한 조합이오.",
+  "육합_미오": "오(午)와 미(未)가 만나 화(Fire)로 합화되오. 두 사람이 함께하면 분위기가 밝고 따뜻해지며, 서로에 대한 호감과 애정 표현이 자연스럽게 흘러나오오. 관계 안에 온기와 즐거움이 가득한 조합이오.",
+  "삼합_인오술": "인(寅)·오(午)·술(戌)이 모여 화국(火局)을 이루오. 함께하면 열정·표현력·사교성이 두드러지며, 두 사람 모두 생기 넘치고 적극적인 에너지를 발휘하게 되오.",
+  "삼합_신자진": "신(申)·자(子)·진(辰)이 모여 수국(水局)을 이루오. 함께하면 서로를 깊이 이해하고 내면을 나누는 대화가 자연스럽게 이루어지며, 감정적 교류가 풍부한 관계가 되오.",
+  "삼합_해묘미": "해(亥)·묘(卯)·미(未)가 모여 목국(木局)을 이루오. 함께하면 서로를 향해 자연스럽게 발전하고 싶은 마음이 생기며, 새로운 일을 시작하거나 함께 무언가를 키워나갈 때 강한 시너지가 발휘되오.",
+  "삼합_사유축": "사(巳)·유(酉)·축(丑)이 모여 금국(金局)을 이루오. 함께하면 서로에게 엄격한 기준을 요구하게 되기도 하지만, 그만큼 두 사람이 함께 이루어내는 결과물의 완성도가 높아지오.",
+  "충_자오": "자(子)와 오(午)가 충하오. 한 사람은 감정을 충분히 삭힌 뒤 말하고 싶고, 다른 사람은 즉각적으로 표현하고 반응받고 싶어하는 구조가 충돌을 만들어내오.",
+  "충_오자": "자(子)와 오(午)가 충하오. 한 사람은 감정을 충분히 삭힌 뒤 말하고 싶고, 다른 사람은 즉각적으로 표현하고 반응받고 싶어하는 구조가 충돌을 만들어내오.",
+  "충_축미": "축(丑)과 미(未)가 충하오. 둘 다 자신의 자리를 굳건히 지키려는 성질이 강해, 서로 상대방의 방식에 맞추는 것을 불편하게 느끼기 쉽소.",
+  "충_미축": "축(丑)과 미(未)가 충하오. 둘 다 자신의 자리를 굳건히 지키려는 성질이 강해, 서로 상대방의 방식에 맞추는 것을 불편하게 느끼기 쉽소.",
+  "충_인신": "인(寅)과 신(申)이 충하오. 한 사람은 직관적으로 빠르게 움직이려 하고, 다른 사람은 논리적으로 따져보고 결정하려 해 함께 무언가를 진행할 때 속도가 맞지 않는 경우가 많소.",
+  "충_신인": "인(寅)과 신(申)이 충하오. 한 사람은 직관적으로 빠르게 움직이려 하고, 다른 사람은 논리적으로 따져보고 결정하려 해 함께 무언가를 진행할 때 속도가 맞지 않는 경우가 많소.",
+  "충_묘유": "묘(卯)와 유(酉)가 충하오. 한 사람은 관계 안에서 자유롭고 유연하게 흐르고 싶어하고, 다른 사람은 질서와 원칙 안에서 안정감을 찾으려 하오.",
+  "충_유묘": "묘(卯)와 유(酉)가 충하오. 한 사람은 관계 안에서 자유롭고 유연하게 흐르고 싶어하고, 다른 사람은 질서와 원칙 안에서 안정감을 찾으려 하오.",
+  "충_진술": "진(辰)과 술(戌)이 충하오. 둘 다 강한 자기 기반과 주관을 가지고 있소. 방향이 다를 때 서로 좀처럼 물러서지 않으려 하오.",
+  "충_술진": "진(辰)과 술(戌)이 충하오. 둘 다 강한 자기 기반과 주관을 가지고 있소. 방향이 다를 때 서로 좀처럼 물러서지 않으려 하오.",
+  "충_사해": "사(巳)와 해(亥)가 충하오. 한 사람은 목표를 향해 직선으로 나아가려 하고, 다른 사람은 다양한 가능성을 탐색하며 넓게 흘러가려 해 속도와 방향이 자주 어긋날 수 있소.",
+  "충_해사": "사(巳)와 해(亥)가 충하오. 한 사람은 목표를 향해 직선으로 나아가려 하고, 다른 사람은 다양한 가능성을 탐색하며 넓게 흘러가려 해 속도와 방향이 자주 어긋날 수 있소.",
+};
+
+function buildCrossRelDesc2JY(r: { kind: string; chars: string[] }): string {
+  const key = `${r.kind}_${r.chars.join("")}`;
+  const reverseKey = `${r.kind}_${[...r.chars].reverse().join("")}`;
+  return CROSS_DESC[key] ?? CROSS_DESC[reverseKey] ?? (KIND_MEANING[r.kind as keyof typeof KIND_MEANING]?.effect ?? "");
+}
+
+const REL_SCORE_G: Record<string, number> = {
+  "삼합":   +12,
+  "천간합": +8,
+  "육합":   +7,
+  "천간충": -8,
+  "원진":   -7,
+  "충":     -6,
+  "형":     -5,
+  "해":     -4,
+  "파":     -3,
+};
+const SCORE_LABELS_G: [number, string][] = [
+  [90, "천생연분"],
+  [80, "빛나는 인연"],
+  [70, "좋은 조화"],
+  [60, "무난한 궁합"],
+  [50, "노력이 필요한 궁합"],
+  [0,  "극과 극의 만남"],
+];
+function calcKunghapScoreG(rels: { kind: string }[]): { score: number; label: string } {
+  const raw = rels.reduce((acc, r) => acc + (REL_SCORE_G[r.kind] ?? 0), 70);
+  const score = Math.min(100, Math.max(0, raw));
+  const label = (SCORE_LABELS_G.find(([min]) => score >= min) ?? SCORE_LABELS_G[SCORE_LABELS_G.length - 1])[1];
+  return { score, label };
+}
+
+function calcCrossRelationsJY(myView: MyeongsikView, ptView: MyeongsikView): { kind: string; chars: string[]; label: string }[] {
+  return calcCrossRelationsShared(myView, ptView);
+}
+
+function buildHapChungDescJY(rels: { kind: string }[], score: number): string {
+  const HAP_KINDS_JY = ["천간합", "육합", "삼합"];
+  const hapRels   = rels.filter(r => HAP_KINDS_JY.includes(r.kind));
+  const chungRels = rels.filter(r => !HAP_KINDS_JY.includes(r.kind));
+  const hapCount  = hapRels.length;
+  const chungCount = chungRels.length;
+  const parts: string[] = [];
+  const countLine = (() => {
+    if (hapCount === 0 && chungCount === 0)
+      return `두 사람의 사주 사이에서 합(合)과 충(沖) 모두 발견되지 않았소. 기운의 충돌도 없지만 강한 연결도 없는, 비교적 중립적인 구조이오. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+    if (hapCount === 0)
+      return `두 사람의 사주 사이에서 합(合)은 발견되지 않았고, 마찰의 기운이 ${chungCount}개 작용하고 있소. 서로를 끌어당기는 기운 없이 충돌 구조만 있는 셈이오. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+    if (chungCount === 0)
+      return `두 사람의 사주 사이에서 합(合)이 ${hapCount}개 형성되어 있고, 충(沖)이나 형·파·해·원진은 발견되지 않았소. 마찰 없이 조화의 기운만 흐르는 드문 구조이오. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+    return `두 사람의 사주 사이에서 합(合)이 ${hapCount}개, 충·형·파·해·원진 등 마찰의 기운이 ${chungCount}개 발견되었소. 이 관계의 점수는 ${score}점으로 산정되었소.`;
+  })();
+  parts.push(countLine);
+  if (hapCount > 0) {
+    const hasSamhap = hapRels.some(r => r.kind === "삼합");
+    const hasGanhap = hapRels.some(r => r.kind === "천간합");
+    const hasYukhap = hapRels.some(r => r.kind === "육합");
+    const roles: string[] = [];
+    if (hasGanhap) roles.push("생각과 의지의 방향이 자연스럽게 맞아드는 천간합");
+    if (hasYukhap) roles.push("감정과 일상의 결이 편안하게 어우러지는 육합");
+    if (hasSamhap) roles.push("두 사람의 에너지가 하나의 강한 방향으로 결집되는 삼합");
+    if (roles.length > 0)
+      parts.push(`합(合)은 두 사람 사이에서 ${roles.join(", ")}의 기운으로 작용하오. 이 합이 있는 영역에서 두 사람은 억지로 맞추지 않아도 자연스럽게 통하게 되며, 함께 있을 때 편안함과 연결감의 근원이 되오.`);
+  }
+  if (chungCount > 0) {
+    const hasWonjin = chungRels.some(r => r.kind === "원진");
+    const hasHyeong = chungRels.some(r => r.kind === "형");
+    const hasChung  = chungRels.some(r => r.kind === "충" || r.kind === "천간충");
+    const hasPa     = chungRels.some(r => r.kind === "파");
+    const hasHae    = chungRels.some(r => r.kind === "해");
+    const chungRoles: string[] = [];
+    if (hasChung)  chungRoles.push("의견과 방향이 부딪히는 직접적인 충돌");
+    if (hasHyeong) chungRoles.push("겉으로 드러나지 않고 내면에서 쌓이는 마찰");
+    if (hasWonjin) chungRoles.push("설명하기 어려운 내면의 거리감");
+    if (hasPa)     chungRoles.push("시작은 좋지만 중간에 어긋나는 어색함");
+    if (hasHae)    chungRoles.push("선의가 오해로 전달되는 뜻밖의 갈등");
+    const chungStr = chungRoles.length > 0 ? chungRoles.join(", ") + "의 기운" : "마찰과 긴장의 기운";
+    parts.push(`충(沖)·형·파·해·원진은 두 사람 사이에서 ${chungStr}으로 작용하오. 이 기운들이 반드시 관계를 해치는 것은 아니오. 충돌이 있는 자리에서 서로를 더 깊이 이해하게 되고, 마찰이 있어야 성장도 있는 법이오. 다만 이 기운이 어떻게 작용하는지 미리 인식해두지 않으면, 반복되는 패턴 속에서 관계가 소진될 수 있소.`);
+  }
+  const conclusion = (() => {
+    if (score >= 90) return `총평하자면, 이 관계는 사주 궁합상 매우 드문 강한 조화를 이루고 있소. 기운의 연결이 여러 겹으로 탄탄하게 쌓여 있어, 함께할수록 서로에게 힘이 되고 안정이 되는 인연이오.`;
+    if (score >= 80) return `총평하자면, 이 관계는 조화로운 기운이 마찰보다 더 강하게 흐르고 있소. 함께할 때 자연스러운 편안함이 있고, 서로를 이해하려는 마음이 있다면 마찰도 충분히 소화해낼 수 있는 구조이오.`;
+    if (score >= 70) return `총평하자면, 이 관계는 맞는 부분과 어긋나는 부분이 공존하는 현실적인 궁합이오. 무조건 잘 맞는 것도, 무조건 힘든 것도 아니오. 서로의 다름을 인정하고 조율하는 노력 위에서 이 관계는 단단해질 수 있소.`;
+    if (score >= 60) return `총평하자면, 이 관계는 조화보다 마찰의 기운이 더 강하게 작용하고 있소. 자연스럽게 흐르기 위해서는 의식적인 소통과 배려가 꾸준히 필요하오.`;
+    if (score >= 50) return `총평하자면, 이 관계는 여러 층위에서 충돌하는 기운이 강하오. 쉽게 흐르는 관계는 아니지만, 가장 어려운 궁합이 가장 강렬한 성장을 이끌기도 하오.`;
+    return `총평하자면, 이 관계는 사주 궁합상 매우 도전적인 구조이오. 서로를 끌어당기는 기운보다 부딪히는 기운이 훨씬 강하여, 자연스럽게 흐르기 어려운 관계이오.`;
+  })();
+  parts.push(conclusion);
+  return parts.join("\n\n");
+}
+
+// 합·충 인터랙티브 카드 (부모·자녀 두 명식 나란히 + 관계 버튼)
+function KunghapRelationCardJY({ myView, partnerView, myName, partnerName, myColor, partnerColor }: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myName: string; partnerName: string;
+  myColor: string; partnerColor: string;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const rels = calcCrossRelationsJY(myView, partnerView);
+  const activeChars: Set<string> = new Set(selected !== null ? rels[selected].chars : []);
+  const isActive = (kor: string) => selected === null || activeChars.has(kor);
+
+  const PillarCol = ({ p }: { p: MyeongsikView["pillars"][0] }) => (
+    <div className="flex flex-col items-center gap-0.5">
+      <span className="text-[9px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.gan)) ? 1 : 0.2 }}>
+        {p.sipTop.replace("(나)", "") || "—"}
+      </span>
+      <div className="w-full" style={{ aspectRatio: "1", transition: "filter 0.2s, opacity 0.2s", filter: isActive(toKor(p.gan)) ? "none" : "blur(1px)", opacity: isActive(toKor(p.gan)) ? 1 : 0.18 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
+      <div className="w-full" style={{ aspectRatio: "1", transition: "filter 0.2s, opacity 0.2s", filter: isActive(toKor(p.ji)) ? "none" : "blur(1px)", opacity: isActive(toKor(p.ji)) ? 1 : 0.18 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
+      <span className="text-[9px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.ji)) ? 1 : 0.2 }}>
+        {p.sipBot || "—"}
+      </span>
+    </div>
+  );
+
+  const renderSide = (view: MyeongsikView, name: string, color: string) => (
+    <div className="flex-1">
+      <p className="text-[12px] font-bold mb-1.5 text-center" style={{ color }}>{name}님</p>
+      <div className="rounded-xl p-2" style={{ background: WHITE, border: `1.5px solid ${color}30` }}>
+        <div className="grid grid-cols-4 gap-1">
+          {view.pillars.map((p, i) => <PillarCol key={i} p={p} />)}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="mx-5 mb-4 rounded-2xl p-3.5" style={{ background: CREAM, border: `1px solid ${INK}12` }}>
+      <div className="flex gap-2 mb-4">
+        {renderSide(myView, myName, myColor)}
+        <div style={{ width: 1, background: `${INK}10`, flexShrink: 0 }} />
+        {renderSide(partnerView, partnerName, partnerColor)}
+      </div>
+      {rels.length === 0 ? (
+        <p className="text-[12px] text-center py-2" style={{ color: MUTE }}>두 사주 사이에 특별한 합·충·형·파·해·원진이 없소.</p>
+      ) : (() => {
+        const HAP_KINDS_JY2 = ["천간합", "육합", "삼합"];
+        const CHUNG_KINDS_JY = ["천간충", "충", "형", "파", "해", "원진"];
+        const hapRels  = rels.map((r, i) => ({ r, i })).filter(({ r }) => HAP_KINDS_JY2.includes(r.kind));
+        const chungRels = rels.map((r, i) => ({ r, i })).filter(({ r }) => CHUNG_KINDS_JY.includes(r.kind));
+        const HAP_GROUP_COLOR = "#2563eb";
+        const CHUNG_GROUP_COLOR = "#dc2626";
+        const renderBtn = ({ r, i }: { r: { kind: string; chars: string[]; label: string }; i: number }) => {
+          const m = KIND_META[r.kind as keyof typeof KIND_META];
+          const isSelected = selected === i;
+          return (
+            <button
+              key={i}
+              onClick={() => setSelected(isSelected ? null : i)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold"
+              style={{ background: isSelected ? m.color : m.bg, color: isSelected ? "#fff" : m.color, border: `1px solid ${m.color}`, transition: "all 0.15s" }}
+            >
+              <span className="text-[11px] font-medium opacity-80">{r.kind}</span>
+              <span>{r.chars.join(HAP_KINDS_JY2.includes(r.kind) ? " + " : " ↔ ")}</span>
+            </button>
+          );
+        };
+        return (
+          <>
+            {hapRels.length > 0 && (
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: `${HAP_GROUP_COLOR}12`, color: HAP_GROUP_COLOR }}>합(合)</span>
+                  <div className="flex-1 h-px" style={{ background: `${HAP_GROUP_COLOR}20` }} />
+                </div>
+                <div className="flex flex-wrap gap-2">{hapRels.map(renderBtn)}</div>
+              </div>
+            )}
+            {chungRels.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: `${CHUNG_GROUP_COLOR}12`, color: CHUNG_GROUP_COLOR }}>충(沖)</span>
+                  <div className="flex-1 h-px" style={{ background: `${CHUNG_GROUP_COLOR}20` }} />
+                </div>
+                <div className="flex flex-wrap gap-2">{chungRels.map(renderBtn)}</div>
+              </div>
+            )}
+            {selected !== null && (() => {
+              const r = rels[selected];
+              const m = KIND_META[r.kind as keyof typeof KIND_META];
+              return (
+                <div className="rounded-xl px-4 py-3 mt-2" style={{ background: `${m.color}10`, borderLeft: `3px solid ${m.color}` }}>
+                  <p className="text-[12px] font-bold mb-1.5" style={{ color: m.color }}>
+                    {r.kind} · {r.chars.join(HAP_KINDS_JY2.includes(r.kind) ? " + " : " ↔ ")}
+                  </p>
+                  <p className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{buildCrossRelDesc2JY(r)}</p>
+                </div>
+              );
+            })()}
+          </>
+        );
+      })()}
+    </div>
+  );
+}
+
+// 합·충 종합 스코어 카드 (자녀궁합 G버전)
+function HapChungScoreCardJY({ data, hapCount, chungCount }: { data: Record<string, unknown> | null; hapCount: number; chungCount: number }) {
+  if (!data) return null;
+  const score = (data.score as number | undefined) ?? 75;
+  const label = (data.label as string | undefined) ?? "";
+  const s = Math.min(100, Math.max(0, score));
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 110, cy = 100, r = 72;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? HAP_COLOR : s >= 60 ? CH6_COLOR : s >= 40 ? CHUNG_COLOR : MUTE;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+      <div className="px-5 pt-4 pb-2">
+        <svg viewBox="0 10 220 100" style={{ width: "100%", maxHeight: 120 }}>
+          <defs>
+            <linearGradient id="gaugeGradJY3" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={CHUNG_COLOR} />
+              <stop offset="50%" stopColor={CH6_COLOR} />
+              <stop offset="100%" stopColor={HAP_COLOR} />
+            </linearGradient>
+          </defs>
+          <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#eee" strokeWidth="18" strokeLinecap="round" />
+          <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#gaugeGradJY3)" strokeWidth="18" strokeLinecap="round" strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+          <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx={cx} cy={cy} r="5" fill={INK} />
+          <text x={cx} y={cy - 12} textAnchor="middle" fontSize="24" fontWeight="900" fill={COLOR}>{s}</text>
+        </svg>
+        <p className="text-center text-[13px] font-bold mb-1" style={{ color: COLOR }}>{label}</p>
+      </div>
+      <div className="flex gap-3 px-5 pb-4">
+        <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl" style={{ background: `${HAP_COLOR}10`, border: `1px solid ${HAP_COLOR}20` }}>
+          <span className="text-[18px]">🌿</span>
+          <div>
+            <p className="text-[16px] font-black leading-none" style={{ color: HAP_COLOR }}>{hapCount}</p>
+            <p className="text-[10px]" style={{ color: MUTE }}>합(合)</p>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl" style={{ background: `${CHUNG_COLOR}10`, border: `1px solid ${CHUNG_COLOR}20` }}>
+          <span className="text-[18px]">⚡</span>
+          <div>
+            <p className="text-[16px] font-black leading-none" style={{ color: CHUNG_COLOR }}>{chungCount}</p>
+            <p className="text-[10px]" style={{ color: MUTE }}>충(沖)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Ch7 전용 컴포넌트 ─────────────────────────────────────────────
 
 /**
@@ -4206,22 +4515,19 @@ function ParentRoleCard({ roles, closing, myName, childName }: {
 // 장번호 → 표시 제목 (자녀궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 자녀궁합에 대하여",
-  "1":  "제1장 · 보호자의 사주원국",
-  "2":  "제2장 · 자녀의 사주 원국",
-  "3":  "제3장 · 부모와 자녀, 어떤 인연으로 만났는가",
-  "4":  "제4장 · 이 아이는 어떤 기질을 타고났는가",
-  "5":  "제5장 · 부모 눈에 비친 아이 vs 아이 눈에 비친 부모",
-  "6":  "제6장 · 궁합의 핵심: 합과 충",
-  "7":  "제7장 · 잘 맞는 것과 부딪히는 것",
-  "8":  "제8장 · 갈등 요소와 극복 방법",
-  "9":  "제9장 · 이 아이에게 맞는 육아 방법",
-  "10": "제10장 · 아이의 재능과 진로, 어떻게 도울까",
-  "11": "제11장 · 아이를 위한 개운법과 좋은 시기",
-  "12": "마무리 · 그대들에게 남기는 홍연의 서신",
+  "1":  "제1장 · 부모인 나는 어떤 사람인가?",
+  "2":  "제2장 · 자녀는 어떤 아이인가?",
+  "3":  "제3장 · 부모와 자녀 사이, 합과 충",
+  "4":  "제4장 · 우리는 어떤 인연일까",
+  "5":  "제5장 · 서로를 어떻게 바라보는가",
+  "6":  "제6장 · 함께하는 삶과 교육 방향",
+  "7":  "제7장 · 주의할 시기와 좋은 시기",
+  "8":  "제8장 · 자녀의 미래와 부모의 역할",
+  "9":  "마무리 · 그대들에게 남기는 홍연의 서신",
 };
 
 // A안 읽기 순서 (연애궁합 0~12)
-const A_ORDER = ["0","1","2","3","4","5","6","7","8","9","10","11","12"];
+const A_ORDER = ["0","1","2","3","4","5","6","7","8","9"];
 
 // 개발용 장 재생성 플로팅 버튼 (배포 전 제거 예정)
 function RegenButton({ chapter, onRegen }: { chapter: number; onRegen: (n: number) => void }) {
@@ -5403,18 +5709,15 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "자녀궁합에 대하여",                        no: "0" },
-  { disp: "제1장",  chip: "나의원국", title: "보호자의 사주원국",                          no: "1" },
-  { disp: "제2장",  chip: "자녀원국", title: "자녀의 사주 원국",                        no: "2" },
-  { disp: "제3장",  chip: "인연",    title: "부모와 자녀, 어떤 인연으로 만났는가",       no: "3" },
-  { disp: "제4장",  chip: "기질",    title: "이 아이는 어떤 기질을 타고났는가",          no: "4" },
-  { disp: "제5장",  chip: "시각",    title: "부모 눈에 비친 아이 vs 아이 눈에 비친 부모", no: "5" },
-  { disp: "제6장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                    no: "6" },
-  { disp: "제7장",  chip: "맞고부딪힘", title: "잘 맞는 것과 부딪히는 것",             no: "7" },
-  { disp: "제8장",  chip: "갈등극복", title: "갈등 요소와 극복 방법",                  no: "8" },
-  { disp: "제9장",  chip: "육아법",  title: "이 아이에게 맞는 육아 방법",               no: "9" },
-  { disp: "제10장", chip: "재능진로", title: "아이의 재능과 진로, 어떻게 도울까",       no: "10" },
-  { disp: "제11장", chip: "개운법",  title: "아이를 위한 개운법과 좋은 시기",           no: "11" },
-  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",            no: "12" },
+  { disp: "제1장",  chip: "나의원국", title: "부모인 나는 어떤 사람인가?",                  no: "1" },
+  { disp: "제2장",  chip: "자녀원국", title: "자녀는 어떤 아이인가?",                    no: "2" },
+  { disp: "제3장",  chip: "합·충",   title: "부모와 자녀 사이, 합과 충",               no: "3" },
+  { disp: "제4장",  chip: "인연",    title: "우리는 어떤 인연일까",                     no: "4" },
+  { disp: "제5장",  chip: "서로의 시각", title: "서로를 어떻게 바라보는가",              no: "5" },
+  { disp: "제6장",  chip: "삶·교육",  title: "함께하는 삶과 교육 방향",                no: "6" },
+  { disp: "제7장",  chip: "주의·좋은시기", title: "주의할 시기와 좋은 시기",           no: "7" },
+  { disp: "제8장",  chip: "미래역할",     title: "자녀의 미래와 부모의 역할",          no: "8" },
+  { disp: "마무리", chip: "당부",         title: "그대들에게 남기는 홍연의 서신",      no: "9" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -6100,6 +6403,7 @@ function ReportPreviewInner() {
         view={report?.partnerView ?? null}
         loading={false}
         meta={report?.partnerName ? { name: report.partnerName, gender: report.partnerGender ?? "", date: report.partnerBirth?.date ?? "", calendar: report.partnerBirth?.calendar ?? "", time: report.partnerBirth?.time ?? "" } : undefined}
+        genderOverride={(g) => g === "여성" ? "여아" : g === "남성" ? "남아" : g}
       />
       {isAdmin && Number(ch) >= 1 && Number(ch) <= 11 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
@@ -6447,7 +6751,7 @@ function ReportPreviewInner() {
       {ch === "1" && (() => {
         const wonguk = (jc.myWonguk as Record<string, unknown> | undefined) ?? {};
         const nature = (jc.myNature as Record<string, unknown> | undefined) ?? null;
-        const lovePattern = (jc.myLovePattern as Record<string, unknown> | undefined) ?? null;
+        const parentStyle = (jc.myParentStyle as Record<string, unknown> | undefined) ?? null;
         const wongukParas = (wonguk.paragraphs as string[] | undefined) ?? [];
         return (
           <>
@@ -6569,12 +6873,12 @@ function ReportPreviewInner() {
               <NatureCard data={nature} color={JN1_COLOR} />
             </section>
 
-            {/* ── 사랑할 때 나는 어떤 사람인가 ── */}
+            {/* ── 부모로서 나는 어떤 사람인가 ── */}
             <section className="pt-4 pb-4">
               <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>사랑할 때 나는 어떤 사람인가</h2>
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>부모로서 나는 어떤 사람인가</h2>
               </div>
-              <LovePatternCard data={lovePattern} color={JN1_COLOR} pale={JN1_PALE} />
+              <LovePatternCard data={parentStyle} color={JN1_COLOR} pale={JN1_PALE} />
             </section>
 
             <Quote>{`"나의 기운을 살펴보았으니,\n이제 자녀의 사주를 펼쳐보겠소."`}</Quote>
@@ -6584,122 +6888,284 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제2장 · 자녀의 사주 원국 ═══════════ */}
+      {/* ═══════════ 제2장 · 자녀는 어떤 아이인가? ═══════════ */}
       {ch === "2" && (() => {
-        const childName       = report?.partnerName || "자녀";
-        const childWonguk     = (jc.childWonguk     as Record<string, unknown> | undefined) ?? null;
-        const childNature     = (jc.childNature     as Record<string, unknown> | undefined) ?? null;
+        const childName        = report?.partnerName || "자녀";
+        const childFirstName   = childName.length > 1 ? childName.slice(1) : childName;
+        const childGender      = report?.partnerGender ?? "male";
+        const childHonorific   = childGender === "female" ? "양" : "군";
+        const childWonguk      = (jc.childWonguk      as Record<string, unknown> | undefined) ?? {};
+        const childNature      = (jc.childNature      as Record<string, unknown> | undefined) ?? null;
         const childPersonality = (jc.childPersonality as Record<string, unknown> | undefined) ?? null;
+        const wongukParas      = (childWonguk.paragraphs as string[] | undefined) ?? [];
+        // LovePatternCard 호환 변환 (personalityType → patternType)
+        const childPersonalityCard = childPersonality ? {
+          ...childPersonality,
+          patternType: childPersonality.personalityType,
+          patternIcon: childPersonality.personalityIcon,
+        } : null;
+        const isFem = childGender === "female";
+        const rodColor = isFem
+          ? "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)"
+          : "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)";
+        const borderColor  = isFem ? "#c0306a" : "#1a4a9e";
+        const bgColor      = isFem
+          ? "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)"
+          : "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)";
+        const textColor    = isFem ? "#6b0030" : "#0d2b5e";
+        const shadowColor  = isFem ? "rgba(176,32,90,0.4)" : "rgba(26,74,158,0.4)";
         return (
           <>
-            {/* 커버 */}
+            {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 자녀 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀의 사주 원국</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀는 어떤 아이인가?</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 300 }}>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"이번엔 ${childName}의 사주팔자를 펼쳐보겠소.\n이 아이가 어떤 기운을 타고났는지\n살펴보시오."`}</Quote>
 
-            {/* 자녀 명식 표 */}
-            <section className="pb-2">
-              <div className="px-6"><Heading>{childName}의 명식</Heading></div>
-              {report?.partnerView ? (
-                <MyeongsikTable view={report.partnerView} name={childName} birth={report.partnerBirth ?? null} />
-              ) : (
-                <p className="mx-6 text-[14px] leading-relaxed" style={{ color: MUTE }}>자녀 명식 정보가 아직 준비 중이오.</p>
-              )}
+            <div className="px-8 py-12 text-center">
+              <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`이제 ${childFirstName}${childHonorific}의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${childFirstName}${childHonorific}의 기질과 타고난 기운이\n모두 담겨 있소.\n\n이게 바로 ${childFirstName}${childHonorific}의 사주팔자요.`}
+              </p>
+            </div>
+
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <MyeongsikTable
+                view={report?.partnerView ?? null}
+                name={childName}
+                birth={report?.partnerBirth ?? null}
+                header={
+                  <div className="text-center">
+                    <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{childFirstName}{childHonorific}의 사주팔자</p>
+                    {report?.partnerBirth?.date && (
+                      <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                        {report.partnerBirth.date}{" "}
+                        {report.partnerBirth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                        {childGender === "female" ? "여아" : "남아"}
+                      </p>
+                    )}
+                  </div>
+                }
+              />
             </section>
 
-            {(() => {
-              const t = { rod: "linear-gradient(to right, #0a3d1f, #1a6e38, #2fa855, #6dd48a, #2fa855, #1a6e38, #0a3d1f)", border: "#1a6e38", bg: "linear-gradient(to bottom, #e8f8ee 0%, #b8e8c8 40%, #a0ddb8 60%, #d0f0dc 100%)", text: "#0a3d1f", shadow: "rgba(26,110,56,0.4)" };
-              return (
-                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
-                  <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
-                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `1px 0 3px ${t.shadow}` }} />
-                    <span style={{ padding: "4px 9px", background: t.bg, borderTop: `1.5px solid ${t.border}`, borderBottom: `1.5px solid ${t.border}`, color: t.text, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${childName})`}</span>
-                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `-1px 0 3px ${t.shadow}` }} />
-                  </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}
-                </Quote>
-              );
-            })()}
+            {/* ── 명식 버튼 안내 ── */}
+            <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", gap: 0 }}>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `1px 0 3px ${shadowColor}` }} />
+              <span style={{ padding: "4px 8px", background: bgColor, borderTop: `1.5px solid ${borderColor}`, borderBottom: `1.5px solid ${borderColor}`, color: textColor, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${childName})`}</span>
+              <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `-1px 0 3px ${shadowColor}` }} />
+            </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}</Quote>
+
+            {/* 섹션 구분선 */}
             <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
               <div style={{ width: 1, height: 40, background: "#ccc" }} />
             </div>
-            {report?.partnerSajuImageUrl && (
-              <div>
-                <div className="px-6 text-center mb-3">
-                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${childName.slice(1) || childName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
-                </div>
+
+            {/* ── 사주화 ── */}
+            <section className="pt-6 pb-10">
+              <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${childFirstName}${childHonorific}의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+              {report?.partnerSajuImageUrl ? (
                 <div className="px-5">
                   <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
-                    <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={report.partnerSajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/dojang.png" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} alt="" />
+                    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 15%, transparent 68%)", pointerEvents: "none" }} />
+                    <div>
+                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={report.partnerSajuImageUrl} alt="자녀 사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} />
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
                     <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
-                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{childName.slice(1) || childName}님의 사주화</p>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{childFirstName}{childHonorific}의 사주화</p>
                     </div>
                   </div>
                 </div>
+              ) : (
+                <WongukIllustration
+                  ilgan={report?.partnerView?.pillars?.[1]?.gan ?? "甲"}
+                  wolji={report?.partnerView?.pillars?.[2]?.ji ?? "子"}
+                />
+              )}
+            </section>
+
+            {/* ── 타고난 기운의 뿌리 / 오행 분포 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
-            )}
-
-            {/* 자녀 오행 분포 */}
-            <section className="px-6 pt-12 pb-2">
-              <Heading>{childName}의 오행 분포</Heading>
-              <P>목·화·토·금·수 다섯 기운이 {childName}의 사주 안에서 어떻게 분포되어 있는지 보겠소. 이 균형이 아이의 기질과 성격, 그리고 부모와의 관계 방향을 결정하오.</P>
-            </section>
-            <OhaengDonutPartner view={report?.partnerView ?? null} gender={report?.partnerGender} />
-
-            {/* 자녀 원국 풀이 */}
-            <section className="px-6 pt-6 pb-2">
-              <Heading>{childName}의 사주 풀이</Heading>
-              <P>일간 오행과 오행 분포가 {childName}에게 어떤 기운과 성향을 부여하는지 살펴보겠소.</P>
-            </section>
-            {childWonguk?.callout && (
-              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${JN2_COLOR}0c`, borderLeft: `3px solid ${JN2_COLOR}` }}>
-                <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: JN2_COLOR }}>{childWonguk.callout as string}</p>
+              <OhaengDonutPartner view={report?.partnerView ?? null} gender={childGender} />
+              <div className="px-5 mt-4">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+                ))}
               </div>
-            )}
-            {childWonguk?.intro && (
-              <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{childWonguk.intro as string}"</p>
-            )}
-            {((childWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
-            ))}
-
-            {/* 자녀 기질 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}의 기질</Heading>
-              <P>사주 원국에 깃든 {childName}의 본연의 성품이오. 이 기질이 일상에서 어떻게 빛나고, 스트레스나 갈등 상황에서 어떤 모습으로 드러나는지 살펴보겠소.</P>
             </section>
-            <JNatureCard data={childNature} color={JN2_COLOR} label={`${childName}를 대표하는 기질`} shadowLabel="갈등·스트레스 상황의 그림자" />
 
-            {/* 자녀 성격 특성 카드 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}의 성격 유형</Heading>
-              <P>사주가 말해주는 {childName}의 타고난 성격 유형이오. 이 아이가 세상을 어떻게 경험하고 반응하는지, 부모가 어떻게 이해하고 대응해야 하는지를 담았소.</P>
+            {/* ── 빛과 그림자 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <NatureCard data={childNature} color={JN2_COLOR} />
             </section>
-            <ChildPersonalityCard data={childPersonality} color={JN2_WARM} pale={JN2_WARM_P} childName={childName} />
 
-            <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
-            <Quote>{`"두 사람의 원국을 보았으니,\n이제 부모와 자녀의\n인연을 살펴보겠소."`}</Quote>
+            {/* ── 이 아이는 어떤 아이인가 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>이 아이는 어떤 아이인가</h2>
+              </div>
+              <LovePatternCard data={childPersonalityCard} color={JN2_COLOR} pale={JN2_WARM_P} />
+            </section>
+
+            <Quote>{`"자녀의 기운을 살펴보았으니,\n이제 부모와 자녀의\n인연을 살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제3장 · 부모와 자녀, 어떤 인연으로 만났는가 ═══════════ */}
+      {/* ═══════════ 제3장 · 궁합의 핵심: 합과 충 ═══════════ */}
       {ch === "3" && (() => {
+        const myName    = name || "나";
+        const myFirstName = myName.slice(1) || myName;
+        const childName = report?.partnerName || "자녀";
+        const childFirstName = childName.slice(1) || childName;
+        const hapList    = (jc.hapList    as Record<string, unknown> | undefined) ?? null;
+        const chungList  = (jc.chungList  as Record<string, unknown> | undefined) ?? null;
+        const overallScoreLlm = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
+        const crossRels = (report?.view && report?.partnerView) ? calcCrossRelationsJY(report.view, report.partnerView) : [];
+        const { score: computedScore, label: computedLabel } = calcKunghapScoreG(crossRels);
+        const computedDesc = buildHapChungDescJY(crossRels, computedScore);
+        const overallScore = overallScoreLlm
+          ? { ...overallScoreLlm, score: computedScore, label: computedLabel, desc: computedDesc }
+          : { score: computedScore, label: computedLabel, desc: computedDesc };
+        return (
+          <>
+            {/* 다크 헤더 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 합·충</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
+            </div>
+
+            {/* 커버 이미지 */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오."`}</Quote>
+
+            {/* 합·충 개념 안내 배너 */}
+            <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${CH6_COLOR}15` }}>
+              <div className="flex">
+                <div className="flex-1 px-4 py-4" style={{ background: `${HAP_COLOR}08`, borderRight: `1px solid ${INK}06` }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[16px]">🌿</span>
+                    <p className="text-[12px] font-black" style={{ color: HAP_COLOR }}>합(合)</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 서로 끌어당겨 하나가 되는 것. 관계를 깊게 하고 안정감을 주오. 합이 많을수록 두 사람은 자연스럽게 가까워지오.</p>
+                </div>
+                <div className="flex-1 px-4 py-4" style={{ background: `${CHUNG_COLOR}08` }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[16px]">⚡</span>
+                    <p className="text-[12px] font-black" style={{ color: CHUNG_COLOR }}>충(沖)</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 정면으로 충돌하는 것. 갈등과 자극을 동시에 주오. 충이 있다고 나쁜 것만은 아니니 서로를 깨어나게 하는 힘이오.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 두 명식 + 합충 인터랙티브 */}
+            {report?.view && report?.partnerView && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람 글자들과의 관계</Heading></div>
+                <KunghapRelationCardJY
+                  myView={report.view} partnerView={report.partnerView}
+                  myName={myFirstName} partnerName={childFirstName}
+                  myColor={JN1_COLOR} partnerColor={JN2_COLOR}
+                />
+              </section>
+            )}
+
+            {/* 종합 궁합 점수 카드 */}
+            <section className="pb-4">
+              <div className="px-5"><Heading>두 사람의 합충 점수는?</Heading></div>
+              <HapChungScoreCardJY data={overallScore} hapCount={crossRels.filter(r => ["천간합","육합","삼합"].includes(r.kind)).length} chungCount={crossRels.filter(r => !["천간합","육합","삼합"].includes(r.kind)).length} />
+            </section>
+
+            {/* 합·충 종합 분석 */}
+            {computedDesc && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>합·충 종합 분석</Heading></div>
+                <div className="mx-5 rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                  <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{computedDesc}</p>
+                </div>
+              </section>
+            )}
+
+            {/* 잘 맞는 점 */}
+            {hapList && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>잘 맞는 점</Heading></div>
+                {(hapList.items as Array<{glyph:string;type:string;strength:string;effect:string;desc:string}> ?? []).map((item, i) => (
+                  <div key={i} className="mx-5 mb-3 rounded-2xl px-5 py-4" style={{ background: `${HAP_COLOR}08`, border: `1px solid ${HAP_COLOR}20` }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[14px]">🌿</span>
+                      <p className="text-[12px] font-black" style={{ color: HAP_COLOR }}>{item.type}</p>
+                      {item.strength && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: `${HAP_COLOR}15`, color: HAP_COLOR }}>{item.strength}</span>}
+                    </div>
+                    {item.effect && <p className="text-[11px] mb-1.5 font-semibold" style={{ color: HAP_COLOR, fontFamily: SERIF }}>{item.effect}</p>}
+                    <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                  </div>
+                ))}
+              </section>
+            )}
+
+            {/* 안 맞는 점 */}
+            {chungList && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>안 맞는 점</Heading></div>
+                {(chungList.items as Array<{glyph:string;type:string;strength:string;impact:string;desc:string;resolve:string}> ?? []).map((item, i) => (
+                  <div key={i} className="mx-5 mb-3 rounded-2xl px-5 py-4" style={{ background: `${CHUNG_COLOR}08`, border: `1px solid ${CHUNG_COLOR}20` }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[14px]">⚡</span>
+                      <p className="text-[12px] font-black" style={{ color: CHUNG_COLOR }}>{item.type}</p>
+                      {item.strength && <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: `${CHUNG_COLOR}15`, color: CHUNG_COLOR }}>{item.strength}</span>}
+                    </div>
+                    {item.impact && <p className="text-[11px] mb-1.5 font-semibold" style={{ color: CHUNG_COLOR, fontFamily: SERIF }}>{item.impact}</p>}
+                    <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                    {item.resolve && (
+                      <div className="mt-2 pt-2" style={{ borderTop: `1px solid ${CHUNG_COLOR}20` }}>
+                        <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF, opacity: 0.85 }}>💡 {item.resolve}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
+            )}
+
+            {/* ── 마무리 인용구 ── */}
+            <Quote>{"\"합·충을 파악했으니,\n이제 부모와 자녀, 어떤 인연으로\n만났는지 살펴보겠소.\""}</Quote>
+
+            <div className="pb-10" />
+            <ChapterNav cur="3" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제4장 · 부모와 자녀, 어떤 인연으로 만났는가 ═══════════ */}
+      {ch === "4" && (() => {
         const myName    = name || "나";
         const childName = report?.partnerName || "자녀";
         const bondScore  = (jc.bondScore  as Record<string, unknown> | undefined) ?? null;
@@ -6713,12 +7179,12 @@ function ReportPreviewInner() {
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 인연</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 인연</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>부모와 자녀, 어떤 인연으로 만났는가</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"부모와 자녀 사이에도\n인연의 깊고 얕음이 있소.\n사주로 두 사람이 어떤 인연으로 만났는지 풀어보겠소."`}</Quote>
@@ -6744,16 +7210,16 @@ function ReportPreviewInner() {
             </section>
             <BondReasonCard data={bondReason} color={JN3_COLOR} pale={JN3_PALE} />
 
-            <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
             <Quote>{`"인연의 깊이와 유형을 알았으니,\n이제 서로를 어떻게 바라보는지\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="3" go={next} />
+            <ChapterNav cur="4" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제4장 · 서로를 어떻게 바라보는가 ═══════════ */}
-      {ch === "4" && (() => {
+      {/* ═══════════ 제5장 · 서로를 어떻게 바라보는가 ═══════════ */}
+      {ch === "5" && (() => {
         const myName      = name || "나";
         const childName   = report?.partnerName || "자녀";
         const myView      = (jc.myView      as Record<string, unknown> | undefined) ?? null;
@@ -6763,12 +7229,12 @@ function ReportPreviewInner() {
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 서로의 시각</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 서로의 시각</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>서로를 어떻게 바라보는가</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_5/kunghap_janyeo_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"같은 하늘 아래 살아도\n부모 눈에 비친 자녀와\n자녀 눈에 비친 부모는 다르오."`}</Quote>
@@ -6794,152 +7260,40 @@ function ReportPreviewInner() {
             </section>
             <ViewGapCard data={viewGap} myName={myName} childName={childName} />
 
-            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-            <Quote>{`"서로의 시각 차이를 알았으니,\n이제 자녀의 기질을\n더 깊이 살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="4" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제5장 · 이 아이는 어떤 기질을 타고났는가 ═══════════ */}
-      {ch === "5" && (() => {
-        const childName     = report?.partnerName || "자녀";
-        const childTemper   = (jc.childTemper   as Record<string, unknown> | undefined) ?? null;
-        const childHabits   = (jc.childHabits   as Record<string, unknown> | undefined) ?? null;
-        const childNeeds    = (jc.childNeeds    as Record<string, unknown> | undefined) ?? null;
-        const habitItems    = (childHabits?.items   as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
-        const needsItems    = (childNeeds?.items    as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
-        const needsTip      = (childNeeds?.tip      as string | undefined) ?? "";
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 자녀 기질</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이는 어떤 기질을 타고났는가</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_5/kunghap_janyeo_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"자녀의 사주 여덟 글자에는\n이 아이만의 기질이 새겨져 있소.\n그것을 이해하는 것이 좋은 부모의 시작이오."`}</Quote>
-
-            {/* 자녀 기질 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}의 타고난 기질</Heading>
-              <P>기질은 의지가 아니오. 사주가 이 아이에게 부여한 타고난 에너지의 방향이오. 부모가 바꾸려 해도 바꿀 수 없는 것들이 있소. 이 기질을 먼저 이해하면, 불필요한 갈등이 줄고 아이의 고유한 빛을 발견할 수 있소. 동시에 이 기질이 드리울 수 있는 그림자도 미리 알아야 하오.</P>
-            </section>
-            <ChildTemperCard data={childTemper} childName={childName} />
-
-            {/* 자녀 반복 특성 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}의 반복 특성</Heading>
-              <P>사주가 만들어내는 이 아이의 반복적인 행동 패턴이오. 특정 상황에서 늘 비슷한 방식으로 반응하고, 비슷한 습관을 갖게 되는 것은 우연이 아니오. 사주 여덟 글자가 만들어내는 구조적인 성향이오. 이 특성들을 알면 아이의 행동이 더 이해되고, 갈등이 줄어들 것이오.</P>
-            </section>
-            <ChildHabitsCard items={habitItems} childName={childName} />
-
-            {/* 자녀에게 필요한 것 섹션 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{childName}에게 특히 필요한 것</Heading>
-              <P>이 아이의 사주 구조가 가장 필요로 하는 것들을 추렸소. 모든 아이에게 좋은 것이 아니라, 이 아이의 기질과 성향에 맞춰 특히 중요한 것들이오. 부모가 이것을 채워줄 때, 아이는 훨씬 더 안정적으로 성장할 수 있소.</P>
-            </section>
-            <ChildNeedsCard items={needsItems} tip={needsTip} childName={childName} />
-
             <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-            <Quote>{`"이 아이의 기질을 깊이 알았으니,\n이제 두 사주의 합과 충으로\n관계의 구조를 살펴보겠소."`}</Quote>
+            <Quote>{`"서로의 시각 차이를 알았으니,\n이제 자녀의 기질을\n더 깊이 살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제6장 · 궁합의 핵심: 합과 충 ═══════════ */}
+      {/* ═══════════ 제6장 · 함께하는 일상의 패턴 ═══════════ */}
       {ch === "6" && (() => {
-        const myName    = name || "나";
-        const childName = report?.partnerName || "자녀";
-        const hapList    = (jc.hapList    as Record<string, unknown> | undefined) ?? null;
-        const chungList  = (jc.chungList  as Record<string, unknown> | undefined) ?? null;
-        const overallScore = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
-        const hapItems   = (hapList?.items   as Array<{ glyph?: string; type: string; strength: string; effect?: string; desc: string }> | undefined) ?? [];
-        const chungItems = (chungList?.items as Array<{ glyph?: string; type: string; strength: string; impact?: string; desc: string; resolve?: string }> | undefined) ?? [];
-        const score      = (overallScore?.score      as number   | undefined) ?? 72;
-        const label      = (overallScore?.label      as string   | undefined) ?? "";
-        const tier       = (overallScore?.tier       as string   | undefined) ?? "보통 궁합";
-        const scoreNote  = (overallScore?.note       as string   | undefined) ?? "";
-        const scorePara  = (overallScore?.paragraphs as string[] | undefined) ?? [];
+        const myName      = name || "나";
+        const childName   = report?.partnerName || "자녀";
+        const lifePattern    = (jc.lifePattern    as Record<string, unknown> | undefined) ?? null;
+        const dailyRhythm   = (jc.dailyRhythm   as Record<string, unknown> | undefined) ?? null;
+        const livingTips    = (jc.livingTips     as Record<string, unknown> | undefined) ?? null;
+        const educationStyle = (jc.educationStyle as Record<string, unknown> | undefined) ?? null;
+        const learningTraits = (jc.learningTraits as Record<string, unknown> | undefined) ?? null;
+        const educationTips  = (jc.educationTips  as Record<string, unknown> | undefined) ?? null;
+        const rhythmItems   = (dailyRhythm?.items as Array<{ icon: string; title: string; desc: string; tip?: string }> | undefined) ?? [];
+        const tipItems      = (livingTips?.items  as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
+        const closing       = (livingTips?.closing as string | undefined) ?? "";
+        const traitItems    = (learningTraits?.items as Array<{ icon: string; title: string; desc: string; level?: string }> | undefined) ?? [];
+        const eduTipItems   = (educationTips?.items  as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
+        const caution       = (educationTips?.caution as string | undefined) ?? "";
         return (
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 함께하는 삶과 교육</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께하는 삶과 교육 방향</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_6/kunghap_janyeo_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n이것이 궁합의 가장 구체적인 실체이오."`}</Quote>
-
-            {/* 두 명식 합쳐 보기 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>두 명식을 합쳐서 보면</Heading>
-              <P>두 사람의 사주 여덟 글자를 한자리에 놓으면, 글자들이 서로 당기고 밀어내는 관계가 드러나오. 합(合)은 두 기운이 하나로 합쳐지는 것이고, 충(沖)은 두 기운이 정면으로 충돌하는 것이오. 이 관계를 먼저 눈으로 확인하시오.</P>
-            </section>
-            <section className="px-6 pb-2">
-              <GanjiRelation view={report?.view ?? null} />
-            </section>
-
-            {/* 합 목록 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>합(合) — 두 기운이 만나 하나가 되는 자리</Heading>
-              <P>합은 두 사주의 글자가 서로 끌어당겨 하나의 기운으로 변화하는 것이오. 합이 많을수록 두 사람은 자연스럽게 서로를 이해하고 공명하는 부분이 많소. 어떤 글자가 합을 이루는지, 그 합이 관계에서 어떤 의미를 갖는지 살펴보겠소.</P>
-            </section>
-            <HapListCard items={hapItems} myName={myName} childName={childName} />
-
-            {/* 충 목록 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>충(沖) — 두 기운이 맞부딪히는 자리</Heading>
-              <P>충은 두 사주의 글자가 서로 정반대 에너지로 충돌하는 것이오. 충이 있다고 해서 나쁜 궁합이 아니오. 충은 긴장감이지만 동시에 서로를 각성시키고 성장하게 만드는 힘이기도 하오. 하지만 어떤 충인지, 어떻게 다루어야 하는지는 반드시 알아야 하오.</P>
-            </section>
-            <ChungListCard items={chungItems} myName={myName} childName={childName} />
-
-            {/* 종합 궁합 점수 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>합충 종합 궁합 점수</Heading>
-              <P>합의 수와 강도, 충의 수와 강도를 종합하여 두 사람의 궁합 점수를 산출하였소. 점수는 단순한 좋고 나쁨이 아니오. 두 사주가 얼마나 자연스럽게 어우러지는지를 나타낸 것이오. 점수와 함께 이 궁합이 부모-자녀 관계에서 어떻게 작용하는지 살펴보겠소.</P>
-            </section>
-            <HapChungScoreCard score={score} label={label} tier={tier} note={scoreNote} paragraphs={scorePara} />
-
-            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-            <Quote>{`"합과 충의 구조를 알았으니,\n이제 함께하는 일상의 패턴을\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="6" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제7장 · 함께하는 일상의 패턴 ═══════════ */}
-      {ch === "7" && (() => {
-        const myName      = name || "나";
-        const childName   = report?.partnerName || "자녀";
-        const lifePattern = (jc.lifePattern as Record<string, unknown> | undefined) ?? null;
-        const dailyRhythm = (jc.dailyRhythm as Record<string, unknown> | undefined) ?? null;
-        const livingTips  = (jc.livingTips  as Record<string, unknown> | undefined) ?? null;
-        const rhythmItems = (dailyRhythm?.items as Array<{ icon: string; title: string; desc: string; tip?: string }> | undefined) ?? [];
-        const tipItems    = (livingTips?.items  as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
-        const closing     = (livingTips?.closing as string | undefined) ?? "";
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 함께하는 삶</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께하는 일상의 패턴</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"사주는 관계의 틀만 아니라\n함께 살아가는 일상의 리듬도 만들어내오.\n두 사람의 생활 패턴을 들여다보겠소."`}</Quote>
@@ -6965,37 +7319,6 @@ function ReportPreviewInner() {
             </section>
             <LivingTipsCard items={tipItems} closing={closing} myName={myName} childName={childName} />
 
-            <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-            <Quote>{`"함께하는 삶의 패턴을 알았으니,\n이제 이 아이에게 맞는\n교육 방향을 살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="7" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제8장 · 사주로 보는 자녀 교육 방향 ═══════════ */}
-      {ch === "8" && (() => {
-        const childName      = report?.partnerName || "자녀";
-        const educationStyle = (jc.educationStyle as Record<string, unknown> | undefined) ?? null;
-        const learningTraits = (jc.learningTraits as Record<string, unknown> | undefined) ?? null;
-        const educationTips  = (jc.educationTips  as Record<string, unknown> | undefined) ?? null;
-        const traitItems     = (learningTraits?.items as Array<{ icon: string; title: string; desc: string; level?: string }> | undefined) ?? [];
-        const tipItems       = (educationTips?.items  as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
-        const caution        = (educationTips?.caution as string | undefined) ?? "";
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 교육 방향</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>사주로 보는 자녀 교육 방향</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_8/kunghap_janyeo_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"모든 아이에게 같은 교육을 할 수는 없소.\n이 아이의 사주가 가리키는 방향이 있소.\n그 방향으로 키우는 것이 진정한 교육이오."`}</Quote>
-
             {/* 교육 스타일 섹션 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>{childName}에게 맞는 교육 스타일</Heading>
@@ -7015,18 +7338,18 @@ function ReportPreviewInner() {
               <Heading>부모가 실천해야 할 교육 조언</Heading>
               <P>이 아이의 사주와 교육 스타일을 알고 나면, 부모로서 무엇을 해주어야 하는지가 보이오. 좋은 부모는 많이 가르치는 부모가 아니오. 이 아이가 배울 수 있는 환경을 만들어주는 부모이오. 지금 당장 실천할 수 있는 것들을 살펴보겠소.</P>
             </section>
-            <EducationTipsCard items={tipItems} caution={caution} childName={childName} />
+            <EducationTipsCard items={eduTipItems} caution={caution} childName={childName} />
 
-            <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-            <Quote>{`"이 아이에게 맞는 교육 방향을 알았으니,\n이제 두 사람의 관계에서\n주의해야 할 시기를 살펴보겠소."`}</Quote>
+            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
+            <Quote>{`"함께하는 삶의 패턴과 교육 방향을 알았으니,\n이제 두 사람의 관계에서\n주의해야 할 시기를 살펴보겠소."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="8" go={next} />
+            <ChapterNav cur="6" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제9장 · 주의해야 할 시기 ═══════════ */}
-      {ch === "9" && (() => {
+      {/* ═══════════ 제7장 · 주의할 시기와 좋은 시기 ═══════════ */}
+      {ch === "7" && (() => {
         const myName      = name || "나";
         const childName   = report?.partnerName || "자녀";
         const crisisScore  = (jc.crisisScore  as Record<string, unknown> | undefined) ?? null;
@@ -7039,16 +7362,25 @@ function ReportPreviewInner() {
         const scorePara    = (crisisScore?.paragraphs   as string[] | undefined) ?? [];
         const tipItems     = (crisisTips?.items    as Array<{ icon: string; title: string; desc: string }> | undefined) ?? [];
         const healing      = (crisisTips?.healing  as string   | undefined) ?? "";
+        const flow  = (jc.goodTimeFlow  as Record<string, unknown> | undefined) ?? null;
+        const goodItems = (jc.goodTimeItems as Record<string, unknown> | undefined) ?? null;
+        const timing = (jc.timingAdvice as Record<string, unknown> | undefined) ?? null;
+        const flowIntro   = typeof flow?.intro  === "string" ? flow.intro  : "";
+        const flowItems   = Array.isArray(flow?.items)  ? (flow.items as Array<{ period: string; icon: string; peak?: boolean; label: string; desc: string }>) : [];
+        const reasonIntro = typeof goodItems?.intro === "string" ? goodItems.intro : "";
+        const reasonItems = Array.isArray(goodItems?.items) ? (goodItems.items as Array<{ icon: string; title: string; desc: string }>) : [];
+        const adviceItems = Array.isArray(timing?.advice) ? (timing.advice as Array<{ icon: string; title: string; desc: string }>) : [];
+        const blessing    = typeof timing?.blessing === "string" ? timing.blessing : "";
         return (
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>주의해야 할 시기</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 시기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>주의할 시기와 좋은 시기</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_9/kunghap_janyeo_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"부모자녀 사이에도\n갈등이 깊어지는 시기가 있소.\n미리 알고 마음을 준비하면 훨씬 잘 넘길 수 있소."`}</Quote>
@@ -7074,42 +7406,8 @@ function ReportPreviewInner() {
             </section>
             <CrisisTipsCard items={tipItems} healing={healing} myName={myName} childName={childName} />
 
-            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
+            <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
             <Quote>{`"위기의 시기를 알고 준비했으니,\n이제 두 사람이 함께 빛나는\n좋은 시기를 살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="9" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제10장 · 좋은 시기 ═══════════ */}
-      {ch === "10" && (() => {
-        const myName    = name || "나";
-        const childName = report?.partnerName || "자녀";
-        const flow  = (jc.goodTimeFlow  as Record<string, unknown> | undefined) ?? null;
-        const items = (jc.goodTimeItems as Record<string, unknown> | undefined) ?? null;
-        const timing = (jc.timingAdvice as Record<string, unknown> | undefined) ?? null;
-
-        const flowIntro   = typeof flow?.intro  === "string" ? flow.intro  : "";
-        const flowItems   = Array.isArray(flow?.items)  ? (flow.items as Array<{ period: string; icon: string; peak?: boolean; label: string; desc: string }>) : [];
-        const reasonIntro = typeof items?.intro === "string" ? items.intro : "";
-        const reasonItems = Array.isArray(items?.items) ? (items.items as Array<{ icon: string; title: string; desc: string }>) : [];
-        const adviceItems = Array.isArray(timing?.advice) ? (timing.advice as Array<{ icon: string; title: string; desc: string }>) : [];
-        const blessing    = typeof timing?.blessing === "string" ? timing.blessing : "";
-
-        return (
-          <>
-            {/* ── 커버 ── */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>가장 좋은 시기</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_10/kunghap_janyeo_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"부모자녀 사이에\n빛나는 시절이 있소.\n그때를 미리 알고 함께하시오."`}</Quote>
 
             {/* ── 좋은 시기 흐름 타임라인 ── */}
             <section className="pt-2 pb-2">
@@ -7147,16 +7445,14 @@ function ReportPreviewInner() {
               }
             </section>
 
-            <Illust src="/media/report/kunghap_janyeo/kunghap_janyeo_10/kunghap_janyeo_10_cover.jpg" h={280} />
-            <Quote>{`"좋은 시기를 알았으니,\n두 사람의 미래를\n함께 살펴보겠소."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="10" go={next} />
+            <ChapterNav cur="7" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제11장 · 미래 흐름 ═══════════ */}
-      {ch === "11" && (() => {
+      {/* ═══════════ 제8장 · 자녀의 미래와 부모의 역할 ═══════════ */}
+      {ch === "8" && (() => {
         const myName    = name || "나";
         const childName = report?.partnerName || "자녀";
         const future = (jc.futureFlow    as Record<string, unknown> | undefined) ?? null;
@@ -7175,62 +7471,56 @@ function ReportPreviewInner() {
           <>
             {/* ── 커버 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 미래 흐름</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 미래 흐름</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀의 미래와 부모의 역할</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_11/kunghap_janyeo_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_8/kunghap_janyeo_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"자녀가 어떤 미래를 걸어갈지,\n부모는 어떤 역할을 해야 하는지\n홍연이 보여드리겠소."`}</Quote>
 
             {/* ── 자녀의 미래 흐름 타임라인 ── */}
-            <section className="pt-2 pb-2">
+            <section className="px-6 pt-4 pb-2">
               <Heading>자녀의 미래 흐름</Heading>
-              <p className="px-6 text-[12px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                사주는 아이가 걸어갈 인생의 굵직한 흐름을 보여주오. 어느 시기에 어떤 기운이 찾아오는지를 미리 알아두면, 부모로서 더 지혜롭게 곁을 지킬 수 있소.
-              </p>
-              {futureItems.length > 0
-                ? <ChildFutureFlowCard intro={futureIntro} items={futureItems} childName={childName} />
-                : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>미래 흐름을 불러오는 중이오...</p>
-              }
+              <P>사주는 아이가 걸어갈 인생의 굵직한 흐름을 보여주오. 어느 시기에 어떤 기운이 찾아오는지를 미리 알아두면, 부모로서 더 지혜롭게 곁을 지킬 수 있소.</P>
             </section>
+            {futureItems.length > 0
+              ? <ChildFutureFlowCard intro={futureIntro} items={futureItems} childName={childName} />
+              : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>미래 흐름을 불러오는 중이오...</p>
+            }
 
             {/* ── 자녀의 비전·재능·방향 ── */}
-            <section className="pt-2 pb-2">
+            <section className="px-6 pt-4 pb-2">
               <Heading>자녀의 비전과 가능성</Heading>
-              <p className="px-6 text-[12px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                {childName}의 사주 원국에는 고유한 재능과 가능성이 깃들어 있소. 그 빛이 어떤 방향으로 뻗어나갈지, 홍연이 살펴드리겠소.
-              </p>
-              {visions.length > 0
-                ? <ChildVisionCard intro={visionIntro} visions={visions} closing={visionClose} childName={childName} />
-                : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>자녀의 비전을 불러오는 중이오...</p>
-              }
+              <P>{childName}의 사주 원국에는 고유한 재능과 가능성이 깃들어 있소. 그 빛이 어떤 방향으로 뻗어나갈지, 홍연이 살펴드리겠소.</P>
             </section>
+            {visions.length > 0
+              ? <ChildVisionCard intro={visionIntro} visions={visions} closing={visionClose} childName={childName} />
+              : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>자녀의 비전을 불러오는 중이오...</p>
+            }
 
             {/* ── 부모의 역할 & 홍연의 마지막 당부 ── */}
-            <section className="pt-2 pb-2">
+            <section className="px-6 pt-4 pb-2">
               <Heading>부모로서의 역할</Heading>
-              <p className="px-6 text-[12px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                {childName}에게 {myName}은 단순한 보호자가 아니라 사주가 정한 인연의 동반자이오. 이 인연을 잘 살리려면 어떤 역할이 필요한지 홍연이 일러드리겠소.
-              </p>
-              {roles.length > 0
-                ? <ParentRoleCard roles={roles} closing={finalClose} myName={myName} childName={childName} />
-                : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>역할 조언을 불러오는 중이오...</p>
-              }
+              <P>{childName}에게 {myName}은 단순한 보호자가 아니라 사주가 정한 인연의 동반자이오. 이 인연을 잘 살리려면 어떤 역할이 필요한지 홍연이 일러드리겠소.</P>
             </section>
+            {roles.length > 0
+              ? <ParentRoleCard roles={roles} closing={finalClose} myName={myName} childName={childName} />
+              : <p className="px-6 text-[12px]" style={{ color: INK_SOFT }}>역할 조언을 불러오는 중이오...</p>
+            }
 
-            <Illust src="/media/report/kunghap_janyeo/kunghap_janyeo_11/kunghap_janyeo_11_cover.jpg" h={280} />
+            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={280} />
             <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="11" go={next} />
+            <ChapterNav cur="8" go={next} />
           </>
         );
       })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
-      {ch === "12" && (
+      {ch === "9" && (
         <>
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -7239,16 +7529,11 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_janyeo/kunghap_janyeo_12/kunghap_janyeo_12_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_janyeo/kunghap_janyeo_9/kunghap_janyeo_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
           <section className="px-6 pt-10 pb-8">
-            <div className="text-center mb-8">
-              <div className="inline-block border-2 rounded-full px-6 py-2" style={{ borderColor: MAROON }}>
-                <p className="text-[11px] tracking-[0.2em]" style={{ color: MAROON, fontFamily: SERIF }}>홍 연 의 서 신</p>
-              </div>
-            </div>
             {(c as unknown as Record<string, {paragraphs?: string[]}>).letter?.paragraphs?.map((p, i) => (
               <P key={i}>{p}</P>
             ))}
@@ -7262,7 +7547,7 @@ function ReportPreviewInner() {
           <ReviewBox />
           <RecoGrid />
           <div className="pb-10" />
-          <ChapterNav cur="12" go={next} />
+          <ChapterNav cur="9" go={next} />
         </div>
         {eventOpen && (
           <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
@@ -7271,7 +7556,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 알 수 없는 장 — 준비 중 ═══════════ */}
-      {!["0","1","2","3","4","5","6","7","8","9","10","11","12"].includes(ch) && (
+      {!["0","1","2","3","4","5","6","7","8","9","11"].includes(ch) && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중이오.</p>

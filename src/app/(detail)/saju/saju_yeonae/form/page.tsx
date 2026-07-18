@@ -314,7 +314,7 @@ function StepSajuPreview({ onPrev, onNext, date, time, calendar, name, gender }:
   }, [date, time, calendar]);
   const pillars = saju ? [saju.pillars.time, saju.pillars.day, saju.pillars.month, saju.pillars.year] : null;
   const PILLAR_LABELS = ["시주", "일주", "월주", "년주"];
-  const suffix = gender === "남성" ? "군" : gender === "여성" ? "양" : "님";
+  const suffix = "님";
 
   return (
     <>
@@ -525,7 +525,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern, phone
   const [progress, setProgress] = useState(0);
   const [msg, setMsg] = useState("그대의 사주팔자를 세우고 있어요...");
   const doneRef = useRef(false);
-  const suffix = gender === "남성" ? "군" : gender === "여성" ? "양" : "님";
+  const suffix = "님";
 
   const MSGS = [
     "그대의 사주팔자를 세우고 있어요...",

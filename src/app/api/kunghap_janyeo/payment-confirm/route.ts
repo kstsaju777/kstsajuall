@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const view = buildMyeongsikView(analysis);
     const myManseryeokText = formatSajuToManseryeok(analysis, birthInfo);
 
-    const pg: "male" | "female" = pGenderRaw === "female" ? "female" : "male";
+    const pg: "male" | "female" = pGenderRaw === "female" || pGenderRaw === "여아" || pGenderRaw === "여성" || pGenderRaw === "여자" ? "female" : "male";
     const pymd = partnerBirthDate ? String(partnerBirthDate).split("-") : null;
     let partnerView = null;
     let partnerManseryeokText = "";

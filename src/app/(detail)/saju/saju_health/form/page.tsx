@@ -321,7 +321,7 @@ function StepSajuPreview({ onPrev, onNext, date, time, calendar, name }: {
       <div className="px-6 pt-4 pb-3" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[12px] font-medium mb-1" style={{ color: "#8a8a8a" }}>사주팔자</p>
         <h2 className="text-[20px] mb-4" style={{ color: TEXT_CLR }}>
-          <span className="font-bold">{name ?? "그대"}의 </span>
+          <span className="font-bold">{name ?? "그대"}님의 </span>
           <span className="font-bold">사주팔자이오</span>
         </h2>
         <div className="rounded-2xl p-4 mb-4" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -343,7 +343,7 @@ function StepSajuPreview({ onPrev, onNext, date, time, calendar, name }: {
         </div>
         <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: "rgba(202,136,75,0.07)", border: "1px solid rgba(202,136,75,0.25)" }}>
           <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
-            홍연이 <span style={{ color: TEXT_CLR, fontWeight: 700 }}>{name ?? "그대"}</span>의 사주팔자를 살펴봤소.
+            홍연이 <span style={{ color: TEXT_CLR, fontWeight: 700 }}>{name ?? "그대"}님</span>의 사주팔자를 살펴봤소.
             이 여덟 글자 안에 타고난 건강의 기운과 취약한 부위, 앞으로의 건강 흐름이 담겨 있소이다.
           </p>
         </div>

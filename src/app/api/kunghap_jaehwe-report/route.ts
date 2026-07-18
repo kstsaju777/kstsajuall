@@ -24,6 +24,7 @@ import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-mansery
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -112,54 +113,6 @@ function calcMonthlyReunionScores(
   return results;
 }
 
-// ── AI 이름 오류 수정: __MY__ / __PT__ 토큰 치환 ──
-function makeFixNames(myLabel: string, ptLabel: string, myFullName?: string, ptFullName?: string) {
-  return function fixNames(s: string): string {
-    let r = s;
-    r = r.replace(/__MY__/g, `${myLabel}님`).replace(/__PT__/g, `${ptLabel}님`);
-    // 풀네임(성+이름)을 이름만으로 치환 (AI가 토큰 대신 직접 이름을 쓴 경우)
-    if (myFullName && myFullName !== myLabel) {
-      const esc = myFullName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      r = r.replace(new RegExp(`${esc}님`, "g"), `${myLabel}님`).replace(new RegExp(esc, "g"), myLabel);
-    }
-    if (ptFullName && ptFullName !== ptLabel) {
-      const esc = ptFullName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      r = r.replace(new RegExp(`${esc}님`, "g"), `${ptLabel}님`).replace(new RegExp(esc, "g"), ptLabel);
-    }
-    for (const label of [myLabel, ptLabel]) {
-      if (label.length < 2) continue;
-      const stem = label.slice(0, -1);
-      const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      r = r
-        .replace(new RegExp(`${esc}는님`, "g"), `${label}님`)
-        .replace(new RegExp(`${esc}가님`, "g"), `${label}님`)
-        .replace(new RegExp(`${esc}는(?!님)`, "g"), `${label}님은`)
-        .replace(new RegExp(`${esc}가(?!님)`, "g"), `${label}님이`)
-        .replace(new RegExp(`${esc}를(?!님)`, "g"), `${label}님을`);
-    }
-    return r;
-  };
-}
-
-function makeFixKoreanWords(fixNames: (s: string) => string): (val: unknown) => unknown {
-  function fix(val: unknown): unknown {
-    if (typeof val === "string") return fixNames(val
-      .replace(/(?<![가-힣])가[를름]/g, "가을")
-      .replace(/(?<![가-힣])여[를름]/g, "여름")
-      // AI가 합성어 내 '과'를 조사규칙 혼용으로 '와'로 잘못 쓰는 경우 교정
-      .replace(/효와/g, "효과")
-      .replace(/교와/g, "교과")
-      // 님(받침 ㅁ) 뒤 잘못된 조사 교정
-      .replace(/님는/g, "님은")
-      .replace(/님가/g, "님이")
-      .replace(/님를/g, "님을")
-      .replace(/님와/g, "님과"));
-    if (Array.isArray(val)) return val.map(fix);
-    if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fix(v)]));
-    return val;
-  }
-  return fix;
-}
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: {
@@ -173,8 +126,6 @@ async function genChapterContent(chapter: number, input: {
 }) {
   const myLabel    = input.name.length        > 1 ? input.name.slice(1)        : input.name;
   const ptLabel    = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
-  const fixNames   = makeFixNames(myLabel, ptLabel, input.name, input.partnerName);
-  const fixKoreanWords = makeFixKoreanWords(fixNames);
 
   const { system, user } = buildJaehweKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -192,7 +143,7 @@ async function genChapterContent(chapter: number, input: {
           rawObj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else { continue; }
       }
-      const obj = fixKoreanWords(rawObj) as typeof rawObj;
+      const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;
       if (isJaehweKunghapChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[kunghap_jaehwe] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
     } catch (e) {

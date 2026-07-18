@@ -4101,6 +4101,8 @@ function ReportPreviewInner() {
         view={report?.view ?? null}
         loading={false}
         meta={report && report.birth ? { name: report.name, gender: report.birth.gender || report.gender || gender, date: report.birth.date, calendar: report.birth.calendar, time: report.birth.time } : undefined}
+        genderOverride={(g) => g === "여성" ? "여아" : g === "남성" ? "남아" : g}
+        nameHonorific={(report?.birth?.gender || report?.gender || gender) === "female" ? "양" : "군"}
       />
       {isAdmin && Number(ch) >= 1 && Number(ch) <= 8 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">

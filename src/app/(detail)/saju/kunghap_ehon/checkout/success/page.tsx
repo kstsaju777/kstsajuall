@@ -49,14 +49,14 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
           <span>{doneCount} / {TOTAL} 장 완성</span>
           <span>{pct}%</span>
         </div>
-        <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a1000" }}>
+        <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a1530" }}>
           <div className="h-full rounded-full relative overflow-hidden transition-all duration-700"
             style={{ width: `${pct}%`, background: "linear-gradient(90deg, #4b3bbf, #7c6af7, #9d8ff9)", animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)", animation: "shimmer 1.6s linear infinite", width: "40%" }} />
           </div>
         </div>
       </div>
-      <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#887766" }}>
+      <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#7c6af755" }}>
         풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.
       </p>
     </div>

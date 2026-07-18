@@ -23,6 +23,7 @@ import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -171,6 +172,9 @@ async function genChapterContent(chapter: number, input: {
       }
       if (isYeonaeKunghapChapterReady(obj, chapter)) {
         obj = fixJosaDeep(obj) as Record<string, unknown>;
+        const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
+        const ptLabel = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
+        obj = fixNamesInValue(obj, myLabel, ptLabel, "님") as Record<string, unknown>;
         const SIPSEONG_ALL = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
         function fixSipseongInText(text: string, correct: string): string {
           for (const s of SIPSEONG_ALL) {

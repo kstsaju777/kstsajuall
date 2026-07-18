@@ -24,6 +24,7 @@ import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-mansery
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -589,37 +590,6 @@ async function generateChapter(body: unknown) {
     const myLabel   = fullName.length  > 1 ? fullName.slice(1)   : fullName;
     const ptLabel   = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
 
-    // 이름 토큰 교체 + AI가 토큰 무시하고 이름 직접 썼을 때 교정
-    const fixNames = (s: string): string => {
-      let r = s;
-      // 1) 토큰 교체
-      r = r.replace(/__MY__/g, `${myLabel}님`).replace(/__PT__/g, `${ptLabel}님`);
-      // 2) AI가 이름 마지막 글자를 조사로 착각해 자른 경우 복원
-      for (const label of [myLabel, ptLabel]) {
-        if (label.length < 2) continue;
-        const stem = label.slice(0, -1); // "채은" → "채"
-        const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        r = r
-          .replace(new RegExp(`${esc}는님`, "g"), `${label}님`)  // "채는님" → "채은님"
-          .replace(new RegExp(`${esc}가님`, "g"), `${label}님`)  // "채가님" → "채은님"
-          .replace(new RegExp(`${esc}는(?!님)`, "g"), `${label}님은`)
-          .replace(new RegExp(`${esc}가(?!님)`, "g"), `${label}님이`)
-          .replace(new RegExp(`${esc}를(?!님)`, "g"), `${label}님을`);
-      }
-      return r;
-    };
-
-    const fixKoreanWords = (val: unknown): unknown => {
-      if (typeof val === "string") return fixNames(val
-        .replace(/(?<![가-힣])가[를름]/g, "가을")
-        .replace(/(?<![가-힣])여[를름]/g, "여름")
-      // AI가 합성어 내 '과'를 조사규칙 혼용으로 '와'로 잘못 쓰는 경우 교정
-      .replace(/효와/g, "효과")   // 효과적 → 효와적
-      .replace(/교와/g, "교과"));
-      if (Array.isArray(val)) return val.map(fixKoreanWords);
-      if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fixKoreanWords(v)]));
-      return val;
-    };
 
     const { obj: rawObj } = await genChapterContent(chapter, {
       name: fullName,
@@ -641,7 +611,7 @@ async function generateChapter(body: unknown) {
       reconcileBarriers,
     });
 
-    const obj = fixKoreanWords(rawObj) as typeof rawObj;
+    const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;
     return NextResponse.json({ sections: obj });
   } catch (err) {
     return NextResponse.json({ error: "장 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });

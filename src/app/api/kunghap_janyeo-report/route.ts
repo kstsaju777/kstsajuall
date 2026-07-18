@@ -20,6 +20,7 @@ import { buildJanyeoKunghapChapterPrompt, isJanyeoKunghapChapterReady, JANYEO_KU
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
 
@@ -55,32 +56,9 @@ async function genChapterContent(chapter: number, input: {
   const ptFullName = input.partnerName ?? "";
   const myLabel    = fullName.length  > 1 ? fullName.slice(1)   : fullName;
   const ptLabel    = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
+  const ptHonorific = input.partnerGender === "male" ? "군" : "양";
+  const ptWithHonorific = `${ptLabel}${ptHonorific}`;
 
-  const fixNames = (s: string): string => {
-    let r = s;
-    r = r.replace(/__MY__/g, `${myLabel}님`).replace(/__PT__/g, `${ptLabel}`);
-    for (const label of [myLabel, ptLabel]) {
-      if (label.length < 2) continue;
-      const stem = label.slice(0, -1);
-      const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      r = r
-        .replace(new RegExp(`${esc}는님`, "g"), `${label}님`)
-        .replace(new RegExp(`${esc}가님`, "g"), `${label}님`);
-    }
-    return r;
-  };
-
-  const fixKoreanWords = (val: unknown): unknown => {
-    if (typeof val === "string") return fixNames(val
-      .replace(/(?<![가-힣])가[를름]/g, "가을")
-      .replace(/(?<![가-힣])여[를름]/g, "여름")
-      // AI가 합성어 내 '과'를 조사규칙 혼용으로 '와'로 잘못 쓰는 경우 교정
-      .replace(/효와/g, "효과")   // 효과적 → 효와적
-      .replace(/교와/g, "교과"));
-    if (Array.isArray(val)) return val.map(fixKoreanWords);
-    if (val && typeof val === "object") return Object.fromEntries(Object.entries(val as Record<string, unknown>).map(([k, v]) => [k, fixKoreanWords(v)]));
-    return val;
-  };
 
   const { system, user } = buildJanyeoKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -98,7 +76,7 @@ async function genChapterContent(chapter: number, input: {
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else { continue; }
       }
-      obj = fixKoreanWords(obj) as Record<string, unknown>;
+      obj = fixNamesInValue(obj, myLabel, ptLabel, ptHonorific) as Record<string, unknown>;
       if (isJanyeoKunghapChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[kunghap_janyeo] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
     } catch (e) {

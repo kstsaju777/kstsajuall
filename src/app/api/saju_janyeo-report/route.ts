@@ -56,6 +56,7 @@ function gzToKr(gz: string): string {
   return (STEM_KR[gz[0]] ?? gz[0]) + (BRANCH_KR[gz[1]] ?? gz[1]) + "년";
 }
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -294,8 +295,11 @@ async function generateChapter(body: unknown) {
       seun: seunWithSip,
       daeun: daeunWithSip,
     });
-
-    return NextResponse.json({ sections: obj });
+    const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
+    const myGender: "male" | "female" = stored?.gender === "female" ? "female" : "male";
+    const myHonorific = myGender === "female" ? "양" : "군";
+    const sections = fixNamesInValue(obj, myLabel, null, "님", myHonorific) as typeof obj;
+    return NextResponse.json({ sections });
   } catch (err) {
     return NextResponse.json({ error: "장 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }

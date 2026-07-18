@@ -24,6 +24,7 @@ import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
 import { calcCrossRelations, calcKunghapScore, buildBreakdownText, HAP_KINDS } from "@/lib/saju/kunghap-cross-relations";
+import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
 
@@ -225,7 +226,12 @@ async function genChapterContent(chapter: number, input: {
           continue;
         }
       }
-      if (isGyeolhonKunghapChapterReady(obj, chapter)) return { obj, ...meta };
+      if (isGyeolhonKunghapChapterReady(obj, chapter)) {
+        const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
+        const ptLabel = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
+        obj = fixNamesInValue(obj, myLabel, ptLabel, "님") as Record<string, unknown>;
+        return { obj, ...meta };
+      }
       console.error(`[kunghap_gyeolhon] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
     } catch (e) {
       console.error(`[kunghap_gyeolhon] ${chapter}장 예외 (시도${i+1}):`, e);
