@@ -241,7 +241,7 @@ function StepBirthDate({
   initialCalendar?: string;
 }) {
   const [date, setDate] = useState(initialDate ?? "");
-  const [calendar, setCalendar] = useState<"양력" | "음력" | "윤달">((initialCalendar as "양력" | "음력" | "윤달") ?? "양력");
+  const [calendar, setCalendar] = useState<"양력" | "음력">((initialCalendar as "양력" | "음력") ?? "양력");
   const interacted = useRef(false);
 
   const formatDate = (raw: string) => {
@@ -297,7 +297,7 @@ function StepBirthDate({
           </div>
           <div className="pb-1.5">
             <PillToggle
-              options={["양력", "음력", "윤달"] as const}
+              options={["양력", "음력"] as const}
               value={calendar}
               onChange={(c) => { interacted.current = true; setCalendar(c); }}
             />
