@@ -5955,121 +5955,142 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
+      {/* ═══════════ 제2장 · 배우자는 부모로써 어떤 사람인가? ═══════════ */}
       {ch === "2" && (() => {
         const partnerName        = report?.partnerName || "배우자";
-        const partnerWonguk      = (jc.partnerWonguk      as Record<string, unknown> | undefined) ?? null;
+        const partnerShort       = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+        const wonguk             = (jc.partnerWonguk      as Record<string, unknown> | undefined) ?? {};
         const partnerNature      = (jc.partnerNature      as Record<string, unknown> | undefined) ?? null;
         const partnerParentStyle = (jc.partnerParentStyle as Record<string, unknown> | undefined) ?? null;
+        const wongukParas        = (wonguk.paragraphs as string[] | undefined) ?? [];
         return (
           <>
-            {/* ── 커버 ── */}
+            {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 배우자 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>배우자의 사주 원국</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>배우자는 어떤 사람인가?</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 300 }}>
+
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_2/kunghap_imshin_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"이번엔 배우자의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
+            <div className="px-8 py-12 text-center">
+              <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`${partnerShort}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${partnerShort}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${partnerShort}님의 사주팔자요.`}
+              </p>
+            </div>
 
-            {/* ── 배우자 명식 표 ── */}
-            <section className="pb-2">
-              <div className="px-6"><Heading>{partnerName}의 명식</Heading></div>
-              {report?.partnerView ? (
-                <MyeongsikTable view={report.partnerView} name={partnerName} birth={report.partnerBirth ?? null} />
-              ) : (
-                <p className="mx-6 text-[14px] leading-relaxed" style={{ color: MUTE }}>배우자 명식 정보가 아직 준비 중이오.</p>
-              )}
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <MyeongsikTable
+                view={report?.partnerView ?? null}
+                name={partnerName}
+                birth={report?.partnerBirth ?? null}
+                header={
+                  <div className="text-center">
+                    <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{partnerShort}님의 사주팔자</p>
+                    {report?.partnerBirth?.date && (
+                      <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                        {report.partnerBirth.date}{" "}
+                        {report.partnerBirth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                        {report?.partnerGender === "female" || report?.partnerGender === "여성" || report?.partnerGender === "여자" ? "여자" : "남자"}
+                      </p>
+                    )}
+                  </div>
+                }
+              />
             </section>
 
-            {/* ── 명식 버튼 안내 (배우자) ── */}
+            {/* ── 명식 버튼 안내 ── */}
             {(() => {
               const isFem = report?.partnerGender === "female" || report?.partnerGender === "여성" || report?.partnerGender === "여자";
-              const color = isFem ? "pink" : "blue";
-              const themes = {
-                blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
-                pink: { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
-              };
-              const t = themes[color];
+              const rodColor = isFem
+                ? "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)"
+                : "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)";
+              const borderColor = isFem ? "#c0306a" : "#1a4a9e";
+              const bgColor = isFem
+                ? "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)"
+                : "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)";
+              const textColor = isFem ? "#6b0030" : "#0d2b5e";
+              const shadowColor = isFem ? "rgba(176,32,90,0.4)" : "rgba(26,74,158,0.4)";
               return (
-                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
-                  <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
-                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `1px 0 3px ${t.shadow}` }} />
-                    <span style={{ padding: "4px 9px", background: t.bg, borderTop: `1.5px solid ${t.border}`, borderBottom: `1.5px solid ${t.border}`, color: t.text, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${partnerName})`}</span>
-                    <span style={{ width: 7, height: 26, flexShrink: 0, background: t.rod, borderRadius: 3, boxShadow: `-1px 0 3px ${t.shadow}` }} />
-                  </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}
-                </Quote>
+                <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", gap: 0 }}>
+                  <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `1px 0 3px ${shadowColor}` }} />
+                  <span style={{ padding: "4px 8px", background: bgColor, borderTop: `1.5px solid ${borderColor}`, borderBottom: `1.5px solid ${borderColor}`, color: textColor, fontFamily: SERIF, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", lineHeight: 1, whiteSpace: "nowrap" }}>{`명식(${partnerName})`}</span>
+                  <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `-1px 0 3px ${shadowColor}` }} />
+                </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}</Quote>
               );
             })()}
+
+            {/* 섹션 구분선 */}
             <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
               <div style={{ width: 1, height: 40, background: "#ccc" }} />
             </div>
-            {report?.partnerSajuImageUrl && (
-              <div>
-                <div className="px-6 text-center mb-3">
-                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${partnerName.slice(1) || partnerName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
-                </div>
+
+            {/* ── 사주화 ── */}
+            <section className="pt-6 pb-10">
+              <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${partnerShort}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+              {report?.partnerSajuImageUrl ? (
                 <div className="px-5">
                   <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
-                    <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={report.partnerSajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/dojang.png" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} alt="" />
+                    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 15%, transparent 68%)", pointerEvents: "none" }} />
+                    <div>
+                      <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={report.partnerSajuImageUrl} alt="사주 원국 이미지" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/dojang.png" alt="홍연 도장" style={{ position: "absolute", bottom: 4, right: 4, width: 22, height: 22, objectFit: "contain", opacity: 0.88 }} />
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
                     <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
-                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{partnerName.slice(1) || partnerName}님의 사주화</p>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{partnerShort}님의 사주화</p>
                     </div>
                   </div>
                 </div>
+              ) : (
+                <WongukIllustration
+                  ilgan={report?.partnerView?.pillars?.[1]?.gan ?? "甲"}
+                  wolji={report?.partnerView?.pillars?.[2]?.ji ?? "子"}
+                />
+              )}
+            </section>
+
+            {/* ── 타고난 기운의 뿌리 / 오행 분포 ── */}
+            <section className="pt-2 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
               </div>
-            )}
-
-            {/* ── 배우자 오행 분포 (리치 도넛 + 바차트) ── */}
-            <section className="px-6 pt-12 pb-2">
-              <Heading>{partnerName}의 오행 분포</Heading>
-              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>목·화·토·금·수 다섯 기운이 {partnerName}의 사주 안에서 어떻게 분포되어 있는지 보겠소. 배우자의 기운 중심을 파악하면 두 사람의 기운이 어떻게 어우러지는지 이해하는 데 도움이 되오.</p>
-            </section>
-            <OhaengDonutRich view={report?.partnerView ?? null} accentColor={IM2_COLOR} />
-
-            {/* ── 배우자 사주 원국 풀이 ── */}
-            <section className="px-6 pt-6 pb-2">
-              <Heading>{partnerName}의 사주 풀이</Heading>
-            </section>
-            {partnerWonguk?.callout && (
-              <div className="mx-5 mb-4 px-4 py-3 rounded-xl" style={{ background: `${IM2_COLOR}0c`, borderLeft: `3px solid ${IM2_COLOR}` }}>
-                <p className="text-[13.5px] font-bold leading-relaxed" style={{ color: IM2_COLOR }}>{partnerWonguk.callout as string}</p>
+              <OhaengDonutRich view={report?.partnerView ?? null} accentColor={IM2_COLOR} />
+              <div className="px-5 mt-4">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+                ))}
               </div>
-            )}
-            {partnerWonguk?.intro && (
-              <p className="mx-5 mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>&#8220;{partnerWonguk.intro as string}&#8221;</p>
-            )}
-            {((partnerWonguk?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-              <p key={i} className="mx-5 mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "break-all" }}>{p}</p>
-            ))}
-
-            {/* ── 배우자 기질 카드 ── */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{partnerName}의 기질</Heading>
-              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{partnerName}의 사주 원국에 깃든 본연의 성품과 기질이오. 강점과 함께 임신·출산 과정에서 주의해야 할 그림자도 살펴보시오.</p>
             </section>
-            <INatureCard data={partnerNature} color={IM2_COLOR} label={`${partnerName}을 대표하는 기질`} />
 
-            {/* ── 배우자 부모 성향 카드 ── */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>{partnerName}의 부모 성향</Heading>
-              <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT }}>{partnerName}의 사주가 품은 부모로서의 타고난 성향이오. 배우자가 임신을 준비하고 아이를 맞이하는 과정에서 어떤 방식으로 부모됨을 경험할지 사주가 보여주고 있소.</p>
+            {/* ── 빛과 그림자 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <INatureCard data={partnerNature} color={IM2_COLOR} label={`${partnerName}을 대표하는 기질`} />
             </section>
-            <ParentStyleCard data={partnerParentStyle} color={IM2_COLOR} pale={IM2_PALE} />
 
-            <Illust src="/media/report/kunghap_imshin/kunghap_imshin_2/kunghap_imshin_2_cover.jpg" h={240} />
-            <Quote>{`"두 사람의 원국을 보았으니,\n임신 궁합 점수를\n살펴보겠소."`}</Quote>
+            {/* ── 부모로서 배우자는 어떤 사람인가 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>부모로서 배우자는 어떤 사람인가</h2>
+              </div>
+              <ParentStyleCard data={partnerParentStyle} color={IM2_COLOR} pale={IM2_PALE} />
+            </section>
+
+            <Quote>{`배우자의 기운을 살펴보았으니,\n이제 두 사람의 임신 궁합을\n살펴보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
