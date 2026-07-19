@@ -66,6 +66,11 @@ const BCH10_WLT   = "#7a5c1e"; // 재물 앰버
 const BCH10_WLT_P = "#fdf8ec";
 const BCH10_HOM   = "#2a4f6e"; // 파트너관계 딥 스틸 블루
 const BCH10_HOM_P = "#eef4f9";
+// 제8장 비즈니스 빛과 그림자 전용
+const BCH8_COLOR  = "#2c5364"; // 딥 틸
+const BCH8_PALE   = "#eaf3f5";
+const BCH8_LIGHT  = "#b07d2a"; // 황금 (빛)
+const BCH8_SHADOW = "#4a5568"; // 슬레이트 (그림자)
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
 // 오행 색상
@@ -5540,6 +5545,158 @@ function BizWealthTipPanel({ data }: { data: Record<string, unknown> | null }) {
   );
 }
 
+// ─── 제8장 비즈니스 빛과 그림자 컴포넌트 ───────────────────────────────────────
+
+// 파트너십 강점(빛) 카드 — icon + 제목 + 풀이 + 빛나는 장면
+function BizRelationStrengthCard({ item, index }: { item: { title: string; icon?: string; desc?: string; effect?: string }; index: number }) {
+  const KOR_ORD = ["첫번째","두번째","세번째","네번째","다섯번째","여섯번째"];
+  const ordinal = KOR_ORD[index] ?? `${index + 1}번째`;
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(160deg, #fffbee 0%, #fff8e0 100%)", border: `1px solid #e8c06040`, boxShadow: "0 1px 10px rgba(0,0,0,0.04)" }}>
+      <div className="px-5 py-2.5 flex items-center gap-2" style={{ borderBottom: `1px solid #e8c06030` }}>
+        <span className="text-[18px] flex-shrink-0">{item.icon ?? "✨"}</span>
+        <p className="text-[14px] font-black leading-tight" style={{ color: "#5a3e10" }}>
+          <span style={{ color: BCH8_LIGHT }}>{ordinal} 빛</span> — {item.title}
+        </p>
+      </div>
+      {item.desc && (
+        <div className="px-5 py-4" style={{ borderBottom: item.effect ? `1px solid #e8c06020` : "none" }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: "#7a6030" }}>{item.desc}</p>
+        </div>
+      )}
+      {item.effect && (
+        <div className="px-5 py-2.5 flex items-start gap-2" style={{ background: "#e8c06015" }}>
+          <span className="text-[12px] font-black flex-shrink-0 mt-0.5" style={{ color: BCH8_LIGHT }}>✦</span>
+          <p className="text-[12px] leading-relaxed font-medium" style={{ color: "#7a6030" }}>{item.effect}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 파트너십 그림자(갈등) 카드 — icon + 제목 + 풀이 + 발생 상황 + 극복법
+function BizRelationShadowCard({ item, index }: { item: { title: string; icon?: string; desc?: string; trigger?: string; overcome?: string }; index: number }) {
+  const KOR_ORD = ["첫번째","두번째","세번째","네번째","다섯번째","여섯번째"];
+  const ordinal = KOR_ORD[index] ?? `${index + 1}번째`;
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: "linear-gradient(160deg, #f4f5f8 0%, #eaedf3 100%)", border: `1px solid #b0b8cc40`, boxShadow: "0 1px 10px rgba(0,0,0,0.04)" }}>
+      <div className="px-5 py-2.5 flex items-center gap-2" style={{ borderBottom: `1px solid #b0b8cc30` }}>
+        <span className="text-[18px] flex-shrink-0">{item.icon ?? "🌙"}</span>
+        <p className="text-[14px] font-black leading-tight" style={{ color: "#2d3748" }}>
+          <span style={{ color: BCH8_SHADOW }}>{ordinal} 그림자</span> — {item.title}
+        </p>
+      </div>
+      {item.desc && (
+        <div className="px-5 py-4" style={{ borderBottom: (item.trigger || item.overcome) ? `1px solid #b0b8cc20` : "none" }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: "#4a5568" }}>{item.desc}</p>
+        </div>
+      )}
+      {item.trigger && (
+        <div className="px-5 py-2.5 flex items-start gap-2" style={{ background: "#b0b8cc15", borderBottom: item.overcome ? `1px solid #b0b8cc20` : "none" }}>
+          <span className="text-[12px] font-black flex-shrink-0 mt-0.5" style={{ color: BCH8_SHADOW }}>▲</span>
+          <p className="text-[12px] leading-relaxed" style={{ color: "#4a5568" }}>{item.trigger}</p>
+        </div>
+      )}
+      {item.overcome && (
+        <div className="px-5 py-2.5 flex items-start gap-2" style={{ background: "#b0b8cc10" }}>
+          <span className="text-[12px] font-black flex-shrink-0 mt-0.5" style={{ color: BCH8_SHADOW }}>✦</span>
+          <p className="text-[12px] leading-relaxed font-medium" style={{ color: "#4a5568" }}>{item.overcome}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 빛·그림자 총평 배너 — 두 요약 나란히
+function BizLightShadowSummaryBanner({ lightSummary, shadowSummary }: { lightSummary: string; shadowSummary: string }) {
+  if (!lightSummary && !shadowSummary) return null;
+  const trimPrefix = (text: string, prefixes: string[]) => {
+    for (const p of prefixes) {
+      if (text.startsWith(p)) return text.slice(p.length).trimStart();
+    }
+    return text;
+  };
+  const lightText  = trimPrefix(lightSummary,  ["이 파트너십의 빛은 ", "이 파트너십의 빛은", "빛은 "]);
+  const shadowText = trimPrefix(shadowSummary, ["이 파트너십의 그림자는 ", "이 파트너십의 그림자는", "그림자는 "]);
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.07)" }}>
+      <div className="flex" style={{ background: `linear-gradient(135deg, #f5d97a 0%, #e8c060 40%, #6b7a99 60%, #3d4a65 100%)`, minHeight: 6 }} />
+      <div className="flex">
+        {lightSummary && (
+          <div className="flex-1 px-4 py-5" style={{ background: "linear-gradient(160deg, #fffbee 0%, #fff8e0 100%)", borderRight: `1px solid ${INK}08` }}>
+            <span className="text-[26px] block text-center mb-2">☀️</span>
+            <p className="text-[14px] font-black mb-2 text-center" style={{ color: BCH8_LIGHT }}>이 파트너십의 빛</p>
+            <p className="text-[12px] leading-relaxed text-center" style={{ color: "#7a6030" }}>{lightText}</p>
+          </div>
+        )}
+        {shadowSummary && (
+          <div className="flex-1 px-4 py-5" style={{ background: "linear-gradient(160deg, #f4f5f8 0%, #eaedf3 100%)" }}>
+            <span className="text-[26px] block text-center mb-2">🌑</span>
+            <p className="text-[14px] font-black mb-2 text-center" style={{ color: BCH8_SHADOW }}>이 파트너십의 그림자</p>
+            <p className="text-[12px] leading-relaxed text-center" style={{ color: "#4a5060" }}>{shadowText}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 빛·그림자 균형 카드 — 비율 바 + 단락 풀이 + 조율 팁
+function BizLightShadowBalanceCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const lightRatio = (data.lightRatio as number | undefined) ?? 60;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const tips       = (data.tips as string[] | undefined) ?? [];
+  const safeLight  = Math.min(100, Math.max(0, lightRatio));
+  return (
+    <div className="mb-2">
+      <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${BCH8_COLOR}15`, boxShadow: "0 1px 10px rgba(0,0,0,0.04)" }}>
+        <div className="px-5 pt-4 pb-3">
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[14px]">☀️</span>
+              <p className="text-[11px] font-black" style={{ color: BCH8_LIGHT }}>빛 {safeLight}%</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[11px] font-black" style={{ color: BCH8_SHADOW }}>그림자 {100 - safeLight}%</p>
+              <span className="text-[14px]">🌑</span>
+            </div>
+          </div>
+          <div className="w-full rounded-full overflow-hidden" style={{ height: 10, background: `${BCH8_SHADOW}20` }}>
+            <div className="h-full rounded-full transition-all" style={{ width: `${safeLight}%`, background: `linear-gradient(90deg, ${BCH8_LIGHT} 0%, ${BCH8_LIGHT}cc 100%)` }} />
+          </div>
+          <p className="text-[11px] mt-2 text-center" style={{ color: MUTE }}>
+            {safeLight >= 70 ? "빛이 그림자를 크게 앞서는 파트너십이오"
+              : safeLight >= 55 ? "빛이 조금 더 많은 균형 잡힌 파트너십이오"
+              : safeLight >= 45 ? "빛과 그림자가 팽팽히 맞서는 파트너십이오"
+              : "그림자를 의식하며 빛을 키워나가야 할 파트너십이오"}
+          </p>
+        </div>
+      </div>
+      <div className="px-6">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+        ))}
+      </div>
+      {tips.length > 0 && (
+        <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${BCH8_COLOR}15` }}>
+          <div className="px-5 py-3" style={{ background: `${BCH8_COLOR}08`, borderBottom: `1px solid ${BCH8_COLOR}12` }}>
+            <p className="text-[12px] font-black" style={{ color: BCH8_COLOR }}>✦ 이 파트너십의 균형을 지키는 법</p>
+          </div>
+          <div className="px-5 py-3 space-y-3">
+            {tips.map((tip, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <span className="text-[13px] font-black flex-shrink-0 mt-0.5" style={{ color: BCH8_COLOR }}>{i + 1}</span>
+                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 
 function GNatureCard({ data, color = MAROON, label = "나를 대표하는 기질" }: {
@@ -6994,47 +7151,63 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제8장 · 갈등 패턴 ═══════════ */}
-      {ch === "8" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 갈등 패턴</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>갈등 패턴과 해결</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"비즈니스 파트너 사이에도\n갈등이 생기오.\n패턴을 알면 먼저 대비할 수 있소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>갈등 스타일</Heading>
-            <ReportSec data={jc.conflictStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>갈등의 촉발 포인트</Heading>
-            {(jc.triggerPoints as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>갈등 해결 조언</Heading>
-            {(jc.resolveTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GREEN, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-          <Quote>{`"갈등 패턴을 알았으니,\n사업의 위기 시기를\n짚어보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="8" go={next} />
-        </>
-      )}
+      {/* ═══════════ 제8장 · 이 파트너십의 빛과 그림자 ═══════════ */}
+      {ch === "8" && (() => {
+        const strengthItems = ((jc.strengths as { items?: Array<{ title: string; icon?: string; desc?: string; effect?: string }> } | undefined)?.items) ?? [];
+        const shadowItems   = ((jc.shadows   as { items?: Array<{ title: string; icon?: string; desc?: string; trigger?: string; overcome?: string }> } | undefined)?.items) ?? [];
+        const balance       = (jc.balance as Record<string, unknown> | undefined) ?? null;
+        const lightSummary  = (jc.strengths as { lightSummary?: string } | undefined)?.lightSummary ?? "";
+        const shadowSummary = (jc.shadows   as { shadowSummary?: string } | undefined)?.shadowSummary ?? "";
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 빛과 그림자</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 파트너십의 빛과 그림자</h1>
+            </div>
+
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"모든 파트너십에는\n빛도 있고 그림자도 있소.\n\n빛만 있으면 눈이 멀고,\n그림자만 있으면 앞이 보이지 않소.\n\n두 사람의 사업 파트너십에서\n그 둘을 살펴보겠소."`}</Quote>
+
+            {(lightSummary || shadowSummary) && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람의 빛과 그림자</Heading></div>
+                <BizLightShadowSummaryBanner lightSummary={lightSummary} shadowSummary={shadowSummary} />
+              </section>
+            )}
+
+            {strengthItems.length > 0 && (
+              <section className="pb-4">
+                <div className="px-6"><Heading>두 사람의 빛</Heading></div>
+                {strengthItems.map((item, i) => <BizRelationStrengthCard key={i} item={item} index={i} />)}
+              </section>
+            )}
+
+            {shadowItems.length > 0 && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람의 그림자</Heading></div>
+                {shadowItems.map((item, i) => <BizRelationShadowCard key={i} item={item} index={i} />)}
+              </section>
+            )}
+
+            {balance && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>빛과 그림자의 균형</Heading></div>
+                <BizLightShadowBalanceCard data={balance} />
+              </section>
+            )}
+
+            <Quote>{`"빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소."`}</Quote>
+
+            <div className="pb-10" />
+            <ChapterNav cur="8" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제9장 · 위기와 극복 ═══════════ */}
       {ch === "9" && (() => {
