@@ -51,6 +51,11 @@ const BCH4_BAL_P  = "#f0eefb";
 // 제6장 비즈니스 스타일 전용
 const BCH6_AMBER  = "#7a5c1e";
 const BCH6_AMBER_P = "#fdf8ec";
+// 제10장 비즈니스 재물흐름 전용
+const BCH10_WLT   = "#7a5c1e"; // 재물 앰버
+const BCH10_WLT_P = "#fdf8ec";
+const BCH10_HOM   = "#2a4f6e"; // 파트너관계 딥 스틸 블루
+const BCH10_HOM_P = "#eef4f9";
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
 // 오행 색상
@@ -4489,6 +4494,270 @@ function HapChungScoreCardBiz({ data, hapCount, chungCount }: { data: Record<str
   );
 }
 
+// ─── 제10장 비즈니스 재물흐름 전용 컴포넌트 ─────────────────────────────────────
+
+function BizWealthFlowGraph({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const fg      = (data.flowGraph as Record<string, unknown> | undefined) ?? null;
+  if (!fg) return null;
+  const pts     = (fg.points  as Record<string, unknown>[] | undefined) ?? [];
+  if (pts.length === 0) return null;
+
+  const W = 320, H = 170;
+  const PL = 28, PR = 12, PT = 24, PB = 32;
+  const CW = W - PL - PR;
+  const CH = H - PT - PB;
+  const MIN_Y = 2025, MAX_Y = 2070;
+
+  const scores = pts.map(p => p.score as number);
+  const rawMin = Math.min(...scores);
+  const rawMax = Math.max(...scores);
+  const pad = Math.max(8, Math.round((rawMax - rawMin) * 0.2));
+  const MIN_S = Math.max(0,   rawMin - pad);
+  const MAX_S = Math.min(100, rawMax + pad);
+
+  const xOf = (year: number) => PL + ((year - MIN_Y) / (MAX_Y - MIN_Y)) * CW;
+  const yOf = (score: number) => PT + (1 - (score - MIN_S) / (MAX_S - MIN_S)) * CH;
+
+  const coords = pts.map(p => ({
+    x: xOf(p.year as number),
+    y: yOf(p.score as number),
+    year: p.year as number,
+    score: p.score as number,
+    note: (p.note as string | undefined) ?? "",
+  }));
+
+  const linePath = coords.reduce((acc, c, i) => {
+    if (i === 0) return `M ${c.x} ${c.y}`;
+    const prev = coords[i - 1];
+    const cpx = (prev.x + c.x) / 2;
+    return `${acc} C ${cpx} ${prev.y} ${cpx} ${c.y} ${c.x} ${c.y}`;
+  }, "");
+  const fillPath = `${linePath} L ${coords[coords.length - 1].x} ${PT + CH} L ${coords[0].x} ${PT + CH} Z`;
+
+  const labelYears = [2025, 2030, 2035, 2040, 2045, 2050, 2055, 2060, 2065, 2070];
+
+  return (
+    <div className="mx-5 mb-2 rounded-2xl overflow-hidden" style={{ border: `1px solid rgba(0,0,0,0.08)`, background: "#fdfaf6" }}>
+      <div className="px-4 pt-3.5 pb-1">
+        <p className="text-[14px] font-black mb-0.5" style={{ color: BCH10_WLT }}>향후 50년 비즈니스 재물흐름</p>
+        <p className="text-[10px]" style={{ color: MUTE }}>{myName}님과 {partnerName}님의 대운과 세운 기반 사업 재물흐름 그래프</p>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", display: "block", overflow: "visible" }}>
+        <defs>
+          <linearGradient id="bwfg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={BCH10_WLT} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={BCH10_WLT} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={fillPath} fill="url(#bwfg)" />
+        <path d={linePath} fill="none" stroke={BCH10_WLT} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        {coords.map((c, i) => (
+          <line key={`vl-${i}`} x1={c.x} y1={c.y + 4} x2={c.x} y2={PT + CH} stroke={BCH10_WLT} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.4" />
+        ))}
+        {(() => {
+          const maxScore = Math.max(...coords.map(c => c.score));
+          const minScore = Math.min(...coords.map(c => c.score));
+          return coords.map((c, i) => {
+            const isMax = c.score === maxScore;
+            const isMin = c.score === minScore;
+            const isPeak = isMax || isMin;
+            return (
+              <g key={i}>
+                {isPeak && <circle cx={c.x} cy={c.y} r="10" fill={isMax ? "#1a4a9e" : "#c0306a"} opacity="0.15" />}
+                <circle cx={c.x} cy={c.y} r={isPeak ? 6.5 : 3} fill={isMax ? "#1a4a9e" : isMin ? "#c0306a" : BCH10_WLT} stroke="#fdfaf6" strokeWidth="1.5" />
+                {isPeak && (
+                  <text x={c.x} y={isMax ? c.y - 14 : c.y + 20} textAnchor="middle" fontSize="9" fontWeight="800"
+                    fill={isMax ? "#1a4a9e" : "#c0306a"}>{isMax ? "최고" : "주의"}</text>
+                )}
+              </g>
+            );
+          });
+        })()}
+        <line x1={PL} y1={PT + CH} x2={W - PR} y2={PT + CH} stroke="rgba(0,0,0,0.1)" strokeWidth="1" />
+        {labelYears.map(y => (
+          <g key={y}>
+            <line x1={xOf(y)} y1={PT + CH} x2={xOf(y)} y2={PT + CH + 4} stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+            <rect x={xOf(y) - 16} y={PT + CH + 6} width={32} height={16} rx={5} ry={5} fill="rgba(0,0,0,0.04)" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
+            <text x={xOf(y)} y={PT + CH + 17} textAnchor="middle" fontSize="9" fontWeight="600" fill={MUTE}>{y}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+const BIZ_FLOW_TREND_META: Record<string, { icon: string; color: string }> = {
+  "상승 중": { icon: "↗", color: "#1a6a4a" },
+  "고점":    { icon: "▲", color: "#b07a20" },
+  "하락 중": { icon: "↘", color: "#9b4a4a" },
+  "저점":    { icon: "▼", color: "#c0306a" },
+  "유지":    { icon: "→", color: "#5a6a7a" },
+};
+
+function BizWealthFlowPeriods({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const periods = (data.flowPeriods as Record<string, unknown>[] | undefined) ?? [];
+  if (periods.length === 0) return null;
+  return (
+    <div className="mx-5 mb-4 space-y-2">
+      {periods.map((p, i) => {
+        const label = (p.label as string | undefined) ?? "";
+        const trend = (p.trend as string | undefined) ?? "유지";
+        const title = (p.title as string | undefined) ?? "";
+        const text  = (p.text  as string | undefined) ?? "";
+        const meta  = BIZ_FLOW_TREND_META[trend] ?? { icon: "•", color: MUTE };
+        return (
+          <div key={i} className="flex gap-3 items-start rounded-2xl px-4 py-3.5" style={{ background: `${meta.color}09`, border: `1px solid ${meta.color}22` }}>
+            <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black mt-0.5"
+              style={{ background: `${meta.color}14`, border: `2px solid ${meta.color}30`, color: meta.color }}>
+              {meta.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="text-[11px] font-black" style={{ color: meta.color }}>{label}</span>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${meta.color}15`, color: meta.color }}>{trend}</span>
+                <span className="text-[12px] font-black" style={{ color: INK, fontFamily: SERIF }}>{title}</span>
+              </div>
+              <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{text}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BizWealthSummaryCard({ data, myName, partnerName, myGender, partnerGender }: {
+  data: Record<string, unknown> | null;
+  myName: string; partnerName: string; myGender?: string; partnerGender?: string;
+}) {
+  if (!data) return null;
+  const dominance = (data.dominance as Record<string, unknown> | undefined) ?? null;
+  const myRatio   = Math.min(100, Math.max(0, (dominance?.myRatio as number | undefined) ?? 50));
+  const ptRatio   = 100 - myRatio;
+  const isMF = (g?: string) => g === "female" || g === "여" || g === "여자" || g === "여성";
+  const MC = isMF(myGender)      ? "#c0306a" : "#1a4a9e";
+  const PC = isMF(partnerGender) ? "#c0306a" : "#1a4a9e";
+  if (!dominance) return null;
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BCH10_WLT}28` }}>
+      <div className="px-5 py-4" style={{ background: WHITE }}>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-black w-8 text-right flex-shrink-0" style={{ color: MC }}>{myName}님</span>
+          <div className="flex-1 flex rounded-full overflow-hidden relative" style={{ height: 26 }}>
+            <div className="flex items-center justify-start pl-2.5" style={{ width: `${myRatio}%`, background: MC, transition: "width 0.4s" }}>
+              <span className="text-[10px] font-black" style={{ color: WHITE }}>{myRatio}%</span>
+            </div>
+            <div className="flex items-center justify-end pr-2.5" style={{ width: `${ptRatio}%`, background: PC, transition: "width 0.4s" }}>
+              <span className="text-[10px] font-black" style={{ color: WHITE }}>{ptRatio}%</span>
+            </div>
+          </div>
+          <span className="text-[11px] font-black w-8 flex-shrink-0" style={{ color: PC }}>{partnerName}님</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BizWealthDetailPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="px-6 mb-2">
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+function BizPartnerRelationCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const partnerType = (data.partnerType as string | undefined) ?? "";
+  const partnerIcon = (data.partnerIcon as string | undefined) ?? "🤝";
+  const callout     = (data.callout     as string | undefined) ?? "";
+  const keywords    = (data.keywords    as string[] | undefined) ?? [];
+  const aspects     = (data.aspects     as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
+  return (
+    <div className="mb-2">
+      <div className="mx-5 mb-3 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BCH10_HOM}28` }}>
+        <div className="px-5 py-4 flex items-center gap-4" style={{ background: BCH10_HOM }}>
+          <span className="text-[34px] leading-none">{partnerIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-0.5" style={{ color: "rgba(255,255,255,0.65)" }}>두 사람의 파트너십 유형</p>
+            <p className="text-[17px] font-black leading-tight" style={{ color: WHITE, fontFamily: SERIF }}>{partnerType}</p>
+          </div>
+        </div>
+        {keywords.length > 0 && (
+          <div className="px-4 py-3 flex flex-wrap gap-1.5" style={{ background: BCH10_HOM_P }}>
+            {keywords.map((kw, i) => (
+              <span key={i} className="text-[11px] font-black px-2.5 py-0.5 rounded-full" style={{ background: `${BCH10_HOM}18`, color: BCH10_HOM, border: `1px solid ${BCH10_HOM}28` }}>{kw}</span>
+            ))}
+          </div>
+        )}
+        {callout && (
+          <div className="px-5 py-3.5" style={{ background: WHITE, borderTop: `1px solid ${BCH10_HOM}12` }}>
+            <p className="text-[13.5px] font-black leading-relaxed" style={{ color: BCH10_HOM, fontFamily: SERIF }}>{callout}</p>
+          </div>
+        )}
+      </div>
+      {aspects.length > 0 && (
+        <div className="mx-5 mb-3 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BCH10_HOM}18` }}>
+          {aspects.map((asp, i) => {
+            const asLabel = (asp.label as string | undefined) ?? "";
+            const asIcon  = (asp.icon  as string | undefined) ?? "•";
+            const asDesc  = (asp.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3.5 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${BCH10_HOM}0e` : "none" }}>
+                <span className="text-[20px] leading-none shrink-0 mt-0.5">{asIcon}</span>
+                <div>
+                  <p className="text-[12px] font-black mb-1" style={{ color: BCH10_HOM }}>{asLabel}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{asDesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div className="px-6">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK, fontFamily: SERIF, wordBreak: "keep-all", textAlign: "justify" }}>{p}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BizWealthTipPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const tips = (data.tips as Record<string, unknown>[] | undefined) ?? [];
+  if (tips.length === 0) return null;
+  return (
+    <div className="mx-5 mb-5 space-y-3">
+      {tips.map((tip, i) => {
+        const tipIcon  = (tip.icon  as string | undefined) ?? "💡";
+        const tipTitle = (tip.title as string | undefined) ?? "";
+        const tipDesc  = (tip.desc  as string | undefined) ?? "";
+        return (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid rgba(0,0,0,0.07)`, borderLeft: `4px solid ${BCH10_WLT}` }}>
+            <div className="px-4 pt-4 pb-3">
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="text-[24px] leading-none">{tipIcon}</span>
+                <p className="text-[14px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{tipTitle}</p>
+              </div>
+              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tipDesc}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+
 function GNatureCard({ data, color = MAROON, label = "나를 대표하는 기질" }: {
   data: Record<string, unknown> | null; color?: string; label?: string;
 }) {
@@ -6025,50 +6294,56 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제10장 · 빛나는 시기 ═══════════ */}
-      {ch === "10" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께 빛나는 시기</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_10/kunghap_business_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 함께 사업할 때\n가장 빛나는 시기가 있소.\n미리 알고 그 기회를 잡으시오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기 흐름</Heading>
-            {(jc.goodTimeFlow as {items?: Array<{label: string; desc: string; highlight?: boolean}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: item.highlight ? `${GOLD}18` : `${NAVY}08`, border: `1px solid ${item.highlight ? GOLD : NAVY}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: item.highlight ? GOLD : NAVY }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>좋은 시기의 이유</Heading>
-            {(jc.goodTimeItems as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}08`, border: `1px solid ${GREEN}22` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.timingAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.timingAdvice as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-          <Quote>{`"좋은 시기를 알았으니,\n두 사람의 사업 미래를\n살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="10" go={next} />
-        </>
-      )}
+      {/* ═══════════ 제10장 · 비즈니스 재물흐름 ═══════════ */}
+      {ch === "10" && (() => {
+        const wf = (jc.wealthFlow as Record<string, unknown> | undefined) ?? null;
+        const hl = (jc.homeLife   as Record<string, unknown> | undefined) ?? null;
+        const wt = (jc.wealthTips as Record<string, unknown> | undefined) ?? null;
+        const myFirstName10      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
+        const partnerFirstName10 = report?.partnerName ? (report.partnerName.length > 1 ? report.partnerName.slice(1) : report.partnerName) : "상대";
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 재물흐름</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께 만드는 사업 재물흐름</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_10/kunghap_business_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"두 사람이 함께 사업할 때\n재물이 어떻게 흘러가는지\n살펴보겠소."`}</Quote>
+
+            <section className="px-6 pt-2 pb-2">
+              <Heading>비즈니스 재물운 흐름</Heading>
+            </section>
+            <BizWealthFlowGraph data={wf} myName={myFirstName10} partnerName={partnerFirstName10} />
+            <BizWealthFlowPeriods data={wf} />
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>사업 재정 주도권</Heading>
+            </section>
+            <BizWealthSummaryCard data={wf} myName={myFirstName10} partnerName={partnerFirstName10} myGender={report?.gender} partnerGender={report?.partnerGender} />
+            <BizWealthDetailPanel data={wf} />
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>사업 파트너십 관계</Heading>
+            </section>
+            <BizPartnerRelationCard data={hl} />
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>재물운을 풍요롭게 하는 법</Heading>
+            </section>
+            <BizWealthTipPanel data={wt} />
+
+            <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
+            <Quote>{`"두 사람의 재물흐름을\n살펴보았으니,\n이제 사업 미래를 보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="10" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제11장 · 미래 흐름 ═══════════ */}
       {ch === "11" && (
