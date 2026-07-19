@@ -5803,9 +5803,8 @@ function ReportPreviewInner() {
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`"자, 이제 두 사람의 인연을\n낱낱이 풀어보겠소."`}
+              {`자, 이제 두 사람의 인연을\n낱낱이 풀어보겠소.`}
             </p>
-            <p className="mt-5 text-[13px]" style={{ color: MUTE, fontFamily: SERIF }}>홍연(紅緣)</p>
           </div>
 
           {/* 다음 장 네비 */}
