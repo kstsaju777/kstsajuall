@@ -9,7 +9,7 @@ export { SYSTEM };
 
 export const IMSHIN_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   1:  ["myWonguk", "myNature", "myParentStyle", "myYongsin"],
-  2:  ["partnerWonguk", "partnerNature", "partnerParentStyle"],
+  2:  ["partnerWonguk", "partnerNature", "partnerParentStyle", "partnerYongsin"],
   3:  ["pregnancyScore", "pregnancyReason"],
   4:  ["childEnergy", "childDesc", "parenthoodTips"],
   5:  ["timingFlow", "bestMonths", "timingAdvice"],
@@ -155,6 +155,16 @@ export function buildImshinKunghapChapterPrompt(
       "단락2 — 출산 과정과 초기 육아에서 이 성향이 어떻게 발현되는지. 이 성향의 강점 중심. 4~5문장.",
       "단락3 — 이 성향의 그림자 — 임신·출산 과정에서 주의해야 할 것과 나(배우자)와 균형 잡는 법. 4~5문장."
     ]
+  },
+  "partnerYongsin": {
+    "yongsinEl": "용신 오행 (목/화/토/금/수 중 1개)",
+    "heusinEl": "희신 오행 (목/화/토/금/수 중 1개, 용신과 다름)",
+    "gisinEl": "기신 오행 (목/화/토/금/수 중 1개)",
+    "yongsinReason": "용신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내)",
+    "heusinReason": "희신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내)",
+    "gisinReason": "기신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내)",
+    "intro": "이 사주의 용신을 한 문장으로. (예: '~일간은 ~이 용신이오.')",
+    "desc": "용신·희신·기신이 각각 어떤 역할을 하는지, 임신·출산·양육 생활에서 어떤 오행 기운을 가까이 하면 좋은지 3~4문장."
   }
 }`,
     3: `{
@@ -469,6 +479,15 @@ export function buildImshinKunghapChapterPrompt(
   ① 이 부모 성향 유형이 임신 준비 단계에서 어떻게 나타나는지. ${input.name}님과의 상호작용 포함. 4~5문장.
   ② 출산 과정과 초기 육아에서 이 성향이 어떻게 발현되는지. 강점 중심. 4~5문장.
   ③ 이 성향의 그림자 — 임신·출산 과정에서 주의할 것과 ${input.name}님과 균형 잡는 법. 4~5문장.
+
+[partnerYongsin 섹션 — 배우자의 용신/희신/기신]
+⚠ 이 섹션은 ${input.partnerName}님 본인의 사주에 대한 내용이오. ${input.name}님 얘기를 섞지 마시오.
+- yongsinEl: 격국·억부 원리에 따라 이 사주의 용신 오행 1개 (목/화/토/금/수 중 택1).
+- heusinEl: 용신을 도와 운의 흐름을 부드럽게 하는 희신 오행 1개.
+- gisinEl: 이 사주에서 꺼리는 기신 오행 1개.
+- yongsinReason / heusinReason / gisinReason: 각 오행이 이 사주에서 어떤 역할을 하는지 15자 이내로.
+- intro: 이 사주의 용신을 한 문장으로. (예: '~일간은 ~이 용신이오.')
+- desc: 용신·희신·기신이 각각 어떤 역할을 하는지, 임신·출산·양육 생활에서 어떤 오행 기운을 가까이 하면 좋은지 3~4문장.
 
 홍연 말투(~이오/~하오/~겠소) 유지.`,
     3: `[제3장 — 두 사람의 자녀운] ${input.name}님과 ${input.partnerName}님 두 사람의 사주 원국을 바탕으로, 임신·출산 궁합 점수와 그 사주 원리상의 근거를 풀어주시오.
