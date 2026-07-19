@@ -2323,10 +2323,10 @@ const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 비즈니스궁합에 대하여",
   "1":  "제1장 · 나의 사주 원국",
   "2":  "제2장 · 상대의 사주 원국",
-  "3":  "제3장 · 두 사람, 함께 일할 수 있는 인연인가",
-  "4":  "제4장 · 나는 이 사람을 파트너로 어떻게 보는가",
-  "5":  "제5장 · 상대는 나를 파트너로 어떻게 보는가",
-  "6":  "제6장 · 궁합의 핵심: 합과 충",
+  "3":  "제3장 · 궁합의 핵심: 합과 충",
+  "4":  "제4장 · 두 사람, 함께 일할 수 있는 인연인가",
+  "5":  "제5장 · 두 사람의 강점과 약점",
+  "6":  "제6장 · 최적의 역할 분담",
   "7":  "제7장 · 비즈니스 스타일의 차이",
   "8":  "제8장 · 이 파트너십의 빛과 그림자",
   "9":  "제9장 · 갈등과 극복",
@@ -3518,10 +3518,10 @@ const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "비즈니스궁합에 대하여",                    no: "0" },
   { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                          no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                        no: "2" },
-  { disp: "제3장",  chip: "인연",    title: "두 사람, 함께 일할 수 있는 인연인가",       no: "3" },
-  { disp: "제4장",  chip: "내시각",  title: "나는 이 사람을 파트너로 어떻게 보는가",    no: "4" },
-  { disp: "제5장",  chip: "상대시각", title: "상대는 나를 파트너로 어떻게 보는가",      no: "5" },
-  { disp: "제6장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                    no: "6" },
+  { disp: "제3장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                    no: "3" },
+  { disp: "제4장",  chip: "인연",    title: "두 사람, 함께 일할 수 있는 인연인가",      no: "4" },
+  { disp: "제5장",  chip: "강점약점", title: "두 사람의 강점과 약점",                   no: "5" },
+  { disp: "제6장",  chip: "역할분담", title: "최적의 역할 분담",                        no: "6" },
   { disp: "제7장",  chip: "스타일",  title: "비즈니스 스타일의 차이",                   no: "7" },
   { disp: "제8장",  chip: "빛그림자", title: "이 파트너십의 빛과 그림자",              no: "8" },
   { disp: "제9장",  chip: "갈등극복", title: "갈등과 극복",                            no: "9" },
@@ -4991,135 +4991,16 @@ function ReportPreviewInner() {
       })()}
 
       {/* ═══════════ 제3장 · 비즈니스 궁합 점수 ═══════════ */}
+      {/* ═══════════ 제3장 · 합과 충 ═══════════ */}
       {ch === "3" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 궁합 점수</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>비즈니스 궁합 점수</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_3/kunghap_business_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 비즈니스 파트너로\n얼마나 잘 맞는지\n홍연이 솔직하게 풀어드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>비즈니스 궁합 점수</Heading>
-            {(jc.compatScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.compatScore as {score: number}).score} label={(jc.compatScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={74} label="함께하면 시너지가 나는 파트너이오" />
-            )}
-            {(jc.compatScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>궁합의 근거</Heading>
-            <ReportSec data={jc.compatReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-          <Quote>{`"궁합 점수를 알았으니,\n이제 두 사람의 강점과\n약점을 살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="3" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제4장 · 강점과 약점 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 강점·약점</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 강점과 약점</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_4/kunghap_business_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 함께할 때\n어디서 힘을 얻고\n어디서 부딪히는지 보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>함께할 때의 강점</Heading>
-            {(jc.strengthList as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>주의해야 할 약점</Heading>
-            {(jc.weaknessList as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.balanceDesc as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.balanceDesc as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"강점과 약점을 알았으니,\n이제 두 사람의 역할 분담을\n살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제5장 · 역할 분담 ═══════════ */}
-      {ch === "5" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 역할 분담</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>최적의 역할 분담</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_5/kunghap_business_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람의 사주는\n각자에게 맞는 역할이 있소.\n그 역할을 잘 나눌 때 시너지가 나오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>역할 분담 분석</Heading>
-            <ReportSec data={jc.rolesDesc as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>역할 충돌 주의점</Heading>
-            {(jc.roleConflict as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}10`, border: `1px solid ${WARN}30` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>역할 조율 조언</Heading>
-            {(jc.roleTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: NAVY, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-          <Quote>{`"역할을 알았으니,\n이제 두 사주의 합·충을\n짚어보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="5" go={next} />
-        </>
-      )}
-
-      {/* ═══════════ 제6장 · 합과 충 ═══════════ */}
-      {ch === "6" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 합·충</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주의 합과 충</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/kunghap_business/kunghap_business_3/kunghap_business_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
@@ -5163,8 +5044,128 @@ function ReportPreviewInner() {
               <AttractionGauge score={70} label="함께할 수 있는 파트너 인연이오" />
             )}
           </section>
+          <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
+          <Quote>{`"두 사주의 합·충을 살펴보았으니,\n이제 두 사람의 비즈니스 궁합 점수를\n살펴보겠소."`}</Quote>
+          <div className="pb-10" />
+          <ChapterNav cur="3" go={next} />
+        </>
+      )}
+
+      {/* ═══════════ 제4장 · 비즈니스 궁합 점수 ═══════════ */}
+      {ch === "4" && (
+        <>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 궁합 점수</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>비즈니스 궁합 점수</h1>
+          </div>
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/kunghap_business/kunghap_business_4/kunghap_business_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <Quote>{`"두 사람이 비즈니스 파트너로\n얼마나 잘 맞는지\n홍연이 솔직하게 풀어드리겠소."`}</Quote>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>비즈니스 궁합 점수</Heading>
+            {(jc.compatScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
+              <AttractionGauge score={(jc.compatScore as {score: number}).score} label={(jc.compatScore as {label?: string}).label || ""} />
+            ) : (
+              <AttractionGauge score={74} label="함께하면 시너지가 나는 파트너이오" />
+            )}
+            {(jc.compatScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+          </section>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>궁합의 근거</Heading>
+            <ReportSec data={jc.compatReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+          </section>
+          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
+          <Quote>{`"궁합 점수를 알았으니,\n이제 두 사람의 강점과\n약점을 살펴보겠소."`}</Quote>
+          <div className="pb-10" />
+          <ChapterNav cur="4" go={next} />
+        </>
+      )}
+
+      {/* ═══════════ 제5장 · 강점과 약점 ═══════════ */}
+      {ch === "5" && (
+        <>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 강점·약점</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 강점과 약점</h1>
+          </div>
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/kunghap_business/kunghap_business_5/kunghap_business_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <Quote>{`"두 사람이 함께할 때\n어디서 힘을 얻고\n어디서 부딪히는지 보겠소."`}</Quote>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>함께할 때의 강점</Heading>
+            {(jc.strengthList as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
+              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
+                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
+                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            ))}
+          </section>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>주의해야 할 약점</Heading>
+            {(jc.weaknessList as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
+              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
+                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
+                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            ))}
+          </section>
+          <section className="px-6 pt-2 pb-4">
+            {(jc.balanceDesc as {desc?: string} | undefined)?.desc && (
+              <div className="p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
+                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.balanceDesc as {desc: string}).desc}</p>
+              </div>
+            )}
+          </section>
+          <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
+          <Quote>{`"강점과 약점을 알았으니,\n이제 두 사람의 역할 분담을\n살펴보겠소."`}</Quote>
+          <div className="pb-10" />
+          <ChapterNav cur="5" go={next} />
+        </>
+      )}
+
+      {/* ═══════════ 제6장 · 역할 분담 ═══════════ */}
+      {ch === "6" && (
+        <>
+          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 역할 분담</p>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>최적의 역할 분담</h1>
+          </div>
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <Quote>{`"두 사람의 사주는\n각자에게 맞는 역할이 있소.\n그 역할을 잘 나눌 때 시너지가 나오."`}</Quote>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>역할 분담 분석</Heading>
+            <ReportSec data={jc.rolesDesc as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+          </section>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>역할 충돌 주의점</Heading>
+            {(jc.roleConflict as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
+              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}10`, border: `1px solid ${WARN}30` }}>
+                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
+                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              </div>
+            ))}
+          </section>
+          <section className="px-6 pt-2 pb-4">
+            <Heading>역할 조율 조언</Heading>
+            {(jc.roleTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
+              <div key={i} className="mb-2 flex items-start gap-2">
+                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: NAVY, color: "#fff" }}>{i + 1}</span>
+                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+              </div>
+            ))}
+          </section>
           <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-          <Quote>{`"합·충을 파악했으니,\n이제 금전 흐름을\n살펴보겠소."`}</Quote>
+          <Quote>{`"역할을 알았으니,\n이제 금전 흐름을\n살펴보겠소."`}</Quote>
           <div className="pb-10" />
           <ChapterNav cur="6" go={next} />
         </>
