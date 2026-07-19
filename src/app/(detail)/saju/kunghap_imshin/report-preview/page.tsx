@@ -3787,9 +3787,9 @@ const CHAPTER_TITLES: Record<string, string> = {
   "1":  "제1장 · 나는 부모로써 어떤 사람인가?",
   "2":  "제2장 · 배우자는 부모로써 어떤 사람인가?",
   "3":  "제3장 · 두 사람의 자녀운",
-  "4":  "제4장 · 임신하기 좋은 시기는 언제인가",
-  "5":  "제5장 · 출산하기 좋은 시기는 언제인가",
-  "6":  "제6장 · 아들인가 딸인가 — 태아의 기운",
+  "4":  "제4장 · 두 사주의 합과 충",
+  "5":  "제5장 · 태어날 자녀의 기운",
+  "6":  "제6장 · 임신에 좋은 시기",
   "7":  "제7장 · 임신·출산 시 주의할 것들",
   "8":  "제8장 · 아이가 태어나면 어떤 가정이 될까",
   "9":  "제9장 · 아이를 위한 개운법과 좋은 환경",
@@ -4982,9 +4982,9 @@ const TOC_A: TocEntry[] = [
   { disp: "제1장",  chip: "나의원국", title: "나는 부모로써 어떤 사람인가?",        no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "배우자는 부모로써 어떤 사람인가?",    no: "2" },
   { disp: "제3장",  chip: "자녀운",  title: "두 사람의 자녀운",                    no: "3" },
-  { disp: "제4장",  chip: "임신시기", title: "임신하기 좋은 시기는 언제인가",      no: "4" },
-  { disp: "제5장",  chip: "출산시기", title: "출산하기 좋은 시기는 언제인가",      no: "5" },
-  { disp: "제6장",  chip: "태아기운", title: "아들인가 딸인가 — 태아의 기운",      no: "6" },
+  { disp: "제4장",  chip: "합·충",    title: "두 사주의 합과 충",                  no: "4" },
+  { disp: "제5장",  chip: "자녀기운", title: "태어날 자녀의 기운",                  no: "5" },
+  { disp: "제6장",  chip: "임신시기", title: "임신에 좋은 시기",                    no: "6" },
   { disp: "제7장",  chip: "주의사항", title: "임신·출산 시 주의할 것들",           no: "7" },
   { disp: "제8장",  chip: "가정상",  title: "아이가 태어나면 어떤 가정이 될까",    no: "8" },
   { disp: "제9장",  chip: "개운법",  title: "아이를 위한 개운법과 좋은 환경",      no: "9" },
@@ -6458,171 +6458,8 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제4장 · 태어날 자녀 ═══════════ */}
+      {/* ═══════════ 제4장 · 합과 충 ═══════════ */}
       {ch === "4" && (() => {
-        const ce  = (jc.childEnergy    as Record<string, unknown> | undefined) ?? null;
-        const cd  = (jc.childDesc      as Record<string, unknown> | undefined) ?? null;
-        const pt  = (jc.parenthoodTips as Record<string, unknown> | undefined) ?? null;
-
-        const energyType = typeof ce?.energyType === "string" ? ce.energyType : "생명의 기운";
-        const energyIcon = typeof ce?.energyIcon === "string" ? ce.energyIcon : "🌟";
-        const keywords   = Array.isArray(ce?.keywords) ? (ce.keywords as string[]) : ["활기", "창조", "온화"];
-        const energyDesc = typeof ce?.desc === "string" ? ce.desc : "태어날 아이의 기운을 살피는 중이오.";
-
-        const cdIntro    = typeof cd?.intro    === "string" ? cd.intro    : "";
-        const cdCallout  = typeof cd?.callout  === "string" ? cd.callout  : "";
-        const cdParas    = Array.isArray(cd?.paragraphs) ? (cd.paragraphs as string[]) : [];
-
-        const tips = Array.isArray(pt?.tips)
-          ? (pt.tips as Array<{ icon: string; title: string; desc: string }>)
-          : [];
-
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 자녀 기운</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>태어날 자녀의 기운</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-
-            {/* 오프닝 인용 */}
-            <Quote>{`"두 사람 사이에 태어날 자녀는\n어떤 기운을 타고 날지\n미리 살펴보겠소."`}</Quote>
-
-            {/* 자녀 기운 유형 카드 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 기운 · 타고난 빛</p>
-            </div>
-            <ChildEnergyCard
-              energyType={energyType}
-              energyIcon={energyIcon}
-              keywords={keywords}
-              desc={energyDesc}
-              color={IM4_COLOR}
-              pale={IM4_PALE}
-            />
-
-            {/* 자녀 특성 상세 카드 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 풀이 · 성품과 재능</p>
-            </div>
-            {(cdIntro || cdCallout || cdParas.length > 0) && (
-              <ChildDescCard
-                intro={cdIntro || "이 아이는 특별한 기운을 품고 태어날 것이오."}
-                callout={cdCallout || ""}
-                paragraphs={cdParas}
-                color={IM4_COLOR}
-                pale={IM4_PALE}
-              />
-            )}
-
-            {/* 양육 조언 카드 */}
-            {tips.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_GREEN }}>✦ 양육의 길 · 부모가 걸어야 할 방향</p>
-                </div>
-                <ParenthoodTipsCard tips={tips} greenColor={IM4_GREEN} greenPale={IM4_GREEN_P} />
-              </>
-            )}
-
-            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-            <Quote>{`"자녀 기운을 알았으니,\n임신에 좋은 시기를\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="4" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제5장 · 임신 좋은 시기 ═══════════ */}
-      {ch === "5" && (() => {
-        const tf  = (jc.timingFlow   as Record<string, unknown> | undefined) ?? null;
-        const bm  = (jc.bestMonths   as Record<string, unknown> | undefined) ?? null;
-        const ta  = (jc.timingAdvice as Record<string, unknown> | undefined) ?? null;
-
-        const timingItems = Array.isArray(tf?.items)
-          ? (tf.items as Array<{ icon?: string; label: string; desc: string; highlight?: boolean }>)
-          : [];
-        const bestItems = Array.isArray(bm?.items)
-          ? (bm.items as Array<{ season?: string; title: string; desc: string }>)
-          : [];
-
-        const taHeadline  = typeof ta?.headline  === "string" ? ta.headline  : "시기를 알았으니, 마음을 준비하시오";
-        const taCallout   = typeof ta?.callout   === "string" ? ta.callout   : "";
-        const taParas     = Array.isArray(ta?.paragraphs) ? (ta.paragraphs as string[]) : (typeof ta?.desc === "string" ? [ta.desc] : []);
-
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 임신 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신에 좋은 시기</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-
-            {/* 오프닝 인용 */}
-            <Quote>{`"임신·출산에 좋은 시기가 있소.\n그 시기를 미리 알고 준비하시오."`}</Quote>
-
-            {/* 임신 시기 흐름 타임라인 */}
-            {timingItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 시기 흐름 · 운기의 파도를 읽다</p>
-                </div>
-                <TimingFlowCard
-                  items={timingItems}
-                  color={IM5_COLOR}
-                  pale={IM5_PALE}
-                  goldColor={IM5_GOLD}
-                  goldPale={IM5_GOLD_P}
-                />
-              </>
-            )}
-
-            {/* 좋은 달 카드 */}
-            {bestItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 좋은 달 · 임신 기운이 모이는 시간</p>
-                </div>
-                <BestMonthsCard items={bestItems} color={IM5_COLOR} pale={IM5_PALE} />
-              </>
-            )}
-
-            {/* 홍연의 시기 조언 카드 */}
-            {(taHeadline || taCallout || taParas.length > 0) && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_GOLD }}>✦ 홍연의 조언 · 시기를 맞이하는 마음</p>
-                </div>
-                <TimingAdviceCard
-                  headline={taHeadline}
-                  callout={taCallout || "사주의 흐름을 알았으니, 그 흐름에 몸과 마음을 맡기시오."}
-                  paragraphs={taParas}
-                  goldColor={IM5_GOLD}
-                  goldPale={IM5_GOLD_P}
-                />
-              </>
-            )}
-
-            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-            <Quote>{`"시기를 알았으니,\n두 사주의 합·충을\n짚어보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="5" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제6장 · 합과 충 ═══════════ */}
-      {ch === "6" && (() => {
         const hl  = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
         const cl  = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
         const os  = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
@@ -6642,12 +6479,12 @@ function ReportPreviewInner() {
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 합·충</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 합·충</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주의 합과 충</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -6703,8 +6540,171 @@ function ReportPreviewInner() {
               paragraphs={osParas}
             />
 
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
+            <Quote>{`"합·충을 알았으니,\n태어날 자녀의 기운을\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제5장 · 태어날 자녀 ═══════════ */}
+      {ch === "5" && (() => {
+        const ce  = (jc.childEnergy    as Record<string, unknown> | undefined) ?? null;
+        const cd  = (jc.childDesc      as Record<string, unknown> | undefined) ?? null;
+        const pt  = (jc.parenthoodTips as Record<string, unknown> | undefined) ?? null;
+
+        const energyType = typeof ce?.energyType === "string" ? ce.energyType : "생명의 기운";
+        const energyIcon = typeof ce?.energyIcon === "string" ? ce.energyIcon : "🌟";
+        const keywords   = Array.isArray(ce?.keywords) ? (ce.keywords as string[]) : ["활기", "창조", "온화"];
+        const energyDesc = typeof ce?.desc === "string" ? ce.desc : "태어날 아이의 기운을 살피는 중이오.";
+
+        const cdIntro    = typeof cd?.intro    === "string" ? cd.intro    : "";
+        const cdCallout  = typeof cd?.callout  === "string" ? cd.callout  : "";
+        const cdParas    = Array.isArray(cd?.paragraphs) ? (cd.paragraphs as string[]) : [];
+
+        const tips = Array.isArray(pt?.tips)
+          ? (pt.tips as Array<{ icon: string; title: string; desc: string }>)
+          : [];
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 자녀 기운</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>태어날 자녀의 기운</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"두 사람 사이에 태어날 자녀는\n어떤 기운을 타고 날지\n미리 살펴보겠소."`}</Quote>
+
+            {/* 자녀 기운 유형 카드 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 기운 · 타고난 빛</p>
+            </div>
+            <ChildEnergyCard
+              energyType={energyType}
+              energyIcon={energyIcon}
+              keywords={keywords}
+              desc={energyDesc}
+              color={IM4_COLOR}
+              pale={IM4_PALE}
+            />
+
+            {/* 자녀 특성 상세 카드 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 풀이 · 성품과 재능</p>
+            </div>
+            {(cdIntro || cdCallout || cdParas.length > 0) && (
+              <ChildDescCard
+                intro={cdIntro || "이 아이는 특별한 기운을 품고 태어날 것이오."}
+                callout={cdCallout || ""}
+                paragraphs={cdParas}
+                color={IM4_COLOR}
+                pale={IM4_PALE}
+              />
+            )}
+
+            {/* 양육 조언 카드 */}
+            {tips.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_GREEN }}>✦ 양육의 길 · 부모가 걸어야 할 방향</p>
+                </div>
+                <ParenthoodTipsCard tips={tips} greenColor={IM4_GREEN} greenPale={IM4_GREEN_P} />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
+            <Quote>{`"자녀 기운을 알았으니,\n임신에 좋은 시기를\n살펴보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="5" go={next} />
+          </>
+        );
+      })()}
+
+      {/* ═══════════ 제6장 · 임신 좋은 시기 ═══════════ */}
+      {ch === "6" && (() => {
+        const tf  = (jc.timingFlow   as Record<string, unknown> | undefined) ?? null;
+        const bm  = (jc.bestMonths   as Record<string, unknown> | undefined) ?? null;
+        const ta  = (jc.timingAdvice as Record<string, unknown> | undefined) ?? null;
+
+        const timingItems = Array.isArray(tf?.items)
+          ? (tf.items as Array<{ icon?: string; label: string; desc: string; highlight?: boolean }>)
+          : [];
+        const bestItems = Array.isArray(bm?.items)
+          ? (bm.items as Array<{ season?: string; title: string; desc: string }>)
+          : [];
+
+        const taHeadline  = typeof ta?.headline  === "string" ? ta.headline  : "시기를 알았으니, 마음을 준비하시오";
+        const taCallout   = typeof ta?.callout   === "string" ? ta.callout   : "";
+        const taParas     = Array.isArray(ta?.paragraphs) ? (ta.paragraphs as string[]) : (typeof ta?.desc === "string" ? [ta.desc] : []);
+
+        return (
+          <>
+            {/* 커버 */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 임신 시기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신에 좋은 시기</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            {/* 오프닝 인용 */}
+            <Quote>{`"임신·출산에 좋은 시기가 있소.\n그 시기를 미리 알고 준비하시오."`}</Quote>
+
+            {/* 임신 시기 흐름 타임라인 */}
+            {timingItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 시기 흐름 · 운기의 파도를 읽다</p>
+                </div>
+                <TimingFlowCard
+                  items={timingItems}
+                  color={IM5_COLOR}
+                  pale={IM5_PALE}
+                  goldColor={IM5_GOLD}
+                  goldPale={IM5_GOLD_P}
+                />
+              </>
+            )}
+
+            {/* 좋은 달 카드 */}
+            {bestItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 좋은 달 · 임신 기운이 모이는 시간</p>
+                </div>
+                <BestMonthsCard items={bestItems} color={IM5_COLOR} pale={IM5_PALE} />
+              </>
+            )}
+
+            {/* 홍연의 시기 조언 카드 */}
+            {(taHeadline || taCallout || taParas.length > 0) && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_GOLD }}>✦ 홍연의 조언 · 시기를 맞이하는 마음</p>
+                </div>
+                <TimingAdviceCard
+                  headline={taHeadline}
+                  callout={taCallout || "사주의 흐름을 알았으니, 그 흐름에 몸과 마음을 맡기시오."}
+                  paragraphs={taParas}
+                  goldColor={IM5_GOLD}
+                  goldPale={IM5_GOLD_P}
+                />
+              </>
+            )}
+
             <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-            <Quote>{`"합·충을 알았으니,\n건강 관리를\n살펴보겠소."`}</Quote>
+            <Quote>{`"시기를 알았으니,\n건강 관리를\n살펴보겠소."`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
           </>
