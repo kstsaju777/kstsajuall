@@ -6867,63 +6867,43 @@ function ReportPreviewInner() {
 
             {/* 두 사람의 합(合) - LLM 카드 */}
             {hapItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: HAP_COLOR }}>✦ 두 사람의 합(合)</p>
-                </div>
-                <div className="px-4 flex flex-col gap-3 mb-4">
-                  {hapItems.map((item, i) => (
-                    <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${HAP_COLOR}25` }}>
-                      <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${HAP_COLOR}12` }}>
-                        <span className="text-[22px]">{item.glyph ?? "🌿"}</span>
-                        <div>
-                          <p className="text-[13px] font-black leading-tight" style={{ color: HAP_COLOR }}>{item.type ?? ""}</p>
-                          {item.effect && <p className="text-[11px] mt-0.5" style={{ color: `${HAP_COLOR}cc` }}>{item.effect}</p>}
-                        </div>
-                      </div>
-                      {item.desc && (
-                        <div className="px-4 py-3">
-                          <p className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
-                        </div>
-                      )}
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람의 합(合)은</Heading></div>
+                {hapItems.map((item, i) => (
+                  <div key={i} className="mx-5 mb-3 px-5 py-4" style={{ background: "var(--surface-2, #fff)", border: `0.5px solid ${HAP_COLOR}30`, borderLeft: `3px solid ${HAP_COLOR}`, borderRadius: "0 12px 12px 0" }}>
+                    {item.effect && <p className="text-[15px] font-medium leading-[1.6] mb-1" style={{ color: INK, fontFamily: SERIF }}>{item.effect}</p>}
+                    <div className="flex items-center gap-1.5 mb-2.5">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${HAP_COLOR}15`, color: HAP_COLOR, border: `0.5px solid ${HAP_COLOR}40` }}>{item.type}</span>
                     </div>
-                  ))}
-                </div>
-              </>
+                    <div style={{ borderTop: `0.5px solid ${HAP_COLOR}20`, paddingTop: 10 }}>
+                      <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </section>
             )}
 
             {/* 두 사람의 충(沖) - LLM 카드 */}
             {chungItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: CHUNG_COLOR }}>✦ 두 사람의 충(沖)</p>
-                </div>
-                <div className="px-4 flex flex-col gap-3 mb-4">
-                  {chungItems.map((item, i) => (
-                    <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${CHUNG_COLOR}25` }}>
-                      <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${CHUNG_COLOR}10` }}>
-                        <span className="text-[22px]">{item.glyph ?? "⚡"}</span>
-                        <div>
-                          <p className="text-[13px] font-black leading-tight" style={{ color: CHUNG_COLOR }}>{item.type ?? ""}</p>
-                          {item.impact && <p className="text-[11px] mt-0.5" style={{ color: `${CHUNG_COLOR}cc` }}>{item.impact}</p>}
-                        </div>
-                      </div>
-                      {item.desc && (
-                        <div className="px-4 py-3">
-                          <p className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
-                        </div>
-                      )}
-                      {item.resolve && (
-                        <div className="px-4 pb-3">
-                          <div className="rounded-xl px-3 py-2" style={{ background: `${HAP_COLOR}10`, border: `1px solid ${HAP_COLOR}20` }}>
-                            <p className="text-[12px] leading-[1.8]" style={{ color: HAP_COLOR }}>💡 {item.resolve}</p>
-                          </div>
-                        </div>
-                      )}
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람의 충(沖)은</Heading></div>
+                {chungItems.map((item, i) => (
+                  <div key={i} className="mx-5 mb-3 px-5 py-4" style={{ background: "var(--surface-2, #fff)", border: `0.5px solid ${CHUNG_COLOR}30`, borderLeft: `3px solid ${CHUNG_COLOR}`, borderRadius: "0 12px 12px 0" }}>
+                    {item.impact && <p className="text-[15px] font-medium leading-[1.6] mb-1" style={{ color: INK, fontFamily: SERIF }}>{item.impact}</p>}
+                    <div className="flex items-center gap-1.5 mb-2.5">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: `${CHUNG_COLOR}15`, color: CHUNG_COLOR, border: `0.5px solid ${CHUNG_COLOR}40` }}>{item.type}</span>
                     </div>
-                  ))}
-                </div>
-              </>
+                    <div style={{ borderTop: `0.5px solid ${CHUNG_COLOR}20`, paddingTop: 10 }}>
+                      <p className="text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                    </div>
+                    {item.resolve && (
+                      <div className="mt-2 pt-2" style={{ borderTop: `0.5px solid ${CHUNG_COLOR}20` }}>
+                        <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF, opacity: 0.85 }}>💡 {item.resolve}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </section>
             )}
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
