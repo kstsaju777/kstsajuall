@@ -32,8 +32,8 @@ export function fixJosa(text: string): string {
   // 과/와
   text = text.replace(/([가-힣])(과|와)/g, (_, p) => p + (hasBatchim(p) ? "과" : "와"));
 
-  // 이/가 — 공백·구두점·줄바꿈 앞에만 (오탐 방지)
-  text = text.replace(/([가-힣])(이|가)(?=[\s,\.!\?"'·\n\r]|$)/g, (_, p) => p + (hasBatchim(p) ? "이" : "가"));
+  // 이/가 — "~이/가 " 패턴에서만 (조사 뒤에 공백+한글이 이어질 때만 교정, 단어 끝 오탐 방지)
+  text = text.replace(/([가-힣])(이|가)(?= [가-힣])/g, (_, p) => p + (hasBatchim(p) ? "이" : "가"));
 
   // 이라/라 — 공백·구두점 앞에만
   text = text.replace(/([가-힣])(이라|라)(?=[\s,\.!\?"'·\n\r]|$)/g, (_, p) => p + (hasBatchim(p) ? "이라" : "라"));

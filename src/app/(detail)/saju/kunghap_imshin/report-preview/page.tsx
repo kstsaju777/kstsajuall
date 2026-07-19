@@ -20,6 +20,7 @@ import { isImshinKunghapChapterReady, IMSHIN_KUNGHAP_CHAPTER_SECTIONS } from "@/
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
+import { yearGanji, monthGanji } from "@/lib/saju/ganji-calc";
 import { calcCrossRelations as calcCrossRelationsShared } from "@/lib/saju/kunghap-cross-relations";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
@@ -714,8 +715,8 @@ function HealthLineChart({ view }: { view: MyeongsikView | null }) {
           return (
             <g key={i}>
               <circle cx={c.x} cy={c.y} r={isWorst || isBest ? 5 : 3} fill={isWorst ? "#E24B4A" : isBest ? "#5b9e6a" : WHITE} stroke={dotColor} strokeWidth="2" />
-              {isWorst && <text x={c.x} y={c.y + 14} fontSize="8" fill="#E24B4A" textAnchor="middle" fontWeight="700">주의</text>}
-              {isBest  && <text x={c.x} y={c.y - 8}  fontSize="8" fill="#5b9e6a" textAnchor="middle" fontWeight="700">최고</text>}
+              {isWorst && <text x={c.x} y={c.y + 16} fontSize="13" fill="#E24B4A" textAnchor="middle" fontWeight="700">주의</text>}
+              {isBest  && <text x={c.x} y={c.y - 10} fontSize="13" fill="#5b9e6a" textAnchor="middle" fontWeight="700">길함</text>}
               <text x={c.x} y={H - 14} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(TARGET_YEARS[i]).slice(2)}년</text>
               <text x={c.x} y={H - 4}  fontSize="7" fill={MUTE} textAnchor="middle">{seunMap[TARGET_YEARS[i]]}</text>
             </g>
@@ -2633,10 +2634,6 @@ function ChildFlowGraph({ data, myName, partnerName }: { data: Record<string, un
 
   return (
     <div className="mx-5 mb-2 rounded-2xl overflow-hidden" style={{ border: `1px solid rgba(0,0,0,0.08)`, background: "#f9f6ff" }}>
-      <div className="px-4 pt-3.5 pb-1">
-        <p className="text-[14px] font-black mb-0.5" style={{ color: IM3_COLOR }}>향후 10년 임신·출산 인연 흐름</p>
-        <p className="text-[10px]" style={{ color: MUTE }}>{myName}님과 {partnerName}님의 세운 기반 임신 인연 흐름 그래프</p>
-      </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", display: "block", overflow: "visible" }}>
         <defs>
           <linearGradient id="im3cfg" x1="0" y1="0" x2="0" y2="1">
@@ -2661,8 +2658,8 @@ function ChildFlowGraph({ data, myName, partnerName }: { data: Record<string, un
                 {isPeak && <circle cx={c.x} cy={c.y} r="10" fill={isMax ? "#1a4a9e" : "#c0306a"} opacity="0.15" />}
                 <circle cx={c.x} cy={c.y} r={isPeak ? 6.5 : 3} fill={isMax ? "#1a4a9e" : isMin ? "#c0306a" : IM3_COLOR} stroke="#f9f6ff" strokeWidth="1.5" />
                 {isPeak && (
-                  <text x={c.x} y={isMax ? c.y - 14 : c.y + 20} textAnchor="middle" fontSize="9" fontWeight="800"
-                    fill={isMax ? "#1a4a9e" : "#c0306a"}>{isMax ? "최고" : "주의"}</text>
+                  <text x={c.x} y={isMax ? c.y - 16 : c.y + 22} textAnchor="middle" fontSize="16" fontWeight="800"
+                    fill={isMax ? "#1a4a9e" : "#c0306a"}>{isMax ? "길함" : "주의"}</text>
                 )}
               </g>
             );
@@ -2678,6 +2675,105 @@ function ChildFlowGraph({ data, myName, partnerName }: { data: Record<string, un
         ))}
       </svg>
       {summary && <p className="px-4 pb-3 text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{summary}</p>}
+    </div>
+  );
+}
+
+function ChildFlowGraphLocal({ myView, partnerView, myYE, myHE, myGE, ptYE, ptHE, ptGE, myGender, ptGender, myName, partnerName }: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myYE: string; myHE: string; myGE: string;
+  ptYE: string; ptHE: string; ptGE: string;
+  myGender: string; ptGender: string;
+  myName: string; partnerName: string;
+}) {
+  const myIlgan = (myView.ilgan ?? "甲")[0];
+  const ptIlgan = (partnerView.ilgan ?? "甲")[0];
+  const baseYear = myView.currentYear ?? new Date().getFullYear();
+  const YEARS = Array.from({ length: 10 }, (_, i) => baseYear + i);
+
+  const scoreYear = (year: number) => {
+    const gz = yearGanji(year);
+    const ganEl = _S5_STEM_EL[gz[0] ?? ""] ?? "";
+    const jiEl  = _S5_STEM_EL[_S5_BRANCH_MAIN[gz[1] ?? ""] ?? ""] ?? "";
+    const base = (el: string, yE: string, hE: string, gE: string) =>
+      (el === yE ? 2 : el === hE ? 1 : el === gE ? -2 : 0);
+    const myBase = base(ganEl, myYE, myHE, myGE) + base(jiEl, myYE, myHE, myGE);
+    const ptBase = base(ganEl, ptYE, ptHE, ptGE) + base(jiEl, ptYE, ptHE, ptGE);
+    const childBonus = (ilgan: string, gender: string) => {
+      const gSS = sipseongOfStem(ilgan, gz[0] ?? "");
+      const jSS = sipseongOfBranch(ilgan, gz[1] ?? "");
+      return (s5IsChildSS(gSS, gender) ? 1.5 : 0) + (s5IsChildSS(jSS, gender) ? 1.5 : 0);
+    };
+    const raw = myBase + ptBase + childBonus(myIlgan, myGender) + childBonus(ptIlgan, ptGender);
+    // raw 범위 -8 ~ +11, 정규화 → 0~100
+    return Math.min(100, Math.max(0, Math.round((raw + 8) / 19 * 100)));
+  };
+
+  const pts = YEARS.map(year => ({ year, score: scoreYear(year) }));
+  const W = 320, H = 200;
+  const PL = 28, PR = 12, PT = 24, PB = 60;
+  const CW = W - PL - PR, CH = H - PT - PB;
+  const scores = pts.map(p => p.score);
+  const rawMin = Math.min(...scores), rawMax = Math.max(...scores);
+  const pad = Math.max(8, Math.round((rawMax - rawMin) * 0.2));
+  const MIN_S = Math.max(0, rawMin - pad), MAX_S = Math.min(100, rawMax + pad);
+  const xOf = (year: number) => PL + ((year - YEARS[0]) / (YEARS.length - 1)) * CW;
+  const yOf = (score: number) => PT + (1 - (score - MIN_S) / (MAX_S - MIN_S)) * CH;
+  const coords = pts.map(p => ({ x: xOf(p.year), y: yOf(p.score), year: p.year, score: p.score }));
+  const linePath = coords.reduce((acc, c, i) => {
+    if (i === 0) return `M ${c.x} ${c.y}`;
+    const prev = coords[i - 1];
+    const cpx = (prev.x + c.x) / 2;
+    return `${acc} C ${cpx} ${prev.y} ${cpx} ${c.y} ${c.x} ${c.y}`;
+  }, "");
+  const fillPath = `${linePath} L ${coords[coords.length - 1].x} ${PT + CH} L ${coords[0].x} ${PT + CH} Z`;
+  const maxScore = Math.max(...scores), minScore = Math.min(...scores);
+
+  return (
+    <div className="mx-5 mb-2 rounded-2xl overflow-hidden" style={{ border: `1px solid rgba(0,0,0,0.08)`, background: "#f9f6ff" }}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", display: "block", overflow: "visible" }}>
+        <defs>
+          <linearGradient id="im3cfg2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={IM3_COLOR} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={IM3_COLOR} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={fillPath} fill="url(#im3cfg2)" />
+        <path d={linePath} fill="none" stroke={IM3_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        {coords.map((c, i) => (
+          <line key={`vl-${i}`} x1={c.x} y1={c.y + 4} x2={c.x} y2={PT + CH} stroke={IM3_COLOR} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.4" />
+        ))}
+        {coords.map((c, i) => {
+          const isMax = c.score === maxScore, isMin = c.score === minScore;
+          const isPeak = isMax || isMin;
+          return (
+            <g key={i}>
+              {isPeak && <circle cx={c.x} cy={c.y} r="10" fill={isMax ? "#1a4a9e" : "#c0306a"} opacity="0.15" />}
+              <circle cx={c.x} cy={c.y} r={isPeak ? 6.5 : 3} fill={isMax ? "#1a4a9e" : isMin ? "#c0306a" : IM3_COLOR} stroke="#f9f6ff" strokeWidth="1.5" />
+            </g>
+          );
+        })}
+        <line x1={PL} y1={PT + CH} x2={W - PR} y2={PT + CH} stroke="rgba(0,0,0,0.1)" strokeWidth="1" />
+        {YEARS.map(y => {
+          const c = coords.find(c => c.year === y)!;
+          const isMax = c.score === maxScore, isMin = c.score === minScore;
+          const isPeak = isMax || isMin;
+          return (
+            <g key={y}>
+              <line x1={xOf(y)} y1={PT + CH} x2={xOf(y)} y2={PT + CH + 4} stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+              <rect x={xOf(y) - 14} y={PT + CH + 6} width={28} height={18} rx={5} ry={5}
+                fill={isPeak ? (isMax ? "#dce8ff" : "#ffe0e0") : "rgba(0,0,0,0.04)"}
+                stroke={isPeak ? (isMax ? "#1a4a9e" : "#c0306a") : "rgba(0,0,0,0.2)"} strokeWidth="1" />
+              <text x={xOf(y)} y={PT + CH + 18} textAnchor="middle" fontSize="10" fontWeight="600"
+                fill={isPeak ? (isMax ? "#1a4a9e" : "#c0306a") : MUTE}>{String(y).slice(2)}</text>
+              {isPeak && (
+                <text x={xOf(y)} y={PT + CH + 38} textAnchor="middle" fontSize="11" fontWeight="800"
+                  fill={isMax ? "#1a4a9e" : "#c0306a"}>{isMax ? "길함" : "주의"}</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
@@ -2707,6 +2803,176 @@ function ChildFlowPeriods({ data }: { data: Record<string, unknown> | null }) {
                 <span className="text-[12px] font-black" style={{ color: INK, fontFamily: SERIF }}>{title}</span>
               </div>
               <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{text}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChildFlowPeriodsLocal({ myView, partnerView, myYE, myHE, myGE, ptYE, ptHE, ptGE, myGender, ptGender, myName, partnerName }: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myYE: string; myHE: string; myGE: string;
+  ptYE: string; ptHE: string; ptGE: string;
+  myGender: string; ptGender: string;
+  myName: string; partnerName: string;
+}) {
+  const myIlgan = (myView.ilgan ?? "甲")[0];
+  const ptIlgan = (partnerView.ilgan ?? "甲")[0];
+  const baseYear = myView.currentYear ?? new Date().getFullYear();
+  const YEARS = Array.from({ length: 10 }, (_, i) => baseYear + i);
+
+  const GAN_KO: Record<string, string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+  const JI_KO:  Record<string, string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+
+  const scoreYear = (year: number) => {
+    const gz = yearGanji(year);
+    const ganEl = _S5_STEM_EL[gz[0] ?? ""] ?? "";
+    const jiEl  = _S5_STEM_EL[_S5_BRANCH_MAIN[gz[1] ?? ""] ?? ""] ?? "";
+    const base = (el: string, yE: string, hE: string, gE: string) =>
+      (el === yE ? 2 : el === hE ? 1 : el === gE ? -2 : 0);
+    const myBase = base(ganEl, myYE, myHE, myGE) + base(jiEl, myYE, myHE, myGE);
+    const ptBase = base(ganEl, ptYE, ptHE, ptGE) + base(jiEl, ptYE, ptHE, ptGE);
+    const childBonus = (ilgan: string, gender: string) => {
+      const gSS = sipseongOfStem(ilgan, gz[0] ?? "");
+      const jSS = sipseongOfBranch(ilgan, gz[1] ?? "");
+      return (s5IsChildSS(gSS, gender) ? 1.5 : 0) + (s5IsChildSS(jSS, gender) ? 1.5 : 0);
+    };
+    const raw = myBase + ptBase + childBonus(myIlgan, myGender) + childBonus(ptIlgan, ptGender);
+    return Math.min(100, Math.max(0, Math.round((raw + 8) / 19 * 100)));
+  };
+
+  const pts = YEARS.map(year => {
+    const gz = yearGanji(year);
+    const myGanSS = sipseongOfStem(myIlgan, gz[0] ?? "");
+    const myJiSS  = sipseongOfBranch(myIlgan, gz[1] ?? "");
+    const ptGanSS = sipseongOfStem(ptIlgan, gz[0] ?? "");
+    const ptJiSS  = sipseongOfBranch(ptIlgan, gz[1] ?? "");
+    const myChild = [myGanSS, myJiSS].filter(ss => s5IsChildSS(ss, myGender));
+    const ptChild = [ptGanSS, ptJiSS].filter(ss => s5IsChildSS(ss, ptGender));
+    return { year, score: scoreYear(year), gz, myChild, ptChild };
+  });
+
+  // 방향 분류 (THRESH 이상 차이만 방향으로 인정)
+  const THRESH = 6;
+  type Dir = "up" | "down" | "flat";
+  const dirs: Dir[] = pts.map((p, i) => {
+    if (i === 0) return "flat";
+    const d = p.score - pts[i - 1].score;
+    return d > THRESH ? "up" : d < -THRESH ? "down" : "flat";
+  });
+
+  // 연속 같은 방향 → 그룹핑 (flat은 앞 방향에 흡수)
+  type Group = { years: number[]; scores: number[]; dir: Dir; myChildYrs: string[][]; ptChildYrs: string[][]; gzList: string[] };
+  const groups: Group[] = [];
+  pts.forEach((p, i) => {
+    const rawDir = dirs[i];
+    const effectiveDir: Dir = rawDir === "flat" && groups.length > 0 ? groups[groups.length - 1].dir : rawDir;
+    if (groups.length === 0 || groups[groups.length - 1].dir !== effectiveDir) {
+      groups.push({ years: [p.year], scores: [p.score], dir: effectiveDir, myChildYrs: [p.myChild], ptChildYrs: [p.ptChild], gzList: [p.gz] });
+    } else {
+      const g = groups[groups.length - 1];
+      g.years.push(p.year); g.scores.push(p.score);
+      g.myChildYrs.push(p.myChild); g.ptChildYrs.push(p.ptChild); g.gzList.push(p.gz);
+    }
+  });
+
+  // 1년짜리 그룹은 인접 그룹에 합병
+  const merged: Group[] = [];
+  groups.forEach((g, i) => {
+    if (g.years.length === 1 && merged.length > 0) {
+      const prev = merged[merged.length - 1];
+      prev.years.push(...g.years); prev.scores.push(...g.scores);
+      prev.myChildYrs.push(...g.myChildYrs); prev.ptChildYrs.push(...g.ptChildYrs);
+      prev.gzList.push(...g.gzList);
+    } else {
+      merged.push({ ...g });
+    }
+  });
+  void groups; // suppress unused warning
+
+  // 각 그룹 → period 카드 데이터 생성
+  const maxScore = Math.max(...pts.map(p => p.score));
+  const minScore = Math.min(...pts.map(p => p.score));
+
+  const gzKo = (gz: string) => `${GAN_KO[gz[0]] ?? gz[0]}${JI_KO[gz[1]] ?? gz[1]}`;
+
+  const periods = merged.map(g => {
+    const avgScore = g.scores.reduce((a, b) => a + b, 0) / g.scores.length;
+    const peakScore = Math.max(...g.scores);
+    const hasMyChild = g.myChildYrs.some(arr => arr.length > 0);
+    const hasPtChild = g.ptChildYrs.some(arr => arr.length > 0);
+    const myChildSS = g.myChildYrs.flat().filter((v, i, a) => a.indexOf(v) === i).join("·") || "";
+    const ptChildSS = g.ptChildYrs.flat().filter((v, i, a) => a.indexOf(v) === i).join("·") || "";
+
+    const isGlobalPeak = g.scores.includes(maxScore);
+    const isGlobalTrough = g.scores.includes(minScore);
+
+    const yearLabel = g.years.length === 1
+      ? `${g.years[0]}년`
+      : `${g.years[0]}~${g.years[g.years.length - 1]}`;
+
+    const gzDesc = g.gzList.slice(0, 2).map(gz => `${g.years[g.gzList.indexOf(gz)]}년 ${gzKo(gz)}`).join("와 ");
+
+    let trend: string, title: string, text: string;
+
+    if (isGlobalPeak && peakScore >= 55) {
+      trend = "고점";
+      title = "자녀 인연이 가장 강하게 열리는 시기";
+      const childPart = hasMyChild && hasPtChild
+        ? `특히 두 분 모두 자녀성(${myChildSS} / ${ptChildSS})이 드는 시기로, 임신·출산의 기운이 강하게 모입니다.`
+        : hasMyChild
+        ? `${myName}님 사주에 자녀성(${myChildSS})이 드는 시기로, 자녀 기운이 활발하게 열립니다.`
+        : hasPtChild
+        ? `${partnerName}님 사주에 자녀성(${ptChildSS})이 드는 시기로, 자녀 기운이 활발하게 열립니다.`
+        : "용신과 희신의 기운이 함께 들어와 두 분 모두 운의 흐름이 좋게 맞아떨어지는 시기입니다.";
+      text = `${gzDesc}의 기운이 두 사람의 사주에 활기를 불어넣습니다. ${childPart} 적극적으로 준비하기 좋은 때이오.`;
+    } else if (isGlobalTrough && peakScore <= 45) {
+      trend = "저점";
+      title = "기운이 약해지는 시기 — 몸과 마음 돌보기";
+      text = `${gzDesc}의 기운은 두 사람의 사주에 부담을 주는 오행이 겹쳐 들어오는 구간입니다. 무리한 시도보다는 체력과 마음의 안정을 우선하는 것이 좋소. 이 시기를 잘 넘기면 다음 상승 구간에서 더 좋은 흐름을 맞이할 수 있습니다.`;
+    } else if (g.dir === "up") {
+      trend = "상승 중";
+      title = avgScore >= 55 ? "임신 인연 활성화" : "기운이 서서히 나아지는 시기";
+      const childPart = hasMyChild || hasPtChild
+        ? ` ${hasMyChild ? myName + "님" : partnerName + "님"}의 사주에 자녀성(${hasMyChild ? myChildSS : ptChildSS})이 겹쳐 들어오며 자녀 기운이 한층 강해집니다.`
+        : "";
+      text = `${gzDesc}의 기운이 나아가며 두 사람의 임신·출산 인연이 점차 활성화되는 구간입니다.${childPart} 이 흐름을 잘 활용하면 좋은 시기이오.`;
+    } else if (g.dir === "down") {
+      trend = "하락 중";
+      title = avgScore >= 45 ? "잠시 숨 고르기" : "기운이 가라앉는 구간";
+      text = `${gzDesc}의 기운이 두 사람의 사주와 충돌하거나 기신 오행이 강해지는 시기입니다. 두 분의 기운을 조화롭게 조정하는 것이 중요하오. 급하게 서두르기보다 안정적인 준비에 집중하면 다음 상승 구간을 더 잘 맞이할 수 있습니다.`;
+    } else {
+      trend = "유지";
+      title = "평이하게 흐르는 시기";
+      const childPart = hasMyChild || hasPtChild
+        ? ` 다만 ${hasMyChild ? myName + "님" : partnerName + "님"}의 자녀성(${hasMyChild ? myChildSS : ptChildSS})이 드는 해가 포함되어 있으니 그 시점을 눈여겨보시오.`
+        : "";
+      text = `${gzDesc}의 기운이 큰 변화 없이 흐르는 구간입니다.${childPart} 꾸준히 준비하고 건강을 챙기는 것이 좋소.`;
+    }
+
+    return { label: yearLabel, trend, title, text };
+  });
+
+  if (periods.length === 0) return null;
+  return (
+    <div className="mx-5 mb-4 space-y-2">
+      {periods.map((p, i) => {
+        const meta = FLOW_TREND_META[p.trend] ?? { icon: "•", color: MUTE };
+        return (
+          <div key={i} className="flex gap-3 items-start rounded-2xl px-4 py-3.5" style={{ background: `${meta.color}09`, border: `1px solid ${meta.color}22` }}>
+            <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black mt-0.5"
+              style={{ background: `${meta.color}14`, border: `2px solid ${meta.color}30`, color: meta.color }}>
+              {meta.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="text-[11px] font-black" style={{ color: meta.color }}>{p.label}</span>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${meta.color}15`, color: meta.color }}>{p.trend}</span>
+                <span className="text-[12px] font-black" style={{ color: INK, fontFamily: SERIF }}>{p.title}</span>
+              </div>
+              <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p.text}</p>
             </div>
           </div>
         );
@@ -2784,6 +3050,429 @@ function ChildHomeTipPanel({ data }: { data: Record<string, unknown> | null }) {
       })}
     </div>
   );
+}
+
+// ══════════════════════════════════════════════════════════
+//  향후 5년 세운별 임신·출산 흐름 컴포넌트
+// ══════════════════════════════════════════════════════════
+
+const _S5_STEM_EL: Record<string, string> = {
+  甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수",
+};
+const _S5_BRANCH_MAIN: Record<string, string> = {
+  子:"癸",丑:"己",寅:"甲",卯:"乙",辰:"戊",巳:"丙",午:"丁",未:"己",申:"庚",酉:"辛",戌:"戊",亥:"壬",
+};
+const _S5_GAN_KO: Record<string, string> = {
+  甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계",
+};
+const _S5_JI_KO: Record<string, string> = {
+  子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해",
+};
+
+type S5Tier = "good" | "caution" | "neutral";
+
+const S5_TIER_COLOR: Record<S5Tier, string> = { good: "#2e7d32", caution: "#c62828", neutral: "#5a5a7a" };
+const S5_TIER_BG:    Record<S5Tier, string> = { good: "#e8f5e9", caution: "#ffebee", neutral: "#f3f4f6" };
+const S5_TIER_LABEL: Record<S5Tier, string> = { good: "길운",    caution: "주의",    neutral: "보통"    };
+
+const S5_CLS_STYLE: Record<string, { bg: string; border: string; text: string; label: string }> = {
+  yong: { bg: "#4285f4", border: "#4285f4", text: "#fff", label: "용신" },
+  heu:  { bg: "#43a047", border: "#43a047", text: "#fff", label: "희신" },
+  gi:   { bg: "#e53935", border: "#e53935", text: "#fff", label: "기신" },
+  neu:  { bg: "#aaa",    border: "#aaa",    text: "#fff", label: ""     },
+};
+
+function s5TierOf(gz: string, yE: string, hE: string, gE: string): S5Tier {
+  const score = (el: string) => el === yE ? 2 : el === hE ? 1 : el === gE ? -2 : 0;
+  const t = score(_S5_STEM_EL[gz[0]] ?? "") + score(_S5_STEM_EL[_S5_BRANCH_MAIN[gz[1]] ?? ""] ?? "");
+  return t >= 2 ? "good" : t <= -1 ? "caution" : "neutral";
+}
+
+function s5ClsEl(el: string, yE: string, hE: string, gE: string): string {
+  return el === yE ? "yong" : el === hE ? "heu" : el === gE ? "gi" : "neu";
+}
+
+const S5_CHILD_SS: Record<string, string[]> = {
+  female: ["식신", "상관"],
+  male:   ["편관", "정관"],
+};
+
+function s5IsChildSS(ss: string, gender: string): boolean {
+  const isFemale = /female|여/.test(gender);
+  return (S5_CHILD_SS[isFemale ? "female" : "male"] ?? []).includes(ss);
+}
+
+function ImshinSeunFiveCard({
+  myView, partnerView,
+  myYE, myHE, myGE, ptYE, ptHE, ptGE,
+  myName, ptName, myGender, ptGender,
+}: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myYE: string; myHE: string; myGE: string;
+  ptYE: string; ptHE: string; ptGE: string;
+  myName: string; ptName: string;
+  myGender: string; ptGender: string;
+}) {
+  const myIlgan = (myView.ilgan ?? "甲")[0];
+  const ptIlgan = (partnerView.ilgan ?? "甲")[0];
+  const baseYear = myView.currentYear ?? new Date().getFullYear();
+  const years: number[] = Array.from({ length: 5 }, (_, i) => baseYear + i);
+  const [sel, setSel] = useState<number | null>(0);
+  const [selMonth, setSelMonth] = useState<number | null>(null);
+
+  return (() => {
+    const selYear = sel !== null ? years[sel] : years[0];
+    const selGz = yearGanji(selYear);
+
+    return (
+      <div className="px-4 pb-6">
+        {/* 안내 문구 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12,
+          padding: "8px 12px", borderRadius: 10, background: "#f0f4ff", border: "1px solid #c7d6f7" }}>
+          <span style={{ fontSize: 14 }}>👇</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#3a5abf" }}>카드를 눌러 년별, 월별 상세 흐름을 확인하시오</span>
+        </div>
+        {/* 범례 */}
+        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
+          {([
+            { label: "용신", color: "#4285f4" },
+            { label: "희신", color: "#43a047" },
+            { label: "기신", color: "#e53935" },
+            { label: "보통", color: "#aaa"    },
+          ]).map(({ label, color }) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: color, display: "inline-block", flexShrink: 0 }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color }}>{label}</span>
+            </div>
+          ))}
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#b07a00", background: "#fff8e1", border: "2px solid #f9a825", borderRadius: 5, padding: "1px 6px" }}>자녀성</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#7a6a50" }}>— 여성:식신·상관 / 남성:편관·정관</span>
+          </div>
+        </div>
+        {/* 카드 스크롤 영역 */}
+        <div style={{ position: "relative" }}>
+          {/* 오른쪽 스크롤 유도 — 화면 끝까지 */}
+          <div style={{ position: "absolute", right: -16, top: 0, bottom: 0, width: 80, zIndex: 10, pointerEvents: "none",
+            background: "linear-gradient(to right, transparent, #fff 80%)",
+            display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>
+            <span style={{ fontSize: 20, color: "#b0a8a4", lineHeight: 1 }}>›</span>
+          </div>
+        <div className="overflow-x-auto pb-2 -mx-1" style={{ scrollbarWidth: "none" }}>
+          <div className="flex gap-2 min-w-max px-1">
+            {years.map((year, idx) => {
+              const gz = yearGanji(year);
+              const myTier = s5TierOf(gz, myYE, myHE, myGE);
+              const ptTier = s5TierOf(gz, ptYE, ptHE, ptGE);
+              const isActive = sel === idx;
+              const bothGood = myTier === "good" && ptTier === "good";
+              const anyBad = myTier === "caution" || ptTier === "caution";
+              const cardAccent = bothGood ? "#2e7d32" : anyBad ? "#c62828" : "#5a5a7a";
+
+              const myGanSS = sipseongOfStem(myIlgan, gz[0] ?? "");
+              const myJiSS = sipseongOfBranch(myIlgan, gz[1] ?? "");
+              const ptGanSS = sipseongOfStem(ptIlgan, gz[0] ?? "");
+              const ptJiSS = sipseongOfBranch(ptIlgan, gz[1] ?? "");
+              const ganEl = _S5_STEM_EL[gz[0] ?? ""] ?? "";
+              const jiEl  = _S5_STEM_EL[_S5_BRANCH_MAIN[gz[1] ?? ""] ?? ""] ?? "";
+              const myGanColor = S5_CLS_STYLE[s5ClsEl(ganEl, myYE, myHE, myGE)].text;
+              const myJiColor  = S5_CLS_STYLE[s5ClsEl(jiEl,  myYE, myHE, myGE)].text;
+              const ptGanColor = S5_CLS_STYLE[s5ClsEl(ganEl, ptYE, ptHE, ptGE)].text;
+              const ptJiColor  = S5_CLS_STYLE[s5ClsEl(jiEl,  ptYE, ptHE, ptGE)].text;
+
+              return (
+                <div key={year} className="flex-shrink-0 flex flex-col items-center"
+                  onClick={() => setSel(idx)}
+                  style={{
+                    width: 88, borderRadius: 16,
+                    border: `2px solid ${isActive ? cardAccent : "#e0dbd8"}`,
+                    background: isActive ? `${cardAccent}12` : "#f6efea",
+                    boxShadow: isActive ? `0 0 0 2px ${cardAccent}55` : undefined,
+                    cursor: "pointer", transition: "all .18s",
+                    padding: "10px 6px 8px",
+                    opacity: sel !== null && !isActive ? 0.35 : 1,
+                  }}>
+                  {/* 연도 */}
+                  <span style={{ fontSize: 14, color: isActive ? cardAccent : "#5a5560", fontWeight: 800, marginBottom: 4 }}>{year}</span>
+                  {/* 천간 십성 — 나 · 님 나란히, 태그 버튼 */}
+                  <div style={{ display: "flex", gap: 3, justifyContent: "center", marginBottom: 3 }}>
+                    {[{ ss: myGanSS, cls: s5ClsEl(ganEl, myYE, myHE, myGE), gender: myGender }, { ss: ptGanSS, cls: s5ClsEl(ganEl, ptYE, ptHE, ptGE), gender: ptGender }].map(({ ss, cls, gender }, i) => {
+                      const s = S5_CLS_STYLE[cls];
+                      const isChild = s5IsChildSS(ss, gender);
+                      return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px", boxShadow: isChild ? "0 0 0 2px #fff, 0 0 0 5px #f9a825" : undefined }}>{ss || "—"}</span>;
+                    })}
+                  </div>
+                  {/* 천간 이미지 */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={ganCharImage(gz[0] ?? "")} alt={gz[0]} style={{ width: 66, height: 66, objectFit: "contain" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  {/* 지지 이미지 */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={jiCharImage(gz[1] ?? "")} alt={gz[1]} style={{ width: 66, height: 66, objectFit: "contain", marginTop: 2 }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  {/* 지지 십성 — 나 · 님 나란히, 태그 버튼 */}
+                  <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 3, marginBottom: 2 }}>
+                    {[{ ss: myJiSS, cls: s5ClsEl(jiEl, myYE, myHE, myGE), gender: myGender }, { ss: ptJiSS, cls: s5ClsEl(jiEl, ptYE, ptHE, ptGE), gender: ptGender }].map(({ ss, cls, gender }, i) => {
+                      const s = S5_CLS_STYLE[cls];
+                      const isChild = s5IsChildSS(ss, gender);
+                      return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px", boxShadow: isChild ? "0 0 0 2px #fff, 0 0 0 5px #f9a825" : undefined }}>{ss || "—"}</span>;
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        </div>
+
+
+        {/* 월운 섹션 — 선택된 연도의 12개월 */}
+        {sel !== null && (() => {
+          const year = years[sel];
+          const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+          return (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#5a5560", marginBottom: 10 }}>
+                {year}년 월별 임신·출산 흐름
+              </div>
+              {/* 월운 카드 스크롤 */}
+              <div style={{ position: "relative" }}>
+                <div style={{ position: "absolute", right: -16, top: 0, bottom: 0, width: 80, zIndex: 10, pointerEvents: "none",
+                  background: "linear-gradient(to right, transparent, #fff 80%)",
+                  display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>
+                  <span style={{ fontSize: 20, color: "#b0a8a4" }}>›</span>
+                </div>
+                <div style={{ overflowX: "auto", scrollbarWidth: "none" as const, paddingBottom: 4 }}>
+                  <div style={{ display: "flex", gap: 8, width: "max-content" }}>
+                    {months.map((month) => {
+                      const mgz = monthGanji(year, month);
+                      const mGanEl = _S5_STEM_EL[mgz[0] ?? ""] ?? "";
+                      const mJiEl  = _S5_STEM_EL[_S5_BRANCH_MAIN[mgz[1] ?? ""] ?? ""] ?? "";
+                      const myMTier = s5TierOf(mgz, myYE, myHE, myGE);
+                      const ptMTier = s5TierOf(mgz, ptYE, ptHE, ptGE);
+                      const bothMGood = myMTier === "good" && ptMTier === "good";
+                      const anyMBad = myMTier === "caution" || ptMTier === "caution";
+                      const mAccent = bothMGood ? "#2e7d32" : anyMBad ? "#c62828" : "#5a5a7a";
+                      const isMonthActive = selMonth === month;
+
+                      const myMGanSS = sipseongOfStem(myIlgan, mgz[0] ?? "");
+                      const myMJiSS  = sipseongOfBranch(myIlgan, mgz[1] ?? "");
+                      const ptMGanSS = sipseongOfStem(ptIlgan, mgz[0] ?? "");
+                      const ptMJiSS  = sipseongOfBranch(ptIlgan, mgz[1] ?? "");
+
+                      return (
+                        <div key={month}
+                          onClick={() => setSelMonth(isMonthActive ? null : month)}
+                          style={{
+                            width: 88, borderRadius: 16, flexShrink: 0,
+                            border: `2px solid ${isMonthActive ? mAccent : "#e0dbd8"}`,
+                            background: isMonthActive ? `${mAccent}12` : "#f6efea",
+                            boxShadow: isMonthActive ? `0 0 0 2px ${mAccent}55` : undefined,
+                            cursor: "pointer", transition: "all .18s",
+                            padding: "10px 6px 8px",
+                            display: "flex", flexDirection: "column", alignItems: "center",
+                            opacity: selMonth !== null && !isMonthActive ? 0.35 : 1,
+                          }}>
+                          <span style={{ fontSize: 14, fontWeight: 800, color: isMonthActive ? mAccent : "#5a5560", marginBottom: 4 }}>{month}월</span>
+                          {/* 천간 십성 태그 */}
+                          <div style={{ display: "flex", gap: 3, justifyContent: "center", marginBottom: 3 }}>
+                            {[{ ss: myMGanSS, cls: s5ClsEl(mGanEl, myYE, myHE, myGE), gender: myGender }, { ss: ptMGanSS, cls: s5ClsEl(mGanEl, ptYE, ptHE, ptGE), gender: ptGender }].map(({ ss, cls, gender }, i) => {
+                              const s = S5_CLS_STYLE[cls];
+                              const isChild = s5IsChildSS(ss, gender);
+                              return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px", boxShadow: isChild ? "0 0 0 2px #fff, 0 0 0 5px #f9a825" : undefined }}>{ss || "—"}</span>;
+                            })}
+                          </div>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={ganCharImage(mgz[0] ?? "")} alt={mgz[0]} style={{ width: 66, height: 66, objectFit: "contain" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={jiCharImage(mgz[1] ?? "")} alt={mgz[1]} style={{ width: 66, height: 66, objectFit: "contain", marginTop: 2 }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          {/* 지지 십성 태그 */}
+                          <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 3, marginBottom: 2 }}>
+                            {[{ ss: myMJiSS, cls: s5ClsEl(mJiEl, myYE, myHE, myGE), gender: myGender }, { ss: ptMJiSS, cls: s5ClsEl(mJiEl, ptYE, ptHE, ptGE), gender: ptGender }].map(({ ss, cls, gender }, i) => {
+                              const s = S5_CLS_STYLE[cls];
+                              const isChild = s5IsChildSS(ss, gender);
+                              return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px", boxShadow: isChild ? "0 0 0 2px #fff, 0 0 0 5px #f9a825" : undefined }}>{ss || "—"}</span>;
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* 월운 디테일 패널 */}
+              {selMonth !== null && (() => {
+                const mgz = monthGanji(year, selMonth);
+                const myMTier = s5TierOf(mgz, myYE, myHE, myGE);
+                const ptMTier = s5TierOf(mgz, ptYE, ptHE, ptGE);
+                const bothMGood = myMTier === "good" && ptMTier === "good";
+                const bothMBad  = myMTier === "caution" && ptMTier === "caution";
+                const anyMBad   = myMTier === "caution" || ptMTier === "caution";
+                const mGanEl = _S5_STEM_EL[mgz[0] ?? ""] ?? "";
+                const mJiEl  = _S5_STEM_EL[_S5_BRANCH_MAIN[mgz[1] ?? ""] ?? ""] ?? "";
+
+                const myMGanSS = sipseongOfStem(myIlgan, mgz[0] ?? "");
+                const myMJiSS  = sipseongOfBranch(myIlgan, mgz[1] ?? "");
+                const ptMGanSS = sipseongOfStem(ptIlgan, mgz[0] ?? "");
+                const ptMJiSS  = sipseongOfBranch(ptIlgan, mgz[1] ?? "");
+                const myGanCls = s5ClsEl(mGanEl, myYE, myHE, myGE);
+                const myJiCls  = s5ClsEl(mJiEl,  myYE, myHE, myGE);
+                const ptGanCls = s5ClsEl(mGanEl, ptYE, ptHE, ptGE);
+                const ptJiCls  = s5ClsEl(mJiEl,  ptYE, ptHE, ptGE);
+                const myGanIsChild = s5IsChildSS(myMGanSS, myGender);
+                const myJiIsChild  = s5IsChildSS(myMJiSS,  myGender);
+                const ptGanIsChild = s5IsChildSS(ptMGanSS, ptGender);
+                const ptJiIsChild  = s5IsChildSS(ptMJiSS,  ptGender);
+                const myChildSS = [myMGanSS, myMJiSS].filter(ss => s5IsChildSS(ss, myGender));
+                const ptChildSS = [ptMGanSS, ptMJiSS].filter(ss => s5IsChildSS(ss, ptGender));
+                const myHasChild = myChildSS.length > 0;
+                const ptHasChild = ptChildSS.length > 0;
+                const bothHasChild = myHasChild && ptHasChild;
+
+                const mCombinedLabel = bothHasChild ? "두 사람 자녀성 ✦"
+                  : myHasChild ? `${myName} 자녀성`
+                  : ptHasChild ? `${ptName} 자녀성`
+                  : bothMGood ? "두 사람 모두 길운"
+                  : bothMBad  ? "두 사람 모두 주의"
+                  : anyMBad   ? "엇갈리는 흐름"
+                  : "평이한 흐름";
+                const mPanelAccent = (myHasChild || ptHasChild) ? "#b07a00"
+                  : bothMGood ? "#2e7d32" : anyMBad ? "#c62828" : "#5a5a7a";
+
+                const chipStyle = (cls: string, isChild: boolean) => {
+                  const s = S5_CLS_STYLE[cls] ?? S5_CLS_STYLE.neu;
+                  return {
+                    fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 9,
+                    background: s.bg, color: s.text,
+                    border: `1.5px solid ${isChild ? "#f9a825" : s.border}`,
+                    boxShadow: isChild ? "0 0 0 2px #fff8e1" : "none",
+                    display: "inline-block",
+                  } as React.CSSProperties;
+                };
+
+                // 코멘트 생성
+                let commentIcon = "→", commentColor = "#5a5a7a", comment = "";
+                if (bothHasChild && bothMGood) {
+                  commentIcon = "✦"; commentColor = "#b07a00";
+                  comment = `두 분 모두 자녀성(${myChildSS.join("·")} / ${ptChildSS.join("·")})이 들고 기운도 길운으로 맞아떨어지는 달입니다. 임신·출산을 시도하기에 이 달보다 좋은 때가 없으오. 적극적으로 준비하시기를 권합니다.`;
+                } else if (bothHasChild && bothMBad) {
+                  commentIcon = "⚠"; commentColor = "#b07a00";
+                  comment = `두 분 모두 자녀성(${myChildSS.join("·")} / ${ptChildSS.join("·")})이 드는 달이나, 기신 오행도 함께 들어와 체력 부담이 있는 시기입니다. 자녀 기운은 열려 있으니 컨디션을 살피며 무리하지 않는 선에서 시도해볼 수 있소.`;
+                } else if (bothHasChild) {
+                  commentIcon = "✦"; commentColor = "#b07a00";
+                  comment = `두 분 모두 자녀성(${myChildSS.join("·")} / ${ptChildSS.join("·")})이 드는 달입니다. 임신·출산의 기운이 두 사람 사주에 동시에 열리는 드문 시기이오. 적극적으로 시도해 보시기를 권합니다.`;
+                } else if (myHasChild && myMTier === "good") {
+                  commentIcon = "↗"; commentColor = "#1a6a4a";
+                  comment = `${myName}님 사주에 자녀성(${myChildSS.join("·")})이 들고 기운도 길운인 달입니다. ${myName}님 쪽의 임신 기운이 강하게 활성화되는 시기이오. ${ptName}님도 무리가 없다면 함께 준비하기 좋은 달입니다.`;
+                } else if (myHasChild && myMTier === "caution") {
+                  commentIcon = "◎"; commentColor = "#b07a00";
+                  comment = `${myName}님 사주에 자녀성(${myChildSS.join("·")})은 드나, 기신 오행도 함께 들어오는 달입니다. 자녀 기운은 열려 있지만 체력 소모가 클 수 있으오. 컨디션을 우선 확인하고 시도 여부를 결정하시기를 권합니다.`;
+                } else if (myHasChild) {
+                  commentIcon = "◎"; commentColor = "#b07a00";
+                  comment = `${myName}님 사주에 자녀성(${myChildSS.join("·")})이 드는 달입니다. 운기 자체는 평이하지만 자녀 기운이 열려 있으니 두 분이 함께 주목해볼 만한 달입니다.`;
+                } else if (ptHasChild && ptMTier === "good") {
+                  commentIcon = "↗"; commentColor = "#1a6a4a";
+                  comment = `${ptName}님 사주에 자녀성(${ptChildSS.join("·")})이 들고 기운도 길운인 달입니다. ${ptName}님 쪽의 임신 기운이 활성화되는 시기이오. ${myName}님도 무리가 없다면 함께 준비하기 좋은 달입니다.`;
+                } else if (ptHasChild && ptMTier === "caution") {
+                  commentIcon = "◎"; commentColor = "#b07a00";
+                  comment = `${ptName}님 사주에 자녀성(${ptChildSS.join("·")})은 드나, 기신 오행도 함께 들어오는 달입니다. 자녀 기운은 열려 있지만 체력 부담이 있을 수 있으오. 무리하지 않는 선에서 시도를 검토해 보시기를 권합니다.`;
+                } else if (ptHasChild) {
+                  commentIcon = "◎"; commentColor = "#b07a00";
+                  comment = `${ptName}님 사주에 자녀성(${ptChildSS.join("·")})이 드는 달입니다. 운기는 평이하나 자녀 기운이 열려 있으니 함께 주목해볼 만한 달입니다.`;
+                } else if (bothMGood) {
+                  commentIcon = "↗"; commentColor = "#1a6a4a";
+                  comment = `두 분 모두 용신·희신 기운이 드는 길운의 달입니다. 자녀성은 들지 않으나 전반적인 기운이 좋으니, 꾸준히 준비하고 컨디션을 쌓기에 좋은 시기입니다.`;
+                } else if (bothMBad) {
+                  commentIcon = "↘"; commentColor = "#c62828";
+                  comment = `두 분 모두 기신 오행이 강하게 드는 달입니다. 무리한 시도보다 몸과 마음의 회복에 집중하는 것이 좋소. 다음 좋은 달을 위해 체력을 비축하는 시기로 삼으시기를 권합니다.`;
+                } else if (anyMBad) {
+                  const badName = myMTier === "caution" ? myName : ptName;
+                  const goodName = myMTier === "caution" ? ptName : myName;
+                  commentIcon = "→"; commentColor = "#5a5a7a";
+                  comment = `${badName}님은 기신 오행이 드는 달로 부담이 있고, ${goodName}님은 무난한 흐름입니다. ${badName}님의 컨디션을 특히 살피며 결정하시기를 권합니다.`;
+                } else {
+                  commentIcon = "→"; commentColor = "#5a5a7a";
+                  comment = `두 분 모두 무난하게 흘러가는 달입니다. 자녀성이나 특별한 길운은 없으나 평온한 기운 속에서 꾸준히 준비하기에 적합한 달입니다.`;
+                }
+
+                const myTierColor = myMTier === "good" ? "#1a6a4a" : myMTier === "caution" ? "#c62828" : "#7a7070";
+                const ptTierColor = ptMTier === "good" ? "#1a6a4a" : ptMTier === "caution" ? "#c62828" : "#7a7070";
+                const myTierLabel = myMTier === "good" ? "길운" : myMTier === "caution" ? "주의" : "평이";
+                const ptTierLabel = ptMTier === "good" ? "길운" : ptMTier === "caution" ? "주의" : "평이";
+
+                return (
+                  <div style={{ marginTop: 12, borderRadius: 16, border: `1.5px solid ${mPanelAccent}35`,
+                    background: "#faf9f8", overflow: "hidden" }}>
+                    {/* 헤더 */}
+                    <div style={{ padding: "11px 14px", background: `${mPanelAccent}10`, borderBottom: `1px solid ${mPanelAccent}20`,
+                      display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: mPanelAccent }}>
+                        {year}년 {selMonth}월&nbsp;
+                        <span style={{ fontWeight: 600, color: "#6a5a50" }}>
+                          {mgz[0]}{mgz[1]}월 ({_S5_GAN_KO[mgz[0] ?? ""] ?? ""}{_S5_JI_KO[mgz[1] ?? ""] ?? ""}월)
+                        </span>
+                      </span>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 20,
+                        background: mPanelAccent, color: "#fff", whiteSpace: "nowrap" }}>{mCombinedLabel}</span>
+                    </div>
+                    {/* C: 좌우 카드 */}
+                    <div style={{ padding: "12px 14px 10px", display: "flex", gap: 10 }}>
+                      {/* 선우 카드 */}
+                      <div style={{ flex: 1, borderRadius: 12, minWidth: 0,
+                        border: `1.5px solid ${myHasChild ? "#f9a825" : myTierColor}30`,
+                        background: myHasChild ? "#fffdf0" : myMTier === "good" ? "#e8f5e9" : myMTier === "caution" ? "#fdecea" : "#f4f4f4",
+                        padding: "11px 12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#3a3030" }}>{myName}님</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
+                            background: myTierColor, color: "#fff" }}>{myTierLabel}</span>
+                        </div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <span style={chipStyle(myGanCls, myGanIsChild)}>{myMGanSS || "—"}</span>
+                          <span style={chipStyle(myJiCls,  myJiIsChild )}>{myMJiSS  || "—"}</span>
+                        </div>
+                        {myHasChild && (
+                          <div style={{ marginTop: 5, fontSize: 10, fontWeight: 700, color: "#b07a00" }}>자녀성 ✦</div>
+                        )}
+                        <div style={{ marginTop: 6, fontSize: 10, color: "#9a8878" }}>천간 {mgz[0]} · 지지 {mgz[1]}</div>
+                      </div>
+                      {/* 체은 카드 */}
+                      <div style={{ flex: 1, borderRadius: 12, minWidth: 0,
+                        border: `1.5px solid ${ptHasChild ? "#f9a825" : ptTierColor}30`,
+                        background: ptHasChild ? "#fffdf0" : ptMTier === "good" ? "#e8f5e9" : ptMTier === "caution" ? "#fdecea" : "#f4f4f4",
+                        padding: "11px 12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#3a3030" }}>{ptName}님</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
+                            background: ptTierColor, color: "#fff" }}>{ptTierLabel}</span>
+                        </div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <span style={chipStyle(ptGanCls, ptGanIsChild)}>{ptMGanSS || "—"}</span>
+                          <span style={chipStyle(ptJiCls,  ptJiIsChild )}>{ptMJiSS  || "—"}</span>
+                        </div>
+                        {ptHasChild && (
+                          <div style={{ marginTop: 5, fontSize: 10, fontWeight: 700, color: "#b07a00" }}>자녀성 ✦</div>
+                        )}
+                        <div style={{ marginTop: 6, fontSize: 10, color: "#9a8878" }}>천간 {mgz[0]} · 지지 {mgz[1]}</div>
+                      </div>
+                    </div>
+                    {/* A+B: 통합 코멘트 */}
+                    <div style={{ padding: "0 14px 14px" }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 12px",
+                        background: `${commentColor}08`, borderRadius: 12, border: `1px solid ${commentColor}25` }}>
+                        <span style={{ fontSize: 16, lineHeight: 1, marginTop: 2, flexShrink: 0, color: commentColor }}>{commentIcon}</span>
+                        <p style={{ fontSize: 12, color: "#4a4040", lineHeight: 1.75, margin: 0, fontFamily: SERIF }}>{comment}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          );
+        })()}
+      </div>
+    );
+  })();
 }
 
 /**
@@ -3614,20 +4303,8 @@ function HealthPersonCard({ name, role, constitution, items, color, pale }: {
 }) {
   return (
     <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}25` }}>
-      {/* 인물 헤더 */}
-      <div className="px-5 py-3 flex items-center gap-3" style={{ background: `${color}15`, borderBottom: `1px solid ${color}20` }}>
-        <div className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black shrink-0"
-          style={{ background: color, color: "#fff" }}>
-          {name.charAt(0)}
-        </div>
-        <div className="flex-1">
-          <p className="text-[13px] font-black" style={{ color }}>{name}</p>
-          <p className="text-[10px]" style={{ color: `${color}aa` }}>{role}{constitution ? ` · ${constitution}` : ""}</p>
-        </div>
-        <span className="text-[12px]">🩺</span>
-      </div>
       {/* 건강 항목 목록 */}
-      <div className="px-4 py-4 space-y-3">
+      <div className="px-4 py-3 space-y-3">
         {items.map((item, i) => (
           <div key={i} className="rounded-2xl overflow-hidden" style={{ background: "#fff", border: `1px solid ${color}18` }}>
             {/* 항목 헤더 */}
@@ -3671,11 +4348,6 @@ function HealthTipsCard({ tips, color, pale }: {
 }) {
   return (
     <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: pale, border: `1.5px solid ${color}25` }}>
-      {/* 헤더 */}
-      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${color}18`, borderBottom: `1px solid ${color}20` }}>
-        <span className="text-[16px]">🌿</span>
-        <p className="text-[12px] font-bold tracking-wide" style={{ color }}>두 사람이 함께 · 건강 관리 지혜</p>
-      </div>
       {/* 팁 목록 */}
       <div className="px-4 py-4 space-y-3">
         {tips.map((tip, i) => (
@@ -3714,27 +4386,13 @@ function EmotionalBondCard({ bondType, bondIcon, intro, callout, paragraphs }: {
       <div className="px-5 pt-5 pb-3 flex items-center gap-3" style={{ borderBottom: `1px solid ${IM8_BOND}18` }}>
         <span className="text-[2.2rem] leading-none">{bondIcon}</span>
         <div>
-          <p className="text-[10px] tracking-[0.2em] mb-0.5" style={{ color: `${IM8_BOND}99`, fontFamily: SERIF }}>감정 유대 유형</p>
           <p className="text-[17px] font-black leading-tight" style={{ color: IM8_BOND, fontFamily: SERIF }}>{bondType}</p>
         </div>
       </div>
-      {/* 인트로 인용구 */}
-      <div className="px-5 py-4" style={{ borderBottom: `1px solid ${IM8_BOND}12` }}>
-        <p className="text-[14px] leading-[1.8] italic" style={{ color: IM8_BOND, fontFamily: SERIF }}>
-          &ldquo;{intro}&rdquo;
-        </p>
-      </div>
-      {/* 콜아웃 */}
-      <div className="mx-5 my-4 pl-4 py-3 rounded-xl" style={{ background: `${IM8_BOND}0f`, borderLeft: `3px solid ${IM8_BOND}` }}>
-        <p className="text-[12px] font-bold leading-relaxed" style={{ color: IM8_BOND }}>{callout}</p>
-      </div>
       {/* 단락들 */}
-      <div className="px-5 pb-5 space-y-3">
+      <div className="px-5 pt-5 pb-5 space-y-3">
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13px] leading-[1.9]" style={{
-            color: INK_SOFT,
-            ...(i === paragraphs.length - 1 ? { padding: "10px 12px", borderRadius: 12, background: `${IM8_BOND}08` } : {}),
-          }}>{p}</p>
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
         ))}
       </div>
     </div>
@@ -3761,18 +4419,13 @@ function SupportStyleCard({ myName, partnerName, myStyle, partnerStyle, bridgeDe
 }) {
   return (
     <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: "#fff", border: "1.5px solid #e8e0f0" }}>
-      {/* 헤더 */}
-      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM8_SUP}10`, borderBottom: `1px solid ${IM8_SUP}18` }}>
-        <span className="text-[15px]">🤝</span>
-        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM8_SUP }}>서로를 지지하는 방식</p>
-      </div>
       {/* 두 패널 */}
       <div className="p-4 grid grid-cols-2 gap-3">
         {/* 나 */}
         <div className="rounded-2xl p-3" style={{ background: IM8_BOND_P, border: `1px solid ${IM8_BOND}20` }}>
           <div className="text-center mb-2">
             <span className="text-[22px]">{myStyle.icon}</span>
-            <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_BOND}99` }}>{myName}</p>
+            <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_BOND}99` }}>{myName}님</p>
             <p className="text-[12px] font-black" style={{ color: IM8_BOND }}>{myStyle.style}</p>
           </div>
           <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{myStyle.desc}</p>
@@ -3781,7 +4434,7 @@ function SupportStyleCard({ myName, partnerName, myStyle, partnerStyle, bridgeDe
         <div className="rounded-2xl p-3" style={{ background: IM8_SUP_P, border: `1px solid ${IM8_SUP}20` }}>
           <div className="text-center mb-2">
             <span className="text-[22px]">{partnerStyle.icon}</span>
-            <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_SUP}99` }}>{partnerName}</p>
+            <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_SUP}99` }}>{partnerName}님</p>
             <p className="text-[12px] font-black" style={{ color: IM8_SUP }}>{partnerStyle.style}</p>
           </div>
           <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{partnerStyle.desc}</p>
@@ -3813,11 +4466,6 @@ function CoupleTipsCard({ tips }: {
 }) {
   return (
     <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: IM8_SUP_P, border: `1.5px solid ${IM8_SUP}25` }}>
-      {/* 헤더 */}
-      <div className="px-5 py-3 flex items-center gap-2" style={{ background: `${IM8_SUP}18`, borderBottom: `1px solid ${IM8_SUP}20` }}>
-        <span className="text-[16px]">💜</span>
-        <p className="text-[12px] font-bold tracking-wide" style={{ color: IM8_SUP }}>부부로서 · 감정을 가꾸는 방법</p>
-      </div>
       {/* 팁 목록 */}
       <div className="px-4 py-4 space-y-3">
         {tips.map((tip, i) => (
@@ -4091,24 +4739,21 @@ function PeakTimingCard({ headline, callout, paragraphs }: {
   );
 }
 
-// 장번호 → 표시 제목 (임신궁합 12장 구조)
+// 장번호 → 표시 제목 (임신궁합 8장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 임신궁합에 대하여",
-  "1":  "제1장 · 나는 부모로써 어떤 사람인가?",
-  "2":  "제2장 · 배우자는 부모로써 어떤 사람인가?",
-  "3":  "제3장 · 두 사람의 자녀운",
-  "4":  "제4장 · 두 사람 글자들의 합과 충",
-  "5":  "제5장 · 태어날 자녀의 기운",
-  "6":  "제6장 · 임신에 좋은 시기",
-  "7":  "제7장 · 임신·출산 시 주의할 것들",
-  "8":  "제8장 · 아이가 태어나면 어떤 가정이 될까",
-  "9":  "제9장 · 아이를 위한 개운법과 좋은 환경",
-  "10": "제10장 · 이 가정의 미래는 어디로 흐르는가",
-  "11": "마무리 · 그대들에게 남기는 홍연의 서신",
+  "1":  "제1장 · 나는 부모로써\n어떤 사람인가?",
+  "2":  "제2장 · 배우자는 부모로써\n어떤 사람인가?",
+  "3":  "제3장 · 두 사람 글자들의 합과 충",
+  "4":  "제4장 · 자녀는 아들일까 딸일까?",
+  "5":  "제5장 · 두 사람의 자녀운 흐름",
+  "6":  "제6장 · 임신·출산 시 주의할 것들",
+  "7":  "제7장 · 아이가 태어나면\n어떤 가정이 될까",
+  "8":  "마무리 · 그대들에게 남기는\n홍연의 서신",
 };
 
-// A안 읽기 순서 (임신궁합 0~11)
-const A_ORDER = ["0","1","2","3","4","5","6","7","8","9","10","11"];
+// A안 읽기 순서 (임신궁합 0~8)
+const A_ORDER = ["0","1","2","3","4","5","6","7","8"];
 
 // 개발용 장 재생성 플로팅 버튼 (배포 전 제거 예정)
 function RegenButton({ chapter, onRegen }: { chapter: number; onRegen: (n: number) => void }) {
@@ -5257,7 +5902,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="min-w-0 flex-1 mr-3">
           <p className="text-[10px] font-bold mt-1" style={{ color: MUTE }}>{label}</p>
-          {subtitle && <p className="text-[14px] font-bold leading-snug mt-1" style={{ color: INK }}>{subtitle}</p>}
+          {subtitle && <p className="text-[14px] font-bold leading-snug mt-1 whitespace-pre-line" style={{ color: INK }}>{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
@@ -5289,17 +5934,14 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "임신궁합에 대하여",                    no: "0" },
-  { disp: "제1장",  chip: "나의원국", title: "나는 부모로써 어떤 사람인가?",        no: "1" },
-  { disp: "제2장",  chip: "상대원국", title: "배우자는 부모로써 어떤 사람인가?",    no: "2" },
-  { disp: "제3장",  chip: "자녀운",  title: "두 사람의 자녀운 흐름",               no: "3" },
-  { disp: "제4장",  chip: "합·충",    title: "두 사람 글자들의 합과 충",            no: "4" },
-  { disp: "제5장",  chip: "자녀기운", title: "태어날 자녀의 기운",                  no: "5" },
-  { disp: "제6장",  chip: "임신시기", title: "임신에 좋은 시기",                    no: "6" },
-  { disp: "제7장",  chip: "주의사항", title: "임신·출산 시 주의할 것들",           no: "7" },
-  { disp: "제8장",  chip: "가정상",  title: "아이가 태어나면 어떤 가정이 될까",    no: "8" },
-  { disp: "제9장",  chip: "개운법",  title: "아이를 위한 개운법과 좋은 환경",      no: "9" },
-  { disp: "제10장", chip: "미래",    title: "이 가정의 미래는 어디로 흐르는가",    no: "10" },
-  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",       no: "11" },
+  { disp: "제1장",  chip: "나의 사주팔자",    title: "나는 부모로써 어떤 사람인가?",        no: "1" },
+  { disp: "제2장",  chip: "배우자의 사주팔자", title: "배우자는 부모로써 어떤 사람인가?",    no: "2" },
+  { disp: "제3장",  chip: "글자들간의 관계",  title: "두 사람 글자들의 합과 충",            no: "3" },
+  { disp: "제4장",  chip: "자녀의 성별",      title: "자녀는 아들일까 딸일까?",             no: "4" },
+  { disp: "제5장",  chip: "자녀운 흐름",      title: "두 사람의 자녀운 흐름",               no: "5" },
+  { disp: "제6장",  chip: "주의할점",         title: "임신·출산 시 주의할 것들",            no: "6" },
+  { disp: "제7장",  chip: "가정분위기",       title: "아이가 태어나면 어떤 가정이 될까",    no: "7" },
+  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",       no: "8" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -5474,9 +6116,9 @@ function Illust({ src, h = 480 }: { src: string; h?: number }) {
 }
 
 // 본문 섹션 제목
-function Heading({ children }: { children: React.ReactNode }) {
+function Heading({ children, color }: { children: React.ReactNode; color?: string }) {
   return (
-    <h2 className="text-[19px] font-black mb-4" style={{ color: INK }}>
+    <h2 className="text-[19px] font-black mb-4" style={{ color: color ?? INK }}>
       {children}
     </h2>
   );
@@ -5834,6 +6476,7 @@ function ReportPreviewInner() {
   const [progress, setProgress] = useState(0);
   const [tocOpen, setTocOpen] = useState(false);
   const [msOpen, setMsOpen] = useState(false);
+
   const [partnerMsOpen, setPartnerMsOpen] = useState(false);
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
@@ -6011,7 +6654,7 @@ function ReportPreviewInner() {
       {ch === "0" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>홍연이 두 사람의 인연을 풀어드리겠소</p>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>인트로 · 서론</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               임신궁합에 대하여
             </h1>
@@ -6338,8 +6981,8 @@ function ReportPreviewInner() {
           <>
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 어떤 사람인가?</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 사주팔자</p>
+              <h1 className="text-[20px] font-black leading-snug whitespace-pre-line" style={{ color: "#fff", fontFamily: SERIF }}>{"나는 부모로써\n어떤 사람인가?"}</h1>
             </div>
 
             {/* ── 커버 이미지 ── */}
@@ -6536,8 +7179,8 @@ function ReportPreviewInner() {
           <>
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 배우자 원국</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>배우자는 어떤 사람인가?</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 배우자의 사주팔자</p>
+              <h1 className="text-[20px] font-black leading-snug whitespace-pre-line" style={{ color: "#fff", fontFamily: SERIF }}>{"배우자는 부모로써\n어떤 사람인가?"}</h1>
             </div>
 
             {/* ── 커버 이미지 ── */}
@@ -6549,7 +7192,7 @@ function ReportPreviewInner() {
 
             <div className="px-8 py-12 text-center">
               <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-                {`${partnerShort}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${partnerShort}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${partnerShort}님의 사주팔자요.`}
+                {`이번 장은 배우자인\n${partnerShort}님의 사주팔자요.`}
               </p>
             </div>
 
@@ -6714,62 +7357,46 @@ function ReportPreviewInner() {
               <ParentStyleCard data={partnerParentStyle} color={IM2_COLOR} pale={IM2_PALE} />
             </section>
 
-            <Quote>{`배우자의 기운을 살펴보았으니,\n이제 두 사람의 임신 궁합을\n살펴보겠소.`}</Quote>
+            <Quote>{`배우자의 기운도 살펴보았으니,\n이제 두 사람의 임신 궁합을\n살펴보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제3장 · 두 사람의 자녀 인연 ═══════════ */}
-      {ch === "3" && (() => {
+      {/* ═══════════ 제4장 · 자녀는 아들일까 딸일까? ═══════════ */}
+      {ch === "4" && (() => {
         const cf = (jc.childFlow as Record<string, unknown> | undefined) ?? null;
-        const ct = (jc.childTips as Record<string, unknown> | undefined) ?? null;
-        const myFirstName3      = name.length > 1 ? name.slice(1) : name;
-        const partnerFirstName3 = (report?.partnerName ?? "배우자").length > 1 ? (report?.partnerName ?? "배우자").slice(1) : (report?.partnerName ?? "배우자");
+
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 자녀운</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 자녀 인연</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 자녀의 성별</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀는 아들일까 딸일까?</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`아이가 이 인연에 들어오는가.\n자녀 인연을\n살펴보겠소.`}</Quote>
+            <Quote>{`아이가 들어온다면,\n아들일까 딸일까.\n사주로 살펴보겠소.`}</Quote>
 
-            {/* 자녀 인연 흐름 그래프 */}
-            <section className="px-6 pt-2 pb-2">
-              <Heading>향후 10년 임신·출산 인연 흐름</Heading>
-            </section>
-            <ChildFlowGraph data={cf} myName={myFirstName3} partnerName={partnerFirstName3} />
-            <ChildFlowPeriods data={cf} />
-
-            {/* 첫 자녀 성별 예측 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>첫 자녀 성별 예측</Heading>
             </section>
             <ChildGenderGauge data={cf} />
             <ChildDetailPanel data={cf} />
 
-            {/* 실천 조언 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>자녀를 풍성하게 맞이하는 법</Heading>
-            </section>
-            <ChildHomeTipPanel data={ct} />
-
-            <Quote>{`자녀 인연을 살펴보았으니,\n태어날 아이의 기운을\n살펴보겠소.`}</Quote>
+            <Quote>{`자녀의 성별을 알아보았으니,\n이제 두 사람의 자녀운 흐름을\n꼼꼼히 살펴보겠소.`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="3" go={next} />
+            <ChapterNav cur="4" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제4장 · 합과 충 ═══════════ */}
-      {ch === "4" && (() => {
+      {/* ═══════════ 제3장 · 합과 충 ═══════════ */}
+      {ch === "3" && (() => {
         const hl  = (jc.hapList     as Record<string, unknown> | undefined) ?? null;
         const cl  = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
         const os  = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
@@ -6800,12 +7427,12 @@ function ReportPreviewInner() {
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 합·충</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 글자들간의 관계</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람 글자들의 합과 충</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -6907,38 +7534,29 @@ function ReportPreviewInner() {
             )}
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-            <Quote>{`두 사람의 기운이\n어떻게 만나는지 보았소.\n\n이제 그 만남이 빚어낼\n자녀의 기운을 살펴보겠소.`}</Quote>
+            <Quote>{`두 사람 글자의 합과 충을\n살펴보았소.\n\n이제 두 사람의\n자녀 인연을 살펴보겠소.`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="4" go={next} />
+            <ChapterNav cur="3" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제5장 · 태어날 자녀 ═══════════ */}
+      {/* ═══════════ 제5장 · 두 사람의 자녀 인연 ═══════════ */}
       {ch === "5" && (() => {
-        const ce  = (jc.childEnergy    as Record<string, unknown> | undefined) ?? null;
-        const cd  = (jc.childDesc      as Record<string, unknown> | undefined) ?? null;
-        const pt  = (jc.parenthoodTips as Record<string, unknown> | undefined) ?? null;
-
-        const energyType = typeof ce?.energyType === "string" ? ce.energyType : "생명의 기운";
-        const energyIcon = typeof ce?.energyIcon === "string" ? ce.energyIcon : "🌟";
-        const keywords   = Array.isArray(ce?.keywords) ? (ce.keywords as string[]) : ["활기", "창조", "온화"];
-        const energyDesc = typeof ce?.desc === "string" ? ce.desc : "태어날 아이의 기운을 살피는 중이오.";
-
-        const cdIntro    = typeof cd?.intro    === "string" ? cd.intro    : "";
-        const cdCallout  = typeof cd?.callout  === "string" ? cd.callout  : "";
-        const cdParas    = Array.isArray(cd?.paragraphs) ? (cd.paragraphs as string[]) : [];
-
-        const tips = Array.isArray(pt?.tips)
-          ? (pt.tips as Array<{ icon: string; title: string; desc: string }>)
-          : [];
-
+        const cf = (jc.childFlow as Record<string, unknown> | undefined) ?? null;
+        const myFirstName3      = name.length > 1 ? name.slice(1) : name;
+        const partnerFirstName3 = (report?.partnerName ?? "배우자").length > 1 ? (report?.partnerName ?? "배우자").slice(1) : (report?.partnerName ?? "배우자");
+        const myYs = (jc.myYongsin      as Record<string, string> | undefined) ?? {};
+        const ptYs = (jc.partnerYongsin as Record<string, string> | undefined) ?? {};
+        const myYE = myYs.yongsinEl ?? ""; const myHE = myYs.heusinEl ?? ""; const myGE = myYs.gisinEl ?? "";
+        const ptYE = ptYs.yongsinEl ?? ""; const ptHE = ptYs.heusinEl ?? ""; const ptGE = ptYs.gisinEl ?? "";
+        const myView = report?.view ?? null;
+        const ptView = report?.partnerView ?? null;
         return (
           <>
-            {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 자녀 기운</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>태어날 자녀의 기운</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 자녀운 흐름</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 자녀운 흐름</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6946,139 +7564,57 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            {/* 오프닝 인용 */}
-            <Quote>{`"두 사람 사이에 태어날 자녀는\n어떤 기운을 타고 날지\n미리 살펴보겠소."`}</Quote>
+            <Quote>{`두 사람 궁합을 보면,\n아이가 들어오기 좋은 때가 있소.\n\n언제, 어느 달이 가장 좋은지\n지금 살펴보겠소.`}</Quote>
 
-            {/* 자녀 기운 유형 카드 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 기운 · 타고난 빛</p>
-            </div>
-            <ChildEnergyCard
-              energyType={energyType}
-              energyIcon={energyIcon}
-              keywords={keywords}
-              desc={energyDesc}
-              color={IM4_COLOR}
-              pale={IM4_PALE}
-            />
-
-            {/* 자녀 특성 상세 카드 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_COLOR }}>✦ 자녀 풀이 · 성품과 재능</p>
-            </div>
-            {(cdIntro || cdCallout || cdParas.length > 0) && (
-              <ChildDescCard
-                intro={cdIntro || "이 아이는 특별한 기운을 품고 태어날 것이오."}
-                callout={cdCallout || ""}
-                paragraphs={cdParas}
-                color={IM4_COLOR}
-                pale={IM4_PALE}
+            {/* 자녀 인연 흐름 그래프 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>향후 10년 세운별 임신·출산 흐름</Heading>
+            </section>
+            {myView && ptView && (
+              <ChildFlowGraphLocal
+                myView={myView} partnerView={ptView}
+                myYE={myYE} myHE={myHE} myGE={myGE}
+                ptYE={ptYE} ptHE={ptHE} ptGE={ptGE}
+                myGender={report?.gender ?? ""} ptGender={report?.partnerGender ?? ""}
+                myName={myFirstName3} partnerName={partnerFirstName3}
+              />
+            )}
+            {myView && ptView && (
+              <ChildFlowPeriodsLocal
+                myView={myView} partnerView={ptView}
+                myYE={myYE} myHE={myHE} myGE={myGE}
+                ptYE={ptYE} ptHE={ptHE} ptGE={ptGE}
+                myGender={report?.gender ?? ""} ptGender={report?.partnerGender ?? ""}
+                myName={myFirstName3} partnerName={partnerFirstName3}
               />
             )}
 
-            {/* 양육 조언 카드 */}
-            {tips.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM4_GREEN }}>✦ 양육의 길 · 부모가 걸어야 할 방향</p>
-                </div>
-                <ParenthoodTipsCard tips={tips} greenColor={IM4_GREEN} greenPale={IM4_GREEN_P} />
-              </>
+            {/* 향후 5년 세운별 임신·출산 흐름 */}
+            <section className="px-6 pt-6 pb-2">
+              <Heading>향후 5년 세운별 임신·출산 흐름</Heading>
+              <p className="text-[14.5px] leading-[1.95] mt-2 mb-6 whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>
+                사주에서 자녀 인연을 살피는 데에는 두 가지 시선이 필요하오. 하나는 그 해의 기운이 두 사람 각자의 사주에 얼마나 이롭게 작용하는지를 보는 것이며, 이것이 바로 용신·희신·기신의 흐름이오. 다른 하나는 그 기운 속에 자녀의 기운이 담겨 있는지를 보는 것으로, 여성에게는 식신·상관이, 남성에게는 편관·정관이 자녀를 뜻하는 십성이오. 이 두 가지가 맞물리는 해와 달이야말로 임신·출산의 기운이 가장 무르익는 시기라 할 수 있소.
+              </p>
+            </section>
+            {myView && ptView && (
+              <ImshinSeunFiveCard
+                myView={myView} partnerView={ptView}
+                myYE={myYE} myHE={myHE} myGE={myGE}
+                ptYE={ptYE} ptHE={ptHE} ptGE={ptGE}
+                myName={myFirstName3} ptName={partnerFirstName3}
+                myGender={report?.gender ?? ""} ptGender={report?.partnerGender ?? ""}
+              />
             )}
 
-            <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-            <Quote>{`"자녀 기운을 알았으니,\n임신에 좋은 시기를\n살펴보겠소."`}</Quote>
+            <Quote>{`아이를 맞이할\n좋은 시기를 알았으니,\n이제 준비를 할 차례겠소.\n\n두 사람이 준비할 것들에 대해\n하나씩 짚어드리겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제6장 · 임신 좋은 시기 ═══════════ */}
+      {/* ═══════════ 제6장 · 건강 관리 ═══════════ */}
       {ch === "6" && (() => {
-        const tf  = (jc.timingFlow   as Record<string, unknown> | undefined) ?? null;
-        const bm  = (jc.bestMonths   as Record<string, unknown> | undefined) ?? null;
-        const ta  = (jc.timingAdvice as Record<string, unknown> | undefined) ?? null;
-
-        const timingItems = Array.isArray(tf?.items)
-          ? (tf.items as Array<{ icon?: string; label: string; desc: string; highlight?: boolean }>)
-          : [];
-        const bestItems = Array.isArray(bm?.items)
-          ? (bm.items as Array<{ season?: string; title: string; desc: string }>)
-          : [];
-
-        const taHeadline  = typeof ta?.headline  === "string" ? ta.headline  : "시기를 알았으니, 마음을 준비하시오";
-        const taCallout   = typeof ta?.callout   === "string" ? ta.callout   : "";
-        const taParas     = Array.isArray(ta?.paragraphs) ? (ta.paragraphs as string[]) : (typeof ta?.desc === "string" ? [ta.desc] : []);
-
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 임신 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신에 좋은 시기</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-
-            {/* 오프닝 인용 */}
-            <Quote>{`"임신·출산에 좋은 시기가 있소.\n그 시기를 미리 알고 준비하시오."`}</Quote>
-
-            {/* 임신 시기 흐름 타임라인 */}
-            {timingItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 시기 흐름 · 운기의 파도를 읽다</p>
-                </div>
-                <TimingFlowCard
-                  items={timingItems}
-                  color={IM5_COLOR}
-                  pale={IM5_PALE}
-                  goldColor={IM5_GOLD}
-                  goldPale={IM5_GOLD_P}
-                />
-              </>
-            )}
-
-            {/* 좋은 달 카드 */}
-            {bestItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_COLOR }}>✦ 좋은 달 · 임신 기운이 모이는 시간</p>
-                </div>
-                <BestMonthsCard items={bestItems} color={IM5_COLOR} pale={IM5_PALE} />
-              </>
-            )}
-
-            {/* 홍연의 시기 조언 카드 */}
-            {(taHeadline || taCallout || taParas.length > 0) && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM5_GOLD }}>✦ 홍연의 조언 · 시기를 맞이하는 마음</p>
-                </div>
-                <TimingAdviceCard
-                  headline={taHeadline}
-                  callout={taCallout || "사주의 흐름을 알았으니, 그 흐름에 몸과 마음을 맡기시오."}
-                  paragraphs={taParas}
-                  goldColor={IM5_GOLD}
-                  goldPale={IM5_GOLD_P}
-                />
-              </>
-            )}
-
-            <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-            <Quote>{`"시기를 알았으니,\n건강 관리를\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="6" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제7장 · 건강 관리 ═══════════ */}
-      {ch === "7" && (() => {
         const hm  = (jc.healthMine    as Record<string, unknown> | undefined) ?? null;
         const hp  = (jc.healthPartner as Record<string, unknown> | undefined) ?? null;
         const ht  = (jc.healthTips    as Record<string, unknown> | undefined) ?? null;
@@ -7099,31 +7635,31 @@ function ReportPreviewInner() {
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 건강 관리</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신·출산 시기의 건강</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 주의할점</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신·출산 시 주의할 것들</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_7/kunghap_imshin_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
             {/* 오프닝 인용 */}
-            <Quote>{`"임신·출산 시기에\n두 사람이 특히 주의해야 할\n건강 사항이 있소."`}</Quote>
+            <Quote>{`자녀를 맞이할 시기에\n두 사람이 준비할 것들이오.`}</Quote>
 
             {/* 본인 건강 주의 카드 */}
             {myItems.length > 0 && (
               <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM7_MY }}>✦ 본인 건강 · 사주가 가리키는 주의 신호</p>
-                </div>
+                <section className="px-6 pt-2 pb-2">
+                  <Heading>{myName}님이 준비할 사항들</Heading>
+                </section>
                 <HealthPersonCard
                   name={myName}
                   role="임신 준비 당사자"
                   constitution={myConstitution}
                   items={myItems}
-                  color={IM7_MY}
-                  pale={IM7_MY_P}
+                  color={/^(female|여성|여자|여아)$/.test(report?.gender ?? "") ? "#6b0030" : "#0d2b5e"}
+                  pale={/^(female|여성|여자|여아)$/.test(report?.gender ?? "") ? "#fce8f0" : "#e8f0fc"}
                 />
               </>
             )}
@@ -7131,16 +7667,16 @@ function ReportPreviewInner() {
             {/* 배우자 건강 주의 카드 */}
             {partnerItems.length > 0 && (
               <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM7_PT }}>✦ 배우자 건강 · 함께 지켜봐야 할 것</p>
-                </div>
+                <section className="px-6 pt-2 pb-2">
+                  <Heading>{partnerName}님이 준비할 사항들</Heading>
+                </section>
                 <HealthPersonCard
                   name={partnerName}
                   role="배우자"
                   constitution={partnerConstitution}
                   items={partnerItems}
-                  color={IM7_PT}
-                  pale={IM7_PT_P}
+                  color={/^(female|여성|여자|여아)$/.test(report?.partnerGender ?? "") ? "#6b0030" : "#0d2b5e"}
+                  pale={/^(female|여성|여자|여아)$/.test(report?.partnerGender ?? "") ? "#fce8f0" : "#e8f0fc"}
                 />
               </>
             )}
@@ -7148,23 +7684,36 @@ function ReportPreviewInner() {
             {/* 건강 관리 조언 카드 */}
             {tips.length > 0 && (
               <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM7_TIP }}>✦ 함께하는 건강 · 두 사람의 실천 지혜</p>
-                </div>
+                <section className="px-6 pt-2 pb-2">
+                  <Heading>두 사람이 함께 준비할 것들</Heading>
+                </section>
                 <HealthTipsCard tips={tips} color={IM7_TIP} pale={IM7_TIP_P} />
               </>
             )}
 
+            {/* 자녀 맞이 실천 조언 */}
+            {(() => {
+              const ct = (jc.childTips as Record<string, unknown> | undefined) ?? null;
+              return ct ? (
+                <>
+                  <section className="px-6 pt-4 pb-2">
+                    <Heading>자녀를 풍성하게 맞이하는 법</Heading>
+                  </section>
+                  <ChildHomeTipPanel data={ct} />
+                </>
+              ) : null;
+            })()}
+
             <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-            <Quote>{`"건강을 알았으니,\n감정적 유대를\n살펴보겠소."`}</Quote>
+            <Quote>{`몸도 마음도 준비가 됐으니,\n이제 그 이후를 보겠소.\n\n아이와 함께할\n두 사람의 가정 이야기요.`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="7" go={next} />
+            <ChapterNav cur="6" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제8장 · 감정적 유대 ═══════════ */}
-      {ch === "8" && (() => {
+      {/* ═══════════ 제7장 · 감정적 유대 ═══════════ */}
+      {ch === "7" && (() => {
         const eb  = (jc.emotionalBond as Record<string, unknown> | undefined) ?? null;
         const ss  = (jc.supportStyle  as Record<string, unknown> | undefined) ?? null;
         const ct  = (jc.coupleTips    as Record<string, unknown> | undefined) ?? null;
@@ -7192,24 +7741,24 @@ function ReportPreviewInner() {
           <>
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 감정 유대</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>감정적 유대와 지지</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 가정분위기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이가 태어나면{"\n"}어떤 가정이 될까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_8/kunghap_imshin_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_7/kunghap_imshin_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
             {/* 오프닝 인용 */}
-            <Quote>{`"임신 과정에서\n두 사람의 감정적 유대가\n얼마나 중요한지 살펴보겠소."`}</Quote>
+            <Quote>{`아이가 태어나면\n두 사람은 어떤 가정을\n만들어갈지 말해주겠소.`}</Quote>
 
             {/* 감정 유대 분석 카드 */}
             {(bondIntro || bondCallout || bondParas.length > 0) && (
               <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM8_BOND }}>✦ 감정 유대 · 두 사람이 맺은 마음의 인연</p>
-                </div>
+                <section className="px-6 pt-2 pb-2">
+                  <Heading>두 사람이 맺은 마음의 인연</Heading>
+                </section>
                 <EmotionalBondCard
                   bondType={bondType}
                   bondIcon={bondIcon}
@@ -7223,9 +7772,9 @@ function ReportPreviewInner() {
             {/* 상호 지지 방식 카드 */}
             {mySupport && ptSupport && (
               <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM8_SUP }}>✦ 지지 방식 · 서로를 돕는 사주의 성질</p>
-                </div>
+                <section className="px-6 pt-2 pb-2">
+                  <Heading>서로를 지지하는 방식</Heading>
+                </section>
                 <SupportStyleCard
                   myName={myName}
                   partnerName={partnerName}
@@ -7239,181 +7788,32 @@ function ReportPreviewInner() {
             {/* 부부 관계 조언 카드 */}
             {coupleTips.length > 0 && (
               <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM8_SUP }}>✦ 함께 가꾸는 유대 · 홍연의 부부 조언</p>
-                </div>
+                <section className="px-6 pt-2 pb-2">
+                  <Heading>두 사람의 유대를 위한 방법</Heading>
+                </section>
                 <CoupleTipsCard tips={coupleTips} />
               </>
             )}
 
             <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-            <Quote>{`"유대를 알았으니,\n임신 과정의 어려움을\n살펴보겠소."`}</Quote>
+            <Quote>{`아이와 함께할\n두 사람의 모습을 보았소.\n\n마지막으로\n홍연이 전하고 싶은 말이 있소.`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="8" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제9장 · 어려움과 극복 ═══════════ */}
-      {ch === "9" && (() => {
-        const ci  = (jc.challengeItems  as Record<string, unknown> | undefined) ?? null;
-        const cr  = (jc.challengeReason as Record<string, unknown> | undefined) ?? null;
-        const ot  = (jc.overcomeTips    as Record<string, unknown> | undefined) ?? null;
-
-        type ChallengeItem = { icon?: string; title: string; phase?: string; caution?: string; desc: string };
-        type OvercomeTip   = { icon: string; title: string; desc: string };
-
-        const challengeItems = Array.isArray(ci?.items) ? (ci.items as ChallengeItem[]) : [];
-        const crIntro    = typeof cr?.intro    === "string" ? cr.intro    : "";
-        const crCallout  = typeof cr?.callout  === "string" ? cr.callout  : "";
-        const crParas    = Array.isArray(cr?.paragraphs) ? (cr.paragraphs as string[]) : [];
-        const overcomeTips   = Array.isArray(ot?.tips)  ? (ot.tips  as OvercomeTip[])  : [];
-
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 어려움·극복</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>어려움과 극복</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_9/kunghap_imshin_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-
-            {/* 오프닝 인용 */}
-            <Quote>{`"임신·출산 과정에\n어려움이 올 수 있소.\n미리 알고 대비하면 넘어설 수 있소."`}</Quote>
-
-            {/* 주요 어려움 카드 목록 */}
-            {challengeItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM9_DARK }}>✦ 주요 어려움 · 사주가 예고하는 도전</p>
-                </div>
-                <div className="px-4">
-                  {challengeItems.map((item, i) => <ChallengeItemCard key={i} item={item} />)}
-                </div>
-              </>
-            )}
-
-            {/* 어려움의 사주 원리 카드 */}
-            {(crIntro || crCallout || crParas.length > 0) && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM9_DARK }}>✦ 사주 원리 · 어려움이 오는 이유</p>
-                </div>
-                <ChallengeReasonCard
-                  intro={crIntro || "어려움을 아는 것이 곧 준비이오."}
-                  callout={crCallout || ""}
-                  paragraphs={crParas}
-                />
-              </>
-            )}
-
-            {/* 극복 조언 카드 */}
-            {overcomeTips.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM9_GOLD }}>✦ 극복의 길 · 어둠을 넘어 빛으로</p>
-                </div>
-                <OvercomeTipsCard tips={overcomeTips} />
-              </>
-            )}
-
-            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-            <Quote>{`"어려움을 알았으니,\n가장 좋은 시기를\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="9" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제10장 · 빛나는 시기 ═══════════ */}
-      {ch === "10" && (() => {
-        const gtf = (jc.goodTimeFlow  as Record<string, unknown> | undefined) ?? null;
-        const gti = (jc.goodTimeItems as Record<string, unknown> | undefined) ?? null;
-        const ca  = (jc.cycleAdvice   as Record<string, unknown> | undefined) ?? null;
-
-        type GoodTimeItem   = { icon?: string; label: string; desc: string; highlight?: boolean };
-        type GoodTimeReason = { icon?: string; title: string; desc: string };
-
-        const flowItems    = Array.isArray(gtf?.items) ? (gtf.items as GoodTimeItem[])   : [];
-        const reasonItems  = Array.isArray(gti?.items) ? (gti.items as GoodTimeReason[]) : [];
-
-        const caHeadline = typeof ca?.headline   === "string" ? ca.headline   : "황금의 시간을 맞이하시오";
-        const caCallout  = typeof ca?.callout    === "string" ? ca.callout    : "";
-        const caParas    = Array.isArray(ca?.paragraphs) ? (ca.paragraphs as string[]) : (typeof ca?.desc === "string" ? [ca.desc] : []);
-
-        return (
-          <>
-            {/* 커버 */}
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 좋은 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>가장 좋은 시기</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_10/kunghap_imshin_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-
-            {/* 오프닝 인용 */}
-            <Quote>{`"두 사람에게 가장 임신·출산이\n잘 이루어지는 시기가 있소.\n그때를 미리 알고 준비하시오."`}</Quote>
-
-            {/* 빛나는 시기 타임라인 */}
-            {flowItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM10_STAR }}>✦ 시기 흐름 · 황금 창이 열리는 순간</p>
-                </div>
-                <GoodTimeFlowCard items={flowItems} />
-              </>
-            )}
-
-            {/* 좋은 시기의 사주 근거 */}
-            {reasonItems.length > 0 && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM10_TEAL }}>✦ 사주 근거 · 이 시기가 빛나는 이유</p>
-                </div>
-                <GoodTimeReasonCard items={reasonItems} />
-              </>
-            )}
-
-            {/* 황금 창 종합 조언 카드 */}
-            {(caHeadline || caCallout || caParas.length > 0) && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM10_STAR }}>✦ 홍연의 당부 · 황금의 시간을 맞이하는 법</p>
-                </div>
-                <PeakTimingCard
-                  headline={caHeadline}
-                  callout={caCallout || "이 시기를 알았으니, 몸과 마음을 함께 준비하시오."}
-                  paragraphs={caParas}
-                />
-              </>
-            )}
-
-            <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-            <Quote>{`"좋은 시기를 알았으니,\n두 사람의 미래를\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="10" go={next} />
+            <ChapterNav cur="7" go={next} />
           </>
         );
       })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
-      {ch === "11" && (
+      {ch === "8" && (
         <>
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마무리 · 홍연의 당부</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대들에게 남기는 홍연의 서신</h1>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마무리 · 당부</p>
+            <h1 className="text-[20px] font-black leading-snug whitespace-pre-line" style={{ color: "#fff", fontFamily: SERIF }}>{"그대들에게 남기는\n홍연의 서신"}</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_imshin/kunghap_imshin_11/kunghap_imshin_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_imshin/kunghap_imshin_8/kunghap_imshin_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -7431,7 +7831,7 @@ function ReportPreviewInner() {
           <ReviewBox />
           <RecoGrid />
           <div className="pb-10" />
-          <ChapterNav cur="11" go={next} />
+          <ChapterNav cur="8" go={next} />
         </div>
         {eventOpen && (
           <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
@@ -7440,7 +7840,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 알 수 없는 장 — 준비 중 ═══════════ */}
-      {!["0","1","2","3","4","5","6","7","8","9","10","11"].includes(ch) && (
+      {!["0","1","2","3","4","5","6","7","8"].includes(ch) && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중이오.</p>
