@@ -6855,6 +6855,18 @@ function ReportPreviewInner() {
               chungCount={chungCount}
             />
 
+            {/* 합충 종합 분석 */}
+            {computedDesc && (
+              <>
+                <div className="px-5"><Heading>합충 종합 분석</Heading></div>
+                <div className="mx-4 mb-5 rounded-2xl px-4 py-4" style={{ background: `${CH6_COLOR}08`, border: `1px solid ${CH6_COLOR}20` }}>
+                  {computedDesc.split("\n\n").map((para, i) => (
+                    <p key={i} className="text-[13px] leading-[1.9] mb-3 last:mb-0" style={{ color: INK_SOFT, fontFamily: SERIF }}>{para}</p>
+                  ))}
+                </div>
+              </>
+            )}
+
             {/* 두 사람의 합(合) - LLM 카드 */}
             {hapItems.length > 0 && (
               <>
@@ -6911,20 +6923,6 @@ function ReportPreviewInner() {
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* 종합 설명 */}
-            {computedDesc && (
-              <>
-                <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: CH6_COLOR }}>✦ 종합 풀이</p>
-                </div>
-                <div className="mx-4 mb-5 rounded-2xl px-4 py-4" style={{ background: `${CH6_COLOR}08`, border: `1px solid ${CH6_COLOR}20` }}>
-                  {computedDesc.split("\n\n").map((para, i) => (
-                    <p key={i} className="text-[13px] leading-[1.9] mb-3 last:mb-0" style={{ color: INK_SOFT, fontFamily: SERIF }}>{para}</p>
                   ))}
                 </div>
               </>
