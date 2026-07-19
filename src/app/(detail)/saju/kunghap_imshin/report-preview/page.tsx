@@ -4097,7 +4097,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "1":  "제1장 · 나는 부모로써 어떤 사람인가?",
   "2":  "제2장 · 배우자는 부모로써 어떤 사람인가?",
   "3":  "제3장 · 두 사람의 자녀운",
-  "4":  "제4장 · 두 사주의 합과 충",
+  "4":  "제4장 · 두 사람 글자들의 합과 충",
   "5":  "제5장 · 태어날 자녀의 기운",
   "6":  "제6장 · 임신에 좋은 시기",
   "7":  "제7장 · 임신·출산 시 주의할 것들",
@@ -6801,7 +6801,7 @@ function ReportPreviewInner() {
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 합·충</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사주의 합과 충</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람 글자들의 합과 충</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
