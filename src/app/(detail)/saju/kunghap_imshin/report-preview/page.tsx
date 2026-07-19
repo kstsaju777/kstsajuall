@@ -20,6 +20,7 @@ import { isImshinKunghapChapterReady, IMSHIN_KUNGHAP_CHAPTER_SECTIONS } from "@/
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
+import { calcCrossRelations as calcCrossRelationsShared } from "@/lib/saju/kunghap-cross-relations";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
 const CREAM = "#fdf8f4";
@@ -2394,6 +2395,10 @@ const IM5_COLOR = "#2a7a6a"; const IM5_PALE  = "#edf8f5"; // 5장 — 틸 (임�
 const IM5_GOLD  = "#8a6200"; const IM5_GOLD_P = "#fdf8e0"; // 5장 — 골드 (최적 시기 강조)
 const IM6_HAP   = "#2a6a3a"; const IM6_HAP_P  = "#edf7f0"; // 6장 — 초록 (합·조화)
 const IM6_CHUNG = "#8a2a2a"; const IM6_CHUNG_P= "#fdf0f0"; // 6장 — 적색 (충·긴장)
+// 4장 합·충 (자녀궁합 ch3 구조) 공용 색상
+const HAP_COLOR   = "#2d6a4f";
+const CHUNG_COLOR = "#b05020";
+const CH6_COLOR   = "#1a5c8a";
 const IM7_MY    = "#8a3a6a"; const IM7_MY_P   = "#fdf0f6"; // 7장 — 로즈 (본인 건강)
 const IM7_PT    = "#2a507a"; const IM7_PT_P   = "#eef3f9"; // 7장 — 딥블루 (배우자 건강)
 const IM7_TIP   = "#2a7a3a"; const IM7_TIP_P  = "#edf8f0"; // 7장 — 초록 (건강 관리 팁)
@@ -3280,6 +3285,311 @@ function HapChungSummaryCard({ score, tier, label, hapCount, chungCount, paragra
         {paragraphs.map((p, i) => (
           <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// ── 제4장 합·충 전용 (자녀궁합 ch3 구조 이식) ─────────────────────
+
+const CROSS_DESC_IM: Record<string, string> = {
+  "천간합_갑기": "갑목(甲)과 기토(己)가 만나 토(土)로 합화되오. 갑목은 앞을 향해 거침없이 뻗어나가는 기운이고, 기토는 그 기운을 품어 안아 안정시키는 기운이오. 두 사람이 만나면 한쪽이 방향을 제시하고 다른 쪽이 든든하게 뒷받침하는 조화가 자연스럽게 이루어지오. 함께할 때 현실적인 기반과 안정감이 커지는 토 기운이 관계 전반에 깔리게 되오.",
+  "천간합_기갑": "갑목(甲)과 기토(己)가 만나 토(土)로 합화되오. 갑목은 앞을 향해 거침없이 뻗어나가는 기운이고, 기토는 그 기운을 품어 안아 안정시키는 기운이오. 두 사람이 만나면 한쪽이 방향을 제시하고 다른 쪽이 든든하게 뒷받침하는 조화가 자연스럽게 이루어지오. 함께할 때 현실적인 기반과 안정감이 커지는 토 기운이 관계 전반에 깔리게 되오.",
+  "천간합_을경": "을목(乙)과 경금(庚)이 만나 금(金)으로 합화되오. 을목의 부드럽고 유연한 감수성이 경금의 날카롭고 결단력 있는 기운과 만나 정밀하고 세련된 에너지로 변화하오. 두 사람은 서로의 성격이 꽤 달라 보이지만, 오히려 그 차이가 맞물려 함께 있을 때 완성도 높은 결과물을 만들어내오. 임신·출산을 앞두고 서로의 역할이 자연스럽게 분담되오.",
+  "천간합_경을": "을목(乙)과 경금(庚)이 만나 금(金)으로 합화되오. 을목의 부드럽고 유연한 감수성이 경금의 날카롭고 결단력 있는 기운과 만나 정밀하고 세련된 에너지로 변화하오. 두 사람은 서로의 성격이 꽤 달라 보이지만, 오히려 그 차이가 맞물려 함께 있을 때 완성도 높은 결과물을 만들어내오. 임신·출산을 앞두고 서로의 역할이 자연스럽게 분담되오.",
+  "천간합_병신": "병화(丙)와 신금(辛)이 만나 수(水)로 합화되오. 병화의 뜨겁고 개방적인 에너지와 신금의 섬세하고 내밀한 기운이 만나, 깊이 있는 감성과 직관의 수 기운으로 변화하오. 겉으로는 전혀 달라 보이는 두 사람이지만, 함께 있을 때 서로의 내면을 꺼내놓게 만드는 묘한 끌림이 있소. 임신 준비 과정에서 서로를 깊이 이해하는 힘이 되오.",
+  "천간합_신병": "병화(丙)와 신금(辛)이 만나 수(Water)로 합화되오. 병화의 뜨겁고 개방적인 에너지와 신금의 섬세하고 내밀한 기운이 만나, 깊이 있는 감성과 직관의 수 기운으로 변화하오. 겉으로는 전혀 달라 보이는 두 사람이지만, 함께 있을 때 서로의 내면을 꺼내놓게 만드는 묘한 끌림이 있소. 임신 준비 과정에서 서로를 깊이 이해하는 힘이 되오.",
+  "천간합_정임": "정화(丁)와 임수(壬)가 만나 목(木)으로 합화되오. 정화의 따뜻하고 섬세한 감성과 임수의 넓고 포용력 있는 기운이 합쳐져, 새로운 생명력과 성장의 목 기운으로 변화하오. 두 사람이 함께하면 서로를 향한 진심 어린 배려가 자연스럽게 흘러나오고, 자녀 인연을 품을 기운이 무르익소.",
+  "천간합_임정": "정화(丁)와 임수(壬)가 만나 목(木)으로 합화되오. 정화의 따뜻하고 섬세한 감성과 임수의 넓고 포용력 있는 기운이 합쳐져, 새로운 생명력과 성장의 목 기운으로 변화하오. 두 사람이 함께하면 서로를 향한 진심 어린 배려가 자연스럽게 흘러나오고, 자녀 인연을 품을 기운이 무르익소.",
+  "천간합_무계": "무토(戊)와 계수(癸)가 만나 화(火)로 합화되오. 무토의 묵직하고 넓은 대지 기운과 계수의 섬세하고 맑은 물 기운이 합쳐지면 강렬한 화 기운이 생겨나오. 두 사람 사이에 열정과 감정의 불꽃이 쉽게 일어나며, 함께 있을 때 생명력 넘치는 에너지가 흐르오. 임신을 향한 두 사람의 의지가 하나로 모이는 구조이오.",
+  "천간합_계무": "무토(戊)와 계수(癸)가 만나 화(Fire)로 합화되오. 무토의 묵직하고 넓은 대지 기운과 계수의 섬세하고 맑은 물 기운이 합쳐지면 강렬한 화 기운이 생겨나오. 두 사람 사이에 열정과 감정의 불꽃이 쉽게 일어나며, 함께 있을 때 생명력 넘치는 에너지가 흐르오. 임신을 향한 두 사람의 의지가 하나로 모이는 구조이오.",
+  "천간충_갑경": "갑목(甲)과 경금(庚)의 충이오. 목이 성장하고 뻗어나가려는 기운과 금이 자르고 제한하는 기운이 정면으로 맞부딪히는 구조이오. 임신 준비 과정에서 한 사람이 빠르게 나아가려 할 때 다른 사람이 신중하게 제동을 거는 패턴이 생길 수 있소. 갑목의 방향성과 경금의 판단력이 협력으로 전환되면 오히려 든든한 부모 팀이 되오.",
+  "천간충_경갑": "갑목(甲)과 경금(庚)의 충이오. 목이 성장하고 뻗어나가려는 기운과 금이 자르고 제한하는 기운이 정면으로 맞부딪히는 구조이오. 임신 준비 과정에서 한 사람이 빠르게 나아가려 할 때 다른 사람이 신중하게 제동을 거는 패턴이 생길 수 있소. 갑목의 방향성과 경금의 판단력이 협력으로 전환되면 오히려 든든한 부모 팀이 되오.",
+  "천간충_을신": "을목(乙)과 신금(辛)의 충이오. 을목의 유연하고 섬세한 기운이 신금의 날카롭고 원칙적인 기운과 충돌하오. 임신·출산 준비에서 서로의 방식이 다를 때 쉽게 부딪힐 수 있으니, 상대방의 스타일을 인정하는 것이 이 충을 다스리는 핵심이오.",
+  "천간충_신을": "을목(乙)과 신금(辛)의 충이오. 을목의 유연하고 섬세한 기운이 신금의 날카롭고 원칙적인 기운과 충돌하오. 임신·출산 준비에서 서로의 방식이 다를 때 쉽게 부딪힐 수 있으니, 상대방의 스타일을 인정하는 것이 이 충을 다스리는 핵심이오.",
+  "천간충_병임": "병화(丙)와 임수(壬)의 충이오. 불과 물이 정면으로 부딪히는 가장 극적인 천간충 중 하나이오. 한 사람은 감정을 바로 표현해야 하고, 다른 사람은 충분히 생각하고 정리한 뒤에 말하는 스타일이어서 임신 준비 과정에서 템포가 자주 어긋날 수 있소.",
+  "천간충_임병": "병화(丙)와 임수(壬)의 충이오. 불과 물이 정면으로 부딪히는 가장 극적인 천간충 중 하나이오. 한 사람은 감정을 바로 표현해야 하고, 다른 사람은 충분히 생각하고 정리한 뒤에 말하는 스타일이어서 임신 준비 과정에서 템포가 자주 어긋날 수 있소.",
+  "천간충_정계": "정화(丁)와 계수(癸)의 충이오. 정화는 감정으로 먼저 반응하고, 계수는 논리와 이성으로 접근하는 경향이 있어 대화가 엇갈리기 쉽소. 상대방의 반응 방식을 다름으로 받아들이는 것이 이 충을 부드럽게 하는 첫걸음이오.",
+  "천간충_계정": "정화(丁)와 계수(癸)의 충이오. 정화는 감정으로 먼저 반응하고, 계수는 논리와 이성으로 접근하는 경향이 있어 대화가 엇갈리기 쉽소. 상대방의 반응 방식을 다름으로 받아들이는 것이 이 충을 부드럽게 하는 첫걸음이오.",
+  "천간충_무임": "무토(戊)와 임수(壬)의 충이오. 안정을 원하는 기운과 변화를 원하는 기운이 충돌하오. 임신·출산을 둘러싼 결정에서 의견 차이가 생기기 쉬우니, 각자의 필요를 존중하며 조율하는 것이 열쇠이오.",
+  "천간충_임무": "무토(戊)와 임수(壬)의 충이오. 안정을 원하는 기운과 변화를 원하는 기운이 충돌하오. 임신·출산을 둘러싼 결정에서 의견 차이가 생기기 쉬우니, 각자의 필요를 존중하며 조율하는 것이 열쇠이오.",
+  "육합_자축": "자(子)와 축(丑)이 만나 토(土)로 합화되오. 가까이 있으면 자연스럽게 서로를 의지하게 되오. 화려하게 드러나는 합은 아니지만, 오래 함께할수록 더욱 깊어지는 조용한 신뢰의 관계이오. 자녀를 함께 키워나가기에 든든한 기운이오.",
+  "육합_축자": "자(子)와 축(丑)이 만나 토(土)로 합화되오. 가까이 있으면 자연스럽게 서로를 의지하게 되오. 화려하게 드러나는 합은 아니지만, 오래 함께할수록 더욱 깊어지는 조용한 신뢰의 관계이오. 자녀를 함께 키워나가기에 든든한 기운이오.",
+  "육합_인해": "인(寅)과 해(亥)가 만나 목(木)으로 합화되오. 두 사람이 함께하면 서로를 성장시키는 에너지가 강하게 흐르오. 새로운 생명을 맞이하는 준비에서 강한 시너지를 발휘하는 조합이오.",
+  "육합_해인": "인(寅)과 해(亥)가 만나 목(木)으로 합화되오. 두 사람이 함께하면 서로를 성장시키는 에너지가 강하게 흐르오. 새로운 생명을 맞이하는 준비에서 강한 시너지를 발휘하는 조합이오.",
+  "육합_묘술": "묘(卯)와 술(戌)이 만나 화(火)로 합화되오. 두 사람 사이에 감정적인 연결이 강하고, 함께 있으면 서로에 대한 감정이 더욱 뜨겁게 달아오르는 경향이 있소. 임신을 향한 두 사람의 마음이 하나로 모이는 자리이오.",
+  "육합_술묘": "묘(卯)와 술(戌)이 만나 화(Fire)로 합화되오. 두 사람 사이에 감정적인 연결이 강하고, 함께 있으면 서로에 대한 감정이 더욱 뜨겁게 달아오르는 경향이 있소. 임신을 향한 두 사람의 마음이 하나로 모이는 자리이오.",
+  "육합_진유": "진(辰)과 유(酉)가 만나 금(金)으로 합화되오. 두 사람이 함께하면 서로의 장점이 더욱 선명하게 빛나고, 상대방을 통해 자신의 잠재력을 발견하게 되는 경우가 많소. 안정적인 가정을 꾸려나가기에 좋은 기운이오.",
+  "육합_유진": "진(辰)과 유(酉)가 만나 금(金)으로 합화되오. 두 사람이 함께하면 서로의 장점이 더욱 선명하게 빛나고, 상대방을 통해 자신의 잠재력을 발견하게 되는 경우가 많소. 안정적인 가정을 꾸려나가기에 좋은 기운이오.",
+  "육합_사신": "사(巳)와 신(申)이 만나 수(Water)로 합화되오. 두 사람 사이에 서로를 날카롭게 파악하는 통찰이 오가고, 임신 준비 과정에서 깊이 있는 대화가 자연스럽게 이어지는 관계이오.",
+  "육합_신사": "사(巳)와 신(申)이 만나 수(Water)로 합화되오. 두 사람 사이에 서로를 날카롭게 파악하는 통찰이 오가고, 임신 준비 과정에서 깊이 있는 대화가 자연스럽게 이어지는 관계이오.",
+  "육합_오미": "오(午)와 미(未)가 만나 화(Fire)로 합화되오. 두 사람이 함께하면 분위기가 밝고 따뜻해지며, 서로에 대한 호감과 애정 표현이 자연스럽게 흘러나오오. 임신·출산 과정에서 서로를 격려하는 온기가 넘치는 조합이오.",
+  "육합_미오": "오(午)와 미(未)가 만나 화(Fire)로 합화되오. 두 사람이 함께하면 분위기가 밝고 따뜻해지며, 서로에 대한 호감과 애정 표현이 자연스럽게 흘러나오오. 임신·출산 과정에서 서로를 격려하는 온기가 넘치는 조합이오.",
+  "삼합_인오술": "인(寅)·오(午)·술(戌)이 모여 화국(火局)을 이루오. 함께하면 열정과 생명력이 두드러지며, 자녀를 품고 키워나가는 과정에서 강한 활력을 발휘하는 조합이오.",
+  "삼합_신자진": "신(申)·자(子)·진(辰)이 모여 수국(水局)을 이루오. 함께하면 서로를 깊이 이해하는 대화가 자연스럽게 이루어지며, 임신·출산 과정에서 감정적 교류가 풍부한 관계가 되오.",
+  "삼합_해묘미": "해(亥)·묘(卯)·미(未)가 모여 목국(木局)을 이루오. 함께하면 새로운 생명을 향한 성장 에너지가 강하게 흐르오. 자녀 인연을 맺고 키워나가는 데 특히 좋은 기운이오.",
+  "삼합_사유축": "사(巳)·유(酉)·축(丑)이 모여 금국(金局)을 이루오. 함께하면 서로에게 엄격한 기준을 요구하게 되기도 하지만, 두 사람이 함께 이루어내는 결과물의 완성도가 높아지오.",
+  "충_자오": "자(子)와 오(午)가 충하오. 한 사람은 감정을 충분히 삭힌 뒤 말하고 싶고, 다른 사람은 즉각적으로 표현하고 반응받고 싶어하는 구조가 충돌을 만들어내오. 임신·출산을 둘러싼 감정 표현 방식의 차이에서 갈등이 생길 수 있소.",
+  "충_오자": "자(子)와 오(午)가 충하오. 한 사람은 감정을 충분히 삭힌 뒤 말하고 싶고, 다른 사람은 즉각적으로 표현하고 반응받고 싶어하는 구조가 충돌을 만들어내오. 임신·출산을 둘러싼 감정 표현 방식의 차이에서 갈등이 생길 수 있소.",
+  "충_축미": "축(丑)과 미(未)가 충하오. 둘 다 자신의 자리를 굳건히 지키려는 성질이 강해, 서로 상대방의 방식에 맞추는 것을 불편하게 느끼기 쉽소.",
+  "충_미축": "축(丑)과 미(未)가 충하오. 둘 다 자신의 자리를 굳건히 지키려는 성질이 강해, 서로 상대방의 방식에 맞추는 것을 불편하게 느끼기 쉽소.",
+  "충_인신": "인(寅)과 신(申)이 충하오. 한 사람은 직관적으로 빠르게 움직이려 하고, 다른 사람은 논리적으로 따져보고 결정하려 해 임신 준비 과정에서 속도가 맞지 않는 경우가 많소.",
+  "충_신인": "인(寅)과 신(申)이 충하오. 한 사람은 직관적으로 빠르게 움직이려 하고, 다른 사람은 논리적으로 따져보고 결정하려 해 임신 준비 과정에서 속도가 맞지 않는 경우가 많소.",
+  "충_묘유": "묘(卯)와 유(酉)가 충하오. 한 사람은 관계 안에서 자유롭고 유연하게 흐르고 싶어하고, 다른 사람은 질서와 원칙 안에서 안정감을 찾으려 하오.",
+  "충_유묘": "묘(卯)와 유(酉)가 충하오. 한 사람은 관계 안에서 자유롭고 유연하게 흐르고 싶어하고, 다른 사람은 질서와 원칙 안에서 안정감을 찾으려 하오.",
+  "충_진술": "진(辰)과 술(戌)이 충하오. 둘 다 강한 자기 기반과 주관을 가지고 있소. 방향이 다를 때 서로 좀처럼 물러서지 않으려 하오.",
+  "충_술진": "진(辰)과 술(戌)이 충하오. 둘 다 강한 자기 기반과 주관을 가지고 있소. 방향이 다를 때 서로 좀처럼 물러서지 않으려 하오.",
+  "충_사해": "사(巳)와 해(亥)가 충하오. 한 사람은 목표를 향해 직선으로 나아가려 하고, 다른 사람은 다양한 가능성을 탐색하며 넓게 흘러가려 해 속도와 방향이 자주 어긋날 수 있소.",
+  "충_해사": "사(巳)와 해(亥)가 충하오. 한 사람은 목표를 향해 직선으로 나아가려 하고, 다른 사람은 다양한 가능성을 탐색하며 넓게 흘러가려 해 속도와 방향이 자주 어긋날 수 있소.",
+};
+
+function buildCrossRelDescIM(r: { kind: string; chars: string[] }): string {
+  const key = `${r.kind}_${r.chars.join("")}`;
+  const reverseKey = `${r.kind}_${[...r.chars].reverse().join("")}`;
+  return CROSS_DESC_IM[key] ?? CROSS_DESC_IM[reverseKey] ?? (KIND_MEANING[r.kind as keyof typeof KIND_MEANING]?.effect ?? "");
+}
+
+const REL_SCORE_IM: Record<string, number> = {
+  "삼합":   +12,
+  "천간합": +8,
+  "육합":   +7,
+  "천간충": -8,
+  "원진":   -7,
+  "충":     -6,
+  "형":     -5,
+  "해":     -4,
+  "파":     -3,
+};
+const SCORE_LABELS_IM: [number, string][] = [
+  [90, "천생연분"],
+  [80, "빛나는 인연"],
+  [70, "좋은 조화"],
+  [60, "무난한 궁합"],
+  [50, "노력이 필요한 궁합"],
+  [0,  "극과 극의 만남"],
+];
+
+function calcKunghapScoreIM(rels: { kind: string }[]): { score: number; label: string } {
+  const raw = rels.reduce((acc, r) => acc + (REL_SCORE_IM[r.kind] ?? 0), 70);
+  const score = Math.min(100, Math.max(0, raw));
+  const label = (SCORE_LABELS_IM.find(([min]) => score >= min) ?? SCORE_LABELS_IM[SCORE_LABELS_IM.length - 1])[1];
+  return { score, label };
+}
+
+function calcCrossRelationsIM(myView: MyeongsikView, ptView: MyeongsikView): { kind: string; chars: string[]; label: string }[] {
+  return calcCrossRelationsShared(myView, ptView);
+}
+
+function buildHapChungDescIM(rels: { kind: string }[], score: number): string {
+  const HAP_KINDS = ["천간합", "육합", "삼합"];
+  const hapRels   = rels.filter(r => HAP_KINDS.includes(r.kind));
+  const chungRels = rels.filter(r => !HAP_KINDS.includes(r.kind));
+  const hapCount  = hapRels.length;
+  const chungCount = chungRels.length;
+  const parts: string[] = [];
+  const countLine = (() => {
+    if (hapCount === 0 && chungCount === 0)
+      return `두 사람의 사주 사이에서 합(合)과 충(沖) 모두 발견되지 않았소. 기운의 충돌도 없지만 강한 연결도 없는, 비교적 중립적인 구조이오. 임신·출산 과정에서 이 점수는 ${score}점으로 산정되었소.`;
+    if (hapCount === 0)
+      return `두 사람의 사주 사이에서 합(合)은 발견되지 않았고, 마찰의 기운이 ${chungCount}개 작용하고 있소. 임신·출산 과정에서 이 점수는 ${score}점으로 산정되었소.`;
+    if (chungCount === 0)
+      return `두 사람의 사주 사이에서 합(合)이 ${hapCount}개 형성되어 있고, 충이나 형·파·해·원진은 발견되지 않았소. 마찰 없이 조화의 기운만 흐르는 드문 구조이오. 임신·출산 과정에서 이 점수는 ${score}점으로 산정되었소.`;
+    return `두 사람의 사주 사이에서 합(合)이 ${hapCount}개, 충·형·파·해·원진 등 마찰의 기운이 ${chungCount}개 발견되었소. 임신·출산 과정에서 이 점수는 ${score}점으로 산정되었소.`;
+  })();
+  parts.push(countLine);
+  if (hapCount > 0) {
+    const hasSamhap = hapRels.some(r => r.kind === "삼합");
+    const hasGanhap = hapRels.some(r => r.kind === "천간합");
+    const hasYukhap = hapRels.some(r => r.kind === "육합");
+    const roles: string[] = [];
+    if (hasGanhap) roles.push("생각과 의지의 방향이 자연스럽게 맞아드는 천간합");
+    if (hasYukhap) roles.push("감정과 일상의 결이 편안하게 어우러지는 육합");
+    if (hasSamhap) roles.push("두 사람의 에너지가 하나의 강한 방향으로 결집되는 삼합");
+    if (roles.length > 0)
+      parts.push(`합(合)은 두 사람 사이에서 ${roles.join(", ")}의 기운으로 작용하오. 이 합이 있는 영역에서 두 사람은 억지로 맞추지 않아도 자연스럽게 통하게 되며, 임신·출산 과정에서 서로에게 힘이 되는 근원이 되오.`);
+  }
+  if (chungCount > 0) {
+    const hasWonjin = chungRels.some(r => r.kind === "원진");
+    const hasHyeong = chungRels.some(r => r.kind === "형");
+    const hasChung  = chungRels.some(r => r.kind === "충" || r.kind === "천간충");
+    const hasPa     = chungRels.some(r => r.kind === "파");
+    const hasHae    = chungRels.some(r => r.kind === "해");
+    const chungRoles: string[] = [];
+    if (hasChung)  chungRoles.push("의견과 방향이 부딪히는 직접적인 충돌");
+    if (hasHyeong) chungRoles.push("겉으로 드러나지 않고 내면에서 쌓이는 마찰");
+    if (hasWonjin) chungRoles.push("설명하기 어려운 내면의 거리감");
+    if (hasPa)     chungRoles.push("시작은 좋지만 중간에 어긋나는 어색함");
+    if (hasHae)    chungRoles.push("선의가 오해로 전달되는 뜻밖의 갈등");
+    const chungStr = chungRoles.length > 0 ? chungRoles.join(", ") + "의 기운" : "마찰과 긴장의 기운";
+    parts.push(`충(沖)·형·파·해·원진은 두 사람 사이에서 ${chungStr}으로 작용하오. 이 기운들이 반드시 임신·출산 과정을 어렵게 만드는 것은 아니오. 충돌이 있는 자리에서 서로를 더 깊이 이해하게 되고, 마찰이 있어야 성장도 있는 법이오.`);
+  }
+  const conclusion = (() => {
+    if (score >= 90) return `총평하자면, 두 사람의 사주 궁합은 임신·출산의 기운을 강하게 뒷받침하는 드문 조화를 이루고 있소. 기운의 연결이 여러 겹으로 탄탄하여 함께할수록 서로에게 힘이 되고 안정이 되는 인연이오.`;
+    if (score >= 80) return `총평하자면, 두 사람의 궁합은 조화로운 기운이 마찰보다 더 강하게 흐르고 있소. 임신·출산 과정에서 자연스러운 편안함이 있고, 서로를 이해하려는 마음이 있다면 마찰도 충분히 소화해낼 수 있는 구조이오.`;
+    if (score >= 70) return `총평하자면, 두 사람의 궁합은 맞는 부분과 어긋나는 부분이 공존하는 현실적인 구조이오. 임신·출산 과정에서 서로의 다름을 인정하고 조율하는 노력 위에서 이 관계는 단단해질 수 있소.`;
+    if (score >= 60) return `총평하자면, 두 사람의 궁합은 조화보다 마찰의 기운이 더 강하게 작용하고 있소. 임신·출산 과정에서 의식적인 소통과 배려가 꾸준히 필요하오.`;
+    if (score >= 50) return `총평하자면, 두 사람의 궁합은 여러 층위에서 충돌하는 기운이 강하오. 쉽게 흐르는 구조는 아니지만, 가장 어려운 궁합이 가장 강렬한 성장을 이끌기도 하오.`;
+    return `총평하자면, 두 사람의 사주 궁합은 서로를 끌어당기는 기운보다 부딪히는 기운이 훨씬 강한 도전적인 구조이오. 의식적인 배려와 소통이 임신·출산 과정의 열쇠이오.`;
+  })();
+  parts.push(conclusion);
+  return parts.join("\n\n");
+}
+
+function KunghapRelationCardIM({ myView, partnerView, myName, partnerName, myColor, partnerColor }: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myName: string; partnerName: string;
+  myColor: string; partnerColor: string;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const rels = calcCrossRelationsIM(myView, partnerView);
+  const activeChars: Set<string> = new Set(selected !== null ? rels[selected].chars : []);
+  const isActive = (kor: string) => selected === null || activeChars.has(kor);
+
+  const PillarCol = ({ p }: { p: MyeongsikView["pillars"][0] }) => (
+    <div className="flex flex-col items-center gap-0.5">
+      <span className="text-[9px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.gan)) ? 1 : 0.2 }}>
+        {p.sipTop.replace("(나)", "") || "—"}
+      </span>
+      <div className="w-full" style={{ aspectRatio: "1", transition: "filter 0.2s, opacity 0.2s", filter: isActive(toKor(p.gan)) ? "none" : "blur(1px)", opacity: isActive(toKor(p.gan)) ? 1 : 0.18 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={ganCharImage(p.gan)} alt={p.gan} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
+      <div className="w-full" style={{ aspectRatio: "1", transition: "filter 0.2s, opacity 0.2s", filter: isActive(toKor(p.ji)) ? "none" : "blur(1px)", opacity: isActive(toKor(p.ji)) ? 1 : 0.18 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={jiCharImage(p.ji)} alt={p.ji} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      </div>
+      <span className="text-[9px]" style={{ color: MUTE, transition: "opacity 0.2s", opacity: isActive(toKor(p.ji)) ? 1 : 0.2 }}>
+        {p.sipBot || "—"}
+      </span>
+    </div>
+  );
+
+  const renderSide = (view: MyeongsikView, n: string, color: string) => (
+    <div className="flex-1">
+      <p className="text-[12px] font-bold mb-1.5 text-center" style={{ color }}>{n}님</p>
+      <div className="rounded-xl p-2" style={{ background: WHITE, border: `1.5px solid ${color}30` }}>
+        <div className="grid grid-cols-4 gap-1">
+          {view.pillars.map((p, i) => <PillarCol key={i} p={p} />)}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="mx-5 mb-4 rounded-2xl p-3.5" style={{ background: CREAM, border: `1px solid ${INK}12` }}>
+      <div className="flex gap-2 mb-4">
+        {renderSide(myView, myName, myColor)}
+        <div style={{ width: 1, background: `${INK}10`, flexShrink: 0 }} />
+        {renderSide(partnerView, partnerName, partnerColor)}
+      </div>
+      {rels.length === 0 ? (
+        <p className="text-[12px] text-center py-2" style={{ color: MUTE }}>두 사주 사이에 특별한 합·충·형·파·해·원진이 없소.</p>
+      ) : (() => {
+        const HAP_KINDS_IM = ["천간합", "육합", "삼합"];
+        const CHUNG_KINDS_IM = ["천간충", "충", "형", "파", "해", "원진"];
+        const hapRels  = rels.map((r, i) => ({ r, i })).filter(({ r }) => HAP_KINDS_IM.includes(r.kind));
+        const chungRels = rels.map((r, i) => ({ r, i })).filter(({ r }) => CHUNG_KINDS_IM.includes(r.kind));
+        const HAP_GROUP_COLOR = "#2563eb";
+        const CHUNG_GROUP_COLOR = "#dc2626";
+        const renderBtn = ({ r, i }: { r: { kind: string; chars: string[]; label: string }; i: number }) => {
+          const m = KIND_META[r.kind as keyof typeof KIND_META];
+          const isSelected = selected === i;
+          return (
+            <button
+              key={i}
+              onClick={() => setSelected(isSelected ? null : i)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold"
+              style={{ background: isSelected ? m.color : m.bg, color: isSelected ? "#fff" : m.color, border: `1px solid ${m.color}`, transition: "all 0.15s" }}
+            >
+              <span className="text-[11px] font-medium opacity-80">{r.kind}</span>
+              <span>{r.chars.join(HAP_KINDS_IM.includes(r.kind) ? " + " : " ↔ ")}</span>
+            </button>
+          );
+        };
+        return (
+          <>
+            {hapRels.length > 0 && (
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: `${HAP_GROUP_COLOR}12`, color: HAP_GROUP_COLOR }}>합(合)</span>
+                  <div className="flex-1 h-px" style={{ background: `${HAP_GROUP_COLOR}20` }} />
+                </div>
+                <div className="flex flex-wrap gap-2">{hapRels.map(renderBtn)}</div>
+              </div>
+            )}
+            {chungRels.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] font-black px-2 py-0.5 rounded-full" style={{ background: `${CHUNG_GROUP_COLOR}12`, color: CHUNG_GROUP_COLOR }}>충(沖)</span>
+                  <div className="flex-1 h-px" style={{ background: `${CHUNG_GROUP_COLOR}20` }} />
+                </div>
+                <div className="flex flex-wrap gap-2">{chungRels.map(renderBtn)}</div>
+              </div>
+            )}
+            {selected !== null && (() => {
+              const r = rels[selected];
+              const m = KIND_META[r.kind as keyof typeof KIND_META];
+              return (
+                <div className="rounded-xl px-4 py-3 mt-2" style={{ background: `${m.color}10`, borderLeft: `3px solid ${m.color}` }}>
+                  <p className="text-[12px] font-bold mb-1.5" style={{ color: m.color }}>
+                    {r.kind} · {r.chars.join(HAP_KINDS_IM.includes(r.kind) ? " + " : " ↔ ")}
+                  </p>
+                  <p className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{buildCrossRelDescIM(r)}</p>
+                </div>
+              );
+            })()}
+          </>
+        );
+      })()}
+    </div>
+  );
+}
+
+function HapChungScoreCardIM({ data, hapCount, chungCount }: { data: Record<string, unknown> | null; hapCount: number; chungCount: number }) {
+  if (!data) return null;
+  const score = (data.score as number | undefined) ?? 75;
+  const label = (data.label as string | undefined) ?? "";
+  const s = Math.min(100, Math.max(0, score));
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 110, cy = 100, r = 72;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? HAP_COLOR : s >= 60 ? CH6_COLOR : s >= 40 ? CHUNG_COLOR : MUTE;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+      <div className="px-5 pt-4 pb-2">
+        <svg viewBox="0 10 220 100" style={{ width: "100%", maxHeight: 120 }}>
+          <defs>
+            <linearGradient id="gaugeGradIM4" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={CHUNG_COLOR} />
+              <stop offset="50%" stopColor={CH6_COLOR} />
+              <stop offset="100%" stopColor={HAP_COLOR} />
+            </linearGradient>
+          </defs>
+          <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#eee" strokeWidth="18" strokeLinecap="round" />
+          <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#gaugeGradIM4)" strokeWidth="18" strokeLinecap="round" strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+          <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx={cx} cy={cy} r="5" fill={INK} />
+          <text x={cx} y={cy - 12} textAnchor="middle" fontSize="24" fontWeight="900" fill={COLOR}>{s}</text>
+        </svg>
+        <p className="text-center text-[13px] font-bold mb-1" style={{ color: COLOR }}>{label}</p>
+      </div>
+      <div className="flex gap-3 px-5 pb-4">
+        <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl" style={{ background: `${HAP_COLOR}10`, border: `1px solid ${HAP_COLOR}20` }}>
+          <span className="text-[18px]">🌿</span>
+          <div>
+            <p className="text-[16px] font-black leading-none" style={{ color: HAP_COLOR }}>{hapCount}</p>
+            <p className="text-[10px]" style={{ color: MUTE }}>합(合)</p>
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl" style={{ background: `${CHUNG_COLOR}10`, border: `1px solid ${CHUNG_COLOR}20` }}>
+          <span className="text-[18px]">⚡</span>
+          <div>
+            <p className="text-[16px] font-black leading-none" style={{ color: CHUNG_COLOR }}>{chungCount}</p>
+            <p className="text-[10px]" style={{ color: MUTE }}>충(沖)</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -6464,16 +6774,26 @@ function ReportPreviewInner() {
         const cl  = (jc.chungList   as Record<string, unknown> | undefined) ?? null;
         const os  = (jc.overallScore as Record<string, unknown> | undefined) ?? null;
 
-        type HapItem   = { icon?: string; type: string; strength?: string; hapEffect?: string; desc: string };
-        type ChungItem = { icon?: string; type: string; strength?: string; chungEffect?: string; resolve?: string; desc: string };
+        type HapItem   = { glyph?: string; type?: string; effect?: string; desc?: string };
+        type ChungItem = { glyph?: string; type?: string; impact?: string; resolve?: string; desc?: string };
 
         const hapItems   = Array.isArray(hl?.items)   ? (hl.items   as HapItem[])   : [];
         const chungItems = Array.isArray(cl?.items)   ? (cl.items   as ChungItem[]) : [];
 
-        const score     = typeof os?.score === "number" ? os.score : 70;
-        const tier      = typeof os?.tier  === "string" ? os.tier  : "B";
-        const label     = typeof os?.label === "string" ? os.label : "합·충이 균형을 이루오";
-        const osParas   = Array.isArray(os?.paragraphs) ? (os.paragraphs as string[]) : (typeof os?.desc === "string" ? [os.desc] : []);
+        const myShort      = name.length > 1 ? name.slice(1) : name;
+        const partnerShort = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+
+        const crossRels     = report?.view && report?.partnerView
+          ? calcCrossRelationsIM(report.view, report.partnerView)
+          : [];
+        const HAP_KINDS_IM4 = ["천간합", "육합", "삼합"];
+        const hapCount      = crossRels.filter(r => HAP_KINDS_IM4.includes(r.kind)).length;
+        const chungCount    = crossRels.filter(r => !HAP_KINDS_IM4.includes(r.kind)).length;
+        const { score: computedScore, label: computedLabel } = calcKunghapScoreIM(crossRels);
+        const computedDesc  = buildHapChungDescIM(crossRels, computedScore);
+        const overallScore  = os
+          ? { ...os, score: computedScore, label: computedLabel, desc: computedDesc }
+          : { score: computedScore, label: computedLabel, desc: computedDesc };
 
         return (
           <>
@@ -6491,54 +6811,105 @@ function ReportPreviewInner() {
             {/* 오프닝 인용 */}
             <Quote>{`"두 사주가 만나면\n글자들이 서로 합치기도, 충돌하기도 하오.\n그 관계를 낱낱이 보여드리겠소."`}</Quote>
 
-            {/* 두 명식 합쳐보기 */}
+            {/* 인터랙티브 관계 카드 */}
             <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM6_HAP }}>✦ 두 명식 · 글자와 글자의 만남</p>
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM1_COLOR }}>✦ 두 사주 · 합과 충의 관계</p>
             </div>
-            <div className="mx-4 mb-4 rounded-3xl overflow-hidden" style={{ background: "#fff", border: "1.5px solid #e5e0d8" }}>
-              <div className="px-5 py-4">
-                <GanjiRelation view={report?.view ?? null} />
-              </div>
-            </div>
+            {report?.view && report?.partnerView && (
+              <KunghapRelationCardIM
+                myView={report.view}
+                partnerView={report.partnerView}
+                myName={myShort}
+                partnerName={partnerShort}
+                myColor={IM1_COLOR}
+                partnerColor={IM2_COLOR}
+              />
+            )}
 
-            {/* 합(合) 목록 */}
+            {/* 점수 게이지 */}
+            <div className="px-4 pt-2">
+              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: CH6_COLOR }}>✦ 궁합 점수 · 합과 충의 균형</p>
+            </div>
+            <HapChungScoreCardIM
+              data={overallScore as Record<string, unknown>}
+              hapCount={hapCount}
+              chungCount={chungCount}
+            />
+
+            {/* 두 사람의 합(合) - LLM 카드 */}
             {hapItems.length > 0 && (
               <>
                 <div className="px-4 pt-2">
-                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM6_HAP }}>✦ 합(合) · 서로 끌어당기는 기운</p>
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: HAP_COLOR }}>✦ 두 사람의 합(合)</p>
                 </div>
-                <div className="px-4">
-                  {hapItems.map((item, i) => <IHapCard key={i} item={item} />)}
+                <div className="px-4 flex flex-col gap-3 mb-4">
+                  {hapItems.map((item, i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${HAP_COLOR}25` }}>
+                      <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${HAP_COLOR}12` }}>
+                        <span className="text-[22px]">{item.glyph ?? "🌿"}</span>
+                        <div>
+                          <p className="text-[13px] font-black leading-tight" style={{ color: HAP_COLOR }}>{item.type ?? ""}</p>
+                          {item.effect && <p className="text-[11px] mt-0.5" style={{ color: `${HAP_COLOR}cc` }}>{item.effect}</p>}
+                        </div>
+                      </div>
+                      {item.desc && (
+                        <div className="px-4 py-3">
+                          <p className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </>
             )}
 
-            {/* 충(沖) 목록 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM6_CHUNG }}>✦ 충(沖) · 서로 밀어내는 기운</p>
-            </div>
-            {chungItems.length > 0 ? (
-              <div className="px-4">
-                {chungItems.map((item, i) => <IChungCard key={i} item={item} />)}
-              </div>
-            ) : (
-              <div className="mx-4 mb-4 p-4 rounded-2xl" style={{ background: `${IM6_HAP}10`, border: `1px solid ${IM6_HAP}25` }}>
-                <p className="text-[13px]" style={{ color: IM6_HAP }}>🌿 두 사주 사이에 강한 충이 없소. 조화로운 만남이오.</p>
-              </div>
+            {/* 두 사람의 충(沖) - LLM 카드 */}
+            {chungItems.length > 0 && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: CHUNG_COLOR }}>✦ 두 사람의 충(沖)</p>
+                </div>
+                <div className="px-4 flex flex-col gap-3 mb-4">
+                  {chungItems.map((item, i) => (
+                    <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1.5px solid ${CHUNG_COLOR}25` }}>
+                      <div className="px-4 py-3 flex items-center gap-2" style={{ background: `${CHUNG_COLOR}10` }}>
+                        <span className="text-[22px]">{item.glyph ?? "⚡"}</span>
+                        <div>
+                          <p className="text-[13px] font-black leading-tight" style={{ color: CHUNG_COLOR }}>{item.type ?? ""}</p>
+                          {item.impact && <p className="text-[11px] mt-0.5" style={{ color: `${CHUNG_COLOR}cc` }}>{item.impact}</p>}
+                        </div>
+                      </div>
+                      {item.desc && (
+                        <div className="px-4 py-3">
+                          <p className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
+                        </div>
+                      )}
+                      {item.resolve && (
+                        <div className="px-4 pb-3">
+                          <div className="rounded-xl px-3 py-2" style={{ background: `${HAP_COLOR}10`, border: `1px solid ${HAP_COLOR}20` }}>
+                            <p className="text-[12px] leading-[1.8]" style={{ color: HAP_COLOR }}>💡 {item.resolve}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
 
-            {/* 합·충 종합 평가 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: "#555" }}>✦ 종합 평가 · 합과 충의 균형</p>
-            </div>
-            <HapChungSummaryCard
-              score={score}
-              tier={tier}
-              label={label}
-              hapCount={hapItems.length}
-              chungCount={chungItems.length}
-              paragraphs={osParas}
-            />
+            {/* 종합 설명 */}
+            {computedDesc && (
+              <>
+                <div className="px-4 pt-2">
+                  <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: CH6_COLOR }}>✦ 종합 풀이</p>
+                </div>
+                <div className="mx-4 mb-5 rounded-2xl px-4 py-4" style={{ background: `${CH6_COLOR}08`, border: `1px solid ${CH6_COLOR}20` }}>
+                  {computedDesc.split("\n\n").map((para, i) => (
+                    <p key={i} className="text-[13px] leading-[1.9] mb-3 last:mb-0" style={{ color: INK_SOFT, fontFamily: SERIF }}>{para}</p>
+                  ))}
+                </div>
+              </>
+            )}
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
             <Quote>{`"합·충을 알았으니,\n태어날 자녀의 기운을\n살펴보겠소."`}</Quote>
