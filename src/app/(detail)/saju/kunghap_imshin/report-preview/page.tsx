@@ -6781,7 +6781,8 @@ function ReportPreviewInner() {
         const chungItems = Array.isArray(cl?.items)   ? (cl.items   as ChungItem[]) : [];
 
         const myShort      = name.length > 1 ? name.slice(1) : name;
-        const partnerShort = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+        const ptName       = report?.partnerName || partnerName || "배우자";
+        const partnerShort = ptName.length > 1 ? ptName.slice(1) : ptName;
 
         const crossRels     = report?.view && report?.partnerView
           ? calcCrossRelationsIM(report.view, report.partnerView)
