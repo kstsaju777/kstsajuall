@@ -6907,7 +6907,7 @@ function ReportPreviewInner() {
             )}
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-            <Quote>{`두 사람의 기운이 어떻게 만나는지 보았소.\n이제 그 만남이 빚어낼\n자녀의 기운을 살펴보겠소.`}</Quote>
+            <Quote>{`두 사람의 기운이\n어떻게 만나는지 보았소.\n\n이제 그 만남이 빚어낼\n자녀의 기운을 살펴보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
