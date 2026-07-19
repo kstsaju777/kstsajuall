@@ -48,6 +48,9 @@ const BCH4_STR_P  = "#eaf5ee";
 const BCH4_WEK    = "#8b2a1a";
 const BCH4_BAL    = "#4a4080";
 const BCH4_BAL_P  = "#f0eefb";
+// 제6장 비즈니스 스타일 전용
+const BCH6_AMBER  = "#7a5c1e";
+const BCH6_AMBER_P = "#fdf8ec";
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
 // 오행 색상
@@ -4050,6 +4053,137 @@ function BusinessBalancePanel({ data }: { data: Record<string, unknown> | null }
   );
 }
 
+// ── 제6장 비즈니스 협업 스타일 전용 컴포넌트 ────────────────────────
+
+function BizStyleBanner({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const styleType  = (data.coupleType  as string | undefined) ?? (data.styleType  as string | undefined) ?? "";
+  const styleIcon  = (data.coupleIcon  as string | undefined) ?? (data.styleIcon  as string | undefined) ?? "🤝";
+  const callout    = (data.callout     as string | undefined) ?? "";
+  const paragraphs = (data.paragraphs  as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {styleType && (
+        <div className="rounded-2xl px-5 py-5 mb-4 flex items-center gap-4" style={{ background: `linear-gradient(135deg, ${BCH6_AMBER} 0%, #b8872e 100%)` }}>
+          <span className="text-[40px] leading-none">{styleIcon}</span>
+          <div>
+            <p className="text-[10px] font-bold mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>이 파트너십의 유형</p>
+            <p className="text-[18px] font-black leading-tight" style={{ color: "#fff" }}>{styleType}</p>
+          </div>
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, textAlign: "justify" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+const BIZ_GENDER_COLORS = {
+  blue: { color: "#1a4a9e", pale: "#e8f0fc" },
+  pink: { color: "#c0306a", pale: "#fce8f0" },
+};
+
+function BizRoleBalanceSplit({ items, myName, partnerName, myGender, partnerGender }: {
+  items: Record<string, unknown>[]; myName: string; partnerName: string; myGender?: string; partnerGender?: string;
+}) {
+  const isFem = (g?: string) => g === "female" || g === "여성" || g === "여자";
+  const myTheme      = BIZ_GENDER_COLORS[isFem(myGender)      ? "pink" : "blue"];
+  const partnerTheme = BIZ_GENDER_COLORS[isFem(partnerGender) ? "pink" : "blue"];
+  const MC = myTheme.color;
+  const MP = myTheme.pale;
+  const PC = partnerTheme.color;
+  const PP = partnerTheme.pale;
+  return (
+    <div className="mx-5 mb-4 space-y-3">
+      <div className="flex items-center justify-between px-1 mb-1">
+        <span className="text-[11.5px] font-black px-3 py-1 rounded-full" style={{ background: MP, color: MC, border: `1.5px solid ${MC}50` }}>{myName}님</span>
+        <span className="text-[10px]" style={{ color: MUTE }}>역할 분담</span>
+        <span className="text-[11.5px] font-black px-3 py-1 rounded-full" style={{ background: PP, color: PC, border: `1.5px solid ${PC}50` }}>{partnerName}님</span>
+      </div>
+      {items.map((item, i) => {
+        const role    = (item.role    as string | undefined) ?? "";
+        const icon    = (item.icon    as string | undefined) ?? "⚖️";
+        const desc    = (item.desc    as string | undefined) ?? "";
+        const myRatio = Math.min(100, Math.max(0, (item.myRatio as number | undefined) ?? 50));
+        const ptRatio = 100 - myRatio;
+        const dominant = myRatio > ptRatio ? "나" : myRatio < ptRatio ? "상대" : "함께";
+        const domColor = dominant === "나" ? MC : dominant === "상대" ? PC : BCH6_AMBER;
+        const domName  = dominant === "나" ? `${myName}님` : dominant === "상대" ? `${partnerName}님` : "같이";
+        return (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${domColor}20`, background: WHITE, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+            <div className="flex items-center gap-2.5 px-4 pt-3 pb-2">
+              <span className="text-[22px] leading-none">{icon}</span>
+              <p className="text-[13.5px] font-black flex-1" style={{ color: INK }}>{role}</p>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${domColor}15`, color: domColor, border: `1px solid ${domColor}35` }}>
+                {domName} 담당
+              </span>
+            </div>
+            <div className="px-4 pb-1">
+              <div className="relative flex h-4 rounded-full overflow-hidden" style={{ background: `${MUTE}15` }}>
+                <div className="flex items-center justify-start pl-2" style={{ width: `${myRatio}%`, background: `linear-gradient(to right, ${MC}cc, ${MC}88)`, minWidth: myRatio > 0 ? 20 : 0 }}>
+                  {myRatio >= 20 && <span className="text-[10px] font-black text-white leading-none">{myRatio}%</span>}
+                </div>
+                <div className="flex items-center justify-end pr-2" style={{ width: `${ptRatio}%`, background: `linear-gradient(to left, ${PC}cc, ${PC}88)`, minWidth: ptRatio > 0 ? 20 : 0 }}>
+                  {ptRatio >= 20 && <span className="text-[10px] font-black text-white leading-none">{ptRatio}%</span>}
+                </div>
+              </div>
+            </div>
+            {desc && (
+              <div className="px-4 pb-3 pt-1">
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BizObservationClipCard({ item, index, myName, partnerName, myGender, partnerGender }: {
+  item: Record<string, unknown>; index: number;
+  myName: string; partnerName: string; myGender?: string; partnerGender?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const situation       = (item.situation       as string | undefined) ?? "";
+  const myReaction      = (item.myReaction      as string | undefined) ?? "";
+  const partnerReaction = (item.partnerReaction as string | undefined) ?? "";
+  const isMF = (g?: string) => g === "female" || g === "여" || g === "여자" || g === "여성";
+  const MC = isMF(myGender)      ? "#c0306a" : "#1a4a9e";
+  const PC = isMF(partnerGender) ? "#c0306a" : "#1a4a9e";
+  return (
+    <div className="mx-5 mb-4 rounded-[18px] overflow-hidden" style={{ border: `1px solid rgba(0,0,0,0.09)` }}>
+      <div className="px-4 pt-4 pb-3.5 flex items-center justify-between gap-3" style={{ background: "#1a2a4a" }}>
+        <p className="text-[17px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>{situation}</p>
+        <button
+          onClick={() => setOpen(v => !v)}
+          className="flex-shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full"
+          style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.2)" }}
+        >
+          {open ? "접기" : "상황보기"}
+        </button>
+      </div>
+      {open && (
+        <div style={{ borderTop: `1px solid rgba(0,0,0,0.07)` }}>
+          {myReaction && (
+            <div className="px-4 py-3 flex gap-2.5 items-start" style={{ background: MC === "#1a4a9e" ? "#e8f0fc" : "#fce8f0", borderBottom: `1px solid rgba(0,0,0,0.05)` }}>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 whitespace-nowrap" style={{ background: MC, color: WHITE }}>{myName}</span>
+              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{myReaction}</p>
+            </div>
+          )}
+          {partnerReaction && (
+            <div className="px-4 py-3 flex gap-2.5 items-start" style={{ background: PC === "#1a4a9e" ? "#e8f0fc" : "#fce8f0" }}>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 whitespace-nowrap" style={{ background: PC, color: WHITE }}>{partnerName}</span>
+              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerReaction}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── 제3장 합·충 전용 ─────────────────────────────────────────────
 
 const CROSS_DESC_BIZ: Record<string, string> = {
@@ -5712,47 +5846,58 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제6장 · 역할 분담 ═══════════ */}
-      {ch === "6" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 역할 분담</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>최적의 역할 분담</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람의 사주는\n각자에게 맞는 역할이 있소.\n그 역할을 잘 나눌 때 시너지가 나오."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>역할 분담 분석</Heading>
-            <ReportSec data={jc.rolesDesc as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>역할 충돌 주의점</Heading>
-            {(jc.roleConflict as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}10`, border: `1px solid ${WARN}30` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
+      {/* ═══════════ 제6장 · 함께 일하면 어떤 파트너가 될까 ═══════════ */}
+      {ch === "6" && (() => {
+        const cs = (jc.bizStyle   as Record<string, unknown> | undefined) ?? null;
+        const rb = (jc.roleBalance as Record<string, unknown> | undefined) ?? null;
+        const dl = (jc.workLife   as Record<string, unknown> | undefined) ?? null;
+        const roleItems = (rb?.items as Record<string, unknown>[] | undefined) ?? [];
+        const clipItems = (dl?.clips as Record<string, unknown>[] | undefined) ?? [];
+        const myFirstName      = name.length > 1 ? name.slice(1) : name;
+        const ptName           = report?.partnerName || partnerName || "상대방";
+        const partnerFirstName = ptName.length > 1 ? ptName.slice(1) : ptName;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 협업 스타일</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께 일하면 어떤 파트너가 될까</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`두 사람이 파트너가 되면\n어떤 모습으로 일하게 될지,\n\n그 속살을\n낱낱이 보여드리겠소.`}</Quote>
+
+            {/* 비즈니스 스타일 배너 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>두 사람이 이루는 협업 스타일</Heading>
+              <P>사주가 보여주는 두 사람만의 비즈니스 파트너십 유형이오. 어떤 빛깔의 파트너가 될지 살펴보겠소.</P>
+            </section>
+            <BizStyleBanner data={cs} />
+
+            {/* 역할 분담 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>두 사람의 역할 분담 예측</Heading>
+              <P>{`두 사람 사주로 점쳐보는\n우리 팀 역할분담 지도이오.\n너무 진지하게 볼 필요는 없소.\n근데, 묘하게 맞아 떨어질 수도 있소.`}</P>
+            </section>
+            <BizRoleBalanceSplit items={roleItems} myName={myFirstName} partnerName={partnerFirstName} myGender={report?.gender} partnerGender={report?.partnerGender} />
+
+            {/* 협업 일상 관찰 클립 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>함께 일하는 일상의 모습</Heading>
+              <P>{`두 사람의 협업 일상을\n관찰 카메라로 들여다봤소.\n\n꽤 낯익은 장면이 나올 수도 있소.`}</P>
+            </section>
+            {clipItems.map((item, i) => (
+              <BizObservationClipCard key={i} item={item} index={i} myName={myFirstName} partnerName={partnerFirstName} myGender={report?.gender} partnerGender={report?.partnerGender} />
             ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>역할 조율 조언</Heading>
-            {(jc.roleTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: NAVY, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-          <Quote>{`"역할을 알았으니,\n이제 금전 흐름을\n살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="6" go={next} />
-        </>
-      )}
+
+            <div className="pb-10" />
+            <ChapterNav cur="6" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제7장 · 금전·수익 흐름 ═══════════ */}
       {ch === "7" && (
