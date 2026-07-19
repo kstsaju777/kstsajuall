@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -2357,25 +2357,24 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
   );
 }
 
-// 장번호 → 표시 제목 (비즈니스궁합 13장 구조)
+// 장번호 → 표시 제목 (비즈니스궁합 12장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 비즈니스궁합에 대하여",
   "1":  "제1장 · 나의 사주 원국",
   "2":  "제2장 · 상대의 사주 원국",
   "3":  "제3장 · 궁합의 핵심: 합과 충",
   "4":  "제4장 · 두 사람, 함께 일할 수 있는 인연인가",
-  "5":  "제5장 · 두 사람의 강점과 약점",
-  "6":  "제6장 · 최적의 역할 분담",
-  "7":  "제7장 · 비즈니스 스타일의 차이",
-  "8":  "제8장 · 이 파트너십의 빛과 그림자",
-  "9":  "제9장 · 갈등과 극복",
-  "10": "제10장 · 함께하면 돈이 되는가 — 재물운",
-  "11": "제11장 · 함께하면 좋은 시기와 조심할 시기",
-  "12": "마무리 · 그대들에게 남기는 홍연의 서신",
+  "5":  "제5장 · 최적의 역할 분담",
+  "6":  "제6장 · 비즈니스 스타일의 차이",
+  "7":  "제7장 · 이 파트너십의 빛과 그림자",
+  "8":  "제8장 · 갈등과 극복",
+  "9":  "제9장 · 함께하면 돈이 되는가 — 재물운",
+  "10": "제10장 · 함께하면 좋은 시기와 조심할 시기",
+  "11": "마무리 · 그대들에게 남기는 홍연의 서신",
 };
 
 // A안 읽기 순서 (연애궁합 0~12)
-const A_ORDER = ["0","1","2","3","4","5","6","7","8","9","10","11","12"];
+const A_ORDER = ["0","1","2","3","4","5","6","7","8","9","10","11"];
 
 // 개발용 장 재생성 플로팅 버튼 (배포 전 제거 예정)
 function RegenButton({ chapter, onRegen }: { chapter: number; onRegen: (n: number) => void }) {
@@ -3559,14 +3558,13 @@ const TOC_A: TocEntry[] = [
   { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                        no: "2" },
   { disp: "제3장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                    no: "3" },
   { disp: "제4장",  chip: "인연",    title: "두 사람, 함께 일할 수 있는 인연인가",      no: "4" },
-  { disp: "제5장",  chip: "강점약점", title: "두 사람의 강점과 약점",                   no: "5" },
-  { disp: "제6장",  chip: "역할분담", title: "최적의 역할 분담",                        no: "6" },
-  { disp: "제7장",  chip: "스타일",  title: "비즈니스 스타일의 차이",                   no: "7" },
-  { disp: "제8장",  chip: "빛그림자", title: "이 파트너십의 빛과 그림자",              no: "8" },
-  { disp: "제9장",  chip: "갈등극복", title: "갈등과 극복",                            no: "9" },
-  { disp: "제10장", chip: "재물운",  title: "함께하면 돈이 되는가 — 재물운",           no: "10" },
-  { disp: "제11장", chip: "좋은시기", title: "함께하면 좋은 시기와 조심할 시기",        no: "11" },
-  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",            no: "12" },
+  { disp: "제5장",  chip: "역할분담", title: "최적의 역할 분담",                        no: "5" },
+  { disp: "제6장",  chip: "스타일",  title: "비즈니스 스타일의 차이",                   no: "6" },
+  { disp: "제7장",  chip: "빛그림자", title: "이 파트너십의 빛과 그림자",              no: "7" },
+  { disp: "제8장",  chip: "갈등극복", title: "갈등과 극복",                            no: "8" },
+  { disp: "제9장",  chip: "재물운",  title: "함께하면 돈이 되는가 — 재물운",           no: "9" },
+  { disp: "제10장", chip: "좋은시기", title: "함께하면 좋은 시기와 조심할 시기",        no: "10" },
+  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",            no: "11" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -3666,7 +3664,7 @@ function Cover() {
     <>
       {/* 헤드라인 블록 */}
       <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-        <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 굴곡</p>
+        <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 굴곡</p>
         <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
           "나는 왜 그 시간을 견뎌야 했나"
         </h1>
@@ -6093,7 +6091,7 @@ function ReportPreviewInner() {
 
   // 마무리 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
   useEffect(() => {
-    if (ch !== "12") { setEventOpen(false); return; }
+    if (ch !== "11") { setEventOpen(false); return; }
     if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
     setEventOpen(true);
   }, [ch]);
@@ -7143,53 +7141,8 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제5장 · 강점과 약점 ═══════════ */}
-      {ch === "5" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 강점·약점</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 강점과 약점</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_5/kunghap_business_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 함께할 때\n어디서 힘을 얻고\n어디서 부딪히는지 보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>함께할 때의 강점</Heading>
-            {(jc.strengthList as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${GREEN}12`, border: `1px solid ${GREEN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: GREEN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>주의해야 할 약점</Heading>
-            {(jc.weaknessList as {items?: Array<{title: string; desc: string}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: `${WARN}12`, border: `1px solid ${WARN}33` }}>
-                <p className="text-[13px] font-bold mb-1" style={{ color: WARN }}>{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
-              </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.balanceDesc as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${NAVY}08`, border: `1px solid ${NAVY}22` }}>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{(jc.balanceDesc as {desc: string}).desc}</p>
-              </div>
-            )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-          <Quote>{`"강점과 약점을 알았으니,\n이제 두 사람의 역할 분담을\n살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="5" go={next} />
-        </>
-      )}
-
       {/* ═══════════ 제6장 · 함께 일하면 어떤 파트너가 될까 ═══════════ */}
-      {ch === "6" && (() => {
+      {ch === "5" && (() => {
         const cs = (jc.bizStyle   as Record<string, unknown> | undefined) ?? null;
         const rb = (jc.roleBalance as Record<string, unknown> | undefined) ?? null;
         const dl = (jc.workLife   as Record<string, unknown> | undefined) ?? null;
@@ -7201,12 +7154,12 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 협업 스타일</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 협업 스타일</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께 일하면 어떤 파트너가 될까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_business/kunghap_business_5/kunghap_business_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -7236,13 +7189,13 @@ function ReportPreviewInner() {
             ))}
 
             <div className="pb-10" />
-            <ChapterNav cur="6" go={next} />
+            <ChapterNav cur="5" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제7장 · 비즈니스 스타일의 차이 ═══════════ */}
-      {ch === "7" && (() => {
+      {/* ═══════════ 제6장 · 비즈니스 스타일의 차이 ═══════════ */}
+      {ch === "6" && (() => {
         const myName7 = report?.name || "나";
         const partnerName7 = report?.partnerName || "상대방";
         const myFirstName7 = myName7.slice(1) || myName7;
@@ -7262,13 +7215,13 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 스타일</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 스타일</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>비즈니스 스타일의 차이</h1>
             </div>
 
             <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_7/kunghap_business_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -7312,13 +7265,13 @@ function ReportPreviewInner() {
             <Quote>{`"스타일의 차이를 알았으니,\n이 파트너십의 빛과 그림자를\n살펴보겠소."`}</Quote>
 
             <div className="pb-10" />
-            <ChapterNav cur="7" go={next} />
+            <ChapterNav cur="6" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제8장 · 이 파트너십의 빛과 그림자 ═══════════ */}
-      {ch === "8" && (() => {
+      {/* ═══════════ 제7장 · 이 파트너십의 빛과 그림자 ═══════════ */}
+      {ch === "7" && (() => {
         const strengthItems = ((jc.strengths as { items?: Array<{ title: string; icon?: string; desc?: string; effect?: string }> } | undefined)?.items) ?? [];
         const shadowItems   = ((jc.shadows   as { items?: Array<{ title: string; icon?: string; desc?: string; trigger?: string; overcome?: string }> } | undefined)?.items) ?? [];
         const balance       = (jc.balance as Record<string, unknown> | undefined) ?? null;
@@ -7327,13 +7280,13 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 빛과 그림자</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 빛과 그림자</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 파트너십의 빛과 그림자</h1>
             </div>
 
             <div className="relative overflow-hidden" style={{ height: 420 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_business/kunghap_business_7/kunghap_business_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -7370,13 +7323,13 @@ function ReportPreviewInner() {
             <Quote>{`"빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소."`}</Quote>
 
             <div className="pb-10" />
-            <ChapterNav cur="8" go={next} />
+            <ChapterNav cur="7" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제9장 · 위기와 극복 ═══════════ */}
-      {ch === "9" && (() => {
+      {/* ═══════════ 제8장 · 위기와 극복 ═══════════ */}
+      {ch === "8" && (() => {
         const cp  = (jc.crisisPoints   as Record<string,unknown>|undefined) ?? null;
         const ot  = (jc.overcomeTips   as Record<string,unknown>|undefined) ?? null;
         const rg  = (jc.recoveryGuide  as Record<string,unknown>|undefined) ?? null;
@@ -7385,12 +7338,12 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기와 극복</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 위기와 극복</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>사업 파트너십의 위기와 극복</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_9/kunghap_business_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <Quote>{`"어떤 사업 파트너십도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
@@ -7422,13 +7375,13 @@ function ReportPreviewInner() {
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
             <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 두 사람의\n재물흐름을 살펴보겠소."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="9" go={next} />
+            <ChapterNav cur="8" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제10장 · 비즈니스 재물흐름 ═══════════ */}
-      {ch === "10" && (() => {
+      {/* ═══════════ 제9장 · 비즈니스 재물흐름 ═══════════ */}
+      {ch === "9" && (() => {
         const wf = (jc.wealthFlow as Record<string, unknown> | undefined) ?? null;
         const hl = (jc.homeLife   as Record<string, unknown> | undefined) ?? null;
         const wt = (jc.wealthTips as Record<string, unknown> | undefined) ?? null;
@@ -7437,12 +7390,12 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 재물흐름</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 재물흐름</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께 만드는 사업 재물흐름</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_10/kunghap_business_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_business/kunghap_business_9/kunghap_business_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -7473,13 +7426,13 @@ function ReportPreviewInner() {
             <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
             <Quote>{`"두 사람의 재물흐름을\n살펴보았으니,\n이제 사업 미래를 보겠소."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="10" go={next} />
+            <ChapterNav cur="9" go={next} />
           </>
         );
       })()}
 
-      {/* ═══════════ 제11장 · 세운·월운별 사업 흐름 ═══════════ */}
-      {ch === "11" && (() => {
+      {/* ═══════════ 제10장 · 세운·월운별 사업 흐름 ═══════════ */}
+      {ch === "10" && (() => {
         const bf = (jc.bizFutureFlow as Record<string,unknown>|undefined) ?? null;
         const bt = (jc.bizFutureTips as Record<string,unknown>|undefined) ?? null;
         const myFirstName11      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
@@ -7493,12 +7446,12 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 사업 흐름</p>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 사업 흐름</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>세운·월운으로 보는 사업 흐름</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_11/kunghap_business_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_business/kunghap_business_10/kunghap_business_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -7548,13 +7501,13 @@ function ReportPreviewInner() {
             <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
             <Quote>{`"두 사람의 사업 흐름을\n살펴보았으니,\n홍연의 마지막 서신을 받으시오."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="11" go={next} />
+            <ChapterNav cur="10" go={next} />
           </>
         );
       })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
-      {ch === "12" && (
+      {ch === "11" && (
         <>
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -7563,7 +7516,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_12/kunghap_business_12_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_business/kunghap_business_11/kunghap_business_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -7581,7 +7534,7 @@ function ReportPreviewInner() {
           <ReviewBox />
           <RecoGrid />
           <div className="pb-10" />
-          <ChapterNav cur="12" go={next} />
+          <ChapterNav cur="11" go={next} />
         </div>
         {eventOpen && (
           <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
@@ -7590,7 +7543,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 알 수 없는 장 — 준비 중 ═══════════ */}
-      {!["0","1","2","3","4","5","6","7","8","9","10","11","12"].includes(ch) && (
+      {!["0","1","2","3","4","5","6","7","8","9","10","11"].includes(ch) && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중이오.</p>
