@@ -5932,6 +5932,61 @@ function ReportPreviewInner() {
               </div>
             </section>
 
+            {/* ── 용신/희신/기신 ── */}
+            {jc.myYongsin && (() => {
+              const YS = jc.myYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; yongsinReason?: string; heusinReason?: string; gisinReason?: string; intro?: string; desc?: string };
+              const OHAENG_META: Record<string, { hanja: string; color: string; bg: string; desc: string }> = {
+                목: { hanja: "木", color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
+                화: { hanja: "火", color: "#222", bg: "#ffebee", desc: "열정·표현" },
+                토: { hanja: "土", color: "#222", bg: "#efebe9", desc: "안정·신뢰" },
+                금: { hanja: "金", color: "#222", bg: "#fffde7", desc: "절제·결단" },
+                수: { hanja: "水", color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
+              };
+              const _OLIST = ["금","목","화","토","수"] as const;
+              const _yTxt = [YS.intro, YS.desc].filter(Boolean).join(" ");
+              const _exEl = (role: string, t: string) => t.match(new RegExp(`${role}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`))?.[1] ?? "";
+              const _pick = (n: number) => { const f: string[] = []; for (const ch of _yTxt) { if ((_OLIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length > n) return f[n]; } return ""; };
+              const yongsinEl = YS.yongsinEl || _exEl("용신", _yTxt) || _pick(0);
+              const heusinEl  = YS.heusinEl  || _exEl("희신", _yTxt) || _pick(1);
+              const gisinEl   = YS.gisinEl   || _exEl("기신", _yTxt) || _pick(2);
+              const rows = [
+                { role: "용신", el: yongsinEl, reason: YS.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
+                { role: "희신", el: heusinEl,  reason: YS.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★" } },
+                { role: "기신", el: gisinEl,   reason: YS.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕" } },
+              ];
+              return (
+                <section className="px-6 pt-2 pb-4">
+                  <Heading>필요한 기운과 피해야 할 기운</Heading>
+                  <div className="my-4 rounded-2xl overflow-hidden" style={{ border: "1px solid #e0d8cc" }}>
+                    {rows.map((r, i) => {
+                      const m = OHAENG_META[r.el] ?? { hanja: r.el, color: "#888", bg: "#f5f5f5", desc: "" };
+                      const isGisin = r.role === "기신";
+                      const imgKey = ({ 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" } as Record<string, string>)[r.el];
+                      return (
+                        <div key={r.role} className="flex items-center gap-3 px-4 py-3" style={{ background: isGisin ? "#fff5f5" : i === 0 ? "#fffcf0" : "#f6faf6", borderBottom: i < 2 ? "1px solid #e8dfd0" : "none" }}>
+                          <div className="shrink-0 flex flex-col items-center gap-1" style={{ width: 52 }}>
+                            <div className="rounded-full px-2 py-0.5 text-[10px] font-black tracking-wide" style={{ background: r.badge.bg, border: `1.5px solid ${r.badge.border}`, color: r.badge.text }}>
+                              {r.badge.label}
+                            </div>
+                            <div className="text-[15px] font-black" style={{ color: r.badge.text }}>{r.role}</div>
+                          </div>
+                          {imgKey && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={`/media/ohaeng/${imgKey}.png`} alt={r.el} className="shrink-0" style={{ width: 54, height: 54, objectFit: "contain" }} />
+                          )}
+                          <div className="flex flex-col gap-1">
+                            <div className="text-[14px] font-black" style={{ color: m.color }}>{m.desc}</div>
+                            {r.reason && <div className="text-[11px] leading-snug" style={{ color: "#555" }}>{r.reason}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {YS.desc && <P>{YS.desc}</P>}
+                </section>
+              );
+            })()}
+
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
               <div className="px-5 mb-3">

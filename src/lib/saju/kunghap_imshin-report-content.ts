@@ -8,7 +8,7 @@ export { parseContentJson };
 export { SYSTEM };
 
 export const IMSHIN_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
-  1:  ["myWonguk", "myNature", "myParentStyle"],
+  1:  ["myWonguk", "myNature", "myParentStyle", "myYongsin"],
   2:  ["partnerWonguk", "partnerNature", "partnerParentStyle"],
   3:  ["pregnancyScore", "pregnancyReason"],
   4:  ["childEnergy", "childDesc", "parenthoodTips"],
@@ -52,6 +52,7 @@ export function isImshinKunghapChapterReady(
       if (typeof obj.constitution === "string") return obj.constitution.length > 0;
       if (typeof obj.bondType === "string")     return obj.bondType.length > 0;
       if (typeof obj.bridgeDesc === "string")   return obj.bridgeDesc.length > 0;
+      if (typeof obj.yongsinEl === "string")    return obj.yongsinEl.length > 0;
     }
     return false;
   });
@@ -117,6 +118,16 @@ export function buildImshinKunghapChapterPrompt(
       "단락2 — 출산 과정과 초기 육아에서 이 성향이 어떻게 발현되는지. 이 성향의 강점 중심. 4~5문장.",
       "단락3 — 이 성향의 그림자 — 임신·출산 과정에서 주의해야 할 것과 배우자와의 균형 잡는 법. 4~5문장."
     ]
+  },
+  "myYongsin": {
+    "yongsinEl": "용신 오행 (목/화/토/금/수 중 1개)",
+    "heusinEl": "희신 오행 (목/화/토/금/수 중 1개, 용신과 다름)",
+    "gisinEl": "기신 오행 (목/화/토/금/수 중 1개)",
+    "yongsinReason": "용신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내)",
+    "heusinReason": "희신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내)",
+    "gisinReason": "기신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내)",
+    "intro": "이 사주의 용신을 한 문장으로. (예: '~일간은 ~이 용신이오.')",
+    "desc": "용신·희신·기신이 각각 어떤 역할을 하는지, 임신·출산·양육 생활에서 어떤 오행 기운을 가까이 하면 좋은지 3~4문장."
   }
 }`,
     2: `{
@@ -423,6 +434,15 @@ export function buildImshinKunghapChapterPrompt(
   ① 이 부모 성향 유형이 임신 준비 단계에서 어떻게 나타나는지. 배우자와의 상호작용 포함. 4~5문장.
   ② 출산 과정과 초기 육아에서 이 성향이 어떻게 발현되는지. 강점 중심. 4~5문장.
   ③ 이 성향의 그림자 — 임신·출산 과정에서 주의할 것과 배우자와 균형 잡는 법. 4~5문장.
+
+[myYongsin 섹션 — 나의 용신/희신/기신]
+⚠ 이 섹션은 ${input.name}님 본인의 사주에 대한 내용이오. 배우자 얘기를 섞지 마시오.
+- yongsinEl: 격국·억부 원리에 따라 이 사주의 용신 오행 1개 (목/화/토/금/수 중 택1).
+- heusinEl: 용신을 도와 운의 흐름을 부드럽게 하는 희신 오행 1개.
+- gisinEl: 이 사주에서 꺼리는 기신 오행 1개.
+- yongsinReason / heusinReason / gisinReason: 각 오행이 이 사주에서 어떤 역할을 하는지 15자 이내로.
+- intro: 이 사주의 용신을 한 문장으로. (예: '~일간은 ~이 용신이오.')
+- desc: 용신·희신·기신이 각각 어떤 역할을 하는지, 임신·출산·양육 생활에서 어떤 오행 기운을 가까이 하면 좋은지 3~4문장.
 
 홍연 말투(~이오/~하오/~겠소) 유지.`,
     2: `[제2장 — 배우자의 사주 원국] ${input.partnerName}님(${partnerGenderLabel})의 사주 원국을 임신·출산·부모됨의 맥락에서 풀어주시오. 제1장과 동일한 구조이되, 배우자 관점에서 ${input.name}님과의 관계를 자연스럽게 연결하시오.
