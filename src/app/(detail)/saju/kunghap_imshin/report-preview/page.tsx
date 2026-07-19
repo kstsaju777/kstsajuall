@@ -6812,18 +6812,18 @@ function ReportPreviewInner() {
             <Quote>{`두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오.`}</Quote>
 
             {/* 인터랙티브 관계 카드 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: IM1_COLOR }}>✦ 두 사주 · 합과 충의 관계</p>
-            </div>
             {report?.view && report?.partnerView && (
-              <KunghapRelationCardIM
-                myView={report.view}
-                partnerView={report.partnerView}
-                myName={myShort}
-                partnerName={partnerShort}
-                myColor={IM1_COLOR}
-                partnerColor={IM2_COLOR}
-              />
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람 글자들과의 관계</Heading></div>
+                <KunghapRelationCardIM
+                  myView={report.view}
+                  partnerView={report.partnerView}
+                  myName={myShort}
+                  partnerName={partnerShort}
+                  myColor={IM1_COLOR}
+                  partnerColor={IM2_COLOR}
+                />
+              </section>
             )}
 
             {/* 점수 게이지 */}
