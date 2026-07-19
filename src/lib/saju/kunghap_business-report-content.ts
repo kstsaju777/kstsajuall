@@ -18,7 +18,7 @@ export const BUSINESS_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   8:  ["conflictStyle", "triggerPoints", "resolveTips"],
   9:  ["crisisScore", "crisisReason", "crisisTips"],
   10: ["wealthFlow", "homeLife", "wealthTips"],
-  11: ["futureFlow", "businessVision", "finalAdvice"],
+  11: ["bizFutureFlow", "bizFutureTips"],
   12: ["letter"],
 };
 
@@ -92,7 +92,7 @@ export function buildBusinessKunghapChapterPrompt(
     8: `{"conflictStyle":{"intro":"","callout":"","paragraphs":[]},"triggerPoints":{"items":[{"title":"","desc":""}]},"resolveTips":{"tips":[]}}`,
     9: `{"crisisScore":{"score":35,"label":"","paragraphs":[]},"crisisReason":{"intro":"","callout":"","paragraphs":[]},"crisisTips":{"tips":[]}}`,
     10: `{"wealthFlow":{"flowGraph":{"points":[{"year":2025,"score":70,"note":""}]},"flowPeriods":[{"label":"","trend":"상승 중","title":"","text":""}],"wealthType":"","wealthIcon":"💰","callout":"","dominance":{"myRatio":50},"paragraphs":[]},"homeLife":{"partnerType":"","partnerIcon":"🤝","callout":"","keywords":[],"aspects":[{"label":"","icon":"","desc":""}],"paragraphs":[]},"wealthTips":{"tips":[{"icon":"💡","title":"","desc":""}]}}`,
-    11: `{"futureFlow":{"items":[{"label":"","icon":"💼","desc":""}]},"businessVision":{"paragraphs":[]},"finalAdvice":{"desc":""}}`,
+    11: `{"bizFutureFlow":{"successGuess":{"successRatio":65,"basis":"","note":""},"paragraphs":[]},"bizFutureTips":{"tips":[{"icon":"💡","title":"","desc":""}]}}`,
     12: `{"letter":{"paragraphs":[]}}`,
   };
 
@@ -180,7 +180,7 @@ __MY__님의 타고난 사주 기운을 깊이 풀이하시오.
     8: `두 사람이 갈등할 때의 패턴과 해결 방법을 풀어주시오. conflictStyle: 갈등 패턴, triggerPoints: 갈등 트리거(2-3개), resolveTips: 해결 조언(3-4개)`,
     9: `두 사람의 비즈니스 위기 가능성과 대처 방법을 풀어주시오. crisisScore: 위기 점수(0-100)+설명, crisisReason: 위기 원인, crisisTips: 대처 조언(3-4개)`,
     10: `두 사람이 함께 사업할 때의 재물흐름과 파트너십 관계를 풀어주시오. wealthFlow: 향후 50년 재물흐름(flowGraph: 2025~2070 주요연도 점수+note, flowPeriods: 구간별 흐름 3-5개, wealthType+wealthIcon+callout, dominance: 재정주도권(myRatio 0-100), paragraphs 2-3개), homeLife: 파트너십 관계유형(partnerType+partnerIcon+callout+keywords 3-5개+aspects 3-4개+paragraphs), wealthTips: 재물운 실천 조언(tips 3-4개, icon+title+desc)`,
-    11: `두 사람의 비즈니스 미래 흐름과 비전을 풀어주시오. futureFlow: 미래 단계(3-5개), businessVision: 비전(2-3단락), finalAdvice: 마지막 한 줄`,
+    11: `두 사람의 사업 흐름에서 성공 가능성과 실천 조언을 풀어주시오. bizFutureFlow: 성공 가능성 예측(successGuess: successRatio 0-100+basis+note, paragraphs 2-3개), bizFutureTips: 사업 흐름 조언(tips 3-4개, icon+title+desc)`,
     12: `__MY__과 __PT__에게 홍연의 따뜻한 편지를 써주시오(3-5단락, ~이오/~하오 말투)`,
   };
 

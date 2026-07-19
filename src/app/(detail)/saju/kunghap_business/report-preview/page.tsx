@@ -19,6 +19,7 @@ import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikM
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
 import { calcCrossRelations as calcCrossRelationsShared } from "@/lib/saju/kunghap-cross-relations";
+import { yearGanji, monthGanji } from "@/lib/saju/ganji-calc";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
 const CREAM = "#fdf8f4";
@@ -51,6 +52,9 @@ const BCH4_BAL_P  = "#f0eefb";
 // 제6장 비즈니스 스타일 전용
 const BCH6_AMBER  = "#7a5c1e";
 const BCH6_AMBER_P = "#fdf8ec";
+// 제11장 비즈니스 미래흐름 전용
+const BCH11_COLOR = "#2e5a4a"; // 딥 틸 그린
+const BCH11_PALE  = "#eaf4f0";
 // 제10장 비즈니스 재물흐름 전용
 const BCH10_WLT   = "#7a5c1e"; // 재물 앰버
 const BCH10_WLT_P = "#fdf8ec";
@@ -4494,6 +4498,619 @@ function HapChungScoreCardBiz({ data, hapCount, chungCount }: { data: Record<str
   );
 }
 
+// ─── 제11장 비즈니스 미래흐름 전용 헬퍼 & 컴포넌트 ──────────────────────────────
+
+const _BIZ11_STEM_EL: Record<string, string> = {
+  甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수",
+};
+const _BIZ11_BRANCH_MAIN: Record<string, string> = {
+  子:"癸",丑:"己",寅:"甲",卯:"乙",辰:"戊",巳:"丙",午:"丁",未:"己",申:"庚",酉:"辛",戌:"戊",亥:"壬",
+};
+const _BIZ11_GAN_KO: Record<string, string> = {
+  甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계",
+};
+const _BIZ11_JI_KO: Record<string, string> = {
+  子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해",
+};
+
+type BIZ11Tier = "good" | "caution" | "neutral";
+const BIZ11_CLS_STYLE: Record<string, { bg: string; border: string; text: string; label: string }> = {
+  yong: { bg: "#4285f4", border: "#4285f4", text: "#fff", label: "용신" },
+  heu:  { bg: "#43a047", border: "#43a047", text: "#fff", label: "희신" },
+  gi:   { bg: "#e53935", border: "#e53935", text: "#fff", label: "기신" },
+  neu:  { bg: "#aaa",    border: "#aaa",    text: "#fff", label: ""     },
+};
+
+function biz11TierOf(gz: string, yE: string, hE: string, gE: string): BIZ11Tier {
+  const score = (el: string) => el === yE ? 2 : el === hE ? 1 : el === gE ? -2 : 0;
+  const t = score(_BIZ11_STEM_EL[gz[0]] ?? "") + score(_BIZ11_STEM_EL[_BIZ11_BRANCH_MAIN[gz[1]] ?? ""] ?? "");
+  return t >= 2 ? "good" : t <= -1 ? "caution" : "neutral";
+}
+
+function biz11ClsEl(el: string, yE: string, hE: string, gE: string): string {
+  return el === yE ? "yong" : el === hE ? "heu" : el === gE ? "gi" : "neu";
+}
+
+function BizFlowGraphBIZ11({ myView, partnerView, myYE, myHE, myGE, ptYE, ptHE, ptGE }: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myYE: string; myHE: string; myGE: string;
+  ptYE: string; ptHE: string; ptGE: string;
+}) {
+  const baseYear = myView.currentYear ?? new Date().getFullYear();
+  const YEARS = Array.from({ length: 10 }, (_, i) => baseYear + i);
+
+  const scoreYear = (year: number) => {
+    const gz = yearGanji(year);
+    const ganEl = _BIZ11_STEM_EL[gz[0] ?? ""] ?? "";
+    const jiEl  = _BIZ11_STEM_EL[_BIZ11_BRANCH_MAIN[gz[1] ?? ""] ?? ""] ?? "";
+    const sc = (el: string, yE: string, hE: string, gE: string) =>
+      el === yE ? 2 : el === hE ? 1 : el === gE ? -2 : 0;
+    const raw = sc(ganEl,myYE,myHE,myGE) + sc(jiEl,myYE,myHE,myGE)
+              + sc(ganEl,ptYE,ptHE,ptGE) + sc(jiEl,ptYE,ptHE,ptGE);
+    return Math.min(100, Math.max(0, Math.round((raw + 8) / 16 * 100)));
+  };
+
+  const pts = YEARS.map(year => ({ year, score: scoreYear(year) }));
+  const W = 320, H = 200;
+  const PL = 28, PR = 12, PT = 24, PB = 60;
+  const CW = W - PL - PR, CH = H - PT - PB;
+  const scores = pts.map(p => p.score);
+  const rawMin = Math.min(...scores), rawMax = Math.max(...scores);
+  const pad = Math.max(8, Math.round((rawMax - rawMin) * 0.2));
+  const MIN_S = Math.max(0, rawMin - pad), MAX_S = Math.min(100, rawMax + pad);
+  const xOf = (year: number) => PL + ((year - YEARS[0]) / (YEARS.length - 1)) * CW;
+  const yOf = (score: number) => PT + (1 - (score - MIN_S) / (MAX_S - MIN_S)) * CH;
+  const coords = pts.map(p => ({ x: xOf(p.year), y: yOf(p.score), year: p.year, score: p.score }));
+  const linePath = coords.reduce((acc, c, i) => {
+    if (i === 0) return `M ${c.x} ${c.y}`;
+    const prev = coords[i - 1];
+    const cpx = (prev.x + c.x) / 2;
+    return `${acc} C ${cpx} ${prev.y} ${cpx} ${c.y} ${c.x} ${c.y}`;
+  }, "");
+  const fillPath = `${linePath} L ${coords[coords.length - 1].x} ${PT + CH} L ${coords[0].x} ${PT + CH} Z`;
+  const maxScore = Math.max(...scores), minScore = Math.min(...scores);
+  const GR_COLOR = BCH11_COLOR;
+
+  return (
+    <div className="mx-5 mb-2 rounded-2xl overflow-hidden" style={{ border: `1px solid rgba(0,0,0,0.08)`, background: BCH11_PALE }}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", display: "block", overflow: "visible" }}>
+        <defs>
+          <linearGradient id="b11cfg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={GR_COLOR} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={GR_COLOR} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={fillPath} fill="url(#b11cfg)" />
+        <path d={linePath} fill="none" stroke={GR_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        {coords.map((c, i) => (
+          <line key={`vl-${i}`} x1={c.x} y1={c.y + 4} x2={c.x} y2={PT + CH} stroke={GR_COLOR} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.4" />
+        ))}
+        {coords.map((c, i) => {
+          const isMax = c.score === maxScore, isMin = c.score === minScore;
+          const isPeak = isMax || isMin;
+          return (
+            <g key={i}>
+              {isPeak && <circle cx={c.x} cy={c.y} r="10" fill={isMax ? "#1a4a9e" : "#c0306a"} opacity="0.15" />}
+              <circle cx={c.x} cy={c.y} r={isPeak ? 6.5 : 3} fill={isMax ? "#1a4a9e" : isMin ? "#c0306a" : GR_COLOR} stroke={BCH11_PALE} strokeWidth="1.5" />
+            </g>
+          );
+        })}
+        <line x1={PL} y1={PT + CH} x2={W - PR} y2={PT + CH} stroke="rgba(0,0,0,0.1)" strokeWidth="1" />
+        {YEARS.map(y => {
+          const c = coords.find(c => c.year === y)!;
+          const isMax = c.score === maxScore, isMin = c.score === minScore;
+          const isPeak = isMax || isMin;
+          return (
+            <g key={y}>
+              <line x1={xOf(y)} y1={PT + CH} x2={xOf(y)} y2={PT + CH + 4} stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+              <rect x={xOf(y) - 14} y={PT + CH + 6} width={28} height={18} rx={5} ry={5}
+                fill={isPeak ? (isMax ? "#dce8ff" : "#ffe0e0") : "rgba(0,0,0,0.04)"}
+                stroke={isPeak ? (isMax ? "#1a4a9e" : "#c0306a") : "rgba(0,0,0,0.2)"} strokeWidth="1" />
+              <text x={xOf(y)} y={PT + CH + 18} textAnchor="middle" fontSize="10" fontWeight="600"
+                fill={isPeak ? (isMax ? "#1a4a9e" : "#c0306a") : "#9a8f88"}>{String(y).slice(2)}</text>
+              {isPeak && (
+                <text x={xOf(y)} y={PT + CH + 38} textAnchor="middle" fontSize="11" fontWeight="800"
+                  fill={isMax ? "#1a4a9e" : "#c0306a"}>{isMax ? "최고" : "주의"}</text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+function BizFlowPeriodsBIZ11({ myView, partnerView, myYE, myHE, myGE, ptYE, ptHE, ptGE, myName, partnerName }: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myYE: string; myHE: string; myGE: string;
+  ptYE: string; ptHE: string; ptGE: string;
+  myName: string; partnerName: string;
+}) {
+  void partnerName;
+  const baseYear = myView.currentYear ?? new Date().getFullYear();
+  const YEARS = Array.from({ length: 10 }, (_, i) => baseYear + i);
+
+  const GAN_KO: Record<string, string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
+  const JI_KO:  Record<string, string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
+
+  const scoreYear = (year: number) => {
+    const gz = yearGanji(year);
+    const ganEl = _BIZ11_STEM_EL[gz[0] ?? ""] ?? "";
+    const jiEl  = _BIZ11_STEM_EL[_BIZ11_BRANCH_MAIN[gz[1] ?? ""] ?? ""] ?? "";
+    const sc = (el: string, yE: string, hE: string, gE: string) =>
+      el === yE ? 2 : el === hE ? 1 : el === gE ? -2 : 0;
+    const raw = sc(ganEl,myYE,myHE,myGE) + sc(jiEl,myYE,myHE,myGE)
+              + sc(ganEl,ptYE,ptHE,ptGE) + sc(jiEl,ptYE,ptHE,ptGE);
+    return Math.min(100, Math.max(0, Math.round((raw + 8) / 16 * 100)));
+  };
+
+  const pts = YEARS.map(year => {
+    const gz = yearGanji(year);
+    return { year, score: scoreYear(year), gz };
+  });
+
+  const THRESH = 6;
+  type Dir = "up" | "down" | "flat";
+  const dirs: Dir[] = pts.map((p, i) => {
+    if (i === 0) return "flat";
+    const d = p.score - pts[i - 1].score;
+    return d > THRESH ? "up" : d < -THRESH ? "down" : "flat";
+  });
+
+  type Group = { years: number[]; scores: number[]; dir: Dir; gzList: string[] };
+  const groups: Group[] = [];
+  pts.forEach((p, i) => {
+    const rawDir = dirs[i];
+    const effectiveDir: Dir = rawDir === "flat" && groups.length > 0 ? groups[groups.length - 1].dir : rawDir;
+    if (groups.length === 0 || groups[groups.length - 1].dir !== effectiveDir) {
+      groups.push({ years: [p.year], scores: [p.score], dir: effectiveDir, gzList: [p.gz] });
+    } else {
+      const g = groups[groups.length - 1];
+      g.years.push(p.year); g.scores.push(p.score); g.gzList.push(p.gz);
+    }
+  });
+
+  const merged: Group[] = [];
+  groups.forEach(g => {
+    if (g.years.length === 1 && merged.length > 0) {
+      const prev = merged[merged.length - 1];
+      prev.years.push(...g.years); prev.scores.push(...g.scores); prev.gzList.push(...g.gzList);
+    } else {
+      merged.push({ ...g });
+    }
+  });
+
+  const maxScore = Math.max(...pts.map(p => p.score));
+  const minScore = Math.min(...pts.map(p => p.score));
+  const gzKo = (gz: string) => `${GAN_KO[gz[0]] ?? gz[0]}${JI_KO[gz[1]] ?? gz[1]}`;
+
+  const periods = merged.map(g => {
+    const avgScore = g.scores.reduce((a, b) => a + b, 0) / g.scores.length;
+    const peakScore = Math.max(...g.scores);
+    const isGlobalPeak   = g.scores.includes(maxScore);
+    const isGlobalTrough = g.scores.includes(minScore);
+    const yearLabel = g.years.length === 1 ? `${g.years[0]}년` : `${g.years[0]}~${g.years[g.years.length - 1]}`;
+    const gzDesc = g.gzList.slice(0, 2).map(gz => `${g.years[g.gzList.indexOf(gz)]}년 ${gzKo(gz)}`).join("와 ");
+
+    let trend: string, title: string, text: string;
+    if (isGlobalPeak && peakScore >= 55) {
+      trend = "고점";
+      title = "사업 운세가 가장 강하게 열리는 시기";
+      text = `${gzDesc}의 기운이 두 사람 사주에 활기를 불어넣는 시기입니다. 용신과 희신의 기운이 맞아떨어져 새로운 사업 계획 실행과 중요한 결정을 내리기에 가장 좋은 때이오.`;
+    } else if (isGlobalTrough && peakScore <= 45) {
+      trend = "저점";
+      title = "기운이 약해지는 시기 — 신중하게 운영";
+      text = `${gzDesc}의 기운은 두 사람 사주에 부담을 주는 오행이 겹쳐 드는 구간입니다. 과감한 투자나 새 도전보다 기존 사업을 안정적으로 유지하고 내실을 다지는 시기로 삼으시기를 권합니다.`;
+    } else if (g.dir === "up") {
+      trend = "상승 중";
+      title = avgScore >= 55 ? "사업 운세 활성화" : "기운이 서서히 나아지는 시기";
+      text = `${gzDesc}의 기운이 나아가며 사업 운세가 점차 상승하는 구간입니다. 새로운 기회를 포착하고 적극적으로 활용하기에 좋은 흐름이오.`;
+    } else if (g.dir === "down") {
+      trend = "하락 중";
+      title = avgScore >= 45 ? "잠시 재정비 시기" : "기운이 가라앉는 구간";
+      text = `${gzDesc}의 기운이 사주와 충돌하거나 기신 오행이 강해지는 시기입니다. 무리한 확장보다 안정적인 운영에 집중하고 내실을 쌓는 것이 좋소.`;
+    } else {
+      trend = "유지";
+      title = "평이하게 흐르는 시기";
+      text = `${gzDesc}의 기운이 큰 변화 없이 흐르는 구간입니다. 꾸준히 사업을 운영하고 기반을 다지기에 적합한 시기이오.`;
+    }
+    return { label: yearLabel, trend, title, text };
+  });
+
+  const TREND_META: Record<string, { icon: string; color: string }> = {
+    "상승 중": { icon: "↗", color: "#1a6a4a" },
+    "고점":    { icon: "▲", color: "#b07a20" },
+    "하락 중": { icon: "↘", color: "#9b4a4a" },
+    "저점":    { icon: "▼", color: "#c0306a" },
+    "유지":    { icon: "→", color: "#5a6a7a" },
+  };
+
+  if (periods.length === 0) return null;
+  return (
+    <div className="mx-5 mb-4 space-y-2">
+      {periods.map((p, i) => {
+        const meta = TREND_META[p.trend] ?? { icon: "•", color: MUTE };
+        return (
+          <div key={i} className="flex gap-3 items-start rounded-2xl px-4 py-3.5" style={{ background: `${meta.color}09`, border: `1px solid ${meta.color}22` }}>
+            <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black mt-0.5"
+              style={{ background: `${meta.color}14`, border: `2px solid ${meta.color}30`, color: meta.color }}>
+              {meta.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="text-[11px] font-black" style={{ color: meta.color }}>{p.label}</span>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${meta.color}15`, color: meta.color }}>{p.trend}</span>
+                <span className="text-[12px] font-black" style={{ color: INK, fontFamily: SERIF }}>{p.title}</span>
+              </div>
+              <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p.text}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BizSeunCardBIZ11({
+  myView, partnerView,
+  myYE, myHE, myGE, ptYE, ptHE, ptGE,
+  myName, ptName,
+}: {
+  myView: MyeongsikView; partnerView: MyeongsikView;
+  myYE: string; myHE: string; myGE: string;
+  ptYE: string; ptHE: string; ptGE: string;
+  myName: string; ptName: string;
+}) {
+  const baseYear = myView.currentYear ?? new Date().getFullYear();
+  const years: number[] = Array.from({ length: 5 }, (_, i) => baseYear + i);
+  const [sel, setSel] = useState<number | null>(0);
+  const [selMonth, setSelMonth] = useState<number | null>(null);
+
+  return (() => {
+    return (
+      <div className="px-4 pb-6">
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12,
+          padding: "8px 12px", borderRadius: 10, background: "#f0f4ff", border: "1px solid #c7d6f7" }}>
+          <span style={{ fontSize: 14 }}>👇</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#3a5abf" }}>카드를 눌러 년별, 월별 사업 흐름을 확인하시오</span>
+        </div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
+          {([
+            { label: "용신", color: "#4285f4" },
+            { label: "희신", color: "#43a047" },
+            { label: "기신", color: "#e53935" },
+            { label: "보통", color: "#aaa"    },
+          ]).map(({ label, color }) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: color, display: "inline-block", flexShrink: 0 }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color }}>{label}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ position: "relative" }}>
+          <div style={{ position: "absolute", right: -16, top: 0, bottom: 0, width: 80, zIndex: 10, pointerEvents: "none",
+            background: "linear-gradient(to right, transparent, #fff 80%)",
+            display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>
+            <span style={{ fontSize: 20, color: "#b0a8a4", lineHeight: 1 }}>›</span>
+          </div>
+          <div className="overflow-x-auto pb-2 -mx-1" style={{ scrollbarWidth: "none" }}>
+            <div className="flex gap-2 min-w-max px-1">
+              {years.map((year, idx) => {
+                const gz = yearGanji(year);
+                const myTier = biz11TierOf(gz, myYE, myHE, myGE);
+                const ptTier = biz11TierOf(gz, ptYE, ptHE, ptGE);
+                const isActive = sel === idx;
+                const bothGood = myTier === "good" && ptTier === "good";
+                const anyBad = myTier === "caution" || ptTier === "caution";
+                const cardAccent = bothGood ? "#2e7d32" : anyBad ? "#c62828" : "#5a5a7a";
+                const myIlgan = (myView.ilgan ?? "甲")[0];
+                const ptIlgan = (partnerView.ilgan ?? "甲")[0];
+                const myGanSS = sipseongOfStem(myIlgan, gz[0] ?? "");
+                const myJiSS  = sipseongOfBranch(myIlgan, gz[1] ?? "");
+                const ptGanSS = sipseongOfStem(ptIlgan, gz[0] ?? "");
+                const ptJiSS  = sipseongOfBranch(ptIlgan, gz[1] ?? "");
+                const ganEl = _BIZ11_STEM_EL[gz[0] ?? ""] ?? "";
+                const jiEl  = _BIZ11_STEM_EL[_BIZ11_BRANCH_MAIN[gz[1] ?? ""] ?? ""] ?? "";
+                void ganEl; void jiEl;
+                return (
+                  <div key={year} className="flex-shrink-0 flex flex-col items-center"
+                    onClick={() => setSel(idx)}
+                    style={{
+                      width: 88, borderRadius: 16,
+                      border: `2px solid ${isActive ? cardAccent : "#e0dbd8"}`,
+                      background: isActive ? `${cardAccent}12` : "#f6efea",
+                      boxShadow: isActive ? `0 0 0 2px ${cardAccent}55` : undefined,
+                      cursor: "pointer", transition: "all .18s",
+                      padding: "10px 6px 8px",
+                      opacity: sel !== null && !isActive ? 0.35 : 1,
+                    }}>
+                    <span style={{ fontSize: 14, color: isActive ? cardAccent : "#5a5560", fontWeight: 800, marginBottom: 4 }}>{year}</span>
+                    <div style={{ display: "flex", gap: 3, justifyContent: "center", marginBottom: 3 }}>
+                      {[{ ss: myGanSS, cls: biz11ClsEl(ganEl, myYE, myHE, myGE) }, { ss: ptGanSS, cls: biz11ClsEl(ganEl, ptYE, ptHE, ptGE) }].map(({ ss, cls }, i) => {
+                        const s = BIZ11_CLS_STYLE[cls];
+                        return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px" }}>{ss || "—"}</span>;
+                      })}
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ganCharImage(gz[0] ?? "")} alt={gz[0]} style={{ width: 66, height: 66, objectFit: "contain" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={jiCharImage(gz[1] ?? "")} alt={gz[1]} style={{ width: 66, height: 66, objectFit: "contain", marginTop: 2 }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 3, marginBottom: 2 }}>
+                      {[{ ss: myJiSS, cls: biz11ClsEl(jiEl, myYE, myHE, myGE) }, { ss: ptJiSS, cls: biz11ClsEl(jiEl, ptYE, ptHE, ptGE) }].map(({ ss, cls }, i) => {
+                        const s = BIZ11_CLS_STYLE[cls];
+                        return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px" }}>{ss || "—"}</span>;
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {sel !== null && (() => {
+          const year = years[sel];
+          const months = Array.from({ length: 12 }, (_, i) => i + 1);
+          return (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#5a5560", marginBottom: 10 }}>
+                {year}년 월별 사업 흐름
+              </div>
+              <div style={{ position: "relative" }}>
+                <div style={{ position: "absolute", right: -16, top: 0, bottom: 0, width: 80, zIndex: 10, pointerEvents: "none",
+                  background: "linear-gradient(to right, transparent, #fff 80%)",
+                  display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 8 }}>
+                  <span style={{ fontSize: 20, color: "#b0a8a4" }}>›</span>
+                </div>
+                <div style={{ overflowX: "auto", scrollbarWidth: "none" as const, paddingBottom: 4 }}>
+                  <div style={{ display: "flex", gap: 8, width: "max-content" }}>
+                    {months.map((month) => {
+                      const mgz = monthGanji(year, month);
+                      const mGanEl = _BIZ11_STEM_EL[mgz[0] ?? ""] ?? "";
+                      const mJiEl  = _BIZ11_STEM_EL[_BIZ11_BRANCH_MAIN[mgz[1] ?? ""] ?? ""] ?? "";
+                      const myMTier = biz11TierOf(mgz, myYE, myHE, myGE);
+                      const ptMTier = biz11TierOf(mgz, ptYE, ptHE, ptGE);
+                      const bothMGood = myMTier === "good" && ptMTier === "good";
+                      const anyMBad = myMTier === "caution" || ptMTier === "caution";
+                      const mAccent = bothMGood ? "#2e7d32" : anyMBad ? "#c62828" : "#5a5a7a";
+                      const isMonthActive = selMonth === month;
+                      const myIlgan = (myView.ilgan ?? "甲")[0];
+                      const ptIlgan = (partnerView.ilgan ?? "甲")[0];
+                      const myMGanSS = sipseongOfStem(myIlgan, mgz[0] ?? "");
+                      const myMJiSS  = sipseongOfBranch(myIlgan, mgz[1] ?? "");
+                      const ptMGanSS = sipseongOfStem(ptIlgan, mgz[0] ?? "");
+                      const ptMJiSS  = sipseongOfBranch(ptIlgan, mgz[1] ?? "");
+                      void mGanEl; void mJiEl;
+                      return (
+                        <div key={month}
+                          onClick={() => setSelMonth(isMonthActive ? null : month)}
+                          style={{
+                            width: 88, borderRadius: 16, flexShrink: 0,
+                            border: `2px solid ${isMonthActive ? mAccent : "#e0dbd8"}`,
+                            background: isMonthActive ? `${mAccent}12` : "#f6efea",
+                            boxShadow: isMonthActive ? `0 0 0 2px ${mAccent}55` : undefined,
+                            cursor: "pointer", transition: "all .18s",
+                            padding: "10px 6px 8px",
+                            display: "flex", flexDirection: "column", alignItems: "center",
+                            opacity: selMonth !== null && !isMonthActive ? 0.35 : 1,
+                          }}>
+                          <span style={{ fontSize: 14, fontWeight: 800, color: isMonthActive ? mAccent : "#5a5560", marginBottom: 4 }}>{month}월</span>
+                          <div style={{ display: "flex", gap: 3, justifyContent: "center", marginBottom: 3 }}>
+                            {[{ ss: myMGanSS, cls: biz11ClsEl(mGanEl, myYE, myHE, myGE) }, { ss: ptMGanSS, cls: biz11ClsEl(mGanEl, ptYE, ptHE, ptGE) }].map(({ ss, cls }, i) => {
+                              const s = BIZ11_CLS_STYLE[cls];
+                              return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px" }}>{ss || "—"}</span>;
+                            })}
+                          </div>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={ganCharImage(mgz[0] ?? "")} alt={mgz[0]} style={{ width: 66, height: 66, objectFit: "contain" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={jiCharImage(mgz[1] ?? "")} alt={mgz[1]} style={{ width: 66, height: 66, objectFit: "contain", marginTop: 2 }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          <div style={{ display: "flex", gap: 3, justifyContent: "center", marginTop: 3, marginBottom: 2 }}>
+                            {[{ ss: myMJiSS, cls: biz11ClsEl(mJiEl, myYE, myHE, myGE) }, { ss: ptMJiSS, cls: biz11ClsEl(mJiEl, ptYE, ptHE, ptGE) }].map(({ ss, cls }, i) => {
+                              const s = BIZ11_CLS_STYLE[cls];
+                              return <span key={i} style={{ fontSize: 11, fontWeight: 700, color: s.text, background: s.bg, borderRadius: 5, padding: "2px 6px" }}>{ss || "—"}</span>;
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              {selMonth !== null && (() => {
+                const mgz = monthGanji(year, selMonth);
+                const myMTier = biz11TierOf(mgz, myYE, myHE, myGE);
+                const ptMTier = biz11TierOf(mgz, ptYE, ptHE, ptGE);
+                const bothMGood = myMTier === "good" && ptMTier === "good";
+                const bothMBad  = myMTier === "caution" && ptMTier === "caution";
+                const anyMBad   = myMTier === "caution" || ptMTier === "caution";
+                const mGanEl = _BIZ11_STEM_EL[mgz[0] ?? ""] ?? "";
+                const mJiEl  = _BIZ11_STEM_EL[_BIZ11_BRANCH_MAIN[mgz[1] ?? ""] ?? ""] ?? "";
+                const myIlgan = (myView.ilgan ?? "甲")[0];
+                const ptIlgan = (partnerView.ilgan ?? "甲")[0];
+                const myMGanSS = sipseongOfStem(myIlgan, mgz[0] ?? "");
+                const myMJiSS  = sipseongOfBranch(myIlgan, mgz[1] ?? "");
+                const ptMGanSS = sipseongOfStem(ptIlgan, mgz[0] ?? "");
+                const ptMJiSS  = sipseongOfBranch(ptIlgan, mgz[1] ?? "");
+                const myGanCls = biz11ClsEl(mGanEl, myYE, myHE, myGE);
+                const myJiCls  = biz11ClsEl(mJiEl,  myYE, myHE, myGE);
+                const ptGanCls = biz11ClsEl(mGanEl, ptYE, ptHE, ptGE);
+                const ptJiCls  = biz11ClsEl(mJiEl,  ptYE, ptHE, ptGE);
+
+                const mPanelAccent = bothMGood ? "#2e7d32" : anyMBad ? "#c62828" : "#5a5a7a";
+                const mCombinedLabel = bothMGood ? "두 사람 모두 길운"
+                  : bothMBad  ? "두 사람 모두 주의"
+                  : anyMBad   ? "엇갈리는 흐름"
+                  : "평이한 흐름";
+
+                let commentIcon = "→", commentColor = "#5a5a7a", comment = "";
+                if (bothMGood) {
+                  commentIcon = "✦"; commentColor = "#1a6a4a";
+                  comment = `두 분 모두 용신·희신 기운이 드는 길운의 달입니다. 중요한 사업 결정, 계약, 협력 논의를 추진하기에 가장 좋은 시기이오.`;
+                } else if (bothMBad) {
+                  commentIcon = "↘"; commentColor = "#c62828";
+                  comment = `두 분 모두 기신 오행이 강하게 드는 달입니다. 과감한 투자나 사업 확장보다 현상 유지와 내실 다지기에 집중하는 것이 좋소.`;
+                } else if (anyMBad) {
+                  const badName = myMTier === "caution" ? myName : ptName;
+                  const goodName = myMTier === "caution" ? ptName : myName;
+                  commentIcon = "→"; commentColor = "#5a5a7a";
+                  comment = `${badName}님은 기신 오행이 드는 달로 부담이 있고, ${goodName}님은 무난한 흐름입니다. ${badName}님의 상태를 살피며 사업 결정을 내리시기를 권합니다.`;
+                } else {
+                  commentIcon = "→"; commentColor = "#5a5a7a";
+                  comment = `두 분 모두 무난하게 흘러가는 달입니다. 평온한 기운 속에서 꾸준히 사업을 운영하기에 적합한 달입니다.`;
+                }
+
+                const myTierColor = myMTier === "good" ? "#1a6a4a" : myMTier === "caution" ? "#c62828" : "#7a7070";
+                const ptTierColor = ptMTier === "good" ? "#1a6a4a" : ptMTier === "caution" ? "#c62828" : "#7a7070";
+                const myTierLabel = myMTier === "good" ? "길운" : myMTier === "caution" ? "주의" : "평이";
+                const ptTierLabel = ptMTier === "good" ? "길운" : ptMTier === "caution" ? "주의" : "평이";
+
+                const chipStyle = (cls: string) => {
+                  const s = BIZ11_CLS_STYLE[cls] ?? BIZ11_CLS_STYLE.neu;
+                  return {
+                    fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 9,
+                    background: s.bg, color: s.text, border: `1.5px solid ${s.border}`,
+                    display: "inline-block",
+                  } as React.CSSProperties;
+                };
+
+                return (
+                  <div style={{ marginTop: 12, borderRadius: 16, border: `1.5px solid ${mPanelAccent}35`,
+                    background: "#faf9f8", overflow: "hidden" }}>
+                    <div style={{ padding: "11px 14px", background: `${mPanelAccent}10`, borderBottom: `1px solid ${mPanelAccent}20`,
+                      display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: mPanelAccent }}>
+                        {year}년 {selMonth}월&nbsp;
+                        <span style={{ fontWeight: 600, color: "#6a5a50" }}>
+                          {mgz[0]}{mgz[1]}월 ({_BIZ11_GAN_KO[mgz[0] ?? ""] ?? ""}{_BIZ11_JI_KO[mgz[1] ?? ""] ?? ""}월)
+                        </span>
+                      </span>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 20,
+                        background: mPanelAccent, color: "#fff", whiteSpace: "nowrap" }}>{mCombinedLabel}</span>
+                    </div>
+                    <div style={{ padding: "12px 14px 10px", display: "flex", gap: 10 }}>
+                      <div style={{ flex: 1, borderRadius: 12, minWidth: 0,
+                        border: `1.5px solid ${myTierColor}30`,
+                        background: myMTier === "good" ? "#e8f5e9" : myMTier === "caution" ? "#fdecea" : "#f4f4f4",
+                        padding: "11px 12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#3a3030" }}>{myName}님</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
+                            background: myTierColor, color: "#fff" }}>{myTierLabel}</span>
+                        </div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <span style={chipStyle(myGanCls)}>{myMGanSS || "—"}</span>
+                          <span style={chipStyle(myJiCls )}>{myMJiSS  || "—"}</span>
+                        </div>
+                        <div style={{ marginTop: 6, fontSize: 10, color: "#9a8878" }}>천간 {mgz[0]} · 지지 {mgz[1]}</div>
+                      </div>
+                      <div style={{ flex: 1, borderRadius: 12, minWidth: 0,
+                        border: `1.5px solid ${ptTierColor}30`,
+                        background: ptMTier === "good" ? "#e8f5e9" : ptMTier === "caution" ? "#fdecea" : "#f4f4f4",
+                        padding: "11px 12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#3a3030" }}>{ptName}님</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
+                            background: ptTierColor, color: "#fff" }}>{ptTierLabel}</span>
+                        </div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <span style={chipStyle(ptGanCls)}>{ptMGanSS || "—"}</span>
+                          <span style={chipStyle(ptJiCls )}>{ptMJiSS  || "—"}</span>
+                        </div>
+                        <div style={{ marginTop: 6, fontSize: 10, color: "#9a8878" }}>천간 {mgz[0]} · 지지 {mgz[1]}</div>
+                      </div>
+                    </div>
+                    <div style={{ padding: "0 14px 14px" }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 12px",
+                        background: `${commentColor}08`, borderRadius: 12, border: `1px solid ${commentColor}25` }}>
+                        <span style={{ fontSize: 16, lineHeight: 1, marginTop: 2, flexShrink: 0, color: commentColor }}>{commentIcon}</span>
+                        <p style={{ fontSize: 12, color: "#4a4040", lineHeight: 1.75, margin: 0, fontFamily: SERIF }}>{comment}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          );
+        })()}
+      </div>
+    );
+  })();
+}
+
+function BizSuccessGauge({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const sg        = (data.successGuess as Record<string, unknown> | undefined) ?? null;
+  if (!sg) return null;
+  const successRatio = Math.min(100, Math.max(0, (sg.successRatio as number | undefined) ?? 50));
+  const riskRatio    = 100 - successRatio;
+  const basis        = (sg.basis as string | undefined) ?? "";
+  const note         = (sg.note  as string | undefined) ?? "";
+  const SUC_C = "#1a4a9e";
+  const RSK_C = "#c0306a";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BCH11_COLOR}28` }}>
+      <div className="px-5 pt-4 pb-3" style={{ background: WHITE }}>
+        <p className="text-[11px] font-black mb-3" style={{ color: BCH11_COLOR }}>사업 성공 가능성 예측</p>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-[11px] font-black w-8 text-right flex-shrink-0" style={{ color: SUC_C }}>성장</span>
+          <div className="flex-1 flex rounded-full overflow-hidden relative" style={{ height: 26 }}>
+            <div className="flex items-center justify-start pl-2.5" style={{ width: `${successRatio}%`, background: SUC_C, transition: "width 0.4s" }}>
+              {successRatio >= 20 && <span className="text-[10px] font-black" style={{ color: WHITE }}>{successRatio}%</span>}
+            </div>
+            <div className="flex items-center justify-end pr-2.5" style={{ width: `${riskRatio}%`, background: RSK_C, transition: "width 0.4s" }}>
+              {riskRatio >= 20 && <span className="text-[10px] font-black" style={{ color: WHITE }}>{riskRatio}%</span>}
+            </div>
+          </div>
+          <span className="text-[11px] font-black w-8 flex-shrink-0" style={{ color: RSK_C }}>주의</span>
+        </div>
+        {basis && <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT, fontFamily: SERIF }}>{basis}</p>}
+        {note && <p className="text-[11px] mb-1" style={{ color: MUTE, fontFamily: SERIF }}>{note}</p>}
+      </div>
+    </div>
+  );
+}
+
+function BizDetailPanel11({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="px-6 mb-2">
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+function BizTipPanel11({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const tips = (data.tips as Record<string, unknown>[] | undefined) ?? [];
+  if (tips.length === 0) return null;
+  return (
+    <div className="mx-5 mb-5 space-y-3">
+      {tips.map((tip, i) => {
+        const tipIcon  = (tip.icon  as string | undefined) ?? "💡";
+        const tipTitle = (tip.title as string | undefined) ?? "";
+        const tipDesc  = (tip.desc  as string | undefined) ?? "";
+        return (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid rgba(0,0,0,0.07)`, borderLeft: `4px solid ${BCH11_COLOR}` }}>
+            <div className="px-4 pt-4 pb-3">
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="text-[24px] leading-none">{tipIcon}</span>
+                <p className="text-[14px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{tipTitle}</p>
+              </div>
+              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tipDesc}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+
 // ─── 제10장 비즈니스 재물흐름 전용 컴포넌트 ─────────────────────────────────────
 
 function BizWealthFlowGraph({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
@@ -6345,44 +6962,80 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제11장 · 미래 흐름 ═══════════ */}
-      {ch === "11" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 미래 흐름</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 사업 미래</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_11/kunghap_business_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 함께 만들어갈\n사업의 미래를\n홍연이 보여드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>미래 흐름</Heading>
-            {(jc.futureFlow as {items?: ReportFlowItem[]} | undefined)?.items ? (
-              <RunFlowChart flow={(jc.futureFlow as {items: ReportFlowItem[]}).items} />
-            ) : (
-              <RelationFlowChart view={report?.view ?? null} partnerView={report?.partnerView ?? null} />
+      {/* ═══════════ 제11장 · 세운·월운별 사업 흐름 ═══════════ */}
+      {ch === "11" && (() => {
+        const bf = (jc.bizFutureFlow as Record<string,unknown>|undefined) ?? null;
+        const bt = (jc.bizFutureTips as Record<string,unknown>|undefined) ?? null;
+        const myFirstName11      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
+        const partnerFirstName11 = report?.partnerName ? (report.partnerName.length > 1 ? report.partnerName.slice(1) : report.partnerName) : "상대";
+        const myYs11 = (jc.myYongsin      as Record<string, string> | undefined) ?? {};
+        const ptYs11 = (jc.partnerYongsin as Record<string, string> | undefined) ?? {};
+        const myYE11 = myYs11.yongsinEl ?? ""; const myHE11 = myYs11.heusinEl ?? ""; const myGE11 = myYs11.gisinEl ?? "";
+        const ptYE11 = ptYs11.yongsinEl ?? ""; const ptHE11 = ptYs11.heusinEl ?? ""; const ptGE11 = ptYs11.gisinEl ?? "";
+        const myView11  = report?.view ?? null;
+        const ptView11  = report?.partnerView ?? null;
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 11 장 · 사업 흐름</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>세운·월운으로 보는 사업 흐름</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_11/kunghap_business_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"두 사람의 사업이\n어떤 시기를 타고 흘러가는지\n살펴보겠소."`}</Quote>
+
+            <section className="px-6 pt-2 pb-2">
+              <Heading>향후 10년 사업 운세 흐름</Heading>
+            </section>
+            {myView11 && ptView11 && (
+              <BizFlowGraphBIZ11
+                myView={myView11} partnerView={ptView11}
+                myYE={myYE11} myHE={myHE11} myGE={myGE11}
+                ptYE={ptYE11} ptHE={ptHE11} ptGE={ptGE11}
+              />
             )}
-          </section>
-          <section className="px-6 pt-4 pb-4">
-            <Heading>사업 비전</Heading>
-            {(jc.businessVision as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            {(jc.finalAdvice as {desc?: string} | undefined)?.desc && (
-              <div className="p-4 rounded-2xl" style={{ background: `${MAROON}08`, border: `1px solid ${MAROON}22` }}>
-                <p className="text-[13px] leading-relaxed font-medium" style={{ color: MAROON }}>{(jc.finalAdvice as {desc: string}).desc}</p>
-              </div>
+            {myView11 && ptView11 && (
+              <BizFlowPeriodsBIZ11
+                myView={myView11} partnerView={ptView11}
+                myYE={myYE11} myHE={myHE11} myGE={myGE11}
+                ptYE={ptYE11} ptHE={ptHE11} ptGE={ptGE11}
+                myName={myFirstName11} partnerName={partnerFirstName11}
+              />
             )}
-          </section>
-          <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
-          <Quote>{`"미래를 살펴보았으니,\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="11" go={next} />
-        </>
-      )}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>세운·월운별 사업 흐름 카드</Heading>
+            </section>
+            {myView11 && ptView11 && (
+              <BizSeunCardBIZ11
+                myView={myView11} partnerView={ptView11}
+                myYE={myYE11} myHE={myHE11} myGE={myGE11}
+                ptYE={ptYE11} ptHE={ptHE11} ptGE={ptGE11}
+                myName={myFirstName11} ptName={partnerFirstName11}
+              />
+            )}
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>사업 성공 가능성 예측</Heading>
+            </section>
+            <BizSuccessGauge data={bf} />
+            <BizDetailPanel11 data={bf} />
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>사업 흐름을 이롭게 하는 법</Heading>
+            </section>
+            <BizTipPanel11 data={bt} />
+
+            <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
+            <Quote>{`"두 사람의 사업 흐름을\n살펴보았으니,\n홍연의 마지막 서신을 받으시오."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="11" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
       {ch === "12" && (
