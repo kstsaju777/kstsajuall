@@ -6812,6 +6812,26 @@ function ReportPreviewInner() {
             {/* 오프닝 인용 */}
             <Quote>{`두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오.`}</Quote>
 
+            {/* 합·충 개념 안내 배너 */}
+            <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${CH6_COLOR}15` }}>
+              <div className="flex">
+                <div className="flex-1 px-4 py-4" style={{ background: `${HAP_COLOR}08`, borderRight: `1px solid ${INK}06` }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[16px]">🌿</span>
+                    <p className="text-[12px] font-black" style={{ color: HAP_COLOR }}>합(合)</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 서로 끌어당겨 하나가 되는 것. 관계를 깊게 하고 안정감을 주오. 합이 많을수록 두 사람은 자연스럽게 가까워지오.</p>
+                </div>
+                <div className="flex-1 px-4 py-4" style={{ background: `${CHUNG_COLOR}08` }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[16px]">⚡</span>
+                    <p className="text-[12px] font-black" style={{ color: CHUNG_COLOR }}>충(沖)</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 정면으로 충돌하는 것. 갈등과 자극을 동시에 주오. 충이 있다고 나쁜 것만은 아니니 서로를 깨어나게 하는 힘이오.</p>
+                </div>
+              </div>
+            </div>
+
             {/* 인터랙티브 관계 카드 */}
             {report?.view && report?.partnerView && (
               <section className="pb-4">
