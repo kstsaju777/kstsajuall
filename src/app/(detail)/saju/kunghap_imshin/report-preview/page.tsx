@@ -5291,7 +5291,7 @@ const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "임신궁합에 대하여",                    no: "0" },
   { disp: "제1장",  chip: "나의원국", title: "나는 부모로써 어떤 사람인가?",        no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "배우자는 부모로써 어떤 사람인가?",    no: "2" },
-  { disp: "제3장",  chip: "자녀운",  title: "두 사람의 자녀운",                    no: "3" },
+  { disp: "제3장",  chip: "자녀운",  title: "두 사람의 자녀운 흐름",               no: "3" },
   { disp: "제4장",  chip: "합·충",    title: "두 사주의 합과 충",                  no: "4" },
   { disp: "제5장",  chip: "자녀기운", title: "태어날 자녀의 기운",                  no: "5" },
   { disp: "제6장",  chip: "임신시기", title: "임신에 좋은 시기",                    no: "6" },
