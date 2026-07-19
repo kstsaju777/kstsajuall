@@ -52,6 +52,12 @@ const BCH4_BAL_P  = "#f0eefb";
 // 제6장 비즈니스 스타일 전용
 const BCH6_AMBER  = "#7a5c1e";
 const BCH6_AMBER_P = "#fdf8ec";
+// 제9장 비즈니스 위기와 극복 전용
+const BCH9_CRISIS   = "#8b2a1a";
+const BCH9_CRISIS_P = "#fdf0ed";
+const BCH9_SOLVE    = "#1e5c3a";
+const BCH9_SOFT     = "#7a5c3a";
+const BIZ_CONFLICT_RED = "#c0404a";
 // 제11장 비즈니스 미래흐름 전용
 const BCH11_COLOR = "#2e5a4a"; // 딥 틸 그린
 const BCH11_PALE  = "#eaf4f0";
@@ -4498,6 +4504,167 @@ function HapChungScoreCardBiz({ data, hapCount, chungCount }: { data: Record<str
   );
 }
 
+// ─── 제9장 비즈니스 위기와 극복 전용 컴포넌트 ───────────────────────────────────
+
+function BizConflictPatternCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const triggerType = (data.triggerType as string | undefined) ?? "";
+  const triggerIcon = (data.triggerIcon as string | undefined) ?? "⚡";
+  const callout     = (data.callout     as string | undefined) ?? "";
+  const patterns    = (data.patterns    as Record<string, unknown>[] | undefined) ?? [];
+  const reconcile   = (data.reconcile   as string | undefined) ?? "";
+  const growthTip   = (data.growthTip   as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${BIZ_CONFLICT_RED}40`, background: `linear-gradient(135deg, ${BIZ_CONFLICT_RED}06 0%, ${WHITE} 60%)` }}>
+      <div className="px-4 pt-3.5 pb-3 flex items-center gap-2.5" style={{ background: `${BIZ_CONFLICT_RED}0d`, borderBottom: `1px solid ${BIZ_CONFLICT_RED}20` }}>
+        <span className="text-[22px]">{triggerIcon}</span>
+        <div>
+          <p className="text-[12.5px] font-black" style={{ color: BIZ_CONFLICT_RED }}>{triggerType}</p>
+          {callout && <p className="text-[11.5px] leading-snug mt-0.5" style={{ color: INK_SOFT, fontFamily: SERIF }}>{callout}</p>}
+        </div>
+      </div>
+      <div className="px-4 pt-3 space-y-3">
+        {patterns.map((p, i) => {
+          const title = (p.title as string | undefined) ?? "";
+          const icon  = (p.icon  as string | undefined) ?? "💢";
+          const desc  = (p.desc  as string | undefined) ?? "";
+          return (
+            <div key={i} className="pb-3" style={{ borderBottom: i < patterns.length - 1 ? `1px dashed ${BIZ_CONFLICT_RED}20` : "none" }}>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-[14px]">{icon}</span>
+                <p className="text-[12.5px] font-black" style={{ color: BIZ_CONFLICT_RED }}>{title}</p>
+              </div>
+              <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+            </div>
+          );
+        })}
+      </div>
+      {reconcile && (
+        <div className="mx-4 mb-3 px-3.5 py-3 rounded-xl" style={{ background: `${BIZ_CONFLICT_RED}08`, border: `1px solid ${BIZ_CONFLICT_RED}20` }}>
+          <p className="text-[11px] font-black mb-1" style={{ color: BIZ_CONFLICT_RED }}>💞 해소 방식</p>
+          <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{reconcile}</p>
+          {growthTip && (
+            <div className="flex items-start gap-1.5 mt-2 pt-2" style={{ borderTop: `1px dashed ${BIZ_CONFLICT_RED}20` }}>
+              <span className="text-[11px] mt-0.5">🌱</span>
+              <p className="text-[12px] font-bold leading-relaxed" style={{ color: BIZ_CONFLICT_RED }}>{growthTip}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BizCrisisCard({ item }: { item: Record<string, unknown> }) {
+  const icon   = (item.icon   as string | undefined) ?? "⚠️";
+  const title  = (item.title  as string | undefined) ?? "";
+  const desc   = (item.desc   as string | undefined) ?? "";
+  const basis  = (item.basis  as string | undefined) ?? "";
+  const signal = (item.signal as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${BCH9_CRISIS}22` }}>
+      <div className="px-4 py-3 flex items-center gap-3" style={{ background: `linear-gradient(135deg, ${BCH9_CRISIS}14 0%, ${BCH9_CRISIS_P} 100%)` }}>
+        <span className="text-[24px] leading-none shrink-0">{icon}</span>
+        <p className="text-[14px] font-black" style={{ color: BCH9_CRISIS }}>{title}</p>
+      </div>
+      <div className="px-4 py-3.5" style={{ background: WHITE }}>
+        <p className="text-[14.5px] leading-[1.95] mb-3 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        {basis && (
+          <div className="mb-2.5 px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${BCH9_CRISIS}08` }}>
+            <span className="text-[12px] shrink-0 mt-0.5">🔍</span>
+            <p className="text-[12px] leading-relaxed" style={{ color: BCH9_CRISIS }}>
+              <span className="font-black">사주 근거 </span>{basis}
+            </p>
+          </div>
+        )}
+        {signal && (
+          <div className="px-3 py-2 rounded-xl flex items-start gap-2" style={{ background: `${GOLD}10`, border: `1px solid ${GOLD}30` }}>
+            <span className="text-[12px] shrink-0 mt-0.5">📡</span>
+            <p className="text-[12px] leading-relaxed font-bold" style={{ color: BCH9_SOFT }}>
+              <span style={{ color: GOLD }}>위기 신호 </span>{signal}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BizOvercomeTipPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const items = (data.items as Record<string, unknown>[] | undefined) ?? [];
+  if (items.length === 0) return null;
+  return (
+    <div className="mx-5 mb-4 space-y-3">
+      {items.map((item, i) => {
+        const icon  = (item.icon  as string | undefined) ?? "💚";
+        const title = (item.title as string | undefined) ?? "";
+        const desc  = (item.desc  as string | undefined) ?? "";
+        const tip   = (item.tip   as string | undefined) ?? "";
+        return (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${BCH9_SOLVE}22` }}>
+            <div className="px-4 py-2.5 flex items-center gap-2.5" style={{ background: `${BCH9_SOLVE}0e` }}>
+              <span className="text-[22px] leading-none shrink-0">{icon}</span>
+              <p className="text-[14px] font-black" style={{ color: BCH9_SOLVE }}>{title}</p>
+            </div>
+            <div className="px-4 py-3" style={{ background: WHITE }}>
+              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+              {tip && (
+                <div className="px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${BCH9_SOLVE}0a`, border: `1px solid ${BCH9_SOLVE}18` }}>
+                  <span className="text-[13px] shrink-0">✅</span>
+                  <p className="text-[12.5px] leading-relaxed font-bold" style={{ color: BCH9_SOLVE }}>{tip}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BizCrisisRecoveryGuide({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout    = (data.callout    as string | undefined) ?? "";
+  const principles = (data.principles as Record<string, unknown>[] | undefined) ?? [];
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="mb-4 px-4 py-3 rounded-xl" style={{ background: `${BCH9_SOLVE}10`, borderLeft: `3px solid ${BCH9_SOLVE}` }}>
+          <p className="text-[13.5px] font-black leading-relaxed" style={{ color: BCH9_SOLVE }}>{callout}</p>
+        </div>
+      )}
+      {principles.length > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BCH9_SOLVE}20` }}>
+          <div className="px-4 py-2.5" style={{ background: `${BCH9_SOLVE}0e` }}>
+            <p className="text-[11px] font-black" style={{ color: BCH9_SOLVE }}>두 파트너의 극복 핵심 원칙</p>
+          </div>
+          {principles.map((pr, i) => {
+            const num    = i + 1;
+            const ptitle = (pr.title as string | undefined) ?? "";
+            const pdesc  = (pr.desc  as string | undefined) ?? "";
+            return (
+              <div key={i} className="px-4 py-3 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${BCH9_SOLVE}0c` : "none" }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-black" style={{ background: BCH9_SOLVE, color: WHITE }}>{num}</div>
+                <div>
+                  <p className="text-[12.5px] font-black mb-0.5" style={{ color: BCH9_SOLVE }}>{ptitle}</p>
+                  <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{pdesc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+
 // ─── 제11장 비즈니스 미래흐름 전용 헬퍼 & 컴포넌트 ──────────────────────────────
 
 const _BIZ11_STEM_EL: Record<string, string> = {
@@ -6869,47 +7036,57 @@ function ReportPreviewInner() {
         </>
       )}
 
-      {/* ═══════════ 제9장 · 위기 시기 ═══════════ */}
-      {ch === "9" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기 시기</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>사업의 위기 시기</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_9/kunghap_business_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"사업에도 위기는 오오.\n미리 알고 대비하면\n넘어설 수 있소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기 점수</Heading>
-            {(jc.crisisScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.crisisScore as {score: number}).score} label={(jc.crisisScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={35} label="위기 위험이 낮은 편이오" />
-            )}
-            {(jc.crisisScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기의 원인</Heading>
-            <ReportSec data={jc.crisisReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>위기 극복 조언</Heading>
-            {(jc.crisisTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-          <Quote>{`"위기를 알았으니,\n이제 가장 좋은 시기를\n살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="9" go={next} />
-        </>
-      )}
+      {/* ═══════════ 제9장 · 위기와 극복 ═══════════ */}
+      {ch === "9" && (() => {
+        const cp  = (jc.crisisPoints   as Record<string,unknown>|undefined) ?? null;
+        const ot  = (jc.overcomeTips   as Record<string,unknown>|undefined) ?? null;
+        const rg  = (jc.recoveryGuide  as Record<string,unknown>|undefined) ?? null;
+        const conflictPat = (jc.conflictPattern as Record<string,unknown>|undefined) ?? null;
+        const cpItems = (cp?.items as Record<string,unknown>[]|undefined) ?? [];
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기와 극복</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>사업 파트너십의 위기와 극복</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 360 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_9/kunghap_business_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <Quote>{`"어떤 사업 파트너십도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>두 사람의 갈등 패턴</Heading>
+              <P>의견이 충돌할 때 어떤 모습인지, 어떻게 해소하는지도 사주에 담겨 있소. 이를 알면 갈등을 다스리는 길이 보이오.</P>
+            </section>
+            <BizConflictPatternCard data={conflictPat} />
+
+            <section className="px-6 pt-2 pb-2">
+              <Heading>위기 요인 분석</Heading>
+              <P>사업 파트너십에서 두 사람 사이에 불씨가 될 수 있는 구체적인 위기 요인들을 하나씩 짚어보겠소. 알면 피할 수 있고, 알면 넘을 수 있소.</P>
+            </section>
+            {cpItems.map((item, i) => <BizCrisisCard key={i} item={item} />)}
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>위기를 넘는 방법</Heading>
+              <P>위기를 아는 것만으로는 부족하오. 두 사람이 함께 써내려갈 극복의 방법들을 사주의 상생 기운에서 찾아 정리하였소.</P>
+            </section>
+            <BizOvercomeTipPanel data={ot} />
+
+            <section className="px-6 pt-4 pb-2">
+              <Heading>두 파트너의 극복 원칙</Heading>
+              <P>위기를 함께 넘기 위해 이 두 사람이 붙들어야 할 핵심 원칙들이오. 사주의 기운이 가리키는 두 파트너만의 화해와 성장의 방향이오.</P>
+            </section>
+            <BizCrisisRecoveryGuide data={rg} />
+
+            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
+            <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 두 사람의\n재물흐름을 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="9" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제10장 · 비즈니스 재물흐름 ═══════════ */}
       {ch === "10" && (() => {
