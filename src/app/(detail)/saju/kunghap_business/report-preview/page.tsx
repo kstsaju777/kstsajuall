@@ -66,6 +66,9 @@ const BCH10_WLT   = "#7a5c1e"; // 재물 앰버
 const BCH10_WLT_P = "#fdf8ec";
 const BCH10_HOM   = "#2a4f6e"; // 파트너관계 딥 스틸 블루
 const BCH10_HOM_P = "#eef4f9";
+// 제7장 비즈니스 스타일 전용
+const BCH7_COLOR = "#8b5e3c"; // 딥 테라코타
+const BCH7_PALE  = "#faf5f0";
 // 제8장 비즈니스 빛과 그림자 전용
 const BCH8_COLOR  = "#2c5364"; // 딥 틸
 const BCH8_PALE   = "#eaf3f5";
@@ -5545,6 +5548,135 @@ function BizWealthTipPanel({ data }: { data: Record<string, unknown> | null }) {
   );
 }
 
+// ─── 제7장 비즈니스 스타일 컴포넌트 ─────────────────────────────────────────────
+
+// 비즈니스 스타일 카드 — 유형 + 키워드 + 스타일 설명 + 파트너십 강점/약점
+function BizStyleCard({
+  data, color, pale, label: sectionLabel,
+}: {
+  data: Record<string, unknown> | null;
+  color: string;
+  pale: string;
+  label: string;
+}) {
+  if (!data) return null;
+  const label       = (data.label       as string   | undefined) ?? "";
+  const icon        = (data.icon        as string   | undefined) ?? "💼";
+  const keywords    = (data.keywords    as string[] | undefined) ?? [];
+  const styleDesc   = (data.styleDesc   as string   | undefined) ?? (data.desc as string | undefined) ?? "";
+  const strengthStyle = (data.strengthStyle as string | undefined) ?? "";
+  const shadowStyle   = (data.shadowStyle   as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${color}20`, boxShadow: "0 2px 14px rgba(0,0,0,0.05)" }}>
+      <div className="px-5 pt-5 pb-4" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, borderBottom: `1px solid ${color}15` }}>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-[30px]">{icon}</span>
+          <div>
+            <p className="text-[18px] font-black leading-tight" style={{ color }}>{label}</p>
+          </div>
+        </div>
+        {keywords.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {keywords.map((kw, i) => (
+              <span key={i} className="px-3 py-1 rounded-full text-[11px] font-bold" style={{ background: `${color}16`, color }}>
+                {kw}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      {styleDesc && (
+        <div className="px-5 py-4" style={{ borderBottom: (strengthStyle || shadowStyle) ? `1px solid ${INK}08` : "none" }}>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{styleDesc}</p>
+        </div>
+      )}
+      {strengthStyle && (
+        <div className="px-5 pt-3 pb-3" style={{ background: `${HAP_COLOR}04`, borderBottom: shadowStyle ? `1px solid ${INK}06` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[13px]">✨</span>
+            <p className="text-[11px] font-black" style={{ color: HAP_COLOR }}>파트너십에서 빛나는 점</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthStyle}</p>
+        </div>
+      )}
+      {shadowStyle && (
+        <div className="px-5 pt-3 pb-4" style={{ background: `${WARN}04` }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[13px]">⚠️</span>
+            <p className="text-[11px] font-black" style={{ color: WARN }}>주의해야 할 스타일 패턴</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowStyle}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 스타일 상성 비교 배너 — 두 유형 나란히 + 상성 평가
+function BizStyleCompareBar({
+  myLabel, myIcon, myColor, myName,
+  partnerLabel, partnerIcon, partnerColor, partnerName,
+  compatRating, compatIcon,
+}: {
+  myLabel: string; myIcon: string; myColor: string; myName: string;
+  partnerLabel: string; partnerIcon: string; partnerColor: string; partnerName: string;
+  compatRating: string; compatIcon: string;
+}) {
+  const COMPAT_COLOR = compatRating === "매우 잘 맞음" ? HAP_COLOR
+    : compatRating === "잘 맞음" ? CH6_COLOR
+    : compatRating === "보통" ? BCH7_COLOR
+    : CHUNG_COLOR;
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${INK}10`, boxShadow: "0 1px 10px rgba(0,0,0,0.04)" }}>
+      <div className="flex items-stretch">
+        <div className="flex-1 flex flex-col items-center justify-center px-3 py-4" style={{ background: `${myColor}08` }}>
+          <span className="text-[24px] mb-1">{myIcon}</span>
+          <p className="text-[12px] font-black text-center leading-tight" style={{ color: myColor }}>{myLabel}</p>
+        </div>
+        <div className="flex flex-col items-center justify-center px-3 py-4" style={{ background: WHITE, borderLeft: `1px solid ${INK}06`, borderRight: `1px solid ${INK}06`, minWidth: 72 }}>
+          <span className="text-[22px] mb-1">{compatIcon}</span>
+          <p className="text-[13px] font-black text-center leading-snug" style={{ color: COMPAT_COLOR }}>{compatRating}</p>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center px-3 py-4" style={{ background: `${partnerColor}08` }}>
+          <span className="text-[24px] mb-1">{partnerIcon}</span>
+          <p className="text-[12px] font-black text-center leading-tight" style={{ color: partnerColor }}>{partnerLabel}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 스타일 차이 분석 + 조율 팁 카드
+function BizStyleGapCard({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const tips       = (data.tips       as string[] | undefined) ?? [];
+  return (
+    <div className="mb-2">
+      <div className="px-6">
+        {paragraphs.map((p, i) => (
+          <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+        ))}
+      </div>
+      {tips.length > 0 && (
+        <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${BCH7_COLOR}18`, boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
+          <div className="px-5 py-3" style={{ background: `${BCH7_COLOR}08`, borderBottom: `1px solid ${BCH7_COLOR}12` }}>
+            <p className="text-[12px] font-black" style={{ color: BCH7_COLOR }}>✦ 두 사람이 조화를 이루는 법</p>
+          </div>
+          <div className="px-5 py-3 space-y-3">
+            {tips.map((tip, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <span className="text-[13px] font-black flex-shrink-0 mt-0.5" style={{ color: BCH7_COLOR }}>{i + 1}</span>
+                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── 제8장 비즈니스 빛과 그림자 컴포넌트 ───────────────────────────────────────
 
 // 파트너십 강점(빛) 카드 — icon + 제목 + 풀이 + 빛나는 장면
@@ -7109,47 +7241,81 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제7장 · 금전·수익 흐름 ═══════════ */}
-      {ch === "7" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 금전·수익</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>금전과 수익 흐름</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_7/kunghap_business_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"함께 사업할 때\n돈이 어떻게 흐르는지\n사주로 풀어보겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>금전 흐름 분석</Heading>
-            <ReportSec data={jc.moneyFlow as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>수익 사이클</Heading>
-            {(jc.profitCycle as {items?: Array<{label: string; desc: string; highlight?: boolean}>} | undefined)?.items?.map((item, i) => (
-              <div key={i} className="mb-3 p-4 rounded-2xl" style={{ background: item.highlight ? `${GOLD}18` : `${GOLD}08`, border: `1px solid ${item.highlight ? GOLD : GOLD}33` }}>
-                <p className="text-[12px] font-bold mb-1" style={{ color: GOLD }}>{item.label}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+      {/* ═══════════ 제7장 · 비즈니스 스타일의 차이 ═══════════ */}
+      {ch === "7" && (() => {
+        const myName7 = report?.name || "나";
+        const partnerName7 = report?.partnerName || "상대방";
+        const myFirstName7 = myName7.slice(1) || myName7;
+        const partnerFirstName7 = partnerName7.slice(1) || partnerName7;
+        const myStyle7      = (jc.myStyle      as Record<string, unknown> | undefined) ?? null;
+        const partnerStyle7 = (jc.partnerStyle as Record<string, unknown> | undefined) ?? null;
+        const styleGap7     = (jc.styleGap     as Record<string, unknown> | undefined) ?? null;
+        const compatRating7 = (styleGap7?.compatRating as string | undefined) ?? "보통";
+        const compatIcon7   = (styleGap7?.compatIcon   as string | undefined) ?? "🤝";
+        const myLabel7      = (myStyle7?.label      as string | undefined) ?? "나의 스타일";
+        const myIcon7       = (myStyle7?.icon       as string | undefined) ?? "💼";
+        const partnerLabel7 = (partnerStyle7?.label as string | undefined) ?? "상대 스타일";
+        const partnerIcon7  = (partnerStyle7?.icon  as string | undefined) ?? "🗂️";
+        const isFemale7 = (g?: string) => g === "female" || g === "여성" || g === "여자";
+        const MY_STYLE_COLOR7      = isFemale7(report?.gender)        ? "#c9607a" : "#4a7cc9";
+        const PARTNER_STYLE_COLOR7 = isFemale7(report?.partnerGender) ? "#c9607a" : "#4a7cc9";
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 스타일</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>비즈니스 스타일의 차이</h1>
+            </div>
+
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_7/kunghap_business_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"합충 점수와 별개로,\n사람마다 사업하는 방식이 다르오.\n\n점수가 높아도\n스타일이 맞지 않으면\n삐걱거릴 수 있고,\n\n점수가 낮아도\n서로의 방식을 이해하면\n잘 흘러갈 수 있는 것이오.\n\n두 사람이 어디서 맞고,\n어디서 다른지 살펴보겠소."`}</Quote>
+
+            <section className="pb-2">
+              <div className="px-5"><Heading>두 사람 스타일 궁합</Heading></div>
+              <div className="flex mx-5 mb-1.5">
+                <div className="flex-1 flex justify-center">
+                  <span className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ color: MY_STYLE_COLOR7, border: `1px solid ${MY_STYLE_COLOR7}50`, background: `${MY_STYLE_COLOR7}10` }}>{myFirstName7}님의 스타일</span>
+                </div>
+                <div style={{ minWidth: 72 }} />
+                <div className="flex-1 flex justify-center">
+                  <span className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ color: PARTNER_STYLE_COLOR7, border: `1px solid ${PARTNER_STYLE_COLOR7}50`, background: `${PARTNER_STYLE_COLOR7}10` }}>{partnerFirstName7}님의 스타일</span>
+                </div>
               </div>
-            ))}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>금전 관리 조언</Heading>
-            {(jc.financeTips as {tips?: string[]} | undefined)?.tips?.map((tip, i) => (
-              <div key={i} className="mb-2 flex items-start gap-2">
-                <span className="mt-1 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: GOLD, color: "#fff" }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
-              </div>
-            ))}
-          </section>
-          <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-          <Quote>{`"금전 흐름을 알았으니,\n갈등 패턴을 살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="7" go={next} />
-        </>
-      )}
+              <BizStyleCompareBar
+                myLabel={myLabel7} myIcon={myIcon7} myColor={MY_STYLE_COLOR7} myName={myFirstName7}
+                partnerLabel={partnerLabel7} partnerIcon={partnerIcon7} partnerColor={PARTNER_STYLE_COLOR7} partnerName={partnerFirstName7}
+                compatRating={compatRating7} compatIcon={compatIcon7}
+              />
+            </section>
+
+            <section className="pb-2">
+              <div className="px-5"><Heading>{myFirstName7}님의 비즈니스 스타일</Heading></div>
+              <BizStyleCard data={myStyle7} color={MY_STYLE_COLOR7} pale={`${MY_STYLE_COLOR7}12`} label={`${myFirstName7}님의 비즈니스 스타일 유형`} />
+            </section>
+
+            <section className="pb-2">
+              <div className="px-5"><Heading>{partnerFirstName7}님의 비즈니스 스타일</Heading></div>
+              <BizStyleCard data={partnerStyle7} color={PARTNER_STYLE_COLOR7} pale={`${PARTNER_STYLE_COLOR7}12`} label={`${partnerFirstName7}님의 비즈니스 스타일 유형`} />
+            </section>
+
+            {styleGap7 && (
+              <section className="pb-4">
+                <div className="px-5"><Heading>두 사람 비즈니스 스타일 총평</Heading></div>
+                <BizStyleGapCard data={styleGap7} />
+              </section>
+            )}
+
+            <Quote>{`"스타일의 차이를 알았으니,\n이 파트너십의 빛과 그림자를\n살펴보겠소."`}</Quote>
+
+            <div className="pb-10" />
+            <ChapterNav cur="7" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제8장 · 이 파트너십의 빛과 그림자 ═══════════ */}
       {ch === "8" && (() => {
