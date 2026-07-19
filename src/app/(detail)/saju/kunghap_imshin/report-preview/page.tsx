@@ -2504,7 +2504,7 @@ function OhaengDonutRich({ view, accentColor }: { view: MyeongsikView | null; ac
  * 본바탕을 이해하는 것은 배우자와의 소통과 태교 준비에도 중요한 출발점입니다.
  */
 function INatureCard({ data, color, label }: {
-  data: Record<string, unknown> | null; color: string; label: string;
+  data: Record<string, unknown> | null; color: string; label?: string;
 }) {
   if (!data) return null;
   const keywords     = (data.keywords     as string[] | undefined) ?? [];
