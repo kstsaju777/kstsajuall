@@ -39,6 +39,15 @@ const TAG_COLORS = ["#2d3a8c", "#b5891c", "#c9474f", "#3f8a52"];
 const HAP_COLOR   = "#2d6a4f";
 const CHUNG_COLOR = "#b05020";
 const CH6_COLOR   = "#1a5c8a";
+// 제4장 비즈니스 궁합 점수 전용
+const BCH4_PURPLE = "#6b3070";
+const BCH4_YES    = "#2e7d52";
+const BCH4_WARN   = "#b5451b";
+const BCH4_STR    = "#1e6b40";
+const BCH4_STR_P  = "#eaf5ee";
+const BCH4_WEK    = "#8b2a1a";
+const BCH4_BAL    = "#4a4080";
+const BCH4_BAL_P  = "#f0eefb";
 const SERIF = "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif";
 
 // 오행 색상
@@ -3919,6 +3928,128 @@ function P({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ── 제4장 비즈니스 궁합 점수 전용 컴포넌트 ──────────────────────────
+
+function BusinessScoreGauge({ score, label, basis }: { score: number; label: string; basis?: string }) {
+  const s = Math.min(100, Math.max(0, score));
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const cx = 130, cy = 110, r = 88;
+  const angle = -180 + (s / 100) * 180;
+  const needleX = cx + r * Math.cos(rad(angle));
+  const needleY = cy + r * Math.sin(rad(angle));
+  const COLOR = s >= 80 ? BCH4_YES : s >= 60 ? BCH4_PURPLE : s >= 40 ? GOLD : BCH4_WARN;
+  const GRADE = s >= 85 ? "천생연분 파트너" : s >= 70 ? "좋은 비즈니스 인연" : s >= 55 ? "노력하는 인연" : "도전적 인연";
+  const GRADE_BG = s >= 85 ? `${BCH4_YES}18` : s >= 70 ? `${BCH4_PURPLE}18` : s >= 55 ? `${GOLD}22` : `${BCH4_WARN}18`;
+  return (
+    <div className="mx-5 my-3 rounded-2xl overflow-hidden" style={{ background: `linear-gradient(160deg, ${BCH4_PURPLE}0a 0%, ${WHITE} 60%)`, border: `1.5px solid ${BCH4_PURPLE}22` }}>
+      <div className="px-5 pt-5 pb-1 flex items-center justify-between">
+        <span className="inline-block px-4 py-1.5 rounded-full text-[14px] font-black" style={{ background: GRADE_BG, color: COLOR }}>{GRADE}</span>
+        <p className="font-black" style={{ color: COLOR, fontFamily: SERIF }}>
+          <span className="text-[42px] leading-none">{s}</span>
+          <span className="text-[16px] ml-1" style={{ color: MUTE }}>/ 100점</span>
+        </p>
+      </div>
+      <svg viewBox="0 0 260 118" style={{ width: "100%", maxHeight: 130 }}>
+        <defs>
+          <linearGradient id="bizGaugeGrad4" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={BCH4_WARN} />
+            <stop offset="45%" stopColor={GOLD} />
+            <stop offset="100%" stopColor={BCH4_YES} />
+          </linearGradient>
+        </defs>
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="#ece8f0" strokeWidth="20" strokeLinecap="round" />
+        <path d={`M${cx - r},${cy} A${r},${r} 0 0,1 ${cx + r},${cy}`} fill="none" stroke="url(#bizGaugeGrad4)" strokeWidth="20" strokeLinecap="round"
+          strokeDasharray={`${(s / 100) * Math.PI * r} ${Math.PI * r}`} />
+        <line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="6" fill={INK} />
+        <text x={cx - r - 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>0</text>
+        <text x={cx + r + 4} y={cy + 16} textAnchor="middle" fontSize="9" fill={MUTE}>100</text>
+      </svg>
+      {label && (
+        <div className="mt-6 py-4 text-center" style={{ background: GRADE_BG }}>
+          <p className="text-[14px] font-black tracking-tight" style={{ color: COLOR }}>{label}</p>
+        </div>
+      )}
+      {basis && (
+        <div className="px-5 py-4">
+          <p className="text-[13px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{basis}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BusinessStrengthCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const title  = (item.title  as string | undefined) ?? "";
+  const desc   = (item.desc   as string | undefined) ?? "";
+  const effect = (item.effect as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-4 rounded-xl overflow-hidden" style={{ borderLeft: `4px solid ${BCH4_STR}`, background: WHITE, boxShadow: "0 1px 6px rgba(30,107,64,0.07)" }}>
+      <div className="px-4 py-3 flex items-center gap-2.5" style={{ background: `${BCH4_STR}0d` }}>
+        <p className="text-[14px] font-black truncate" style={{ color: INK }}>{title}</p>
+      </div>
+      {effect && (
+        <div className="mx-4 mt-3 px-3 py-2 rounded-lg flex items-start gap-2" style={{ background: BCH4_STR_P }}>
+          <p className="text-[12.5px] font-bold leading-relaxed" style={{ color: BCH4_STR }}>{effect}</p>
+        </div>
+      )}
+      <div className="px-4 pt-2.5 pb-3">
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+function BusinessWeaknessCard({ item, index }: { item: Record<string, unknown>; index: number }) {
+  const title    = (item.title    as string | undefined) ?? "";
+  const desc     = (item.desc     as string | undefined) ?? "";
+  const overcome = (item.overcome as string | undefined) ?? "";
+  return (
+    <div className="mx-5 mb-4 rounded-xl overflow-hidden" style={{ borderLeft: `4px solid ${BCH4_WEK}`, background: WHITE, boxShadow: "0 1px 6px rgba(139,42,26,0.07)" }}>
+      <div className="px-4 py-3 flex items-center gap-2.5" style={{ background: `${BCH4_WEK}0d` }}>
+        <p className="text-[14px] font-black truncate" style={{ color: INK }}>{title}</p>
+      </div>
+      {overcome && (
+        <div className="mx-4 mt-3 px-3 py-2 rounded-lg flex items-start gap-2" style={{ background: `${BCH4_WEK}12` }}>
+          <p className="text-[12.5px] font-bold leading-relaxed" style={{ color: BCH4_WEK }}>{overcome}</p>
+        </div>
+      )}
+      <div className="px-4 pt-2.5 pb-3">
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+function BusinessBalancePanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const callout = (data.callout as string | undefined) ?? "";
+  const tips    = (data.tips   as Record<string, unknown>[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {callout && (
+        <div className="mb-4 px-5 py-4 rounded-2xl" style={{ background: `linear-gradient(135deg, ${BCH4_BAL}14 0%, ${BCH4_BAL_P} 100%)`, border: `1.5px solid ${BCH4_BAL}22` }}>
+          <p className="text-[14px] font-black leading-relaxed" style={{ color: BCH4_BAL }}>{callout}</p>
+        </div>
+      )}
+      {tips.map((tip, i) => {
+        const title = (tip.title as string | undefined) ?? "";
+        const desc  = (tip.desc  as string | undefined) ?? (tip as unknown as string);
+        return (
+          <div key={i} className="mb-3 rounded-xl overflow-hidden" style={{ borderLeft: `4px solid ${BCH4_BAL}`, background: WHITE, boxShadow: "0 1px 6px rgba(0,0,0,0.05)" }}>
+            <div className="px-4 py-2.5" style={{ background: `${BCH4_BAL}0d` }}>
+              <p className="text-[13px] font-black" style={{ color: BCH4_BAL }}>{title}</p>
+            </div>
+            <div className="px-4 py-3">
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── 제3장 합·충 전용 ─────────────────────────────────────────────
 
 const CROSS_DESC_BIZ: Record<string, string> = {
@@ -5437,38 +5568,104 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제4장 · 비즈니스 궁합 점수 ═══════════ */}
-      {ch === "4" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 궁합 점수</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>비즈니스 궁합 점수</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_4/kunghap_business_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
-          <Quote>{`"두 사람이 비즈니스 파트너로\n얼마나 잘 맞는지\n홍연이 솔직하게 풀어드리겠소."`}</Quote>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>비즈니스 궁합 점수</Heading>
-            {(jc.compatScore as {score?: number; label?: string} | undefined)?.score !== undefined ? (
-              <AttractionGauge score={(jc.compatScore as {score: number}).score} label={(jc.compatScore as {label?: string}).label || ""} />
-            ) : (
-              <AttractionGauge score={74} label="함께하면 시너지가 나는 파트너이오" />
+      {/* ═══════════ 제4장 · 두 사람, 함께 일할 수 있는 인연인가 ═══════════ */}
+      {ch === "4" && (() => {
+        const cs   = (jc.compatScore  as Record<string, unknown> | undefined) ?? null;
+        const cr   = (jc.compatReason as Record<string, unknown> | undefined) ?? null;
+        const str  = (jc.strengths    as Record<string, unknown> | undefined) ?? null;
+        const wek  = (jc.weaknesses   as Record<string, unknown> | undefined) ?? null;
+        const bal  = (jc.balanceTip   as Record<string, unknown> | undefined) ?? null;
+        const score     = (cs?.score     as number | undefined) ?? 0;
+        const label     = (cs?.label     as string | undefined) ?? "";
+        const basis     = (cs?.basis     as string | undefined) ?? "";
+        const strItems  = (str?.items    as Record<string, unknown>[] | undefined) ?? [];
+        const wekItems  = (wek?.items    as Record<string, unknown>[] | undefined) ?? [];
+        return (
+          <>
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 비즈니스 인연</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 함께 일할 수 있는 인연인가</h1>
+            </div>
+            <div className="relative overflow-hidden" style={{ height: 300 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_4/kunghap_business_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+
+            <Quote>{`"두 사람의 원국을 살핀 뒤,\n이제 가장 중요한 것을 보겠소.\n두 사람, 함께 일할 수 있는 인연인가."`}</Quote>
+
+            {/* 비즈니스 궁합 점수 게이지 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>두 사람의 비즈니스 궁합 점수</Heading>
+              <p className="text-[13px] leading-[1.85] mb-0" style={{ color: INK_SOFT, fontFamily: SERIF }}>사주 원국의 구조와 오행의 상생·상극, 천간·지지의 합충(合沖)을 종합하여 두 사람의 비즈니스 인연을 수치로 나타낸 것이오.</p>
+            </section>
+            <BusinessScoreGauge
+              score={score || 75}
+              label={label || "사주로 본 비즈니스 궁합"}
+              basis={basis}
+            />
+
+            {/* 점수 풀이 단락 */}
+            {((cs?.paragraphs as string[] | undefined) ?? []).length > 0 && (
+              <section className="px-5 pt-2 pb-4">
+                {((cs?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{normText(p)}</p>
+                ))}
+              </section>
             )}
-            {(jc.compatScore as {paragraphs?: string[]} | undefined)?.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
-          <section className="px-6 pt-2 pb-4">
-            <Heading>궁합의 근거</Heading>
-            <ReportSec data={jc.compatReason as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-          </section>
-          <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-          <Quote>{`"궁합 점수를 알았으니,\n이제 두 사람의 강점과\n약점을 살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="4" go={next} />
-        </>
-      )}
+
+            {/* 궁합의 근거 */}
+            {cr && (
+              <section className="px-6 pt-4 pb-2">
+                <Heading>궁합의 근거</Heading>
+                <ReportSec data={cr as {intro?: string; callout?: string; paragraphs?: string[]}} />
+              </section>
+            )}
+
+            {/* 비즈니스 파트너십의 강점 */}
+            {strItems.length > 0 && (
+              <>
+                <section className="px-6 pt-4 pb-2">
+                  <Heading>이 비즈니스 인연의 강점</Heading>
+                  <P>두 사람의 사주가 만나 만들어내는 비즈니스 파트너십의 빛나는 면이오. 이 강점들이 두 사람의 협업을 더욱 풍요롭게 할 것이오.</P>
+                </section>
+                {strItems.map((item, i) => (
+                  <BusinessStrengthCard key={i} item={item} index={i} />
+                ))}
+              </>
+            )}
+
+            {/* 비즈니스 파트너십의 약점 */}
+            {wekItems.length > 0 && (
+              <>
+                <section className="px-6 pt-4 pb-2">
+                  <Heading>이 비즈니스 인연의 약점</Heading>
+                  <P>솔직하게 보아야 더 잘 대비할 수 있소. 이 약점들은 두 사람이 알고 있으면 충분히 넘어설 수 있는 것들이오.</P>
+                </section>
+                {wekItems.map((item, i) => (
+                  <BusinessWeaknessCard key={i} item={item} index={i} />
+                ))}
+              </>
+            )}
+
+            {/* 균형 잡기 가이드 */}
+            {bal && (
+              <>
+                <section className="px-6 pt-4 pb-2">
+                  <Heading>강점을 살리고 약점을 보완하는 법</Heading>
+                  <P>강점을 더 빛나게 하고 약점을 지혜롭게 보완하는 구체적인 방법이오.</P>
+                </section>
+                <BusinessBalancePanel data={bal} />
+              </>
+            )}
+
+            <Illust src="/media/report/kunghap/kh-4-1.jpg" h={280} />
+            <Quote>{`"비즈니스 인연을 살펴보았으니,\n이제 두 사람의 강점과\n약점을 살펴보겠소."`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="4" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제5장 · 강점과 약점 ═══════════ */}
       {ch === "5" && (
