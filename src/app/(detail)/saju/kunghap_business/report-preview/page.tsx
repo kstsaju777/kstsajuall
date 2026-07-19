@@ -3915,6 +3915,73 @@ function P({ children }: { children: React.ReactNode }) {
   );
 }
 
+function GNatureCard({ data, color = MAROON, label = "나를 대표하는 기질" }: {
+  data: Record<string, unknown> | null; color?: string; label?: string;
+}) {
+  if (!data) return null;
+  const keywords     = (data.keywords     as string[] | undefined) ?? [];
+  const strengthDesc = (data.strengthDesc as string | undefined) ?? (data.desc as string | undefined) ?? "";
+  const shadowDesc   = (data.shadowDesc   as string | undefined) ?? "";
+  const KW_COLORS    = [color, "#3f7d6b", "#b07d2a", "#c9474f", "#3f63c4"];
+  return (
+    <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+      <div className="px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${INK}08` }}>
+        <div className="flex flex-wrap gap-1.5">
+          {keywords.map((kw, i) => (
+            <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${KW_COLORS[i % KW_COLORS.length]}14`, color: KW_COLORS[i % KW_COLORS.length] }}>{kw}</span>
+          ))}
+        </div>
+      </div>
+      {strengthDesc && (
+        <div className="px-4 pt-3 pb-3" style={{ borderBottom: shadowDesc ? `1px solid ${INK}08` : "none" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">✨</span>
+            <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+        </div>
+      )}
+      {shadowDesc && (
+        <div className="px-4 pt-3 pb-4" style={{ background: "#fffaf9" }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[14px]">🌙</span>
+            <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
+          </div>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BusinessPatternCard({ data, color = MAROON, pale = CALLOUT_BG }: {
+  data: Record<string, unknown> | null; color?: string; pale?: string;
+}) {
+  if (!data) return null;
+  const intro       = (data.intro       as string | undefined) ?? "";
+  const patternType = (data.patternType as string | undefined) ?? "";
+  const patternIcon = (data.patternIcon as string | undefined) ?? "💼";
+  const paragraphs  = (data.paragraphs  as string[] | undefined) ?? [];
+  return (
+    <div className="mx-5 mb-5">
+      {(patternType || intro) && (
+        <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${color}12 0%, ${pale} 100%)`, border: `1px solid ${color}20` }}>
+          {patternType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[22px]">{patternIcon}</span>
+              <span className="text-[15px] font-black" style={{ color }}>{patternType}</span>
+            </div>
+          )}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+        </div>
+      )}
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, textAlign: "justify", wordBreak: "break-all" }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
 // 강조 콜아웃 박스 (사주 용어 하이라이트)
 function Callout({ children }: { children: React.ReactNode }) {
   return (
@@ -4178,6 +4245,12 @@ function ReportPreviewInner() {
 
 
   const name = report?.name?.trim() || nameParam.trim() || "고객";
+  const firstName = name.length > 1 ? name.slice(1) : name;
+  const effectivePartnerName = report?.partnerName?.trim() || partnerName || "상대방";
+  const partnerFirstName = effectivePartnerName.length > 1 ? effectivePartnerName.slice(1) : effectivePartnerName;
+  const normText = (text: string) =>
+    text.replace(/__MY__님/g, `${firstName}님`).replace(/__MY__/g, `${firstName}님`)
+        .replace(/__PT__님/g, `${partnerFirstName}님`).replace(/__PT__/g, `${partnerFirstName}님`);
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
@@ -4557,34 +4630,63 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 제1장 · 나의 사주 원국 ═══════════ */}
-      {ch === "1" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_1/kunghap_business_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
+      {ch === "1" && (() => {
+        const wonguk = (jc.myWonguk as Record<string, unknown> | undefined) ?? {};
+        const nature = (jc.myNature as Record<string, unknown> | undefined) ?? null;
+        const businessStyle = (jc.myBusinessStyle as Record<string, unknown> | undefined) ?? null;
+        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normText);
+        const myYS1 = (jc.myYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; yongsinReason?: string; heusinReason?: string; gisinReason?: string; desc?: string } | undefined) ?? null;
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 어떤 사람인가?</h1>
+            </div>
 
-          <Quote>{`"먼저 나의 사주팔자를 펼쳐보겠소.\n내 명식이 어떤 기운으로 이루어졌는지\n살펴보시오."`}</Quote>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_1/kunghap_business_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          <section className="pb-2">
-            <div className="px-6"><Heading>나의 명식</Heading></div>
-            <MyeongsikTable view={report?.view ?? null} name={name} birth={report?.birth ?? null} />
-          </section>
+            <div className="px-8 py-12 text-center">
+              <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`${firstName}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${firstName}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${firstName}님의 사주팔자요.`}
+              </p>
+            </div>
+
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <MyeongsikTable
+                view={report?.view ?? null}
+                name={name}
+                birth={report?.birth ?? null}
+                header={
+                  <div className="text-center">
+                    <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{firstName}님의 사주팔자</p>
+                    {report?.birth?.date && (
+                      <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                        {report.birth.date}{" "}
+                        {report.birth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                        {(report.birth.gender || gender) === "female" ? "여자" : "남자"}
+                      </p>
+                    )}
+                  </div>
+                }
+              />
+            </section>
 
             {/* ── 명식 버튼 안내 ── */}
             {(() => {
               const isFem = (report?.gender || gender) === "female" || (report?.gender || gender) === "여성" || (report?.gender || gender) === "여자";
-              const color = isFem ? "pink" : "blue";
+              const btnColor = isFem ? "pink" : "blue";
               const themes = {
                 blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
                 pink: { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
               };
-              const t = themes[color];
+              const t = themes[btnColor];
               const btnText = `명식(${name})`;
               return (
                 <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
@@ -4606,14 +4708,10 @@ function ReportPreviewInner() {
             {report?.sajuImageUrl && (
               <div>
                 <div className="px-6 text-center mb-3">
-                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${firstName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
                 </div>
                 <div className="px-5">
-                  <div style={{
-                    position: "relative", padding: "16px",
-                    background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
-                    boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", "),
-                  }}>
+                  <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
                     <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={report.sajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
@@ -4623,85 +4721,154 @@ function ReportPreviewInner() {
                   </div>
                   <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
                     <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
-                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{name.slice(1) || name}님의 사주화</p>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{firstName}님의 사주화</p>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-          <section className="px-6 pt-12 pb-6">
-            <Heading>나의 오행 분포</Heading>
-            <P>목·화·토·금·수 다섯 기운이<br />내 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-            <div className="flex justify-center mt-4">
-              <OhaengRadar view={report?.view ?? null} color={MAROON} />
-            </div>
-          </section>
-
-          {jc.myWonguk && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>원국 풀이</Heading>
-              <ReportSec data={jc.myWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-            </section>
-          )}
-          {(jc.myNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>기질 키워드</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.myNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${MAROON}15`, color: MAROON }}>{kw}</span>
+            {/* ── 타고난 기운의 뿌리 ── */}
+            <section className="pt-12 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+              </div>
+              <OhaengDonut view={report?.view ?? null} />
+              <div className="px-5 mt-4">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, textAlign: "justify", wordBreak: "break-all" }}>{p}</p>
                 ))}
               </div>
-              {(jc.myNature as {desc?: string}).desc && <P>{(jc.myNature as {desc: string}).desc}</P>}
             </section>
-          )}
-          {jc.myBusinessStyle && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>비즈니스 성향</Heading>
-              <ReportSec data={jc.myBusinessStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+
+            {/* ── 용신/희신/기신 ── */}
+            {myYS1 && (() => {
+              const OHAENG_META: Record<string, { color: string; bg: string; desc: string }> = {
+                목: { color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
+                화: { color: "#222", bg: "#ffebee", desc: "열정·표현" },
+                토: { color: "#222", bg: "#efebe9", desc: "안정·신뢰" },
+                금: { color: "#222", bg: "#fffde7", desc: "절제·결단" },
+                수: { color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
+              };
+              const rows = [
+                { role: "용신", el: myYS1.yongsinEl ?? "", reason: myYS1.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
+                { role: "희신", el: myYS1.heusinEl  ?? "", reason: myYS1.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★"  } },
+                { role: "기신", el: myYS1.gisinEl   ?? "", reason: myYS1.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕"   } },
+              ];
+              return (
+                <section className="px-6 pt-2 pb-4">
+                  <Heading>필요한 기운과 피해야 할 기운</Heading>
+                  <div className="my-4 rounded-2xl overflow-hidden" style={{ border: "1px solid #e0d8cc" }}>
+                    {rows.map((r, i) => {
+                      const m = OHAENG_META[r.el] ?? { color: "#888", bg: "#f5f5f5", desc: "" };
+                      const isGisin = r.role === "기신";
+                      const imgKey = ({ 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" } as Record<string, string>)[r.el];
+                      return (
+                        <div key={r.role} className="flex items-center gap-3 px-4 py-3" style={{ background: isGisin ? "#fff5f5" : i === 0 ? "#fffcf0" : "#f6faf6", borderBottom: i < 2 ? "1px solid #e8dfd0" : "none" }}>
+                          <div className="shrink-0 flex flex-col items-center gap-1" style={{ width: 52 }}>
+                            <div className="rounded-full px-2 py-0.5 text-[10px] font-black tracking-wide" style={{ background: r.badge.bg, border: `1.5px solid ${r.badge.border}`, color: r.badge.text }}>{r.badge.label}</div>
+                            <div className="text-[15px] font-black" style={{ color: r.badge.text }}>{r.role}</div>
+                          </div>
+                          {imgKey && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={`/media/ohaeng/${imgKey}.png`} alt={r.el} className="shrink-0" style={{ width: 54, height: 54, objectFit: "contain" }} />
+                          )}
+                          <div className="flex flex-col gap-1">
+                            <div className="text-[14px] font-black" style={{ color: m.color }}>{m.desc}</div>
+                            {r.reason && <div className="text-[11px] leading-snug" style={{ color: "#555" }}>{r.reason}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {myYS1.desc && <P>{myYS1.desc}</P>}
+                </section>
+              );
+            })()}
+
+            {/* ── 빛과 그림자 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <GNatureCard data={nature} color={MAROON} label="나를 대표하는 기질" />
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-1-1.jpg" h={280} />
-          <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="1" go={next} />
-        </>
-      )}
+
+            {/* ── 비즈니스에서 나는 어떤 사람인가 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>비즈니스에서 나는 어떤 사람인가</h2>
+              </div>
+              <BusinessPatternCard data={businessStyle} color={MAROON} pale={CALLOUT_BG} />
+            </section>
+
+            <Quote>{`나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소.`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="1" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제2장 · 상대의 사주 원국 ═══════════ */}
-      {ch === "2" && (
-        <>
-          <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대의 사주 원국</h1>
-          </div>
-          <div className="relative overflow-hidden" style={{ height: 300 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_2/kunghap_business_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-          </div>
+      {ch === "2" && (() => {
+        const wonguk = (jc.partnerWonguk as Record<string, unknown> | undefined) ?? {};
+        const nature = (jc.partnerNature as Record<string, unknown> | undefined) ?? null;
+        const businessStyle = (jc.partnerBusinessStyle as Record<string, unknown> | undefined) ?? null;
+        const wongukParas = ((wonguk.paragraphs as string[] | undefined) ?? []).map(normText);
+        const ptYS2 = (jc.partnerYongsin as { yongsinEl?: string; heusinEl?: string; gisinEl?: string; yongsinReason?: string; heusinReason?: string; gisinReason?: string; desc?: string } | undefined) ?? null;
+        return (
+          <>
+            {/* ── 다크 헤더 ── */}
+            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 상대 원국</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>상대는 어떤 사람인가?</h1>
+            </div>
 
-          <Quote>{`"이번엔 상대방의 사주팔자를\n펼쳐보겠소.\n어떤 기운의 사람인지 살펴보시오."`}</Quote>
+            {/* ── 커버 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 420 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_business/kunghap_business_2/kunghap_business_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+            </div>
 
-          {report?.partnerView ? (
-            <>
-              <section className="pb-2">
-                <div className="px-6"><Heading>{report.partnerName || "상대방"}의 명식</Heading></div>
-                <MyeongsikTable view={report.partnerView} name={report.partnerName || "상대방"} birth={report.partnerBirth ?? null} />
-              </section>
+            <div className="px-8 py-12 text-center">
+              <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`이번에는 ${partnerFirstName}님의\n사주를 펼쳐보겠소.`}
+              </p>
+            </div>
 
-            {/* ── 명식 버튼 안내 (상대방) ── */}
+            {/* ── 명식표 ── */}
+            <section className="pb-4">
+              <MyeongsikTable
+                view={report?.partnerView ?? null}
+                name={effectivePartnerName}
+                birth={report?.partnerBirth ?? null}
+                header={
+                  <div className="text-center">
+                    <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{partnerFirstName}님의 사주팔자</p>
+                    {report?.partnerBirth?.date && (
+                      <p className="text-[13px]" style={{ color: "#5b504a" }}>
+                        {report.partnerBirth.date}{" "}
+                        {report.partnerBirth.calendar === "lunar" ? "(음력)" : "(양력)"}{" "}
+                        {report?.partnerGender === "female" ? "여자" : "남자"}
+                      </p>
+                    )}
+                  </div>
+                }
+              />
+            </section>
+
+            {/* ── 명식 버튼 안내 ── */}
             {(() => {
               const pg = report?.partnerGender ?? "";
               const isFem = pg === "female" || pg === "여성" || pg === "여자";
-              const color = isFem ? "pink" : "blue";
+              const btnColor = isFem ? "pink" : "blue";
               const themes = {
                 blue: { rod: "linear-gradient(to right, #0d2b5e, #1a4a9e, #3a7bd5, #6aaef6, #3a7bd5, #1a4a9e, #0d2b5e)", border: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", text: "#0d2b5e", shadow: "rgba(26,74,158,0.4)" },
                 pink: { rod: "linear-gradient(to right, #6b0030, #b0205a, #e05090, #f8a0c0, #e05090, #b0205a, #6b0030)", border: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", text: "#6b0030", shadow: "rgba(176,32,90,0.4)" },
               };
-              const t = themes[color];
-              const pName = report?.partnerName || "상대방";
-              const btnText = `명식(${pName})`;
+              const t = themes[btnColor];
+              const btnText = `명식(${effectivePartnerName})`;
               return (
                 <Quote>{"풀이를 읽다 명식이 궁금할 때면\n상단 "}
                   <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
@@ -4718,18 +4885,14 @@ function ReportPreviewInner() {
               <div style={{ width: 1, height: 40, background: "#ccc" }} />
             </div>
 
-            {/* ── AI 사주화 (상대방) ── */}
+            {/* ── AI 사주화 ── */}
             {report?.partnerSajuImageUrl && (
               <div>
                 <div className="px-6 text-center mb-3">
-                  {(() => { const pName = report?.partnerName || "상대방"; const pFirst = pName.slice(1) || pName; return <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${pFirst}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>; })()}
+                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${partnerFirstName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
                 </div>
                 <div className="px-5">
-                  <div style={{
-                    position: "relative", padding: "16px",
-                    background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)",
-                    boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", "),
-                  }}>
+                  <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
                     <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={report.partnerSajuImageUrl} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} alt="" />
@@ -4738,55 +4901,94 @@ function ReportPreviewInner() {
                     </div>
                   </div>
                   <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
-                    {(() => { const pName = report?.partnerName || "상대방"; const pFirst = pName.slice(1) || pName; return <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}><p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{pFirst}님의 사주화</p></div>; })()}
+                    <div style={{ background: "linear-gradient(135deg, #d8b428 0%, #a87c10 45%, #d0aa24 100%)", padding: "5px 22px", boxShadow: "0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,240,100,0.45), inset 0 -1px 0 rgba(0,0,0,0.3)", border: "1px solid #7a5808" }}>
+                      <p style={{ fontSize: 11, color: "#1e1000", fontFamily: SERIF, letterSpacing: "0.12em", margin: 0 }}>{partnerFirstName}님의 사주화</p>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-              <section className="px-6 pt-12 pb-6">
-                <Heading>상대방의 오행 분포</Heading>
-                <P>목·화·토·금·수 다섯 기운이<br />상대방 사주 안에서 어떻게 분포되어 있는지 보겠소.</P>
-                <div className="flex justify-center mt-4">
-                  <OhaengRadar view={report.partnerView} color={NAVY} />
-                </div>
-              </section>
-            </>
-          ) : (
-            <section className="px-6 pt-6 pb-6">
-              <p className="text-[14px] leading-relaxed" style={{ color: MUTE }}>상대방 명식 정보가 아직 준비 중이오.</p>
-            </section>
-          )}
-
-          {jc.partnerWonguk && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>원국 풀이</Heading>
-              <ReportSec data={jc.partnerWonguk as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
-            </section>
-          )}
-          {(jc.partnerNature as {keywords?: string[]; desc?: string} | undefined)?.keywords && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>기질 키워드</Heading>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {(jc.partnerNature as {keywords: string[]}).keywords.map((kw, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${NAVY}15`, color: NAVY }}>{kw}</span>
+            {/* ── 타고난 기운의 뿌리 ── */}
+            <section className="pt-12 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>타고난 기운의 뿌리</h2>
+              </div>
+              <OhaengDonut view={report?.partnerView ?? null} />
+              <div className="px-5 mt-4">
+                {wongukParas.map((p, i) => (
+                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF, textAlign: "justify", wordBreak: "break-all" }}>{p}</p>
                 ))}
               </div>
-              {(jc.partnerNature as {desc?: string}).desc && <P>{(jc.partnerNature as {desc: string}).desc}</P>}
             </section>
-          )}
-          {jc.partnerBusinessStyle && (
-            <section className="px-6 pt-2 pb-4">
-              <Heading>비즈니스 성향</Heading>
-              <ReportSec data={jc.partnerBusinessStyle as {intro?: string; callout?: string; paragraphs?: string[]} | undefined} />
+
+            {/* ── 용신/희신/기신 ── */}
+            {ptYS2 && (() => {
+              const OHAENG_META: Record<string, { color: string; bg: string; desc: string }> = {
+                목: { color: "#222", bg: "#e8f5e9", desc: "성장·추진" },
+                화: { color: "#222", bg: "#ffebee", desc: "열정·표현" },
+                토: { color: "#222", bg: "#efebe9", desc: "안정·신뢰" },
+                금: { color: "#222", bg: "#fffde7", desc: "절제·결단" },
+                수: { color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
+              };
+              const rows = [
+                { role: "용신", el: ptYS2.yongsinEl ?? "", reason: ptYS2.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
+                { role: "희신", el: ptYS2.heusinEl  ?? "", reason: ptYS2.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★"  } },
+                { role: "기신", el: ptYS2.gisinEl   ?? "", reason: ptYS2.gisinReason,   badge: { bg: "#ffeaea", border: "#e53935", text: "#7f0000", label: "✕"   } },
+              ];
+              return (
+                <section className="px-6 pt-2 pb-4">
+                  <Heading>필요한 기운과 피해야 할 기운</Heading>
+                  <div className="my-4 rounded-2xl overflow-hidden" style={{ border: "1px solid #e0d8cc" }}>
+                    {rows.map((r, i) => {
+                      const m = OHAENG_META[r.el] ?? { color: "#888", bg: "#f5f5f5", desc: "" };
+                      const isGisin = r.role === "기신";
+                      const imgKey = ({ 목: "mok", 화: "hwa", 토: "to", 금: "geum", 수: "su" } as Record<string, string>)[r.el];
+                      return (
+                        <div key={r.role} className="flex items-center gap-3 px-4 py-3" style={{ background: isGisin ? "#fff5f5" : i === 0 ? "#fffcf0" : "#f6faf6", borderBottom: i < 2 ? "1px solid #e8dfd0" : "none" }}>
+                          <div className="shrink-0 flex flex-col items-center gap-1" style={{ width: 52 }}>
+                            <div className="rounded-full px-2 py-0.5 text-[10px] font-black tracking-wide" style={{ background: r.badge.bg, border: `1.5px solid ${r.badge.border}`, color: r.badge.text }}>{r.badge.label}</div>
+                            <div className="text-[15px] font-black" style={{ color: r.badge.text }}>{r.role}</div>
+                          </div>
+                          {imgKey && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={`/media/ohaeng/${imgKey}.png`} alt={r.el} className="shrink-0" style={{ width: 54, height: 54, objectFit: "contain" }} />
+                          )}
+                          <div className="flex flex-col gap-1">
+                            <div className="text-[14px] font-black" style={{ color: m.color }}>{m.desc}</div>
+                            {r.reason && <div className="text-[11px] leading-snug" style={{ color: "#555" }}>{r.reason}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {ptYS2.desc && <P>{ptYS2.desc}</P>}
+                </section>
+              );
+            })()}
+
+            {/* ── 빛과 그림자 ── */}
+            <section className="pt-4 pb-2">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
+              </div>
+              <GNatureCard data={nature} color={NAVY} label={`${partnerFirstName}님을 대표하는 기질`} />
             </section>
-          )}
-          <Illust src="/media/report/kunghap/kh-2-1.jpg" h={280} />
-          <Quote>{`"두 사람의 원국을 보았으니,\n이제 비즈니스 궁합 점수를\n살펴보겠소."`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="2" go={next} />
-        </>
-      )}
+
+            {/* ── 비즈니스에서 상대는 어떤 사람인가 ── */}
+            <section className="pt-4 pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>비즈니스에서 상대는 어떤 사람인가</h2>
+              </div>
+              <BusinessPatternCard data={businessStyle} color={NAVY} pale="#eef0fb" />
+            </section>
+
+            <Quote>{`두 사람의 원국을 보았으니,\n이제 비즈니스 궁합 점수를\n살펴보겠소.`}</Quote>
+            <div className="pb-10" />
+            <ChapterNav cur="2" go={next} />
+          </>
+        );
+      })()}
 
       {/* ═══════════ 제3장 · 비즈니스 궁합 점수 ═══════════ */}
       {ch === "3" && (

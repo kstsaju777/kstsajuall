@@ -8,8 +8,8 @@ export { parseContentJson };
 export { SYSTEM };
 
 export const BUSINESS_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
-  1:  ["myWonguk", "myNature", "myBusinessStyle"],
-  2:  ["partnerWonguk", "partnerNature", "partnerBusinessStyle"],
+  1:  ["myWonguk", "myNature", "myYongsin", "myBusinessStyle"],
+  2:  ["partnerWonguk", "partnerNature", "partnerYongsin", "partnerBusinessStyle"],
   3:  ["compatScore", "compatReason"],
   4:  ["strengthList", "weaknessList", "balanceDesc"],
   5:  ["rolesDesc", "roleConflict", "roleTips"],
@@ -82,8 +82,8 @@ export function buildBusinessKunghapChapterPrompt(
   const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}\n${input.manseryeokText}\n\n파트너 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）${ptIlganNote}\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
-    1: `{"myWonguk":{"intro":"","callout":"","paragraphs":[]},"myNature":{"keywords":[],"desc":""},"myBusinessStyle":{"intro":"","callout":"","paragraphs":[]}}`,
-    2: `{"partnerWonguk":{"intro":"","callout":"","paragraphs":[]},"partnerNature":{"keywords":[],"desc":""},"partnerBusinessStyle":{"intro":"","callout":"","paragraphs":[]}}`,
+    1: `{"myWonguk":{"intro":"","callout":"","singang":"","dominantEl":"","paragraphs":[]},"myNature":{"keywords":[],"strengthDesc":"","shadowDesc":""},"myYongsin":{"yongsinEl":"","heusinEl":"","gisinEl":"","yongsinReason":"","heusinReason":"","gisinReason":"","desc":""},"myBusinessStyle":{"intro":"","patternType":"","patternIcon":"💼","paragraphs":[]}}`,
+    2: `{"partnerWonguk":{"intro":"","callout":"","singang":"","dominantEl":"","paragraphs":[]},"partnerNature":{"keywords":[],"strengthDesc":"","shadowDesc":""},"partnerYongsin":{"yongsinEl":"","heusinEl":"","gisinEl":"","yongsinReason":"","heusinReason":"","gisinReason":"","desc":""},"partnerBusinessStyle":{"intro":"","patternType":"","patternIcon":"💼","paragraphs":[]}}`,
     3: `{"compatScore":{"score":72,"label":"","paragraphs":[]},"compatReason":{"intro":"","callout":"","paragraphs":[]}}`,
     4: `{"strengthList":{"items":[{"title":"","desc":""}]},"weaknessList":{"items":[{"title":"","desc":""}]},"balanceDesc":{"desc":""}}`,
     5: `{"rolesDesc":{"intro":"","callout":"","paragraphs":[]},"roleConflict":{"items":[{"title":"","desc":""}]},"roleTips":{"tips":[]}}`,
@@ -97,8 +97,81 @@ export function buildBusinessKunghapChapterPrompt(
   };
 
   const questions: Record<number, string> = {
-    1: `__MY__의 사주 원국과 비즈니스 스타일을 풀어주시오. myWonguk: 원국 요약, myNature: 기질(키워드3개+설명), myBusinessStyle: 비즈니스 성향`,
-    2: `__PT__의 사주 원국과 비즈니스 스타일을 풀어주시오. partnerWonguk: 원국 요약, partnerNature: 기질(키워드3개+설명), partnerBusinessStyle: 비즈니스 성향`,
+    1: `아래는 __MY__님의 사주 명식 데이터를 바탕으로 네 개 섹션을 작성하는 지시사항이오.
+
+⚠️ 데이터 사용 원칙:
+- 명식 데이터에 포함된 서버 확정값(일간, 오행 분포)을 그대로 사용하시오.
+- 직접 세거나 재계산하는 것은 절대 금지. 확정값과 다른 숫자를 쓰는 것은 절대 금지.
+- 신강·신약: 일간을 생조하는 글자(비겁+인성)가 4개 이상이면 신강, 미만이면 신약.
+
+━━━ [myWonguk] __MY__님의 원국 ━━━
+__MY__님의 타고난 사주 기운을 깊이 풀이하시오.
+- intro: __MY__님의 일간 오행을 명시하며 "~한 사주로" 형식 한 문장 요약.
+- callout: 오행 분포 확정값과 신강·신약 판단 근거를 담은 핵심 한 문장.
+- singang: "신강" 또는 "신약"
+- dominantEl: 확정값에서 가장 많은 오행 한 글자 (목/화/토/금/수 중 하나)
+- paragraphs 3개 (각 6~8문장, 260자+, 홍연 말투):
+  ① __MY__님의 일간 오행(반드시 실제 글자 명시)이 인생에 새긴 기운 — 근본 성질과 삶을 대하는 방식을 깊고 풍부하게.
+  ② 오행 분포 확정값 숫자를 근거로 강한 기운·부족한 기운이 성격과 비즈니스 방식에 드러나는 방식.
+  ③ 신강·신약 판단 근거(비겁·인성 개수 등 확정 데이터)와 비즈니스·파트너 관계에서 드러나는 본바탕 — 의사결정 방식, 협력 스타일, 자기 표현 방식까지.
+
+━━━ [myNature] __MY__님의 기질 ━━━
+- keywords: __MY__님을 대표하는 기질 키워드 4~5개 (예: "추진력", "분석력", "독립심", "직관력").
+- strengthDesc: 이 기질의 강점을 5~7문장(200자+)으로 서술. 비즈니스에서 어떤 면모로 작용하는지 구체적으로.
+- shadowDesc: 이 기질의 그림자를 5~7문장(200자+)으로. 파트너 입장에서 어떻게 느껴질 수 있는지까지.
+
+━━━ [myYongsin] __MY__님의 용신/희신/기신 ━━━
+⚠ 이 섹션은 __MY__님 본인의 사주에 대한 내용이오. 상대방 얘기를 섞지 마시오.
+- yongsinEl: 격국·억부 원리에 따라 이 사주의 용신 오행 1개 (목/화/토/금/수 중 택1).
+- heusinEl: 용신을 도와 운의 흐름을 부드럽게 하는 희신 오행 1개.
+- gisinEl: 이 사주에서 꺼리는 기신 오행 1개.
+- yongsinReason: 용신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
+- heusinReason: 희신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
+- gisinReason: 기신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
+- desc: 용신·희신·기신 오행이 비즈니스와 파트너 관계에 어떤 영향을 미치는지 2~3문장으로 종합 서술.
+
+━━━ [myBusinessStyle] __MY__님의 비즈니스 패턴 ━━━
+- intro: __MY__님의 비즈니스 스타일 핵심 한 줄 (인상적인 문장으로).
+- patternType: 비즈니스 유형명 (예: "선도형 리더", "전략형 파트너", "안정형 실행자", "직관형 기획자").
+- patternIcon: 유형에 맞는 이모지 1개.
+- paragraphs 3개 (홍연 말투):
+  ① 비즈니스에서의 의사결정 방식과 협력 스타일 — __MY__님이 파트너·팀 관계에서 보여주는 행동 패턴을 구체적으로 (6~8문장, 250자+).
+  ② 비즈니스 관계에서 반복되는 패턴과 파트너에게 기대하는 것 (6~8문장, 250자+).
+  ③ 비즈니스에서 주의해야 할 점과 이 패턴을 인식했을 때 달라지는 것 (5~7문장, 220자+).`,
+    2: `[partnerWonguk 섹션 — 상대 원국 풀이]
+⚠️ 상대방 명식 데이터에 서버가 사전 계산한 확정값이 제공되오. 반드시 그 값을 그대로 사용하시오. 직접 세거나 재계산하는 것은 절대 금지.
+  - 일간(日干): 데이터의 "상대방 일간(日干) 확정값"을 그대로 사용하시오.
+  - 오행 분포: 데이터의 "상대방 오행 분포 확정값"의 숫자를 그대로 사용하시오.
+  - 신강·신약: 일간을 생조하는 글자(비겁+인성)가 4개 이상이면 신강, 그 미만이면 신약.
+- intro: 위에서 읽은 상대의 일간 오행을 명시하며 "~한 사주로" 형식 한 문장 요약.
+- callout: 실제 오행 분포와 신강·신약 판단 근거를 담은 핵심 한 문장.
+- singang: "신강" 또는 "신약"
+- dominantEl: 8글자에서 가장 많은 오행 한 글자 (목/화/토/금/수 중 하나)
+- paragraphs 3개: ①상대의 일간 오행(반드시 실제 글자 언급)이 인생 전반에 새긴 기운과 삶을 대하는 방식(6~8문장, 260자+) ②실제 오행 분포 숫자를 근거로 강한 기운·부족한 기운이 성격과 비즈니스 방식에 드러나는 것(6~8문장, 260자+) ③신강·신약 판단 근거와 비즈니스·파트너 관계에서 드러나는 본바탕(6~8문장, 260자+). 홍연 말투(~이오/~하오/~겠소) 사용.
+
+[partnerNature 섹션 — 상대방의 기질]
+- keywords: 상대를 대표하는 기질 키워드 4~5개.
+- strengthDesc: 상대 기질의 빛(강점) — 비즈니스에서 어떤 강점으로 작용하는지 5~7문장(200자+).
+- shadowDesc: 상대 기질의 그림자(주의점) — 비즈니스 파트너 입장에서 어떻게 느껴질 수 있는지 5~7문장(200자+).
+
+[partnerYongsin 섹션 — 상대방의 용신/희신/기신]
+⚠ 이 섹션은 상대방 본인의 사주에 대한 내용이오. __MY__님 얘기를 섞지 마시오.
+- yongsinEl: 격국·억부 원리에 따라 이 사주의 용신 오행 1개 (목/화/토/금/수 중 택1).
+- heusinEl: 용신을 도와 운의 흐름을 부드럽게 하는 희신 오행 1개.
+- gisinEl: 이 사주에서 꺼리는 기신 오행 1개.
+- yongsinReason: 용신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
+- heusinReason: 희신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
+- gisinReason: 기신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
+- desc: 용신·희신·기신 오행이 비즈니스와 파트너 관계에 어떤 영향을 미치는지 2~3문장으로 종합 서술.
+
+[partnerBusinessStyle 섹션 — 상대방의 비즈니스 패턴]
+- intro: 상대방의 비즈니스 스타일 핵심 한 줄 (인상적인 문장으로).
+- patternType: 비즈니스 유형명 (예: "보호형 리더", "자유형 기획자", "감성형 조율자").
+- patternIcon: 유형에 맞는 이모지 1개.
+- paragraphs 3개 (홍연 말투):
+  ① 비즈니스에서의 의사결정·협력 스타일, 파트너에게 기대하는 것 (5~7문장, 220자+).
+  ② 비즈니스 관계에서 반복될 수 있는 패턴과 그것이 파트너에게 어떻게 보이는가 (5~7문장, 220자+).
+  ③ 이 패턴을 가진 상대와 좋은 비즈니스 파트너가 되는 법 (5~7문장, 220자+).`,
     3: `두 사람의 비즈니스 궁합 점수(0-100)와 근거를 풀어주시오. compatScore: 점수+라벨+설명단락, compatReason: 근거 상세`,
     4: `두 사람이 협력할 때의 강점과 약점, 균형 방법을 풀어주시오. strengthList: 강점(3개), weaknessList: 약점(3개), balanceDesc: 균형 조언`,
     5: `두 사람의 역할 분담과 역할 충돌 가능성을 풀어주시오. rolesDesc: 역할 분담 방향, roleConflict: 충돌 요소(2-3개), roleTips: 조언(3-4개)`,
