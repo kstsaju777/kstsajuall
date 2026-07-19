@@ -2380,6 +2380,13 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 const IM1_COLOR = "#9b3558"; const IM1_PALE  = "#f8edf2"; // 1장 — 딥 로즈 (나의 원국)
 const IM2_COLOR = "#2d3a8c"; const IM2_PALE  = "#eef0fb"; // 2장 — 딥 네이비 (상대 원국)
 const IM3_COLOR = "#6a3a8a"; const IM3_PALE  = "#f3eeff"; // 3장 — 보라 (자녀운·궁합 점수)
+const FLOW_TREND_META: Record<string, { icon: string; color: string }> = {
+  "상승 중": { icon: "↗", color: "#1a6a4a" },
+  "고점":    { icon: "▲", color: "#b07a20" },
+  "하락 중": { icon: "↘", color: "#9b4a4a" },
+  "저점":    { icon: "▼", color: "#c0306a" },
+  "유지":    { icon: "→", color: "#5a6a7a" },
+};
 const IM3_DEEP  = "#4a1a6a";                               // 3장 강조용 딥 보라
 const IM4_COLOR = "#8a5a00"; const IM4_PALE  = "#fdf6e0"; // 4장 — 앰버 (태어날 자녀 기운)
 const IM4_GREEN = "#2a6a4a"; const IM4_GREEN_P = "#edf7f2"; // 4장 — 초록 (성장·양육)
@@ -2573,6 +2580,203 @@ function ParentStyleCard({ data, color, pale }: {
       {paragraphs.map((p, i) => (
         <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
       ))}
+    </div>
+  );
+}
+
+// ── 자녀 인연 흐름 그래프 ──
+function ChildFlowGraph({ data, myName, partnerName }: { data: Record<string, unknown> | null; myName: string; partnerName: string }) {
+  if (!data) return null;
+  const fg      = (data.childGraph as Record<string, unknown> | undefined) ?? null;
+  if (!fg) return null;
+  const pts     = (fg.points  as Record<string, unknown>[] | undefined) ?? [];
+  const summary = (fg.summary as string | undefined) ?? "";
+  if (pts.length === 0) return null;
+
+  const W = 320, H = 170;
+  const PL = 28, PR = 12, PT = 24, PB = 32;
+  const CW = W - PL - PR;
+  const CH = H - PT - PB;
+  const MIN_Y = 2026, MAX_Y = 2035;
+
+  const scores = pts.map(p => p.score as number);
+  const rawMin = Math.min(...scores);
+  const rawMax = Math.max(...scores);
+  const pad = Math.max(8, Math.round((rawMax - rawMin) * 0.2));
+  const MIN_S = Math.max(0,   rawMin - pad);
+  const MAX_S = Math.min(100, rawMax + pad);
+
+  const xOf = (year: number) => PL + ((year - MIN_Y) / (MAX_Y - MIN_Y)) * CW;
+  const yOf = (score: number) => PT + (1 - (score - MIN_S) / (MAX_S - MIN_S)) * CH;
+
+  const coords = pts.map(p => ({
+    x: xOf(p.year as number),
+    y: yOf(p.score as number),
+    year: p.year as number,
+    score: p.score as number,
+  }));
+
+  const linePath = coords.reduce((acc, c, i) => {
+    if (i === 0) return `M ${c.x} ${c.y}`;
+    const prev = coords[i - 1];
+    const cpx = (prev.x + c.x) / 2;
+    return `${acc} C ${cpx} ${prev.y} ${cpx} ${c.y} ${c.x} ${c.y}`;
+  }, "");
+  const fillPath = `${linePath} L ${coords[coords.length - 1].x} ${PT + CH} L ${coords[0].x} ${PT + CH} Z`;
+
+  const labelYears = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
+
+  return (
+    <div className="mx-5 mb-2 rounded-2xl overflow-hidden" style={{ border: `1px solid rgba(0,0,0,0.08)`, background: "#f9f6ff" }}>
+      <div className="px-4 pt-3.5 pb-1">
+        <p className="text-[14px] font-black mb-0.5" style={{ color: IM3_COLOR }}>향후 10년 임신·출산 인연 흐름</p>
+        <p className="text-[10px]" style={{ color: MUTE }}>{myName}님과 {partnerName}님의 세운 기반 임신 인연 흐름 그래프</p>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", display: "block", overflow: "visible" }}>
+        <defs>
+          <linearGradient id="im3cfg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={IM3_COLOR} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={IM3_COLOR} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={fillPath} fill="url(#im3cfg)" />
+        <path d={linePath} fill="none" stroke={IM3_COLOR} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        {coords.map((c, i) => (
+          <line key={`vl-${i}`} x1={c.x} y1={c.y + 4} x2={c.x} y2={PT + CH} stroke={IM3_COLOR} strokeWidth="1" strokeDasharray="2 2" strokeOpacity="0.4" />
+        ))}
+        {(() => {
+          const maxScore = Math.max(...coords.map(c => c.score));
+          const minScore = Math.min(...coords.map(c => c.score));
+          return coords.map((c, i) => {
+            const isMax = c.score === maxScore;
+            const isMin = c.score === minScore;
+            const isPeak = isMax || isMin;
+            return (
+              <g key={i}>
+                {isPeak && <circle cx={c.x} cy={c.y} r="10" fill={isMax ? "#1a4a9e" : "#c0306a"} opacity="0.15" />}
+                <circle cx={c.x} cy={c.y} r={isPeak ? 6.5 : 3} fill={isMax ? "#1a4a9e" : isMin ? "#c0306a" : IM3_COLOR} stroke="#f9f6ff" strokeWidth="1.5" />
+                {isPeak && (
+                  <text x={c.x} y={isMax ? c.y - 14 : c.y + 20} textAnchor="middle" fontSize="9" fontWeight="800"
+                    fill={isMax ? "#1a4a9e" : "#c0306a"}>{isMax ? "최고" : "주의"}</text>
+                )}
+              </g>
+            );
+          });
+        })()}
+        <line x1={PL} y1={PT + CH} x2={W - PR} y2={PT + CH} stroke="rgba(0,0,0,0.1)" strokeWidth="1" />
+        {labelYears.map(y => (
+          <g key={y}>
+            <line x1={xOf(y)} y1={PT + CH} x2={xOf(y)} y2={PT + CH + 4} stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+            <rect x={xOf(y) - 14} y={PT + CH + 6} width={28} height={16} rx={5} ry={5} fill="rgba(0,0,0,0.04)" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
+            <text x={xOf(y)} y={PT + CH + 17} textAnchor="middle" fontSize="8.5" fontWeight="600" fill={MUTE}>{String(y).slice(2)}</text>
+          </g>
+        ))}
+      </svg>
+      {summary && <p className="px-4 pb-3 text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{summary}</p>}
+    </div>
+  );
+}
+
+function ChildFlowPeriods({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const periods = (data.childPeriods as Record<string, unknown>[] | undefined) ?? [];
+  if (periods.length === 0) return null;
+  return (
+    <div className="mx-5 mb-4 space-y-2">
+      {periods.map((p, i) => {
+        const label = (p.label as string | undefined) ?? "";
+        const trend = (p.trend as string | undefined) ?? "유지";
+        const title = (p.title as string | undefined) ?? "";
+        const text  = (p.text  as string | undefined) ?? "";
+        const meta  = FLOW_TREND_META[trend] ?? { icon: "•", color: MUTE };
+        return (
+          <div key={i} className="flex gap-3 items-start rounded-2xl px-4 py-3.5" style={{ background: `${meta.color}09`, border: `1px solid ${meta.color}22` }}>
+            <div className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-black mt-0.5"
+              style={{ background: `${meta.color}14`, border: `2px solid ${meta.color}30`, color: meta.color }}>
+              {meta.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="text-[11px] font-black" style={{ color: meta.color }}>{label}</span>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: `${meta.color}15`, color: meta.color }}>{trend}</span>
+                <span className="text-[12px] font-black" style={{ color: INK, fontFamily: SERIF }}>{title}</span>
+              </div>
+              <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{text}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChildGenderGauge({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const gg       = (data.genderGuess as Record<string, unknown> | undefined) ?? null;
+  if (!gg) return null;
+  const sonRatio = Math.min(100, Math.max(0, (gg.sonRatio as number | undefined) ?? 50));
+  const dlgRatio = 100 - sonRatio;
+  const basis    = (gg.basis as string | undefined) ?? "";
+  const note     = (gg.note  as string | undefined) ?? "";
+  const SON_C    = "#1a4a9e";
+  const DLG_C    = "#c0306a";
+  return (
+    <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${IM3_COLOR}28` }}>
+      <div className="px-5 pt-4 pb-1" style={{ background: WHITE }}>
+        <p className="text-[11px] font-black mb-3" style={{ color: IM3_COLOR }}>첫 자녀 성별 예측</p>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-[11px] font-black w-6 text-right flex-shrink-0" style={{ color: SON_C }}>아들</span>
+          <div className="flex-1 flex rounded-full overflow-hidden relative" style={{ height: 26 }}>
+            <div className="flex items-center justify-start pl-2.5" style={{ width: `${sonRatio}%`, background: SON_C, transition: "width 0.4s" }}>
+              {sonRatio >= 20 && <span className="text-[10px] font-black" style={{ color: WHITE }}>{sonRatio}%</span>}
+            </div>
+            <div className="flex items-center justify-end pr-2.5" style={{ width: `${dlgRatio}%`, background: DLG_C, transition: "width 0.4s" }}>
+              {dlgRatio >= 20 && <span className="text-[10px] font-black" style={{ color: WHITE }}>{dlgRatio}%</span>}
+            </div>
+          </div>
+          <span className="text-[11px] font-black w-4 flex-shrink-0" style={{ color: DLG_C }}>딸</span>
+        </div>
+        {basis && <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT, fontFamily: SERIF }}>{basis}</p>}
+        {note && <p className="text-[11px] mb-3" style={{ color: MUTE, fontFamily: SERIF }}>{note}</p>}
+      </div>
+    </div>
+  );
+}
+
+function ChildDetailPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  return (
+    <div className="px-6 mb-2">
+      {paragraphs.map((p, i) => (
+        <p key={i} className="mb-4 text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+function ChildHomeTipPanel({ data }: { data: Record<string, unknown> | null }) {
+  if (!data) return null;
+  const tips = (data.tips as Record<string, unknown>[] | undefined) ?? [];
+  if (tips.length === 0) return null;
+  return (
+    <div className="mx-5 mb-5 space-y-3">
+      {tips.map((tip, i) => {
+        const tipIcon  = (tip.icon  as string | undefined) ?? "💡";
+        const tipTitle = (tip.title as string | undefined) ?? "";
+        const tipDesc  = (tip.desc  as string | undefined) ?? "";
+        return (
+          <div key={i} className="rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid rgba(0,0,0,0.07)`, borderLeft: `4px solid ${IM3_COLOR}` }}>
+            <div className="px-4 pt-4 pb-3">
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="text-[24px] leading-none">{tipIcon}</span>
+                <p className="text-[14px] font-black leading-snug" style={{ color: INK, fontFamily: SERIF }}>{tipTitle}</p>
+              </div>
+              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tipDesc}</p>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -6207,55 +6411,47 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제3장 · 두 사람의 자녀운 ═══════════ */}
+      {/* ═══════════ 제3장 · 두 사람의 자녀 인연 ═══════════ */}
       {ch === "3" && (() => {
-        const ps   = (jc.pregnancyScore  as Record<string, unknown> | undefined) ?? null;
-        const pr   = (jc.pregnancyReason as Record<string, unknown> | undefined) ?? null;
-
-        const score      = typeof ps?.score === "number" ? ps.score : 72;
-        const tier       = typeof ps?.tier  === "string" ? ps.tier  : "B";
-        const label      = typeof ps?.label === "string" ? ps.label : "자녀 인연이 있는 부부이오";
-        const scoreParas = Array.isArray(ps?.paragraphs) ? (ps.paragraphs as string[]) : [];
-
-        const intro    = typeof pr?.intro   === "string" ? pr.intro   : "";
-        const callout  = typeof pr?.callout === "string" ? pr.callout : "";
-        const reasons  = Array.isArray(pr?.reasons) ? (pr.reasons as Array<{ icon: string; title: string; desc: string }>) : [];
-        const reasonPs = Array.isArray(pr?.paragraphs) ? (pr.paragraphs as string[]) : [];
-
+        const cf = (jc.childFlow as Record<string, unknown> | undefined) ?? null;
+        const ct = (jc.childTips as Record<string, unknown> | undefined) ?? null;
+        const myFirstName3      = name.length > 1 ? name.slice(1) : name;
+        const partnerFirstName3 = (report?.partnerName ?? "배우자").length > 1 ? (report?.partnerName ?? "배우자").slice(1) : (report?.partnerName ?? "배우자");
         return (
           <>
-            {/* ── 커버 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 자녀운</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 자녀운</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 자녀 인연</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"두 사람의 사주에\n임신·출산의 기운이 담겨 있소.\n홍연이 솔직하게 풀어드리겠소."`}</Quote>
 
-            {/* ── 임신·출산 궁합 점수 카드 ── */}
-            <section className="pt-2 pb-2">
-              <Heading>임신·출산 궁합 점수</Heading>
-              <p className="px-6 text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                두 사람의 사주가 임신·출산의 기운을 얼마나 풍성하게 품고 있는지를 점수로 나타낸 것이오. 단순한 숫자가 아니라 식상의 기운, 자녀성의 배치, 오행의 조화 등 여러 사주 요소를 종합하여 산출한 수치이오.
-              </p>
-              <PregnancyScoreCard score={score} tier={tier} label={label} paragraphs={scoreParas} />
+            <Quote>{`아이가 이 인연에 들어오는가.\n자녀 인연을\n살펴보겠소.`}</Quote>
+
+            {/* 자녀 인연 흐름 그래프 */}
+            <section className="px-6 pt-2 pb-2">
+              <Heading>향후 10년 임신·출산 인연 흐름</Heading>
             </section>
+            <ChildFlowGraph data={cf} myName={myFirstName3} partnerName={partnerFirstName3} />
+            <ChildFlowPeriods data={cf} />
 
-            {/* ── 임신 궁합 사주 근거 ── */}
-            <section className="pt-4 pb-2">
-              <Heading>이 점수의 사주 근거</Heading>
-              <p className="px-6 text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT }}>
-                이 점수가 나오게 된 사주 원리상의 이유를 구체적으로 살펴보겠소. 두 사람의 원국에서 읽히는 임신·출산 기운의 구조를 홍연이 풀어드리겠소.
-              </p>
-              <PregnancyReasonCard intro={intro} callout={callout} reasons={reasons} paragraphs={reasonPs} />
+            {/* 첫 자녀 성별 예측 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>첫 자녀 성별 예측</Heading>
             </section>
+            <ChildGenderGauge data={cf} />
+            <ChildDetailPanel data={cf} />
 
-            <Illust src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" h={300} />
-            <Quote>{`"자녀운을 살펴보았으니,\n태어날 아이의 기운을\n살펴보겠소."`}</Quote>
+            {/* 실천 조언 */}
+            <section className="px-6 pt-4 pb-2">
+              <Heading>자녀를 풍성하게 맞이하는 법</Heading>
+            </section>
+            <ChildHomeTipPanel data={ct} />
+
+            <Quote>{`자녀 인연을 살펴보았으니,\n태어날 아이의 기운을\n살펴보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
