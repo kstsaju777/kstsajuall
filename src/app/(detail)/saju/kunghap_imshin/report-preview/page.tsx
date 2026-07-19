@@ -5937,7 +5937,7 @@ function ReportPreviewInner() {
               <div className="px-5 mb-3">
                 <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
-              <INatureCard data={myNature} color={IM1_COLOR} label="나를 대표하는 기질" />
+              <INatureCard data={myNature} color={IM1_COLOR} />
             </section>
 
             {/* ── 부모로서 나는 어떤 사람인가 ── */}
@@ -6079,7 +6079,7 @@ function ReportPreviewInner() {
               <div className="px-5 mb-3">
                 <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
               </div>
-              <INatureCard data={partnerNature} color={IM2_COLOR} label={`${partnerName}을 대표하는 기질`} />
+              <INatureCard data={partnerNature} color={IM2_COLOR} />
             </section>
 
             {/* ── 부모로서 배우자는 어떤 사람인가 ── */}
