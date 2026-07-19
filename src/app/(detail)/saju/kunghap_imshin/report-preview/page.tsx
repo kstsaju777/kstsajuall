@@ -6848,9 +6848,7 @@ function ReportPreviewInner() {
             )}
 
             {/* 점수 게이지 */}
-            <div className="px-4 pt-2">
-              <p className="text-[11px] font-bold tracking-widest mb-2 pl-1" style={{ color: CH6_COLOR }}>✦ 궁합 점수 · 합과 충의 균형</p>
-            </div>
+            <div className="px-5"><Heading>두 사람의 합충 점수는?</Heading></div>
             <HapChungScoreCardIM
               data={overallScore as Record<string, unknown>}
               hapCount={hapCount}
