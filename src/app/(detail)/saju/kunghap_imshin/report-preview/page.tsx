@@ -6857,14 +6857,12 @@ function ReportPreviewInner() {
 
             {/* 합충 종합 분석 */}
             {computedDesc && (
-              <>
-                <div className="px-5"><Heading>합충 종합 분석</Heading></div>
-                <div className="mx-4 mb-5 rounded-2xl px-4 py-4" style={{ background: `${CH6_COLOR}08`, border: `1px solid ${CH6_COLOR}20` }}>
-                  {computedDesc.split("\n\n").map((para, i) => (
-                    <p key={i} className="text-[13px] leading-[1.9] mb-3 last:mb-0" style={{ color: INK_SOFT, fontFamily: SERIF }}>{para}</p>
-                  ))}
+              <section className="pb-4">
+                <div className="px-5"><Heading>합·충 종합 분석</Heading></div>
+                <div className="mx-5 rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                  <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{computedDesc}</p>
                 </div>
-              </>
+              </section>
             )}
 
             {/* 두 사람의 합(合) - LLM 카드 */}
