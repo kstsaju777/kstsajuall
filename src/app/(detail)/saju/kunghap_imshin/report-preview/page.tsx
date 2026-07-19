@@ -3580,7 +3580,7 @@ function PeakTimingCard({ headline, callout, paragraphs }: {
 // 장번호 → 표시 제목 (임신궁합 12장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 임신궁합에 대하여",
-  "1":  "제1장 · 나의 사주 원국",
+  "1":  "제1장 · 나는 부모로써 어떤 사람인가?",
   "2":  "제2장 · 상대의 사주 원국",
   "3":  "제3장 · 두 사람의 자녀운",
   "4":  "제4장 · 임신하기 좋은 시기는 언제인가",
@@ -4775,7 +4775,7 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "임신궁합에 대하여",                    no: "0" },
-  { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                     no: "1" },
+  { disp: "제1장",  chip: "나의원국", title: "나는 부모로써 어떤 사람인가?",        no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                   no: "2" },
   { disp: "제3장",  chip: "자녀운",  title: "두 사람의 자녀운",                    no: "3" },
   { disp: "제4장",  chip: "임신시기", title: "임신하기 좋은 시기는 언제인가",      no: "4" },
