@@ -11,6 +11,8 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
@@ -1264,36 +1266,92 @@ function EventBox() {
 }
 
 // 추천 상품(크로스셀) 그리드 (마무리)
-const RECO_GROUPS: { cat: string; heading: string; cards: { badge: "사주" | "자미두수"; title: string; img: string }[] }[] = [
-  { cat: "자미두수 분야", heading: "사주보다 용하다고? 자미두수 풀이", cards: [
-    { badge: "자미두수", title: "프리미엄 자미두수", img: "hero-12" },
-    { badge: "자미두수", title: "베이직 자미두수", img: "hero-9" },
-    { badge: "자미두수", title: "자미두수 연애운", img: "hero-2" },
-    { badge: "자미두수", title: "자미두수 결혼운", img: "hero-13" },
-  ] },
-];
+const RECO_BADGE_COLORS: Record<string, string> = {
+  "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
+  "재물": "#eac660", "건강": "#2e7d32", "결혼": "#c2185b", "임신": "#6a1b9a",
+  "연애": "#e1337d", "자녀": "#0077b6", "유아": "#dddbd1", "재회": "#7b2fff",
+  "이혼": "#444", "비즈니스": "#1d6fce",
+};
+const RECO_TAG_COLORS: Record<string, string> = {
+  "사주": "#111111", "HOT": "#ff4500", "궁합": "#e1337d", "비즈니스": "#1d6fce",
+  "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b", "NEW": "#4fd5e8",
+};
+const RECO_EXCLUDE = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주"]);
+const SAJU_ORDER = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주", "팔자도둑 재물사주"];
+const KUNGHAP_ORDER = ["말좀듣자 자녀궁합", "평생내짝 결혼궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
+
+function sortBy(cards: CategoryCard[], order: string[]) {
+  return order.flatMap((name) => cards.filter((c) => c.name === name));
+}
+
+function RecoProductCard({ card }: { card: CategoryCard }) {
+  const imgSrc = card.thumbnail ?? card.image;
+  const [imgErr, setImgErr] = useState(false);
+  return (
+    <Link href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
+      {imgErr ? (
+        <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={imgSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
+      )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
+        <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
+          {card.tag && (
+            card.tag === "HOT" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#fff", background: "linear-gradient(105deg,#ff4500 30%,#ffd700 48%,#fff8e0 53%,#ffd700 58%,#ff4500 72%)", backgroundSize: "200% auto", animation: "hotShimmer 1.8s linear infinite" }}>HOT</span>
+            ) : card.tag === "BEST" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", color: "#111", background: "linear-gradient(105deg,#e6a800 30%,#ffe566 48%,#fffbe0 53%,#ffe566 58%,#e6a800 72%)", backgroundSize: "200% auto", animation: "bestShimmer 2s linear infinite" }}>BEST</span>
+            ) : card.tag === "NEW" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#4fd5e8", color: "#000", display: "inline-block", animation: "newBounce 1.2s ease-in-out infinite" }}>NEW</span>
+            ) : card.tag === "추천" ? (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: "#00ff73", color: "#000", animation: "chukNeon 1.6s ease-in-out infinite" }}>추천</span>
+            ) : (
+              <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag}</span>
+            )
+          )}
+          {card.tag2 && (
+            <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_TAG_COLORS[card.tag2] ?? "rgba(255,255,255,0.2)", color: "#fff" }}>{card.tag2}</span>
+          )}
+          <span className="font-bold rounded-full" style={{ fontSize: 8, padding: "2px 6px", backgroundColor: RECO_BADGE_COLORS[card.badge] ?? "#711b20", color: ["유아","재물"].includes(card.badge) ? "#000" : "#fff" }}>{card.badge}</span>
+        </div>
+        {card.tagline && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.6)", marginBottom: 1 }}>{card.tagline}</p>}
+        <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
+        <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
+      </div>
+    </Link>
+  );
+}
+
 function RecoGrid() {
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("kunghap_business") && !RECO_EXCLUDE.has(c.name));
+  const sajuCards    = sortBy(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER);
+  const kunghapCards = sortBy(all.filter((c) =>  c.href.includes("kunghap")), KUNGHAP_ORDER);
+
+  const Row = ({ title, cards }: { title: string; cards: CategoryCard[] }) => (
+    <div className="mb-8">
+      <div className="px-6 mb-3">
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
+        <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="pb-4">
-      {RECO_GROUPS.map((g, gi) => (
-        <div key={gi} className="mb-6">
-          <div className="px-6">
-            <p className="text-[11px] font-bold mb-1" style={{ color: MUTE }}>다른풀이 보기</p>
-            <h3 className="text-[16px] font-black mb-3" style={{ color: INK }}>종합사주 외에 연애와 재물운은?</h3>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
-            {g.cards.map((c, i) => (
-              <div key={i} className="relative rounded-2xl overflow-hidden flex-shrink-0" style={{ width: "36vw", aspectRatio: "3 / 4", scrollSnapAlign: "start" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/media/hero/${c.img}.jpg`} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ filter: "blur(3px) brightness(0.7)", transform: "scale(1.05)" }} />
-                <div className="absolute left-0 right-0" style={{ top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.82)", padding: "10px 0" }}>
-                  <p className="text-center text-[13px] font-black text-white tracking-widest">서비스 준비중</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+      <style>{`
+        @keyframes hotShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes bestShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes newBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} 60%{transform:translateY(-2px)} }
+        @keyframes chukNeon { 0%,100%{box-shadow:0 0 3px 1px rgba(0,255,115,0.5)} 50%{box-shadow:0 0 7px 2px rgba(0,255,115,0.9)} }
+      `}</style>
+      {sajuCards.length > 0 && <Row title="홍연의 사주풀이" cards={sajuCards} />}
+      {kunghapCards.length > 0 && <Row title="홍연의 궁합풀이" cards={kunghapCards} />}
     </div>
   );
 }
@@ -2502,21 +2560,19 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 // 장번호 → 표시 제목 (비즈니스궁합 12장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 비즈니스궁합에 대하여",
-  "1":  "제1장 · 나의 사주 원국",
-  "2":  "제2장 · 상대의 사주 원국",
-  "3":  "제3장 · 궁합의 핵심: 합과 충",
-  "4":  "제4장 · 두 사람, 함께 일할 수 있는 인연인가",
-  "5":  "제5장 · 최적의 역할 분담",
+  "1":  "제1장 · 나는 어떤 사람인가?",
+  "2":  "제2장 · 상대는 어떤 사람인가?",
+  "3":  "제3장 · 두 사람 글자들의 합과 충",
+  "4":  "제4장 · 두사람,\n함께 일할 수 있는 인연인가",
+  "5":  "제5장 · 함께 일하면\n어떤 파트너가 될까",
   "6":  "제6장 · 비즈니스 스타일의 차이",
   "7":  "제7장 · 이 파트너십의 빛과 그림자",
-  "8":  "제8장 · 갈등과 극복",
-  "9":  "제9장 · 함께하면 돈이 되는가 — 재물운",
-  "10": "제10장 · 함께하면 좋은 시기와 조심할 시기",
-  "11": "마무리 · 그대들에게 남기는 홍연의 서신",
+  "8":  "제8장 · 함께하면 좋은시기와\n조심할 시기",
+  "9":  "마무리 · 그대들에게 남기는\n홍연의 서신",
 };
 
 // A안 읽기 순서 (연애궁합 0~12)
-const A_ORDER = ["0","1","2","3","4","5","6","7","8","9","10","11"];
+const A_ORDER = ["0","1","2","3","4","5","6","7","8","9"];
 
 // 개발용 장 재생성 플로팅 버튼 (배포 전 제거 예정)
 function RegenButton({ chapter, onRegen }: { chapter: number; onRegen: (n: number) => void }) {
@@ -3664,7 +3720,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="min-w-0 flex-1 mr-3">
           <p className="text-[10px] font-bold mt-1" style={{ color: MUTE }}>{label}</p>
-          {subtitle && <p className="text-[14px] font-bold leading-snug mt-1" style={{ color: INK }}>{subtitle}</p>}
+          {subtitle && <p className="text-[14px] font-bold leading-snug mt-1" style={{ color: INK, whiteSpace: "pre-line" }}>{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* 명식 버튼 세로 배치 — 같은 너비 고정 */}
@@ -3696,17 +3752,15 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "비즈니스궁합에 대하여",                    no: "0" },
-  { disp: "제1장",  chip: "나의원국", title: "나의 사주 원국",                          no: "1" },
-  { disp: "제2장",  chip: "상대원국", title: "상대의 사주 원국",                        no: "2" },
-  { disp: "제3장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                    no: "3" },
+  { disp: "제1장",  chip: "나의 사주팔자", title: "나는 어떤 사람인가?",                no: "1" },
+  { disp: "제2장",  chip: "상대방 사주팔자", title: "상대는 어떤 사람인가?",            no: "2" },
+  { disp: "제3장",  chip: "글자들의 합과 충", title: "두 사람 글자들의 합과 충",        no: "3" },
   { disp: "제4장",  chip: "인연",    title: "두 사람, 함께 일할 수 있는 인연인가",      no: "4" },
-  { disp: "제5장",  chip: "역할분담", title: "최적의 역할 분담",                        no: "5" },
+  { disp: "제5장",  chip: "역할분담", title: "함께 일하면 어떤 파트너가 될까",           no: "5" },
   { disp: "제6장",  chip: "스타일",  title: "비즈니스 스타일의 차이",                   no: "6" },
   { disp: "제7장",  chip: "빛그림자", title: "이 파트너십의 빛과 그림자",              no: "7" },
-  { disp: "제8장",  chip: "갈등극복", title: "갈등과 극복",                            no: "8" },
-  { disp: "제9장",  chip: "재물운",  title: "함께하면 돈이 되는가 — 재물운",           no: "9" },
-  { disp: "제10장", chip: "좋은시기", title: "함께하면 좋은 시기와 조심할 시기",        no: "10" },
-  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",            no: "11" },
+  { disp: "제8장",  chip: "시기와 흐름", title: "함께하면 좋은시기와 조심할 시기",       no: "8" },
+  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",            no: "9" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -3786,7 +3840,7 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
                   {/* 키워드(작게) + 소제목(명조) */}
                   <div className="min-w-0">
                     <span className="text-[10px] tracking-wide" style={{ color: active ? MAROON : MUTE }}>{it.chip}</span>
-                    <p className="text-[12px] leading-tight truncate" style={{ color: active ? MAROON : INK, fontWeight: active ? 800 : 600, fontFamily: SERIF }}>
+                    <p className="text-[12px] leading-tight" style={{ color: active ? MAROON : INK, fontWeight: active ? 800 : 600, fontFamily: SERIF, whiteSpace: "pre-line" }}>
                       {it.title}
                     </p>
                   </div>
@@ -4435,6 +4489,39 @@ function calcKunghapScoreBiz(rels: { kind: string }[]): { score: number; label: 
 
 function calcCrossRelationsBiz(myView: MyeongsikView, ptView: MyeongsikView): { kind: string; chars: string[]; label: string }[] {
   return calcCrossRelationsShared(myView, ptView);
+}
+
+// 오행 상생/상극 호환도 — ch4 전용
+function calcOhaengCompatScore(myView: MyeongsikView, ptView: MyeongsikView): number {
+  // 상생: A가 B를 生함 (목→화, 화→토, 토→금, 금→수, 수→목)
+  const SAENG: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+  // 상극: A가 B를 剋함 (목→토, 토→수, 수→화, 화→금, 금→목)
+  const GEUK: Record<string, string>  = { 목: "토", 토: "수", 수: "화", 화: "금", 금: "목" };
+
+  const myEls = [...new Set(myView.pillars.flatMap(p => [p.ganEl, p.jiEl]).filter(Boolean))];
+  const ptEls = [...new Set(ptView.pillars.flatMap(p => [p.ganEl, p.jiEl]).filter(Boolean))];
+
+  let saeng = 0, geuk = 0;
+  for (const a of myEls) {
+    for (const b of ptEls) {
+      if (SAENG[a] === b || SAENG[b] === a) saeng++;
+      if (GEUK[a] === b || GEUK[b] === a) geuk++;
+    }
+  }
+
+  return Math.min(100, Math.max(0, 70 + saeng * 5 - geuk * 4));
+}
+
+// ch4 종합 궁합 점수: 합충(50%) + 오행 상생/상극(50%)
+function calcBusinessCompatScoreCh4(
+  hapChungScore: number,
+  myView: MyeongsikView,
+  ptView: MyeongsikView
+): { score: number; label: string } {
+  const ohaengScore = calcOhaengCompatScore(myView, ptView);
+  const score = Math.min(100, Math.max(0, Math.round(hapChungScore * 0.5 + ohaengScore * 0.5)));
+  const label = (SCORE_LABELS_BIZ.find(([min]) => score >= min) ?? SCORE_LABELS_BIZ[SCORE_LABELS_BIZ.length - 1])[1];
+  return { score, label };
 }
 
 function buildHapChungDescBiz(rels: { kind: string }[], score: number): string {
@@ -5790,7 +5877,7 @@ function BizStyleCompareBar({
 function BizStyleGapCard({ data }: { data: Record<string, unknown> | null }) {
   if (!data) return null;
   const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
-  const tips       = (data.tips       as string[] | undefined) ?? [];
+  const rawTips    = (data.tips as (string | Record<string, unknown>)[] | undefined) ?? [];
   return (
     <div className="mb-2">
       <div className="px-6">
@@ -5798,19 +5885,24 @@ function BizStyleGapCard({ data }: { data: Record<string, unknown> | null }) {
           <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
         ))}
       </div>
-      {tips.length > 0 && (
-        <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${BCH7_COLOR}18`, boxShadow: "0 1px 8px rgba(0,0,0,0.04)" }}>
-          <div className="px-5 py-3" style={{ background: `${BCH7_COLOR}08`, borderBottom: `1px solid ${BCH7_COLOR}12` }}>
-            <p className="text-[12px] font-black" style={{ color: BCH7_COLOR }}>✦ 두 사람이 조화를 이루는 법</p>
-          </div>
-          <div className="px-5 py-3 space-y-3">
-            {tips.map((tip, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <span className="text-[13px] font-black flex-shrink-0 mt-0.5" style={{ color: BCH7_COLOR }}>{i + 1}</span>
-                <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+      {rawTips.length > 0 && (
+        <div className="mx-5 mb-4 space-y-3">
+          {rawTips.map((tip, i) => {
+            const title = typeof tip === "object" ? (tip.title as string | undefined) ?? "" : "";
+            const desc  = typeof tip === "object" ? (tip.desc  as string | undefined) ?? "" : (tip as string);
+            return (
+              <div key={i} className="rounded-xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${BCH7_COLOR}18`, boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+                {title && (
+                  <div className="px-4 py-2.5" style={{ background: `${BCH7_COLOR}0d`, borderBottom: `1px solid ${BCH7_COLOR}12` }}>
+                    <p className="text-[13px] font-black" style={{ color: BCH7_COLOR }}>{title}</p>
+                  </div>
+                )}
+                <div className="px-4 py-3">
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -5894,20 +5986,16 @@ function BizLightShadowSummaryBanner({ lightSummary, shadowSummary }: { lightSum
     <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.07)" }}>
       <div className="flex" style={{ background: `linear-gradient(135deg, #f5d97a 0%, #e8c060 40%, #6b7a99 60%, #3d4a65 100%)`, minHeight: 6 }} />
       <div className="flex">
-        {lightSummary && (
-          <div className="flex-1 px-4 py-5" style={{ background: "linear-gradient(160deg, #fffbee 0%, #fff8e0 100%)", borderRight: `1px solid ${INK}08` }}>
+            <div className="flex-1 px-4 py-5" style={{ background: "linear-gradient(160deg, #fffbee 0%, #fff8e0 100%)", borderRight: `1px solid ${INK}08` }}>
             <span className="text-[26px] block text-center mb-2">☀️</span>
             <p className="text-[14px] font-black mb-2 text-center" style={{ color: BCH8_LIGHT }}>이 파트너십의 빛</p>
             <p className="text-[12px] leading-relaxed text-center" style={{ color: "#7a6030" }}>{lightText}</p>
           </div>
-        )}
-        {shadowSummary && (
           <div className="flex-1 px-4 py-5" style={{ background: "linear-gradient(160deg, #f4f5f8 0%, #eaedf3 100%)" }}>
             <span className="text-[26px] block text-center mb-2">🌑</span>
             <p className="text-[14px] font-black mb-2 text-center" style={{ color: BCH8_SHADOW }}>이 파트너십의 그림자</p>
             <p className="text-[12px] leading-relaxed text-center" style={{ color: "#4a5060" }}>{shadowText}</p>
           </div>
-        )}
       </div>
     </div>
   );
@@ -6239,11 +6327,11 @@ function ReportPreviewInner() {
   }, [ch]);
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
-  const persist = (mergedContent: Record<string, unknown>) => {
+  const persist = (mergedContent: Record<string, unknown>, skipAlimtalk = false) => {
     fetch("/api/kunghap_business-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, content: mergedContent }),
+      body: JSON.stringify({ id, content: mergedContent, force: skipAlimtalk }),
     }).catch(() => {});
   };
 
@@ -6265,11 +6353,11 @@ function ReportPreviewInner() {
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => {
         const sec = d?.sections;
-        if (!sec || !isYeonaeChapterReady(sec, toApiChapter(n))) return;
+        if (!sec || !isBusinessKunghapChapterReady(sec, toApiChapter(n))) return;
         setReport((p) => {
           if (!p) return p;
           const merged = { ...(p.content as Record<string, unknown>), ...sec };
-          persist(merged);
+          persist(merged, force);
           return { ...p, content: merged as ReportContent, sajuImageUrl: d.sajuImageUrl ?? p.sajuImageUrl, partnerView: d.partnerView ?? p.partnerView, partnerSajuImageUrl: d.partnerSajuImageUrl ?? p.partnerSajuImageUrl, partnerName: d.partnerName ?? p.partnerName };
         });
       })
@@ -6313,12 +6401,23 @@ function ReportPreviewInner() {
   const c = { ...SAMPLE_CONTENT, ...(report?.content ?? {}) } as ReportContent;
   const jc = (report?.content ?? {}) as Record<string, unknown>;
   // 실제 결제자(id 있음)인데 현재 장이 아직 생성 안 됨 → 샘플 대신 로딩/에러 표시
-  const needGen = !!id && !!BUSINESS_KUNGHAP_CHAPTER_SECTIONS[chNum] && !isYeonaeChapterReady(report?.content as Record<string, unknown>, chNum);
+  const needGen = !!id && !!BUSINESS_KUNGHAP_CHAPTER_SECTIONS[chNum] && !isBusinessKunghapChapterReady(report?.content as Record<string, unknown>, chNum);
   const showLoading = generating || (needGen && !generatedRef.current); // 일괄 생성 중/직전
   const ilganHanja = (report?.view?.ilgan ?? "乙")[0];
   const ilganLabel = (report?.view?.ilgan ?? "乙 (을목)").match(/\(([^)]+)\)/)?.[1] ?? "을목";
 
   const next = (n: string) => router.push(`/saju/kunghap_business/report-preview?${id ? `id=${id}&` : ""}ch=${n}`);
+
+  // 합충 점수 — 제3장 전용 (사주 글자 기반 확정값)
+  const hapChungCrossRels = report?.view && report?.partnerView
+    ? calcCrossRelationsBiz(report.view, report.partnerView)
+    : [];
+  const { score: hapChungScore, label: hapChungLabel } = calcKunghapScoreBiz(hapChungCrossRels);
+
+  // 종합 궁합 점수 — 제4장 전용 (합충 50% + 오행 상생/상극 50%)
+  const { score: ch4Score, label: ch4Label } = (report?.view && report?.partnerView)
+    ? calcBusinessCompatScoreCh4(hapChungScore, report.view, report.partnerView)
+    : { score: hapChungScore, label: hapChungLabel };
 
   return (
     <div ref={rootRef} style={{ backgroundColor: CREAM, minHeight: "100%" }}>
@@ -7046,7 +7145,6 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제3장 · 비즈니스 궁합 점수 ═══════════ */}
       {/* ═══════════ 제3장 · 합과 충 ═══════════ */}
       {ch === "3" && (() => {
         const myShort      = name.length > 1 ? name.slice(1) : name;
@@ -7191,8 +7289,8 @@ function ReportPreviewInner() {
         const str  = (jc.strengths    as Record<string, unknown> | undefined) ?? null;
         const wek  = (jc.weaknesses   as Record<string, unknown> | undefined) ?? null;
         const bal  = (jc.balanceTip   as Record<string, unknown> | undefined) ?? null;
-        const score     = (cs?.score     as number | undefined) ?? 0;
-        const label     = (cs?.label     as string | undefined) ?? "";
+        const score     = ch4Score;
+        const label     = ch4Label || ((cs?.label as string | undefined) ?? "");
         const basis     = (cs?.basis     as string | undefined) ?? "";
         const strItems  = (str?.items    as Record<string, unknown>[] | undefined) ?? [];
         const wekItems  = (wek?.items    as Record<string, unknown>[] | undefined) ?? [];
@@ -7200,7 +7298,7 @@ function ReportPreviewInner() {
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 비즈니스 인연</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 함께 일할 수 있는 인연인가</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두사람,<br />함께 일할 수 있는 인연인가</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 300 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -7229,14 +7327,6 @@ function ReportPreviewInner() {
                     <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{normText(p)}</p>
                   ))}
                 </div>
-              </section>
-            )}
-
-            {/* 궁합의 근거 */}
-            {cr && (
-              <section className="px-6 pt-4 pb-2">
-                <Heading>궁합의 근거</Heading>
-                <ReportSec data={cr as {intro?: string; callout?: string; paragraphs?: string[]}} />
               </section>
             )}
 
@@ -7278,7 +7368,7 @@ function ReportPreviewInner() {
             )}
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={280} />
-            <Quote>{`"비즈니스 인연을 살펴보았으니,\n이제 두 사람의 강점과\n약점을 살펴보겠소."`}</Quote>
+            <Quote>{`두 사람의 강점과 약점을 살폈으니,\n이제 함께 일할 때\n어떤 파트너가 되는지 보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="4" go={next} />
           </>
@@ -7307,7 +7397,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`두 사람이 파트너가 되면\n어떤 모습으로 일하게 될지,\n\n그 속살을\n낱낱이 보여드리겠소.`}</Quote>
+            <Quote>{`두 사람이 함께 일하면\n어떤 그림이 펼쳐지는지,\n하나씩 들여다보겠소.`}</Quote>
 
             {/* 비즈니스 스타일 배너 */}
             <section className="px-6 pt-2 pb-2">
@@ -7323,15 +7413,7 @@ function ReportPreviewInner() {
             </section>
             <BizRoleBalanceSplit items={roleItems} myName={myFirstName} partnerName={partnerFirstName} myGender={report?.gender} partnerGender={report?.partnerGender} />
 
-            {/* 협업 일상 관찰 클립 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>함께 일하는 일상의 모습</Heading>
-              <P>{`두 사람의 협업 일상을\n관찰 카메라로 들여다봤소.\n\n꽤 낯익은 장면이 나올 수도 있소.`}</P>
-            </section>
-            {clipItems.map((item, i) => (
-              <BizObservationClipCard key={i} item={item} index={i} myName={myFirstName} partnerName={partnerFirstName} myGender={report?.gender} partnerGender={report?.partnerGender} />
-            ))}
-
+            <Quote>{`두 사람이 함께\n일하는 모습을 살펴봤소.\n\n이제 두 사람의\n비즈니스 스타일 차이를 보겠소.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </>
@@ -7369,7 +7451,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"합충 점수와 별개로,\n사람마다 사업하는 방식이 다르오.\n\n점수가 높아도\n스타일이 맞지 않으면\n삐걱거릴 수 있고,\n\n점수가 낮아도\n서로의 방식을 이해하면\n잘 흘러갈 수 있는 것이오.\n\n두 사람이 어디서 맞고,\n어디서 다른지 살펴보겠소."`}</Quote>
+            <Quote>{`궁합 점수와 별개로,\n사람마다 일하는 방식이 다르오.\n\n스타일이 맞으면\n점수가 낮아도 잘 굴러가고,\n\n스타일이 어긋나면\n점수가 높아도 삐걱거리오.\n\n두 사람의 차이를 살펴보겠소.`}</Quote>
 
             <section className="pb-2">
               <div className="px-5"><Heading>두 사람 스타일 궁합</Heading></div>
@@ -7406,7 +7488,7 @@ function ReportPreviewInner() {
               </section>
             )}
 
-            <Quote>{`"스타일의 차이를 알았으니,\n이 파트너십의 빛과 그림자를\n살펴보겠소."`}</Quote>
+            <Quote>{`스타일의 차이를 알았으니,\n이 파트너십의 빛과 그림자를\n살펴보겠소.`}</Quote>
 
             <div className="pb-10" />
             <ChapterNav cur="6" go={next} />
@@ -7434,7 +7516,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"모든 파트너십에는\n빛도 있고 그림자도 있소.\n\n빛만 있으면 눈이 멀고,\n그림자만 있으면 앞이 보이지 않소.\n\n두 사람의 사업 파트너십에서\n그 둘을 살펴보겠소."`}</Quote>
+            <Quote>{`모든 파트너십에는\n빛도 있고 그림자도 있소.\n\n빛만 있으면 눈이 멀고,\n그림자만 있으면 앞이 보이지 않소.\n\n두 사람의 사업 파트너십에서\n그 둘을 살펴보겠소.`}</Quote>
 
             {(lightSummary || shadowSummary) && (
               <section className="pb-4">
@@ -7464,7 +7546,7 @@ function ReportPreviewInner() {
               </section>
             )}
 
-            <Quote>{`"빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소."`}</Quote>
+            <Quote>{`빛과 그림자를 알았으니,\n이제 위기는 언제 오는지\n짚어보겠소.`}</Quote>
 
             <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
@@ -7472,111 +7554,8 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제8장 · 위기와 극복 ═══════════ */}
+      {/* ═══════════ 제8장 · 세운·월운별 사업 흐름 ═══════════ */}
       {ch === "8" && (() => {
-        const cp  = (jc.crisisPoints   as Record<string,unknown>|undefined) ?? null;
-        const ot  = (jc.overcomeTips   as Record<string,unknown>|undefined) ?? null;
-        const rg  = (jc.recoveryGuide  as Record<string,unknown>|undefined) ?? null;
-        const conflictPat = (jc.conflictPattern as Record<string,unknown>|undefined) ?? null;
-        const cpItems = (cp?.items as Record<string,unknown>[]|undefined) ?? [];
-        return (
-          <>
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 위기와 극복</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>사업 파트너십의 위기와 극복</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-            <Quote>{`"어떤 사업 파트너십도 위기 없이\n쭉 평탄하지는 않소.\n두 사람의 위기와 극복의 흐름을\n미리 알려드리겠소."`}</Quote>
-
-            <section className="px-6 pt-4 pb-2">
-              <Heading>두 사람의 갈등 패턴</Heading>
-              <P>의견이 충돌할 때 어떤 모습인지, 어떻게 해소하는지도 사주에 담겨 있소. 이를 알면 갈등을 다스리는 길이 보이오.</P>
-            </section>
-            <BizConflictPatternCard data={conflictPat} />
-
-            <section className="px-6 pt-2 pb-2">
-              <Heading>위기 요인 분석</Heading>
-              <P>사업 파트너십에서 두 사람 사이에 불씨가 될 수 있는 구체적인 위기 요인들을 하나씩 짚어보겠소. 알면 피할 수 있고, 알면 넘을 수 있소.</P>
-            </section>
-            {cpItems.map((item, i) => <BizCrisisCard key={i} item={item} />)}
-
-            <section className="px-6 pt-4 pb-2">
-              <Heading>위기를 넘는 방법</Heading>
-              <P>위기를 아는 것만으로는 부족하오. 두 사람이 함께 써내려갈 극복의 방법들을 사주의 상생 기운에서 찾아 정리하였소.</P>
-            </section>
-            <BizOvercomeTipPanel data={ot} />
-
-            <section className="px-6 pt-4 pb-2">
-              <Heading>두 파트너의 극복 원칙</Heading>
-              <P>위기를 함께 넘기 위해 이 두 사람이 붙들어야 할 핵심 원칙들이오. 사주의 기운이 가리키는 두 파트너만의 화해와 성장의 방향이오.</P>
-            </section>
-            <BizCrisisRecoveryGuide data={rg} />
-
-            <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-            <Quote>{`"위기를 알았다면 극복할 수 있소.\n이제 두 사람의\n재물흐름을 살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="8" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제9장 · 비즈니스 재물흐름 ═══════════ */}
-      {ch === "9" && (() => {
-        const wf = (jc.wealthFlow as Record<string, unknown> | undefined) ?? null;
-        const hl = (jc.homeLife   as Record<string, unknown> | undefined) ?? null;
-        const wt = (jc.wealthTips as Record<string, unknown> | undefined) ?? null;
-        const myFirstName10      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
-        const partnerFirstName10 = report?.partnerName ? (report.partnerName.length > 1 ? report.partnerName.slice(1) : report.partnerName) : "상대";
-        return (
-          <>
-            <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 재물흐름</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께 만드는 사업 재물흐름</h1>
-            </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_9/kunghap_business_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
-            </div>
-
-            <Quote>{`"두 사람이 함께 사업할 때\n재물이 어떻게 흘러가는지\n살펴보겠소."`}</Quote>
-
-            <section className="px-6 pt-2 pb-2">
-              <Heading>비즈니스 재물운 흐름</Heading>
-            </section>
-            <BizWealthFlowGraph data={wf} myName={myFirstName10} partnerName={partnerFirstName10} />
-            <BizWealthFlowPeriods data={wf} />
-
-            <section className="px-6 pt-4 pb-2">
-              <Heading>사업 재정 주도권</Heading>
-            </section>
-            <BizWealthSummaryCard data={wf} myName={myFirstName10} partnerName={partnerFirstName10} myGender={report?.gender} partnerGender={report?.partnerGender} />
-            <BizWealthDetailPanel data={wf} />
-
-            <section className="px-6 pt-4 pb-2">
-              <Heading>사업 파트너십 관계</Heading>
-            </section>
-            <BizPartnerRelationCard data={hl} />
-
-            <section className="px-6 pt-4 pb-2">
-              <Heading>재물운을 풍요롭게 하는 법</Heading>
-            </section>
-            <BizWealthTipPanel data={wt} />
-
-            <Illust src="/media/report/kunghap/kh-10-1.jpg" h={360} />
-            <Quote>{`"두 사람의 재물흐름을\n살펴보았으니,\n이제 사업 미래를 보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="9" go={next} />
-          </>
-        );
-      })()}
-
-      {/* ═══════════ 제10장 · 세운·월운별 사업 흐름 ═══════════ */}
-      {ch === "10" && (() => {
         const bf = (jc.bizFutureFlow as Record<string,unknown>|undefined) ?? null;
         const bt = (jc.bizFutureTips as Record<string,unknown>|undefined) ?? null;
         const myFirstName11      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
@@ -7590,12 +7569,12 @@ function ReportPreviewInner() {
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 10 장 · 사업 흐름</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>세운·월운으로 보는 사업 흐름</h1>
+              <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 좋은시기와 조심할 시기</p>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께하면 좋은시기와 조심할 시기</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 360 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_business/kunghap_business_10/kunghap_business_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -7645,13 +7624,13 @@ function ReportPreviewInner() {
             <Illust src="/media/report/kunghap/kh-11-1.jpg" h={360} />
             <Quote>{`"두 사람의 사업 흐름을\n살펴보았으니,\n홍연의 마지막 서신을 받으시오."`}</Quote>
             <div className="pb-10" />
-            <ChapterNav cur="10" go={next} />
+            <ChapterNav cur="8" go={next} />
           </>
         );
       })()}
 
       {/* ═══════════ 마무리 · 홍연의 서신 ═══════════ */}
-      {ch === "11" && (
+      {ch === "9" && (
         <>
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -7660,7 +7639,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_business/kunghap_business_11/kunghap_business_11_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_business/kunghap_business_9/kunghap_business_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -7678,7 +7657,7 @@ function ReportPreviewInner() {
           <ReviewBox />
           <RecoGrid />
           <div className="pb-10" />
-          <ChapterNav cur="11" go={next} />
+          <ChapterNav cur="9" go={next} />
         </div>
         {eventOpen && (
           <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
@@ -7687,7 +7666,7 @@ function ReportPreviewInner() {
       )}
 
       {/* ═══════════ 알 수 없는 장 — 준비 중 ═══════════ */}
-      {!["0","1","2","3","4","5","6","7","8","9","10","11"].includes(ch) && (
+      {!["0","1","2","3","4","5","6","7","8","9"].includes(ch) && (
         <div className="flex flex-col items-center justify-center px-8 text-center" style={{ minHeight: "70vh" }}>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full mb-3" style={{ background: `${MAROON}12`, color: MAROON }}>Chapter {ch}</span>
           <p className="text-[14px]" style={{ color: MUTE }}>이 장은 준비 중이오.</p>

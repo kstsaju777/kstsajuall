@@ -17,6 +17,7 @@ import {
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
 import { buildBusinessKunghapChapterPrompt, isBusinessKunghapChapterReady, BUSINESS_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_business-report-content";
+import { calcCrossRelations, REL_SCORE } from "@/lib/saju/kunghap-cross-relations";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -53,6 +54,8 @@ async function genChapterContent(chapter: number, input: {
   birthYear?: number;
   ilgan?: string;
   partnerIlgan?: string;
+  ch4ComputedScore?: number;
+  ch4ComputedLabel?: string;
 }) {
   const { system, user } = buildBusinessKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -65,7 +68,7 @@ async function genChapterContent(chapter: number, input: {
         obj = parseContentJson(llm.text);
       } catch (parseErr) {
         console.error(`[kunghap_business] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
-        if (chapter === 12) {
+        if (chapter === 9) {
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
           obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else { continue; }
@@ -318,6 +321,37 @@ async function generateChapter(body: unknown) {
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
     const ilgan: string | undefined = stored?.view?.ilgan as string | undefined;
     const partnerIlgan: string | undefined = stored?.partnerView?.ilgan as string | undefined;
+
+    // ch4 전용: 종합 궁합 점수 미리 계산 (합충 50% + 오행 상생/상극 50%)
+    let ch4ComputedScore: number | undefined;
+    let ch4ComputedLabel: string | undefined;
+    if (chapter === 4 && stored?.view && stored?.partnerView) {
+      const vw  = stored.view    as { pillars: Array<{ gan: string; ji: string; ganEl?: string; jiEl?: string }> };
+      const pvw = stored.partnerView as { pillars: Array<{ gan: string; ji: string; ganEl?: string; jiEl?: string }> };
+
+      const crossRels = calcCrossRelations(vw, pvw);
+      const hapChungRaw = crossRels.reduce((acc, r) => acc + (REL_SCORE[r.kind] ?? 0), 70);
+      const hapChungScore = Math.min(100, Math.max(0, hapChungRaw));
+
+      const SAENG: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+      const GEUK: Record<string, string>  = { 목: "토", 토: "수", 수: "화", 화: "금", 금: "목" };
+      const myEls  = [...new Set(vw.pillars.flatMap(p  => [p.ganEl ?? "", p.jiEl ?? ""]).filter(Boolean))];
+      const ptEls  = [...new Set(pvw.pillars.flatMap(p => [p.ganEl ?? "", p.jiEl ?? ""]).filter(Boolean))];
+      let saeng = 0, geuk = 0;
+      for (const a of myEls) for (const b of ptEls) {
+        if (SAENG[a] === b || SAENG[b] === a) saeng++;
+        if (GEUK[a]  === b || GEUK[b]  === a) geuk++;
+      }
+      const ohaengScore = Math.min(100, Math.max(0, 70 + saeng * 5 - geuk * 4));
+      ch4ComputedScore = Math.round(hapChungScore * 0.5 + ohaengScore * 0.5);
+
+      const SCORE_LABELS: [number, string][] = [
+        [90, "천생연분 파트너"], [80, "빛나는 비즈니스 인연"], [70, "좋은 조화"],
+        [60, "무난한 궁합"],    [50, "노력이 필요한 궁합"],  [0, "극과 극의 만남"],
+      ];
+      ch4ComputedLabel = (SCORE_LABELS.find(([min]) => ch4ComputedScore! >= min) ?? SCORE_LABELS[SCORE_LABELS.length - 1])[1];
+    }
+
     const { obj: rawObj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -328,6 +362,8 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
       ilgan,
       partnerIlgan,
+      ch4ComputedScore,
+      ch4ComputedLabel,
     });
     const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;
 

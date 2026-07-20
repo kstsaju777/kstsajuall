@@ -7082,7 +7082,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"합충 점수와 별개로,\n사람마다 연애하는 방식이 다르오.\n\n점수가 높아도\n스타일이 맞지 않으면\n삐걱거릴 수 있고,\n\n점수가 낮아도\n서로의 방식을 이해하면\n잘 흘러갈 수 있는 것이오.\n\n두 사람이 어디서 맞고,\n어디서 다른지 살펴보겠소."`}</Quote>
+            <Quote>{`합충 점수와 별개로,\n사람마다 연애하는 방식이 다르오.\n\n점수가 높아도\n스타일이 맞지 않으면\n삐걱거릴 수 있고,\n\n점수가 낮아도\n서로의 방식을 이해하면\n잘 흘러갈 수 있는 것이오.\n\n두 사람이 어디서 맞고,\n어디서 다른지 살펴보겠소.`}</Quote>
 
             {/* 스타일 상성 비교 배너 */}
             <section className="pb-2">
