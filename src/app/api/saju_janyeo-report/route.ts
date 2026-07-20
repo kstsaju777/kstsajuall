@@ -76,7 +76,7 @@ const createSchema = z.object({
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; krName?: string; sipTop?: string; sipBot?: string }[]; daeun?: { label: string; gz: string; krName?: string; yearStart: number; active: boolean; sipTop?: string; sipBot?: string }[]; ilganChar?: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; krName?: string; sipTop?: string; sipBot?: string }[]; daeun?: { label: string; gz: string; krName?: string; yearStart: number; active: boolean; sipTop?: string; sipBot?: string }[]; ilganChar?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string }) {
   const { system, user } = buildJanyeoChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -286,6 +286,12 @@ async function generateChapter(body: unknown) {
     const rawDaeun: { label: string; gz: string; yearStart: number; active: boolean }[] = stored?.view?.daeun ?? [];
     const seunWithSip = rawSeun.map(s => ({ ...s, ...computeSipseong(ilgan, s.gz), krName: gzToKr(s.gz) }));
     const daeunWithSip = rawDaeun.map(d => ({ ...d, ...computeSipseong(ilgan, d.gz), krName: gzToKr(d.gz) }));
+
+    // ch2 생성 후 저장된 용신/희신/기신 읽기 (ch3~에 주입)
+    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -295,7 +301,47 @@ async function generateChapter(body: unknown) {
       seun: seunWithSip,
       daeun: daeunWithSip,
       ilganChar: ilgan || undefined,
+      yongsinEl,
+      heusinEl,
+      gisinEl,
     });
+
+    // ch2: yongsin 섹션에서 용신/희신/기신 추출 후 myeongsik에 저장 (ch3~에서 참조)
+    if (chapter === 2) {
+      const ys = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
+      if (ys) {
+        const OHAENG = ["금", "목", "화", "토", "수"] as const;
+        const ilganEl = (pillars.find((p: { pos: string }) => p.pos === "일주") as { ganEl?: string } | undefined)?.ganEl ?? "";
+        const GEN_M: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+        const CTL_M: Record<string, string> = { 목: "토", 화: "금", 토: "수", 금: "목", 수: "화" };
+        const CLASHED_BY: Record<string, string> = { 목: "금", 화: "수", 토: "목", 금: "화", 수: "토" };
+        const GEN_BY: Record<string, string> = { 목: "수", 화: "목", 토: "화", 금: "토", 수: "금" };
+        function sipToEl(sip: string): string {
+          if (["비견", "겁재"].some(s => sip.includes(s))) return ilganEl;
+          if (["식신", "상관"].some(s => sip.includes(s))) return GEN_M[ilganEl] ?? "";
+          if (["편재", "정재", "재성"].some(s => sip.includes(s))) return CTL_M[ilganEl] ?? "";
+          if (["편관", "정관", "관성"].some(s => sip.includes(s))) return CLASHED_BY[ilganEl] ?? "";
+          if (["편인", "정인", "인성"].some(s => sip.includes(s))) return GEN_BY[ilganEl] ?? "";
+          return "";
+        }
+        function resolveEl(fieldVal: unknown, keyword: string, allText: string): string {
+          const v = String(fieldVal ?? "").trim();
+          if ((OHAENG as readonly string[]).includes(v)) return v;
+          const sipMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*[''""]?([가-힣]{2,3})[''""]?`));
+          if (sipMatch) { const el = sipToEl(sipMatch[1]); if (el) return el; if ((OHAENG as readonly string[]).includes(sipMatch[1])) return sipMatch[1]; }
+          const elMatch = allText.match(new RegExp(`${keyword}[가-힣]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
+          if (elMatch) return elMatch[1];
+          return "";
+        }
+        const allText = [ys.intro, ys.callout, ...((ys.paragraphs as string[]) ?? [])].filter(Boolean).join(" ");
+        const resolvedYongsin = resolveEl(ys.yongsinEl, "용신", allText);
+        const resolvedHeusin = resolveEl(ys.heusinEl, "희신", allText);
+        const resolvedGisin = resolveEl(ys.gisinEl, "기신", allText);
+        if (resolvedYongsin) {
+          await service.from("saju_results").update({ myeongsik: { ...stored, yongsinEl: resolvedYongsin, heusinEl: resolvedHeusin ?? "", gisinEl: resolvedGisin ?? "" } as never }).eq("id", id);
+        }
+      }
+    }
     const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
     const myGender: "male" | "female" = stored?.gender === "female" ? "female" : "male";
     const myHonorific = myGender === "female" ? "양" : "군";

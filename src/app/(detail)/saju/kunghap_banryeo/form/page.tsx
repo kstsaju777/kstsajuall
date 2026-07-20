@@ -456,7 +456,7 @@ function StepPetType({ onPrev, onNext, initial }: { onPrev: () => void; onNext: 
             return (
               <button
                 key={label}
-                onClick={() => { setSelected(label); if (label !== "기타") setCustomPet(""); }}
+                onClick={() => { setSelected(label); if (label !== "기타") { setCustomPet(""); setTimeout(() => onNext(label), 120); } }}
                 className="flex flex-col items-center py-3 rounded-2xl transition-all"
                 style={{
                   backgroundColor: active ? "rgba(180,114,33,0.18)" : "rgba(255,255,255,0.04)",
@@ -801,13 +801,13 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
 }) {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
-  const [msg, setMsg] = useState("두 사람의 사주팔자를 세우고 있어요...");
+  const [msg, setMsg] = useState("보호자와 반려동물의 사주를 세우고 있어요...");
   const doneRef = useRef(false);
 
   const MSGS = [
-    "두 사람의 사주팔자를 세우고 있어요...",
+    "보호자와 반려동물의 사주를 세우고 있어요...",
     "반려 인연의 흐름을 살펴보고 있어요...",
-    "두 사람의 궁합을 분석하고 있어요...",
+    "보호자와 반려동물의 궁합을 분석하고 있어요...",
     "홍연이 반려 풀이를 정리하고 있어요...",
   ];
 
@@ -845,7 +845,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
         <p className="font-black mb-1 leading-tight" style={{ color: "#fff", fontSize: 20 }}>
           {name}님 🐾 {partnerName}
         </p>
-        <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 두 사람의 반려 궁합을 살펴보고 있어요</p>
+        <p className="text-[13px] mb-8" style={{ color: "rgba(255,255,255,0.5)" }}>홍연이 보호자와 반려동물의 궁합을 살펴보고 있어요</p>
         <div className="w-full rounded-full h-2 mb-3" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
           <div className="h-full rounded-full transition-all duration-200" style={{ width: `${progress}%`, backgroundColor: CLR }} />
         </div>

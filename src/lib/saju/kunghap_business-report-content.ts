@@ -63,6 +63,12 @@ export function buildBusinessKunghapChapterPrompt(
     partnerIlgan?: string;
     ch4ComputedScore?: number;
     ch4ComputedLabel?: string;
+    yongsinEl?: string;
+    heusinEl?: string;
+    gisinEl?: string;
+    partnerYongsinEl?: string;
+    partnerHeusinEl?: string;
+    partnerGisinEl?: string;
   },
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
@@ -280,7 +286,15 @@ balance: 빛 비율(lightRatio 0-100)+풀이단락(2-3개, 각 5~7문장 200자+
 - 말투: 홍연 특유의 따뜻하면서도 단호한 고어체(~이오/~하오/~겠소). 상투적 위로 문장 금지.`,
   };
 
-  const user = `${intro}${honorificBlock}\n\n비즈니스궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
+  let yongsinNote = "";
+  if (chapter !== 1 && input.yongsinEl && input.heusinEl && input.gisinEl) {
+    yongsinNote += `\n[확정 오행 — 나의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n나의 용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}\n`;
+  }
+  if (chapter > 2 && input.partnerYongsinEl && input.partnerHeusinEl && input.partnerGisinEl) {
+    yongsinNote += `[확정 오행 — 상대방의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n상대방 용신: ${input.partnerYongsinEl} / 희신: ${input.partnerHeusinEl} / 기신: ${input.partnerGisinEl}\n`;
+  }
+
+  const user = `${intro}${honorificBlock}${yongsinNote}\n\n비즈니스궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
   return { system: SYSTEM, user };
 }
 

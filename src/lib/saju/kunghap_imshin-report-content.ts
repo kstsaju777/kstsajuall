@@ -66,6 +66,12 @@ export function buildImshinKunghapChapterPrompt(
     birthYear?: number;
     ilgan?: string;
     partnerIlgan?: string;
+    yongsinEl?: string;
+    heusinEl?: string;
+    gisinEl?: string;
+    partnerYongsinEl?: string;
+    partnerHeusinEl?: string;
+    partnerGisinEl?: string;
   },
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
@@ -627,7 +633,15 @@ export function buildImshinKunghapChapterPrompt(
 홍연 말투(~이오/~하오/~겠소/~시오) 유지. 분석 투로 쓰지 말고 편지 투로만. 두 사람의 이름을 직접 부르시오.`,
   };
 
-  const user = `${intro}${honorificBlock}\n\n임신궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
+  let yongsinNote = "";
+  if (chapter !== 1 && input.yongsinEl && input.heusinEl && input.gisinEl) {
+    yongsinNote += `\n[확정 오행 — 나의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n나의 용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}\n`;
+  }
+  if (chapter > 2 && input.partnerYongsinEl && input.partnerHeusinEl && input.partnerGisinEl) {
+    yongsinNote += `[확정 오행 — 상대방의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n상대방 용신: ${input.partnerYongsinEl} / 희신: ${input.partnerHeusinEl} / 기신: ${input.partnerGisinEl}\n`;
+  }
+
+  const user = `${intro}${honorificBlock}${yongsinNote}\n\n임신궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
   return { system: SYSTEM, user };
 }
 

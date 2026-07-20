@@ -6396,7 +6396,7 @@ function ReportPreviewInner() {
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`"자, 이제 두 사람의 인연을\n낱낱이 풀어보겠소."`}
+              {`자, 이제 두 사람의 인연을\n낱낱이 풀어보겠소.`}
             </p>
           </div>
 
@@ -6771,7 +6771,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"두 사람이 서로에게 끌린 것은\n우연이 아니오.\n그 이유가 이미 사주 안에\n새겨져 있었소."`}</Quote>
+            <Quote>{`두 사람이 서로에게 끌린 것은\n우연이 아니오.\n그 이유가 이미 사주 안에\n새겨져 있었소.`}</Quote>
 
             {/* ── 끌림의 이유 ── */}
             <section className="pb-4">
@@ -6798,7 +6798,7 @@ function ReportPreviewInner() {
             </section>
 
             {/* ── 마무리 인용구 ── */}
-            <Quote>{`"끌림의 이유를 알았으니,\n이제 내 눈에 ${partnerFirstName}님이\n어떻게 보이는지 살펴보겠소."`}</Quote>
+            <Quote>{`끌림의 이유를 알았으니,\n이제 내 눈에 ${partnerFirstName}님이\n어떻게 보이는지 살펴보겠소.`}</Quote>
 
             <div className="pb-10" />
             <ChapterNav cur="3" go={next} />

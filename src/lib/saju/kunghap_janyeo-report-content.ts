@@ -87,6 +87,12 @@ export function buildJanyeoKunghapChapterPrompt(
     hapChungBase?: number;
     mySipseong?: string;
     partnerSipseong?: string;
+    yongsinEl?: string;
+    heusinEl?: string;
+    gisinEl?: string;
+    partnerYongsinEl?: string;
+    partnerHeusinEl?: string;
+    partnerGisinEl?: string;
   },
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
@@ -750,7 +756,15 @@ ${input.partnerIlgan ? `⚑ 자녀 일간(확정): ${input.partnerIlgan} — 이
 - JSON 배열 안에 단락 문자열로만 반환`,
   };
 
-  const user = `${intro}${honorificBlock}\n\n자녀궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
+  let yongsinNote = "";
+  if (chapter !== 1 && input.yongsinEl && input.heusinEl && input.gisinEl) {
+    yongsinNote += `\n[확정 오행 — 나(부모)의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n나의 용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}\n`;
+  }
+  if (chapter > 2 && input.partnerYongsinEl && input.partnerHeusinEl && input.partnerGisinEl) {
+    yongsinNote += `[확정 오행 — 아이의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n아이 용신: ${input.partnerYongsinEl} / 희신: ${input.partnerHeusinEl} / 기신: ${input.partnerGisinEl}\n`;
+  }
+
+  const user = `${intro}${honorificBlock}${yongsinNote}\n\n자녀궁합 결과지 제${chapter}장을 작성하시오.\n\n${questions[chapter]}\n\n반드시 아래 JSON 형식으로만 응답하시오:\n${schemas[chapter]}`;
   return { system: SYSTEM, user };
 }
 
