@@ -316,8 +316,8 @@ async function generateChapter(body: unknown) {
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
-    const ilgan: string | undefined = (stored?.view?.ilgan as string | undefined)?.split(" ")[0];
-    const partnerIlgan: string | undefined = (stored?.partnerView?.ilgan as string | undefined)?.split(" ")[0];
+    const ilgan: string | undefined = stored?.view?.ilgan as string | undefined;
+    const partnerIlgan: string | undefined = stored?.partnerView?.ilgan as string | undefined;
     const { obj: rawObj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
