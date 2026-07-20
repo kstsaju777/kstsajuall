@@ -7211,22 +7211,24 @@ function ReportPreviewInner() {
             <Quote>{`두 사람이 만나서\n함께 시너지를 낼 수 있을지\n하나씩 살펴보겠소.`}</Quote>
 
             {/* 비즈니스 궁합 점수 게이지 */}
-            <section className="px-6 pt-2 pb-2">
-              <Heading>두 사람의 비즈니스 궁합 점수</Heading>
-              <p className="text-[13px] leading-[1.85] mb-0" style={{ color: INK_SOFT, fontFamily: SERIF }}>사주 원국의 구조와 오행의 상생·상극, 천간·지지의 합충(合沖)을 종합하여 두 사람의 비즈니스 인연을 수치로 나타낸 것이오.</p>
+            <section className="pb-4">
+              <div className="px-5 mb-3">
+                <h2 className="text-[19px] font-black" style={{ color: INK }}>두 사람의 비즈니스 궁합 점수</h2>
+              </div>
+              <AttractionGauge
+                score={score || 75}
+                label={label || "사주로 본 비즈니스 궁합"}
+              />
             </section>
-            <BusinessScoreGauge
-              score={score || 75}
-              label={label || "사주로 본 비즈니스 궁합"}
-              basis={basis}
-            />
 
             {/* 점수 풀이 단락 */}
             {((cs?.paragraphs as string[] | undefined) ?? []).length > 0 && (
-              <section className="px-5 pt-2 pb-4">
-                {((cs?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
-                  <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{normText(p)}</p>
-                ))}
+              <section className="pb-4">
+                <div className="px-5">
+                  {((cs?.paragraphs as string[] | undefined) ?? []).map((p, i) => (
+                    <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, fontFamily: SERIF }}>{normText(p)}</p>
+                  ))}
+                </div>
               </section>
             )}
 
