@@ -197,7 +197,20 @@ items 0~3개: 두 사람 사주에서 발견되는 충(沖). 실제 명식에서
 - score: 0~100 사이 정수. 합의 개수·강도와 충의 개수·강도를 종합하여 산출.
 - label: 점수에 맞는 한 줄 라벨 (예: "천생 파트너", "강한 시너지", "노력이 필요한 조합", "갈등이 많은 조합").
 - desc: 합·충을 종합한 비즈니스 궁합 분석 4~5문장. 합과 충의 비율, 전체 관계 에너지, 이 점수가 나온 사주적 근거, 비즈니스 파트너십의 전체적인 방향성. 홍연 말투(~이오/~하오/~겠소).`,
-    4: `두 사람이 비즈니스 파트너로 함께 일할 수 있는 인연인지 풀어주시오. compatScore: 점수(0-100)+라벨+basis(한 줄 핵심)+설명단락, compatReason: 근거 상세(intro+callout+단락), strengths: 강점(3개, title+effect+desc), weaknesses: 약점(3개, title+overcome+desc), balanceTip: 균형 가이드(callout+tips 3개)`,
+    4: `[compatScore 섹션 — 비즈니스 궁합 점수]
+- score: 0~100 사이 정수. 두 사람 사주의 오행 상생·상극, 합충, 일간 관계를 종합하여 산출.
+- label: 점수에 맞는 한 줄 라벨 (예: "천생 비즈니스 파트너", "강한 시너지 조합", "노력이 필요한 인연", "도전적 파트너십").
+- basis: 이 점수가 나온 사주적 핵심 근거 한 줄.
+- paragraphs 4개: ①두 사람 사주 오행·십성에서 비즈니스 시너지를 만드는 구조적 이유 — 어떤 기운이 어떻게 맞물려 협력을 끌어내는지 구체적으로(8~10문장, 350자+) ②두 사람이 함께 일할 때 자연스럽게 생기는 역할 분담과 업무 분위기 — 실제 협업 장면을 그려가며(8~10문장, 350자+) ③이 비즈니스 인연에서 특히 주의해야 할 갈등 요소와 극복 방법(6~8문장, 280자+) ④이 비즈니스 인연이 빛나는 조건과 홍연의 당부(6~8문장, 260자+). 두 사람을 이름+님으로 직접 지칭. 홍연 말투(~이오/~하오/~겠소).
+
+[compatReason 섹션 — 궁합의 근거]
+- intro: 두 사람 비즈니스 궁합의 핵심 한 줄.
+- callout: 오행·십성·합충 기반 핵심 근거 한 문장.
+- paragraphs 2개: ①합충·오행 상생상극의 구체적 사주 근거(5~7문장, 220자+) ②비즈니스 관계 전체 방향성과 조언(4~6문장, 180자+). 홍연 말투.
+
+[strengths 섹션 — 강점] items 3개, 각 item: title+effect(강점이 발휘되는 비즈니스 장면 한 줄)+desc(3~4문장, 홍연 말투)
+[weaknesses 섹션 — 약점] items 3개, 각 item: title+overcome(극복 방향 한 줄)+desc(3~4문장, 홍연 말투)
+[balanceTip 섹션] callout(핵심 조언 한 줄)+tips 3개(title+desc, 각 2~3문장, 홍연 말투)`,
     5: `두 사람이 함께 일하면 어떤 파트너가 될지 풀어주시오. bizStyle: 파트너십 유형명(coupleType)+아이콘(coupleIcon)+풀이단락(3개), roleBalance: 역할분담(4-5개, role+icon+myRatio(0-100)+desc), workLife: 협업 일상 관찰 클립(3개, situation+myReaction+partnerReaction)`,
     6: `두 사람의 비즈니스 스타일 차이를 풀어주시오. myStyle: 나의 비즈니스 스타일(label+icon+keywords 3-4개+styleDesc+strengthStyle[파트너십에서 빛나는 점]+shadowStyle[주의할 패턴]), partnerStyle: 상대방 비즈니스 스타일(동일 구조), styleGap: 스타일 궁합(compatRating[매우 잘 맞음/잘 맞음/보통/주의]+compatIcon+paragraphs 2-3개+tips 3-4개)`,
     7: `두 사람의 사업 파트너십에서 빛(강점)과 그림자(갈등)를 풀어주시오. strengths: 파트너십 강점 items(3개, icon+title+desc+effect[빛나는 장면])+lightSummary, shadows: 파트너십 그림자 items(3개, icon+title+desc+trigger[발생상황]+overcome[극복법])+shadowSummary, balance: 빛 비율(lightRatio 0-100)+풀이단락(2-3개)+균형 팁(3-4개)`,
