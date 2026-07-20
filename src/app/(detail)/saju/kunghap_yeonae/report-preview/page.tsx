@@ -6738,7 +6738,7 @@ function ReportPreviewInner() {
             </section>
 
             {/* ── 마무리 인용구 ── */}
-            <Quote>{`"${partnerFirstName}님의 사주도 살펴보았으니,\n이제 두 사람 사이의 끌림을\n이야기 해보겠소."`}</Quote>
+            <Quote>{`${partnerFirstName}님의 사주도 살펴보았으니,\n이제 두 사람 사이의 끌림을\n이야기 해보겠소.`}</Quote>
 
             <div className="pb-10" />
             <ChapterNav cur="2" go={next} />
