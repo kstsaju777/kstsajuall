@@ -6566,7 +6566,7 @@ function ReportPreviewInner() {
             </section>
 
             {/* ── 마무리 인용구 ── */}
-            <Quote>{'"나의 기운을 살펴보았으니,\n이제 상대방의 사주를 펼쳐보겠소."'}</Quote>
+            <Quote>{'나의 기운을 살펴보았으니,\n이제 상대방의 사주를 펼쳐보겠소.'}</Quote>
 
             <div className="pb-10" />
             <ChapterNav cur="1" go={next} />
