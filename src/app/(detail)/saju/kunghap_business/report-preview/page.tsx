@@ -7177,7 +7177,7 @@ function ReportPreviewInner() {
             )}
 
             <Illust src="/media/report/kunghap/kh-3-1.jpg" h={360} />
-            <Quote>{`두 사람 글자의 합과 충을\n살펴보았소.\n\n이제 두 사람의\n비즈니스 궁합 점수를 살펴보겠소.`}</Quote>
+            <Quote>{`두 사람 글자의 합과 충을\n살펴보았소.\n\n이제 가장 중요한 것을\n보겠소.\n\n두 사람, 함께 일할 수 있는\n인연인가.`}</Quote>
             <div className="pb-10" />
             <ChapterNav cur="3" go={next} />
           </>
