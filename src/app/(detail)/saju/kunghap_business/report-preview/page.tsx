@@ -7208,7 +7208,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
-            <Quote>{`"두 사람의 원국을 살핀 뒤,\n이제 가장 중요한 것을 보겠소.\n두 사람, 함께 일할 수 있는 인연인가."`}</Quote>
+            <Quote>{`두 사람이 만나서\n함께 시너지를 낼 수 있을지\n하나씩 살펴보겠소.`}</Quote>
 
             {/* 비즈니스 궁합 점수 게이지 */}
             <section className="px-6 pt-2 pb-2">
