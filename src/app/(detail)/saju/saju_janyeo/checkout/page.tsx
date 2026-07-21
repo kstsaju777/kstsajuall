@@ -116,7 +116,7 @@ function MyeongsikSection({
             rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
             header={
               <div className="text-center">
-                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}님의 사주팔자</p>
+                <p className="text-[22px] font-black mb-1" style={{ color: "#2a2320" }}>{name}의 사주팔자</p>
                 {dateLabel && <p className="text-[13px]" style={{ color: "#5b504a" }}>{dateLabel}</p>}
               </div>
             }
