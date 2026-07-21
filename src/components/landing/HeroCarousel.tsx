@@ -76,7 +76,7 @@ export function HeroCarousel() {
         className="flex"
         style={{
           transform: getTranslate(current),
-          transition: animated ? "transform 0.28s ease-out" : "none",
+          transition: animated ? "transform 0.18s ease-out" : "none",
         }}
         onTransitionEnd={handleTransitionEnd}
         onTouchStart={handleTouchStart}
