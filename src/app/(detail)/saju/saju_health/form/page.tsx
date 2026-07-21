@@ -86,7 +86,7 @@ function StepIntro({ scenes, onNext }: { scenes: string[]; onNext: () => void })
     return () => clearInterval(iv);
   }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0d0905" }}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#0d0905" }}>
       <img src={IMG_BG} className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(13,9,5,0.3) 0%, rgba(13,9,5,0.7) 60%, rgba(13,9,5,1) 100%)" }} />
       <div className="relative z-10 px-8 text-center">
@@ -556,7 +556,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern, phone
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#080a0f" }}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#080a0f" }}>
       <img src={IMG_BG} className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,15,0.5), rgba(8,10,15,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
