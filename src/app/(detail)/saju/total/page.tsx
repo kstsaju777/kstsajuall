@@ -133,7 +133,7 @@ const CHAPTERS = [
     bubble: null,
     circleBubbles: [
       { text: "자, \n 여기 앉으시오", top: "0%", left: "5%",  width: "40%", ratio: "4/3" },
-      { text: "내가 묻는말에 \n 답해주겠나?", top: "110%", left: "30%", width: "40%", ratio: "4/3" },
+      { text: "내가 묻는말에 \n 답해주겠나?", top: "110%", left: "20%", width: "58%", ratio: "4/3", fontSize: "24px" },
     ],
   },
   {
