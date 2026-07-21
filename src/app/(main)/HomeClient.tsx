@@ -175,7 +175,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             <style>{TAG_ANIMATIONS}</style>
           {FREE_SECTIONS.map((section) => (
             <div key={section.title} style={{ marginBottom: 36 }}>
-              <div style={{ padding: "0 16px 12px" }}>
+              <div style={{ padding: "16px 16px 12px" }}>
                 <p style={{ fontSize: 18, fontWeight: 900, color: "#fff", marginBottom: 4 }}>{section.title}</p>
                 <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{section.subtitle}</p>
               </div>
