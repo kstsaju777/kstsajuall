@@ -147,6 +147,43 @@ const CATEGORIES = [
   },
 ];
 
+const NAV_TABS = [
+  { label: "전체", value: "" },
+  { label: "재물", value: "재물" },
+  { label: "사랑", value: "사랑" },
+  { label: "가족", value: "가족" },
+  { label: "기타", value: "기타" },
+  { label: "무료", value: "무료" },
+];
+
+function NavTabsClient({ category, setCategory }: { category: string; setCategory: (v: string) => void }) {
+  return (
+    <div className="overflow-x-auto scrollbar-none" style={{ backgroundColor: "#ffffff" }}>
+      <div className="flex w-full gap-[2px]">
+        {NAV_TABS.map((tab) => {
+          const active = category === tab.value;
+          return (
+            <button
+              key={tab.value}
+              onClick={() => setCategory(tab.value)}
+              style={{
+                flex: 1, padding: "10px 0 8px", fontSize: 13, border: "none",
+                fontWeight: active ? 700 : 400,
+                color: active ? "#fff" : "#111",
+                backgroundColor: active ? "#711b20" : "#eeeeee",
+                borderRadius: "8px 8px 0 0",
+                cursor: "pointer", whiteSpace: "nowrap",
+              }}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const DUMMY_GRADIENTS = [
   "linear-gradient(135deg, #2d1b4e 0%, #6b2d6b 50%, #c0392b 100%)",
   "linear-gradient(135deg, #1a2a4a 0%, #2d6b8a 50%, #1abc9c 100%)",
@@ -165,51 +202,12 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 
   const getHref = (slug: string) => `/saju/${slug}`;
 
-  const RED = "#711b20";
-  const TABS = [
-    { label: "전체", value: "" },
-    { label: "재물", value: "재물" },
-    { label: "사랑", value: "사랑" },
-    { label: "가족", value: "가족" },
-    { label: "기타", value: "기타" },
-    { label: "무료", value: "무료" },
-  ];
-
-  const NavTabsInline = () => (
-    <div className="overflow-x-auto scrollbar-none sticky top-14 z-40" style={{ backgroundColor: "#ffffff" }}>
-      <div className="flex w-full gap-[2px]">
-        {TABS.map((tab) => {
-          const active = category === tab.value;
-          return (
-            <button
-              key={tab.label}
-              onClick={() => setCategory(tab.value)}
-              className="relative flex-1 text-center whitespace-nowrap transition-all"
-              style={{
-                padding: "10px 0 8px",
-                fontSize: 13,
-                fontWeight: active ? 700 : 400,
-                color: active ? "#fff" : "#111",
-                backgroundColor: active ? RED : "#eeeeee",
-                borderRadius: "8px 8px 0 0",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-
   // 카테고리 탭 선택 시 필터 뷰
   if (category) {
     if (category === "무료") {
       return (
         <div className="pb-20">
-          {isAdmin && <NavTabsInline />}
+          {isAdmin && <NavTabsClient category={category} setCategory={setCategory} />}
           <style>{TAG_ANIMATIONS}</style>
           <div style={{ margin: "12px 12px 20px", background: "#fff", borderRadius: 16, padding: "16px 18px" }}>
             <p style={{ fontSize: 16, fontWeight: 900, color: "#111", marginBottom: 8 }}>기간 한정 무료 이벤트 🔔</p>
@@ -247,7 +245,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
     const cards = CATEGORY_CARDS[category] ?? [];
     return (
       <div className="px-3 pt-4 pb-20">
-        {isAdmin && <NavTabsInline />}
+        {isAdmin && <NavTabsClient category={category} setCategory={setCategory} />}
         <style>{TAG_ANIMATIONS}</style>
         <p className="text-[13px] font-bold mb-4 px-1" style={{ color: "rgba(255,255,255,0.5)" }}>
           {category} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
@@ -301,7 +299,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 
   return (
     <div className={`flex flex-col gap-4 ${isAdmin ? "pb-10" : "pb-4"}`}>
-      {isAdmin && <NavTabsInline />}
+      {isAdmin && <NavTabsClient category={category} setCategory={setCategory} />}
       <style>{TAG_ANIMATIONS}</style>
       {/* 캐러셀 — 어드민만 */}
       {isAdmin && products.length > 0 && (
