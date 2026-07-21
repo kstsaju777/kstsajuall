@@ -88,7 +88,7 @@ export function HeroCarousel() {
             <Link
               key={i}
               href={slide.href}
-              className="relative flex-shrink-0 overflow-hidden rounded-3xl cursor-pointer block [transform:translateZ(0)] [box-shadow:inset_0_-2px_0_0_#000]"
+              className="relative flex-shrink-0 overflow-hidden rounded-3xl cursor-pointer block"
               style={{
                 width: `${CARD_W}%`,
                 marginRight: CARD_GAP,
@@ -97,6 +97,7 @@ export function HeroCarousel() {
                 opacity: isActive ? 1 : 0.6,
                 transform: isActive ? "scale(1)" : "scale(0.97)",
                 transition: "opacity 0.4s, transform 0.4s",
+                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
               }}
             >
               {slide.type === "video" ? (
