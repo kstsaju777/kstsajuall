@@ -45,7 +45,7 @@ function SiteHeader({ isLoggedIn, isAdmin }: { isLoggedIn: boolean; isAdmin: boo
           <SideDrawer isLoggedIn={isLoggedIn} />
         </div>
       </div>
-      {isAdmin && <NavTabs />}
+      <NavTabs />
     </header>
   );
 }

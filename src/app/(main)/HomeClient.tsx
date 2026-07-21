@@ -236,10 +236,10 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   };
 
   return (
-    <div className={`flex flex-col gap-4 ${isAdmin ? "pt-4 pb-10" : "pb-4"}`}>
+    <div className={`flex flex-col gap-4 pt-4 ${isAdmin ? "pb-10" : "pb-4"}`}>
       <style>{TAG_ANIMATIONS}</style>
-      {/* 캐러셀 — 어드민만 */}
-      {isAdmin && products.length > 0 && (
+      {/* 캐러셀 */}
+      {products.length > 0 && (
         <AdminSlider
           products={products}
           slideIndex={slideIndex}
@@ -250,8 +250,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       )}
 
       {/* 카테고리 섹션 */}
-      {isAdmin && (
-        <div className="flex flex-col gap-5" style={{ marginTop: -12 }}>
+      <div className="flex flex-col gap-5" style={{ marginTop: -12 }}>
           {CATEGORIES.map((cat, catIdx) => {
             const catProducts = cat.slugs
               .map(slug => products.find(p => p.slug === slug))
@@ -359,7 +358,6 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             );
           })}
         </div>
-      )}
 
       {/* 로고 구분선 */}
       {isAdmin && (
@@ -379,7 +377,6 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
         )}
         {products.map((product, index) => {
           const active = product.is_active;
-          const comingSoon = !isAdmin && !active;
           const href = getHref(product.slug);
           const _c = SLUG_CARD_MAP[product.slug];
           const isVideo = _c?.type === "video";
@@ -389,35 +386,24 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           return (
             <div key={product.id} className="relative">
               <Link
-                href={comingSoon ? "#" : href}
-                onClick={e => { if (comingSoon) e.preventDefault(); }}
+                href={href}
                 className="block w-full rounded-2xl overflow-hidden relative"
                 style={{
                   aspectRatio: "4/3",
-                  pointerEvents: comingSoon ? "none" : "auto",
                   background: isDummy ? DUMMY_GRADIENTS[index % DUMMY_GRADIENTS.length] : undefined,
                 }}
               >
                 {!isDummy && (isVideo ? (
-                  <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline preload="none"
-                    style={comingSoon ? { filter: "blur(8px) brightness(0.15)", transform: "scale(1.05)" } : {}} />
+                  <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline preload="none" />
                 ) : (
-                  <img src={imageUrl!} alt={product.name} className="w-full h-full object-cover"
-                    style={comingSoon ? { filter: "blur(8px) brightness(0.15)", transform: "scale(1.05)" } : {}} />
+                  <img src={imageUrl!} alt={product.name} className="w-full h-full object-cover" />
                 ))}
-                {comingSoon ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                    <p className="text-white font-black text-[18px]">서비스 준비중입니다</p>
-                    <p className="text-white/70 text-[13px]">멋진 풀이로 선보이겠습니다</p>
+                <>
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.7))" }} />
+                  <div className="absolute left-0 right-0" style={{ bottom: -12, padding: "0 16px 16px" }}>
+                    {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p className="text-white font-bold text-[30px] leading-tight">{n}</p> : <p style={{ fontSize: 30, lineHeight: 1.25 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.desc ?? product.description) && <p className="text-white/80 text-[15px] mt-0.5">{c?.desc ?? product.description}</p>}</>; })()}
                   </div>
-                ) : (
-                  <>
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.7))" }} />
-                    <div className="absolute left-0 right-0" style={{ bottom: -12, padding: "0 16px 16px" }}>
-                      {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p className="text-white font-bold text-[30px] leading-tight">{n}</p> : <p style={{ fontSize: 30, lineHeight: 1.25 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.desc ?? product.description) && <p className="text-white/80 text-[15px] mt-0.5">{c?.desc ?? product.description}</p>}</>; })()}
-                    </div>
-                  </>
-                )}
+                </>
               </Link>
 
               {isAdmin && (

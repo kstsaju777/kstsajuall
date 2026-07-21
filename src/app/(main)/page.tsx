@@ -18,11 +18,7 @@ export default async function HomePage() {
     .select("id, name, slug, price, description, is_active, image_url, badge, tag, is_video, category")
     .order("display_order", { ascending: true });
 
-  if (!isAdmin) {
-    query = query.eq("is_active", true);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: products } = await (query as any);
 
   return <HomeClient initialProducts={products ?? []} isAdmin={isAdmin} />;
