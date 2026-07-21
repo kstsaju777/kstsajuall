@@ -77,6 +77,7 @@ export function HeroCarousel() {
         style={{
           transform: getTranslate(current),
           transition: animated ? "transform 0.18s ease-out" : "none",
+          willChange: "transform",
         }}
         onTransitionEnd={handleTransitionEnd}
         onTouchStart={handleTouchStart}
