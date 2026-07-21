@@ -27,6 +27,7 @@ export function HeroCarousel() {
 
   // 자동 슬라이드
   const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
       setCurrent((p) => p + 1);
       setAnimated(true);
