@@ -3973,7 +3973,7 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
               <h2 className="text-[21px] font-black" style={{ color: INK, fontFamily: SERIF }}>목차</h2>
-              <span className="text-[11.5px]" style={{ color: MUTE }}>홍연이 그대에게 들려줄 이야기</span>
+              <span className="text-[11.5px]" style={{ color: MUTE }}>인트로 · 서론</span>
             </div>
             <button
               onClick={onClose}
@@ -4707,7 +4707,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           {/* 헤드라인 블록 */}
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>홍연이 그대에게 들려줄 이야기</p>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>인 트 로 · 서 론</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               사주팔자란 무엇인가
             </h1>
@@ -5079,7 +5079,7 @@ function ReportPreviewInner() {
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`"자, 이제 ${name}님의\n서사가 담긴 책을 펼쳐보겠소?"`}
+              {`자, 이제 ${name}님의\n서사가 담긴 책을 펼쳐보겠소?`}
             </p>
             
           </div>
@@ -5556,7 +5556,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-1/total-1-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"${name}님의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소."`}</Quote>
+          <Quote>{`${name}님의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소.`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
@@ -5572,7 +5572,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 운명</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              "나의 진짜 모습은 무엇일까"
+              나의 진짜 모습은 무엇일까
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -5713,7 +5713,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-2/total-2-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"다음으로는, ${name}님이\n세상과 어떤 방식으로\n조우하게 되는지\n알려주겠소."`}</Quote>
+          <Quote>{`다음으로는, ${name}님이\n세상과 어떤 방식으로\n조우하게 되는지\n알려주겠소.`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
@@ -5729,7 +5729,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 특징</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              "내 사주에 나타나는 특이점"
+              내 사주에 나타나는 특이점
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -5739,7 +5739,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"${name}님의 사주에서\n나타나는 특이점에 대해\n하나씩 짚어드리겠소."`}</Quote>
+          <Quote>{`${name}님의 사주에서\n나타나는 특이점에 대해\n하나씩 짚어드리겠소.`}</Quote>
 
 
           {/* 이 사주가 드문 이유 */}
@@ -5761,7 +5761,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-4/total-4-2.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"지금까지의 분석결과들로\n${name}님의 실제 인생에 대하여\n\n더 깊이 알아보는 시간을\n함께 가져보겠소."`}</Quote>
+          <Quote>{`지금까지의 분석결과들로\n${name}님의 실제 인생에 대하여\n\n더 깊이 알아보는 시간을\n함께 가져보겠소.`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
@@ -5777,7 +5777,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 관계</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              "나는 세상을 어떻게 대하는가"
+              나는 세상을 어떻게 대하는가
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -5787,7 +5787,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"${name}님이 세상을\n어떤 방식으로 마주하는지\n하나씩 살펴보겠소."`}</Quote>
+          <Quote>{`${name}님이 세상을\n어떤 방식으로 마주하는지\n하나씩 살펴보겠소.`}</Quote>
 
           {/* 오행 분포 */}
           <section className="px-6 pt-2 pb-2">
@@ -5991,7 +5991,9 @@ function ReportPreviewInner() {
           {/* 마무리 인용 */}
           <div className="px-8 py-12 text-center">
             <p className="text-[26px] font-black mb-3" style={{ color: INK, fontFamily: SERIF }}>知彼知己 百戰百勝</p>
-            <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`지피지기 백전백승\n\n"내가 어떤 사람인지를\n정확히 알고있어야 이겨낼 수 있소.\n결코 잊어서는 안될 것이오."`}</p>
+            <p className="text-[18px] font-black mb-10" style={{ color: INK, fontFamily: SERIF }}>지피지기 백전백승</p>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 40px" }} />
+            <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`내가 어떤 사람인지를\n정확히 알고있어야 이겨낼 수 있소.\n결코 잊어서는 안될 것이오.`}</p>
           </div>
 
           {/* 다음 장 네비 */}
@@ -6008,7 +6010,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 흐름</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {`"내 인생은 어떻게 흐르는가"`}
+              내 인생은 어떻게 흐르는가
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -6018,7 +6020,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"앞으로의 인생흐름에 대해\n면밀히 살펴봐 드리겠소."`}</Quote>
+          <Quote>{`앞으로의 인생흐름에 대해\n면밀히 살펴봐 드리겠소.`}</Quote>
 
           {/* 대운 흐름 */}
           {/* 대운 흐름 */}
@@ -6054,7 +6056,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-11/total-11-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"흐름을 알았다면, 이제\n조심해야 할 시기도 알아야 하오.\n다음 장에서 살펴보겠소."`}</Quote>
+          <Quote>{`흐름을 알았다면, 이제\n조심해야 할 시기도 알아야 하오.\n다음 장에서 살펴보겠소.`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
@@ -6070,7 +6072,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 재물</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              "내 재물과 천직은 어떠한가"
+              내 재물과 천직은 어떠한가
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -6080,7 +6082,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"재물과 천직은\n타고난 그릇에 따라 흐르오.\n\n${name}님의 재물 그릇\n지금 바로 열어보겠소."`}</Quote>
+          <Quote>{`재물과 천직은\n타고난 그릇에 따라 흐르오.\n\n${name}님의 재물 그릇\n지금 바로 열어보겠소.`}</Quote>
 
           {/* 재물운 시점 */}
           <section className="px-6 pt-2 pb-4">
@@ -6163,7 +6165,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-5/total-5-1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"재물의 그릇을 살폈으니,\n이제는 인연의 실을 따라가 보겠소.\n\n${name}님에게\n붉은 실이 닿는 때는 언제인가 —"`}</Quote>
+          <Quote>{`재물의 그릇을 살폈으니,\n이제는 인연의 실을 따라가 보겠소.\n\n${name}님에게\n붉은 실이 닿는 때는 언제인가`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
@@ -6179,7 +6181,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 사랑</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              "내 인연과 혼인의 때는 언제인가"
+              내 인연과 혼인의 때는 언제인가
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -6189,7 +6191,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"사람은 누구나\n제 운명의 실로 엮인 인연을 만나오.\n\n${name}님의 붉은 실,\n지금 풀어보겠소."`}</Quote>
+          <Quote>{`사람은 누구나\n제 운명의 실로 엮인 인연을 만나오.\n\n${name}님의 붉은 실,\n지금 풀어보겠소.`}</Quote>
 
           {/* 사랑하는 방식 */}
           <section className="px-6 pt-2 pb-4">
@@ -6213,7 +6215,7 @@ function ReportPreviewInner() {
 
 
           {/* 마무리 인용 */}
-          <Quote>{`"돈도, 사랑도...\n결국 건강해야 지킬 수 있는것.\n\n${name.slice(1) || name}님의 사주팔자에 나오는\n건강을 진단해주겠소."`}</Quote>
+          <Quote>{`돈도, 사랑도...\n결국 건강해야 지킬 수 있는것.\n\n${name.slice(1) || name}님의 사주팔자에 나오는\n건강을 진단해주겠소.`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
@@ -6229,7 +6231,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 건강</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              "내 건강과 약한 곳은 어디인가"
+              내 건강과 약한 곳은 어디인가
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -6239,7 +6241,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"${name}님의 사주팔자에서\n건강에 관련된 징후들을 봐주겠소."`}</Quote>
+          <Quote>{`${name}님의 사주팔자에서\n건강에 관련된 징후들을 봐주겠소.`}</Quote>
 
           {/* 약한 부위 */}
           <section className="px-6 pt-2 pb-4">
@@ -6262,7 +6264,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-7/total-7-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"${name.slice(1) || name}님에게 앞으로의 대운은\n어떻게 흐르는지 살펴보겠소."`}</Quote>
+          <Quote>{`${name.slice(1) || name}님에게 앞으로의 대운은\n어떻게 흐르는지 살펴보겠소.`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
@@ -6277,7 +6279,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 개운</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {`"나는 어떻게 운을 바꿀 수 있나"`}
+              나는 어떻게 운을 바꿀 수 있나
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -6287,7 +6289,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
-          <Quote>{`"운은 타고나는 것이지만,\n가꾸는 것은\n바로 그대의 몫이오."`}</Quote>
+          <Quote>{`운은 타고나는 것이지만,\n가꾸는 것은\n바로 그대의 몫이오.`}</Quote>
 
           {/* 용신 오행 개운법 */}
           <section className="px-6 pt-2 pb-2">
@@ -6333,7 +6335,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-14/total-14-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"이로써 ${name}님의 사주를\n모두 살펴보았소.\n\n마지막으로,\n소인이 그대에게 전하는\n서신을 남겨드리겠소."`}</Quote>
+          <Quote>{`이로써 ${name}님의 사주를\n모두 살펴보았소.\n\n마지막으로,\n소인이 그대에게 전하는\n서신을 남겨드리겠소.`}</Quote>
 
           {/* 다음 장 네비 */}
           <div className="pb-10" />
