@@ -782,7 +782,7 @@ function BanryeoEmailIntro({ onNext }: { onNext: () => void }) {
   }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#0a0c10" }}>
       <img src="/media/cards/kunghap_banryeo/kunghap_banryeo-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
       <div className="relative z-10 px-8 text-center">
@@ -838,7 +838,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
   const CLR = "#b47221";
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#080a0f" }}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#080a0f" }}>
       <img src="/media/cards/kunghap_banryeo/banryeo-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(15,10,5,0.5), rgba(15,10,5,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
