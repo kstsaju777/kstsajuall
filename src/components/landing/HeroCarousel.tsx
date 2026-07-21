@@ -119,7 +119,7 @@ export function HeroCarousel() {
                 />
               )}
               <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#2a1f3d] to-[#111]" />
-              <div className="absolute inset-x-0 top-0 -bottom-px bg-gradient-to-t from-black via-black/20 to-transparent" />
+              <div className="absolute inset-x-0 top-0 -bottom-2 bg-[linear-gradient(to_top,#000_0%,#000_12%,rgba(0,0,0,0.2)_45%,transparent_100%)]" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
                 <span className="mb-2 inline-block rounded-full bg-orange-500 px-2.5 py-0.5 text-[11px] font-bold text-white">
                   {slide.badge}
