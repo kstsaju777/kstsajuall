@@ -1,9 +1,7 @@
 ﻿import Link from "next/link";
-import { Suspense } from "react";
 import { siteConfig, businessInfo } from "@/config/site";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth";
-import { NavTabs } from "@/components/layout/NavTabs";
 import { SideDrawer } from "@/components/layout/SideDrawer";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { FooterLegal } from "@/components/layout/FooterLegal";
@@ -43,11 +41,6 @@ function SiteHeader({ isLoggedIn, isAdmin }: { isLoggedIn: boolean; isAdmin: boo
           <SideDrawer isLoggedIn={isLoggedIn} />
         </div>
       </div>
-      {isAdmin && (
-        <Suspense fallback={null}>
-          <NavTabs />
-        </Suspense>
-      )}
     </header>
   );
 }

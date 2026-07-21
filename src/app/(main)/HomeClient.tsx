@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { CATEGORY_CARDS, FREE_SECTIONS } from "@/config/category-cards";
 
@@ -158,19 +158,58 @@ const DUMMY_GRADIENTS = [
 export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Product[]; isAdmin: boolean }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [confirm, setConfirm] = useState<{ id: string; toActive: boolean } | null>(null);
+  const [category, setCategory] = useState("");
   const [slideIndex, setSlideIndex] = useState(0);
   const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const category = searchParams.get("category") ?? "";
 
   const getHref = (slug: string) => `/saju/${slug}`;
+
+  const RED = "#711b20";
+  const TABS = [
+    { label: "전체", value: "" },
+    { label: "재물", value: "재물" },
+    { label: "사랑", value: "사랑" },
+    { label: "가족", value: "가족" },
+    { label: "기타", value: "기타" },
+    { label: "무료", value: "무료" },
+  ];
+
+  const NavTabsInline = () => (
+    <div className="overflow-x-auto scrollbar-none sticky top-14 z-40" style={{ backgroundColor: "#ffffff" }}>
+      <div className="flex w-full gap-[2px]">
+        {TABS.map((tab) => {
+          const active = category === tab.value;
+          return (
+            <button
+              key={tab.label}
+              onClick={() => setCategory(tab.value)}
+              className="relative flex-1 text-center whitespace-nowrap transition-all"
+              style={{
+                padding: "10px 0 8px",
+                fontSize: 13,
+                fontWeight: active ? 700 : 400,
+                color: active ? "#fff" : "#111",
+                backgroundColor: active ? RED : "#eeeeee",
+                borderRadius: "8px 8px 0 0",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   // 카테고리 탭 선택 시 필터 뷰
   if (category) {
     if (category === "무료") {
       return (
         <div className="pb-20">
+          {isAdmin && <NavTabsInline />}
           <style>{TAG_ANIMATIONS}</style>
           <div style={{ margin: "12px 12px 20px", background: "#fff", borderRadius: 16, padding: "16px 18px" }}>
             <p style={{ fontSize: 16, fontWeight: 900, color: "#111", marginBottom: 8 }}>기간 한정 무료 이벤트 🔔</p>
@@ -208,6 +247,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
     const cards = CATEGORY_CARDS[category] ?? [];
     return (
       <div className="px-3 pt-4 pb-20">
+        {isAdmin && <NavTabsInline />}
         <style>{TAG_ANIMATIONS}</style>
         <p className="text-[13px] font-bold mb-4 px-1" style={{ color: "rgba(255,255,255,0.5)" }}>
           {category} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
@@ -260,7 +300,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   };
 
   return (
-    <div className={`flex flex-col gap-4 pt-4 ${isAdmin ? "pb-10" : "pb-4"}`}>
+    <div className={`flex flex-col gap-4 ${isAdmin ? "pb-10" : "pb-4"}`}>
+      {isAdmin && <NavTabsInline />}
       <style>{TAG_ANIMATIONS}</style>
       {/* 캐러셀 — 어드민만 */}
       {isAdmin && products.length > 0 && (
@@ -315,6 +356,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     )}
                   </div>
                   {!isHot && <span onClick={() => router.push(`/products?category=${cat.tag}`)} style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 600, whiteSpace: "nowrap", cursor: "pointer", marginBottom: -2 }}>더보기 →</span>}
+
                 </div>
                 {isHot ? (
                 <HotCarousel cardW={cardW} gap={10}>
