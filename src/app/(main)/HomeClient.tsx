@@ -215,7 +215,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
               {isDev && (
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
                   <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
-                  <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>곧 공개합니다</p>
+                  <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
                 </div>
               )}
             </>;
@@ -321,7 +321,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                       {isDev && (
                         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20, gap: 4 }}>
                           <p style={{ color: "#fff", fontWeight: 800, fontSize: 15, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
-                          <p style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500, fontSize: 12, margin: 0 }}>곧 공개합니다</p>
+                          <p style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500, fontSize: 12, margin: 0 }}>Coming Soon..</p>
                         </div>
                       )}
                     </>;
@@ -364,7 +364,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                       {isDev && (
                         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, gap: 3 }}>
                           <p style={{ color: "#fff", fontWeight: 800, fontSize: isBig ? 14 : 11, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
-                          <p style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500, fontSize: isBig ? 12 : 9, margin: 0 }}>곧 공개합니다</p>
+                          <p style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500, fontSize: isBig ? 12 : 9, margin: 0 }}>Coming Soon..</p>
                         </div>
                       )}
                     </>;
@@ -416,7 +416,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             {isDev && (
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
                 <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
-                <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>곧 공개합니다</p>
+                <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
               </div>
             )}
           </>;
@@ -626,7 +626,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref,
               {isCurrent && !isAdmin && product.slug === "saju_health" && (
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4, pointerEvents: "none" }}>
                   <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
-                  <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>곧 공개합니다</p>
+                  <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
                 </div>
               )}
               {isCurrent && !(product.slug === "saju_health" && !isAdmin) && (
