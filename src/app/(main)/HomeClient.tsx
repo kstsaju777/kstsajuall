@@ -319,9 +319,9 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, margin: "0 0 1px" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 800, fontSize: 25, lineHeight: 1.3, margin: 0 }}>{n}</p> : <p style={{ fontSize: 25, lineHeight: 1.3, margin: 0 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
                       </div>
                       {isDev && (
-                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20, gap: 4 }}>
-                          <p style={{ color: "#fff", fontWeight: 800, fontSize: 15, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
-                          <p style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500, fontSize: 12, margin: 0 }}>Coming Soon..</p>
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20, gap: 4 }}>
+                          <p style={{ color: "#fff", fontWeight: 800, fontSize: 15, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
+                          <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 12, margin: 0 }}>Coming Soon..</p>
                         </div>
                       )}
                     </>;
@@ -362,9 +362,9 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={badgeFontSize} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: isBig ? 11 : 8, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 800, fontSize, lineHeight: 1.3, margin: 0 }}>{n}</p> : <p style={{ fontSize, lineHeight: 1.3, margin: 0 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: isBig ? 12 : 9, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
                       </div>
                       {isDev && (
-                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, gap: 3 }}>
-                          <p style={{ color: "#fff", fontWeight: 800, fontSize: isBig ? 14 : 11, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
-                          <p style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500, fontSize: isBig ? 12 : 9, margin: 0 }}>Coming Soon..</p>
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, gap: 3 }}>
+                          <p style={{ color: "#fff", fontWeight: 800, fontSize: isBig ? 14 : 11, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
+                          <p style={{ color: "#FFD700", fontWeight: 500, fontSize: isBig ? 12 : 9, margin: 0 }}>Coming Soon..</p>
                         </div>
                       )}
                     </>;
@@ -414,8 +414,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
               {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p className="text-white font-bold text-[30px] leading-tight">{n}</p> : <p style={{ fontSize: 30, lineHeight: 1.25 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.desc ?? product.description) && <p className="text-white/80 text-[15px] mt-0.5">{c?.desc ?? product.description}</p>}</>; })()}
             </div>
             {isDev && (
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
-                <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
+                <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
                 <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
               </div>
             )}
@@ -624,8 +624,8 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref,
                 {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={12} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 900, fontSize: 30, lineHeight: 1.3, margin: "0 0 1px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}>{n}</p> : <p style={{ fontSize: 30, lineHeight: 1.3, margin: "0 0 1px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 900 }}>{n.slice(i+1)}</span></p>; })()}{isCurrent && (c?.desc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, margin: 0, marginTop: 1 }}>{c?.desc ?? product.description}</p>}</>; })()}
               </div>
               {isCurrent && !isAdmin && product.slug === "saju_health" && (
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4, pointerEvents: "none" }}>
-                  <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4, pointerEvents: "none" }}>
+                  <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
                   <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
                 </div>
               )}
