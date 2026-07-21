@@ -96,7 +96,7 @@ export function HeroCarousel() {
                 aspectRatio: "1/1",
                 backgroundColor: "#000",
                 opacity: isActive ? 1 : 0.6,
-                transform: isActive ? "scale(1)" : "scale(0.97)",
+                transform: isActive ? "scale(1) translateZ(0)" : "scale(0.97) translateZ(0)",
                 transition: "opacity 0.4s, transform 0.4s",
               }}
             >
