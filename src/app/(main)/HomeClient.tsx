@@ -612,11 +612,13 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref 
                 width: CARD_W, height: CARD_W,
                 borderRadius: 18, overflow: "hidden",
                 zIndex, opacity,
-                transform: `translateX(calc(-50% + ${baseX}px)) scale(${scale}) rotateY(${rotateY}deg)`,
+                transform: `translateX(calc(-50% + ${baseX}px)) scale(${scale}) rotateY(${rotateY}deg) translateZ(0)`,
                 transition: isMoving ? "opacity 0.15s" : "transform 0.45s cubic-bezier(.4,0,.2,1), opacity 0.3s, box-shadow 0.3s",
                 boxShadow: isCurrent ? "0 10px 28px rgba(0,0,0,0.55)" : "0 4px 12px rgba(0,0,0,0.3)",
                 filter: isCurrent ? "none" : "brightness(0.55)",
                 cursor: "pointer",
+                willChange: "transform",
+                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
                 background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
               }}
             >
