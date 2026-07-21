@@ -404,13 +404,16 @@ function StickyCTA() {
   }, []);
 
   return (
-    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
-      left: "max(0px, calc(50vw - 240px))",
-      width: "min(100%, 480px)",
-      background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
-    }}>
+    <>
+      {/* 토스트 알림 — 그라데이션과 분리된 독립 레이어 */}
       <style>{`@keyframes spFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-      <div className="flex flex-col items-end gap-1 mb-2" style={{ minHeight: "30px" }}>
+      <div className="fixed z-50 px-5" style={{
+        left: "max(0px, calc(50vw - 240px))",
+        width: "min(100%, 480px)",
+        bottom: "130px",
+        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px",
+        pointerEvents: "none",
+      }}>
         {toasts.map((t) => (
           <div key={t.id} style={{
             animation: "spFadeIn 0.4s ease",
@@ -430,6 +433,11 @@ function StickyCTA() {
         ))}
       </div>
 
+    <div className="fixed bottom-0 z-40 px-5 pb-6 pt-20" style={{
+      left: "max(0px, calc(50vw - 240px))",
+      width: "min(100%, 480px)",
+      background: "linear-gradient(to top, #0a0a0a 55%, transparent)",
+    }}>
       <p className="text-center text-[13px] font-bold mb-1">
         <span style={{ color: "#ffffff" }}>할인혜택 종료까지 </span>
         <span style={{ color: "#ffc107" }}>{timeLeft}</span>
@@ -468,6 +476,7 @@ function StickyCTA() {
         </button>
       </div>
     </div>
+    </>
   );
 }
 
