@@ -173,13 +173,6 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
       return (
         <div className="pb-20">
             <style>{TAG_ANIMATIONS}</style>
-          <div style={{ margin: "12px 12px 20px", background: "#fff", borderRadius: 16, padding: "16px 18px" }}>
-            <p style={{ fontSize: 16, fontWeight: 900, color: "#111", marginBottom: 8 }}>기간 한정 무료 이벤트 🔔</p>
-            <ul style={{ paddingLeft: 16, margin: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-              <li style={{ fontSize: 13, color: "#333", lineHeight: 1.5 }}>아래 상품들은 곧 런칭될 아이템들이에요!</li>
-              <li style={{ fontSize: 13, color: "#c0392b", fontWeight: 700, lineHeight: 1.5 }}>아이템을 쭉 둘러보고 신중히 골라주세요! (인당 3개 제한)</li>
-            </ul>
-          </div>
           {FREE_SECTIONS.map((section) => (
             <div key={section.title} style={{ marginBottom: 36 }}>
               <div style={{ padding: "0 16px 12px" }}>
