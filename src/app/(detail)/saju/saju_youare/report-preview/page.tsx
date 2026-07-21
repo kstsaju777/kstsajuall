@@ -1178,7 +1178,7 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
   const imgSrc = card.thumbnail ?? card.image;
   const [imgErr, setImgErr] = useState(false);
   return (
-    <Link href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+    <div className="block rounded-2xl overflow-hidden relative flex-shrink-0"
       style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
       {imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
@@ -1187,6 +1187,10 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
         <img src={imgSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
       )}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute inset-0 flex flex-col items-center justify-start" style={{ paddingTop: 16, gap: 3, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)" }}>
+        <p style={{ color: "#fff", fontWeight: 800, fontSize: 13 }}>🛠️ 열심히 개발중</p>
+        <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 11 }}>Coming Soon..</p>
+      </div>
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
         <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
           {card.tag && (
@@ -1211,7 +1215,7 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
         <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
         <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -4640,8 +4644,9 @@ function ReportPreviewInner() {
 
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`"자, 이제 ${name}${effectiveGender === "female" ? "양" : "군"}의\n서사가 담긴 책을 펼쳐보겠소?"`}
+              {`자, 이제 ${name}${effectiveGender === "female" ? "양" : "군"}의\n서사가 담긴 책을 펼쳐보겠소?`}
             </p>
           </div>
 
@@ -4657,7 +4662,7 @@ function ReportPreviewInner() {
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 환경</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>"나는 어떤 그릇으로 태어났나"</h1>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 어떤 그릇으로 태어났나</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -4665,6 +4670,7 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
           <Quote>{`${honorShort}의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${honorShort}의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${honorShort}의 사주팔자요.`}</Quote>
 
           {/* 명식표 */}
@@ -5084,10 +5090,15 @@ function ReportPreviewInner() {
           <Illust src="/media/report/saju_youare/saju_youare_1/saju_youare_1_1.jpg" h={360} />
 
           {/* 마무리 인용 */}
-          <Quote>{`"${honor}의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소."`}</Quote>
-
-          <div className="pb-10" />
-          <ChapterNav cur="1" go={next} />
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+              {`${honor}의 진짜 모습은 무엇인지,\n사주의 구조를 알려드리겠소.`}
+            </p>
+          </div>
+          <div style={{ background: PINK_PALE }}>
+            <ChapterNav cur="1" go={next} />
+          </div>
         </>
       )}
 
@@ -5103,6 +5114,7 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_youare/saju_youare_2/saju_youare_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, #fdf8f4 100%)" }} />
           </div>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
           <Quote>{`몸의 약한 곳도\n사주에 새겨져 있소.\n\n${honor}의\n건강 주의점을 살펴보겠소.`}</Quote>
 
           {(() => {
@@ -5222,9 +5234,11 @@ function ReportPreviewInner() {
             );
           })()}
 
-          <Quote>{`아이의 건강을 알았으니\n이제 양육 이야기를 하겠소.\n\n${honor}에게\n맞는 양육 방식을\n살펴보겠소.`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="2" go={next} />
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`아이의 건강을 알았으니\n이제 양육 이야기를 하겠소.\n\n${honor}에게\n맞는 양육 방식을\n살펴보겠소.`}</p>
+          </div>
+          <div style={{ background: PINK_PALE }}><ChapterNav cur="2" go={next} /></div>
         </>
       )}
 
@@ -5240,6 +5254,7 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_youare/saju_youare_3/saju_youare_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, #fdf8f4 100%)" }} />
           </div>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
           <Quote>{`아이가 꽃피려면\n맞는 환경이 있어야 하오.\n\n${honor}에게\n맞는 양육 방식을 살펴보겠소.`}</Quote>
 
           {(() => {
@@ -5309,9 +5324,11 @@ function ReportPreviewInner() {
             );
           })()}
 
-          <Quote>{`양육 방향을 알았으니\n이제 재능 이야기를 하겠소.\n\n타고난 재능은\n사주에 이미 새겨져 있소.\n\n${honor}의\n타고난 재능을 살펴보겠소.`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="3" go={next} />
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`양육 방향을 알았으니\n이제 재능 이야기를 하겠소.\n\n타고난 재능은\n사주에 이미 새겨져 있소.\n\n${honor}의\n타고난 재능을 살펴보겠소.`}</p>
+          </div>
+          <div style={{ background: PINK_PALE }}><ChapterNav cur="3" go={next} /></div>
         </>
       )}
 
@@ -5327,6 +5344,7 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_youare/saju_youare_4/saju_youare_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
           <Quote>{`양육 방향을 알았다면\n이제 재능을 알아야 하오.\n\n타고난 재능을 알아야\n더 잘 키울 수 있소.\n\n${honor}의\n재능과 적성을 살펴보겠소.`}</Quote>
 
           {(() => {
@@ -5402,9 +5420,11 @@ function ReportPreviewInner() {
             );
           })()}
 
-          <Quote>{`아이의 성장에도\n파고가 있소.\n\n${honor}의 성장 시기별\n주의할 때를 알려드리겠소.`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="4" go={next} />
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`아이의 성장에도\n파고가 있소.\n\n${honor}의 성장 시기별\n주의할 때를 알려드리겠소.`}</p>
+          </div>
+          <div style={{ background: PINK_PALE }}><ChapterNav cur="4" go={next} /></div>
         </>
       )}
 
@@ -5420,6 +5440,7 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
           <Quote>{`아이가 자라는 시기마다\n양육할 때 조언이 다르오.\n\n${honor}의 시기별로\n양육 시 알아야 할 것들이오.`}</Quote>
 
           {(() => {
@@ -5623,9 +5644,11 @@ function ReportPreviewInner() {
             );
           })()}
 
-          <Quote>{`아이의 기운을 살리는\n또 하나의 방법이 있소.\n\n부족한 오행을 채우는\n개운법을 알려드리겠소.`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="5" go={next} />
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`아이의 기운을 살리는\n또 하나의 방법이 있소.\n\n부족한 오행을 채우는\n개운법을 알려드리겠소.`}</p>
+          </div>
+          <div style={{ background: PINK_PALE }}><ChapterNav cur="5" go={next} /></div>
         </>
       )}
 
@@ -5641,6 +5664,7 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
           <Quote>{`부족한 기운을 채우면\n아이의 흐름이 달라지오.\n\n${honor}에게 맞는\n개운법을 알려드리겠소.`}</Quote>
 
           {(() => {
@@ -5771,9 +5795,11 @@ function ReportPreviewInner() {
             );
           })()}
 
-          <Quote>{`마지막으로,\n${honor}의 부모님께\n홍연이 전하는\n서신을 남기겠소.`}</Quote>
-          <div className="pb-10" />
-          <ChapterNav cur="6" go={next} />
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`마지막으로,\n${honor}의 부모님께\n홍연이 전하는\n서신을 남기겠소.`}</p>
+          </div>
+          <div style={{ background: PINK_PALE }}><ChapterNav cur="6" go={next} /></div>
         </>
       )}
 
@@ -5790,7 +5816,6 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_youare/saju_youare_7/saju_youare_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, #fdf8f4 100%)" }} />
             </div>
-            <Quote>{`${honor}의 부모님께\n홍연이 드리는\n마지막 서신이오.`}</Quote>
             <section className="px-6 pt-4 pb-8">
               {((jc.letter as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
                 <P key={i}>{p}</P>
