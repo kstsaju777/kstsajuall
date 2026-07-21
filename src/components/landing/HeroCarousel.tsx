@@ -88,22 +88,21 @@ export function HeroCarousel() {
             <Link
               key={i}
               href={slide.href}
-              className="relative flex-shrink-0 cursor-pointer block [clip-path:inset(0_round_24px)]"
+              className="relative flex-shrink-0 rounded-3xl cursor-pointer block"
               style={{
                 width: `${CARD_W}%`,
                 marginRight: CARD_GAP,
                 aspectRatio: "1/1",
-                backgroundColor: "#1a1a1a",
+                backgroundColor: "#000",
                 opacity: isActive ? 1 : 0.6,
                 transform: isActive ? "scale(1)" : "scale(0.97)",
                 transition: "opacity 0.4s, transform 0.4s",
-                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
               }}
             >
               {slide.type === "video" ? (
                 <video
                   src={slide.image}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover rounded-3xl"
                   autoPlay
                   loop
                   muted
@@ -114,12 +113,12 @@ export function HeroCarousel() {
                 <img
                   src={slide.image}
                   alt={slide.title}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover rounded-3xl"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                 />
               )}
-              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#2a1f3d] to-[#111]" />
-              <div className="absolute inset-x-0 top-0 -bottom-2 bg-[linear-gradient(to_top,#000_0%,#000_12%,rgba(0,0,0,0.2)_45%,transparent_100%)]" />
+              <div className="absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-[#2a1f3d] to-[#111]" />
+              <div className="absolute inset-x-0 top-0 bottom-0 bg-[linear-gradient(to_top,#000_0%,#000_12%,rgba(0,0,0,0.2)_45%,transparent_100%)]" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
                 <span className="mb-2 inline-block rounded-full bg-orange-500 px-2.5 py-0.5 text-[11px] font-bold text-white">
                   {slide.badge}
