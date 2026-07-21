@@ -1217,7 +1217,7 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
   const imgSrc = card.thumbnail ?? card.image;
   const [imgErr, setImgErr] = useState(false);
   return (
-    <Link href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+    <div className="block rounded-2xl overflow-hidden relative flex-shrink-0"
       style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
       {imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
@@ -1250,7 +1250,11 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
         <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
         <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
       </div>
-    </Link>
+      <div className="absolute inset-0 flex flex-col" style={{ paddingTop: 16, gap: 3, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)" }}>
+        <p style={{ textAlign: "center", color: "#fff", fontWeight: 800, fontSize: 13 }}>🛠️ 열심히 개발중</p>
+        <p style={{ textAlign: "center", color: "#FFD700", fontWeight: 500, fontSize: 11 }}>Coming Soon..</p>
+      </div>
+    </div>
   );
 }
 
@@ -6263,7 +6267,7 @@ function ReportPreviewInner() {
       {ch === "0" && (
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>홍연이 두 사람의 인연을 풀어드리겠소</p>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>인 트 로 · 서 론</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               재회궁합에 대하여
             </h1>
@@ -6568,8 +6572,9 @@ function ReportPreviewInner() {
 
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`"자, 이제 두 사람의 인연을\n낱낱이 풀어보겠소."`}
+              {`자, 이제 두 사람의 인연을\n낱낱이 풀어보겠소.`}
             </p>
           </div>
 
@@ -6602,6 +6607,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 사주팔자 소개 텍스트 ── */}
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <div className="px-8 py-12 text-center">
               <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
                 {`${name.slice(1) || name}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name.slice(1) || name}님의 사주팔자요.`}
@@ -6707,9 +6713,15 @@ function ReportPreviewInner() {
               <RelationStyleCard data={myRelationStyle} color={JCH1_COLOR} pale={JCH1_PALE} />
             </section>
 
-            <Quote>{`"나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="1" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`나의 기운을 살펴보았으니,\n이제 상대방의 사주를\n펼쳐보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="1" go={next} />
+            </div>
           </>
         );
       })()}
@@ -6738,6 +6750,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 사주팔자 소개 텍스트 ── */}
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <div className="px-8 py-12 text-center">
               <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
                 {`이번에는 ${pLabel}님의\n사주를 펼쳐보겠소.`}
@@ -6847,9 +6860,15 @@ function ReportPreviewInner() {
               <RelationStyleCard data={partnerRelationStyle} color={JCH2_COLOR} pale={JCH2_PALE} />
             </section>
 
-            <Quote>{`"두 사람의 원국을 보았으니,\n이제 두 사람이 왜 헤어졌는지\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="2" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`두 사람의 원국을 보았으니,\n이제 두 사람이 왜 헤어졌는지\n살펴보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="2" go={next} />
+            </div>
           </>
         );
       })()}
@@ -6882,6 +6901,7 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`두 사주가 만나면\n글자들이 서로 합치기도,\n충돌하기도 하오.\n\n합은 두 기운이 어우러지는 것이고,\n충은 두 기운이 부딪히는 것이오.`}</Quote>
 
             {/* 합·충 개념 안내 배너 */}
@@ -6933,10 +6953,15 @@ function ReportPreviewInner() {
             )}
 
             {/* ── 마무리 인용구 ── */}
-            <Quote>{`합·충을 알았으니,\n두 사람, 왜 헤어졌는지\n살펴보겠소.`}</Quote>
-
-            <div className="pb-10" />
-            <ChapterNav cur="3" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`합·충을 알았으니,\n두 사람, 왜 헤어졌는지\n살펴보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="3" go={next} />
+            </div>
           </>
         );
       })()}
@@ -6965,6 +6990,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`이별은 우연이 아니오.\n두 사람의 사주가\n왜 갈라서게 했는지 풀어보겠소.`}</Quote>
 
             {/* 신청자가 밝힌 이별 정보 — 홍연 서술문 */}
@@ -7053,9 +7079,15 @@ function ReportPreviewInner() {
             <HealingPathCard data={hd} myGender={report?.gender ?? undefined} partnerGender={report?.partnerGender ?? undefined} myName={myName} partnerName={partnerName} />
 
             <Illust src="/media/report/kunghap/kh-4-1.jpg" h={360} />
-            <Quote>{`왜 헤어졌는지 알았으니,\n\n나는 지금 이 사람을\n어떻게 보는지 들여다보겠소.`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="4" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`왜 헤어졌는지 알았으니,\n\n나는 지금 이 사람을\n어떻게 보는지 들여다보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="4" go={next} />
+            </div>
           </>
         );
       })()}
@@ -7084,6 +7116,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_5/kunghap_jaehwe_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`지금 내 마음이\n이 사람을 어떻게 보고 있는지,\n사주로 들여다보겠소.`}</Quote>
 
             {/* 미련·그리움 지수 */}
@@ -7111,9 +7144,15 @@ function ReportPreviewInner() {
             <MyHeartDescCard data={myHeartDesc} myName={myName} partnerName={partnerName} />
 
             <Illust src="/media/report/kunghap/kh-5-1.jpg" h={360} />
-            <Quote>{`"나의 마음을 알았으니,\n상대의 마음도\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="5" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`나의 마음을 알았으니,\n상대의 마음도 살펴보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="5" go={next} />
+            </div>
           </>
         );
       })()}
@@ -7142,6 +7181,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_6/kunghap_jaehwe_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`지금 상대의 마음이\n나를 어떻게 보고 있는지,\n사주로 들여다보겠소.`}</Quote>
 
             {/* 상대방 미련·그리움 지수 */}
@@ -7169,9 +7209,15 @@ function ReportPreviewInner() {
             <PartnerHeartDescCard data={partnerHeartDesc} myName={myName} partnerName={partnerName} />
 
             <Illust src="/media/report/kunghap/kh-6-1.jpg" h={360} />
-            <Quote>{`"두 사람의 마음을 알았으니,\n헤어진 후 감정의 흐름을\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="6" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`두 사람의 마음을 알았으니,\n헤어진 후 감정의 흐름을\n살펴보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="6" go={next} />
+            </div>
           </>
         );
       })()}
@@ -7203,6 +7249,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_7/kunghap_jaehwe_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`합충도 보았고\n마음도 들여다 보았소.\n\n재회, 가능한 인연인가.`}</Quote>
 
             {/* 재회 가능성 종합 점수 */}
@@ -7244,9 +7291,15 @@ function ReportPreviewInner() {
             <ReunionVerdictCard data={reunionVerdict} myName={myName} partnerName={partnerName} />
 
             <Illust src="/media/report/kunghap/kh-7-1.jpg" h={360} />
-            <Quote>{`"인연의 판단을 내렸으니,\n재회한다면 어떻게 될지\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="7" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`인연의 판단을 내렸으니,\n재회한다면 어떻게 될지\n살펴보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="7" go={next} />
+            </div>
           </>
         );
       })()}
@@ -7268,7 +7321,8 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_8/kunghap_jaehwe_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <Quote>{`"마음만으로는 부족하오.\n사주가 열어주는 시기를\n알고 움직여야 하오."`}</Quote>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
+            <Quote>{`마음만으로는 부족하오.\n사주가 열어주는 시기를\n알고 움직여야 하오.`}</Quote>
 
             {/* 월별 재회 에너지 꺾은선 차트 */}
             <section className="px-6 pt-4 pb-2">
@@ -7298,9 +7352,15 @@ function ReportPreviewInner() {
             <ReunionTimingAdvicePanel data={ta} />
 
             <Illust src="/media/report/kunghap/kh-8-1.jpg" h={360} />
-            <Quote>{`"시기를 알았으니,\n재회한다면 어떻게 될지\n살펴보겠소."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="8" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`시기를 알았으니,\n재회한다면 어떻게 될지\n살펴보겠소.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="8" go={next} />
+            </div>
           </>
         );
       })()}
@@ -7325,6 +7385,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_9/kunghap_jaehwe_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`다시 만나게 된 두 사람,\n그 뒷 이야기를 들려드리겠소.`}</Quote>
 
             {/* 재회 후 관계 장면 */}
@@ -7354,9 +7415,15 @@ function ReportPreviewInner() {
             </section>
 
             <Illust src="/media/report/kunghap/kh-9-1.jpg" h={360} />
-            <Quote>{`"두 사람의 미래를 살펴보았소.\n홍연의 마지막 서신을\n받아보시오."`}</Quote>
-            <div className="pb-10" />
-            <ChapterNav cur="9" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
+                {`두 사람의 미래를 살펴보았소.\n홍연의 마지막 서신을\n받아보시오.`}
+              </p>
+            </div>
+            <div style={{ background: PINK_PALE }}>
+              <ChapterNav cur="9" go={next} />
+            </div>
           </>
         );
       })()}
@@ -7371,7 +7438,7 @@ function ReportPreviewInner() {
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_12/kunghap_jaehwe_12_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_10/kunghap_jaehwe_10_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
