@@ -171,30 +171,12 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   if (category) {
     if (category === "무료") {
       return (
-        <div className="pb-20">
-            <style>{TAG_ANIMATIONS}</style>
-          {FREE_SECTIONS.map((section) => (
-            <div key={section.title} style={{ marginBottom: 36 }}>
-              <div style={{ padding: "28px 16px 12px" }}>
-                <p style={{ fontSize: 18, fontWeight: 900, color: "#fff", marginBottom: 4 }}>{section.title}</p>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>{section.subtitle}</p>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 12px" }}>
-                {section.cards.map((card, i) => (
-                  <Link key={i} href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ aspectRatio: "3/4" }}>
-                    <div className="absolute inset-0" style={{ background: DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] }} />
-                    {card.image && <img src={card.image} alt={card.name} className="absolute inset-0 w-full h-full object-cover" />}
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)" }} />
-                    <div className="absolute bottom-0 left-0 right-0" style={{ padding: "0 12px 14px" }}>
-                      {card.badge && <div className="flex gap-1" style={{ marginBottom: 5 }}><span className="text-white font-bold rounded-full" style={{ fontSize: 10, padding: "2px 8px", background: "#711b20" }}>{card.badge}</span></div>}
-                      <p className="font-black text-white leading-tight" style={{ fontSize: 14, marginBottom: 4 }}>{card.name}</p>
-                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.4 }}>{card.desc}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", padding: "0 32px", textAlign: "center", gap: 16 }}>
+          <p style={{ fontSize: 40 }}>🎁</p>
+          <p style={{ fontSize: 20, fontWeight: 900, color: "#fff", lineHeight: 1.4 }}>멋진 상품들을 준비 중이에요</p>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7 }}>
+            곧 홍연당만의 특별한 무료 콘텐츠로<br />찾아뵐게요. 조금만 기다려주세요 🙏
+          </p>
         </div>
       );
     }
