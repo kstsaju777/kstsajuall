@@ -21,3 +21,5 @@ supabase/.branches
 supabase/.temp
 
 .vercel
+
+.claude/worktrees/
