@@ -190,7 +190,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
         </p>
         <div className="flex flex-col gap-3">
           {cards.map((card, i) => {
-            const isDev = card.href === "/saju/saju_health" && !isAdmin;
+            const isDev = card.href !== "/saju/total" && !isAdmin;
             const cardInner = <>
               {card.videoUrl || card.type === "video" ? (
                 <video src={card.videoUrl ?? card.image} className="w-full h-full object-cover" autoPlay muted loop playsInline />
@@ -310,7 +310,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const imageUrl = _hc?.videoUrl ?? _hc?.image ?? product.image_url;
                     const isDummy = !imageUrl;
                     const isVideo = !!_hc?.videoUrl;
-                    const isDev = product.slug === "saju_health" && !isAdmin;
+                    const isDev = product.slug !== "total" && !isAdmin;
                     const cardStyle: React.CSSProperties = { display: "block", flexShrink: 0, width: cardW, height: cardH, borderRadius: 16, overflow: "hidden", position: "relative", cursor: isDev ? "default" : "pointer", background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined };
                     const inner = <>
                       {!isDummy && (isVideo ? <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} autoPlay muted loop playsInline preload="none" /> : <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />)}
@@ -337,7 +337,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const imageUrl = (_card?.smallImage ?? _card?.image) ?? product.image_url;
                     const isDummy = !imageUrl;
                     const isVideo = _card?.type === "video";
-                    const isDev = product.slug === "saju_health" && !isAdmin;
+                    const isDev = product.slug !== "total" && !isAdmin;
                     const cardStyle: React.CSSProperties = {
                       display: "block",
                       flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
@@ -402,7 +402,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           const isVideo = _c?.type === "video";
           const imageUrl = _c?.image ?? product.image_url;
           const isDummy = !imageUrl;
-          const isDev = product.slug === "saju_health" && !isAdmin;
+          const isDev = product.slug !== "total" && !isAdmin;
           const cardInner = <>
             {!isDummy && (isVideo ? (
               <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline preload="none" />
@@ -623,13 +623,13 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref,
               <div style={{ position: "absolute", bottom: 16, left: 14, right: 14 }}>
                 {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={12} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 900, fontSize: 30, lineHeight: 1.3, margin: "0 0 1px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}>{n}</p> : <p style={{ fontSize: 30, lineHeight: 1.3, margin: "0 0 1px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 900 }}>{n.slice(i+1)}</span></p>; })()}{isCurrent && (c?.desc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, margin: 0, marginTop: 1 }}>{c?.desc ?? product.description}</p>}</>; })()}
               </div>
-              {isCurrent && !isAdmin && product.slug === "saju_health" && (
+              {isCurrent && !isAdmin && product.slug !== "total" && (
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4, pointerEvents: "none" }}>
                   <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
                   <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
                 </div>
               )}
-              {isCurrent && !(product.slug === "saju_health" && !isAdmin) && (
+              {isCurrent && !(product.slug !== "total" && !isAdmin) && (
                 <Link href={href} prefetch={true} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
               )}
             </div>
