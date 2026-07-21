@@ -380,21 +380,17 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
         </div>
 
       {/* 로고 구분선 */}
-      {isAdmin && (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 0 0px" }}>
-          <img src="/logo_128.jpg" alt="홍연당" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "50%", cursor: "pointer" }} />
-        </div>
-      )}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 0 0px" }}>
+        <img src="/logo_128.jpg" alt="홍연당" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "50%", cursor: "pointer" }} />
+      </div>
 
       {/* 전체 상품 카드 목록 — admin 전용 */}
-      <div className={`px-4 flex flex-col gap-4 ${isAdmin ? "pt-4" : "pt-2"}`}>
-        {isAdmin && (
-          <div className="px-0 flex items-center justify-between mb-1">
-            <div>
-              <p style={{ fontSize: 20, color: "#fff", fontWeight: 900, lineHeight: 1.3 }}>전체상품 한눈에 보기</p>
-            </div>
+      <div className="px-4 flex flex-col gap-4 pt-4">
+        <div className="px-0 flex items-center justify-between mb-1">
+          <div>
+            <p style={{ fontSize: 20, color: "#fff", fontWeight: 900, lineHeight: 1.3 }}>전체상품 한눈에 보기</p>
           </div>
-        )}
+        </div>
         {products.map((product, index) => {
           const active = product.is_active;
           const href = getHref(product.slug);
