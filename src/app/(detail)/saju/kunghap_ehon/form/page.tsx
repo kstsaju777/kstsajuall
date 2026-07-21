@@ -375,8 +375,8 @@ function StepIntro({ onNext }: { onNext: () => void }) {
   }, [scene]);
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
-      <img src="/media/cards/kunghap_ehon/ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" />
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_ehon/ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
       <div className="relative z-10 px-8 text-center">
         <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
@@ -416,8 +416,8 @@ function StepIntro2({ onNext }: { onNext: () => void }) {
   }, [scene]);
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
-      <img src="/media/cards/kunghap_ehon/ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" />
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_ehon/ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
       <div className="relative z-10 px-8 text-center">
         <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
@@ -983,8 +983,8 @@ function EhonEmailIntro({ onNext }: { onNext: () => void }) {
   }, [scene]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
-      <img src="/media/cards/kunghap_ehon/kunghap_ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#0a0c10" }}>
+      <img src="/media/cards/kunghap_ehon/ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
       <div className="relative z-10 px-8 text-center">
         <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
@@ -1039,7 +1039,7 @@ function StepLoading({ name, date, time, calendar, gender, email, partnerName, p
   const CLR = "#7c6af7";
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#080a0f" }}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center" style={{ backgroundColor: "#080a0f" }}>
       <img src="/media/cards/kunghap_ehon/ehon-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-20" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,8,20,0.5), rgba(10,8,20,0.95))" }} />
       <div className="relative z-10 px-8 w-full max-w-sm text-center">
