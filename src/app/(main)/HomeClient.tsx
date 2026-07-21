@@ -261,7 +261,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   };
 
   return (
-    <div className={`flex flex-col gap-4 ${isAdmin ? "pb-10" : "pb-4"}`}>
+    <div className={`flex flex-col gap-4 ${isAdmin ? "pt-4 pb-10" : "pb-4"}`}>
       <style>{TAG_ANIMATIONS}</style>
       {/* 캐러셀 — 어드민만 */}
       {isAdmin && products.length > 0 && (
