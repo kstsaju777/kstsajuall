@@ -88,7 +88,7 @@ export function HeroCarousel() {
             <Link
               key={i}
               href={slide.href}
-              className="relative flex-shrink-0 overflow-hidden rounded-3xl cursor-pointer block"
+              className="relative flex-shrink-0 cursor-pointer block [clip-path:inset(0_round_24px)]"
               style={{
                 width: `${CARD_W}%`,
                 marginRight: CARD_GAP,
