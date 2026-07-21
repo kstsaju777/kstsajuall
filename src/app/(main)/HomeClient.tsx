@@ -213,8 +213,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 <p className="leading-snug" style={{ fontSize: 15, color: "rgba(255,255,255,0.5)" }}>{card.desc}</p>
               </div>
               {isDev && (
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
-                  <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>열심히 개발중</p>
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
+                  <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
                   <p style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500, fontSize: 13, margin: 0 }}>곧 공개합니다</p>
                 </div>
               )}
