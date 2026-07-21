@@ -361,7 +361,7 @@ function StepBirthTime({
                 className="absolute bottom-full left-0 right-0 z-20 rounded-2xl overflow-hidden shadow-xl mb-2"
                 style={{ border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(19,25,33,0.55)", backdropFilter: "blur(8px)" }}
               >
-                <div className="max-h-56 overflow-y-auto flex flex-col-reverse">
+                <div className="max-h-56 overflow-y-auto">
                   <div>
                     {BIRTH_TIMES.map((t) => (
                       <div
@@ -495,7 +495,7 @@ function StepConcern({
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>괜찮소, 나에게 털어놔 보시오.</p>
         <h2 className="text-[20px] font-bold mb-4 whitespace-nowrap" style={{ color: TEXT_CLR }}>
-          고민을 상세히 적어주겠소?{" "}
+          고민을 말해보시겠소?{" "}
           <span className="text-[13px] font-normal" style={{ color: "#888" }}>(선택)</span>
         </h2>
         <textarea
@@ -811,7 +811,7 @@ function JeongtongEmailIntro({ onNext }: { onNext: () => void }) {
 
   return (
     <div className="relative flex flex-col items-center justify-center" style={{ minHeight: "100dvh", backgroundColor: "#0a0c10" }}>
-      <img src="/media/cards/saju_total/saju_total-0.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
+      <img src="/media/cards/saju_total/total-0-image.jpg" className="absolute inset-0 w-full h-full object-cover object-top opacity-30" alt="" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,12,16,0.3) 0%, rgba(10,12,16,0.7) 60%, rgba(10,12,16,1) 100%)" }} />
       <div className="relative z-10 px-8 text-center">
         <p className="text-[26px] font-bold leading-relaxed whitespace-pre-line" style={{ color: "#fff", minHeight: "2.2em" }}>
@@ -862,7 +862,7 @@ function StepLoading({
 
   return (
     <div className="relative w-full h-full overflow-hidden" style={{ backgroundColor: "#0a0a0a" }}>
-      <style>{`@keyframes loadFade { from {opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }`}</style>
+      <style>{`@keyframes loadFade { from {opacity:0; transform:translateY(12px);} to {opacity:0.8; transform:translateY(0);} }`}</style>
 
       {/* 배경 영상 — 끝나면 자동 이동 */}
       <video
@@ -876,18 +876,18 @@ function StepLoading({
       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.25), rgba(10,10,10,0.55))" }} />
 
       {/* 말풍선 — 좌상단 (1초 후, b3 등장 시 페이드아웃) */}
-      <div className="absolute" style={{ top: "10%", left: "6%", opacity: b1 ? 1 : 0, transition: "opacity 0.5s ease" }}>
+      <div className="absolute" style={{ top: "10%", left: "6%", opacity: b1 ? 0.8 : 0, transition: "opacity 0.5s ease" }}>
         <LoadBubble text={`${name}님\n사주를 보니`} size="20px" width="200px" />
       </div>
 
       {/* 말풍선 — 중앙 (2초 후, b3 등장 시 페이드아웃) */}
-      <div className="absolute" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: b2 ? 1 : 0, transition: "opacity 0.5s ease" }}>
+      <div className="absolute" style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: b2 ? 0.8 : 0, transition: "opacity 0.5s ease" }}>
         <LoadBubble text={"놀라운게\n보이는군.."} size="25px" width="200px" />
       </div>
 
       {/* 말풍선 — 좌하단 (2초 후) */}
       {b3 && (
-        <div className="absolute" style={{ bottom: "20%", left: "15%", animation: "loadFade 0.5s ease" }}>
+        <div className="absolute" style={{ bottom: "20%", left: "15%", animation: "loadFade 0.5s ease forwards" }}>
           <LoadBubble text={"한번\n들어보겠소?"} size="35px" width="300px" />
         </div>
       )}

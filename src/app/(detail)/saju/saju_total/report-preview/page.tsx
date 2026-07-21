@@ -1736,7 +1736,7 @@ function SealStamp() {
 }
 
 // 결과지 만족도 리뷰 위젯 (마무리)
-function ReviewBox({ resultId, name, gender }: { resultId: string; name: string; gender: string }) {
+function ReviewBox({ resultId, name, gender, birthDate }: { resultId: string; name: string; gender: string; birthDate?: string }) {
   const faces = [
     { v: 1, e: "😞", l: "매우불만" }, { v: 2, e: "😕", l: "불만" }, { v: 3, e: "😐", l: "보통" }, { v: 4, e: "🙂", l: "만족" }, { v: 5, e: "😍", l: "매우만족" },
   ];
@@ -1751,10 +1751,15 @@ function ReviewBox({ resultId, name, gender }: { resultId: string; name: string;
     try {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
+      const birthYear = birthDate ? Number(birthDate.split(".")[0]) : null;
+      const currentYear = new Date().getFullYear();
+      const age = birthYear ? currentYear - birthYear + 1 : null;
+      const age_group = age ? (age < 20 ? "10대" : age < 30 ? "20대" : age < 40 ? "30대" : age < 50 ? "40대" : age < 60 ? "50대" : "60대") : null;
       await supabase.from("saju_total_reviews").insert({
         result_id: resultId,
         name,
         gender,
+        age_group,
         star: rating,
         text: text.trim() || "",
         approved: false,
@@ -6369,7 +6374,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 만족도 리뷰 */}
-          <ReviewBox resultId={id} name={nameParam || report?.name || ""} gender={gender || report?.gender || ""} />
+          <ReviewBox resultId={id} name={nameParam || report?.name || ""} gender={gender || report?.gender || ""} birthDate={report?.birth?.date} />
 
           {/* 추천 상품 (크로스셀) */}
           <RecoGrid />

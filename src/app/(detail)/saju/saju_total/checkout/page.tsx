@@ -1365,7 +1365,7 @@ const REVIEW_DATES = (() => {
   return dates;
 })();
 
-type DBReview = { id: string; name: string; gender: string | null; star: number; text: string; created_at: string };
+type DBReview = { id: string; name: string; gender: string | null; age_group: string | null; star: number; text: string; created_at: string };
 
 function ReviewSection() {
   const [page, setPage] = useState(0);
@@ -1376,7 +1376,7 @@ function ReviewSection() {
     import("@/lib/supabase/client").then(({ createClient }) => {
       createClient()
         .from("saju_total_reviews")
-        .select("id, name, gender, star, text, created_at")
+        .select("id, name, gender, age_group, star, text, created_at")
         .eq("approved", true)
         .order("created_at", { ascending: false })
         .limit(50)
@@ -1384,32 +1384,100 @@ function ReviewSection() {
     });
   }, []);
 
-  // DB 후기 + 정적 후기 합산 (DB 최신순 앞에)
   const totalStaticCount = getTotalReviewCount();
   const extraCount = Math.max(0, totalStaticCount - REVIEWS_RAW.length);
-  const totalPages = Math.ceil((dbReviews.length + totalStaticCount) / REVIEWS_PER_PAGE);
-  const allCount = dbReviews.length + totalStaticCount;
 
-  // 추가 생성된 후기 날짜 (2026-07-05 이후 순방향)
+  // 추가 생성된 후기 날짜 (BASE_DATE+1 이후 순방향, getTotalReviewCount와 동일 seed)
   const extraDates = (() => {
     const dates: string[] = [];
     let cur = new Date("2026-07-05");
     let idx = 0;
+    let day = 1;
     while (idx < extraCount) {
-      const seed = (591 + idx) * 31 + 7;
-      const count = (seed % 6) + 3;
+      const count = (day * 31 + 7) % 6 + 3;
       const y = cur.getFullYear();
       const m = String(cur.getMonth() + 1).padStart(2, "0");
       const d = String(cur.getDate()).padStart(2, "0");
       const dateStr = `${y}.${m}.${d}`;
       for (let k = 0; k < count && idx < extraCount; k++, idx++) dates.push(dateStr);
       cur.setDate(cur.getDate() + 1);
+      day++;
     }
-    return dates;
+    return dates.reverse(); // 최신순: 최근 날짜가 index 0
   })();
+  // 모든 후기를 통합 배열로 구성 후 날짜 내림차순 정렬
   const AGE_GROUPS = ["20대", "30대", "30대", "40대", "50대"];
+  const surnames = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권","황","안","송","전","홍","고","문","양","손","배","백","허","유","남","심","노","하","곽","성","차","주","우","구","민","류"];
+  const surWeights = [10,8,6,4,4,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+  const surTotal = surWeights.reduce((a,b)=>a+b,0);
+  const prefixes = ["rladk","ghkd","dkagh","tnals","wjdgh","ekdl","alswl","dhkdl","qkrgh","thsms","whdms","rlaqo","sksms","dnjsgh","ghkrl"];
+  const domainPool = ["naver.com","naver.com","naver.com","naver.com","gmail.com","gmail.com","gmail.com","gmail.com","kakao.com","daum.net","nate.com","hanmail.net","icloud.com","outlook.com","yahoo.co.kr"];
+
+  type ReviewItem = { key: string; date: string; star: number; text: string; meta: string };
+  const unified: ReviewItem[] = [];
+
+  // DB 후기
+  const dbPrefixes = ["rladk","ghkd","dkagh","tnals","wjdgh","ekdl","alswl","dhkdl","qkrgh","thsms"];
+  const dbDomains = ["naver.com","naver.com","gmail.com","gmail.com","kakao.com","daum.net","naver.com","gmail.com","nate.com","hanmail.net"];
+  dbReviews.forEach((dr, di) => {
+    const maskedName = dr.name ? `${dr.name.charAt(0)}OO` : "고OO";
+    const ageGroups = ["20대", "30대", "30대", "40대"];
+    const agePart = dr.age_group || ageGroups[di % ageGroups.length];
+    const genderPart = dr.gender === "male" ? "남성" : dr.gender === "female" ? "여성" : dr.gender ?? "";
+    const dbPrefix = dbPrefixes[di % dbPrefixes.length];
+    const dbNum = ((di * 43 + 17) % 90) + 10;
+    const dbDomain = dbDomains[di % dbDomains.length];
+    unified.push({
+      key: `db-${dr.id}`,
+      date: dr.created_at?.slice(0, 10).replace(/-/g, ".") ?? "",
+      star: dr.star,
+      text: dr.text,
+      meta: `— ${agePart} ${genderPart} ${maskedName} | ${dbPrefix}${dbNum}***@${dbDomain}`,
+    });
+  });
+
+  // 자동생성 + 정적 후기
+  for (let staticIdx = 0; staticIdx < totalStaticCount; staticIdx++) {
+    const gIdx = dbReviews.length + staticIdx;
+    const gender = gIdx % 2 === 0 ? "여성" : "남성";
+    const prefix = prefixes[gIdx % prefixes.length];
+    const num = ((gIdx * 37 + 13) % 90) + 10;
+    const domain = domainPool[gIdx % domainPool.length];
+    const maskedEmail = `${prefix}${num}***@${domain}`;
+    let surPick = (gIdx * 7 + 3) % surTotal;
+    let surName = surnames[0];
+    for (let si = 0; si < surWeights.length; si++) { if (surPick < surWeights[si]) { surName = surnames[si]; break; } surPick -= surWeights[si]; }
+    const namePart = `${surName}OO`;
+
+    let agePart: string, star: number, reviewText: string, dateStr: string;
+    if (staticIdx < extraCount) {
+      agePart = AGE_GROUPS[staticIdx % AGE_GROUPS.length];
+      star = getReviewStar(591 + staticIdx);
+      reviewText = getReviewText(591 + staticIdx, parseInt(agePart) || 30, star);
+      dateStr = extraDates[staticIdx] ?? "2026.07.05";
+    } else {
+      const rawIdx = staticIdx - extraCount;
+      const r = REVIEWS_RAW[rawIdx];
+      agePart = r.name.match(/\d+대/)?.[0] ?? "";
+      star = getReviewStar(gIdx);
+      reviewText = getReviewText(gIdx, parseInt(agePart) || 30, star);
+      dateStr = REVIEW_DATES[rawIdx] ?? "";
+    }
+    unified.push({
+      key: `s-${staticIdx}`,
+      date: dateStr,
+      star,
+      text: reviewText,
+      meta: `— ${agePart} ${gender} ${namePart} | ${maskedEmail}`,
+    });
+  }
+
+  // 날짜 내림차순 정렬
+  unified.sort((a, b) => b.date.localeCompare(a.date));
+
+  const totalPages = Math.ceil(unified.length / REVIEWS_PER_PAGE);
   const pageStart = page * REVIEWS_PER_PAGE;
-  const pageEnd = pageStart + REVIEWS_PER_PAGE;
+  const pageSlice = unified.slice(pageStart, pageStart + REVIEWS_PER_PAGE);
 
   const goPage = (p: number) => {
     setPage(p);
@@ -1419,7 +1487,7 @@ function ReviewSection() {
   return (
     <div ref={sectionRef} className="px-5 py-7" style={{ backgroundColor: CREAM }}>
       <h2 className="text-center text-[20px] font-black mb-1" style={{ color: GRAY1 }}>이미 수천 명이 만족했소</h2>
-      <p className="text-center text-[12px] mb-4" style={{ color: GRAY3 }}>총 {getTotalReviewCount() + dbReviews.length}개 후기 · 최신순</p>
+      <p className="text-center text-[12px] mb-4" style={{ color: GRAY3 }}>총 {unified.length}개 후기 · 최신순</p>
 
       {/* 페이지네이션 */}
       <div className="flex items-center justify-center gap-4 mb-4">
@@ -1441,77 +1509,21 @@ function ReviewSection() {
       </div>
 
       <div className="space-y-3 mb-5">
-        {Array.from({ length: Math.min(REVIEWS_PER_PAGE, allCount - pageStart) }).map((_, i) => {
-          const globalIdx = pageStart + i;
-          // DB 후기 우선
-          if (globalIdx < dbReviews.length) {
-            const dr = dbReviews[globalIdx];
-            const starArr = Array.from({ length: 5 });
-            return (
-              <div key={`db-${dr.id}`} className="rounded-2xl px-4 py-4"
-                style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex gap-0.5">
-                    {starArr.map((_, j) => (
-                      <span key={j} className="text-[13px]" style={{ color: j < dr.star ? "#f5a623" : GRAY4 }}>★</span>
-                    ))}
-                  </div>
-                  <span className="text-[11px]" style={{ color: GRAY3 }}>{dr.created_at?.slice(0, 10).replace(/-/g, ".")}</span>
-                </div>
-                <p className="text-[13px] leading-relaxed mb-1.5" style={{ color: GRAY2 }}>{dr.text}</p>
-                <p className="text-[11px]" style={{ color: GRAY3 }}>— {dr.name || "고객님"} {dr.gender || ""}</p>
+        {pageSlice.map((item) => (
+          <div key={item.key} className="rounded-2xl px-4 py-4"
+            style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <span key={j} className="text-[13px]" style={{ color: j < item.star ? "#f5a623" : GRAY4 }}>★</span>
+                ))}
               </div>
-            );
-          }
-          const staticIdx = globalIdx - dbReviews.length;
-          const gender = globalIdx % 2 === 0 ? "여성" : "남성";
-          const prefixes = ["rladk","ghkd","dkagh","tnals","wjdgh","ekdl","alswl","dhkdl","qkrgh","thsms","whdms","rlaqo","sksms","dnjsgh","ghkrl"];
-          const domainPool = ["naver.com","naver.com","naver.com","naver.com","gmail.com","gmail.com","gmail.com","gmail.com","kakao.com","daum.net","nate.com","hanmail.net","icloud.com","outlook.com","yahoo.co.kr"];
-          const prefix = prefixes[globalIdx % prefixes.length];
-          const num = ((globalIdx * 37 + 13) % 90) + 10;
-          const domain = domainPool[globalIdx % domainPool.length];
-          const maskedEmail = `${prefix}${num}***@${domain}`;
-          const surnames = ["김","이","박","최","정","강","조","윤","장","임","한","오","서","신","권","황","안","송","전","홍","고","문","양","손","배","백","허","유","남","심","노","하","곽","성","차","주","우","구","민","류"];
-          const surWeights = [10,8,6,4,4,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
-          const surTotal = surWeights.reduce((a,b)=>a+b,0);
-          let surPick = (globalIdx * 7 + 3) % surTotal;
-          let surName = surnames[0];
-          for (let si = 0; si < surWeights.length; si++) { if (surPick < surWeights[si]) { surName = surnames[si]; break; } surPick -= surWeights[si]; }
-          const namePart = `${surName}OO`;
-          // 새로 자동생성된 후기 (extraCount개) → 동적 생성
-          let agePart: string;
-          let star: number;
-          let reviewText: string;
-          let dateStr: string;
-          if (staticIdx < extraCount) {
-            agePart = AGE_GROUPS[staticIdx % AGE_GROUPS.length];
-            star = getReviewStar(591 + staticIdx);
-            reviewText = getReviewText(591 + staticIdx, parseInt(agePart) || 30, star);
-            dateStr = extraDates[staticIdx] ?? "2026.07.05";
-          } else {
-            const rawIdx = staticIdx - extraCount;
-            const r = REVIEWS_RAW[rawIdx];
-            agePart = r.name.match(/\d+대/)?.[0] ?? "";
-            star = getReviewStar(globalIdx);
-            reviewText = getReviewText(globalIdx, parseInt(agePart) || 30, star);
-            dateStr = REVIEW_DATES[rawIdx] ?? "";
-          }
-          return (
-            <div key={i} className="rounded-2xl px-4 py-4"
-              style={{ backgroundColor: WHITE, border: `1px solid ${GRAY4}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <span key={j} className="text-[13px]" style={{ color: j < star ? "#f5a623" : GRAY4 }}>★</span>
-                  ))}
-                </div>
-                <span className="text-[11px]" style={{ color: GRAY3 }}>{dateStr}</span>
-              </div>
-              <p className="text-[13px] leading-relaxed mb-1.5" style={{ color: GRAY2 }}>{reviewText}</p>
-              <p className="text-[11px]" style={{ color: GRAY3 }}>— {agePart} {gender} {namePart} | {maskedEmail}</p>
+              <span className="text-[11px]" style={{ color: GRAY3 }}>{item.date}</span>
             </div>
-          );
-        })}
+            <p className="text-[13px] leading-relaxed mb-1.5" style={{ color: GRAY2 }}>{item.text}</p>
+            <p className="text-[11px]" style={{ color: GRAY3 }}>{item.meta}</p>
+          </div>
+        ))}
       </div>
 
     </div>
