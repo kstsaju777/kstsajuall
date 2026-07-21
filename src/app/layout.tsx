@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: siteConfig.name,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     startupImage: ["/splash.png"],
   },
   openGraph: {
@@ -40,7 +40,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body suppressHydrationWarning className="bg-[#0a0a0a]">
+      <head>
+        <meta name="theme-color" content="#b40501" />
+      </head>
+      <body suppressHydrationWarning className="bg-[#b40501]">
         <div style={{ maxWidth: 430, margin: "0 auto", position: "relative" }}>
           {children}
         </div>
