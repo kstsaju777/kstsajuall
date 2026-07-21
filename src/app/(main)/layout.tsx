@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { SideDrawer } from "@/components/layout/SideDrawer";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { FooterLegal } from "@/components/layout/FooterLegal";
+import { NavTabs } from "@/components/layout/NavTabs";
+import { CategoryProvider } from "@/components/layout/CategoryContext";
 
 const ADMIN_EMAIL = "admin@hongyeondang.com";
 
@@ -14,14 +16,16 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const isAdmin = !!user && user.email === ADMIN_EMAIL;
 
   return (
-    <div className="mx-auto w-full max-w-[480px] min-h-screen shadow-2xl relative overflow-hidden flex flex-col" style={{ backgroundColor: "#711b20" }}>
-<div className="relative z-10 flex flex-col flex-1">
-        <SiteHeader isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+    <CategoryProvider>
+      <div className="mx-auto w-full max-w-[480px] min-h-screen shadow-2xl relative overflow-hidden flex flex-col" style={{ backgroundColor: "#711b20" }}>
+        <div className="relative z-10 flex flex-col flex-1">
+          <SiteHeader isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+        </div>
+        {isAdmin && <AdminOverlay />}
       </div>
-      {isAdmin && <AdminOverlay />}
-    </div>
+    </CategoryProvider>
   );
 }
 
@@ -41,6 +45,7 @@ function SiteHeader({ isLoggedIn, isAdmin }: { isLoggedIn: boolean; isAdmin: boo
           <SideDrawer isLoggedIn={isLoggedIn} />
         </div>
       </div>
+      {isAdmin && <NavTabs />}
     </header>
   );
 }
