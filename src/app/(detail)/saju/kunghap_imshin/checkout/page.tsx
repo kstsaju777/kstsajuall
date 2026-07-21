@@ -249,7 +249,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>임신궁합</span>
-                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 두 사람의 임신 궁합 이야기</p>
+                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>두 사람의 임신궁합 이야기</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-[11px]" style={{ color: DSTRIKE }}>
