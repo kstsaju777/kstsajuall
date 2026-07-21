@@ -425,20 +425,6 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 ? <div className={cardClass} style={{ ...cardStyle, cursor: "default" }}>{cardInner}</div>
                 : <Link href={href} className={cardClass} style={cardStyle}>{cardInner}</Link>
               }
-              {isAdmin && (
-                <button
-                  onClick={e => { e.stopPropagation(); toggleCard(product.id, active); }}
-                  style={{
-                    position: "absolute", top: 8, right: 8, zIndex: 10,
-                    padding: "4px 11px", borderRadius: 12, border: "none",
-                    fontSize: 11, fontWeight: 700, cursor: "pointer",
-                    background: active ? "#16a34a" : "#6b7280",
-                    color: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
-                  }}
-                >
-                  {active ? "✓ 공개" : "비공개"}
-                </button>
-              )}
             </div>
           );
         })}
