@@ -218,7 +218,7 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
   const imgSrc = card.thumbnail ?? card.image;
   const [imgErr, setImgErr] = useState(false);
   return (
-    <Link href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
+    <div className="block rounded-2xl overflow-hidden relative flex-shrink-0"
       style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" }}>
       {imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
@@ -227,6 +227,10 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
         <img src={imgSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
       )}
       <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
+      <div className="absolute inset-0 flex flex-col items-center justify-start" style={{ paddingTop: 16, gap: 3, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)" }}>
+        <p style={{ color: "#fff", fontWeight: 800, fontSize: 13 }}>🛠️ 열심히 개발중</p>
+        <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 11 }}>Coming Soon..</p>
+      </div>
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
         <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
           {card.tag && (
@@ -251,7 +255,7 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
         <p className="text-white font-bold leading-tight" style={{ fontSize: 13, marginBottom: 2 }}>{card.name}</p>
         <p className="leading-snug" style={{ fontSize: 9, color: "rgba(255,255,255,0.5)" }}>{card.shortDesc ?? card.desc}</p>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -4602,7 +4606,7 @@ function ReportPreviewInner() {
           {/* 표지 */}
           {/* 헤드라인 블록 */}
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
-            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>홍연이 그대에게 들려줄 이야기</p>
+            <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>인 트 로 · 서 론</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
               사주팔자란 무엇인가
             </h1>
@@ -4973,8 +4977,9 @@ function ReportPreviewInner() {
 
           {/* 맺음말 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`"자, 이제 ${name}${"님"}의\n서사가 담긴 책을 펼쳐보겠소?"`}
+              {`자, 이제 ${name}${"님"}의\n서사가 담긴 책을 펼쳐보겠소?`}
             </p>
           </div>
 
@@ -5005,9 +5010,7 @@ function ReportPreviewInner() {
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 체질</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                나는 어떤 체질로<br />태어났나
-              </h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 어떤 체질로 태어났나</h1>
             </div>
             {/* ── 커버 이미지 ── */}
             <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -5015,6 +5018,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_1/saju_health_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`${name.slice(1) || name}님의 사주를\n펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 건강의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name.slice(1) || name}님의 사주팔자요.`}</Quote>
 
             {/* 명식표 */}
@@ -5133,10 +5137,11 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 하단멘트 ── */}
-            <Quote>{`체질을 알았으니,\n이제, ${name.slice(1) || name}님 신체 어느 부위가\n약한지 알아보겠소.`}</Quote>
-
-            <div className="pb-10" />
-            <ChapterNav cur="1" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`체질을 알았으니,\n이제, ${name.slice(1) || name}님 신체 어느 부위가\n약한지 알아보겠소.`}</p>
+            </div>
+            <div style={{ background: PINK_PALE }}><ChapterNav cur="1" go={next} /></div>
           </>
         );
       })()}
@@ -5177,9 +5182,7 @@ function ReportPreviewInner() {
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 2 장 · 약점</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                내 사주에 약한<br />부위는 어디인가
-              </h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>내 사주에 약한 부위는 어디인가</h1>
             </div>
             {/* ── 커버 이미지 ── */}
             <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -5187,6 +5190,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_2/saju_health_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`오행의 균형이\n신체 건강과 이어지오.\n\n약한 곳을 알면\n미리 지킬 수 있소.`}</Quote>
 
             {/* ── 타고난 체질 유형 (ch1에서 이동) ── */}
@@ -5351,10 +5355,11 @@ function ReportPreviewInner() {
             })()}
 
             {/* ── ⑨ 하단멘트 ── */}
-            <Quote>{`약한 부위를 알았으니,\n이제 건강을 살릴\n생활방식과 개운법을 살펴보겠소.`}</Quote>
-
-            <div className="pb-10" />
-            <ChapterNav cur="2" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`약한 부위를 알았으니,\n이제 건강을 살릴\n생활방식과 개운법을 살펴보겠소.`}</p>
+            </div>
+            <div style={{ background: PINK_PALE }}><ChapterNav cur="2" go={next} /></div>
           </>
         );
       })()}
@@ -5379,9 +5384,7 @@ function ReportPreviewInner() {
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 생활방식과 개운법</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                건강을 살릴<br />생활방식과 개운법
-              </h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>건강을 살릴 생활방식과 개운법</h1>
             </div>
             {/* ── 커버 이미지 ── */}
             <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -5389,6 +5392,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_3/saju_health_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`몸에 맞는 음식과\n생활 방식이 따로 있소.\n\n사주가 알려주는\n최적의 루틴을 말해주겠소.`}</Quote>
 
             {/* ── ① 인트로 + 단락 1 합쳐서 하나의 단락 ── */}
@@ -5568,10 +5572,11 @@ function ReportPreviewInner() {
             })()}
 
             {/* ── ⑪ 하단멘트 ── */}
-            <Quote>{`생활방식과 개운법을 알았으니,\n이제 내 건강 흐름과\n조심해야 할 시기를 살펴보겠소.`}</Quote>
-
-            <div className="pb-10" />
-            <ChapterNav cur="3" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`생활방식과 개운법을 알았으니,\n이제 내 건강 흐름과\n조심해야 할 시기를 살펴보겠소.`}</p>
+            </div>
+            <div style={{ background: PINK_PALE }}><ChapterNav cur="3" go={next} /></div>
           </>
         );
       })()}
@@ -5595,9 +5600,7 @@ function ReportPreviewInner() {
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 흐름</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                건강 흐름과<br />조심해야 할 시기
-              </h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>내 건강 흐름과 조심해야 할 시기</h1>
             </div>
             {/* ── 커버 이미지 ── */}
             <div className="relative overflow-hidden" style={{ height: 320 }}>
@@ -5605,6 +5608,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_5/saju_health_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
             <Quote>{`건강의 물결도\n대운을 따라 흐르오.\n\n조심해야 할 시기를\n미리 알고 대비하시오.`}</Quote>
 
             {/* ── ① 인트로 + 콜아웃 ── */}
@@ -5654,10 +5658,11 @@ function ReportPreviewInner() {
             {hf.paragraphs?.[2] && <section className="px-6 pb-4"><P>{hf.paragraphs[2]}</P></section>}
 
             {/* ── ⑧ 하단멘트 ── */}
-            <Quote>{`이로써\n${name}님의 건강을\n모두 살펴보았소.\n\n마지막으로 그대에게\n전하고 싶은 말이 남아있소.`}</Quote>
-
-            <div className="pb-10" />
-            <ChapterNav cur="4" go={next} />
+            <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+              <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+              <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`이로써\n${name}님의 건강을\n모두 살펴보았소.\n\n마지막으로 그대에게\n전하고 싶은 말이 남아있소.`}</p>
+            </div>
+            <div style={{ background: PINK_PALE }}><ChapterNav cur="4" go={next} /></div>
           </>
         );
       })()}
@@ -5668,9 +5673,7 @@ function ReportPreviewInner() {
           <div style={{ filter: eventOpen ? "blur(5px)" : "none", pointerEvents: eventOpen ? "none" : "auto", transition: "filter 0.2s" }}>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                그대에게 남기는<br />홍연의 서신
-              </h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대에게 남기는 홍연의 서신</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 320 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
