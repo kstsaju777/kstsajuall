@@ -4,7 +4,6 @@ import { siteConfig, businessInfo } from "@/config/site";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth";
 import { NavTabs } from "@/components/layout/NavTabs";
-import { GoldDust } from "@/components/layout/GoldDust";
 import { SideDrawer } from "@/components/layout/SideDrawer";
 import { AdminOverlay } from "@/components/admin/AdminOverlay";
 import { FooterLegal } from "@/components/layout/FooterLegal";
@@ -18,8 +17,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="mx-auto w-full max-w-[480px] min-h-screen shadow-2xl relative overflow-hidden flex flex-col" style={{ backgroundColor: "#711b20" }}>
-      <GoldDust />
-      <div className="relative z-10 flex flex-col flex-1">
+<div className="relative z-10 flex flex-col flex-1">
         <SiteHeader isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
         <main className="flex-1">{children}</main>
         <SiteFooter />
