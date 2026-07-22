@@ -4116,12 +4116,16 @@ function HanjaDivider({ hanja, sub }: { hanja: string; sub: string }) {
 }
 
 // 풀블리드 일러스트 (표제 없는 삽화)
-function Illust({ src, h = 480 }: { src: string; h?: number }) {
+function Illust({ src, h = 480, noTopGrad, mt, children }: { src: string; h?: number; noTopGrad?: boolean; mt?: number; children?: React.ReactNode }) {
+  const grad = noTopGrad
+    ? `linear-gradient(to bottom, transparent 0%, transparent 65%, ${CREAM}55 80%, ${CREAM}bb 90%, ${CREAM} 100%)`
+    : `linear-gradient(to bottom, ${CREAM} 0%, ${CREAM}bb 10%, ${CREAM}55 20%, transparent 35%, transparent 65%, ${CREAM}55 80%, ${CREAM}bb 90%, ${CREAM} 100%)`;
   return (
-    <div className="relative w-full" style={{ background: PINK_PALE }}>
+    <div className="relative w-full" style={{ background: noTopGrad ? CREAM : PINK_PALE, marginTop: mt }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" className="w-full block" style={{ display: "block" }} />
-      <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${CREAM} 0%, ${CREAM}bb 10%, ${CREAM}55 20%, transparent 35%, transparent 65%, ${CREAM}55 80%, ${CREAM}bb 90%, ${CREAM} 100%)` }} />
+      <div className="absolute inset-0" style={{ background: grad }} />
+      {children}
     </div>
   );
 }
@@ -5212,14 +5216,23 @@ function ReportPreviewInner() {
                 wolji={report?.view?.pillars?.[2]?.ji ?? "子"}
               />
             )}
-            <div className="px-6 pt-4">
+            <div className="px-6 pt-4 pb-0">
               {c.wonguk.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
             </div>
           </section>
 
           {/* 오행 분석 + 도넛 */}
-          <Illust src="/media/report/total/total-1/total-1-2.jpg" h={360} />
-          <section className="px-6 pt-2 pb-4">
+          <Illust src="/media/report/total/total-1/total-1-2.jpg" h={360} noTopGrad mt={-24}>
+            <div className="absolute pointer-events-none" style={{ top: "16%", left: "69%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#2a1a1a", fontFamily: SERIF, lineHeight: 1.8 }}>
+                네개의 기둥은<br />
+                {name}님의 인생을 담고 있소.<br />
+                <br />
+                하나씩 살펴보겠소.
+              </p>
+            </div>
+          </Illust>
+          <section className="px-6 pt-14 pb-4">
             <Heading>네 기둥이 품은 인생의 흐름</Heading>
 
             {/* 네 기둥 인생시기 시각화 */}
