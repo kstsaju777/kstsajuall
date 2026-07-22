@@ -39,11 +39,12 @@ const createSchema = z.object({
   calendar: z.string().optional().default("양력"),
   gender: z.string().optional().default(""),
   email: z.string().optional().default(""),
+  concern: z.string().optional().default(""),
 });
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[]; ilganChar?: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[]; ilganChar?: string; concern?: string }) {
   const { system, user } = buildJaemulChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -135,7 +136,7 @@ async function createReport(body: unknown) {
   }
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { name, date, time, calendar, gender, email } = parsed.data;
+  const { name, date, time, calendar, gender, email, concern } = parsed.data;
 
   const ymd = parseDate(date);
   if (!ymd) return NextResponse.json({ error: "생년월일 형식 오류" }, { status: 400 });
@@ -194,7 +195,7 @@ async function createReport(body: unknown) {
 
         const { data: result, error: resultErr } = await service
           .from("saju_results")
-          .insert({ order_id: order.id, myeongsik: { view, name, birth, manseryeokText, gender: g } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
+          .insert({ order_id: order.id, myeongsik: { view, name, birth, manseryeokText, gender: g, concern: concern || "" } as never, interpretation_md: JSON.stringify({}), llm_provider: llm.provider, llm_model: llm.model })
           .select("id").single();
         if (resultErr || !result) return NextResponse.json({ error: "결과 저장 실패" }, { status: 500 });
 
@@ -274,6 +275,7 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
       seun: stored?.view?.seun ?? [],
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
+      concern: stored?.concern || undefined,
     });
     const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
     const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;
@@ -296,7 +298,7 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, content });
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern: stored?.concern ?? "", content });
 }
 
 // ── 이미지 재생성 ──

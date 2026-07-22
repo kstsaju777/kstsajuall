@@ -14,7 +14,7 @@ export const JAEMUL_CHAPTER_SECTIONS: Record<number, string[]> = {
   4: ["careerWealth", "jobFit", "splitType"],
   5: ["wealthPeak", "moneyTrap", "warningFlow"],
   6: ["wealthCare", "wealthAvoid", "wealthSummary"],
-  7: ["letter"],
+  7: ["letter", "concernAdvice"],
 };
 
 // ── 장 완성 여부 확인 ──
@@ -24,7 +24,9 @@ export function isJaemulChapterReady(
 ): boolean {
   if (!content) return false;
   const keys = JAEMUL_CHAPTER_SECTIONS[chapter] ?? [];
+  const OPTIONAL_SECTIONS = ["concernAdvice"];
   return keys.every((k) => {
+    if (OPTIONAL_SECTIONS.includes(k) && content[k] == null) return true;
     const val = content[k];
     if (!val || typeof val !== "object") return false;
     const v = val as Record<string, unknown>;
@@ -267,7 +269,15 @@ desc 작성 기준:
 재물사주 풀이를 마치며 홍연이 독자에게 쓰는 따뜻한 손편지.
 - paragraphs: 3~4개 단락. 각 단락 6~8문장.
 - 이 사람의 재물 기운, 강점, 주의할 점을 따뜻하게 갈무리하되 희망적인 메시지로 맺으시오.
-- 바로 본론으로 시작하여 따뜻한 마무리로 끝내시오.`,
+- 바로 본론으로 시작하여 따뜻한 마무리로 끝내시오.
+
+[concernAdvice 섹션 — 재물 고민에 대한 명리학적 조언]
+고민({고민})이 비어있거나 없으면 concernAdvice.paragraphs를 빈 배열([])로 출력하오. 고민이 있을 때만 아래 규칙으로 작성하오.
+
+- paragraphs[0] (5~6문장, 250자 이상): 고민의 핵심을 {이름1}님의 일간·오행·재성 구조와 연결해 풀이하오. "이 고민은 우연이 아니오"라는 뉘앙스로, 사주 속에서 이 재물 고민이 왜 생기는지 명리학적 근거와 함께 설명하오.
+- paragraphs[1] (5~6문장, 250자 이상): 현재 대운·세운 흐름이 이 고민에 어떤 영향을 주는지 분석하오. 언제쯤 상황이 바뀌거나 재물의 돌파구가 오는지 구체적 시기와 함께 짚어주오.
+- paragraphs[2] (4~5문장, 200자 이상): 지금 당장 실천할 수 있는 명리학적 조언과 마음가짐을 전하오. 홍연의 따뜻하고 단호한 말투로 마무리하오.
+총 글자수: 650자 이상. 홍연 말투(~이오/~하오/~겠소). 점수·수치 언급 금지.`,
 };
 
 // ── 장별 JSON 스키마 ──
@@ -430,6 +440,13 @@ const JAEMUL_CH_SCHEMA: Record<number, string> = {
   7: `{
   "letter": {
     "paragraphs": ["단락1 (6~8문장, 각 단락 최소 150자 이상)", "단락2 (6~8문장, 각 단락 최소 150자 이상)", "단락3 (6~8문장, 각 단락 최소 150자 이상)", "단락4 (6~8문장, 따뜻한 마무리, 최소 150자 이상)"]
+  },
+  "concernAdvice": {
+    "paragraphs": [
+      "고민 + 일간·오행·재성 구조 연결 (5~6문장, 250자 이상)",
+      "대운·세운 흐름 분석 + 재물 돌파구 시기 (5~6문장, 250자 이상)",
+      "실천 조언 + 마무리 (4~5문장, 200자 이상)"
+    ]
   }
 }`,
 };
@@ -445,12 +462,16 @@ export function buildJaemulChapterPrompt(
     birthYear?: number;
     seun?: { label: string; gz: string; active?: boolean }[];
     ilganChar?: string;
+    concern?: string;
   }
 ): { system: string; user: string } {
   const theme = JAEMUL_CH_THEME[chapter] ?? `[제${chapter}장]`;
-  const guide = JAEMUL_CH_GUIDE[chapter] ?? "";
-  const schema = JAEMUL_CH_SCHEMA[chapter] ?? "{}";
   const firstName = input.name ? (input.name.slice(1) || input.name) : "";
+  const rawGuide = JAEMUL_CH_GUIDE[chapter] ?? "";
+  const guide = rawGuide
+    .replace(/\{고민\}/g, input.concern?.trim() ?? "")
+    .replace(/\{이름1\}/g, firstName);
+  const schema = JAEMUL_CH_SCHEMA[chapter] ?? "{}";
   const honor = firstName ? `${firstName}님` : "그대";
   const currentYear = new Date().getFullYear();
 

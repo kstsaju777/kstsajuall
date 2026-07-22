@@ -4117,7 +4117,7 @@ function ReportPreviewInner() {
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
   type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null } | null>(null);
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; concern?: string } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -4138,7 +4138,7 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/jaemul-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null }))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, concern: d.concern ?? "" }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -4224,6 +4224,7 @@ function ReportPreviewInner() {
 
 
   const name = report?.name?.trim() || nameParam.trim() || "고객";
+  const concern = report?.concern || "";
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
@@ -5561,6 +5562,29 @@ function ReportPreviewInner() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <section className="px-6 pt-10 pb-8">
+              {/* 고민 조언 파트 — 고민이 있고 concernAdvice가 생성된 경우만 표시 */}
+              {concern && (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs && ((jc.concernAdvice as { paragraphs?: string[] }).paragraphs ?? []).length > 0 && (
+                <div className="mb-8">
+                  <p className="text-[18px] font-black mb-5" style={{ color: INK }}>{(name.slice(1) || name)}님의 고민에 대한 조언</p>
+                  {/* 고민 인용구 */}
+                  <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${MAROON}09`, borderLeft: `3px solid ${MAROON}55` }}>
+                    <p className="text-[11px] font-bold mb-1" style={{ color: MAROON, opacity: 0.7 }}>남겨주신 고민</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{concern}&rdquo;</p>
+                  </div>
+                  {/* 편지형 박스 */}
+                  <div className="rounded-2xl px-5 pt-6 pb-4 mb-2" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                    <div className="flex justify-center mb-4">
+                      <span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span>
+                    </div>
+                    {((jc.concernAdvice as { paragraphs?: string[] }).paragraphs ?? []).map((p, i) => (
+                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                    ))}
+                  </div>
+                  {/* 구분선 */}
+                  <div className="mt-8 mb-8" style={{ height: 1, background: `${INK}12` }} />
+                </div>
+              )}
+              <p className="text-[18px] font-black mb-5" style={{ color: INK }}>홍연이 드리는 마지막 서신</p>
               {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
                 <P key={i}>{p}</P>
               ))}
