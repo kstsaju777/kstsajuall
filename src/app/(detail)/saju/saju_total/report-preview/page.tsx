@@ -2902,7 +2902,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "7": "제7장 · 내 건강과 약한 곳은 어디인가",
   "8": "제8장 · 내 인생은 어떻게 흐르는가",
   "9": "제9장 · 나는 어떻게 운을 바꿀 수 있나",
-  "10": "마무리 · 그대에게 남기는 홍연의 서신",
+  "10": "마무리 · 홍연이 드리는 조언과 서신",
 };
 
 // A안 읽기 순서 (장수와 일치하므로 1~16 순차)
@@ -3952,7 +3952,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제7장", chip: "건강", title: "내 건강과 약한 곳은 어디인가", no: "7" },
   { disp: "제8장", chip: "흐름", title: "내 인생은 어떻게 흐르는가", no: "8" },
   { disp: "제9장", chip: "개운", title: "나는 어떻게 운을 바꿀 수 있나", no: "9" },
-  { disp: "마무리", chip: "결론", title: "그대에게 남기는 홍연의 서신", no: "10" },
+  { disp: "마무리", chip: "결론", title: "홍연이 드리는 조언과 서신", no: "10" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -4545,7 +4545,7 @@ function ReportPreviewInner() {
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
   type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null } | null>(null);
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; concern?: string } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -4566,7 +4566,7 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/saju_total-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null }))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, concern: d.concern ?? "" }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -4671,6 +4671,7 @@ function ReportPreviewInner() {
 
 
   const name = report?.name?.trim() || nameParam.trim() || "고객";
+  const concern = report?.concern || "";
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
@@ -6361,17 +6362,6 @@ function ReportPreviewInner() {
             ))}
           </section>
 
-          {/* 이달 개운 타이밍 */}
-          <section className="px-6 pt-6 pb-2">
-            <Heading>이달, 개운 에너지가 모이는 때</Heading>
-            {c.weekFlow.intro && <P>{c.weekFlow.intro}</P>}
-            {c.weekFlow.callout && (
-              <div className="my-4 px-4 py-3 rounded-xl" style={{ background: `${MAROON}07`, borderLeft: `3px solid ${MAROON}` }}>
-                <p className="text-[14px] leading-relaxed font-semibold" style={{ color: MAROON, fontFamily: SERIF }}>{c.weekFlow.callout}</p>
-              </div>
-            )}
-            {c.weekFlow.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
-          </section>
 
           {/* 삽화 */}
           <Illust src="/media/report/total/total-14/total-14-1.jpg" h={400} />
@@ -6400,7 +6390,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>맺음 · 결론</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              그대에게 남기는 홍연의 서신
+              홍연이 드리는 조언과 서신
             </h1>
           </div>
           {/* 커버 이미지 */}
@@ -6412,6 +6402,29 @@ function ReportPreviewInner() {
 
           {/* 편지 본문 */}
           <section className="px-7 pt-8 pb-2">
+            {/* 고민 조언 파트 — 고민이 있고 concernAdvice가 생성된 경우만 표시 */}
+            {concern && c.concernAdvice?.paragraphs && c.concernAdvice.paragraphs.length > 0 && (
+              <div className="mb-8">
+                <Heading>{(name.slice(1) || name)}님의 고민에 대한 조언</Heading>
+                {/* 고민 인용구 */}
+                <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${MAROON}09`, borderLeft: `3px solid ${MAROON}55` }}>
+                  <p className="text-[11px] font-bold mb-1" style={{ color: MAROON, opacity: 0.7 }}>남겨주신 고민</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{concern}&rdquo;</p>
+                </div>
+                {/* 편지형 박스 */}
+                <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                  <div className="flex justify-center mb-4">
+                    <span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span>
+                  </div>
+                  {c.concernAdvice.paragraphs.map((p, i) => (
+                    <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                  ))}
+                </div>
+                {/* 구분선 */}
+                <div className="mt-8 mb-8" style={{ height: 1, background: `${INK}12` }} />
+              </div>
+            )}
+            <Heading>홍연이 드리는 마지막 서신</Heading>
             {c.letter.paragraphs.map((p, i) => (
               <P key={i}>{p}</P>
             ))}

@@ -51,8 +51,8 @@ const chapterSchema = z.object({
 });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string }) {
-  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult });
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string; daeunNote?: string }) {
+  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult, daeunNote: input.daeunNote });
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
@@ -350,6 +350,33 @@ async function generateChapter(body: unknown) {
       } catch { /* 복원 실패 시 빈 pillars로 진행 */ }
     }
 
+    // 현재 대운 코드 계산 (AI 오판 방지)
+    let daeunNote: string | undefined;
+    const daeunList: { label: string; gz: string; active?: boolean }[] = stored?.view?.daeun ?? [];
+    if (daeunList.length > 0) {
+      const currentYear = new Date().getFullYear();
+      const birthYearNum = birthYear || currentYear;
+      const currentAge = currentYear - birthYearNum;
+      // active 플래그 우선, 없으면 나이로 직접 계산
+      let currentDaeun = daeunList.find(d => d.active);
+      if (!currentDaeun) {
+        // 시작나이(label) 기준으로 현재 나이가 속하는 대운 찾기
+        const sorted = [...daeunList].sort((a, b) => Number(a.label) - Number(b.label));
+        for (let i = sorted.length - 1; i >= 0; i--) {
+          if (currentAge >= Number(sorted[i].label)) { currentDaeun = sorted[i]; break; }
+        }
+      }
+      if (currentDaeun) {
+        const idx = daeunList.findIndex(d => d.gz === currentDaeun!.gz && d.label === currentDaeun!.label);
+        const startAge = Number(currentDaeun.label);
+        const endAge = daeunList[idx + 1] ? Number(daeunList[idx + 1].label) - 1 : startAge + 9;
+        const startYear = birthYearNum + startAge;
+        const endYear = birthYearNum + endAge;
+        const yearsIn = currentYear - startYear;
+        daeunNote = `[현재 대운 고정값 — 반드시 이 값만 사용, 독자적 재산출 절대 금지]\n현재 대운: ${currentDaeun.gz} (${startAge}세~${endAge}세, ${startYear}년~${endYear}년)\n현재 나이: ${currentAge}세 (${currentYear}년 기준) — 이 대운 시작 후 ${yearsIn}년차\n※ 이 대운을 "막바지", "시작", "중반" 등으로 표현할 때 반드시 위 ${yearsIn}년차 정보를 기준으로 판단하오.`;
+      }
+    }
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.["{이름1}"] || stored?.name || "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -362,6 +389,7 @@ async function generateChapter(body: unknown) {
       gisinEl,
       deungResult: deungResult ?? undefined,
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
+      daeunNote,
     });
 
     // 2장 생성 완료 시 용신 오행을 myeongsik에 즉시 저장 (이후 모든 장에서 참조)
@@ -395,7 +423,7 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.["{이름1}"] || stored?.name || "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, content });
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.["{이름1}"] || stored?.name || "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern: stored?.["{고민}"] || stored?.concern || "", content });
 }
 
 // ── 이미지 재생성 ──
