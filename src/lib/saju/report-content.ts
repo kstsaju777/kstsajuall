@@ -428,44 +428,19 @@ const CH_SCHEMA: Record<number, string> = {
     "intro": "절대 쓰지 마오 — 빈 문자열로",
     "callout": "절대 쓰지 마오 — 빈 문자열로",
     "investTypes": [
-      {
-        "category": "저축",
-        "icon": "🏦",
-        "score": "【필수】위 투자유형별 적합도 점수표의 저축 점수를 그대로 입력",
-        "products": ["CMA", "적금", "예금"],
-        "tip": "이 사주에 저축이 맞는 이유 한 줄"
-      },
-      {
-        "category": "주식",
-        "icon": "📈",
-        "score": "【필수】위 점수표의 주식 점수를 그대로 입력",
-        "products": ["미장ETF", "국내성장주", "배당주"],
-        "tip": "주식 궁합 한 줄"
-      },
-      {
-        "category": "코인",
-        "icon": "🪙",
-        "score": "【필수】위 점수표의 코인 점수를 그대로 입력",
-        "products": ["비트코인", "이더리움"],
-        "tip": "코인 궁합 한 줄"
-      },
-      {
-        "category": "현물",
-        "icon": "🥇",
-        "score": "【필수】위 점수표의 현물 점수를 그대로 입력",
-        "products": ["금", "달러", "은"],
-        "tip": "현물 궁합 한 줄"
-      },
-      {
-        "category": "부동산",
-        "icon": "🏠",
-        "score": "【필수】위 점수표의 부동산 점수를 그대로 입력",
-        "products": ["아파트", "리츠", "경매"],
-        "tip": "부동산 궁합 한 줄"
-      }
+      { "category": "저축", "icon": "🏦", "score": "【필수】점수표의 저축 점수 그대로", "products": ["CMA", "적금", "예금"], "tip": "한 줄" },
+      { "category": "주식", "icon": "📈", "score": "【필수】점수표의 주식 점수 그대로", "products": ["성장주", "배당주", "테마주"], "tip": "한 줄" },
+      { "category": "ETF", "icon": "📊", "score": "【필수】점수표의 ETF 점수 그대로", "products": ["미국ETF", "국내ETF", "섹터ETF"], "tip": "한 줄" },
+      { "category": "채권", "icon": "📜", "score": "【필수】점수표의 채권 점수 그대로", "products": ["국채", "회사채", "채권펀드"], "tip": "한 줄" },
+      { "category": "코인", "icon": "🪙", "score": "【필수】점수표의 코인 점수 그대로", "products": ["비트코인", "이더리움", "알트코인"], "tip": "한 줄" },
+      { "category": "현물", "icon": "🥇", "score": "【필수】점수표의 현물 점수 그대로", "products": ["달러", "은", "원자재"], "tip": "한 줄" },
+      { "category": "금", "icon": "✨", "score": "【필수】점수표의 금 점수 그대로", "products": ["금현물", "금ETF", "금통장"], "tip": "한 줄" },
+      { "category": "부동산", "icon": "🏠", "score": "【필수】점수표의 부동산 점수 그대로", "products": ["아파트", "리츠", "경매"], "tip": "한 줄" },
+      { "category": "스타트업", "icon": "🚀", "score": "【필수】점수표의 스타트업투자 점수 그대로", "products": ["엔젤투자", "크라우드펀딩", "VC"], "tip": "한 줄" },
+      { "category": "P2P대출", "icon": "🤝", "score": "【필수】점수표의 P2P대출 점수 그대로", "products": ["P2P플랫폼", "개인대출채권"], "tip": "한 줄" }
     ],
     "paragraphs": [
-      "【필수 — 500자 내외 하나의 흐름으로】 위 investTypes의 score 순서를 기반으로 어떤 투자가 잘 맞고, 어떤 투자가 위험한지 구체적으로 서술하오. 십성·오행 명칭은 사용하지 마오. 이 사람의 기질·성향·삶의 태도로 풀어서 설명하오. 잘 맞는 투자 유형은 구체적 접근법(예: 매달 일정액 적립, 달러 분할 매수)을 담으오. 위험한 유형은 왜 손실로 이어지기 쉬운지 경고하오. 홍연 말투(~이오/~하오/~겠소), 500자 내외."
+      "【필수 — 800자 이상, 하나의 흐름으로】 위 investTypes의 score를 반드시 참고하여 아래 순서로 서술하오.\n①점수 상위 1~2개 투자 유형이 왜 이 사주의 기질과 잘 맞는지, 구체적인 접근법(예: 분할 매수, 장기 보유, 월 적립 등)과 함께 설명하오.\n②점수 중간(45~65점) 유형에 대해서는 조건부로 어떻게 활용하면 좋은지 한두 문장 언급하오.\n③점수 하위 1~2개 유형은 왜 이 사람의 기질과 맞지 않는지, 어떤 상황에서 손실로 이어지기 쉬운지 구체적으로 경고하오.\n십성·오행 명칭은 사용하지 마오. 이 사람의 기질·성향·삶의 태도로 풀어서 설명하오. 홍연 말투(~이오/~하오/~겠소), 800자 이상."
     ]
   }
 }`,
@@ -1449,11 +1424,16 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     const investScores = {
       저축: clamp(50 + inseong*10 + gwanseong*8 - gc(["겁재"])*8 - gc(["상관"])*8, 20, 95),
       주식: clamp(50 + jaeseong*10 + gc(["식신"])*8 - inseong*8 + gc(["상관"])*4, 20, 90),
+      ETF: clamp(50 + inseong*8 + gwanseong*6 + jaeseong*5 - gc(["겁재"])*5, 25, 90),
+      채권: clamp(45 + inseong*10 + gwanseong*8 - siksang*6 - bigeop*4, 20, 88),
       코인: clamp(30 + gc(["겁재"])*12 + gc(["상관"])*10 - inseong*10 - gwanseong*8, 5, 75),
       현물: clamp(50 + elCount["금"]*8 + elCount["토"]*5 + inseong*6, 25, 90),
+      금: clamp(48 + elCount["금"]*10 + inseong*7 + gwanseong*5 - gc(["겁재"])*5, 20, 90),
       부동산: clamp(50 + elCount["토"]*10 + gc(["정재"])*8 + gwanseong*5 - bigeop*4, 20, 90),
+      스타트업투자: clamp(30 + bigeop*8 + siksang*10 - inseong*8 - gwanseong*6, 5, 75),
+      P2P대출: clamp(40 + jaeseong*8 + gc(["식신"])*6 - gc(["겁재"])*6 - gc(["상관"])*5, 15, 80),
     };
-    wealthTable += `\n[투자유형별 적합도 점수 — invest.investTypes score 필드에 반드시 이 값을 그대로 사용하오. 임의 변경 절대 금지]\n저축: ${investScores["저축"]}점\n주식: ${investScores["주식"]}점\n코인: ${investScores["코인"]}점\n현물: ${investScores["현물"]}점\n부동산: ${investScores["부동산"]}점\n`;
+    wealthTable += `\n[투자유형별 적합도 점수 — invest.investTypes score 필드에 반드시 이 값을 그대로 사용하오. 임의 변경 절대 금지]\n저축: ${investScores["저축"]}점\n주식: ${investScores["주식"]}점\nETF: ${investScores["ETF"]}점\n채권: ${investScores["채권"]}점\n코인: ${investScores["코인"]}점\n현물: ${investScores["현물"]}점\n금: ${investScores["금"]}점\n부동산: ${investScores["부동산"]}점\n스타트업투자: ${investScores["스타트업투자"]}점\nP2P대출: ${investScores["P2P대출"]}점\n`;
   }
 
   // ── 7장: 건강운 점수표 (chapter 7 전용) ──
@@ -1555,10 +1535,13 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     : "";
 
   // 새 형식(CH_GUIDE가 {명식표1}로 시작): CH_GUIDE가 전체 프롬프트 역할
+  const tenseReminder = `\n⚠️ 최종 확인: chonyeongi(초년기)를 제외한 모든 섹션의 종결어미는 반드시 현재형(~하오, ~이오, ~겠소)만 사용하오. ~하였소, ~했소, ~되었소, ~이었소 등 과거형 어미가 단 하나라도 있으면 오류이오.\n`;
+  const investReminder = chapter === 5 ? `\n⚠️ invest.paragraphs[0]은 반드시 800자 이상으로 작성하오. 상위 투자 유형 2개의 구체적 접근법, 중간 유형 활용법, 하위 유형 경고를 모두 담아야 하오. 400자 미만은 오류이오.\n` : "";
+
   const PROMPT_TEMPLATE = isNewStyleGuide
     ? `{장가이드}${yongsinBlock}${concernBlock}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
-
+${tenseReminder}${investReminder}
 {스키마}`
     : `[대상] {호칭1} ({성별1}) — 풀이 전체에서 이름을 부를 때 반드시 '{호칭1}'로만 호칭하오. '님' 호칭은 절대 사용하지 마오.
 
@@ -1568,7 +1551,7 @@ ${ageGuide}${deungTable}${ohaengTable}${wealthTable}${healthTable}${guiinTable}
 위 명식을 근거로, {호칭1}의 {장주제} 에 대한 결과지 콘텐츠를 작성하세요.
 ${vars.장가이드 ? `\n[이 장에서 특히 신경 쓸 것]\n{장가이드}\n` : ""}${yongsinBlock}${concernBlock}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
-
+${tenseReminder}${investReminder}
 {스키마}`;
 
   const user = PROMPT_TEMPLATE.replace(/\{([^}]+)\}/g, (_, key) => vars[key] ?? `{${key}}`);

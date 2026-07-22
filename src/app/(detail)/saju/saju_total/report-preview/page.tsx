@@ -998,7 +998,7 @@ function WealthBars({ title, sub, bars }: { title: string; sub: string; bars: { 
 function HealthLineChart({ view }: { view: MyeongsikView | null }) {
   const TARGET_YEARS = [2024,2025,2026,2027,2028,2029,2030,2031,2032,2033];
   const SIPSEONG_SCORE: Record<string, number> = {
-    인성:80, 정인:82, 편인:78,
+    인성:82, 정인:84, 편인:80,
     비겁:70, 비견:72, 겁재:65,
     식상:50, 식신:52, 상관:48,
     재성:35, 정재:37, 편재:32,
@@ -1023,27 +1023,28 @@ function HealthLineChart({ view }: { view: MyeongsikView | null }) {
   const baseIdx = GANJIS.indexOf("甲辰");
   TARGET_YEARS.forEach(y => { if (!seunMap[y]) seunMap[y] = GANJIS[(baseIdx + (y - 2024)) % 60]; });
 
-  // 점수 50 기준으로 위아래 정규화 → -1 ~ +1
-  const raw = TARGET_YEARS.map(y => {
+  // 절대 점수 15~95 (healthTable과 동일)
+  const scores = TARGET_YEARS.map(y => {
     const gz = seunMap[y] ?? "";
     const sEl = STEM_EL[gz[0]]; const bEl = BRANCH_EL[gz[1]];
     const sS = sEl ? (SIPSEONG_SCORE[toSip(ilEl, sEl)] ?? 50) : 50;
     const bS = bEl ? (SIPSEONG_SCORE[toSip(ilEl, bEl)] ?? 50) : 50;
-    return Math.round(sS * 0.6 + bS * 0.4);
+    return Math.min(95, Math.max(15, Math.round(sS * 0.6 + bS * 0.4)));
   });
-  const mid = (Math.max(...raw) + Math.min(...raw)) / 2;
-  const amp = (Math.max(...raw) - Math.min(...raw)) / 2 || 1;
-  const normalized = raw.map(v => (v - mid) / amp); // -1 ~ +1
 
-  const W = 320, H = 180, padX = 24, padTop = 24, padBot = 56;
+  const W = 320, H = 190, padX = 24, padTop = 24, padBot = 62;
+  const hBoxW = 24, hBoxH = 28;
+  const hBoxY = H - padBot + 18;
   const innerH = H - padTop - padBot;
-  const zeroY = padTop + innerH / 2;
+  const SCORE_MIN = 15, SCORE_MAX = 95;
+  const THRESHOLD = 50; // 양호/주의 기준
   const n = TARGET_YEARS.length;
   const cx = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
-  const cy = (v: number) => zeroY - v * (innerH / 2 - 4);
+  const cy = (v: number) => padTop + innerH * (1 - (v - SCORE_MIN) / (SCORE_MAX - SCORE_MIN));
+  const zeroY = cy(THRESHOLD);
 
   // 스무스 베지어 경로
-  const coords = normalized.map((v, i) => ({ x: cx(i), y: cy(v) }));
+  const coords = scores.map((v, i) => ({ x: cx(i), y: cy(v) }));
   let path = `M ${coords[0].x} ${coords[0].y}`;
   for (let i = 1; i < coords.length; i++) {
     const prev = coords[i - 1], cur = coords[i];
@@ -1055,8 +1056,8 @@ function HealthLineChart({ view }: { view: MyeongsikView | null }) {
   // 아래 영역(주의) 클립 경로
   const botArea = path + ` L ${coords[n-1].x} ${zeroY} L ${coords[0].x} ${zeroY} Z`;
 
-  const worstI = normalized.reduce((m, v, i) => v < normalized[m] ? i : m, 0);
-  const bestI  = normalized.reduce((m, v, i) => v > normalized[m] ? i : m, 0);
+  const worstI = scores.reduce((m, v, i) => v < scores[m] ? i : m, 0);
+  const bestI  = scores.reduce((m, v, i) => v > scores[m] ? i : m, 0);
 
   return (
     <div className="rounded-2xl p-4 mt-2 mb-4" style={{ background: WHITE, border:`1px solid ${INK}12`, boxShadow:"0 2px 12px rgba(0,0,0,0.04)" }}>
@@ -1074,10 +1075,10 @@ function HealthLineChart({ view }: { view: MyeongsikView | null }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow:"visible" }}>
         <defs>
           <clipPath id="hClipTop">
-            <rect x={padX} y={padTop} width={W - padX * 2} height={innerH / 2} />
+            <rect x={padX} y={padTop} width={W - padX * 2} height={zeroY - padTop} />
           </clipPath>
           <clipPath id="hClipBot">
-            <rect x={padX} y={zeroY} width={W - padX * 2} height={innerH / 2} />
+            <rect x={padX} y={zeroY} width={W - padX * 2} height={H - padBot - zeroY} />
           </clipPath>
           <linearGradient id="hGradTop" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#5b9e6a" stopOpacity="0.35" />
@@ -1089,9 +1090,6 @@ function HealthLineChart({ view }: { view: MyeongsikView | null }) {
           </linearGradient>
         </defs>
 
-        {/* 가로 가이드선 */}
-        <line x1={padX} x2={W-padX} y1={padTop} y2={padTop} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
-        <line x1={padX} x2={W-padX} y1={H-padBot} y2={H-padBot} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
 
         {/* 0 기준선 */}
         <line x1={padX} x2={W-padX} y1={zeroY} y2={zeroY} stroke={`${INK}30`} strokeWidth="1.5" />
@@ -1111,14 +1109,16 @@ function HealthLineChart({ view }: { view: MyeongsikView | null }) {
         {/* 점 + 라벨 */}
         {coords.map((c, i) => {
           const isWorst = i === worstI, isBest = i === bestI;
-          const dotColor = normalized[i] >= 0 ? "#5b9e6a" : "#E24B4A";
+          const dotColor = scores[i] >= THRESHOLD ? "#5b9e6a" : "#E24B4A";
           return (
             <g key={i}>
               <circle cx={c.x} cy={c.y} r={isWorst || isBest ? 5 : 3} fill={isWorst ? "#E24B4A" : isBest ? "#5b9e6a" : WHITE} stroke={dotColor} strokeWidth="2" />
               {isWorst && <text x={c.x} y={c.y + 14} fontSize="8" fill="#E24B4A" textAnchor="middle" fontWeight="700">주의</text>}
               {isBest  && <text x={c.x} y={c.y - 8}  fontSize="8" fill="#5b9e6a" textAnchor="middle" fontWeight="700">최고</text>}
-              <text x={c.x} y={H - 26} fontSize="11" fill={INK_SOFT} textAnchor="middle">{String(TARGET_YEARS[i]).slice(2)}년</text>
-              <text x={c.x} y={H - 13} fontSize="10" fill={MUTE} textAnchor="middle">{seunMap[TARGET_YEARS[i]]}</text>
+              <line x1={c.x} y1={c.y + 5} x2={c.x} y2={hBoxY - 3} stroke={`${dotColor}88`} strokeWidth="1" strokeDasharray="2,2" />
+              <rect x={c.x - hBoxW / 2} y={hBoxY} width={hBoxW} height={hBoxH} rx={4} ry={4} fill="none" stroke={`${dotColor}55`} strokeWidth="0.8" />
+              <text x={c.x} y={hBoxY + 11} fontSize="12" fontWeight="700" fill={INK_SOFT} textAnchor="middle">{String(TARGET_YEARS[i]).slice(2)}</text>
+              <text x={c.x} y={hBoxY + 24} fontSize="9" fontWeight="600" fill={INK_SOFT} textAnchor="middle">{seunMap[TARGET_YEARS[i]]}</text>
             </g>
           );
         })}
@@ -1172,7 +1172,7 @@ function WealthLineChart({ view }: { view: MyeongsikView | null }) {
     return { year: y, gz, score: Math.min(95, Math.max(40, raw)) };
   });
 
-  const W = 320, H = 160, padX = 20, padTop = 20, padBot = 30;
+  const W = 320, H = 190, padX = 20, padTop = 20, padBot = 62;
   const n = data.length;
   const minS = Math.min(...data.map(d => d.score));
   const maxS = Math.max(...data.map(d => d.score));
@@ -1182,6 +1182,7 @@ function WealthLineChart({ view }: { view: MyeongsikView | null }) {
   const pts = data.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
   const area = `${x(0)},${y(minS - range * 0.1)} ${pts} ${x(n-1)},${y(minS - range * 0.1)}`;
   const peakI = data.reduce((m, d, i) => (d.score > data[m].score ? i : m), 0);
+  const boxW = 24, boxH = 28, boxGap = 4;
 
   return (
     <div className="rounded-2xl p-4 mt-2 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
@@ -1192,19 +1193,25 @@ function WealthLineChart({ view }: { view: MyeongsikView | null }) {
             <stop offset="100%" stopColor={GOLD} stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        {[0,1,2,3].map(i => {
-          const yy = padTop + ((H - padTop - padBot) * i) / 3;
-          return <line key={i} x1={padX} x2={W - padX} y1={yy} y2={yy} stroke={`${INK}0d`} strokeWidth="1" />;
-        })}
         <polygon points={area} fill="url(#wealthArea)" />
         <polyline points={pts} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        {data.map((d, i) => (
-          <g key={i}>
-            <circle cx={x(i)} cy={y(d.score)} r={3} fill={WHITE} stroke={GOLD} strokeWidth="2" />
-            <text x={x(i)} y={H - 12} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
-            <text x={x(i)} y={H - 3} fontSize="7" fill={MUTE} textAnchor="middle">{d.gz}</text>
-          </g>
-        ))}
+        {data.map((d, i) => {
+          const cx = x(i);
+          const boxY = H - padBot + 18;
+          return (
+            <g key={i}>
+              <circle cx={cx} cy={y(d.score)} r={3} fill={WHITE} stroke={GOLD} strokeWidth="2" />
+              {/* 점선 연결선 */}
+              <line x1={cx} y1={y(d.score) + 5} x2={cx} y2={boxY - 3} stroke={`${GOLD}55`} strokeWidth="1" strokeDasharray="2,2" />
+              {/* 라운딩 사각형 */}
+              <rect x={cx - boxW / 2} y={boxY} width={boxW} height={boxH} rx={4} ry={4} fill="none" stroke={`${GOLD}55`} strokeWidth="0.8" />
+              {/* 년도 (뒤 두 자리) */}
+              <text x={cx} y={boxY + 11} fontSize="12" fontWeight="700" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
+              {/* 간지 */}
+              <text x={cx} y={boxY + 24} fontSize="9" fontWeight="600" fill={INK_SOFT} textAnchor="middle">{d.gz}</text>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
@@ -1297,49 +1304,55 @@ function JobClusters({ clusters, name }: { clusters: JobCluster[]; name?: string
 type InvestType = { category: string; icon: string; score: number; products: string[]; tip: string };
 function InvestTypeCards({ types }: { types: InvestType[] }) {
   if (!types?.length) return null;
-  const BAR_MAX_H = 110;
-  const scoreColor = (s: number) => s >= 70 ? "#16a34a" : s >= 45 ? "#f59e0b" : "#e53935";
   const scoreLabel = (s: number) => s >= 80 ? "최적" : s >= 65 ? "잘 맞음" : s >= 45 ? "보통" : s >= 25 ? "주의" : "비추천";
   const scores = types.map(t => Math.min(100, Math.max(0, Number(t.score) || 0)));
   const maxScore = Math.max(...scores, 1);
+  const sorted = [...types.map((t, i) => ({ ...t, sc: scores[i] }))].sort((a, b) => b.sc - a.sc);
   return (
-    <div className="mb-4 rounded-2xl px-4 pt-5 pb-4" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
-      {/* 바 차트 영역 */}
-      <div className="flex items-end justify-between gap-2" style={{ height: BAR_MAX_H + 20 }}>
-        {types.map((t, i) => {
-          const sc = scores[i];
-          const color = scoreColor(sc);
-          const barH = Math.round((sc / maxScore) * BAR_MAX_H);
-          return (
-            <div key={i} className="flex-1 flex flex-col items-center gap-0">
-              {/* 점수 */}
-              <span className="text-[11px] font-black mb-1" style={{ color }}>{sc}점</span>
-              {/* 막대 */}
-              <div className="w-full rounded-t-md" style={{
-                height: barH,
-                background: `linear-gradient(to top, ${color}, ${color}88)`,
-                minHeight: 4,
-              }} />
+    <div className="mb-4 space-y-2">
+      {sorted.map((t, i) => {
+        const pct = Math.round((t.sc / maxScore) * 100);
+        const isTop = i === 0;
+        const barColor = t.sc >= 80
+          ? `linear-gradient(to right, #d4a017, #f5cc50)`
+          : t.sc >= 65
+          ? `linear-gradient(to right, #3f7d6b, #5db89e)`
+          : t.sc >= 45
+          ? `linear-gradient(to right, #3f63c4, #6b8de8)`
+          : t.sc >= 25
+          ? `linear-gradient(to right, #c97a2a, #e8a855)`
+          : `linear-gradient(to right, #c9474f, #e87880)`;
+        return (
+          <div key={i} className="rounded-xl px-4 py-3" style={{
+            background: isTop ? `${GOLD}10` : WHITE,
+            border: `1px solid ${isTop ? GOLD : INK}${isTop ? "40" : "0d"}`,
+          }}>
+            <div className="flex items-center gap-3">
+              <span className="text-[20px] flex-shrink-0">{t.icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[13px] font-black" style={{ color: INK }}>{t.category}</span>
+                  <div className="flex items-center gap-1.5">
+                    {isTop && <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full" style={{ background: GOLD, color: "#fff" }}>추천</span>}
+                    <span className="text-[11px] font-black" style={{ color: t.sc >= 70 ? GOLD : t.sc >= 45 ? MUTE : ROSE }}>{t.sc}점</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={
+                      t.sc >= 80 ? { background: "#d4a01722", color: "#b8860b" }
+                      : t.sc >= 65 ? { background: "#3f7d6b22", color: "#2d6b5a" }
+                      : t.sc >= 45 ? { background: "#3f63c422", color: "#3f63c4" }
+                      : t.sc >= 25 ? { background: "#c97a2a22", color: "#a05a10" }
+                      : { background: "#c9474f22", color: "#a03040" }
+                    }>{scoreLabel(t.sc)}</span>
+                  </div>
+                </div>
+                <div className="rounded-full overflow-hidden" style={{ height: 5, background: `${INK}0d` }}>
+                  <div style={{ width: `${pct}%`, height: "100%", background: barColor, borderRadius: 999, transition: "width 0.4s" }} />
+                </div>
+                {t.tip && <p className="text-[11px] mt-1.5 leading-relaxed" style={{ color: INK_SOFT }}>{t.tip}</p>}
+              </div>
             </div>
-          );
-        })}
-      </div>
-      {/* 구분선 */}
-      <div style={{ height: 1, background: `${INK}10`, marginBottom: 10 }} />
-      {/* X축: 아이콘 + 카테고리명 + 라벨 */}
-      <div className="flex justify-between gap-2">
-        {types.map((t, i) => {
-          const sc = scores[i];
-          const color = scoreColor(sc);
-          return (
-            <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
-              <span className="text-[16px]">{t.icon}</span>
-              <span className="text-[9.5px] font-bold text-center" style={{ color: MUTE }}>{t.category}</span>
-              <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded-full text-center" style={{ background: `${color}15`, color }}>{scoreLabel(sc)}</span>
-            </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1445,7 +1458,8 @@ function LoveLineChart({ view, gender }: { view: MyeongsikView | null; gender?: 
     const gzKr = `${GAN_KR2[stem] ?? ""}${JI_KR2[branch] ?? ""}`;
     return { year: y, gz: gzKr, score: Math.min(95, Math.max(40, raw)) };
   });
-  const W = 320, H = 160, padX = 20, padTop = 20, padBot = 30;
+  const W = 320, H = 190, padX = 20, padTop = 20, padBot = 62;
+  const loveBoxW = 24, loveBoxH = 28;
   const n = data.length;
   const minS = Math.min(...data.map(d => d.score));
   const maxS = Math.max(...data.map(d => d.score));
@@ -1463,19 +1477,21 @@ function LoveLineChart({ view, gender }: { view: MyeongsikView | null; gender?: 
             <stop offset="100%" stopColor="#e8547a" stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        {[0,1,2,3].map(i => {
-          const yy = padTop + ((H - padTop - padBot) * i) / 3;
-          return <line key={i} x1={padX} x2={W - padX} y1={yy} y2={yy} stroke={`${INK}0d`} strokeWidth="1" />;
-        })}
         <polygon points={area} fill="url(#loveArea)" />
         <polyline points={pts} fill="none" stroke="#e8547a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        {data.map((d, i) => (
-          <g key={i}>
-            <circle cx={x(i)} cy={y(d.score)} r={3} fill={WHITE} stroke="#e8547a" strokeWidth="2" />
-            <text x={x(i)} y={H - 12} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
-            <text x={x(i)} y={H - 3} fontSize="7" fill={MUTE} textAnchor="middle">{d.gz}</text>
-          </g>
-        ))}
+        {data.map((d, i) => {
+          const cx = x(i);
+          const boxY = H - padBot + 18;
+          return (
+            <g key={i}>
+              <circle cx={cx} cy={y(d.score)} r={3} fill={WHITE} stroke="#e8547a" strokeWidth="2" />
+              <line x1={cx} y1={y(d.score) + 5} x2={cx} y2={boxY - 3} stroke="#e8547a55" strokeWidth="1" strokeDasharray="2,2" />
+              <rect x={cx - loveBoxW / 2} y={boxY} width={loveBoxW} height={loveBoxH} rx={4} ry={4} fill="none" stroke="#e8547a55" strokeWidth="0.8" />
+              <text x={cx} y={boxY + 11} fontSize="12" fontWeight="700" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
+              <text x={cx} y={boxY + 24} fontSize="9" fontWeight="600" fill={INK_SOFT} textAnchor="middle">{d.gz}</text>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
@@ -5146,7 +5162,7 @@ function ReportPreviewInner() {
           {/* 원국 분석 */}
           <section className="pt-6 pb-12">
             <div className="px-6">
-              <Heading>나란 사람의 본질과 성향</Heading>
+              <Heading>{(name.slice(1) || name)}님의 타고난 기질과 성향</Heading>
               <P>{c.wonguk.intro}</P>
             </div>
             <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
@@ -5201,6 +5217,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 오행 분석 + 도넛 */}
+          <Illust src="/media/report/total/total-1/total-1-2.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
             <Heading>네 기둥이 품은 인생의 흐름</Heading>
 
@@ -5475,8 +5492,9 @@ function ReportPreviewInner() {
           </section>
 
           {/* 십성 분석 + 레이더 */}
+          <Illust src="/media/report/total/total-1/total-1-3.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
-            <Heading>그대의 타고난 능력치</Heading>
+            <Heading>{(name.slice(1) || name)}님의 타고난 능력치</Heading>
             {(report?.view?.pillars?.length ?? 0) > 0 && (
               <AbilityRadar pillars={(report!.view.pillars as { sipTop: string; sipBot: string; ganEl: string; jiEl: string }[])} />
             )}
@@ -5485,7 +5503,7 @@ function ReportPreviewInner() {
 
           {/* 십이운성 분석 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>그대에게 숨겨진 기운들</Heading>
+            <Heading>{(name.slice(1) || name)}님 사주에 숨겨진 기운들</Heading>
             {report?.view && (() => {
               const SINSAL_EXCLUDE = new Set(["지살", "재살", "월살", "겁살", "천살", "공망"]);
               const items = [...new Set(
@@ -5609,6 +5627,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 1. 용신 */}
+          <Illust src="/media/report/total/total-2/total-2-2.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
             <Heading>필요한 기운과 피해야 할 기운</Heading>
             {(() => {
@@ -5670,6 +5689,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 4. 합충형해파원진 */}
+          <Illust src="/media/report/total/total-2/total-2-3.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
             <Heading>그대를 대표하는 사주의 격</Heading>
           </section>
@@ -5816,7 +5836,7 @@ function ReportPreviewInner() {
 
           {/* 오행 분포 */}
           <section className="px-6 pt-2 pb-2">
-            <Heading>그대가 가진 오행들의 분포</Heading>
+            <Heading>{(name.slice(1) || name)}님이 가진 오행들의 분포</Heading>
           </section>
           {(() => {
             const ELS = [
@@ -5911,7 +5931,7 @@ function ReportPreviewInner() {
 
           {/* 해답 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>내 사주팔자를 MBTI로</Heading>
+            <Heading>{(name.slice(1) || name)}님의 사주를 MBTI로</Heading>
             {/* MBTI 4×4 그리드 */}
             {(() => {
               const MBTI_GRID = [
@@ -6086,7 +6106,7 @@ function ReportPreviewInner() {
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`흐름을 알았다면, 이제\n조심해야 할 시기도 알아야 하오.\n다음 장에서 살펴보겠소.`}
+              {`운의 흐름을 알았으니,\n이제 그 기운을 열어줄\n방법을 알아볼 차례이오.`}
             </p>
           </div>
 
@@ -6120,18 +6140,20 @@ function ReportPreviewInner() {
 
           {/* 재물운 시점 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>나의 시기별 재물 흐름</Heading>
+            <Heading>{(name.slice(1) || name)}님의 시기별 재물의 흐름</Heading>
             <WealthLineChart view={report?.view ?? null} />
             {c.wealthTime.paragraphs?.[0] && <P>{c.wealthTime.paragraphs[0]}</P>}
           </section>
 
           {/* 적직 */}
+          <Illust src="/media/report/total/total-5/total-5-2.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
-            <Heading>타고난 적성과 잘 맞는 직업</Heading>
+            <Heading>{(name.slice(1) || name)}님에게 잘 맞는 직업들</Heading>
             <JobClusters clusters={c.jobFit.clusters} name={name} />
           </section>
 
           {/* 직장인 vs 사업가 */}
+          <Illust src="/media/report/total/total-5/total-5-3.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{name.slice(1) || name}님에게 직장인이냐 사업이냐</Heading>
             {(() => {
@@ -6153,46 +6175,9 @@ function ReportPreviewInner() {
 
           {/* 투자 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>내 사주에 맞는 투자 방법</Heading>
+            <Heading>{(name.slice(1) || name)}님에게 맞는 투자방법</Heading>
             <InvestTypeCards types={c.invest.investTypes} />
-            {(() => {
-              const types = c.invest.investTypes;
-              if (!types?.length) return null;
-              const sorted = [...types].sort((a, b) => Number(b.score) - Number(a.score));
-              const best = sorted[0];
-              const worst = sorted[sorted.length - 1];
-              const bestScore = Number(best?.score) || 0;
-              const worstScore = Number(worst?.score) || 0;
-              const n = name.slice(1) || name;
-              const LABEL: Record<string, string> = { 저축:"저축", 주식:"주식", 코인:"코인·가상자산", 원물:"원자재·원물", 부동산:"부동산" };
-              const bestName = LABEL[best?.category] ?? best?.category ?? "";
-              const worstName = LABEL[worst?.category] ?? worst?.category ?? "";
-              const scoreLabel = (s: number) => s >= 80 ? "가장 잘 맞는" : s >= 65 ? "잘 맞는" : s >= 45 ? "보통 수준의" : "주의가 필요한";
-              const TIP_EXTRA: Record<string, string> = {
-                저축: "꾸준히 적립하고 원금을 지키는 방식이 심리적으로 안정감을 주며, 복리의 힘을 믿고 장기적으로 굴려나가는 것이 맞소.",
-                주식: "단기 매매보다는 기업의 가치를 분석해 중장기로 보유하는 방식이 이 사주의 기질과 잘 맞소. 분할 매수로 리스크를 줄이는 접근이 효과적이오.",
-                코인: "변동성이 크기 때문에 전체 자산의 일부만 배분하고, 확신이 생길 때만 진입하는 냉정함이 필요하오.",
-                원물: "실물 자산의 안정성이 이 사주의 재물 기운과 잘 맞소. 금·은 등 귀금속이나 원자재를 장기 보유하는 방식을 권하오.",
-                부동산: "실거주 겸 투자 목적으로 접근할 때 가장 큰 성과가 나오. 입지를 꼼꼼히 따져 장기적으로 보유하는 전략이 맞소.",
-              };
-              const WARN_EXTRA: Record<string, string> = {
-                저축: "수익률이 낮아 물가 상승을 따라가지 못할 수 있으니 전체 자산의 안전판 역할로만 활용하오.",
-                주식: "단기 수익을 노린 잦은 매매는 이 사주의 기질과 맞지 않아 손실로 이어지기 쉽소.",
-                코인: "극단적인 변동성으로 인한 심리적 소진과 손실 위험이 크니 최대한 거리를 두는 것이 좋겠소.",
-                원물: "수익 실현 시점을 잡기 어렵고 유동성이 낮으니 과도한 비중은 피하오.",
-                부동산: "큰 초기 자본과 낮은 유동성이 부담으로 작용할 수 있으니 현금 흐름을 먼저 확인하고 진입하오.",
-              };
-              const text = `${n}님의 사주에 ${scoreLabel(bestScore)} 투자 방법은 ${bestName}이오.`
-                + ` ${best?.tip ? best.tip + " " : ""}이 방식이 그대의 기질과 재물 흐름에 가장 자연스럽게 맞닿아 있소.`
-                + ` ${TIP_EXTRA[best?.category] ?? ""}`
-                + (sorted.length > 1 && sorted[1].category !== best?.category
-                  ? ` 차선으로는 ${LABEL[sorted[1].category] ?? sorted[1].category}도 ${sorted[1].score}점으로 잘 맞는 편이니 분산 배분을 고려해볼 만하오.`
-                  : "")
-                + (worst && worst.category !== best?.category
-                  ? ` 반면 ${worstName}은 적합도가 ${worstScore}점으로 가장 낮으니, ${WARN_EXTRA[worst?.category] ?? (worstScore < 40 ? "신중하게 거리를 두는 것이 좋겠소." : "비중을 낮게 가져가는 것이 바람직하오.")}`
-                  : "");
-              return <P>{text}</P>;
-            })()}
+            {c.invest.paragraphs?.[0] && <P>{c.invest.paragraphs[0]}</P>}
           </section>
 
           {/* 삽화 */}
@@ -6232,24 +6217,25 @@ function ReportPreviewInner() {
           </div>
 
           <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
-          <Quote>{`사람은 누구나\n제 운명의 실로 엮인 인연을 만나오.\n\n${name}님의 붉은 실,\n지금 풀어보겠소.`}</Quote>
+          <Quote>{`사람은 누구나\n제 운명의 실로 엮인 인연을 만나오.\n\n${name}님의 붉은 실,\n지금 말해주겠소.`}</Quote>
 
           {/* 사랑하는 방식 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>내 사주가 추구하는 연애관</Heading>
+            <Heading>{(name.slice(1) || name)}님이 추구하는 연애관</Heading>
             {c.loveStyle.paragraphs?.[0] && <P>{c.loveStyle.paragraphs[0]}</P>}
           </section>
 
           {/* 시기별 연애 흐름 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>나의 시기별 연애 흐름</Heading>
+            <Heading>{(name.slice(1) || name)}님의 시기별 연애운 흐름</Heading>
             <LoveLineChart view={report?.view ?? null} gender={effectiveGender} />
             {c.loveFlow.paragraphs?.[0] && <P>{c.loveFlow.paragraphs[0]}</P>}
           </section>
 
           {/* 이런 사주와 잘 맞아요 */}
+          <Illust src="/media/report/total/total-6/total-6-1.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
-            <Heading>나와 찰떡궁합인 이성의 사주</Heading>
+            <Heading>{(name.slice(1) || name)}님과 찰떡궁합인 이성의 사주</Heading>
             <p style={{ fontSize:12, color:"#9a9a9a", margin:"-8px 0 16px", fontStyle:"italic", lineHeight:1 }}>(시주는 비중이 적으니 참고만 하시오.)</p>
             <CompatibleJujuCards items={c.compatibleJuju} myPillars={report?.view?.pillars?.map(p => ({ pos: p.pos, gan: p.gan, ji: p.ji }))} myBirthYear={report?.birth?.date ? parseInt(String(report.birth.date).slice(0,4)) : undefined} />
           </section>
@@ -6293,7 +6279,7 @@ function ReportPreviewInner() {
 
           {/* 약한 부위 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>사주로 보는 부위별 건강운</Heading>
+            <Heading>{(name.slice(1) || name)}님의 사주로 보는 건강운</Heading>
             {(c.bodyWeak.categories ?? []).map((cat, ci) => (
               <BodyCategoryCard key={ci} emoji={cat.emoji} title={cat.title} subtitle={cat.subtitle} items={cat.items} />
             ))}
@@ -6301,8 +6287,9 @@ function ReportPreviewInner() {
           </section>
 
           {/* 조심해야 할 시기 */}
+          <Illust src="/media/report/total/total-7/total-7-2.jpg" h={360} />
           <section className="px-6 pt-2 pb-4">
-            <Heading>나의 시기별 건강 흐름</Heading>
+            <Heading>{(name.slice(1) || name)}님의 시기별 건강 흐름</Heading>
             <HealthLineChart view={report?.view ?? null} />
             {c.riskTime.intro && <P>{[c.riskTime.intro, ...c.riskTime.paragraphs].join("\n")}</P>}
           </section>
@@ -6348,7 +6335,7 @@ function ReportPreviewInner() {
 
           {/* 용신 오행 개운법 */}
           <section className="px-6 pt-2 pb-2">
-            <Heading>나만의 오행 맞춤 개운법</Heading>
+            <Heading>{(name.slice(1) || name)}님에게 맞는 사주 개운법</Heading>
             {c.openMethod.intro && <P>{c.openMethod.intro}</P>}
             {c.openMethod.callout && (
               <div className="my-4 px-4 py-3 rounded-xl" style={{ background: "rgba(60,100,60,0.07)", borderLeft: "3px solid #3a7a4a" }}>
