@@ -6273,7 +6273,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 620 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_intro/kunghap_jaehwe_intro_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6600,7 +6600,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_1/kunghap_jaehwe_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6895,9 +6895,9 @@ function ReportPreviewInner() {
             </div>
 
             {/* 커버 이미지 */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_3/kunghap_jaehwe_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 25%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
@@ -6985,7 +6985,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 이별 원인</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 왜 헤어졌는가</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_4/kunghap_jaehwe_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
