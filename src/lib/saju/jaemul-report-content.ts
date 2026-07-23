@@ -26,7 +26,12 @@ export function isJaemulChapterReady(
   const keys = JAEMUL_CHAPTER_SECTIONS[chapter] ?? [];
   const OPTIONAL_SECTIONS = ["concernAdvice"];
   return keys.every((k) => {
-    if (OPTIONAL_SECTIONS.includes(k) && content[k] == null) return true;
+    if (OPTIONAL_SECTIONS.includes(k)) {
+      const ov = content[k];
+      if (ov == null) return true;
+      if (typeof ov === "object" && Array.isArray((ov as Record<string, unknown>).paragraphs) && ((ov as Record<string, unknown>).paragraphs as unknown[]).length === 0) return true;
+      if (typeof ov === "object" && Object.keys(ov as object).length === 0) return true;
+    }
     const val = content[k];
     if (!val || typeof val !== "object") return false;
     const v = val as Record<string, unknown>;

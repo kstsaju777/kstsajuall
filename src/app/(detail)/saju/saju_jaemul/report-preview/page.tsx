@@ -4675,7 +4675,7 @@ function ReportPreviewInner() {
               {name}님은<br />어떤 그릇으로 태어났나
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 420 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -4816,7 +4816,7 @@ function ReportPreviewInner() {
               돈을 대하는 나의 방식
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 420 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_jaemul/saju_jaemul_2/saju_jaemul_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -4945,10 +4945,10 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 재물</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              내 사주에<br />재물이 보이는가
+              내 사주에 재물이 보이는가
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 420 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5148,10 +5148,10 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 천직</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              돈이 되는 일과<br />나의 천직
+              돈이 되는 일과 나의 천직
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 420 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5230,9 +5230,9 @@ function ReportPreviewInner() {
               언제 벌고 언제 조심할까
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 420 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+            <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 70%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
@@ -5399,7 +5399,7 @@ function ReportPreviewInner() {
               내 재물운을 바꾸는<br />개운법
             </h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_jaemul/saju_jaemul_6/saju_jaemul_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5553,12 +5553,12 @@ function ReportPreviewInner() {
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                그대에게 남기는<br />홍연의 서신
+                그대에게 남기는 홍연의 서신
               </h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 320 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/saju_jaemul/saju_jaemul_7/saju_jaemul_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+              <img src="/media/report/saju_jaemul/saju_jaemul_7/saju_jaemul_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <section className="px-6 pt-10 pb-8">
