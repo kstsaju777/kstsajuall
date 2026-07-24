@@ -2464,7 +2464,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "1": "제1장 · 이 아이는 어떤 기질로 태어났나",
   "2": "제2장 · 아이의 건강과 주의할 부분",
   "3": "제3장 · 잘 맞는 양육 환경과 방식",
-  "4": "제4장 · 성장하면서 두드러질 재능",
+  "4": "제4장 · 아이의 타고난 재능과 적성",
   "5": "제5장 · 아이를 키울 때 조심해야 할 시기",
   "6": "제6장 · 이 아이의 기운을 살릴 개운법",
   "7": "마무리 · 그대에게 남기는 홍연의 서신",
@@ -3510,7 +3510,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제1장",  chip: "기질",   title: "이 아이는 어떤 기질로 태어났나", no: "1" },
   { disp: "제2장",  chip: "건강",   title: "아이의 건강과 주의할 부분",     no: "2" },
   { disp: "제3장",  chip: "양육",   title: "잘 맞는 양육 환경과 방식",     no: "3" },
-  { disp: "제4장",  chip: "재능",   title: "성장하면서 두드러질 재능",     no: "4" },
+  { disp: "제4장",  chip: "재능",   title: "아이의 타고난 재능과 적성",     no: "4" },
   { disp: "제5장",  chip: "양육",   title: "아이를 키울 때 조심해야 할 시기", no: "5" },
   { disp: "제6장",  chip: "개운",   title: "이 아이의 기운을 살릴 개운법", no: "6" },
   { disp: "마무리", chip: "결론",   title: "그대에게 남기는 홍연의 서신",   no: "7" },
@@ -4662,9 +4662,9 @@ function ReportPreviewInner() {
         <>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 환경</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 어떤 그릇으로 태어났나</h1>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이는 어떤 기질로 태어났나</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5109,7 +5109,7 @@ function ReportPreviewInner() {
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.45)", fontFamily: SERIF }}>제 2 장 · 건강</p>
             <h1 className="text-[22px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이의 건강과 주의할 부분</h1>
           </div>
-          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+          <div className="relative w-full overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_2/saju_youare_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, #fdf8f4 100%)" }} />
@@ -5249,7 +5249,7 @@ function ReportPreviewInner() {
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.45)", fontFamily: SERIF }}>제 3 장 · 양육</p>
             <h1 className="text-[22px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>잘 맞는 양육 환경과 방식</h1>
           </div>
-          <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+          <div className="relative w-full overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_3/saju_youare_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, #fdf8f4 100%)" }} />
@@ -5339,7 +5339,7 @@ function ReportPreviewInner() {
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 재능</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이의 타고난 재능과 적성</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_4/saju_youare_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5435,7 +5435,7 @@ function ReportPreviewInner() {
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 양육</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이를 키울 때 조심해야 할 시기</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5659,7 +5659,7 @@ function ReportPreviewInner() {
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 개운</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이의 기운을 살릴 개운법</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 320 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5811,7 +5811,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.45)", fontFamily: SERIF }}>마무리 · 결론</p>
               <h1 className="text-[22px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대에게 남기는 홍연의 서신</h1>
             </div>
-            <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
+            <div className="relative w-full overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/saju_youare/saju_youare_7/saju_youare_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, #fdf8f4 100%)" }} />

@@ -2247,7 +2247,7 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 // 장번호 → 표시 제목 (이제 장수와 키가 1:1로 일치)
 const CHAPTER_TITLES: Record<string, string> = {
   "0": "인트로 · 사주팔자란 무엇인가",
-  "1": "제1장 · 나는 어떤 그릇으로 태어났나",
+  "1": "제1장 · 이 아이는 어떤 기질로 태어났나",
   "2": "제2장 · 나의 진짜 모습은 무엇일까",
   "3": "제3장 · 나는 세상을 어떻게 대하는가",
   "4": "제4장 · 내 사주에 나타나는 특이점",
@@ -3300,7 +3300,7 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론", title: "사주팔자란 무엇인가", no: "0" },
-  { disp: "제1장", chip: "환경", title: "나는 어떤 그릇으로 태어났나", no: "1" },
+  { disp: "제1장", chip: "환경", title: "이 아이는 어떤 기질로 태어났나", no: "1" },
   { disp: "제2장", chip: "운명", title: "나의 진짜 모습은 무엇일까", no: "2" },
   { disp: "제3장", chip: "관계", title: "나는 세상을 어떻게 대하는가", no: "3" },
   { disp: "제4장", chip: "특징", title: "내 사주에 나타나는 특이점", no: "4" },
@@ -4458,7 +4458,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 환경</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              "나는 어떤 그릇으로 태어났나"
+              "이 아이는 어떤 기질로 태어났나"
             </h1>
           </div>
           {/* 커버 이미지 */}
