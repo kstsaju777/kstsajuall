@@ -2460,7 +2460,7 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 
 // 장번호 → 표시 제목 (이제 장수와 키가 1:1로 일치)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0": "인트로 · 유아사주에 대하여",
+  "0": "인트로 · 사주팔자란 무엇인가",
   "1": "제1장 · 이 아이는 어떤 기질로 태어났나",
   "2": "제2장 · 아이의 건강과 주의할 부분",
   "3": "제3장 · 잘 맞는 양육 환경과 방식",
@@ -3506,7 +3506,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "서론",   title: "유아사주에 대하여",             no: "0" },
+  { disp: "인트로", chip: "서론",   title: "사주팔자란 무엇인가",             no: "0" },
   { disp: "제1장",  chip: "기질",   title: "이 아이는 어떤 기질로 태어났나", no: "1" },
   { disp: "제2장",  chip: "건강",   title: "아이의 건강과 주의할 부분",     no: "2" },
   { disp: "제3장",  chip: "양육",   title: "잘 맞는 양육 환경과 방식",     no: "3" },
@@ -4279,9 +4279,9 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-0/total-0-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/saju_youare/saju_youare_intro/saju_youare_intro_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 

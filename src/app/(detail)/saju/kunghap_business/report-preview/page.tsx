@@ -6474,7 +6474,7 @@ function ReportPreviewInner() {
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>비즈니스궁합에 대하여</h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap_business/kunghap_business_intro/kunghap_business_intro_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6483,7 +6483,7 @@ function ReportPreviewInner() {
           {/* 인사말 */}
           <section className="px-6 pt-10 pb-6">
             <P>안녕하시오.</P>
-            <P>본격적으로 풀이에 들어가기 전에,<br />연애궁합이 무엇인지 먼저 짚고 넘어가겠소.</P>
+            <P>본격적으로 풀이에 들어가기 전에,<br />궁합이 무엇인지 먼저 짚고 넘어가겠소.</P>
           </section>
 
           {/* ─ 궁합이란 ─ */}
