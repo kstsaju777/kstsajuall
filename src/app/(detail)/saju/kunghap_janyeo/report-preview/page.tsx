@@ -4569,7 +4569,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "3":  "제3장 · 부모와 자녀 사이, 합과 충",
   "4":  "제4장 · 우리는 어떤 인연일까",
   "5":  "제5장 · 서로를 어떻게 바라보는가",
-  "6":  "제6장 · 자녀의 교육과 양육방향",
+  "6":  "제6장 · 아이의 교육과 양육방향",
   "7":  "제7장 · 자녀의 미래와 부모의 역할",
   "8":  "제8장 · 시기별 양육 포인트",
   "9":  "마무리 · 그대들에게 남기는 홍연의 서신",
@@ -5763,7 +5763,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제3장",  chip: "합·충",   title: "부모와 자녀 사이, 합과 충",               no: "3" },
   { disp: "제4장",  chip: "인연",    title: "우리는 어떤 인연일까",       no: "4" },
   { disp: "제5장",  chip: "서로의 시각", title: "서로를 어떻게 바라보는가",              no: "5" },
-  { disp: "제6장",  chip: "삶·교육",  title: "자녀의 교육과 양육방향",                no: "6" },
+  { disp: "제6장",  chip: "삶·교육",  title: "아이의 교육과 양육방향",                no: "6" },
   { disp: "제7장",  chip: "미래역할",     title: "자녀의 미래와 부모의 역할",          no: "7" },
   { disp: "제8장",  chip: "양육포인트",    title: "시기별 양육 포인트",               no: "8" },
   { disp: "마무리", chip: "당부",         title: "그대들에게 남기는 홍연의 서신",      no: "9" },
@@ -6487,7 +6487,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap_janyeo/kunghap_janyeo_intro/kunghap_janyeo_intro_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6814,7 +6814,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_1/kunghap_janyeo_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7033,7 +7033,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7226,7 +7226,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* 커버 이미지 */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7354,7 +7354,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 인연</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>우리는 어떤 인연일까</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7412,7 +7412,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 서로의 시각</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>서로를 어떻게 바라보는가</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_5/kunghap_janyeo_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7501,9 +7501,9 @@ function ReportPreviewInner() {
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 학업</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이의 학업운과 공부 스타일</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이의 교육과 양육방향</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_6/kunghap_janyeo_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7747,7 +7747,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 양육</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>시기별 양육 포인트</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_8/kunghap_janyeo_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7916,7 +7916,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 미래 흐름</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀의 미래와 부모의 역할</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -8216,7 +8216,7 @@ function ReportPreviewInner() {
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마무리 · 홍연의 당부</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대들에게 남기는 홍연의 서신</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap_janyeo/kunghap_janyeo_9/kunghap_janyeo_9_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
