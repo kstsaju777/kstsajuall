@@ -6664,7 +6664,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap_imshin/kunghap_imshin_intro/kunghap_imshin_intro_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6991,7 +6991,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_1/kunghap_imshin_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7192,7 +7192,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_2/kunghap_imshin_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7385,7 +7385,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 자녀의 성별</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>자녀는 아들일까 딸일까?</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7444,7 +7444,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 글자들간의 관계</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람 글자들의 합과 충</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_3/kunghap_imshin_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7575,7 +7575,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 자녀운 흐름</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 자녀운 흐름</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7658,7 +7658,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 6 장 · 주의할점</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>임신·출산 시 주의할 것들</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7767,7 +7767,7 @@ function ReportPreviewInner() {
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 7 장 · 가정분위기</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이가 태어나면{"\n"}어떤 가정이 될까</h1>
             </div>
-            <div className="relative overflow-hidden" style={{ height: 360 }}>
+            <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_imshin/kunghap_imshin_7/kunghap_imshin_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7837,7 +7837,7 @@ function ReportPreviewInner() {
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마무리 · 당부</p>
             <h1 className="text-[20px] font-black leading-snug whitespace-pre-line" style={{ color: "#fff", fontFamily: SERIF }}>{"그대들에게 남기는\n홍연의 서신"}</h1>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/kunghap_imshin/kunghap_imshin_8/kunghap_imshin_8_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
