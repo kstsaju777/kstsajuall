@@ -18,7 +18,7 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
       style={{ background: "radial-gradient(ellipse at 50% 40%, #1a0005 0%, #0a0003 100%)" }}>
       <style>{`
         @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(400%)} }
-        @keyframes glow-pulse { 0%,100%{box-shadow:0 0 8px 2px #9b2335aa,0 0 20px 4px #c44455aa} 50%{box-shadow:0 0 16px 4px #c44455cc,0 0 40px 10px #9b233588} }
+        @keyframes glow-pulse { 0%,100%{box-shadow:0 0 8px 2px #ff6b9daa,0 0 20px 4px #ffaaccaa} 50%{box-shadow:0 0 16px 4px #ffaacccc,0 0 40px 10px #ff6b9d88} }
         @keyframes title-fade { 0%{opacity:0;transform:translateY(6px)} 20%{opacity:1;transform:translateY(0)} 80%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-6px)} }
         @keyframes orbit { 0%{transform:rotate(0deg) translateX(38px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(38px) rotate(-360deg)} }
       `}</style>
@@ -41,22 +41,22 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
       <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5f5", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #9b233588" }}>
         결과지를 완성하고 있소…
       </p>
-      <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#c44455", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
+      <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#ff6b9d", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
         {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
       </p>
       <div className="w-full max-w-[280px] mb-3">
-        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#c44455" }}>
+        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#ff6b9d" }}>
           <span>{doneCount} / {TOTAL} 장 완성</span>
           <span>{pct}%</span>
         </div>
         <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a1000" }}>
           <div className="h-full rounded-full relative overflow-hidden transition-all duration-700"
-            style={{ width: `${pct}%`, background: "linear-gradient(90deg, #7a1a28, #9b2335, #c44455)", animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none" }}>
+            style={{ width: `${pct}%`, background: "linear-gradient(90deg, #c44b7a, #ff6b9d, #ffaac8)", animation: pct > 0 ? "glow-pulse 1.8s ease-in-out infinite" : "none" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)", animation: "shimmer 1.6s linear infinite", width: "40%" }} />
           </div>
         </div>
       </div>
-      <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#887766" }}>
+      <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#e0a8b0" }}>
         풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.
       </p>
     </div>
