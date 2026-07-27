@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const CHAPTER_TITLES = [
@@ -59,7 +59,14 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
           </div>
         </div>
       </div>
-      <p className="text-[11px] text-center leading-relaxed mt-4" style={{ color: "#886820" }}>
+      <div className="w-full max-w-[280px] mt-5 px-4 py-3 rounded-xl text-center"
+        style={{ background: "rgba(249,220,100,0.15)", border: "1px solid rgba(249,220,100,0.4)" }}>
+        <p className="text-[15px] font-semibold mb-1" style={{ color: "#f9dc64" }}>⚠️ 주의</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: "#f9dc64" }}>
+          풀이 중 새로고침 하시면<br />처음부터 다시 시작됩니다
+        </p>
+      </div>
+      <p className="text-[13px] text-center leading-relaxed mt-4" style={{ color: "#886820" }}>
         풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.
       </p>
     </div>
@@ -90,6 +97,13 @@ function SuccessInner() {
   const [doneCount, setDoneCount] = useState(0);
   const [currentChapter, setCurrentChapter] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const navigatingRef = useRef(false);
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => { if (navigatingRef.current) return; e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
 
   useEffect(() => {
     const paymentKey = search.get("paymentKey");
@@ -132,6 +146,7 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
+      navigatingRef.current = true;
       router.push(`/saju/saju_jaemul/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });
   // eslint-disable-next-line react-hooks/exhaustive-deps
