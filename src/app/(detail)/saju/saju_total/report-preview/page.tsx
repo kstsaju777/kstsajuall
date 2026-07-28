@@ -4058,7 +4058,7 @@ function Cover() {
         </h1>
       </div>
       {/* 커버 이미지 */}
-      <div className="relative overflow-hidden" style={{ height: 360 }}>
+      <div className="relative overflow-hidden" style={{ height: 520 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/media/report/total/total-10/total-10-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -4124,7 +4124,7 @@ function Illust({ src, h = 480, noTopGrad, mt, children }: { src: string; h?: nu
     <div className="relative w-full" style={{ background: noTopGrad ? CREAM : PINK_PALE, marginTop: mt }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" className="w-full block" style={{ display: "block" }} />
-      <div className="absolute inset-0" style={{ background: grad }} />
+      <div className="absolute inset-0" style={{ background: grad, pointerEvents: "none" }} />
       {children}
     </div>
   );
@@ -4738,7 +4738,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-0/total-0-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5129,7 +5129,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-1/total-1-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5137,7 +5137,16 @@ function ReportPreviewInner() {
 
           <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto -24px" }} />
           <Quote>{`${name.slice(1) || name}님의 사주를
-펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 운의 흐름이\n모두 담겨 있소.\n\n이게 바로 ${name.slice(1) || name}님의 사주팔자요.`}</Quote>
+펼치는 순간이오.\n\n사주팔자는 태어난 연·월·일·시,\n네 기둥으로 이루어지오.\n각 기둥에는 천간과 지지, 두 글자씩\n총 여덟 글자가 담기오.\n\n이 여덟 글자 안에\n${name.slice(1) || name}님의 기질과 운의 흐름이\n모두 담겨 있소.`}</Quote>
+
+          <Illust src="/media/report/total/total-1/total-1-4.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "34%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>
+                이게 바로 {name.slice(1) || name}님의<br />사주팔자요.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
 
           {/* 명식표 */}
           <MyeongsikTable
@@ -5170,7 +5179,14 @@ function ReportPreviewInner() {
               <Heading>{(name.slice(1) || name)}님의 타고난 기질과 성향</Heading>
               <P>{c.wonguk.intro}</P>
             </div>
-            <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${name.slice(1) || name}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+            <Illust src="/media/report/total/total-1/total-1-5.jpg" noTopGrad>
+              <div className="absolute pointer-events-none" style={{ top: "15%", left: "62%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                  {name.slice(1) || name}님의 사주팔자로<br />한 폭의 그림을 그려봤소.
+                </p>
+              </div>
+            </Illust>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
             {report?.sajuImageUrl ? (
               <div className="px-5">
                 <div style={{
@@ -5224,10 +5240,10 @@ function ReportPreviewInner() {
           {/* 오행 분석 + 도넛 */}
           <Illust src="/media/report/total/total-1/total-1-2.jpg" h={360} noTopGrad mt={-24}>
             <div className="absolute pointer-events-none" style={{ top: "16%", left: "69%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-              <p style={{ fontSize: 13, fontWeight: 500, color: "#2a1a1a", fontFamily: SERIF, lineHeight: 1.8 }}>
+              <p style={{ fontSize: 18, fontWeight: 700, color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, textAlign: "center", whiteSpace: "nowrap" }}>
                 네개의 기둥은<br />
-                {name}님의 인생을 담고 있소.<br />
-                <br />
+                {name.slice(1) || name}님의 인생 전체를<br />
+                담고 있는 것이오.<br />
                 하나씩 살펴보겠소.
               </p>
             </div>
@@ -5506,9 +5522,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 십성 분석 + 레이더 */}
-          <Illust src="/media/report/total/total-1/total-1-3.jpg" h={360} />
+          <Illust src="/media/report/total/total-1/total-1-3.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "17%", left: "39%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                사주팔자를 분석하면<br />{name.slice(1) || name}님의 재능을 알수있소.<br /><br />지금 말해주겠소.
+              </p>
+            </div>
+          </Illust>
           <section className="px-6 pt-2 pb-4">
-            <Heading>{(name.slice(1) || name)}님의 타고난 능력치</Heading>
             {(report?.view?.pillars?.length ?? 0) > 0 && (
               <AbilityRadar pillars={(report!.view.pillars as { sipTop: string; sipBot: string; ganEl: string; jiEl: string }[])} />
             )}
@@ -5620,7 +5641,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-2/total-2-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 40%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5641,7 +5662,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 1. 용신 */}
-          <Illust src="/media/report/total/total-2/total-2-2.jpg" h={360} />
+          <Illust src="/media/report/total/total-2/total-2-2.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "15%", left: "70%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>필요한 기운과 피해야 할 기운</Heading>
             {(() => {
@@ -5703,7 +5731,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 4. 합충형해파원진 */}
-          <Illust src="/media/report/total/total-2/total-2-3.jpg" h={360} />
+          <Illust src="/media/report/total/total-2/total-2-3.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "17%", left: "72%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>그대를 대표하는 사주의 격</Heading>
           </section>
@@ -5784,7 +5819,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-4/total-4-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5801,8 +5836,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 1 */}
-          <Illust src="/media/report/total/total-4/total-4-1.jpg" h={360} />
-
+          <Illust src="/media/report/total/total-4/total-4-1.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "18%", left: "42%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-8 pb-4">
             <h2 className="text-[19px] font-black mb-3" style={{ color: INK }}>내 글자들에는 어떤 관계가 있을까</h2>
             <GanjiRelation view={report?.view ?? null} />
@@ -5810,7 +5851,13 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 2 */}
-          <Illust src="/media/report/total/total-4/total-4-2.jpg" h={360} />
+          <Illust src="/media/report/total/total-4/total-4-2.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "25%", left: "70%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
 
           {/* 마무리 인용 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
@@ -5839,7 +5886,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-3/total-3-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 55%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -5899,6 +5946,14 @@ function ReportPreviewInner() {
           )}
 
           {/* 균형 */}
+          <Illust src="/media/report/total/total-3/total-3-2.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "65%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>월주, 사회적 영역을 말하다</Heading>
             {/* 월주 강조 명식 도식 — 1장과 동일한 컴포넌트 */}
@@ -5944,6 +5999,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 해답 */}
+          <Illust src="/media/report/total/total-3/total-3-3.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "22%", left: "35%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님의 사주를 MBTI로</Heading>
             {/* MBTI 4×4 그리드 */}
@@ -6045,7 +6108,13 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/media/report/total/total-3/total-3-1.jpg" h={360} />
+          <Illust src="/media/report/total/total-3/total-3-1.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "25%", left: "70%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
 
           {/* 마무리 인용 */}
           <div className="px-8 py-12 text-center">
@@ -6074,9 +6143,9 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-11/total-11-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/total/total-8/total-8-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -6099,6 +6168,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 세운 흐름 */}
+          <Illust src="/media/report/total/total-8/total-8-1.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "22%", left: "30%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>세운으로 보는 해마다의 운</Heading>
             {(() => {
@@ -6143,7 +6220,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-5/total-5-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 40%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6153,6 +6230,14 @@ function ReportPreviewInner() {
           <Quote>{`재물과 천직은\n타고난 그릇에 따라 흐르오.\n\n${name}님의 재물 그릇\n지금 바로 열어보겠소.`}</Quote>
 
           {/* 재물운 시점 */}
+          <Illust src="/media/report/total/total-5/total-5-2.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "15%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님의 시기별 재물의 흐름</Heading>
             <WealthLineChart view={report?.view ?? null} />
@@ -6160,14 +6245,28 @@ function ReportPreviewInner() {
           </section>
 
           {/* 적직 */}
-          <Illust src="/media/report/total/total-5/total-5-2.jpg" h={360} />
+          <Illust src="/media/report/total/total-5/total-5-3.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "25%", left: "75%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님에게 잘 맞는 직업들</Heading>
             <JobClusters clusters={c.jobFit.clusters} name={name} />
           </section>
 
           {/* 직장인 vs 사업가 */}
-          <Illust src="/media/report/total/total-5/total-5-3.jpg" h={360} />
+          <Illust src="/media/report/total/total-5/total-5-4.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "32%", left: "33%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{name.slice(1) || name}님에게 직장인이냐 사업이냐</Heading>
             {(() => {
@@ -6188,6 +6287,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 투자 */}
+          <Illust src="/media/report/total/total-5/total-5-5.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "60%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님에게 맞는 투자방법</Heading>
             <InvestTypeCards types={c.invest.investTypes} />
@@ -6224,7 +6331,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-6/total-6-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 40%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6240,6 +6347,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 시기별 연애 흐름 */}
+          <Illust src="/media/report/total/total-6/total-6-1.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "25%", left: "32%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님의 시기별 연애운 흐름</Heading>
             <LoveLineChart view={report?.view ?? null} gender={effectiveGender} />
@@ -6247,7 +6362,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 이런 사주와 잘 맞아요 */}
-          <Illust src="/media/report/total/total-6/total-6-1.jpg" h={360} />
+          <Illust src="/media/report/total/total-6/total-6-2.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님과 찰떡궁합인 이성의 사주</Heading>
             <p style={{ fontSize:12, color:"#9a9a9a", margin:"-8px 0 16px", fontStyle:"italic", lineHeight:1 }}>(시주는 비중이 적으니 참고만 하시오.)</p>
@@ -6256,6 +6378,13 @@ function ReportPreviewInner() {
 
 
           {/* 마무리 인용 */}
+          <Illust src="/media/report/total/total-6/total-6-3.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "15%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
@@ -6282,7 +6411,7 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/total/total-7/total-7-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 60%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -6301,7 +6430,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 조심해야 할 시기 */}
-          <Illust src="/media/report/total/total-7/total-7-2.jpg" h={360} />
+          <Illust src="/media/report/total/total-7/total-7-2.jpg" h={360} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "23%", left: "30%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님의 시기별 건강 흐름</Heading>
             <HealthLineChart view={report?.view ?? null} />
@@ -6310,7 +6446,13 @@ function ReportPreviewInner() {
 
 
           {/* 삽화 */}
-          <Illust src="/media/report/total/total-7/total-7-1.jpg" h={400} />
+          <Illust src="/media/report/total/total-7/total-7-1.jpg" h={400} noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
 
           {/* 마무리 인용 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
@@ -6338,9 +6480,9 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-14/total-14-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 70%" }} />
+            <img src="/media/report/total/total-9/total-14-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 70%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
@@ -6356,30 +6498,33 @@ function ReportPreviewInner() {
                 <p className="text-[14px] leading-relaxed font-semibold" style={{ color: "#3a7a4a", fontFamily: SERIF }}>{c.openMethod.callout}</p>
               </div>
             )}
+            </section>
+          <Illust src="/media/report/total/total-9/total-14-1.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
+          <section className="px-6 pt-2 pb-2">
             <GaewunMethodCard element={c.openMethod.element} tips={c.openMethod.tips} />
             {c.openMethod.paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
           </section>
 
-          {/* 삽화 */}
-          <Illust src="/media/report/total/total-14/total-14-1.jpg" h={360} />
-
-          {/* 지금 당장 시작하는 개운 루틴 */}
-          <section className="px-6 pt-4 pb-2">
-            <Heading>지금 당장 시작하는 개운 루틴</Heading>
-            {c.tomorrow.intro && <P>{c.tomorrow.intro}</P>}
-            {c.tomorrow.paragraphs?.map((p, i) => (
-              <div key={i} className="flex gap-3 items-start py-3" style={{ borderTop: `1px solid ${INK}0a` }}>
-                <span className="flex-shrink-0 text-[11px] font-black px-2 py-1 rounded-lg mt-0.5" style={{ background: `${MAROON}12`, color: MAROON, minWidth: 32, textAlign: "center" }}>{["아침", "낮", "저녁"][i] ?? `${i + 1}`}</span>
-                <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
-              </div>
-            ))}
-          </section>
 
 
           {/* 삽화 */}
           <Illust src="/media/report/total/total-14/total-14-1.jpg" h={400} />
 
           {/* 마무리 인용 */}
+          <Illust src="/media/report/total/total-9/total-14-2.jpg" noTopGrad>
+            <div className="absolute pointer-events-none" style={{ top: "22%", left: "32%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                텍스트를<br />입력하시오.
+              </p>
+            </div>
+          </Illust>
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
@@ -6407,9 +6552,9 @@ function ReportPreviewInner() {
             </h1>
           </div>
           {/* 커버 이미지 */}
-          <div className="relative overflow-hidden" style={{ height: 360 }}>
+          <div className="relative overflow-hidden" style={{ height: 520 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/total/total-16/total-16-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
+            <img src="/media/report/total/total-10/total-16-cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
