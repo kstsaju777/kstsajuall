@@ -4042,10 +4042,31 @@ function ReportPreviewInner() {
     setGenerating(true);
     const abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), 90_000); // 90초 타임아웃
+    // 2장: 컴포넌트와 동일한 로직으로 득령·득지·득시·득세 계산 → 서버에 전달
+    let deungResult: Record<string, unknown> | undefined;
+    if (toApiChapter(n) === 2 && report?.view?.pillars && report.view.pillars.length >= 4) {
+      const ps = report.view.pillars; // [시,일,월,년]
+      const ilganEl = (ps as { ganEl: string }[])[1].ganEl;
+      const generates: Record<string, string> = { 목: "화", 화: "토", 토: "금", 금: "수", 수: "목" };
+      const helps = (el: string) => el === ilganEl || generates[el] === ilganEl;
+      const seElems = [(ps as { ganEl: string }[])[0].ganEl, (ps as { ganEl: string }[])[2].ganEl, (ps as { ganEl: string }[])[3].ganEl, (ps as { jiEl: string }[])[3].jiEl];
+      const seCount = seElems.filter(helps).length;
+      deungResult = {
+        deungnyeong: helps((ps as { jiEl: string }[])[2].jiEl),
+        deungji: helps((ps as { jiEl: string }[])[1].jiEl),
+        deungsi: helps((ps as { jiEl: string }[])[0].jiEl),
+        deungse: seCount >= 2,
+        ilganEl,
+        woljiEl: (ps as { jiEl: string }[])[2].jiEl,
+        iljiEl: (ps as { jiEl: string }[])[1].jiEl,
+        sijiEl: (ps as { jiEl: string }[])[0].jiEl,
+        seCount,
+      };
+    }
     fetch("/api/saju_janyeo-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, chapter: toApiChapter(n), force }),
+      body: JSON.stringify({ id, chapter: toApiChapter(n), force, ...(deungResult ? { deungResult } : {}) }),
       signal: abort.signal,
     })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -4896,6 +4917,15 @@ function ReportPreviewInner() {
 
           </section>
 
+          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+          </div>
+
           {/* 십성 분석 + 레이더 */}
           <section className="px-6 pt-2 pb-4">
             <Heading>아이의 타고난 능력치</Heading>
@@ -4979,7 +5009,11 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" h={360} />
+          <div className="relative overflow-hidden" style={{ height: 360 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_4.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(253,248,244,1) 0%, transparent 30%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
+          </div>
 
           {/* 마무리 인용 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
@@ -5026,6 +5060,15 @@ function ReportPreviewInner() {
               <P>{[(jc.strength as { intro?: string; paragraphs?: string[] }).intro, ...((jc.strength as { paragraphs?: string[] }).paragraphs ?? [])].filter(Boolean).join("\n")}</P>
             )}
           </section>
+
+          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+          </div>
 
           {/* 용신 */}
           <section className="px-6 pt-2 pb-4">
@@ -5084,6 +5127,15 @@ function ReportPreviewInner() {
               <P>{[(jc.yongsin as { intro?: string; paragraphs?: string[] }).intro, ...((jc.yongsin as { paragraphs?: string[] }).paragraphs ?? [])].filter(Boolean).join("\n")}</P>
             )}
           </section>
+
+          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+          </div>
 
           {/* 격국 */}
           <section className="px-6 pt-2 pb-4">
@@ -5219,6 +5271,15 @@ function ReportPreviewInner() {
               </>
             );
           })()}
+
+          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_janyeo/saju_janyeo_3/saju_janyeo_3_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+          </div>
 
           {(() => {
             const ss = (jc.studyStyle as {
@@ -5371,6 +5432,15 @@ function ReportPreviewInner() {
 
                 {/* ④ 재능 키우는 방법 — tipCards형 */}
                 {(tl as { talentTipCards?: { icon: string; title: string; desc: string }[] }).talentTipCards && (tl as { talentTipCards?: { icon: string; title: string; desc: string }[] }).talentTipCards!.length > 0 && (
+                  <>
+                  <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_janyeo/saju_janyeo_4/saju_janyeo_4_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  </div>
+                  <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                    <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                  </div>
                   <section className="px-6 pt-4 pb-8">
                     <Heading>재능을 키우는 방법</Heading>
                     <div className="mt-3 space-y-2.5">
@@ -5388,6 +5458,7 @@ function ReportPreviewInner() {
                       ))}
                     </div>
                   </section>
+                  </>
                 )}
               </>
             );
@@ -5530,6 +5601,15 @@ function ReportPreviewInner() {
                   const tips = (hl as { healthTipCards?: { icon: string; title: string; desc: string }[] }).healthTipCards;
                   if (!tips || tips.length === 0) return null;
                   return (
+                    <>
+                    <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/media/report/saju_janyeo/saju_janyeo_5/saju_janyeo_5_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                    </div>
+                    <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                      <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                    </div>
                     <section className="px-6 pt-2 pb-8">
                       <Heading>건강 관리 팁</Heading>
                       <div className="mt-3 space-y-2.5">
@@ -5547,6 +5627,7 @@ function ReportPreviewInner() {
                         ))}
                       </div>
                     </section>
+                    </>
                   );
                 })()}
               </>
@@ -5759,6 +5840,15 @@ function ReportPreviewInner() {
                   const cards = (pf as { parentingTipCards?: { icon: string; title: string; desc: string }[] }).parentingTipCards;
                   if (!cards || cards.length === 0) return null;
                   return (
+                    <>
+                    <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/media/report/saju_janyeo/saju_janyeo_6/saju_janyeo_6_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                    </div>
+                    <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                      <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                    </div>
                     <section className="px-6 pt-2 pb-8">
                       <Heading>부모에게 들려줄 TIP</Heading>
                       <div className="mt-3 space-y-2.5">
@@ -5776,6 +5866,7 @@ function ReportPreviewInner() {
                         ))}
                       </div>
                     </section>
+                    </>
                   );
                 })()}
               </>
@@ -5946,6 +6037,15 @@ function ReportPreviewInner() {
 
                 {/* ② 인간관계 패턴 카드 — 세로 전체폭 */}
                 {fs.friendPattern && fs.friendPattern.length > 0 && (
+                  <>
+                  <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_janyeo/saju_janyeo_7/saju_janyeo_7_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  </div>
+                  <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                    <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                  </div>
                   <section className="px-6 pt-0 pb-4">
                     <Heading>인간관계 패턴</Heading>
                     <div className="space-y-2.5 mt-3">
@@ -5967,6 +6067,7 @@ function ReportPreviewInner() {
                       })}
                     </div>
                   </section>
+                  </>
                 )}
 
 
@@ -5997,6 +6098,15 @@ function ReportPreviewInner() {
                     </div>
                   </section>
                 )}
+
+                <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/media/report/saju_janyeo/saju_janyeo_7/saju_janyeo_7_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                </div>
+                <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                  <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                </div>
 
                 {/* ⑤ 시기별 사회성 흐름 차트 */}
                 {(() => {

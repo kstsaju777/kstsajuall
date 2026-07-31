@@ -73,10 +73,18 @@ const createSchema = z.object({
   gender: z.string().optional().default(""),
   email: z.string().optional().default(""),
 });
-const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
+const chapterSchema = z.object({
+  id: z.string().min(1),
+  chapter: z.number().int().min(1).max(30),
+  force: z.boolean().optional().default(false),
+  deungResult: z.object({
+    deungnyeong: z.boolean(), deungji: z.boolean(), deungsi: z.boolean(), deungse: z.boolean(),
+    ilganEl: z.string(), woljiEl: z.string(), iljiEl: z.string(), sijiEl: z.string(), seCount: z.number(),
+  }).optional(),
+});
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; krName?: string; sipTop?: string; sipBot?: string }[]; daeun?: { label: string; gz: string; krName?: string; yearStart: number; active: boolean; sipTop?: string; sipBot?: string }[]; ilganChar?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; krName?: string; sipTop?: string; sipBot?: string }[]; daeun?: { label: string; gz: string; krName?: string; yearStart: number; active: boolean; sipTop?: string; sipBot?: string }[]; ilganChar?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number } }) {
   const { system, user } = buildJanyeoChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -286,7 +294,7 @@ async function createReport(body: unknown) {
 async function generateChapter(body: unknown) {
   const parsed = chapterSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { id, chapter, force } = parsed.data;
+  const { id, chapter, force, deungResult } = parsed.data;
 
   const service = createServiceClient();
   const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
@@ -345,6 +353,7 @@ async function generateChapter(body: unknown) {
       yongsinEl,
       heusinEl,
       gisinEl,
+      deungResult: deungResult ?? undefined,
     });
 
     // ch2: yongsin 섹션에서 용신/희신/기신 추출 후 myeongsik에 저장 (ch3~에서 참조)
