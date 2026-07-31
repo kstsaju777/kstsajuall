@@ -5001,6 +5001,15 @@ function ReportPreviewInner() {
 
                 {/* ② 나의 인연 황금기 */}
                 {lpeak.peakPeriod && (
+                  <>
+                  <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_yeonae/saju_yeonae_4/saju_yeonae_4_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  </div>
+                  <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                    <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                  </div>
                   <section className="px-6 pt-2 pb-6">
                     <Heading>나의 인연 황금기</Heading>
                     <div className="rounded-2xl overflow-hidden mb-4" style={{ border: `2px solid #e8547a30` }}>
@@ -5029,6 +5038,7 @@ function ReportPreviewInner() {
                       )}
                     </div>
                   </section>
+                  </>
                 )}
 
                 {/* ③ 지금 당장 해야 할 것 */}
