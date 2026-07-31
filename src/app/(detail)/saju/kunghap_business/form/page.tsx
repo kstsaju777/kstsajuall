@@ -801,7 +801,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
           <div style={{ width: 1, backgroundColor: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
           <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
         </div>
-        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>소인이 작은 조언을 해주겠소</p>
+        <p className="text-[13px] font-medium mb-1" style={{ color: "#8a8a8a" }}>소인이 작은 조언을 해주겠소. (안적어도 괜찮소.)</p>
         <h2 className="text-[18px] font-bold mb-4" style={{ color: TEXT_CLR }}>
           비즈니스 고민을 적어주겠소?{" "}
           <span className="text-[13px] font-normal" style={{ color: "#888" }}>(선택)</span>
