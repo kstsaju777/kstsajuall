@@ -2292,7 +2292,7 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 
 // 장번호 → 표시 제목 (재물사주 8장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0": "인트로 · 재물사주에 대하여",
+  "0": "인트로 · 사주팔자란 무엇인가",
   "1": "제1장 · 나는 어떤 그릇으로 태어났나",
   "2": "제2장 · 돈을 대하는 나의 방식",
   "3": "제3장 · 내 사주에 재물이 보이는가",
@@ -3338,7 +3338,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "서론",   title: "재물사주에 대하여",                         no: "0" },
+  { disp: "인트로", chip: "서론",   title: "사주팔자란 무엇인가",                         no: "0" },
   { disp: "제1장",  chip: "그릇",   title: "나는 어떤 그릇으로 태어났나",               no: "1" },
   { disp: "제2장",  chip: "재물기질", title: "돈을 대하는 나의 방식",   no: "2" },
   { disp: "제3장",  chip: "재물",   title: "내 사주에 재물이 보이는가",                 no: "3" },
@@ -3386,7 +3386,7 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
               <h2 className="text-[21px] font-black" style={{ color: INK, fontFamily: SERIF }}>목차</h2>
-              <span className="text-[11.5px]" style={{ color: MUTE }}>인트로 · 서론</span>
+              <span className="text-[15px]" style={{ color: MUTE }}>[재물사주]</span>
             </div>
             <button
               onClick={onClose}
