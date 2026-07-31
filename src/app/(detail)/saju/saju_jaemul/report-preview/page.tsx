@@ -4150,7 +4150,7 @@ function ReportPreviewInner() {
               const r = await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, chapter: 7, force: true }) });
               const data = await r.json();
               if (data.sections) {
-                await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, content: data.sections }) });
+                await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, content: data.sections, force: true }) });
                 setReport(prev => prev ? { ...prev, content: { ...prev.content, ...data.sections } as typeof prev.content } : prev);
               }
             } catch { /* 실패해도 무시 */ }
