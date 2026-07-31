@@ -4141,17 +4141,16 @@ function ReportPreviewInner() {
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then(async (d) => {
           setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, concern: d.concern ?? "" });
-          // concern 있는데 concernAdvice 비어있으면 ch7 자동 재생성
+          // concern 있는데 concernAdvice 비어있으면 자동 재생성 (별도 엔드포인트)
           const concern: string = d.concern ?? "";
           const ca = (d.content?.concernAdvice as { paragraphs?: string[] } | undefined);
           const caEmpty = !ca || !ca.paragraphs || ca.paragraphs.length === 0;
           if (concern && caEmpty) {
             try {
-              const r = await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, chapter: 7, force: true }) });
-              const data = await r.json();
-              if (data.sections) {
-                await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, content: data.sections, force: true }) });
-                setReport(prev => prev ? { ...prev, content: { ...prev.content, ...data.sections } as typeof prev.content } : prev);
+              const r = await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, concernOnly: true }) });
+              const caData = await r.json();
+              if (caData.concernAdvice?.paragraphs?.length > 0) {
+                setReport(prev => prev ? { ...prev, content: { ...prev.content, concernAdvice: caData.concernAdvice } as typeof prev.content } : prev);
               }
             } catch { /* 실패해도 무시 */ }
           }
@@ -5662,7 +5661,7 @@ function ReportPreviewInner() {
               {/* 고민 조언 파트 — 고민이 있고 concernAdvice가 생성된 경우만 표시 */}
               {concern && (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs && ((jc.concernAdvice as { paragraphs?: string[] }).paragraphs ?? []).length > 0 && (
                 <div className="mb-8">
-                  <p className="text-[18px] font-black mb-5" style={{ color: INK }}>{(name.slice(1) || name)}님의 고민에 대한 조언</p>
+                  <p className="text-[18px] font-black mb-5" style={{ color: INK }}>{(name.slice(1) || name)}님의 고민에 대한 작은조언</p>
                   {/* 고민 인용구 */}
                   <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${MAROON}09`, borderLeft: `3px solid ${MAROON}55` }}>
                     <p className="text-[11px] font-bold mb-1" style={{ color: MAROON, opacity: 0.7 }}>남겨주신 고민</p>

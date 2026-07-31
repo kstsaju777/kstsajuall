@@ -116,10 +116,58 @@ export async function POST(request: NextRequest) {
   if (body && typeof body.id === "string" && body.content && typeof body.content === "object") {
     return saveContent(body.id, body.content as Record<string, unknown>, !!body.force);
   }
+  if (body && typeof body.id === "string" && body.concernOnly === true) {
+    return generateConcernAdvice(body.id);
+  }
   if (body && typeof body.id === "string" && typeof body.chapter === "number") {
     return generateChapter(body); // 그 장 생성해서 반환만(저장은 클라가 합본 1회)
   }
   return createReport(body);
+}
+
+// concernAdvice만 단독 생성 (letter와 분리 → JSON 짧아서 절대 안 잘림)
+async function generateConcernAdvice(id: string) {
+  const service = createServiceClient();
+  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
+  if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stored = data.myeongsik as any;
+  let concern: string = stored?.concern ?? "";
+  if (!concern && data.order_id) {
+    const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
+    concern = (si?.concerns as string[] | null)?.[0] ?? "";
+  }
+  if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
+
+  let manseryeokText: string | undefined = stored?.manseryeokText;
+  if (!manseryeokText) manseryeokText = (await loadManseryeokFromInputs(service, id)) ?? undefined;
+  if (!manseryeokText) return NextResponse.json({ error: "명식 정보 없음" }, { status: 500 });
+
+  const name: string = stored?.name ?? "";
+  const name1 = name.length > 1 ? name.slice(1) : name;
+  const gender: "male" | "female" = stored?.gender === "female" ? "female" : "male";
+
+  const system = `당신은 명리학 전문가 홍연이오. 홍연 말투(~이오/~하오/~겠소)로 작성하오.`;
+  const user = `다음은 ${name}님의 재물사주 만세력이오.\n\n${manseryeokText}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "${name1}님의 고민을 명식(일간·오행·십성)과 연결한 풀이 (3~4문장, 150자 이상)",\n      "현재 대운·세운이 이 고민에 주는 영향과 돌파구 시기 (3~4문장, 150자 이상)",\n      "지금 당장 실천할 수 있는 조언과 마음가짐 (2~3문장, 100자 이상)"\n    ]\n  }\n}\n\n고민의 주제(재물·인연·직업 등)에 상관없이 반드시 작성하오. 홍연 말투(~이오/~하오/~겠소).`;
+
+  for (let i = 0; i < 3; i++) {
+    try {
+      const llm = await generateInterpretation({ system, user, json: true });
+      const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
+      const paras = obj?.concernAdvice?.paragraphs;
+      if (Array.isArray(paras) && paras.length > 0) {
+        // DB에 저장 (force=true → 알림톡 X)
+        await service.from("saju_results").select("interpretation_md").eq("id", id).maybeSingle().then(async ({ data: cur }) => {
+          let existing: Record<string, unknown> = {};
+          try { existing = JSON.parse(cur?.interpretation_md || "{}") || {}; } catch { existing = {}; }
+          await service.from("saju_results").update({ interpretation_md: JSON.stringify({ ...existing, concernAdvice: obj.concernAdvice }) }).eq("id", id);
+        });
+        return NextResponse.json({ concernAdvice: obj.concernAdvice });
+      }
+    } catch { /* 재시도 */ }
+  }
+  return NextResponse.json({ concernAdvice: { paragraphs: [] } });
 }
 
 // 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
