@@ -158,7 +158,6 @@ export function formatSajuToManseryeok(
     { key: "dohwa",          label: "도화살" },
     { key: "hwagae",         label: "화개살" },
     { key: "sibisinsals",    label: "12신살" },
-    { key: "bigyeonGeobjae", label: "비견/겁재" },
     { key: "hapchung",       label: "합·충·형·해·파" },
   ];
 
