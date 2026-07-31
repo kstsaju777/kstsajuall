@@ -147,6 +147,18 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
+      // concernAdvice 별도 생성 (letter와 분리 → 신뢰성 보장)
+      try {
+        const caRes = await fetch("/api/saju_yeonae-report", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: resultId, concernOnly: true }),
+        });
+        const caData = await caRes.json();
+        if (caData.concernAdvice?.paragraphs?.length > 0) {
+          Object.assign(allContent, { concernAdvice: caData.concernAdvice });
+        }
+      } catch { /* 실패해도 계속 */ }
+
       navigatingRef.current = true;
       router.push(`/saju/saju_yeonae/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });
