@@ -4556,7 +4556,9 @@ function ReportPreviewInner() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_yeonae/saju_yeonae_1/saju_yeonae_1_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2" style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0), rgba(180,120,100,0.5))" }} />
+          </div>
+          <div className="flex justify-center" style={{ paddingTop: 12, paddingBottom: 20 }}>
+            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
           </div>
           <section className="px-6 pt-6 pb-0">
             <Heading>{name.slice(1) || name}님의 기운은 얼마나 강한가</Heading>
