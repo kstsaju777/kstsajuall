@@ -3731,7 +3731,7 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
               <h2 className="text-[21px] font-black" style={{ color: INK, fontFamily: SERIF }}>목차</h2>
-              <span className="text-[11.5px]" style={{ color: MUTE }}>홍연이 그대에게 들려줄 이야기</span>
+              <span className="text-[15px]" style={{ color: MUTE }}>[건강사주]</span>
             </div>
             <button
               onClick={onClose}

@@ -5603,7 +5603,7 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
               <h2 className="text-[21px] font-black" style={{ color: INK, fontFamily: SERIF }}>목차</h2>
-              <span className="text-[11.5px]" style={{ color: MUTE }}>홍연이 두 사람의 인연을 풀어드리겠소</span>
+              <span className="text-[15px]" style={{ color: MUTE }}>[재회궁합]</span>
             </div>
             <button
               onClick={onClose}
