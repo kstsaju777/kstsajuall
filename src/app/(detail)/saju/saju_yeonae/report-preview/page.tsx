@@ -4614,17 +4614,45 @@ function ReportPreviewInner() {
               ? [gg.intro, ...(gg.paragraphs ?? [])].join("\n")
               : gg.desc ?? "";
             return gg.name ? (
-              <section className="px-6 pt-6 pb-2">
+              <>
+              <section className="px-6 pt-2 pb-4">
                 <Heading>{name.slice(1) || name}님의 사주를 대표하는 격국</Heading>
-                <div className="rounded-2xl p-5" style={{ background: `${MAROON}08`, border: `1.5px solid ${MAROON}25` }}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="px-4 py-1.5 rounded-full font-black text-[15px]" style={{ background: MAROON, color: "#fff", fontFamily: SERIF }}>{gg.name}</div>
-                    {gg.keyword && <p className="text-[12px] font-bold" style={{ color: MAROON }}>{gg.keyword}</p>}
-                  </div>
-                  {gg.callout && <p className="text-[13px] font-bold mb-2 leading-relaxed" style={{ color: MAROON }}>{gg.callout}</p>}
-                  {ggText && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{ggText}</p>}
-                </div>
               </section>
+              <div className="mx-6 mb-6 rounded-2xl overflow-hidden relative" style={{ background: "#fff", border: "1.5px solid #e8dfd0" }}>
+                <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none select-none" style={{ opacity: 0.06 }}>
+                  <span style={{ fontSize: 130, fontFamily: SERIF, color: MAROON, lineHeight: 1 }}>格</span>
+                </div>
+                <div style={{ height: 5, background: `linear-gradient(90deg, ${MAROON}, #e07b39, #f5c842)` }} />
+                <div className="relative px-5 py-4">
+                  <p className="text-[30px] font-black leading-none mb-3" style={{ color: MAROON, fontFamily: SERIF }}>
+                    {gg.name}
+                    {(() => {
+                      const hanja: Record<string, string> = {
+                        편인격:"偏印格", 정인격:"正印格", 식신격:"食神格", 상관격:"傷官格",
+                        편재격:"偏財格", 정재격:"正財格", 편관격:"偏官格", 정관격:"正官格",
+                        비견격:"比肩格", 겁재격:"劫財格", 건록격:"建祿格", 양인격:"羊刃格",
+                      };
+                      const h = hanja[gg.name ?? ""];
+                      return h ? <span className="text-[18px] font-bold ml-2" style={{ opacity: 0.45 }}>({h})</span> : null;
+                    })()}
+                  </p>
+                  {gg.keyword && (
+                    <div className="flex gap-2 flex-wrap">
+                      {gg.keyword.split(/[·,\s]+/).filter(Boolean).map((kw: string, i: number) => {
+                        const colors = ["#e53935", "#e07b39", "#f5c842", "#43a047", "#1565c0"];
+                        const c0 = colors[i % colors.length];
+                        return (
+                          <span key={i} className="px-3 py-1 rounded-full text-[12px] font-bold" style={{ background: `${c0}18`, color: c0, border: `1.5px solid ${c0}55` }}>
+                            {kw}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+              {ggText && <div className="px-6 pb-4"><P>{ggText}</P></div>}
+              </>
             ) : null;
           })()}
 
