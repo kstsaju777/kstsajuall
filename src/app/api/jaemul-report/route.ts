@@ -56,11 +56,19 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
         obj = parseContentJson(llm.text);
       } catch (parseErr) {
         console.error(`[saju_jaemul] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
-        // 7장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
         if (chapter === 7) {
+          // letter 텍스트는 살리되 concernAdvice 빈 배열 → 아래 재시도 로직이 감지해서 재시도
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
-          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
+          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] }, concernAdvice: { paragraphs: [] } };
         } else {
+          continue;
+        }
+      }
+      // 7장: concern 있는데 concernAdvice 비어있으면 재시도
+      if (chapter === 7 && input.concern?.trim()) {
+        const ca = (obj.concernAdvice as { paragraphs?: string[] } | undefined);
+        if (!ca || !ca.paragraphs || ca.paragraphs.length === 0) {
+          console.error(`[saju_jaemul] 7장 concernAdvice 누락 (시도${i+1}), 재시도`);
           continue;
         }
       }
@@ -241,20 +249,31 @@ async function generateChapter(body: unknown) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
 
-  // myeongsik에 gender가 없으면 saju_inputs에서 fallback
-  if (!stored?.gender && data.order_id && stored) {
-    const { data: si } = await service.from("saju_inputs").select("gender").eq("order_id", data.order_id).maybeSingle();
-    if (si?.gender) stored.gender = (si.gender as string) === "female" || (si.gender as string) === "여자" || (si.gender as string) === "여성" || (si.gender as string) === "여아" ? "female" : "male";
+  // myeongsik에 gender/concern이 없으면 saju_inputs에서 fallback
+  let siConcern: string | undefined;
+  if (data.order_id && stored) {
+    const { data: si } = await service.from("saju_inputs").select("gender, concerns").eq("order_id", data.order_id).maybeSingle();
+    if (si?.gender && !stored?.gender) stored.gender = (si.gender as string) === "female" || (si.gender as string) === "여자" || (si.gender as string) === "여성" || (si.gender as string) === "여아" ? "female" : "male";
+    // saju_inputs.concerns[0] 를 concern fallback으로 사용
+    siConcern = (si?.concerns as string[] | null)?.[0] || undefined;
   }
+  const effectiveConcern: string = stored?.concern || siConcern || "";
 
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
   if (!force && isJaemulChapterReady(content, chapter)) {
-    // 이미 저장돼 있으면 그 장 섹션만 반환
-    const sections: Record<string, unknown> = {};
-    for (const k of JAEMUL_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
-    return NextResponse.json({ sections });
+    // 7장: concern 있는데 concernAdvice가 비어있으면 강제 재생성
+    const ca = (content.concernAdvice as { paragraphs?: string[] } | undefined);
+    const caEmpty = !ca || !ca.paragraphs || ca.paragraphs.length === 0;
+    if (chapter === 7 && effectiveConcern && caEmpty) {
+      // 재생성 허용 (fall through)
+    } else {
+      // 이미 저장돼 있으면 그 장 섹션만 반환
+      const sections: Record<string, unknown> = {};
+      for (const k of JAEMUL_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
+      return NextResponse.json({ sections });
+    }
   }
 
   let manseryeokText: string | undefined = stored?.manseryeokText;
@@ -275,7 +294,7 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
       seun: stored?.view?.seun ?? [],
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
-      concern: stored?.concern || undefined,
+      concern: effectiveConcern || undefined,
     });
     const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
     const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;
@@ -291,14 +310,22 @@ export async function GET(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
 
   const service = createServiceClient();
-  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md").eq("id", id).maybeSingle();
+  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
   if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern: stored?.concern ?? "", content });
+
+  // concern: myeongsik.concern 우선, 없으면 saju_inputs.concerns[0] fallback
+  let concern: string = stored?.concern ?? "";
+  if (!concern && data.order_id) {
+    const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
+    concern = (si?.concerns as string[] | null)?.[0] ?? "";
+  }
+
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern, content });
 }
 
 // ── 이미지 재생성 ──
