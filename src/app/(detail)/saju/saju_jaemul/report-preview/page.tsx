@@ -4109,6 +4109,7 @@ function ReportPreviewInner() {
   const gender = searchParams.get("gender") ?? "";
   const nameParam = searchParams.get("name") ?? "";
   const email = searchParams.get("email") ?? "";
+  const concernParam = searchParams.get("concern") ?? "";
 
   const rootRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
@@ -4138,18 +4139,34 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/jaemul-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, concern: d.concern ?? "" }))
+        .then(async (d) => {
+          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, concern: d.concern ?? "" });
+          // concern 있는데 concernAdvice 비어있으면 ch7 자동 재생성
+          const concern: string = d.concern ?? "";
+          const ca = (d.content?.concernAdvice as { paragraphs?: string[] } | undefined);
+          const caEmpty = !ca || !ca.paragraphs || ca.paragraphs.length === 0;
+          if (concern && caEmpty) {
+            try {
+              const r = await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, chapter: 7, force: true }) });
+              const data = await r.json();
+              if (data.sections) {
+                await fetch("/api/jaemul-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, content: data.sections }) });
+                setReport(prev => prev ? { ...prev, content: { ...prev.content, ...data.sections } as typeof prev.content } : prev);
+              }
+            } catch { /* 실패해도 무시 */ }
+          }
+        })
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
       fetch("/api/jaemul-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: nameParam, date, time, calendar, gender, email }),
+        body: JSON.stringify({ name: nameParam, date, time, calendar, gender, email, concern: concernParam }),
       })
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => {
-          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null });
+          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null, concern: concernParam });
           if (d.resultId) router.replace(`/saju/saju_jaemul/report-preview?id=${d.resultId}&gender=${encodeURIComponent(d.gender ?? gender)}`);
         })
         .catch(() => {})
