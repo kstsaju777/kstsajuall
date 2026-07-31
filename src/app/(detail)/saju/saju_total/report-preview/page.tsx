@@ -3993,7 +3993,6 @@ function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClo
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
               <h2 className="text-[21px] font-black" style={{ color: INK, fontFamily: SERIF }}>목차</h2>
-              <span className="text-[11.5px]" style={{ color: MUTE }}>인트로 · 서론</span>
             </div>
             <button
               onClick={onClose}
@@ -5665,7 +5664,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-2/total-2-2.jpg" h={360} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "15%", left: "70%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                {name.slice(1) || name}님에게<br />꼭 필요한 기운과<br />멀리해야할 기운을<br />알려주겠소.
               </p>
             </div>
           </Illust>
@@ -5734,7 +5733,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-2/total-2-3.jpg" h={360} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "17%", left: "72%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                {name.slice(1) || name}님을 대표하는<br />사주의 결이 있소.<br /><br />{name.slice(1) || name}님의 격국은,
               </p>
             </div>
           </Illust>
@@ -5839,7 +5838,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-4/total-4-1.jpg" h={360} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "18%", left: "42%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                사주 안에서 글자들은<br /><br />서로 싸우기도 하고,<br />힘을 합치기도 하오.
               </p>
             </div>
           </Illust>
@@ -5854,7 +5853,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-4/total-4-2.jpg" h={360} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "25%", left: "70%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                글자 하나하나가<br /><br />{name.slice(1) || name}님 인생의<br />단서였소.
               </p>
             </div>
           </Illust>
@@ -5949,7 +5948,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-3/total-3-2.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "20%", left: "65%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                {name.slice(1) || name}님이 세상에<br />내보이는 모습,<br /><br />월주에 담겨있소.
               </p>
             </div>
           </Illust>
@@ -6002,7 +6001,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-3/total-3-3.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "22%", left: "35%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                {name.slice(1) || name}님의 사주팔자를<br />MBTI로 치환하면<br />어떤 유형이 나올지<br /><br />궁금하지 않소?
               </p>
             </div>
           </Illust>
@@ -6109,19 +6108,17 @@ function ReportPreviewInner() {
 
           {/* 삽화 */}
           <Illust src="/media/report/total/total-3/total-3-1.jpg" h={360} noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "25%", left: "70%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "25%", left: "68%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                知彼知己 百戰百勝<br /><br />지피지기 백전백승
               </p>
             </div>
           </Illust>
 
           {/* 마무리 인용 */}
-          <div className="px-8 py-12 text-center">
-            <p className="text-[26px] font-black mb-3" style={{ color: INK, fontFamily: SERIF }}>知彼知己 百戰百勝</p>
-            <p className="text-[18px] font-black mb-10" style={{ color: INK, fontFamily: SERIF }}>지피지기 백전백승</p>
-            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 40px" }} />
-            <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`내가 어떤 사람인지를\n정확히 알고있어야 이겨낼 수 있소.\n결코 잊어서는 안될 것이오.`}</p>
+          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
+            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`내가 어떤 사람인지를\n정확히 알고있어야 이겨낼 수 있소.\n결코 잊어서는 안될 것이오.`}</p>
           </div>
 
           {/* 다음 장 네비 */}
@@ -6170,8 +6167,8 @@ function ReportPreviewInner() {
           {/* 세운 흐름 */}
           <Illust src="/media/report/total/total-8/total-8-1.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "22%", left: "30%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+              <p className="text-[15px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                대운의 흐름 안에서<br />해마다 어떤 운이 오는지,<br />세운으로 살펴보겠소.
               </p>
             </div>
           </Illust>
@@ -6233,7 +6230,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-5/total-5-2.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "15%", left: "50%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                언제 벌고 언제 잃는지,<br /><br />{name.slice(1) || name}님의 재물 흐름을<br />그래프로 보여드리겠소.
               </p>
             </div>
           </Illust>
@@ -6247,8 +6244,8 @@ function ReportPreviewInner() {
           {/* 적직 */}
           <Illust src="/media/report/total/total-5/total-5-3.jpg" h={360} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "25%", left: "75%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+              <p className="text-[12px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                돈보다 중요한 것은<br />맞는 일을 하는 것이오.<br /><br />{name.slice(1) || name}님에게<br />맞는 직업을 보겠소.
               </p>
             </div>
           </Illust>
@@ -6260,9 +6257,9 @@ function ReportPreviewInner() {
 
           {/* 직장인 vs 사업가 */}
           <Illust src="/media/report/total/total-5/total-5-4.jpg" h={360} noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "32%", left: "33%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "33%", left: "33%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                조직 안에서<br />빛날 것인지,<br />스스로의 길을<br />걸을 것인지,<br /><br />사주에 답이 있소.
               </p>
             </div>
           </Illust>
@@ -6288,9 +6285,9 @@ function ReportPreviewInner() {
 
           {/* 투자 */}
           <Illust src="/media/report/total/total-5/total-5-5.jpg" noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "20%", left: "60%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "19%", left: "60%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                사주는 투자도 알고 있소.<br /><br />{name.slice(1) || name}님에게 맞는<br />재테크 방식을 보여드리겠소.
               </p>
             </div>
           </Illust>
@@ -6349,8 +6346,8 @@ function ReportPreviewInner() {
           {/* 시기별 연애 흐름 */}
           <Illust src="/media/report/total/total-6/total-6-1.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "25%", left: "32%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+              <p className="text-[15px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                사랑도 때가 있소.<br /><br />{name.slice(1) || name}님의 연애 흐름을<br />그래프로 보여드리겠소.
               </p>
             </div>
           </Illust>
@@ -6363,9 +6360,9 @@ function ReportPreviewInner() {
 
           {/* 이런 사주와 잘 맞아요 */}
           <Illust src="/media/report/total/total-6/total-6-2.jpg" h={360} noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "16%", left: "50%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                {name.slice(1) || name}님과 가장 잘 맞는<br />이성의 사주가 있소.<br />딱 3명, 지금 공개하겠소!
               </p>
             </div>
           </Illust>
@@ -6379,9 +6376,9 @@ function ReportPreviewInner() {
 
           {/* 마무리 인용 */}
           <Illust src="/media/report/total/total-6/total-6-3.jpg" noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "15%", left: "50%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+            <div className="absolute pointer-events-none" style={{ top: "16%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[16px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                {name.slice(1) || name}님의 연애운도 다 살펴봤소.<br />사랑은 준비된 자에게 오는것이오.<br /><br /><span style={{ fontSize: 18 }}>잘 기억하고 준비하시오.</span>
               </p>
             </div>
           </Illust>
@@ -6433,7 +6430,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-7/total-7-2.jpg" h={360} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "23%", left: "30%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                돈도, 사랑도,<br />결국 건강해야<br />지킬 수 있는것.<br /><br />{name.slice(1) || name}님의<br />건강 흐름이오.
               </p>
             </div>
           </Illust>
@@ -6449,18 +6446,11 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-7/total-7-1.jpg" h={400} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                건강까지 모두 살펴보았소.<br /><br />{name.slice(1) || name}님에게 앞으로의 대운은<br />어떻게 펼쳐지는지 살펴보겠소.
               </p>
             </div>
           </Illust>
-
-          {/* 마무리 인용 */}
-          <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
-            <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
-            <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`${name.slice(1) || name}님에게 앞으로의 대운은\n어떻게 흐르는지 살펴보겠소.`}
-            </p>
-          </div>
+          <div className="py-10" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }} />
 
           {/* 다음 장 네비 */}
           <div style={{ background: PINK_PALE }}>
@@ -6500,9 +6490,9 @@ function ReportPreviewInner() {
             )}
             </section>
           <Illust src="/media/report/total/total-9/total-14-1.jpg" noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+            <div className="absolute pointer-events-none" style={{ top: "24%", left: "33%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[16px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+                타고난 기운을 살리면<br />운이 열리는 법이오.<br /><br />{name.slice(1) || name}님만의 개운법을<br />알려드리겠소.
               </p>
             </div>
           </Illust>
@@ -6521,14 +6511,14 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-9/total-14-2.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "22%", left: "32%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                텍스트를<br />입력하시오.
+                이로써,<br /><br />{name.slice(1) || name}님의 사주를<br />모두 살펴보았소.
               </p>
             </div>
           </Illust>
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
             <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
             <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>
-              {`이로써 ${name}님의 사주를\n모두 살펴보았소.\n\n마지막으로,\n소인이 그대에게 전하는\n서신을 남겨드리겠소.`}
+              {`마지막으로,\n소인이 그대에게 전하는\n서신을 남겨드리겠소.`}
             </p>
           </div>
 
