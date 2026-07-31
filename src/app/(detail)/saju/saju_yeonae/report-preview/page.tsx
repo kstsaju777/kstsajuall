@@ -4488,7 +4488,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 그릇</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              {name}님은<br />어떤 그릇으로 태어났나
+              나는 어떤 그릇으로 태어났나
             </h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 520 }}>
