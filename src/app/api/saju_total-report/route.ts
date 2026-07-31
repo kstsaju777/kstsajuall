@@ -69,6 +69,11 @@ function fixEomiInObj(obj: unknown): unknown {
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string; daeunNote?: string }) {
   const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult, daeunNote: input.daeunNote });
+  if (chapter === 1) {
+    console.log("[DEBUG ch1] pillars:", JSON.stringify(input.pillars ?? []));
+    const pillarLog = (input.pillars ?? []).map(p => `${p.pos}: sipTop=${p.sipTop || "(빈값)"} sipBot=${p.sipBot || "(빈값)"}`).join(" | ");
+    console.log("[DEBUG ch1] pillarTable 십성값:", pillarLog);
+  }
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
