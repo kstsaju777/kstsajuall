@@ -4751,6 +4751,15 @@ function ReportPreviewInner() {
 
                 {/* ③ 연애 성향 게이지 */}
                 {ls.traits && ls.traits.length > 0 && (
+                  <>
+                  <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_yeonae/saju_yeonae_2/saju_yeonae_2_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  </div>
+                  <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                    <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                  </div>
                   <section className="px-6 pt-6 pb-2">
                     <Heading>나의 연애 성향</Heading>
                     <div className="rounded-2xl p-5 mt-2 space-y-4" style={{ background: WHITE, border: `1px solid ${INK}0d` }}>
@@ -4767,6 +4776,7 @@ function ReportPreviewInner() {
                       ))}
                     </div>
                   </section>
+                  </>
                 )}
 
                 {/* ④ 종합 풀이 */}
