@@ -145,7 +145,7 @@ export function formatSajuToManseryeok(
   // 출력 순서를 보기 좋게 고정
   const order: { key: AnalysisField; label: string }[] = [
     { key: "ganji",          label: "천간지지 (사주 원국)" },
-    { key: "sipseong",        label: "십성" },
+
     { key: "sinStrength",     label: "신강/신약" },
     { key: "gyeokguk",        label: "격국 (억부용신)" },
     { key: "gyeokgukYongsin", label: "격국용신 (자평진전)" },

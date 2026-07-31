@@ -50,6 +50,22 @@ const chapterSchema = z.object({
   }).optional(),
 });
 
+// 홍연 말투 어미 오류 후처리
+function fixHongyeonEomi(text: string): string {
+  return text
+    .replace(/맞아소/g, "맞소")
+    .replace(/크소/g, "크오")
+    .replace(/보이소/g, "보이오");
+}
+function fixEomiInObj(obj: unknown): unknown {
+  if (typeof obj === "string") return fixHongyeonEomi(obj);
+  if (Array.isArray(obj)) return obj.map(fixEomiInObj);
+  if (obj && typeof obj === "object") {
+    return Object.fromEntries(Object.entries(obj as Record<string, unknown>).map(([k, v]) => [k, fixEomiInObj(v)]));
+  }
+  return obj;
+}
+
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string; daeunNote?: string }) {
   const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult, daeunNote: input.daeunNote });
@@ -71,6 +87,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
           continue;
         }
       }
+      obj = fixEomiInObj(obj) as Record<string, unknown>;
       // 6장: 서버 계산된 tags + pillars를 LLM 결과에 덮어씌우기
       if (Array.isArray((obj as Record<string,unknown>).compatibleJuju)) {
         const cj = (obj as Record<string,unknown>).compatibleJuju as Record<string,unknown>[];

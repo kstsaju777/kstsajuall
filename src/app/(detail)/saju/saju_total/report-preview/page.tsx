@@ -6285,7 +6285,7 @@ function ReportPreviewInner() {
 
           {/* 투자 */}
           <Illust src="/media/report/total/total-5/total-5-5.jpg" noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "19%", left: "60%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "19%", left: "58%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
                 사주는 투자도 알고 있소.<br /><br />{name.slice(1) || name}님에게 맞는<br />재테크 방식을 보여드리겠소.
               </p>
