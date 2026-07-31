@@ -2328,7 +2328,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "5": "제5장 · 아이의 건강에서 주의할 부분",
   "6": "제6장 · 아이를 키울 때 조심해야 할 시기",
   "7": "제7장 · 아이의 교우관계와 사회성",
-  "8": "마무리 · 그대에게 남기는 홍연의 서신",
+  "8": "마무리 · 부모님께 드리는 홍연의 서신",
 };
 
 // A안 읽기 순서
@@ -3375,7 +3375,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제5장",  chip: "건강",   title: "아이의 건강에서 주의할 부분",     no: "5" },
   { disp: "제6장",  chip: "양육",   title: "아이를 키울 때 조심해야 할 시기", no: "6" },
   { disp: "제7장",  chip: "친구",   title: "아이의 교우관계와 사회성",        no: "7" },
-  { disp: "마무리", chip: "결론",   title: "그대에게 남기는 홍연의 서신",     no: "8" },
+  { disp: "마무리", chip: "결론",   title: "부모님께 드리는 홍연의 서신",     no: "8" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -6240,7 +6240,7 @@ function ReportPreviewInner() {
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-                {honor}의 부모님께<br />홍연이 드리는 서신
+                부모님께 드리는 홍연의 서신
               </h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
