@@ -4935,7 +4935,14 @@ function ReportPreviewInner() {
 
                 {/* ③ 돈 성향 게이지 */}
                 {(ws.traits?.length ?? 0) > 0 && (
-                  <section className="px-6 pt-6 pb-2">
+                  <>
+                  <div className="relative w-full mt-10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_jaemul/saju_jaemul_2/saju_jaemul_2_1.jpg" alt="" className="w-full block" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                  </div>
+                  <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
+                  <section className="px-6 pt-2 pb-2">
                     <Heading>돈 성향 지수</Heading>
                     <div className="rounded-2xl px-5 py-4 mt-2 space-y-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                       {ws.traits!.map((t, i) => (
@@ -4951,6 +4958,7 @@ function ReportPreviewInner() {
                       ))}
                     </div>
                   </section>
+                  </>
                 )}
 
                 {/* ④ 종합 풀이 */}
@@ -5090,6 +5098,12 @@ function ReportPreviewInner() {
 
 
                 {/* ④ 투자 성향 레이더 차트 */}
+                <div className="relative w-full mt-10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_1.jpg" alt="" className="w-full block" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                </div>
+                <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                 {inv.types && inv.types.length > 0 && (() => {
                   const invData = inv as {
                     investorType?: string;
@@ -5242,10 +5256,18 @@ function ReportPreviewInner() {
 
                 {/* ③ 어울리는 직군 */}
                 {jf.clusters && jf.clusters.length > 0 && (
+                  <>
+                  <div className="relative w-full mt-10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_1.jpg" alt="" className="w-full block" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                  </div>
+                  <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-6">
                     <Heading>{name.slice(1)}님에게 어울리는 직군</Heading>
                     <JobFitTabs clusters={jf.clusters as JobClusterTab[]} />
                   </section>
+                  </>
                 )}
 
               </>
@@ -5346,6 +5368,13 @@ function ReportPreviewInner() {
 
                 {/* ② 재물 황금기 */}
                 {pk.peakTitle && (
+                  <>
+                  <div className="relative w-full mt-10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_1.jpg" alt="" className="w-full block" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                  </div>
+                  <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-6">
                     <Heading>{name.slice(1)}님의 재물 황금기</Heading>
                     <div className="rounded-2xl overflow-hidden mt-2 mb-4 relative" style={{ background: `linear-gradient(135deg, ${MAROON}0d 0%, ${GOLD}12 100%)`, border: `3.5px solid ${GOLD}`, boxShadow: `0 0 0 1px ${GOLD}44, 0 4px 20px ${GOLD}28` }}>
@@ -5371,6 +5400,7 @@ function ReportPreviewInner() {
                       )}
                     </div>
                   </section>
+                  </>
                 )}
 
                 {/* ② 재물의 함정 */}
@@ -5544,6 +5574,13 @@ function ReportPreviewInner() {
 
                 {/* ③ 종합 정리 */}
                 {(ws.coreMessage || (ws.items && ws.items.length > 0)) && (
+                  <>
+                  <div className="relative w-full mt-10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/media/report/saju_jaemul/saju_jaemul_6/saju_jaemul_6_1.jpg" alt="" className="w-full block" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                  </div>
+                  <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-8">
                     <Heading>{name.slice(1)}님은 이렇게 하는게 좋소</Heading>
 
@@ -5572,6 +5609,7 @@ function ReportPreviewInner() {
                     )}
 
                   </section>
+                  </>
                 )}
               </>
             );
