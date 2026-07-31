@@ -4625,6 +4625,14 @@ function ReportPreviewInner() {
           </section>
 
           {/* 오행 분석 + 도넛 */}
+          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+          </div>
           <section className="px-6 pt-2 pb-4">
             <Heading>네 기둥이 품은 인생의 흐름</Heading>
 
