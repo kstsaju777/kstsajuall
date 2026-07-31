@@ -4851,6 +4851,14 @@ function ReportPreviewInner() {
           })()}
 
           {/* 나와 찰떡궁합인 이성의 사주 */}
+          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/report/saju_yeonae/saju_yeonae_3/saju_yeonae_3_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+          </div>
+          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+          </div>
           <section className="px-6 pt-6 pb-4">
             <Heading>나와 찰떡궁합인 이성의 사주</Heading>
             <p style={{ fontSize:12, color:"#9a9a9a", margin:"-8px 0 16px", fontStyle:"italic", lineHeight:1 }}>(시주는 비중이 적으니 참고만 하시오.)</p>
