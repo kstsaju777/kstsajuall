@@ -98,10 +98,51 @@ export async function POST(request: NextRequest) {
   if (body && typeof body.id === "string" && body.content && typeof body.content === "object") {
     return saveContent(body.id, body.content as Record<string, unknown>, !!body.force);
   }
+  if (body && typeof body.id === "string" && body.concernOnly === true) {
+    return generateConcernAdvice(body.id);
+  }
   if (body && typeof body.id === "string" && typeof body.chapter === "number") {
     return generateChapter(body); // 그 장 생성해서 반환만(저장은 클라가 합본 1회)
   }
   return createReport(body);
+}
+
+// concernAdvice 단독 생성 (letter와 분리 → JSON 짧아서 출력 한계 없음)
+async function generateConcernAdvice(id: string) {
+  const service = createServiceClient();
+  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
+  if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stored = data.myeongsik as any;
+  const name: string = stored?.name ?? "";
+  const manseryeokText: string = stored?.manseryeokText ?? "";
+
+  let concern: string = stored?.concern ?? "";
+  if (!concern && data.order_id) {
+    const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
+    concern = (si?.concerns as string[] | null)?.[0] ?? "";
+  }
+  if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
+
+  const name1 = name.length > 1 ? name.slice(1) : name;
+  const system = `당신은 홍연당의 사주 풀이 AI이오. 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
+  const user = `아이 이름: ${name1}\n명식:\n${manseryeokText}\n\n부모님의 고민: "${concern}"\n\n위 고민에 대해 이 아이의 명식을 바탕으로 따뜻하고 실질적인 조언을 3~5문장으로 작성하시오.\n반드시 아래 JSON 형식으로만 출력하시오:\n{"concernAdvice":{"paragraphs":["조언 문장1","조언 문장2","조언 문장3"]}}`;
+
+  for (let i = 0; i < 3; i++) {
+    try {
+      const llm = await generateInterpretation({ system, user, json: true });
+      const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
+      const paras = obj?.concernAdvice?.paragraphs;
+      if (paras && paras.length > 0) {
+        let existing: Record<string, unknown> = {};
+        try { existing = JSON.parse(data.interpretation_md || "{}") || {}; } catch { existing = {}; }
+        await service.from("saju_results").update({ interpretation_md: JSON.stringify({ ...existing, concernAdvice: obj.concernAdvice }) }).eq("id", id);
+        return NextResponse.json({ concernAdvice: obj.concernAdvice });
+      }
+    } catch { /* retry */ }
+  }
+  return NextResponse.json({ concernAdvice: { paragraphs: [] } });
 }
 
 // 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
@@ -339,14 +380,19 @@ export async function GET(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
 
   const service = createServiceClient();
-  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md").eq("id", id).maybeSingle();
+  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
   if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, content });
+  let concern: string = stored?.concern ?? "";
+  if (!concern && data.order_id) {
+    const { data: inp } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
+    concern = (inp?.concerns as string[] | null)?.[0] ?? "";
+  }
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern, content });
 }
 
 // ── 이미지 재생성 ──

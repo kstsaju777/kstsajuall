@@ -4099,7 +4099,7 @@ function ReportPreviewInner() {
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
   type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null } | null>(null);
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; concern?: string } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -4120,7 +4120,20 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/saju_youare-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null }))
+        .then(async (d) => {
+          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, concern: d.concern ?? "" });
+          const concern: string = d.concern ?? "";
+          const caEmpty = !(d.content?.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs?.length;
+          if (concern && caEmpty) {
+            try {
+              const r = await fetch("/api/saju_youare-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, concernOnly: true }) });
+              const caData = await r.json();
+              if (caData.concernAdvice?.paragraphs?.length > 0) {
+                setReport(prev => prev ? { ...prev, content: { ...prev.content, concernAdvice: caData.concernAdvice } as typeof prev.content } : prev);
+              }
+            } catch { /* 실패 무시 */ }
+          }
+        })
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -4143,7 +4156,7 @@ function ReportPreviewInner() {
 
   // 마무리(단하의 편지) 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
   useEffect(() => {
-    if (ch !== "16") { setEventOpen(false); return; }
+    if (ch !== "7") { setEventOpen(false); return; }
     if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
     setEventOpen(true);
   }, [ch]);
@@ -5816,7 +5829,29 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_youare/saju_youare_7/saju_youare_7_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, #fdf8f4 100%)" }} />
             </div>
-            <section className="px-6 pt-4 pb-8">
+            <section className="px-6 pt-10 pb-8">
+              {/* 고민에 대한 조언 파트 */}
+              {(() => {
+                const concern = report?.concern || "";
+                const paras = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs;
+                if (!concern || !paras || paras.length === 0) return null;
+                return (
+                  <div className="mb-10">
+                    <p className="text-[18px] font-black mb-5" style={{ color: INK, fontFamily: SERIF }}>{report?.name ?? ""}님의 고민에 대한 작은 조언</p>
+                    <div className="rounded-xl px-5 py-4 mb-5" style={{ background: CALLOUT_BG, border: `1.5px solid ${ROSE}30` }}>
+                      <p className="text-[13px] leading-relaxed" style={{ color: ROSE, fontStyle: "italic" }}>"{concern}"</p>
+                    </div>
+                    <div className="rounded-2xl px-6 py-6" style={{ background: "#fff", border: `1.5px solid ${ROSE}25`, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+                      {paras.map((p, i) => (
+                        <P key={i}>{p}</P>
+                      ))}
+                    </div>
+                    <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+                      <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                    </div>
+                  </div>
+                );
+              })()}
               {((jc.letter as Record<string,unknown>)?.paragraphs as string[] | undefined)?.map((p, i) => (
                 <P key={i}>{p}</P>
               ))}

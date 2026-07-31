@@ -147,6 +147,18 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
+      // concernAdvice 별도 생성 (letter와 분리 → 신뢰성 보장)
+      try {
+        const caRes = await fetch("/api/saju_youare-report", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: resultId, concernOnly: true }),
+        });
+        const caData = await caRes.json();
+        if (caData.concernAdvice?.paragraphs?.length > 0) {
+          Object.assign(allContent, { concernAdvice: caData.concernAdvice });
+        }
+      } catch { /* 실패해도 계속 */ }
+
       // 이미지 생성 완료까지 대기 (알림톡은 PATCH 완료 후 서버에서 발송)
       await fetch("/api/saju_youare-report", {
         method: "PATCH", headers: { "Content-Type": "application/json" },
