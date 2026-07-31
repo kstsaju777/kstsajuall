@@ -47,6 +47,8 @@ const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int(
 async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[]; ilganChar?: string; concern?: string }) {
   const { system, user } = buildJaemulChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
+  // 7장: letter만 있는 최선 결과를 보관 (concernAdvice 재시도 실패 시 fallback으로 반환)
+  let ch7LetterFallback: { obj: Record<string, unknown>; provider: string; model: string } | null = null;
   for (let i = 0; i < 3; i++) {
     try {
       const llm = await generateInterpretation({ system, user, json: true });
@@ -57,17 +59,18 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
       } catch (parseErr) {
         console.error(`[saju_jaemul] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         if (chapter === 7) {
-          // letter 텍스트는 살리되 concernAdvice 빈 배열 → 아래 재시도 로직이 감지해서 재시도
           const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
-          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] }, concernAdvice: { paragraphs: [] } };
+          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
         } else {
           continue;
         }
       }
-      // 7장: concern 있는데 concernAdvice 비어있으면 재시도
+      // 7장: concern 있는데 concernAdvice 비어있으면 재시도 (letter는 보관)
       if (chapter === 7 && input.concern?.trim()) {
         const ca = (obj.concernAdvice as { paragraphs?: string[] } | undefined);
         if (!ca || !ca.paragraphs || ca.paragraphs.length === 0) {
+          const letterOk = ((obj.letter as { paragraphs?: string[] } | undefined)?.paragraphs?.length ?? 0) > 0;
+          if (letterOk && !ch7LetterFallback) ch7LetterFallback = { obj, ...meta };
           console.error(`[saju_jaemul] 7장 concernAdvice 누락 (시도${i+1}), 재시도`);
           continue;
         }
@@ -77,6 +80,11 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
     } catch (e) {
       console.error(`[saju_jaemul] ${chapter}장 예외 (시도${i+1}):`, e);
     }
+  }
+  // 7장: concernAdvice 재시도 3번 모두 실패해도 letter라도 반환
+  if (chapter === 7 && ch7LetterFallback) {
+    console.error(`[saju_jaemul] 7장 concernAdvice 생성 실패, letter 단독 반환`);
+    return ch7LetterFallback;
   }
   throw new Error(`${chapter}장 생성 실패(LLM 응답 불량)`);
 }
