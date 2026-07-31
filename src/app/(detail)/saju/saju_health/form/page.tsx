@@ -370,7 +370,7 @@ function StepConcern({ onPrev, onNext, initial }: {
           <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>건강에 대해 </span>
           <span className="font-bold">궁금한 점이 있소?</span>
         </h2>
-        <p className="text-[12px] mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>자세히 적을수록 좋소. (안적어도 괜찮소.)</p>
+        <p className="text-[12px] mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>소인이 작은 조언을 해주겠소. (안적어도 괜찮소.)</p>
         <style>{`textarea.health-concern::placeholder { color: rgba(232,184,130,0.3); }`}</style>
         <div className="rounded-2xl px-4 pt-4 pb-3" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(202,136,75,0.25)" }}>
           <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, MAX))}

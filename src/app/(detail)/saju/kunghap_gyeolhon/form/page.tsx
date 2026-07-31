@@ -392,7 +392,7 @@ function StepConcern({ onPrev, onNext, initial, name, myDate, myTime, myCalendar
           <span className="font-bold">궁금한 점이 있소?</span>
         </h2>
         <p className="text-[12px] mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>
-          자세히 적을수록 좋소. (안적어도 괜찮소.)
+          소인이 작은 조언을 해주겠소. (안적어도 괜찮소.)
         </p>
         <div className="rounded-2xl px-4 pt-4 pb-3" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(225,51,125,0.25)" }}>
           <textarea
