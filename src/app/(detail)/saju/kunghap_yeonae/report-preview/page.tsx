@@ -7036,6 +7036,16 @@ function ReportPreviewInner() {
               <MyViewCard data={partnerViewData} color={CH5_COLOR} pale={CH5_PALE} />
             </section>
 
+            {/* ── 일러스트 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_5/kunghap_yeonae_5_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
+
             {/* 상대가 나에게 기대하는 것 */}
             {partnerExpectation?.items && partnerExpectation.items.length > 0 && (
               <section className="pb-4">
