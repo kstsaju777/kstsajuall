@@ -3059,7 +3059,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "6":  "제6장 · 궁합의 핵심: 합과 충",
   "7":  "제7장 · 연애 스타일의 차이",
   "8":  "제8장 · 이 관계의 빛과 그림자",
-  "9":  "제9장 · 위기와 극복",
+  "9":  "제9장 · 두 사람의 위기와 극복",
   "10": "제10장 · 결혼으로 이어지는가",
   "11": "마무리 · 그대들에게 남기는 홍연의 서신",
 };
@@ -5384,7 +5384,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제6장",  chip: "합충형", title: "궁합의 핵심: 합과 충",                no: "6" },
   { disp: "제7장",  chip: "스타일", title: "연애 스타일의 차이",                   no: "7" },
   { disp: "제8장",  chip: "빛그림자",title: "이 관계의 빛과 그림자",              no: "8" },
-  { disp: "제9장",  chip: "위기극복",title: "위기와 극복",                        no: "9" },
+  { disp: "제9장",  chip: "위기극복",title: "두 사람의 위기와 극복",               no: "9" },
   { disp: "제10장", chip: "결혼",   title: "결혼으로 이어지는가",                  no: "10" },
   { disp: "마무리", chip: "당부",   title: "그대들에게 남기는 홍연의 서신",        no: "11" },
 ];
@@ -7381,7 +7381,7 @@ function ReportPreviewInner() {
             {/* 헤더 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 9 장 · 위기·극복</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>위기와 극복</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람의 위기와 극복</h1>
             </div>
             {/* 커버 이미지 */}
             <div className="relative overflow-hidden" style={{ height: 420 }}>
