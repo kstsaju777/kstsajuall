@@ -8087,7 +8087,7 @@ function ReportPreviewInner() {
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 자녀운</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼 후 두사람의 자녀운</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이가 들어오는 인연일까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
