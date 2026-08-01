@@ -1257,124 +1257,6 @@ function RecoGrid({ excludeSlug }: { excludeSlug: string }) {
   );
 }
 
-// SNS 리뷰 이벤트 팝업 (마무리 장 진입 시)
-function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
-  const [slide, setSlide] = useState(0);
-  const [hide, setHide] = useState(false);
-  const [link, setLink] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const sns = [
-    { label: "네이버 블로그", color: "#03c75a", t: "b" },
-    { label: "인스타그램", color: "#e1306c", t: "✦" },
-    { label: "카카오스토리", color: "#f9e000", t: "K", tc: "#3c1e1e" },
-  ];
-  const steps = [
-    { icon: "📸", title: "풀이 화면 캡쳐", desc: "인상 깊었던 장면을 1장 이상 사진으로 담아주시오." },
-    { icon: "✍️", title: "솔직한 후기 작성", desc: "소름 돋았던 부분, 맞아떨어진 부분을 진솔하게 써주시오." },
-    { icon: "🔖", title: "'홍연사주' 태그 포함", desc: "후기에 #홍연사주 #사주 태그를 반드시 넣어주시오." },
-  ];
-  const numBadge = (n: string) => (
-    <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[12px] font-black" style={{ width: 22, height: 22, background: "#5a8a4a" }}>{n}</span>
-  );
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5" style={{ pointerEvents: "auto" }}>
-      <div onClick={() => onClose(hide)} className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
-      <div className="relative w-full overflow-hidden rounded-3xl" style={{ maxWidth: 360, background: "#faf6ef", boxShadow: "0 16px 50px rgba(0,0,0,0.35)" }}>
-        {slide === 0 ? (
-          <>
-            <button onClick={() => onClose(hide)} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "rgba(0,0,0,0.25)", color: "#fff", fontSize: 15, lineHeight: 1 }} aria-label="닫기">✕</button>
-            {/* 표지 이미지 */}
-            <div className="relative" style={{ height: 210 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/total/total-1/total-1-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.3) 60%, #faf6ef 100%)" }} />
-            </div>
-            <div className="px-6 pb-2 mt-2 text-center">
-              <h3 className="text-[20px] font-black" style={{ color: "#2a2320" }}>SNS 리뷰 이벤트</h3>
-              <p className="text-[13px] mt-1.5" style={{ color: "#7a6a5a" }}>후기 남기면 전 제품 무료쿠폰을 드려요!</p>
-              <span className="inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full" style={{ background: "#e8f5e9", color: "#3a7d44" }}>이벤트 마감 일시: 2999. 12. 31.</span>
-              <div className="rounded-2xl px-5 py-5 mt-4" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8" }}>
-                <span className="text-[11px] font-black px-2.5 py-1 rounded-full" style={{ background: "#5a8a4a", color: "#fff" }}>BENEFIT</span>
-                <p className="text-[20px] font-black mt-2.5" style={{ color: "#2a2320" }}>무료쿠폰 1장 제공</p>
-              </div>
-              <button onClick={() => setSlide(1)} className="w-full mt-4 py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: "#5a8a4a" }}>참여하고 무료쿠폰 받기 ›</button>
-              <p className="text-[11.5px] mt-2.5" style={{ color: "#a09080" }}>참여 방법은 오른쪽으로 스와이프 하기 →</p>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* 헤더바 */}
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #e0d5c0" }}>
-              <button onClick={() => setSlide(0)} className="text-[13px] font-bold flex items-center gap-1" style={{ color: "#7a6a5a" }}>‹ 안내로</button>
-              <span className="text-[15px] font-black" style={{ color: "#2a2320", fontFamily: SERIF }}>참여 방법</span>
-              <button onClick={() => onClose(hide)} className="flex items-center justify-center rounded-full" style={{ width: 26, height: 26, background: "#e8dfc8", color: "#5a4a3a", fontSize: 13, lineHeight: 1 }} aria-label="닫기">✕</button>
-            </div>
-            <div className="px-5 py-4">
-              {/* 홍연 도입 멘트 */}
-              <div className="rounded-2xl px-4 py-3 mb-3 text-center" style={{ background: "#f5efe3", border: "1px solid #d8c9a8" }}>
-                <p className="text-[12.5px] leading-relaxed" style={{ color: "#5a4030", fontFamily: SERIF }}>
-                  "그대의 진심 어린 한마디가<br />귀인을 불러오는 법이오.<br />후기를 남기고 쿠폰을 받아가시오."
-                </p>
-                <p className="text-[11px] mt-1.5 font-bold" style={{ color: "#a09080" }}>— 홍연</p>
-              </div>
-
-              {/* SNS 채널 */}
-              <div className="flex justify-around mb-3 px-2">
-                {sns.map((s, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5">
-                    <span className="flex items-center justify-center rounded-2xl font-black text-[18px]" style={{ width: 52, height: 52, background: s.color, color: (s as {tc?: string}).tc ?? "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>{s.t}</span>
-                    <span className="text-[11px] font-bold" style={{ color: "#5a4a3a" }}>{s.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* 단계별 안내 */}
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #d8c9a8" }}>
-                {steps.map((s, i) => (
-                  <div key={i} className="flex items-start gap-3 px-4 py-3" style={{ background: i % 2 === 0 ? "#f5efe3" : "#f0ebe0", borderTop: i > 0 ? "1px solid #e0d0b0" : "none" }}>
-                    <span className="text-[20px] flex-shrink-0 mt-0.5">{s.icon}</span>
-                    <div>
-                      <p className="text-[12.5px] font-black mb-0.5" style={{ color: "#2a2320" }}>{s.title}</p>
-                      <p className="text-[11.5px] leading-relaxed" style={{ color: "#7a6a5a" }}>{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 링크 제출 */}
-              <div className="mt-3">
-                {submitted ? (
-                  <div className="rounded-2xl py-5 text-center" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8" }}>
-                    <p className="text-[26px] mb-1">🎁</p>
-                    <p className="text-[14px] font-black" style={{ color: "#9b2335", fontFamily: SERIF }}>제출이 완료되었소!</p>
-                    <p className="text-[11.5px] mt-1" style={{ color: "#a09080" }}>확인 후 쿠폰을 전해드리겠소.</p>
-                  </div>
-                ) : (
-                  <>
-                    <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="후기 링크를 붙여넣으시오" className="w-full rounded-xl px-3.5 py-3 text-[13px] outline-none mb-2" style={{ background: "#f5efe3", border: "1px solid #d0c0a0", color: "#2a2320" }} />
-                    <button onClick={() => link.trim() && setSubmitted(true)} className="w-full py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: link.trim() ? "#9b2335" : "#c8bca8", fontFamily: SERIF }}>쿠폰 받기 ›</button>
-                  </>
-                )}
-              </div>
-              <p className="text-[10px] leading-relaxed text-center mt-3" style={{ color: "#b0a090" }}>1인 1회 참여 가능하며, AI 작성 후기는 제외됩니다.</p>
-            </div>
-          </>
-        )}
-        {/* 슬라이드 도트 */}
-        <div className="flex justify-center gap-1.5 pb-1">
-          {[0, 1].map((i) => (
-            <button key={i} onClick={() => setSlide(i)} className="rounded-full transition-all" style={{ width: slide === i ? 18 : 7, height: 7, background: slide === i ? "#5a8a4a" : "#d0c0a0" }} />
-          ))}
-        </div>
-        {/* 다시 보지 않기 */}
-        <button onClick={() => setHide((v) => !v)} className="w-full flex items-center gap-2 px-6 py-3.5 mt-1" style={{ borderTop: "1px solid #e0d5c0" }}>
-          <span className="flex items-center justify-center rounded" style={{ width: 17, height: 17, border: `1.5px solid ${hide ? "#5a8a4a" : "#c0b090"}`, background: hide ? "#5a8a4a" : "transparent", color: "#fff", fontSize: 11, lineHeight: 1 }}>{hide ? "✓" : ""}</span>
-          <span className="text-[12.5px]" style={{ color: "#9a8a7a" }}>다시 보지 않기</span>
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // 홍연 낙관(도장) — 붉은 사각 전각
 function SealStamp() {
@@ -4103,7 +3985,6 @@ function ReportPreviewInner() {
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
-  const [eventOpen, setEventOpen] = useState(false); // 마무리 장 진입 시 SNS 리뷰 이벤트 팝업
   const [isAdmin, setIsAdmin] = useState(false);
   const startedRef = useRef(false);
   const generatedRef = useRef(false); // 일괄 생성 1회만
@@ -4154,12 +4035,6 @@ function ReportPreviewInner() {
 
   const openMyeongsik = () => setMsOpen(true);
 
-  // 마무리(단하의 편지) 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
-  useEffect(() => {
-    if (ch !== "7") { setEventOpen(false); return; }
-    if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
-    setEventOpen(true);
-  }, [ch]);
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
   const persist = (mergedContent: Record<string, unknown>, force = false) => {
@@ -5883,7 +5758,7 @@ function ReportPreviewInner() {
       {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "7" && (
         <>
-          <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
+          <div>
             <div className="text-center px-6 py-5" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.45)", fontFamily: SERIF }}>마무리 · 결론</p>
               <h1 className="text-[22px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대에게 남기는 홍연의 서신</h1>
@@ -5930,9 +5805,6 @@ function ReportPreviewInner() {
             <div className="pb-10" />
             <ChapterNav cur="7" go={next} />
           </div>
-          {eventOpen && (
-            <EventPopup onClose={(hide) => { if (hide && typeof window !== "undefined") localStorage.setItem("hyd_event_hide", "1"); setEventOpen(false); }} />
-          )}
         </>
       )}
       </>
