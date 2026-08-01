@@ -5124,7 +5124,7 @@ function ReportPreviewInner() {
           </section>
 
           {/* 삽화 */}
-          <Illust src="/media/report/saju_youare/saju_youare_1/saju_youare_1_1.jpg" h={360} />
+          <Illust src="/media/report/saju_youare/saju_youare_1/saju_youare_1_4.jpg" h={360} />
 
           {/* 마무리 인용 */}
           <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
