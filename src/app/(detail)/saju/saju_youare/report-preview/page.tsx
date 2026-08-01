@@ -5776,7 +5776,7 @@ function ReportPreviewInner() {
                 if (!concern || !paras || paras.length === 0) return null;
                 return (
                   <div className="mb-10">
-                    <p className="text-[18px] font-black mb-5" style={{ color: INK, fontFamily: SERIF }}>{report?.name ?? ""}님의 고민에 대한 작은조언</p>
+                    <Heading>{report?.name ?? ""}님의 고민에 대한 작은조언</Heading>
                     <div className="rounded-xl px-5 py-4 mb-5" style={{ background: CALLOUT_BG, border: `1.5px solid ${ROSE}30` }}>
                       <p className="text-[13px] leading-relaxed" style={{ color: ROSE, fontStyle: "italic" }}>"{concern}"</p>
                     </div>
