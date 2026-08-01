@@ -126,8 +126,46 @@ async function generateConcernAdvice(id: string) {
   if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
 
   const name1 = name.length > 1 ? name.slice(1) : name;
+
+  // 현재 대운 코드 계산 (종합사주와 동일 — AI 오판 방지)
+  let daeunNote = "";
+  const daeunList: { label: string; gz: string; active?: boolean }[] = stored?.view?.daeun ?? [];
+  if (daeunList.length > 0) {
+    const currentYear = new Date().getFullYear();
+    const birthDateStr: string = stored?.birth?.date ?? "";
+    const birthYearNum = birthDateStr ? Number(birthDateStr.split(".")[0]) : currentYear;
+    const currentAge = currentYear - birthYearNum;
+    let currentDaeun = daeunList.find(d => d.active);
+    if (!currentDaeun) {
+      const sorted = [...daeunList].sort((a, b) => Number(a.label) - Number(b.label));
+      for (let i = sorted.length - 1; i >= 0; i--) {
+        if (currentAge >= Number(sorted[i].label)) { currentDaeun = sorted[i]; break; }
+      }
+    }
+    if (currentDaeun) {
+      const idx = daeunList.findIndex(d => d.gz === currentDaeun!.gz && d.label === currentDaeun!.label);
+      const startAge = Number(currentDaeun.label);
+      const endAge = daeunList[idx + 1] ? Number(daeunList[idx + 1].label) - 1 : startAge + 9;
+      const startYear = birthYearNum + startAge;
+      const endYear = birthYearNum + endAge;
+      const yearsIn = currentYear - startYear;
+      daeunNote = `[현재 대운 고정값 — 반드시 이 값만 사용, 독자적 재산출 절대 금지]\n현재 대운: ${currentDaeun.gz} (${startAge}세~${endAge}세, ${startYear}년~${endYear}년)\n현재 나이: ${currentAge}세 (${currentYear}년 기준) — 이 대운 시작 후 ${yearsIn}년차`;
+    }
+  }
+
+  // 현재 세운 계산
+  let seunNote = "";
+  const seunList: { label: string; gz: string; active?: boolean }[] = stored?.view?.seun ?? [];
+  if (seunList.length > 0) {
+    const currentYear = new Date().getFullYear();
+    const currentSeun = seunList.find(s => Number(s.label) === currentYear) ?? seunList.find(s => s.active);
+    if (currentSeun) seunNote = `[현재 세운 고정값 — 반드시 이 값만 사용]\n현재 세운: ${currentSeun.gz} (${currentYear}년)`;
+  }
+
+  const daeunSeunBlock = [daeunNote, seunNote].filter(Boolean).join("\n\n");
+
   const system = `당신은 홍연당의 사주 풀이 AI이오. 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
-  const user = `다음은 ${name1}님의 건강사주 만세력이오.\n\n${manseryeokText}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "${name1}님의 고민을 명식(일간·오행·십성)과 연결한 풀이 — 이 고민이 왜 생겼는지 명식 구조로 설명 (3~4문장, 150자 이상)",\n      "명식에서 이 고민을 해결할 수 있는 힘과 방향 — 용신·희신 또는 강한 오행을 활용한 구체적 돌파구 (3~4문장, 150자 이상)",\n      "지금 당장 실천할 수 있는 조언과 마음가짐 (2~3문장, 100자 이상)"\n    ]\n  }\n}\n\n고민의 주제(건강·체질·생활습관 등)에 상관없이 반드시 작성하오. 세운·대운은 언급하지 마오. 홍연 말투(~이오/~하오/~겠소).`;
+  const user = `다음은 ${name1}님의 건강사주 만세력이오.\n\n${manseryeokText}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "${name1}님의 고민을 명식(일간·오행·십성)과 연결한 풀이 — 이 고민이 왜 생겼는지 명식 구조로 설명 (4~5문장, 200자 이상)",\n      "위에 제공된 현재 대운·세운 고정값을 기준으로, 이 흐름이 고민에 어떤 영향을 주는지 분석하는 단락 — 언제쯤 상황이 나아지거나 결실이 오는지 구체적으로 짚어주오 (4~5문장, 200자 이상)",\n      "이 고민을 풀어가기 위해 지금 당장 실천할 수 있는 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n고민의 주제(건강·체질·생활습관 등)에 상관없이 반드시 작성하오. 홍연 말투(~이오/~하오/~겠소).`;
 
   for (let i = 0; i < 3; i++) {
     try {
