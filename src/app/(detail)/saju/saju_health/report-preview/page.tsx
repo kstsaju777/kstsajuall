@@ -5313,6 +5313,14 @@ function ReportPreviewInner() {
             {wp.paragraphs?.[0] && <section className="px-6 pb-4"><P>{wp.paragraphs[0]}</P></section>}
 
             {/* ── ④ 취약 부위 상세 카드 ── */}
+            <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_2/saju_health_2_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
             {wp.parts && wp.parts.length > 0 && (
               <section className="px-6 pb-6">
                 <Heading>주요 취약 부위</Heading>
