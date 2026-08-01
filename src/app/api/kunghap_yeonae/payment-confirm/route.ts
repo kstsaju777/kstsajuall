@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
   if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다" }, { status: 503 });
 
   try {
-    const partnerDataRaw = (input.concerns as string[] | null)?.[0] ?? "{}";
+    const concernsArr = (input.concerns as string[] | null) ?? [];
+    const partnerDataRaw = concernsArr.at(-1) ?? "{}";
     const partnerData = JSON.parse(partnerDataRaw);
     const { partnerName: pName, partnerBirthDate, partnerBirthTime, partnerGender: pGenderRaw, partnerCalendar: pCalendar } = partnerData;
 
