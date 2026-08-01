@@ -5627,7 +5627,7 @@ function ReportPreviewInner() {
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
   type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string; partnerGender?: string; partnerBirth?: BirthMeta } | null>(null);
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string; partnerGender?: string; partnerBirth?: BirthMeta; concern?: string } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -5648,7 +5648,7 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/kunghap_banryeo-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null }))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null, concern: d.concern ?? "" }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -5659,7 +5659,7 @@ function ReportPreviewInner() {
       })
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => {
-          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null });
+          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null, concern: d.concern ?? "" });
           if (d.resultId) router.replace(`/saju/kunghap_banryeo/report-preview?id=${d.resultId}&gender=${encodeURIComponent(d.gender ?? gender)}`);
         })
         .catch(() => {})
@@ -5675,6 +5675,28 @@ function ReportPreviewInner() {
     if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
     setEventOpen(true);
   }, [ch]);
+
+  // 고민 조언 온디맨드 생성 (마무리 장 진입 시, 고민이 있고 아직 생성 안 된 경우)
+  useEffect(() => {
+    if (ch !== "7") return;
+    if (!id) return;
+    if (!report?.concern) return;
+    if ((jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs?.length) return;
+    fetch("/api/kunghap_banryeo-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, concernOnly: true }),
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => {
+        if (!d?.concernAdvice?.paragraphs?.length) return;
+        setReport((p) => {
+          if (!p) return p;
+          return { ...p, content: { ...(p.content as Record<string, unknown>), concernAdvice: d.concernAdvice } as ReportContent };
+        });
+      })
+      .catch(() => {});
+  }, [ch, id, report?.concern]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
   const persist = (mergedContent: Record<string, unknown>, skipAlimtalk = false) => {
@@ -6882,6 +6904,28 @@ function ReportPreviewInner() {
             </div>
 
             <section className="px-6 pt-10 pb-8">
+              {(() => {
+                const name7 = report?.name?.trim() || "";
+                const name1_7 = name7.length > 1 ? name7.slice(1) : name7;
+                const concernParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
+                const hasConcern = !!report?.concern;
+                return (
+                  <>
+                    {hasConcern && concernParas.length > 0 && (
+                      <div className="mb-8">
+                        <h2 className="text-[17px] font-black mb-4" style={{ color: INK, fontFamily: SERIF }}>{name1_7}님의 고민에 대한 조언</h2>
+                        {concernParas.map((p, i) => <P key={i}>{p}</P>)}
+                        <div className="my-6" style={{ width: "100%", height: 1, background: `${INK}15` }} />
+                      </div>
+                    )}
+                    {hasConcern && concernParas.length === 0 && (
+                      <div className="mb-8 p-4 rounded-2xl text-center" style={{ background: `${ROSE}08`, border: `1px solid ${ROSE}20` }}>
+                        <p className="text-[13px]" style={{ color: MUTE }}>고민 조언을 생성 중이오…</p>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
               {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
                 <P key={i}>{p}</P>
               ))}

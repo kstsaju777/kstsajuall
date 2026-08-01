@@ -24,6 +24,7 @@ import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
 import { fixNamesInValue } from "@/lib/saju/fix-names";
+import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
 
 export const maxDuration = 300;
 
@@ -44,6 +45,7 @@ const createSchema = z.object({
   partnerTime: z.string().optional().default(""),
   partnerCalendar: z.string().optional().default("양력"),
   partnerGender: z.string().optional().default(""),
+  concern: z.string().optional().default(""),
 });
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
@@ -110,10 +112,121 @@ async function loadManseryeokFromInputs(service: any, resultId: string): Promise
   return formatSajuToManseryeok(analysis, birthInfo);
 }
 
+// ── 고민 조언 단독 생성 ──
+async function generateConcernAdvice(id: string) {
+  const service = createServiceClient();
+  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
+  if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stored = data.myeongsik as any;
+  let concern: string = stored?.["{고민}"] ?? stored?.concern ?? "";
+  if (!concern && data.order_id) {
+    const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
+    const arr = (si?.concerns as string[] | null) ?? [];
+    concern = arr[0] ?? "";
+  }
+  if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
+
+  const manseryeokText: string = stored?.manseryeokText ?? stored?.["{명식표1}"] ?? "";
+  const partnerManseryeokText: string = stored?.partnerManseryeokText ?? stored?.["{명식표2}"] ?? "";
+  const name: string = stored?.name ?? stored?.["{이름1}"] ?? "";
+  const partnerName: string = stored?.partnerName ?? stored?.["{이름2}"] ?? "";
+  const name1 = name.length > 1 ? name.slice(1) : name;
+  const partnerName1 = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+
+  const ilganFull: string = stored?.view?.ilgan ?? "";
+  const partnerIlganFull: string = stored?.partnerView?.ilgan ?? "";
+  const ilgan = ilganFull.charAt(0) || "";
+  const partnerIlgan = partnerIlganFull.charAt(0) || "";
+
+  const STEMS_60    = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+  const BRANCHES_60 = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  const GAN_KOR: Record<string,string> = {"甲":"갑","乙":"을","丙":"병","丁":"정","戊":"무","己":"기","庚":"경","辛":"신","壬":"임","癸":"계"};
+  const JI_KOR:  Record<string,string> = {"子":"자","丑":"축","寅":"인","卯":"묘","辰":"진","巳":"사","午":"오","未":"미","申":"신","酉":"유","戌":"술","亥":"해"};
+
+  let daeunNote = "";
+  const daeunList: { label: string; gz: string; active?: boolean }[] = stored?.view?.daeun ?? [];
+  if (daeunList.length > 0) {
+    const currentYear = new Date().getFullYear();
+    const birthDateStr: string = stored?.birth?.date ?? "";
+    const birthYearNum = birthDateStr ? Number(birthDateStr.split(".")[0]) : currentYear;
+    const currentAge = currentYear - birthYearNum;
+    let cur = daeunList.find(d => d.active);
+    if (!cur) { const sorted = [...daeunList].sort((a,b)=>Number(a.label)-Number(b.label)); for(let i=sorted.length-1;i>=0;i--){if(currentAge>=Number(sorted[i].label)){cur=sorted[i];break;}} }
+    if (cur) {
+      const idx = daeunList.findIndex(d=>d.gz===cur!.gz&&d.label===cur!.label);
+      const startAge=Number(cur.label); const endAge=daeunList[idx+1]?Number(daeunList[idx+1].label)-1:startAge+9;
+      const startYear=birthYearNum+startAge; const endYear=birthYearNum+endAge; const yearsIn=currentYear-startYear;
+      daeunNote=`[${name1}님 현재 대운 고정값 — 반드시 이 값만 사용, 독자적 재산출 절대 금지]\n현재 대운: ${cur.gz} (${startAge}세~${endAge}세, ${startYear}년~${endYear}년)\n현재 나이: ${currentAge}세 (${currentYear}년 기준) — 이 대운 시작 후 ${yearsIn}년차`;
+    }
+  }
+  let partnerDaeunNote = "";
+  const partnerDaeunList: { label: string; gz: string; active?: boolean }[] = stored?.partnerView?.daeun ?? [];
+  if (partnerDaeunList.length > 0) {
+    const currentYear = new Date().getFullYear();
+    const pBirthDateStr: string = stored?.partnerBirth?.date ?? "";
+    const pBirthYearNum = pBirthDateStr ? Number(pBirthDateStr.split(".")[0]) : currentYear;
+    const pCurrentAge = currentYear - pBirthYearNum;
+    let pCur = partnerDaeunList.find(d=>d.active);
+    if (!pCur) { const sorted=[...partnerDaeunList].sort((a,b)=>Number(a.label)-Number(b.label)); for(let i=sorted.length-1;i>=0;i--){if(pCurrentAge>=Number(sorted[i].label)){pCur=sorted[i];break;}} }
+    if (pCur) {
+      const idx=partnerDaeunList.findIndex(d=>d.gz===pCur!.gz&&d.label===pCur!.label);
+      const startAge=Number(pCur.label); const endAge=partnerDaeunList[idx+1]?Number(partnerDaeunList[idx+1].label)-1:startAge+9;
+      const startYear=pBirthYearNum+startAge; const endYear=pBirthYearNum+endAge; const yearsIn=currentYear-startYear;
+      partnerDaeunNote=`[${partnerName1}님 현재 대운 고정값 — 반드시 이 값만 사용, 독자적 재산출 절대 금지]\n현재 대운: ${pCur.gz} (${startAge}세~${endAge}세, ${startYear}년~${endYear}년)\n현재 나이: ${pCurrentAge}세 (${currentYear}년 기준) — 이 대운 시작 후 ${yearsIn}년차`;
+    }
+  }
+  const currentYear = new Date().getFullYear();
+  const seunGan = STEMS_60[((currentYear-4)%10+10)%10];
+  const seunJi  = BRANCHES_60[((currentYear-4)%12+12)%12];
+  const seunGanKor = GAN_KOR[seunGan]??seunGan; const seunJiKor=JI_KOR[seunJi]??seunJi;
+  let seunLine = `[현재 세운 고정값 — 반드시 이 값만 사용]\n${currentYear}년 세운: ${seunGan}${seunJi}(${seunGanKor}${seunJiKor}년)`;
+  if (ilgan && partnerIlgan) {
+    const myGanSip=sipseongOfStem(ilgan,seunGan); const myJiSip=sipseongOfBranch(ilgan,seunJi);
+    const ptGanSip=sipseongOfStem(partnerIlgan,seunGan); const ptJiSip=sipseongOfBranch(partnerIlgan,seunJi);
+    seunLine+=`\n${name1}님: 천간→${myGanSip} / 지지→${myJiSip}\n${partnerName1}님: 천간→${ptGanSip} / 지지→${ptJiSip}`;
+  }
+  const daeunSeunBlock = [daeunNote, partnerDaeunNote, seunLine].filter(Boolean).join("\n\n");
+
+  let prevChapterContext = "";
+  try {
+    const prev = JSON.parse(data.interpretation_md || "{}") as Record<string, unknown>;
+    const lines: string[] = [];
+    const os = prev.overallScore as { score?: number; label?: string } | undefined;
+    if (os?.score !== undefined) lines.push(`궁합 점수: ${os.score}점 (${os.label ?? ""})`);
+    const cs = prev.compatScore as { score?: number; label?: string; desc?: string } | undefined;
+    if (cs?.score !== undefined) lines.push(`사업 궁합 점수: ${cs.score}점 (${cs.label ?? ""})`);
+    const bf = prev.bizFutureFlow as { desc?: string } | undefined;
+    if (bf?.desc) lines.push(`사업 미래 흐름: ${bf.desc.slice(0, 100)}…`);
+    if (lines.length > 0) prevChapterContext = `\n\n[이 궁합 리포트에서 이미 분석된 핵심 결과 — 반드시 이 내용과 일치하는 조언을 작성할 것]\n${lines.join("\n")}`;
+  } catch { /* 무시 */ }
+
+  const system = `당신은 홍연당의 사주 풀이 AI이오. 두 사람의 비즈니스궁합 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
+  const user = `다음은 두 사람의 비즈니스궁합 만세력이오.\n\n[${name1}님 만세력]\n${manseryeokText}\n\n[${partnerName1}님 만세력]\n${partnerManseryeokText}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}${prevChapterContext}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "이 고민을 두 사람의 명식(일간·오행·십성·합충) 구조와 연결한 풀이 (4~5문장, 200자 이상)",\n      "현재 대운·세운 흐름과 사업 궁합 분석 결과를 기준으로 설명 (4~5문장, 200자 이상)",\n      "이 고민을 풀어가기 위한 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n홍연 말투(~이오/~하오/~겠소).`;
+
+  for (let i = 0; i < 3; i++) {
+    try {
+      const llm = await generateInterpretation({ system, user, json: true });
+      const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
+      const paras = obj?.concernAdvice?.paragraphs;
+      if (Array.isArray(paras) && paras.length > 0) {
+        let existing: Record<string, unknown> = {};
+        try { existing = JSON.parse(data.interpretation_md || "{}") || {}; } catch { existing = {}; }
+        await service.from("saju_results").update({ interpretation_md: JSON.stringify({ ...existing, concernAdvice: obj.concernAdvice }) }).eq("id", id);
+        return NextResponse.json({ concernAdvice: obj.concernAdvice });
+      }
+    } catch { /* 재시도 */ }
+  }
+  return NextResponse.json({ concernAdvice: { paragraphs: [] } });
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   if (body && typeof body.id === "string" && body.content && typeof body.content === "object") {
     return saveContent(body.id, body.content as Record<string, unknown>, !!body.force);
+  }
+  if (body && typeof body.id === "string" && body.concernOnly === true) {
+    return generateConcernAdvice(body.id);
   }
   if (body && typeof body.id === "string" && typeof body.chapter === "number") {
     return generateChapter(body);
@@ -151,7 +264,7 @@ async function createReport(body: unknown) {
   }
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
-  const { name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender } = parsed.data;
+  const { name, date, time, calendar, gender, email, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender, concern } = parsed.data;
 
   const pad = (n: number | string) => String(n).padStart(2, "0");
 
@@ -239,10 +352,10 @@ async function createReport(body: unknown) {
       birth_date: `${ymd.year}-${pad(ymd.month)}-${pad(ymd.day)}`,
       birth_time: hasTime ? `${pad(hh)}:${pad(mm)}` : null,
       time_unknown: !hasTime, gender: g,
-      calendar: cal === "solar" ? "solar" : "lunar", concerns: [],
+      calendar: cal === "solar" ? "solar" : "lunar", concerns: concern ? [concern] : [],
     });
 
-    const storedMyeongsik = { view, name, birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg };
+    const storedMyeongsik = { view, name, birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName, partnerBirth, partnerGender: pg, "{고민}": concern ?? "" };
 
     const { data: result, error: resultErr } = await service
       .from("saju_results")
@@ -479,6 +592,7 @@ export async function GET(request: NextRequest) {
     partnerBirth: stored?.partnerBirth ?? null,
     partnerGender: stored?.partnerGender ?? "",
     partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null,
+    concern: stored?.["{고민}"] ?? stored?.concern ?? "",
   });
 }
 

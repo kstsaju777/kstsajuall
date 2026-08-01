@@ -6485,7 +6485,7 @@ function ReportPreviewInner() {
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
   type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string; partnerGender?: string; partnerBirth?: BirthMeta } | null>(null);
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string; partnerGender?: string; partnerBirth?: BirthMeta; concern?: string } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -6506,7 +6506,7 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/kunghap_imshin-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null }))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null, concern: d.concern ?? "" }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -6517,7 +6517,7 @@ function ReportPreviewInner() {
       })
         .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => {
-          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null });
+          setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? gender, sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null, concern: d.concern ?? "" });
           if (d.resultId) router.replace(`/saju/kunghap_imshin/report-preview?id=${d.resultId}&gender=${encodeURIComponent(d.gender ?? gender)}`);
         })
         .catch(() => {})
@@ -6529,10 +6529,31 @@ function ReportPreviewInner() {
 
   // 마무리 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
   useEffect(() => {
-    if (ch !== "11") { setEventOpen(false); return; }
+    if (ch !== "8") { setEventOpen(false); return; }
     if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
     setEventOpen(true);
   }, [ch]);
+
+  // concern 있는데 concernAdvice 비어있으면 자동 생성
+  useEffect(() => {
+    if (!id || !report) return;
+    const concern = report.concern ?? "";
+    const ca = (report.content?.concernAdvice as { paragraphs?: string[] } | undefined);
+    const caEmpty = !ca?.paragraphs || ca.paragraphs.length === 0;
+    if (!concern || !caEmpty) return;
+    fetch("/api/kunghap_imshin-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, concernOnly: true }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.concernAdvice?.paragraphs?.length > 0) {
+          setReport(prev => prev ? { ...prev, content: { ...prev.content, concernAdvice: d.concernAdvice } as typeof prev.content } : prev);
+        }
+      })
+      .catch(() => {});
+  }, [id, report?.concern, report?.content?.concernAdvice]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
   const persist = (mergedContent: Record<string, unknown>, skipAlimtalk = false) => {
@@ -7844,6 +7865,30 @@ function ReportPreviewInner() {
           </div>
 
           <section className="px-7 pt-8 pb-2">
+            {(() => {
+              const concern = report?.concern ?? "";
+              const caParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
+              if (!concern || caParas.length === 0) return null;
+              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
+              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              return (
+                <div className="mb-8">
+                  <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>
+                  <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${ROSE}09`, borderLeft: `3px solid ${ROSE}55` }}>
+                    <p className="text-[11px] font-bold mb-1" style={{ color: ROSE, opacity: 0.7 }}>남겨주신 고민</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{concern}&rdquo;</p>
+                  </div>
+                  <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                    <div className="flex justify-center mb-4"><span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span></div>
+                    {caParas.map((p, i) => (
+                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                    ))}
+                  </div>
+                  <div className="mt-8 mb-8" style={{ height: 1, background: `${INK}12` }} />
+                </div>
+              );
+            })()}
+            <Heading>홍연이 남기는 마지막 서신</Heading>
             {(c as unknown as Record<string, {paragraphs?: string[]}>).letter?.paragraphs?.map((p, i) => (
               <P key={i}>{p}</P>
             ))}
