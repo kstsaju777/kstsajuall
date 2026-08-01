@@ -23,7 +23,7 @@ import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-mansery
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
-import { calcCrossRelations, calcKunghapScore, buildBreakdownText, HAP_KINDS } from "@/lib/saju/kunghap-cross-relations";
+import { calcCrossRelations, calcKunghapScore, calcMarriageScore, buildBreakdownText, HAP_KINDS } from "@/lib/saju/kunghap-cross-relations";
 import { fixNamesInValue } from "@/lib/saju/fix-names";
 
 export const maxDuration = 300;
@@ -709,7 +709,7 @@ async function generateChapter(body: unknown) {
       const rels = calcCrossRelations(stored.view, stored.partnerView);
       const hapRels = rels.filter(r => HAP_KINDS.includes(r.kind));
       const negRels = rels.filter(r => !HAP_KINDS.includes(r.kind));
-      marriageScore = calcKunghapScore(rels).score;
+      marriageScore = calcMarriageScore(rels, (ilgan ?? "").charAt(0), (partnerIlgan ?? "").charAt(0)).score;
       hapCount = hapRels.length;
       chungCount = negRels.length;
       hapChungBreakdown = buildBreakdownText(rels);

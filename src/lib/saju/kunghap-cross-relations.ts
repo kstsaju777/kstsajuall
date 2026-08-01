@@ -122,6 +122,48 @@ export function calcKunghapScore(rels: CrossRel[]): { score: number } {
   return { score: Math.min(100, Math.max(0, raw)) };
 }
 
+// 일간 오행 상생·상극 — 결혼궁합 점수 전용 보정값
+const ILGAN_OHAENG: Record<string, string> = {
+  "갑":"목","을":"목","병":"화","정":"화","무":"토","기":"토","경":"금","신":"금","임":"수","계":"수",
+};
+const SANGSAENG_PAIRS: [string, string][] = [
+  ["목","화"],["화","토"],["토","금"],["금","수"],["수","목"],
+];
+const SANGGEUK_PAIRS: [string, string][] = [
+  ["목","토"],["토","수"],["수","화"],["화","금"],["금","목"],
+];
+// 음양: 갑·병·무·경·임 = 양, 을·정·기·신·계 = 음
+const YANG_ILGAN = new Set(["갑","병","무","경","임"]);
+
+function ilganRelBonus(myIlgan: string, ptIlgan: string): number {
+  const myO = ILGAN_OHAENG[myIlgan] ?? "";
+  const ptO = ILGAN_OHAENG[ptIlgan] ?? "";
+  if (!myO || !ptO) return 0;
+  let bonus = 0;
+  if (myO === ptO) {
+    bonus += 2; // 비화(比和) — 동질감
+  } else {
+    for (const [a, b] of SANGSAENG_PAIRS) {
+      if ((myO === a && ptO === b) || (myO === b && ptO === a)) { bonus += 9; break; }
+    }
+    for (const [a, b] of SANGGEUK_PAIRS) {
+      if ((myO === a && ptO === b) || (myO === b && ptO === a)) { bonus -= 9; break; }
+    }
+  }
+  // 음양 조화: 이성 궁합에서 음양이 다를수록 끌림
+  const myYang = YANG_ILGAN.has(myIlgan);
+  const ptYang = YANG_ILGAN.has(ptIlgan);
+  bonus += myYang !== ptYang ? 3 : -2;
+  return bonus;
+}
+
+/** 결혼궁합 점수: 합충 기반 + 일간 오행 상생·상극 보정 */
+export function calcMarriageScore(rels: CrossRel[], myIlgan: string, ptIlgan: string): { score: number } {
+  const base = rels.reduce((acc, r) => acc + (REL_SCORE[r.kind] ?? 0), 90);
+  const bonus = ilganRelBonus(myIlgan, ptIlgan);
+  return { score: Math.min(100, Math.max(0, base + bonus)) };
+}
+
 export function buildBreakdownText(rels: CrossRel[]): string {
   const hapRels = rels.filter(r => HAP_KINDS.includes(r.kind));
   const negRels = rels.filter(r => !HAP_KINDS.includes(r.kind));
