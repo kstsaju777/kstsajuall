@@ -205,8 +205,27 @@ async function generateConcernAdvice(id: string) {
 
   const daeunSeunBlock = [daeunNote, seunNote].filter(Boolean).join("\n\n");
 
+  // 이전 장 생성 결과에서 핵심 정보 추출
+  let prevChapterContext = "";
+  try {
+    const prev = JSON.parse(data.interpretation_md || "{}") as Record<string, unknown>;
+    const lines: string[] = [];
+    const essence = prev.essence as { desc?: string } | undefined;
+    if (essence?.desc) lines.push(`기질·성향 요약: ${essence.desc.slice(0, 80)}…`);
+    const studyStyle = prev.studyStyle as { desc?: string; strengths?: string[] } | undefined;
+    if (studyStyle?.desc) lines.push(`학습 스타일: ${studyStyle.desc.slice(0, 80)}…`);
+    const talent = prev.talent as { desc?: string } | undefined;
+    if (talent?.desc) lines.push(`재능 분석: ${talent.desc.slice(0, 80)}…`);
+    const health = prev.health as { desc?: string; summary?: string } | undefined;
+    if (health?.summary) lines.push(`건강 요약: ${health.summary.slice(0, 80)}…`);
+    else if (health?.desc) lines.push(`건강 분석: ${health.desc.slice(0, 80)}…`);
+    const parentingFlow = prev.parentingFlow as { desc?: string; period?: string } | undefined;
+    if (parentingFlow?.period) lines.push(`성장 흐름 핵심 시기: ${parentingFlow.period}`);
+    if (lines.length > 0) prevChapterContext = `\n\n[이 리포트에서 이미 분석된 핵심 결과 — 반드시 이 내용과 일치하는 조언을 작성할 것]\n${lines.join("\n")}`;
+  } catch { /* 무시 */ }
+
   const system = `당신은 홍연당의 사주 풀이 AI이오. 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
-  const user = `다음은 ${name}님의 자녀사주 만세력이오.\n\n${manseryeokText}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "${name1}님의 고민을 명식(일간·오행·십성)과 연결한 풀이 — 이 고민이 왜 생겼는지 명식 구조로 설명 (4~5문장, 200자 이상)",\n      "위에 제공된 현재 대운·세운 고정값을 기준으로, 이 흐름이 고민에 어떤 영향을 주는지 분석하는 단락 — 언제쯤 상황이 나아지거나 결실이 오는지 구체적으로 짚어주오 (4~5문장, 200자 이상)",\n      "이 고민을 풀어가기 위해 지금 당장 실천할 수 있는 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n고민의 주제(자녀·학업·건강 등)에 상관없이 반드시 작성하오. 홍연 말투(~이오/~하오/~겠소).`;
+  const user = `다음은 ${name}님의 자녀사주 만세력이오.\n\n${manseryeokText}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}${prevChapterContext}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n반드시 위 '이미 분석된 핵심 결과'의 내용과 모순되지 않는 조언을 작성하오.\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "${name1}님의 고민을 명식(일간·오행·십성)과 연결한 풀이 — 이 고민이 왜 생겼는지 명식 구조로 설명 (4~5문장, 200자 이상)",\n      "위에 제공된 현재 대운·세운 고정값과 이미 분석된 결과를 기준으로, 이 흐름이 고민에 어떤 영향을 주는지 분석 — 구체적 시기를 리포트 내용과 일치하게 언급 (4~5문장, 200자 이상)",\n      "이 고민을 풀어가기 위해 지금 당장 실천할 수 있는 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n고민의 주제(자녀·학업·건강 등)에 상관없이 반드시 작성하오. 홍연 말투(~이오/~하오/~겠소).`;
 
   for (let i = 0; i < 3; i++) {
     try {
