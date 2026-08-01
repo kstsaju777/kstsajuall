@@ -53,8 +53,10 @@ export async function POST(request: NextRequest) {
   if (!isSajuApiConfigured()) return NextResponse.json({ error: "사주 API가 설정되지 않았습니다" }, { status: 503 });
 
   try {
-    const partnerDataRaw = (input.concerns as string[] | null)?.[0] ?? "{}";
+    const concernsArr = (input.concerns as string[] | null) ?? [];
+    const partnerDataRaw = concernsArr.at(-1) ?? "{}";
     const partnerData = JSON.parse(partnerDataRaw);
+    const userConcern = concernsArr.length >= 2 ? concernsArr[0] : "";
     const { partnerName: pName, partnerBirthDate, partnerBirthTime, partnerGender: pGenderRaw, partnerCalendar: pCalendar } = partnerData;
 
     const pad = (n: string | number) => String(n).padStart(2, "0");
@@ -112,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     const { data: result, error: resultErr } = await service.from("saju_results").insert({
       order_id: order.id,
-      myeongsik: { view, name: input.name ?? "", birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName: pName ?? "", partnerBirth, partnerGender: pg } as never,
+      myeongsik: { view, name: input.name ?? "", birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName: pName ?? "", partnerBirth, partnerGender: pg, "{고민}": userConcern } as never,
       interpretation_md: JSON.stringify({}),
       llm_provider: llmMeta.provider,
       llm_model: llmMeta.model,
