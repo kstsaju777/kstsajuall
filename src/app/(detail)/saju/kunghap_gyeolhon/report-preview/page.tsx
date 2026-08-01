@@ -7427,21 +7427,13 @@ function ReportPreviewInner() {
             })()}
 
             {/* ── 제1장 삽화 ── */}
-            <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_1/kunghap_gyeolhon_1_1.jpg"
-                alt=""
-                style={{ width: "100%", display: "block", objectFit: "cover" }}
-              />
-              <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0, height: "45%",
-                background: "linear-gradient(to bottom, transparent 0%, #f5f0e8 100%)",
-                pointerEvents: "none",
-              }} />
+              <img src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_1/kunghap_gyeolhon_1_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <div style={{ display: "flex", justifyContent: "center", padding: "20px 0 48px" }}>
-              <div style={{ width: 1, height: 48, background: "#ccc" }} />
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
             </div>
 
             {/* ── AI 사주화 ── */}
