@@ -7431,6 +7431,24 @@ function ReportPreviewInner() {
               <div style={{ width: 1, height: 40, background: "#ccc" }} />
             </div>
 
+            {/* ── 제1장 삽화 ── */}
+            <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/media/report/kunghap_gyeolhon/kunghap_gyeolhon_1/kunghap_gyeolhon_1_1.jpg"
+                alt=""
+                style={{ width: "100%", display: "block", objectFit: "cover" }}
+              />
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, height: "45%",
+                background: "linear-gradient(to bottom, transparent 0%, #f5f0e8 100%)",
+                pointerEvents: "none",
+              }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", padding: "20px 0 48px" }}>
+              <div style={{ width: 1, height: 48, background: "#ccc" }} />
+            </div>
+
             {/* ── AI 사주화 ── */}
             {report?.sajuImageUrl && (
               <div>
