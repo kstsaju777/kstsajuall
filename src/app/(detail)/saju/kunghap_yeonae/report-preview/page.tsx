@@ -3061,7 +3061,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "8":  "제8장 · 이 관계의 빛과 그림자",
   "9":  "제9장 · 두 사람의 위기와 극복",
   "10": "제10장 · 결혼으로 이어지는가",
-  "11": "마무리 · 홍염이 남기는 마지막 서신",
+  "11": "마무리 · 홍연이 남기는 마지막 서신",
 };
 
 // A안 읽기 순서 (연애궁합 0~12)
@@ -5386,7 +5386,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제8장",  chip: "빛그림자",title: "이 관계의 빛과 그림자",              no: "8" },
   { disp: "제9장",  chip: "위기극복",title: "두 사람의 위기와 극복",               no: "9" },
   { disp: "제10장", chip: "결혼",   title: "결혼으로 이어지는가",                  no: "10" },
-  { disp: "마무리", chip: "당부",   title: "홍염이 남기는 마지막 서신",        no: "11" },
+  { disp: "마무리", chip: "당부",   title: "홍연이 남기는 마지막 서신",        no: "11" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -7576,7 +7576,7 @@ function ReportPreviewInner() {
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마무리 · 홍연의 당부</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>홍염이 남기는 마지막 서신</h1>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>홍연이 남기는 마지막 서신</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 420 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
