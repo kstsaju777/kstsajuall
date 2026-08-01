@@ -5500,6 +5500,14 @@ function ReportPreviewInner() {
             {lif.paragraphs?.[1] && <section className="px-6 pb-4"><P>{lif.paragraphs[1]}</P></section>}
 
             {/* ── ⑦ 실천 팁 divider ── */}
+            <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_3/saju_health_3_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
             {lif.tips && lif.tips.length > 0 && (
               <section className="px-6 pb-6">
                 <Heading>오늘부터 실천하는 습관</Heading>
