@@ -7248,6 +7248,16 @@ function ReportPreviewInner() {
               <LoveStyleCard data={partnerStyle} color={PARTNER_STYLE_COLOR} pale={`${PARTNER_STYLE_COLOR}12`} label={`${partnerFirstName}님의 연애 스타일 유형`} />
             </section>
 
+            {/* ── 일러스트 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_7/kunghap_yeonae_7_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
+
             {/* 스타일 차이 분석 + 조율법 */}
             {styleGap && (
               <section className="pb-4">
