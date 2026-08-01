@@ -185,7 +185,7 @@ async function generateConcernAdvice(id: string) {
 
   const petManseryeokPart = partnerManseryeokText ? `\n\n[${petName}(반려동물) 만세력]\n${partnerManseryeokText}` : "";
   const system = `당신은 홍연당의 사주 풀이 AI이오. 반려동물궁합 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
-  const user = `다음은 보호자와 반려동물의 만세력이오.\n\n[${name1}님(보호자) 만세력]\n${manseryeokText}${petManseryeokPart}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}${prevChapterContext}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "이 고민을 보호자와 반려동물의 사주 구조와 연결한 풀이 (4~5문장, 200자 이상)",\n      "현재 대운·세운 흐름과 반려동물 궁합 분석 결과를 기준으로 설명 (4~5문장, 200자 이상)",\n      "이 고민을 풀어가기 위한 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n홍연 말투(~이오/~하오/~겠소).`;
+  const user = `다음은 보호자와 반려동물의 만세력이오.\n\n[${name1}님(보호자) 만세력]\n${manseryeokText}${petManseryeokPart}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}${prevChapterContext}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n위 리포트 분석 결과(반려동물 궁합 점수·기질·대운·세운)를 종합하여, 고민에 직접 답하는 현실적이고 맞춤화된 조언을 작성하오. 리포트의 구체적 수치·기질 분석을 반드시 언급하오.\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "이 고민을 보호자와 반려동물의 사주 구조와 연결한 풀이 — 이 고민이 생긴 사주적 이유와 리포트에서 도출된 궁합 점수·반려동물 기질을 언급하오 (4~5문장, 200자 이상)",\n      "현재(${currentYear}년) 시점 기준으로 보호자의 대운·세운 흐름이 이 고민에 어떤 영향을 주는지 분석하오. 리포트에서 도출된 시기가 이미 지난 경우 현재 이후 관점으로 자연스럽게 전환하여 실질적 조언을 작성하오 (4~5문장, 200자 이상)",\n      "이 고민을 풀어가기 위한 조언과 마음가짐을, 리포트에서 분석된 반려동물 기질과 보호자 성향을 근거로 구체적으로 작성하오 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n홍연 말투(~이오/~하오/~겠소).`;
 
   for (let i = 0; i < 3; i++) {
     try {
