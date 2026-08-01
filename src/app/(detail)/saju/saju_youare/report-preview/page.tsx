@@ -5793,7 +5793,7 @@ function ReportPreviewInner() {
                   </div>
                 );
               })()}
-              <p className="text-[18px] font-black mb-5" style={{ color: INK, fontFamily: SERIF }}>홍연이 드리는 마지막 서신</p>
+              <Heading>홍연이 드리는 마지막 서신</Heading>
               {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
                 <P key={i}>{p}</P>
               ))}
