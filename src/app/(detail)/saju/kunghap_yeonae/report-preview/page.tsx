@@ -7584,7 +7584,38 @@ function ReportPreviewInner() {
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
           </div>
 
+          {/* 편지 본문 */}
           <section className="px-7 pt-8 pb-2">
+            {/* 고민 조언 파트 — 고민이 있고 concernAdvice가 생성된 경우만 표시 */}
+            {(() => {
+              const concern = report?.concern ?? "";
+              const caParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
+              if (!concern || caParas.length === 0) return null;
+              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
+              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              return (
+                <div className="mb-8">
+                  <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>
+                  {/* 고민 인용구 */}
+                  <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${ROSE}09`, borderLeft: `3px solid ${ROSE}55` }}>
+                    <p className="text-[11px] font-bold mb-1" style={{ color: ROSE, opacity: 0.7 }}>남겨주신 고민</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{concern}&rdquo;</p>
+                  </div>
+                  {/* 편지형 박스 */}
+                  <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                    <div className="flex justify-center mb-4">
+                      <span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span>
+                    </div>
+                    {caParas.map((p, i) => (
+                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                    ))}
+                  </div>
+                  {/* 구분선 */}
+                  <div className="mt-8 mb-8" style={{ height: 1, background: `${INK}12` }} />
+                </div>
+              );
+            })()}
+            <Heading>홍연이 남기는 마지막 서신</Heading>
             {(jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs?.map((p, i) => (
               <P key={i}>{p}</P>
             ))}
@@ -7594,23 +7625,6 @@ function ReportPreviewInner() {
               <img src="/dojang.png" alt="도장" style={{ width: 56, height: 56, objectFit: "contain" }} />
             </div>
           </section>
-
-          {/* 고민 조언 파트 — 고민을 작성한 경우에만 표시 */}
-          {(() => {
-            const concern = report?.concern ?? "";
-            const caParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
-            if (!concern || caParas.length === 0) return null;
-            const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
-            const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
-            return (
-              <section className="px-7 pt-2 pb-6">
-                <div className="my-8" style={{ height: 1, background: `linear-gradient(to right, transparent, ${ROSE}55, transparent)` }} />
-                <p className="text-[11px] tracking-[0.2em] mb-2 font-bold" style={{ color: ROSE }}>고민에 대한 작은 조언</p>
-                <h2 className="text-[17px] font-black mb-6" style={{ color: INK }}>{name1}님 &amp; {partnerName1}님의 고민을 살펴보겠소</h2>
-                {caParas.map((p, i) => <P key={i}>{p}</P>)}
-              </section>
-            );
-          })()}
 
           <ReviewBox />
           <RecoGrid />
