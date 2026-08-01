@@ -5096,7 +5096,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "1":  "제1장 · 나는 어떤 사람인가?",
   "2":  "제2장 · 상대는 어떤 사람인가?",
   "3":  "제3장 · 두 사람 사주의 합과 충",
-  "4":  "제4장 · 두 사람, 결혼할 수 있는 인연인가",
+  "4":  "제4장 · 결혼할 수 있는 인연일까",
   "5":  "제5장 · 언제 결혼하면 좋을까",
   "6":  "제6장 · 결혼하면 어떤 부부가 될까",
   "7":  "제7장 · 결혼 후 두사람의 재물운",
@@ -6289,7 +6289,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제1장",  chip: "나의원국", title: "나는 어떤 사람인가?",                     no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "상대는 어떤 사람인가?",                   no: "2" },
   { disp: "제3장",  chip: "합충",   title: "두 사람 사주의 합과 충",                   no: "3" },
-  { disp: "제4장",  chip: "인연",   title: "두 사람, 결혼할 수 있는 인연인가",          no: "4" },
+  { disp: "제4장",  chip: "인연",   title: "결혼할 수 있는 인연일까",                   no: "4" },
   { disp: "제5장",  chip: "결혼시기", title: "언제 결혼하면 좋을까",                    no: "5" },
   { disp: "제6장",  chip: "부부상",  title: "결혼하면 어떤 부부가 될까",               no: "6" },
   { disp: "제7장",  chip: "재물가정", title: "결혼 후 두사람의 재물운",               no: "7" },
@@ -7716,7 +7716,7 @@ function ReportPreviewInner() {
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 결혼 가능성</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람, 결혼할 수 있는 인연인가</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>결혼할 수 있는 인연일까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
