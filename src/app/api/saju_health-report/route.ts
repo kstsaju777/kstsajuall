@@ -127,7 +127,7 @@ async function generateConcernAdvice(id: string) {
 
   const name1 = name.length > 1 ? name.slice(1) : name;
   const system = `당신은 홍연당의 사주 풀이 AI이오. 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
-  const user = `이름: ${name1}\n명식:\n${manseryeokText}\n\n고민: "${concern}"\n\n위 고민에 대해 이 사람의 명식을 바탕으로 건강 사주 관점에서 따뜻하고 실질적인 조언을 3~5문장으로 작성하시오.\n반드시 아래 JSON 형식으로만 출력하시오:\n{"concernAdvice":{"paragraphs":["조언 문장1","조언 문장2","조언 문장3"]}}`;
+  const user = `다음은 ${name1}님의 건강사주 만세력이오.\n\n${manseryeokText}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "${name1}님의 고민을 명식(일간·오행·십성)과 연결한 풀이 (3~4문장, 150자 이상)",\n      "현재 대운·세운이 이 고민에 주는 영향과 돌파구 시기 (3~4문장, 150자 이상)",\n      "지금 당장 실천할 수 있는 조언과 마음가짐 (2~3문장, 100자 이상)"\n    ]\n  }\n}\n\n고민의 주제(건강·체질·생활습관 등)에 상관없이 반드시 작성하오. 홍연 말투(~이오/~하오/~겠소).`;
 
   for (let i = 0; i < 3; i++) {
     try {
