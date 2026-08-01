@@ -808,10 +808,10 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
           <div style={{ width: 1, backgroundColor: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
           <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
         </div>
-        <h2 className="text-[18px] font-bold mb-4" style={{ color: TEXT_CLR }}>
-          고민을 말해주겠소?{" "}
-          <span className="text-[13px] font-normal" style={{ color: "#888" }}>(선택)</span>
+        <h2 className="text-[18px] font-bold mb-1" style={{ color: TEXT_CLR }}>
+          고민을 말해보겠소?
         </h2>
+        <p className="text-[12px] mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>소인이 작은 조언을 해주겠소. (안적어도 괜찮소.)</p>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, MAX))}
