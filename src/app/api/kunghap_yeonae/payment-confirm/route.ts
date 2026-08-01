@@ -56,6 +56,8 @@ export async function POST(request: NextRequest) {
     const concernsArr = (input.concerns as string[] | null) ?? [];
     const partnerDataRaw = concernsArr.at(-1) ?? "{}";
     const partnerData = JSON.parse(partnerDataRaw);
+    // partnerData는 항상 마지막, 고민 텍스트가 있으면 첫 번째 요소
+    const userConcern = concernsArr.length >= 2 ? concernsArr[0] : "";
     const { partnerName: pName, partnerBirthDate, partnerBirthTime, partnerGender: pGenderRaw, partnerCalendar: pCalendar } = partnerData;
 
     const pad = (n: string | number) => String(n).padStart(2, "0");
@@ -113,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     const { data: result, error: resultErr } = await service.from("saju_results").insert({
       order_id: order.id,
-      myeongsik: { view, name: input.name ?? "", birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName: pName ?? "", partnerBirth, partnerGender: pg } as never,
+      myeongsik: { view, name: input.name ?? "", birth, manseryeokText: myManseryeokText, partnerManseryeokText, gender: g, partnerView, partnerName: pName ?? "", partnerBirth, partnerGender: pg, concern: userConcern } as never,
       interpretation_md: JSON.stringify({}),
       llm_provider: llmMeta.provider,
       llm_model: llmMeta.model,

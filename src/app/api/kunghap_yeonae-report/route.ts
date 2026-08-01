@@ -253,7 +253,10 @@ async function generateConcernAdvice(id: string) {
   let concern: string = stored?.concern ?? "";
   if (!concern && data.order_id) {
     const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
-    concern = (si?.concerns as string[] | null)?.[0] ?? "";
+    const arr = (si?.concerns as string[] | null) ?? [];
+    // partnerData JSON은 마지막 요소, 고민 텍스트는 2개 이상일 때 첫 번째
+    const candidate = arr.length >= 2 ? arr[0] : "";
+    concern = candidate;
   }
   if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
 
