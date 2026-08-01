@@ -3054,7 +3054,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "1":  "제1장 · 나는 어떤 사람인가?",
   "2":  "제2장 · 상대는 어떤 사람인가?",
   "3":  "제3장 · 첫인상과 끌림의 비밀",
-  "4":  "제4장 · 나는 이 사람을 어떻게 보는가",
+  "4":  "제4장 · 나는 상대를 어떻게 보는가",
   "5":  "제5장 · 상대는 나를 어떻게 보는가",
   "6":  "제6장 · 궁합의 핵심: 합과 충",
   "7":  "제7장 · 연애 스타일의 차이",
@@ -5379,7 +5379,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제1장",  chip: "나의원국", title: "나는 어떤 사람인가?",                    no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "상대는 어떤 사람인가?",                  no: "2" },
   { disp: "제3장",  chip: "끌림",   title: "첫인상과 끌림의 비밀",                no: "3" },
-  { disp: "제4장",  chip: "내시각", title: "나는 이 사람을 어떻게 보는가",         no: "4" },
+  { disp: "제4장",  chip: "내시각", title: "나는 상대를 어떻게 보는가",         no: "4" },
   { disp: "제5장",  chip: "상대시각",title: "상대는 나를 어떻게 보는가",           no: "5" },
   { disp: "제6장",  chip: "합충형", title: "궁합의 핵심: 합과 충",                no: "6" },
   { disp: "제7장",  chip: "스타일", title: "연애 스타일의 차이",                   no: "7" },
@@ -6890,7 +6890,7 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제4장 · 나는 이 사람을 어떻게 보는가 ═══════════ */}
+      {/* ═══════════ 제4장 · 나는 상대를 어떻게 보는가 ═══════════ */}
       {ch === "4" && (() => {
         const myName = report?.name || "나";
         const myFirstName = myName.slice(1) || myName;
@@ -6916,7 +6916,7 @@ function ReportPreviewInner() {
             {/* 다크 헤더 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 내 시각</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 이 사람을 어떻게 보는가</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>나는 상대를 어떻게 보는가</h1>
             </div>
 
             {/* 커버 이미지 */}
