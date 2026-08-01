@@ -3050,7 +3050,7 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 
 // 장번호 → 표시 제목 (연애궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0":  "인트로 · 연애궁합에 대하여",
+  "0":  "인트로 · 사주궁합이란 무엇인가",
   "1":  "제1장 · 나는 어떤 사람인가?",
   "2":  "제2장 · 상대는 어떤 사람인가?",
   "3":  "제3장 · 첫인상과 끌림의 비밀",
@@ -5375,7 +5375,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "서론",   title: "연애궁합에 대하여",                   no: "0" },
+  { disp: "인트로", chip: "서론",   title: "사주궁합이란 무엇인가",                   no: "0" },
   { disp: "제1장",  chip: "나의원국", title: "나는 어떤 사람인가?",                    no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "상대는 어떤 사람인가?",                  no: "2" },
   { disp: "제3장",  chip: "끌림",   title: "첫인상과 끌림의 비밀",                no: "3" },
@@ -6117,7 +6117,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>인 트 로 · 서 론</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              연애궁합에 대하여
+              사주궁합이란 무엇인가
             </h1>
           </div>
           {/* 커버 이미지 */}
