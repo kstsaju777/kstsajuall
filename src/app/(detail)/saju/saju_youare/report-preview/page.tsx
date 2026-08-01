@@ -4713,6 +4713,14 @@ function ReportPreviewInner() {
 
           {/* 원국 분석 */}
           <section className="pt-6 pb-12">
+            <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
             <div className="px-6">
               <Heading>아이의 타고난 성향과 기질</Heading>
               <P>{(jc.wonguk as { intro?: string } | undefined)?.intro}</P>
