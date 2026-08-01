@@ -5676,6 +5676,14 @@ function ReportPreviewInner() {
 
 
             {/* ── ⑥ 시기별 대비 수칙 divider ── */}
+            <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_health/saju_health_4/saju_health_4_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
             {hf.periodTips && hf.periodTips.length > 0 && (
               <section className="px-6 pb-6" style={{ marginTop: 16 }}>
                 <Heading>건강 고비를 대비하는 수칙</Heading>
