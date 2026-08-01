@@ -5161,7 +5161,7 @@ function ReportPreviewInner() {
             {/* ── 하단 이미지 ── */}
             <div className="relative overflow-hidden" style={{ height: 300 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/saju_health/saju_health_1/saju_health_1_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <img src="/media/report/saju_health/saju_health_1/saju_health_1_3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(253,248,244,1) 0%, transparent 25%, transparent 75%, rgba(253,248,244,1) 100%)" }} />
             </div>
 
