@@ -7426,11 +7426,6 @@ function ReportPreviewInner() {
               );
             })()}
 
-            {/* ── 구분선 ── */}
-            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
-              <div style={{ width: 1, height: 40, background: "#ccc" }} />
-            </div>
-
             {/* ── 제1장 삽화 ── */}
             <div style={{ position: "relative", width: "100%", lineHeight: 0 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
