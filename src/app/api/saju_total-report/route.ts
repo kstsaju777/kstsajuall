@@ -67,8 +67,9 @@ function fixEomiInObj(obj: unknown): unknown {
 }
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string; daeunNote?: string }) {
-  const { system, user, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult, daeunNote: input.daeunNote });
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string; daeunNote?: string }, prevChapterContext?: string) {
+  const { system, user: userRaw, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult, daeunNote: input.daeunNote });
+  const user = prevChapterContext ? userRaw + prevChapterContext : userRaw;
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
@@ -394,6 +395,33 @@ async function generateChapter(body: unknown) {
       }
     }
 
+    // 마무리 장(10장)에서 이전 장 핵심 결과를 고민 조언 프롬프트에 주입
+    let prevChapterContext: string | undefined;
+    if (chapter === 10 && (stored?.["{고민}"] || stored?.concern)) {
+      try {
+        const lines: string[] = [];
+        const essence = content.essence as { desc?: string; summary?: string } | undefined;
+        if (essence?.desc) lines.push(`사주 핵심 기질: ${essence.desc.slice(0, 100)}…`);
+        const wealthTime = content.wealthTime as { bestPeriod?: string; desc?: string } | undefined;
+        if (wealthTime?.bestPeriod) lines.push(`재물 전성기: ${wealthTime.bestPeriod}${wealthTime.desc ? " — " + wealthTime.desc.slice(0, 80) + "…" : ""}`);
+        const jobFit = content.jobFit as { jobs?: string[]; desc?: string } | undefined;
+        if (jobFit?.jobs?.length) lines.push(`적합 직업군: ${jobFit.jobs.join(", ")}`);
+        const invest = content.invest as { style?: string; desc?: string } | undefined;
+        if (invest?.style) lines.push(`투자 성향: ${invest.style}${invest.desc ? " — " + invest.desc.slice(0, 80) + "…" : ""}`);
+        const loveFlow = content.loveFlow as { desc?: string; peak?: string } | undefined;
+        if (loveFlow?.peak) lines.push(`연애 전성기: ${loveFlow.peak}`);
+        const marriage = content.marriage as { timing?: string; desc?: string } | undefined;
+        if (marriage?.timing) lines.push(`결혼 시기: ${marriage.timing}${marriage.desc ? " — " + marriage.desc.slice(0, 80) + "…" : ""}`);
+        const daeFlow = content.daeFlow as { current?: string; desc?: string } | undefined;
+        if (daeFlow?.current) lines.push(`현재 대운 흐름: ${daeFlow.current}${daeFlow.desc ? " — " + daeFlow.desc.slice(0, 80) + "…" : ""}`);
+        const seun = content.seun as { thisYear?: string; desc?: string } | undefined;
+        if (seun?.thisYear) lines.push(`올해 세운: ${seun.thisYear}${seun.desc ? " — " + seun.desc.slice(0, 80) + "…" : ""}`);
+        const unseong = content.unseong as { summary?: string } | undefined;
+        if (unseong?.summary) lines.push(`전체 운세 요약: ${(unseong.summary as string).slice(0, 100)}…`);
+        if (lines.length > 0) prevChapterContext = `\n\n[이 사주 리포트에서 이미 분석된 핵심 결과 — 반드시 이 내용과 일치하는 조언을 작성할 것]\n${lines.join("\n")}`;
+      } catch { /* 무시 */ }
+    }
+
     const { obj } = await genChapterContent(chapter, {
       name: stored?.["{이름1}"] || stored?.name || "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -407,7 +435,7 @@ async function generateChapter(body: unknown) {
       deungResult: deungResult ?? undefined,
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
       daeunNote,
-    });
+    }, prevChapterContext);
 
     // 2장 생성 완료 시 용신 오행을 myeongsik에 즉시 저장 (이후 모든 장에서 참조)
     if (chapter === 2) {
