@@ -2641,7 +2641,7 @@ function SpecialTag({ label, sub, color }: { label: string; sub?: string; color:
 
 // 장번호 → 표시 제목 (이제 장수와 키가 1:1로 일치)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0": "인트로 · 건강사주에 대하여",
+  "0": "인트로 · 사주팔자란 무엇인가",
   "1": "제1장 · 나는 어떤 체질로 태어났나",
   "2": "제2장 · 내 사주에 약한 부위는 어디인가",
   "3": "제3장 · 건강을 살릴 생활방식과 개운법",
@@ -3685,7 +3685,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik }: { progress: number; ti
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "서론",   title: "건강사주에 대하여",              no: "0" },
+  { disp: "인트로", chip: "서론",   title: "사주팔자란 무엇인가",            no: "0" },
   { disp: "제1장",  chip: "체질",   title: "나는 어떤 체질로 태어났나",      no: "1" },
   { disp: "제2장",  chip: "약점",   title: "내 사주에 약한 부위는 어디인가", no: "2" },
   { disp: "제3장",  chip: "개운법", title: "건강을 살릴 생활방식과 개운법",   no: "3" },
