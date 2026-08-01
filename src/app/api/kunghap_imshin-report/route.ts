@@ -211,6 +211,8 @@ async function generateConcernAdvice(id: string) {
       const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
       const paras = obj?.concernAdvice?.paragraphs;
       if (Array.isArray(paras) && paras.length > 0) {
+        const fixed = fixNamesInValue({ concernAdvice: obj.concernAdvice }, name1, partnerName1, "님") as { concernAdvice: { paragraphs: string[] } };
+        obj.concernAdvice = fixed.concernAdvice;
         let existing: Record<string, unknown> = {};
         try { existing = JSON.parse(data.interpretation_md || "{}") || {}; } catch { existing = {}; }
         await service.from("saju_results").update({ interpretation_md: JSON.stringify({ ...existing, concernAdvice: obj.concernAdvice }) }).eq("id", id);
