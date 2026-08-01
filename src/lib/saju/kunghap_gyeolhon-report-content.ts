@@ -622,7 +622,7 @@ const CH_SCHEMA: Record<number, string> = {
   3: `{
   "hapList": { "items": [{ "type": "갑기합", "hapEl": "토", "desc": "관계 영향 3~5문장", "strength": "강함", "effect": "장면 한 줄" }, { "type": "자축합", "hapEl": "토", "desc": "관계 영향 3~5문장", "strength": "보통", "effect": "장면 한 줄" }] },
   "chungList": { "items": [{ "type": "자오충", "desc": "관계 영향 3~5문장", "strength": "보통", "effect": "장면 한 줄", "overcome": "충 다스리는 방법 한 줄" }] },
-  "overallScore": { "score": 78, "label": "빛나는 인연", "hapSummary": "합 전체 요약 한 줄", "chungSummary": "충 전체 요약 한 줄", "desc": "합·충 종합 분석 4~5문장" }
+  "overallScore": { "score": 0, "label": "종합 평가 레이블", "hapSummary": "합 전체 요약 한 줄", "chungSummary": "충 전체 요약 한 줄", "desc": "합·충 종합 분석 4~5문장" }
 }`,
   7: `{
   "wealthFlow": {
