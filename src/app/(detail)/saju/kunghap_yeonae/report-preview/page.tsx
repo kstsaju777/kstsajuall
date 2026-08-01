@@ -7405,8 +7405,15 @@ function ReportPreviewInner() {
               </section>
             )}
 
-            {/* 구분선 */}
-            <div className="mx-5 my-5" style={{ borderTop: `1px dashed ${CH9_COLOR}20` }} />
+            {/* ── 일러스트 이미지 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_yeonae/kunghap_yeonae_9/kunghap_yeonae_9_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
 
             {/* 위기 요소 */}
             {crisisItems.length > 0 && (
