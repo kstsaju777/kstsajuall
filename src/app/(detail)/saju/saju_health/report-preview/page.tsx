@@ -115,92 +115,6 @@ function EventBox() {
   );
 }
 
-function EventPopup({ onClose }: { onClose: (hide: boolean) => void }) {
-  const [slide, setSlide] = useState(0);
-  const [hide, setHide] = useState(false);
-  const [link, setLink] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const sns = [
-    { label: "네이버 블로그", color: "#03c75a", t: "b" },
-    { label: "인스타그램", color: "#e1306c", t: "✦" },
-    { label: "카카오스토리", color: "#f9e000", t: "K", tc: "#3c1e1e" },
-  ];
-  const steps = [
-    { icon: "📸", title: "풀이 화면 캡쳐", desc: "인상 깊었던 장면을 1장 이상 사진으로 담아주시오." },
-    { icon: "✍️", title: "솔직한 후기 작성", desc: "소름 돋았던 부분, 맞아떨어진 부분을 진솔하게 써주시오." },
-    { icon: "🔖", title: "'홍연사주' 태그 포함", desc: "후기에 #홍연사주 #건강사주 태그를 반드시 넣어주시오." },
-  ];
-  const numBadge = (n: string) => (
-    <span className="flex-shrink-0 flex items-center justify-center rounded-full text-white text-[12px] font-black" style={{ width: 22, height: 22, background: "#5a8a4a" }}>{n}</span>
-  );
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-5" style={{ pointerEvents: "auto" }}>
-      <div onClick={() => onClose(hide)} className="absolute inset-0" style={{ background: "rgba(0,0,0,0.55)" }} />
-      <div className="relative w-full overflow-hidden rounded-3xl" style={{ maxWidth: 360, background: "#faf6ef", boxShadow: "0 16px 50px rgba(0,0,0,0.35)" }}>
-        {slide === 0 ? (
-          <>
-            <button onClick={() => onClose(hide)} className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full" style={{ width: 28, height: 28, background: "rgba(0,0,0,0.25)", color: "#fff", fontSize: 15, lineHeight: 1 }} aria-label="닫기">✕</button>
-            <div className="relative" style={{ height: 210 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/total/total-1/total-1-1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 20%" }} />
-              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.3) 60%, #faf6ef 100%)" }} />
-            </div>
-            <div className="px-6 pb-6 mt-2 text-center">
-              <h3 className="text-[20px] font-black" style={{ color: "#2a2320" }}>SNS 리뷰 이벤트</h3>
-              <p className="text-[13px] mt-1.5" style={{ color: "#7a6a5a" }}>후기 남기면 전 제품 무료쿠폰을 드려요!</p>
-              <span className="inline-block mt-3 text-[12px] font-bold px-3 py-1 rounded-full" style={{ background: "#e8f5e9", color: "#3a7d44" }}>이벤트 마감 일시: 2999. 12. 31.</span>
-              <div className="rounded-2xl px-5 py-5 mt-4" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8" }}>
-                <span className="text-[11px] font-black px-2.5 py-1 rounded-full" style={{ background: "#5a8a4a", color: "#fff" }}>BENEFIT</span>
-                <p className="text-[20px] font-black mt-2.5" style={{ color: "#2a2320" }}>무료쿠폰 1장 제공</p>
-              </div>
-              <button onClick={() => setSlide(1)} className="w-full mt-4 py-3.5 rounded-xl text-[14.5px] font-bold text-white active:scale-[0.99] transition-all" style={{ background: "#5a8a4a" }}>참여하고 무료쿠폰 받기 ›</button>
-              <p className="text-[11.5px] mt-2.5" style={{ color: "#a09080" }}>참여 방법은 오른쪽으로 스와이프 하기 →</p>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #e0d5c0" }}>
-              <button onClick={() => setSlide(0)} style={{ fontSize: 18, color: "#7a6a5a", background: "none", border: "none", cursor: "pointer" }}>←</button>
-              <p className="text-[13px] font-black" style={{ color: "#2a2320" }}>참여 방법</p>
-              <button onClick={() => onClose(hide)} style={{ fontSize: 18, color: "#7a6a5a", background: "none", border: "none", cursor: "pointer" }}>✕</button>
-            </div>
-            <div className="px-6 py-5">
-              <div className="flex gap-2 mb-5">
-                {sns.map((s) => (
-                  <div key={s.label} className="flex-1 rounded-xl py-2.5 text-center" style={{ background: s.color }}>
-                    <p className="text-[11px] font-black" style={{ color: (s as {tc?: string}).tc ?? "#fff" }}>{s.label}</p>
-                  </div>
-                ))}
-              </div>
-              {steps.map((st, i) => (
-                <div key={i} className="flex gap-3 mb-4">
-                  {numBadge(String(i + 1))}
-                  <div>
-                    <p className="text-[13px] font-black" style={{ color: "#2a2320" }}>{st.icon} {st.title}</p>
-                    <p className="text-[12px] mt-0.5" style={{ color: "#7a6a5a" }}>{st.desc}</p>
-                  </div>
-                </div>
-              ))}
-              <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="후기 링크를 여기에 붙여넣으세요" className="w-full rounded-xl px-4 py-3 text-[13px] outline-none mt-1" style={{ background: "#f0ebe0", border: "1px solid #d8c9a8", color: "#2a2320" }} />
-              {submitted ? (
-                <div className="mt-4 py-3 rounded-xl text-center" style={{ background: "#e8f5e9" }}>
-                  <p className="text-[14px] font-black" style={{ color: "#3a7d44" }}>✓ 제출 완료!</p>
-                  <p className="text-[12px] mt-0.5" style={{ color: "#7a6a5a" }}>확인 후 쿠폰을 보내드릴게요.</p>
-                </div>
-              ) : (
-                <button onClick={() => link && setSubmitted(true)} disabled={!link} className="w-full mt-4 py-3.5 rounded-xl text-[14px] font-bold text-white" style={{ background: link ? "#5a8a4a" : "#ccc" }}>후기 링크 제출하기</button>
-              )}
-              <label className="flex items-center gap-2 mt-3 cursor-pointer">
-                <input type="checkbox" checked={hide} onChange={(e) => setHide(e.target.checked)} className="w-4 h-4" />
-                <span className="text-[12px]" style={{ color: "#a09080" }}>다시 보지 않기</span>
-              </label>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
 
 const RECO_BADGE_COLORS: Record<string, string> = {
   "궁합": "#e1337d", "반려동물": "#b47221", "사주": "#711b20", "종합": "#711b20",
@@ -4437,7 +4351,6 @@ function ReportPreviewInner() {
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
-  const [eventOpen, setEventOpen] = useState(false); // 마무리 장 진입 시 SNS 리뷰 이벤트 팝업
   const [isAdmin, setIsAdmin] = useState(false);
   const startedRef = useRef(false);
   const generatedRef = useRef(false); // 일괄 생성 1회만
@@ -4447,9 +4360,6 @@ function ReportPreviewInner() {
     fetch("/api/admin/check").then(r => r.json()).then(d => setIsAdmin(d.isAdmin)).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (ch === "5" && !localStorage.getItem("hy_health_event_hide")) setEventOpen(true);
-  }, [ch]);
 
   // id 있으면 저장된 결과 조회(재생성 X), 입력만 있으면 생성+저장 후 id 주소로 교체
   useEffect(() => {
@@ -4493,11 +4403,6 @@ function ReportPreviewInner() {
   const openMyeongsik = () => setMsOpen(true);
 
   // 마무리(단하의 편지) 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
-  useEffect(() => {
-    if (ch !== "16") { setEventOpen(false); return; }
-    if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
-    setEventOpen(true);
-  }, [ch]);
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
   const persist = (mergedContent: Record<string, unknown>, skipAlimtalk = false) => {
@@ -5723,7 +5628,7 @@ function ReportPreviewInner() {
       {/* ═══════════ 마무리 — 홍연의 서신 ═══════════ */}
       {ch === "5" && (
         <>
-          <div style={{ filter: eventOpen ? "blur(5px)" : "none", pointerEvents: eventOpen ? "none" : "auto", transition: "filter 0.2s" }}>
+          <div>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
               <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대에게 남기는 홍연의 서신</h1>
@@ -5741,7 +5646,7 @@ function ReportPreviewInner() {
                 if (!concern || !paras || paras.length === 0) return null;
                 return (
                   <div className="mb-10">
-                    <p className="text-[18px] font-black mb-5" style={{ color: INK, fontFamily: SERIF }}>{report?.name ?? ""}님의 고민에 대한 작은 조언</p>
+                    <Heading>고민에 대한 작은 조언</Heading>
                     <div className="rounded-xl px-5 py-4 mb-5" style={{ background: CALLOUT_BG, border: `1.5px solid ${ROSE}30` }}>
                       <p className="text-[13px] leading-relaxed" style={{ color: ROSE, fontStyle: "italic" }}>"{concern}"</p>
                     </div>
@@ -5750,12 +5655,15 @@ function ReportPreviewInner() {
                         <P key={i}>{p}</P>
                       ))}
                     </div>
-                    <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
-                      <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+                    <div className="my-8 flex items-center gap-3">
+                      <div className="flex-1 h-px" style={{ background: `${ROSE}30` }} />
+                      <span className="text-[11px] tracking-widest" style={{ color: ROSE }}>✦</span>
+                      <div className="flex-1 h-px" style={{ background: `${ROSE}30` }} />
                     </div>
                   </div>
                 );
               })()}
+              <Heading>홍연이 드리는 마지막 서신</Heading>
               {((jc.letter as { paragraphs?: string[] } | undefined)?.paragraphs ?? []).map((p, i) => (
                 <P key={i}>{p}</P>
               ))}
@@ -5770,7 +5678,6 @@ function ReportPreviewInner() {
             <div className="pb-10" />
             <ChapterNav cur="5" go={next} />
           </div>
-          {eventOpen && <EventPopup onClose={(hide) => { if (hide) localStorage.setItem("hy_health_event_hide", "1"); setEventOpen(false); }} />}
         </>
       )}
       </>
