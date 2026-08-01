@@ -122,9 +122,10 @@ export function calcKunghapScore(rels: CrossRel[]): { score: number } {
   return { score: Math.min(100, Math.max(0, raw)) };
 }
 
-// 일간 오행 상생·상극 — 결혼궁합 점수 전용 보정값
+// 일간 오행 상생·상극 — 결혼궁합 점수 전용 보정값 (한글/한자 모두 지원)
 const ILGAN_OHAENG: Record<string, string> = {
   "갑":"목","을":"목","병":"화","정":"화","무":"토","기":"토","경":"금","신":"금","임":"수","계":"수",
+  "甲":"목","乙":"목","丙":"화","丁":"화","戊":"토","己":"토","庚":"금","辛":"금","壬":"수","癸":"수",
 };
 const SANGSAENG_PAIRS: [string, string][] = [
   ["목","화"],["화","토"],["토","금"],["금","수"],["수","목"],

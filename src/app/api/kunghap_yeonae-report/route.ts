@@ -24,6 +24,7 @@ import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail, sendAlimtalk } from "@/lib/order-notifications";
 import { WAIT_FOR_IMAGE } from "@/lib/alimtalk-config";
 import { fixNamesInValue } from "@/lib/saju/fix-names";
+import { calcCrossRelations, calcMarriageScore } from "@/lib/saju/kunghap-cross-relations";
 
 export const maxDuration = 300;
 
@@ -699,16 +700,16 @@ async function generateChapter(body: unknown) {
     let marriageLabel: string | undefined;
 
     if (chapter === 10 && stored?.view && stored?.partnerView) {
-      hapChungScore = calcHapChungScore(stored.view, stored.partnerView);
-      if (hapChungScore !== undefined) {
-        marriageScore = hapChungScore;
-        marriageLabel = marriageScore >= 85 ? "천생연분에 가까운 인연이오"
-          : marriageScore >= 70 ? "결혼을 권하는 인연이오"
-          : marriageScore >= 60 ? "노력하면 충분히 가능한 인연이오"
-          : marriageScore >= 50 ? "결혼을 서두르기엔 아직 이른 인연이오"
-          : marriageScore >= 40 ? "많은 준비가 필요한 인연이오"
-          : "더 깊이 이해하는 시간이 필요한 인연이오";
-      }
+      const rels10 = calcCrossRelations(stored.view, stored.partnerView);
+      hapChungScore = rels10.reduce((acc: number, r: { kind: string }) => acc + (({ "삼합":12,"천간합":8,"육합":7,"천간충":-8,"원진":-7,"충":-6,"형":-5,"해":-4,"파":-3 } as Record<string,number>)[r.kind] ?? 0), 70);
+      hapChungScore = Math.min(100, Math.max(0, hapChungScore));
+      marriageScore = calcMarriageScore(rels10, ilgan, partnerIlgan).score;
+      marriageLabel = marriageScore >= 85 ? "천생연분에 가까운 인연이오"
+        : marriageScore >= 70 ? "결혼을 권하는 인연이오"
+        : marriageScore >= 60 ? "노력하면 충분히 가능한 인연이오"
+        : marriageScore >= 50 ? "결혼을 서두르기엔 아직 이른 인연이오"
+        : marriageScore >= 40 ? "많은 준비가 필요한 인연이오"
+        : "더 깊이 이해하는 시간이 필요한 인연이오";
       // ch9 crisisFlow에서 가장 좋은 시기 추출 → ch10 프롬프트에 주입
       type FlowItem = { label: string; tone: string; score?: number };
       const ch9Flow = (content?.crisisFlow as { items?: FlowItem[] } | undefined)?.items ?? [];
