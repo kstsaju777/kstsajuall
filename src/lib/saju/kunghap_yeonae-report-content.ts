@@ -19,7 +19,7 @@ export const YEONAE_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   8:  ["strengths", "shadows", "balance"],
   9:  ["crisisPoints", "overcomeTips", "crisisFlow"],
   10: ["marriagePossibility", "marriageConditions", "marriageTiming"],
-  11: ["letter"],
+  11: ["letter"], // concernAdvice는 optional — isYeonaeKunghapChapterReady에서 제외
 };
 
 // ── 장 완성 여부 확인 ──

@@ -5925,7 +5925,7 @@ function ReportPreviewInner() {
 
   // 결과지 데이터 (명식 view + 구조화 풀이 content + 이름 + 생년월일)
   type BirthMeta = { date: string; calendar: string; time: string; gender?: string } | null;
-  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string; partnerGender?: string; partnerBirth?: BirthMeta } | null>(null);
+  const [report, setReport] = useState<{ view: MyeongsikView; content: ReportContent; name: string; birth: BirthMeta; gender: string; sajuImageUrl?: string | null; partnerView?: MyeongsikView | null; partnerSajuImageUrl?: string | null; partnerName?: string; partnerGender?: string; partnerBirth?: BirthMeta; concern?: string } | null>(null);
   const [loading, setLoading] = useState(!!(id || date));
   const [generating, setGenerating] = useState(false); // 결제 직후 전 장 일괄 생성 중
   const [revealed, setRevealed] = useState(true); // 일괄 생성 완료 후 '결과 보기'로 본문 공개
@@ -5946,7 +5946,7 @@ function ReportPreviewInner() {
     if (id) {
       fetch(`/api/kunghap_yeonae-report?id=${encodeURIComponent(id)}`)
         .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null }))
+        .then((d) => setReport({ view: d.view, content: d.content, name: d.name, birth: d.birth ?? null, gender: d.gender ?? "", sajuImageUrl: d.sajuImageUrl ?? null, partnerView: d.partnerView ?? null, partnerSajuImageUrl: d.partnerSajuImageUrl ?? null, partnerName: d.partnerName ?? "", partnerGender: d.partnerGender ?? "", partnerBirth: d.partnerBirth ?? null, concern: d.concern ?? "" }))
         .catch(() => {})
         .finally(() => setLoading(false));
     } else if (date) {
@@ -5969,6 +5969,27 @@ function ReportPreviewInner() {
 
   // SNS 리뷰 이벤트 팝업 비활성화
   useEffect(() => { setEventOpen(false); }, [ch]);
+
+  // concern 있는데 concernAdvice 비어있으면 자동 생성
+  useEffect(() => {
+    if (!id || !report) return;
+    const concern = report.concern ?? "";
+    const ca = (report.content?.concernAdvice as { paragraphs?: string[] } | undefined);
+    const caEmpty = !ca?.paragraphs || ca.paragraphs.length === 0;
+    if (!concern || !caEmpty) return;
+    fetch("/api/kunghap_yeonae-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, concernOnly: true }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.concernAdvice?.paragraphs?.length > 0) {
+          setReport(prev => prev ? { ...prev, content: { ...prev.content, concernAdvice: d.concernAdvice } as typeof prev.content } : prev);
+        }
+      })
+      .catch(() => {});
+  }, [id, report?.concern, report?.content?.concernAdvice]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 합본 저장 헬퍼 (생성한 섹션들을 합쳐 1회 저장 → 동시 쓰기 레이스 없음)
   const persist = (mergedContent: Record<string, unknown>, force = false) => {
@@ -7459,6 +7480,23 @@ function ReportPreviewInner() {
               <img src="/dojang.png" alt="도장" style={{ width: 56, height: 56, objectFit: "contain" }} />
             </div>
           </section>
+
+          {/* 고민 조언 파트 — 고민을 작성한 경우에만 표시 */}
+          {(() => {
+            const concern = report?.concern ?? "";
+            const caParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
+            if (!concern || caParas.length === 0) return null;
+            const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
+            const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+            return (
+              <section className="px-7 pt-2 pb-6">
+                <div className="my-8" style={{ height: 1, background: `linear-gradient(to right, transparent, ${ROSE}55, transparent)` }} />
+                <p className="text-[11px] tracking-[0.2em] mb-2 font-bold" style={{ color: ROSE }}>고민에 대한 작은 조언</p>
+                <h2 className="text-[17px] font-black mb-6" style={{ color: INK }}>{name1}님 &amp; {partnerName1}님의 고민을 살펴보겠소</h2>
+                {caParas.map((p, i) => <P key={i}>{p}</P>)}
+              </section>
+            );
+          })()}
 
           <ReviewBox />
           <RecoGrid />
