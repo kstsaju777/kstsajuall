@@ -181,6 +181,7 @@ async function generateConcernAdvice(id: string) {
     if (pt?.desc) lines.push(`반려동물 기질: ${pt.desc.slice(0, 100)}…`);
     if (lines.length > 0) prevChapterContext = `\n\n[이 궁합 리포트에서 이미 분석된 핵심 결과 — 반드시 이 내용과 일치하는 조언을 작성할 것]\n${lines.join("\n")}`;
   } catch { /* 무시 */ }
+  prevChapterContext += `\n\n[현재 날짜 기준 — 반드시 참고]\n현재는 ${currentYear}년이오. 위 분석에서 언급된 시기 중 ${currentYear}년 이전의 날짜(예: 2024년, 2025년 등)는 이미 지난 시기이오. 과거 시기를 앞으로의 권유로 제시하지 말고, ${currentYear}년 이후를 기준으로 실질적인 조언을 작성하오.`;
 
   const petManseryeokPart = partnerManseryeokText ? `\n\n[${petName}(반려동물) 만세력]\n${partnerManseryeokText}` : "";
   const system = `당신은 홍연당의 사주 풀이 AI이오. 반려동물궁합 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;

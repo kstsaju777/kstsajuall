@@ -200,6 +200,7 @@ async function generateConcernAdvice(id: string) {
     if (bf?.desc) lines.push(`사업 미래 흐름: ${bf.desc.slice(0, 100)}…`);
     if (lines.length > 0) prevChapterContext = `\n\n[이 궁합 리포트에서 이미 분석된 핵심 결과 — 반드시 이 내용과 일치하는 조언을 작성할 것]\n${lines.join("\n")}`;
   } catch { /* 무시 */ }
+  prevChapterContext += `\n\n[현재 날짜 기준 — 반드시 참고]\n현재는 ${currentYear}년이오. 위 분석에서 언급된 시기 중 ${currentYear}년 이전의 날짜(예: 2024년, 2025년 등)는 이미 지난 시기이오. 과거 시기를 앞으로의 권유로 제시하지 말고, ${currentYear}년 이후를 기준으로 실질적인 조언을 작성하오.`;
 
   const system = `당신은 홍연당의 사주 풀이 AI이오. 두 사람의 비즈니스궁합 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
   const user = `다음은 두 사람의 비즈니스궁합 만세력이오.\n\n[${name1}님 만세력]\n${manseryeokText}\n\n[${partnerName1}님 만세력]\n${partnerManseryeokText}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}${prevChapterContext}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "이 고민을 두 사람의 명식(일간·오행·십성·합충) 구조와 연결한 풀이 (4~5문장, 200자 이상)",\n      "현재 대운·세운 흐름과 사업 궁합 분석 결과를 기준으로 설명 (4~5문장, 200자 이상)",\n      "이 고민을 풀어가기 위한 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n홍연 말투(~이오/~하오/~겠소).`;
