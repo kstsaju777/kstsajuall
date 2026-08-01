@@ -5785,11 +5785,7 @@ function ReportPreviewInner() {
                         <P key={i}>{p}</P>
                       ))}
                     </div>
-                    <div className="my-8 flex items-center gap-3">
-                      <div className="flex-1 h-px" style={{ background: `${ROSE}30` }} />
-                      <span className="text-[11px] tracking-widest" style={{ color: ROSE }}>✦</span>
-                      <div className="flex-1 h-px" style={{ background: `${ROSE}30` }} />
-                    </div>
+                    <div className="my-8" />
                   </div>
                 );
               })()}
