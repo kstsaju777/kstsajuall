@@ -63,7 +63,7 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
           풀이 중 새로고침 하시면<br />처음부터 다시 시작됩니다
         </p>
       </div>
-      <p className="text-[13px] text-center leading-relaxed mt-4" style={{ color: "#7c6af755" }}>
+      <p className="text-[13px] text-center leading-relaxed mt-4" style={{ color: "#b8b0fb" }}>
         풀이가 완성되면 자동으로 열리오.<br />이 창을 벗어나셔도 입력하신 이메일로<br />결과지 링크를 보내드렸으니 언제든 확인하실 수 있소.
       </p>
     </div>
