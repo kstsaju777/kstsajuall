@@ -7493,6 +7493,16 @@ function ReportPreviewInner() {
             </section>
             <ReunionTimingCautionCard data={cy} />
 
+            {/* ── 제8장 삽화1 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_8/kunghap_jaehwe_8_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
+
             {/* 재회 준비 조언 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>재회를 앞두고 준비할 것들</Heading>
