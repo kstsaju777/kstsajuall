@@ -730,6 +730,12 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
                 </div>
               ))}
             </div>
+            <div className="rounded-2xl px-4 py-3 mt-3" style={{ backgroundColor: "rgba(184,176,251,0.07)", border: "1px solid rgba(184,176,251,0.25)" }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                홍연이 <span style={{ color: TEXT_CLR, fontWeight: 700 }}>{name}님</span>의 사주팔자를 살펴봤소.
+                {isPartner ? " 두 사람의 사주를 함께 보아 이별의 흐름과 재출발의 인연을 풀어드리겠소이다." : " 이 여덟 글자 안에 그대의 이혼 인연과 새 출발의 흐름이 담겨 있소이다."}
+              </p>
+            </div>
           </div>
         )}
       </div>
