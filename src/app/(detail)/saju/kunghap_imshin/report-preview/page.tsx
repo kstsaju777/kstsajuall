@@ -4746,7 +4746,7 @@ function PeakTimingCard({ headline, callout, paragraphs }: {
 // 장번호 → 표시 제목 (임신궁합 8장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 사주궁합이란 무엇인가",
-  "1":  "제1장 · 나는 부모로써\n어떤 사람인가?",
+  "1":  "제1장 · 나는 어떤 부모인가",
   "2":  "제2장 · 배우자는 부모로써\n어떤 사람인가?",
   "3":  "제3장 · 두 사람 글자들의 합과 충",
   "4":  "제4장 · 자녀는 아들일까 딸일까?",
@@ -5938,7 +5938,7 @@ type TocEntry = { disp: string; chip: string; title: string; no: string; entry?:
 
 const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "사주궁합이란 무엇인가",                    no: "0" },
-  { disp: "제1장",  chip: "나의 사주팔자",    title: "나는 부모로써 어떤 사람인가?",        no: "1" },
+  { disp: "제1장",  chip: "나의 사주팔자",    title: "나는 어떤 부모인가",        no: "1" },
   { disp: "제2장",  chip: "배우자의 사주팔자", title: "배우자는 부모로써 어떤 사람인가?",    no: "2" },
   { disp: "제3장",  chip: "글자들간의 관계",  title: "두 사람 글자들의 합과 충",            no: "3" },
   { disp: "제4장",  chip: "자녀의 성별",      title: "자녀는 아들일까 딸일까?",             no: "4" },
@@ -7008,7 +7008,7 @@ function ReportPreviewInner() {
             {/* ── 다크 헤더 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 1 장 · 나의 사주팔자</p>
-              <h1 className="text-[20px] font-black leading-snug whitespace-pre-line" style={{ color: "#fff", fontFamily: SERIF }}>{"나는 부모로써\n어떤 사람인가?"}</h1>
+              <h1 className="text-[20px] font-black leading-snug whitespace-pre-line" style={{ color: "#fff", fontFamily: SERIF }}>{"나는 어떤 부모인가"}</h1>
             </div>
 
             {/* ── 커버 이미지 ── */}
