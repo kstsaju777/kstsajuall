@@ -2834,7 +2834,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "0":  "인트로 · 사주궁합이란 무엇인가",
   "1":  "제1장 · 나는 어떤 사람인가?",
   "2":  "제2장 · 상대는 어떤 사람인가?",
-  "3":  "제3장 · 궁합의 핵심: 합과 충",
+  "3":  "제3장 · 두 사람 사주의 합과 충",
   "4":  "제4장 · 두 사람, 이혼하게 되는 인연인가",
   "5":  "제5장 · 언제 이혼하면 좋을까",
   "6":  "제6장 · 이혼 후 재산과 자녀",
@@ -5814,7 +5814,7 @@ const TOC_A: TocEntry[] = [
   { disp: "인트로", chip: "서론",    title: "사주궁합이란 무엇인가",                        no: "0" },
   { disp: "제1장",  chip: "나의원국", title: "나는 어떤 사람인가?",                       no: "1" },
   { disp: "제2장",  chip: "상대원국", title: "상대는 어떤 사람인가?",                    no: "2" },
-  { disp: "제3장",  chip: "합충형",  title: "궁합의 핵심: 합과 충",                    no: "3" },
+  { disp: "제3장",  chip: "합충형",  title: "두 사람 사주의 합과 충",                    no: "3" },
   { disp: "제4장",  chip: "흔들림",  title: "두 사람, 이혼하게 되는 인연인가",                  no: "4" },
   { disp: "제5장",  chip: "이혼시기", title: "언제 이혼하면 좋을까",           no: "5" },
   { disp: "제6장",  chip: "재산자녀", title: "이혼 후 재산과 자녀",                     no: "6" },
@@ -7304,7 +7304,7 @@ function ReportPreviewInner() {
             {/* 다크 헤더 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 3 장 · 합·충</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>궁합의 핵심: 합과 충</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두 사람 사주의 합과 충</h1>
             </div>
 
             {/* 커버 이미지 */}
