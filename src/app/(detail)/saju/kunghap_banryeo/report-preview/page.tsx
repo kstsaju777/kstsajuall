@@ -6399,6 +6399,15 @@ function ReportPreviewInner() {
               );
             })()}
 
+            {/* ── 삽화1 ── */}
+            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_2/kunghap_banryeo_2_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "#ccc" }} />
+            </div>
+
             {/* ── 오행 도넛 + 원국 풀이 ── */}
             <section className="pt-2 pb-2">
               <div className="px-5 mb-3">
