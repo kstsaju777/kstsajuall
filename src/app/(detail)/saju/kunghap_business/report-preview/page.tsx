@@ -5478,7 +5478,10 @@ function BizSuccessGauge({ data }: { data: Record<string, unknown> | null }) {
 
 function BizDetailPanel11({ data }: { data: Record<string, unknown> | null }) {
   if (!data) return null;
-  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
+  const raw = (data.paragraphs as unknown[] | undefined) ?? [];
+  const paragraphs = raw.map((p) =>
+    typeof p === "string" ? p : typeof p === "object" && p !== null ? String((p as Record<string, unknown>).paragraph ?? (p as Record<string, unknown>).text ?? "") : String(p)
+  ).filter(Boolean);
   return (
     <div className="px-6 mb-2">
       {paragraphs.map((p, i) => (
