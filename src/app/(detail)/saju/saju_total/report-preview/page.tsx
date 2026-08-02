@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
@@ -1799,10 +1799,10 @@ function ReviewBox({ resultId, name, gender, birthDate }: { resultId: string; na
     );
   }
   return (
-    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <p className="text-center text-[11px] font-bold" style={{ color: MAROON }}>좋은 길잡이 홍연</p>
-      <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>풀이는 마음에 드셨나요?</h3>
-      <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>리뷰 작성자 중 매월 10분을 추첨해 환급해 드려요.</p>
+    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1.5px solid ${MAROON}`, boxShadow: `0 0 6px ${MAROON}80, 0 0 16px ${MAROON}40, 0 0 32px ${MAROON}20` }}>
+      
+      <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>그대의 진솔한 이야기가<br />누군가의 첫 발걸음이 되오.</h3>
+      <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>매월 열분을 추첨하여 환급해드리겠소.</p>
       <div className="flex justify-between mb-4">
         {faces.map((f) => {
           const on = rating === f.v;
@@ -6229,7 +6229,7 @@ function ReportPreviewInner() {
 
           {/* 재물운 시점 */}
           <Illust src="/media/report/total/total-5/total-5-2.jpg" noTopGrad>
-            <div className="absolute pointer-events-none" style={{ top: "15%", left: "50%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "16%", left: "50%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
                 언제 벌고 언제 잃는지,<br /><br />{name.slice(1) || name}님의 재물 흐름을<br />그래프로 보여드리겠소.
               </p>
