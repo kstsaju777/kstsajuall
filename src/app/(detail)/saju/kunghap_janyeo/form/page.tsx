@@ -807,28 +807,36 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
       <div className="px-6 pt-6 pb-2" style={{ backgroundColor: CARD_BG }}>
         {/* 명식 그리드 */}
         {name && (
-          <div className="mb-2">
-            <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{isPartner ? "자녀의" : "보호자의"} 사주팔자</p>
-            <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
-              <span className="font-bold" style={{ color: TEXT_CLR }}>{name}{isPartner ? (gender === "남아" ? "군" : gender === "여아" ? "양" : "님") : "님"}의</span>
-              <span className="font-bold"> 사주팔자이오.</span>
-            </h2>
-            <div className="grid grid-cols-4 gap-2 rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              {(pillars ?? Array(4).fill(null)).map((p, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <p className="text-[15px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
-                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.stemSs || "-"}</span>
-                  <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
-                    {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
+          <>
+            <div className="mb-2">
+              <p className="text-[12px] font-medium mb-0.5" style={{ color: "#8a8a8a" }}>{isPartner ? "자녀의" : "보호자의"} 사주팔자</p>
+              <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
+                <span className="font-bold" style={{ color: TEXT_CLR }}>{name}{isPartner ? (gender === "남아" ? "군" : gender === "여아" ? "양" : "님") : "님"}의</span>
+                <span className="font-bold"> 사주팔자이오.</span>
+              </h2>
+              <div className="grid grid-cols-4 gap-2 rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                {(pillars ?? Array(4).fill(null)).map((p, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <p className="text-[15px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
+                    <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.stemSs || "-"}</span>
+                    <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
+                      {p ? <img src={ganCharImage(p.stem)} alt={p.stem} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
+                    </div>
+                    <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
+                      {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
+                    </div>
+                    <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.branchSs || "-"}</span>
                   </div>
-                  <div className="w-full rounded-2xl flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1", backgroundColor: "rgba(255,255,255,0.06)" }}>
-                    {p ? <img src={jiCharImage(p.branch)} alt={p.branch} style={{ width: "80%", height: "80%", objectFit: "contain" }} /> : <div className="animate-pulse w-full h-full" style={{ backgroundColor: "rgba(255,255,255,0.08)" }} />}
-                  </div>
-                  <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.branchSs || "-"}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+            <div className="rounded-2xl px-4 py-3 mt-3" style={{ backgroundColor: "rgba(144,224,239,0.07)", border: "1px solid rgba(144,224,239,0.25)" }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                홍연이 <span style={{ color: LABEL_CLR, fontWeight: 700 }}>{name}{isPartner ? (gender === "남아" ? "군" : gender === "여아" ? "양" : "님") : "님"}</span>의 사주팔자를 살펴봤소.
+                {isPartner ? " 두 사람의 사주를 함께 보아 부모와 자녀의 인연과 흐름을 풀어드리겠소이다." : " 이 여덟 글자 안에 보호자로서의 기운과 자녀와의 인연이 담겨 있소이다."}
+              </p>
+            </div>
+          </>
         )}
       </div>
       <BottomNav onPrev={onPrev} onNext={() => onSubmit("")} nextLabel="다음으로" />
