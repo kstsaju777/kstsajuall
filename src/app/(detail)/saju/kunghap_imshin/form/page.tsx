@@ -397,7 +397,6 @@ function StepConcern({ onPrev, onNext,
           <div style={{ width: 1, backgroundColor: "rgba(255,255,255,0.1)", flexShrink: 0 }} />
           <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
         </div>
-        <p className="text-[12px] font-medium mb-1" style={{ color: "#8a8a8a" }}>임신 고민</p>
         <h2 className="text-[20px] mb-3" style={{ color: TEXT_CLR }}>
           <span className="font-normal" style={{ color: "rgba(245,245,245,0.45)" }}>임신에 대해 </span>
           <span className="font-bold">궁금한 점이 있소?</span>
