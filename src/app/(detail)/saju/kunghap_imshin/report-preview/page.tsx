@@ -7820,6 +7820,15 @@ function ReportPreviewInner() {
               </>
             )}
 
+            {/* ── 삽화4 ── */}
+            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_6/kunghap_imshin_6_4.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "#ccc" }} />
+            </div>
+
             {/* 자녀 맞이 실천 조언 */}
             {(() => {
               const ct = (jc.childTips as Record<string, unknown> | undefined) ?? null;
