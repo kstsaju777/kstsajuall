@@ -791,8 +791,7 @@ function StepConcernInput({ onPrev, onSubmit, initial, myDate, myTime, myCalenda
           <MiniMyeongsik date={partnerDate} time={partnerTime} calendar={partnerCalendar} name={partnerName} />
         </div>
         <h2 className="text-[18px] font-bold mb-1" style={{ color: TEXT_CLR }}>
-          고민을 상세히 적어주겠소?{" "}
-          <span className="text-[13px] font-normal" style={{ color: "#888" }}>(선택)</span>
+          고민을 상세히 적어주겠소?
         </h2>
         <p className="text-[13px] font-medium mb-4" style={{ color: "#8a8a8a" }}>소인이 작은 조언을 해주겠소. (안적어도 괜찮소.)</p>
         <textarea
