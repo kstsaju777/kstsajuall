@@ -4596,10 +4596,13 @@ function ReportPreviewInner() {
             </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
           {/* 원국 분석 */}
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -4646,10 +4649,13 @@ function ReportPreviewInner() {
           </section>
 
           {/* 오행 분석 + 도넛 */}
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_2.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -4917,10 +4923,13 @@ function ReportPreviewInner() {
 
           </section>
 
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_3.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5061,10 +5070,13 @@ function ReportPreviewInner() {
             )}
           </section>
 
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_1.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5128,10 +5140,13 @@ function ReportPreviewInner() {
             )}
           </section>
 
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_2.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5272,10 +5287,13 @@ function ReportPreviewInner() {
             );
           })()}
 
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_3/saju_janyeo_3_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_janyeo/saju_janyeo_3/saju_janyeo_3_1.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5433,10 +5451,13 @@ function ReportPreviewInner() {
                 {/* ④ 재능 키우는 방법 — tipCards형 */}
                 {(tl as { talentTipCards?: { icon: string; title: string; desc: string }[] }).talentTipCards && (tl as { talentTipCards?: { icon: string; title: string; desc: string }[] }).talentTipCards!.length > 0 && (
                   <>
-                  <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                  <div className="relative w-full mt-8">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/media/report/saju_janyeo/saju_janyeo_4/saju_janyeo_4_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                    <img src="/media/report/saju_janyeo/saju_janyeo_4/saju_janyeo_4_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                    <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                    </div>
                   </div>
                   <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                     <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5602,10 +5623,13 @@ function ReportPreviewInner() {
                   if (!tips || tips.length === 0) return null;
                   return (
                     <>
-                    <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                    <div className="relative w-full mt-8">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/media/report/saju_janyeo/saju_janyeo_5/saju_janyeo_5_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                      <img src="/media/report/saju_janyeo/saju_janyeo_5/saju_janyeo_5_1.jpg" alt="" className="w-full block" />
                       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                      <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                        <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                      </div>
                     </div>
                     <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                       <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5841,10 +5865,13 @@ function ReportPreviewInner() {
                   if (!cards || cards.length === 0) return null;
                   return (
                     <>
-                    <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                    <div className="relative w-full mt-8">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/media/report/saju_janyeo/saju_janyeo_6/saju_janyeo_6_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                      <img src="/media/report/saju_janyeo/saju_janyeo_6/saju_janyeo_6_1.jpg" alt="" className="w-full block" />
                       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                      <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                        <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                      </div>
                     </div>
                     <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                       <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -6038,10 +6065,13 @@ function ReportPreviewInner() {
                 {/* ② 인간관계 패턴 카드 — 세로 전체폭 */}
                 {fs.friendPattern && fs.friendPattern.length > 0 && (
                   <>
-                  <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                  <div className="relative w-full mt-8">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/media/report/saju_janyeo/saju_janyeo_7/saju_janyeo_7_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                    <img src="/media/report/saju_janyeo/saju_janyeo_7/saju_janyeo_7_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                    <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                    </div>
                   </div>
                   <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                     <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -6099,10 +6129,13 @@ function ReportPreviewInner() {
                   </section>
                 )}
 
-                <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                <div className="relative w-full mt-8">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/media/report/saju_janyeo/saju_janyeo_7/saju_janyeo_7_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                  <img src="/media/report/saju_janyeo/saju_janyeo_7/saju_janyeo_7_2.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                  </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                   <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
