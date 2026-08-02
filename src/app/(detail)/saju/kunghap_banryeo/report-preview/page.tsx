@@ -5418,8 +5418,8 @@ function PetHealthFlowChart({ view, petName }: { view: MyeongsikView | null; pet
   if (!daeunList.length) return null;
 
   return (
-    <div className="rounded-2xl mt-2 mb-4 overflow-hidden" style={{ background: WHITE, border: "2px solid #b8dfc8", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-      <div className="px-4 py-2.5" style={{ background: "#e8f5ee", borderBottom: "1px solid #b8dfc8" }}>
+    <div className="rounded-2xl mt-2 mb-4 overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
+      <div className="px-4 py-2.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
         <p className="text-[13px] font-bold" style={{ color: "#111" }}>{petName}의 15년간 건강 흐름</p>
       </div>
       <div className="p-4">
