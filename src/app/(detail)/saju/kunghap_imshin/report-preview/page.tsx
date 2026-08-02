@@ -7447,6 +7447,12 @@ function ReportPreviewInner() {
             <ChildGenderGauge data={cf} />
             <ChildDetailPanel data={cf} />
 
+            {/* ── 삽화1 ── */}
+            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_4/kunghap_imshin_4_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to bottom, rgba(253,248,244,1), transparent)" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            </div>
             <div className="px-8 py-10 text-center" style={{ background: `linear-gradient(to bottom, ${CREAM}, ${PINK_PALE})` }}>
               <div style={{ width: 1, height: 48, background: "#ccc", margin: "0 auto 32px" }} />
               <p className="text-[17px] leading-[2.1] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`자녀의 성별을 알아보았으니,\n이제 두 사람의 자녀운 흐름을\n꼼꼼히 살펴보겠소.`}</p>
