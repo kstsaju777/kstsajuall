@@ -124,7 +124,7 @@ async function generateConcernAdvice(id: string) {
   if (!concern && data.order_id) {
     const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
     const arr = (si?.concerns as string[] | null) ?? [];
-    concern = arr[0] ?? "";
+    concern = arr.length >= 2 ? (arr[0] ?? "") : "";
   }
   if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
 
@@ -537,13 +537,19 @@ export async function GET(request: NextRequest) {
   if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
 
   const service = createServiceClient();
-  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md").eq("id", id).maybeSingle();
+  const { data, error } = await service.from("saju_results").select("myeongsik, interpretation_md, order_id").eq("id", id).maybeSingle();
   if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
+  let concern: string = stored?.["{고민}"] || stored?.concern || "";
+  if (!concern && data.order_id) {
+    const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
+    const arr = (si?.concerns as string[] | null) ?? [];
+    concern = arr.length >= 2 ? (arr[0] ?? "") : "";
+  }
   return NextResponse.json({
     view: stored?.view ?? stored,
     name: stored?.name ?? "",
@@ -556,7 +562,7 @@ export async function GET(request: NextRequest) {
     partnerBirth: stored?.partnerBirth ?? null,
     partnerGender: stored?.partnerGender ?? "",
     partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null,
-    concern: stored?.["{고민}"] || stored?.concern || "",
+    concern,
   });
 }
 
