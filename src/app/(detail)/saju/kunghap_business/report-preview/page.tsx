@@ -2570,7 +2570,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "5":  "제5장 · 우린 어떤 파트너가 될까",
   "6":  "제6장 · 비즈니스 스타일의 차이",
   "7":  "제7장 · 이 파트너십의 빛과 그림자",
-  "8":  "제8장 · 함께하면 좋은시기와\n조심할 시기",
+  "8":  "제8장 · 두사람 시기별 길과 흉",
   "9":  "마무리 · 그대들에게 남기는\n홍연의 서신",
 };
 
@@ -3762,7 +3762,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제5장",  chip: "역할분담", title: "우린 어떤 파트너가 될까",           no: "5" },
   { disp: "제6장",  chip: "스타일",  title: "비즈니스 스타일의 차이",                   no: "6" },
   { disp: "제7장",  chip: "빛그림자", title: "이 파트너십의 빛과 그림자",              no: "7" },
-  { disp: "제8장",  chip: "시기와 흐름", title: "함께하면 좋은시기와 조심할 시기",       no: "8" },
+  { disp: "제8장",  chip: "시기와 흐름", title: "두사람 시기별 길과 흉",       no: "8" },
   { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",            no: "9" },
 ];
 
@@ -7703,7 +7703,7 @@ function ReportPreviewInner() {
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 좋은시기와 조심할 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께하면 좋은시기와 조심할 시기</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두사람 시기별 길과 흉</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
