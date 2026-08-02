@@ -7393,7 +7393,7 @@ function ReportPreviewInner() {
             {/* ── 제7장 삽화1 ── */}
             <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_7/kunghap_jaehwe_7_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_7/kunghap_jaehwe_7_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
