@@ -7577,6 +7577,16 @@ function ReportPreviewInner() {
             </section>
             <ReunionDynamicCard data={reunionDynamic} />
 
+            {/* ── 제9장 삽화2 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_9/kunghap_jaehwe_9_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
+
             {/* 재회 후 흐름과 미래 — 단락형 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>재회 후의 시간, 그리고 두 사람의 미래</Heading>
