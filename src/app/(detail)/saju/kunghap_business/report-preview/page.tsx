@@ -7588,6 +7588,15 @@ function ReportPreviewInner() {
               <BizStyleCard data={partnerStyle7} color={PARTNER_STYLE_COLOR7} pale={`${PARTNER_STYLE_COLOR7}12`} label={`${partnerFirstName7}님의 비즈니스 스타일 유형`} />
             </section>
 
+            {/* ── 삽화1 ── */}
+            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
+              <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "40%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "#ccc" }} />
+            </div>
+
             {styleGap7 && (
               <section className="pb-4">
                 <div className="px-5"><Heading>두 사람 비즈니스 스타일 총평</Heading></div>
