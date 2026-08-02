@@ -7668,15 +7668,6 @@ function ReportPreviewInner() {
                 myName={myFirstName3} partnerName={partnerFirstName3}
               />
             )}
-            {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
-              <div style={{ width: 1, height: 48, background: "#ccc" }} />
-            </div>
-
             {myView && ptView && (
               <ChildFlowPeriodsLocal
                 myView={myView} partnerView={ptView}
@@ -7694,6 +7685,16 @@ function ReportPreviewInner() {
                 사주에서 자녀 인연을 살피는 데에는 두 가지 시선이 필요하오. 하나는 그 해의 기운이 두 사람 각자의 사주에 얼마나 이롭게 작용하는지를 보는 것이며, 이것이 바로 용신·희신·기신의 흐름이오. 다른 하나는 그 기운 속에 자녀의 기운이 담겨 있는지를 보는 것으로, 여성에게는 식신·상관이, 남성에게는 편관·정관이 자녀를 뜻하는 십성이오. 이 두 가지가 맞물리는 해와 달이야말로 임신·출산의 기운이 가장 무르익는 시기라 할 수 있소.
               </p>
             </section>
+
+            {/* ── 삽화1 ── */}
+            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "#ccc" }} />
+            </div>
+
             {myView && ptView && (
               <ImshinSeunFiveCard
                 myView={myView} partnerView={ptView}
