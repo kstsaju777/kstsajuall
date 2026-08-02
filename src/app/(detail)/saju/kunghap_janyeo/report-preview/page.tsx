@@ -7108,9 +7108,13 @@ function ReportPreviewInner() {
               <span style={{ width: 7, height: 24, flexShrink: 0, background: rodColor, borderRadius: 3, boxShadow: `-1px 0 3px ${shadowColor}` }} />
             </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}</Quote>
 
-            {/* 섹션 구분선 */}
-            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
-              <div style={{ width: 1, height: 40, background: "#ccc" }} />
+            {/* ── 삽화1 ── */}
+            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "#ccc" }} />
             </div>
 
             {/* ── 사주화 ── */}
