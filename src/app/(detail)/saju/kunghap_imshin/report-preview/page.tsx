@@ -7668,6 +7668,15 @@ function ReportPreviewInner() {
                 myName={myFirstName3} partnerName={partnerFirstName3}
               />
             )}
+            {/* ── 삽화1 ── */}
+            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
+              <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "#ccc" }} />
+            </div>
+
             {myView && ptView && (
               <ChildFlowPeriodsLocal
                 myView={myView} partnerView={ptView}
@@ -7677,15 +7686,6 @@ function ReportPreviewInner() {
                 myName={myFirstName3} partnerName={partnerFirstName3}
               />
             )}
-
-            {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_imshin/kunghap_imshin_5/kunghap_imshin_5_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
-              <div style={{ width: 1, height: 48, background: "#ccc" }} />
-            </div>
 
             {/* 향후 5년 세운별 임신·출산 흐름 */}
             <section className="px-6 pt-6 pb-2">
