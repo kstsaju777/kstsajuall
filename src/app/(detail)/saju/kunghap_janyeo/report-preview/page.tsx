@@ -4563,7 +4563,7 @@ function ParentRoleCard({ roles, closing, myName, childName }: {
 
 // 장번호 → 표시 제목 (자녀궁합 13장 구조)
 const CHAPTER_TITLES: Record<string, string> = {
-  "0":  "인트로 · 사주궁합은 무엇인가",
+  "0":  "인트로 · 사주궁합이란 무엇인가",
   "1":  "제1장 · 부모인 나는 어떤 사람인가?",
   "2":  "제2장 · 자녀는 어떤 아이인가?",
   "3":  "제3장 · 부모와 자녀 사이, 합과 충",
@@ -5757,7 +5757,7 @@ function TopBar({ progress, title, onMenu, onMyeongsik, onPartnerMyeongsik, hasP
 type TocEntry = { disp: string; chip: string; title: string; no: string; entry?: true };
 
 const TOC_A: TocEntry[] = [
-  { disp: "인트로", chip: "서론",    title: "사주궁합은 무엇인가",                        no: "0" },
+  { disp: "인트로", chip: "서론",    title: "사주궁합이란 무엇인가",                        no: "0" },
   { disp: "제1장",  chip: "나의원국", title: "부모인 나는 어떤 사람인가?",                  no: "1" },
   { disp: "제2장",  chip: "자녀원국", title: "자녀는 어떤 아이인가?",                    no: "2" },
   { disp: "제3장",  chip: "합·충",   title: "부모와 자녀 사이, 합과 충",               no: "3" },
@@ -6504,7 +6504,7 @@ function ReportPreviewInner() {
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>인 트 로 · 서 론</p>
             <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>
-              사주궁합은 무엇인가
+              사주궁합이란 무엇인가
             </h1>
           </div>
           {/* 커버 이미지 */}
