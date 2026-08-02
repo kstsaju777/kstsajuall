@@ -1237,7 +1237,7 @@ function ReviewBox() {
     );
   }
   return (
-    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1.5px solid ${MAROON}`, boxShadow: `0 0 6px ${MAROON}80, 0 0 16px ${MAROON}40, 0 0 32px ${MAROON}20` }}>
+    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1.5px solid ${GOLD}`, boxShadow: `0 0 6px ${GOLD}80, 0 0 16px ${GOLD}40, 0 0 32px ${GOLD}20` }}>
       
       <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>그대의 진솔한 이야기가<br />누군가의 첫 발걸음이 되오.</h3>
       <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>매월 열분을 추첨하여 환급해드리겠소.</p>
