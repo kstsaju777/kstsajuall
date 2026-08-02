@@ -6886,7 +6886,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 500 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_ehon/kunghap_ehon_1/kunghap_ehon_1_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7028,7 +7028,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* ── 커버 이미지 ── */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 500 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_ehon/kunghap_ehon_2/kunghap_ehon_2_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
@@ -7278,7 +7278,7 @@ function ReportPreviewInner() {
             </div>
 
             {/* 커버 이미지 */}
-            <div className="relative overflow-hidden" style={{ height: 420 }}>
+            <div className="relative overflow-hidden" style={{ height: 500 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_ehon/kunghap_ehon_3/kunghap_ehon_3_cover.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(17,17,17,1) 0%, rgba(17,17,17,0.3) 35%, transparent 60%, transparent 70%, rgba(253,248,244,1) 100%)" }} />
