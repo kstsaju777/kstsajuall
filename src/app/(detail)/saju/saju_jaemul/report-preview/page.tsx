@@ -4756,6 +4756,9 @@ function ReportPreviewInner() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_1.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+            <div className="absolute pointer-events-none" style={{ top: "25%", left: "65%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
 
@@ -4809,6 +4812,9 @@ function ReportPreviewInner() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_2.jpg" alt="" className="w-full block" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                <div className="absolute pointer-events-none" style={{ top: "30%", left: "33%", transform: "translate(-50%, -50%)" }}>
+                  <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                </div>
               </div>
               <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
               <section className="px-6 pt-2 pb-4">
@@ -4956,6 +4962,9 @@ function ReportPreviewInner() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/media/report/saju_jaemul/saju_jaemul_2/saju_jaemul_2_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                    <div className="absolute pointer-events-none" style={{ top: "18%", left: "45%", transform: "translate(-50%, -50%)" }}>
+                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                    </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-2">
@@ -5118,6 +5127,9 @@ function ReportPreviewInner() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                  <div className="absolute pointer-events-none" style={{ top: "22%", left: "66%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                  </div>
                 </div>
                 <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                 {inv.types && inv.types.length > 0 && (() => {
@@ -5277,6 +5289,9 @@ function ReportPreviewInner() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                    <div className="absolute pointer-events-none" style={{ top: "18%", left: "57%", transform: "translate(-50%, -50%)" }}>
+                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                    </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-6">
@@ -5389,6 +5404,9 @@ function ReportPreviewInner() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                    <div className="absolute pointer-events-none" style={{ top: "30%", left: "31%", transform: "translate(-50%, -50%)" }}>
+                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                    </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-6">
@@ -5595,6 +5613,9 @@ function ReportPreviewInner() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/media/report/saju_jaemul/saju_jaemul_6/saju_jaemul_6_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
+                    <div className="absolute pointer-events-none" style={{ top: "15%", left: "62%", transform: "translate(-50%, -50%)" }}>
+                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                    </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-8">
