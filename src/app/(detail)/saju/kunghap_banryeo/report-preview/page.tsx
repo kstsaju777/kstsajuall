@@ -3606,9 +3606,9 @@ const CHAPTER_TITLES: Record<string, string> = {
   "2":  "제2장 · 우리 아이는 어떤 아이인가",
   "3":  "제3장 · 우리는 잘 맞는 인연인가",
   "4":  "제4장 · 이 아이의 건강과 흐름",
-  "5":  "제5장 · 이 아이에게 맞는\n환경과 생활 방식",
+  "5":  "제5장 · 아이에게 맞는 환경과 생활",
   "6":  "제6장 · 이 아이를 위한 개운법",
-  "7":  "마무리 · 그대들에게 남기는\n홍연의 서신",
+  "7":  "마무리 · 홍연이 남기는 마지막 서신",
 };
 
 // A안 읽기 순서 (반려궁합 0~9)
@@ -4796,9 +4796,9 @@ const TOC_A: TocEntry[] = [
   { disp: "제2장",  chip: "우리아이",  title: "우리 아이는 어떤 아이인가",          no: "2" },
   { disp: "제3장",  chip: "인연",    title: "우리는 잘 맞는 인연인가",             no: "3" },
   { disp: "제4장",  chip: "건강",    title: "이 아이의 건강과 흐름",               no: "4" },
-  { disp: "제5장",  chip: "환경",    title: "이 아이에게 맞는 환경과 생활 방식",   no: "5" },
+  { disp: "제5장",  chip: "환경",    title: "아이에게 맞는 환경과 생활",             no: "5" },
   { disp: "제6장",  chip: "개운법",  title: "이 아이를 위한 개운법",               no: "6" },
-  { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",       no: "7" },
+  { disp: "마무리", chip: "당부",    title: "홍연이 남기는 마지막 서신",           no: "7" },
 ];
 
 function TocPanel({ open, onClose, currentNo, onSelect }: { open: boolean; onClose: () => void; currentNo: string; onSelect: (no: string) => void }) {
@@ -5365,36 +5365,32 @@ function PetHealthFlowChart({ view, petName }: { view: MyeongsikView | null; pet
     return m ?? daeunList.find(d => d.active) ?? daeunList[0] ?? null;
   }
 
-  const allSeunScores = TARGET_YEARS.map(y => rawScore(seunMap[y] ?? ""));
-  const sMid = (Math.max(...allSeunScores) + Math.min(...allSeunScores)) / 2;
-  const sAmp = (Math.max(...allSeunScores) - Math.min(...allSeunScores)) / 2 || 1;
-
   const yearData = TARGET_YEARS.map(y => {
     const daeun = getDaeunForYear(y);
     const ds = daeun ? rawScore(daeun.gz) : dMid;
     const gz = seunMap[y] ?? "";
     const ss = rawScore(gz);
-    const normD = (ds - dMid) / dAmp;
-    const normS = (ss - sMid) / sAmp;
-    const norm = normD * 0.7 + normS * 0.3;
-    return { year: y, gz, daeunLabel: daeun?.label ?? "", daeunScore: ds, seunScore: ss, norm, normDaeun: normD };
+    const norm = ds * 0.7 + ss * 0.3;
+    return { year: y, gz, daeunLabel: daeun?.label ?? "", daeunScore: ds, seunScore: ss, norm };
   });
 
-  const bands: Array<{startI: number; endI: number; label: string; normScore: number}> = [];
+  const bands: Array<{startI: number; endI: number; label: string}> = [];
   let bi = 0;
   while (bi < yearData.length) {
     let ei = bi;
     while (ei + 1 < yearData.length && yearData[ei + 1].daeunLabel === yearData[bi].daeunLabel) ei++;
-    bands.push({ startI: bi, endI: ei, label: yearData[bi].daeunLabel ? `${yearData[bi].daeunLabel}세 대운` : "", normScore: yearData[bi].normDaeun });
+    bands.push({ startI: bi, endI: ei, label: yearData[bi].daeunLabel ? `${yearData[bi].daeunLabel}세 대운` : "" });
     bi = ei + 1;
   }
 
   const W = 320, H = 230, padX = 30, padTop = 36, padBot = 44;
   const innerH = H - padTop - padBot;
-  const zeroY = padTop + innerH / 2;
   const n = TARGET_YEARS.length;
+  const allNorms = yearData.map(d => d.norm);
+  const minN = Math.min(...allNorms), maxN = Math.max(...allNorms);
+  const normRange = maxN - minN || 1;
   const cx = (i: number) => padX + ((W - padX * 2) * i) / (n - 1);
-  const cy = (v: number) => zeroY - v * (innerH / 2 - 4);
+  const cy = (v: number) => padTop + innerH - ((v - minN) / normRange) * (innerH - 8) - 4;
   const coords = yearData.map((d, i) => ({ x: cx(i), y: cy(d.norm) }));
 
   let linePath = `M ${coords[0].x} ${coords[0].y}`;
@@ -5402,10 +5398,10 @@ function PetHealthFlowChart({ view, petName }: { view: MyeongsikView | null; pet
     const p = coords[i-1], c = coords[i], mx = (p.x + c.x) / 2;
     linePath += ` C ${mx} ${p.y} ${mx} ${c.y} ${c.x} ${c.y}`;
   }
-  const areaClose = ` L ${coords[n-1].x} ${zeroY} L ${coords[0].x} ${zeroY} Z`;
+  const areaClose = ` L ${coords[n-1].x} ${H-padBot} L ${coords[0].x} ${H-padBot} Z`;
   const worstI = yearData.reduce((m, _, i) => yearData[i].norm < yearData[m].norm ? i : m, 0);
   const bestI  = yearData.reduce((m, _, i) => yearData[i].norm > yearData[m].norm ? i : m, 0);
-  const GOOD_C = "#2d6a4f"; const WARN_C = "#9b3535"; const BAND_WARN_C = "#3a6fa8";
+  const GOOD_C = "#2d6a4f"; const WARN_C = "#9b3535";
 
   function bandX(idx: number, isStart: boolean) {
     if (isStart && idx === 0) return padX;
@@ -5418,38 +5414,26 @@ function PetHealthFlowChart({ view, petName }: { view: MyeongsikView | null; pet
   if (!daeunList.length) return null;
 
   return (
-    <div className="rounded-2xl mt-2 mb-4 overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
-      <div className="px-4 py-2.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+    <div className="rounded-2xl mt-2 mb-4 overflow-hidden" style={{ background: WHITE, border: "2px solid #b8dfc8", boxShadow: "0 2px 12px rgba(45,106,79,0.07)" }}>
+      <div className="px-4 py-2.5" style={{ background: "#e8f5ee", borderBottom: "1px solid #b8dfc8" }}>
         <p className="text-[13px] font-bold" style={{ color: "#111" }}>{petName}의 15년간 건강 흐름</p>
       </div>
       <div className="p-4">
       <svg viewBox={`12 16 296 208`} className="w-full" style={{ overflow: "visible" }}>
         <defs>
-          <clipPath id="phTop"><rect x={padX} y={padTop} width={W - padX*2} height={innerH/2} /></clipPath>
-          <clipPath id="phBot"><rect x={padX} y={zeroY} width={W - padX*2} height={innerH/2} /></clipPath>
           <linearGradient id="phGT" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={GOOD_C} stopOpacity="0.35" />
-            <stop offset="100%" stopColor={GOOD_C} stopOpacity="0.04" />
-          </linearGradient>
-          <linearGradient id="phGB" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={WARN_C} stopOpacity="0.04" />
-            <stop offset="100%" stopColor={WARN_C} stopOpacity="0.3" />
+            <stop offset="0%" stopColor={GOOD_C} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={GOOD_C} stopOpacity="0.03" />
           </linearGradient>
         </defs>
 
         {bands.map((band, bi2) => {
           const x1 = bandX(band.startI, true);
           const x2 = bandX(band.endI, false);
-          const good = band.normScore >= 0;
-          const intensity = Math.min(Math.abs(band.normScore) * 0.18 + 0.06, 0.22);
           return (
             <g key={bi2}>
-              <rect x={x1} y={padTop} width={x2-x1} height={innerH} fill={good ? GOOD_C : BAND_WARN_C} opacity={intensity} rx={3} />
-              {band.label && (
-                <text x={(x1+x2)/2} y={padTop - 6} fontSize="10" fill={good ? "#2d6a4f" : BAND_WARN_C} textAnchor="middle" fontWeight="700">
-                  {band.label}
-                </text>
-              )}
+              <rect x={x1} y={padTop} width={x2-x1} height={innerH} fill={INK} opacity={0.04} rx={3} />
+              {false && band.label && null}
               {bi2 > 0 && (
                 <line x1={x1} x2={x1} y1={padTop-4} y2={H-padBot+2} stroke={INK} strokeWidth="1.2" strokeDasharray="3 2" opacity="0.25" />
               )}
@@ -5459,42 +5443,24 @@ function PetHealthFlowChart({ view, petName }: { view: MyeongsikView | null; pet
 
         <line x1={padX} x2={W-padX} y1={padTop} y2={padTop} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
         <line x1={padX} x2={W-padX} y1={H-padBot} y2={H-padBot} stroke={`${INK}08`} strokeWidth="1" strokeDasharray="3 3"/>
-        <line x1={padX} x2={W-padX} y1={zeroY} y2={zeroY} stroke={`${INK}35`} strokeWidth="1.5"/>
-        <text x={padX-4} y={zeroY+4} fontSize="8" fill={MUTE} textAnchor="end">0</text>
-        <text x={padX-4} y={padTop+4} fontSize="8" fill={GOOD_C} textAnchor="end">+</text>
-        <text x={padX-4} y={H-padBot+4} fontSize="8" fill={WARN_C} textAnchor="end">−</text>
 
-        <path d={linePath + areaClose} fill="url(#phGT)" clipPath="url(#phTop)" />
-        <path d={linePath + areaClose} fill="url(#phGB)" clipPath="url(#phBot)" />
-        <path d={linePath} fill="none" stroke={GOOD_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#phTop)" />
-        <path d={linePath} fill="none" stroke={WARN_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" clipPath="url(#phBot)" />
+        <path d={linePath + areaClose} fill="url(#phGT)" />
+        <path d={linePath} fill="none" stroke={GOOD_C} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
 
         {coords.map((c, i) => {
           const isWorst = i === worstI, isBest = i === bestI;
-          const v = yearData[i].norm;
-          const dc = v >= 0 ? GOOD_C : WARN_C;
           return (
             <g key={i}>
               <circle cx={c.x} cy={c.y}
                 r={isWorst || isBest ? 5 : 3}
-                fill={isWorst ? WARN_C : isBest ? GOOD_C : WHITE}
-                stroke={dc} strokeWidth="2" />
+                fill={isBest ? GOOD_C : WHITE}
+                stroke={GOOD_C} strokeWidth="2" />
               <text x={c.x} y={H-padBot+14} fontSize="11" fill={INK} textAnchor="middle" opacity="0.85">&apos;{String(TARGET_YEARS[i]).slice(2)}</text>
               <line x1={c.x} y1={c.y + 4} x2={c.x} y2={H-padBot} stroke={`${INK}20`} strokeWidth="1" strokeDasharray="3 3"/>
             </g>
           );
         })}
       </svg>
-      <div style={{ display: "flex", gap: 14, marginTop: 8, flexWrap: "wrap", justifyContent: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <div style={{ width: 12, height: 12, borderRadius: "50%", background: GOOD_C }} />
-          <span style={{ fontSize: 10, color: GOOD_C, fontWeight: 600 }}>건강 안정</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <div style={{ width: 12, height: 12, borderRadius: "50%", background: WARN_C }} />
-          <span style={{ fontSize: 10, color: WARN_C, fontWeight: 600 }}>건강 주의</span>
-        </div>
-      </div>
       </div>
       {yearData.length > 0 && (() => {
         const bestYear  = yearData[bestI];
@@ -6600,6 +6566,15 @@ function ReportPreviewInner() {
               <PetHealthFlowChart view={report?.partnerView ?? null} petName={petName} />
             </section>
 
+            {/* ── 삽화4_1 ── */}
+            <div style={{ position: "relative", height: 340, overflow: "hidden", marginBottom: 0 }}>
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_4/kunghap_banryeo_4_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, rgba(253,248,244,0) 0%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ height: 48, width: 1, background: "#ccc" }} />
+            </div>
+
             {/* ── ② 오행과 신체 연결 ── */}
             {petPillars.length > 0 && (
               <section className="px-0 pb-0">
@@ -6619,6 +6594,15 @@ function ReportPreviewInner() {
                 />
               </section>
             )}
+
+            {/* ── 삽화4_2 ── */}
+            <div style={{ position: "relative", height: 340, overflow: "hidden", marginBottom: 0 }}>
+              <img src="/media/report/kunghap_banryeo/kunghap_banryeo_4/kunghap_banryeo_4_2.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, rgba(253,248,244,0) 0%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ height: 48, width: 1, background: "#ccc" }} />
+            </div>
 
             {/* ── ③ 타고난 기질 — 키워드 + 설명 ── */}
             {(temperKws.length > 0 || temperParas.length > 0) && (
@@ -6678,7 +6662,7 @@ function ReportPreviewInner() {
             {/* ── 커버 ── */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 5 장 · 환경과 생활</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>이 아이에게 맞는<br />환경과 생활 방식</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>아이에게 맞는 환경과 생활</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6747,6 +6731,14 @@ function ReportPreviewInner() {
             {/* ── 환경 조성 팁 섹션 ── */}
             {tipItems.length > 0 && (
               <section className="pt-2 pb-2">
+                {/* ── 삽화5_1 ── */}
+                <div style={{ position: "relative", height: 340, overflow: "hidden", marginBottom: 0 }}>
+                  <img src="/media/report/kunghap_banryeo/kunghap_banryeo_5/kunghap_banryeo_5_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, rgba(253,248,244,0) 0%, rgba(253,248,244,1) 100%)" }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+                  <div style={{ height: 48, width: 1, background: "#ccc" }} />
+                </div>
                 <div className="px-5 mb-3">
                   <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}을 위한 환경 만들기</h2>
                 </div>
@@ -6899,6 +6891,14 @@ function ReportPreviewInner() {
             {/* ── 행운 요소 섹션 ── */}
             {luckyItems.length > 0 && (
               <section className="pt-2 pb-2">
+                {/* ── 삽화6_1 ── */}
+                <div style={{ position: "relative", height: 340, overflow: "hidden", marginBottom: 0 }}>
+                  <img src="/media/report/kunghap_banryeo/kunghap_banryeo_6/kunghap_banryeo_6_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, rgba(253,248,244,0) 0%, rgba(253,248,244,1) 100%)" }} />
+                </div>
+                <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+                  <div style={{ height: 48, width: 1, background: "#ccc" }} />
+                </div>
                 <div className="px-5 mb-3">
                   <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}에게 맞는 행운 요소</h2>
                 </div>
@@ -6940,7 +6940,7 @@ function ReportPreviewInner() {
           <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마 무 리</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대들에게 남기는<br />홍연의 서신</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>홍연이 남기는 마지막 서신</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -6956,18 +6956,29 @@ function ReportPreviewInner() {
                 const hasConcern = !!report?.concern;
                 return (
                   <>
-                    {hasConcern && concernParas.length > 0 && (
-                      <div className="mb-8">
-                        <h2 className="text-[17px] font-black mb-4" style={{ color: INK, fontFamily: SERIF }}>{name1_7}님의 고민에 대한 조언</h2>
-                        {concernParas.map((p, i) => <P key={i}>{p}</P>)}
-                        <div className="my-6" style={{ width: "100%", height: 1, background: `${INK}15` }} />
-                      </div>
-                    )}
-                    {hasConcern && concernParas.length === 0 && (
-                      <div className="mb-8 p-4 rounded-2xl text-center" style={{ background: `${ROSE}08`, border: `1px solid ${ROSE}20` }}>
-                        <p className="text-[13px]" style={{ color: MUTE }}>고민 조언을 생성 중이오…</p>
-                      </div>
-                    )}
+                    {hasConcern && (() => {
+                      if (concernParas.length === 0) return (
+                        <div className="mb-8 p-4 rounded-2xl text-center" style={{ background: `${ROSE}08`, border: `1px solid ${ROSE}20` }}>
+                          <p className="text-[13px]" style={{ color: MUTE }}>고민 조언을 생성 중이오…</p>
+                        </div>
+                      );
+                      return (
+                        <div className="mb-8">
+                          <Heading>{name1_7}님의 고민에 대한 조언</Heading>
+                          <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${ROSE}09`, borderLeft: `3px solid ${ROSE}55` }}>
+                            <p className="text-[11px] font-bold mb-1" style={{ color: ROSE, opacity: 0.7 }}>남겨주신 고민</p>
+                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{report?.concern}&rdquo;</p>
+                          </div>
+                          <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                            <div className="flex justify-center mb-4"><span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span></div>
+                            {concernParas.map((p, i) => (
+                              <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                            ))}
+                          </div>
+                          <div className="mt-8 mb-8" style={{ height: 1, background: `${INK}12` }} />
+                        </div>
+                      );
+                    })()}
                   </>
                 );
               })()}
@@ -7037,7 +7048,7 @@ function ReportPreviewInner() {
         <div style={{ filter: eventOpen ? "blur(5px)" : "none", transition: "filter 0.25s ease", pointerEvents: eventOpen ? "none" : "auto" }}>
           <div className="text-center px-6 py-4" style={{ background: "#111" }}>
             <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>마무리 · 홍연의 당부</p>
-            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>그대들에게 남기는 홍연의 서신</h1>
+            <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>홍연이 남기는 마지막 서신</h1>
           </div>
           <div className="relative overflow-hidden" style={{ height: 360 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}

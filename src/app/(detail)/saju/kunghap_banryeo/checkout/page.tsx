@@ -229,7 +229,7 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="text-[14.5px] font-bold" style={{ color: DTXT }}>반려궁합</span>
-                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 두 사람의 반려 인연 이야기</p>
+                  <p className="text-[11.5px] mt-1" style={{ color: DMUTE }}>홍연이 들려주는 반려동물 궁합</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-[11px]" style={{ color: DSTRIKE }}>
@@ -491,6 +491,7 @@ function CheckoutContent() {
   const partnerTime     = searchParams.get("partnerTime")     ?? "시간 모름";
   const partnerCalendar = searchParams.get("partnerCalendar") ?? "양력";
   const partnerGender   = searchParams.get("partnerGender")   ?? "";
+  const concern         = searchParams.get("concern")          ?? "";
 
   const saju        = useMemo(() => calcSaju(date, time, calendar), [date, time, calendar]);
   const partnerSaju = useMemo(() => calcSaju(partnerDate, partnerTime, partnerCalendar), [partnerDate, partnerTime, partnerCalendar]);
@@ -516,8 +517,8 @@ function CheckoutContent() {
     const partnerTimeUnknown = !partnerBirthTime;
     const partnerCalApi = partnerCalendar === "음력" ? "lunar" : "solar";
     const partnerGenderApi: "male" | "female" = partnerGender === "여자" || partnerGender === "여성" || partnerGender === "female" ? "female" : "male";
-    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: [], phone: phone || undefined, partnerName, partnerBirthDate, partnerBirthTime, partnerTimeUnknown, partnerGender: partnerGenderApi, partnerCalendar: partnerCalApi };
-  }, [name, date, time, calendar, gender, email, phone, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender]);
+    return { productSlug: PRODUCT_SLUG, email: email || "", name, birthDate, birthTime, timeUnknown, gender: genderApi, calendar: calApi, concerns: concern ? [concern] : [], phone: phone || undefined, partnerName, partnerBirthDate, partnerBirthTime, partnerTimeUnknown, partnerGender: partnerGenderApi, partnerCalendar: partnerCalApi };
+  }, [name, date, time, calendar, gender, email, phone, concern, partnerName, partnerDate, partnerTime, partnerCalendar, partnerGender]);
 
   useEffect(() => {
     if (orderCreating.current) return;
