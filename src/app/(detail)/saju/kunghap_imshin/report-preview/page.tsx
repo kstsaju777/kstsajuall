@@ -6527,12 +6527,12 @@ function ReportPreviewInner() {
 
   const openMyeongsik = () => setMsOpen(true);
 
-  // 마무리 장에 진입하면 SNS 리뷰 이벤트 팝업 노출 (다시 보지 않기 체크 시 제외)
-  useEffect(() => {
-    if (ch !== "8") { setEventOpen(false); return; }
-    if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
-    setEventOpen(true);
-  }, [ch]);
+  // SNS 리뷰 이벤트 팝업 비활성화
+  // useEffect(() => {
+  //   if (ch !== "8") { setEventOpen(false); return; }
+  //   if (typeof window !== "undefined" && localStorage.getItem("hyd_event_hide") === "1") return;
+  //   setEventOpen(true);
+  // }, [ch]);
 
   // concern 있는데 concernAdvice 비어있으면 자동 생성
   useEffect(() => {
