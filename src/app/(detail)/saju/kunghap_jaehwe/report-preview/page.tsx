@@ -4366,7 +4366,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "5":  "제5장 · 나는 상대를 어떻게 보는가",
   "6":  "제6장 · 상대는 나를 어떻게 보는가",
   "7":  "제7장 · 재회할 수 있는 인연인가",
-  "8":  "제8장 · 재회하기 좋은 시기는 언제인가",
+  "8":  "제8장 · 재회하기 좋은날은 언제일까",
   "9":  "제9장 · 재회한다면 우린 어떻게 될까",
   "12": "마무리 · 그대들에게 남기는 홍연의 서신",
 };
@@ -5560,7 +5560,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제5장",  chip: "내시각",  title: "나는 상대를 어떻게 보는가",          no: "5" },
   { disp: "제6장",  chip: "상대시각", title: "상대는 나를 어떻게 보는가",            no: "6" },
   { disp: "제7장",  chip: "재회가능", title: "재회할 수 있는 인연인가",                   no: "7" },
-  { disp: "제8장",  chip: "재회시기", title: "재회하기 좋은 시기는 언제인가",             no: "8" },
+  { disp: "제8장",  chip: "재회시기", title: "재회하기 좋은날은 언제일까",             no: "8" },
   { disp: "제9장",  chip: "재회 후",  title: "재회한다면 우린 어떻게 될까",               no: "9" },
   { disp: "마무리", chip: "당부",    title: "그대들에게 남기는 홍연의 서신",              no: "12" },
 ];
@@ -7455,7 +7455,7 @@ function ReportPreviewInner() {
         );
       })()}
 
-      {/* ═══════════ 제8장 · 재회하기 좋은 시기는 언제인가 ═══════════ */}
+      {/* ═══════════ 제8장 · 재회하기 좋은날은 언제일까 ═══════════ */}
       {ch === "8" && (() => {
         const ti = (jc.timingItems  as Record<string,unknown>|undefined) ?? null;
         const cy = (jc.cautionYears as Record<string,unknown>|undefined) ?? null;
@@ -7465,7 +7465,7 @@ function ReportPreviewInner() {
             {/* 커버 */}
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 8 장 · 시기</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회하기 좋은 시기는 언제인가</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>재회하기 좋은날은 언제일까</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
