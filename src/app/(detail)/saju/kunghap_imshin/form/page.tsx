@@ -412,7 +412,7 @@ function StepConcern({ onPrev, onNext,
             style={{ color: TEXT_CLR, caretColor: ACCENT, border: "none" }}
           />
         </div>
-        <p className="text-right text-[11px] mt-1" style={{ color: "rgba(115,142,111,0.7)" }}>{text.length}/{MAX}</p>
+        <p className="text-right text-[11px] mt-1 pr-1" style={{ color: "rgba(115,142,111,0.7)" }}>{text.length}/{MAX}</p>
       </div>
       <BottomNav onPrev={onPrev} onNext={() => onNext(text)} nextLabel={filled ? "입력했어요" : "궁금한 건 없소"} />
     </>
