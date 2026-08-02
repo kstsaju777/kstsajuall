@@ -7273,6 +7273,16 @@ function ReportPreviewInner() {
               <P>사주 원국에 새겨진 두 사람의 갈등 본능이오. 나와 상대방이 갈등을 다루는 방식이 어떻게 다른지, 그 차이가 어디서 충돌하는지 살펴보겠소.</P>
             </section>
             <ConflictStyleBanner data={cs} myName={myName4} partnerName={partnerName4} myGender={report?.gender} partnerGender={report?.partnerGender} />
+            {/* ── 제4장 삽화3 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_ehon/kunghap_ehon_4/kunghap_ehon_4_3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
+
             {triggerItems.length > 0 && (
               <>
                 <section className="px-6 pt-4 pb-2">
