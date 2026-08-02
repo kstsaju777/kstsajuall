@@ -7355,6 +7355,16 @@ function ReportPreviewInner() {
               <HapChungScoreCardG data={overallScore} hapCount={crossRels.filter(r => ["천간합","육합","삼합"].includes(r.kind)).length} chungCount={crossRels.filter(r => !["천간합","육합","삼합"].includes(r.kind)).length} />
             </section>
 
+            {/* ── 제3장 삽화1 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_ehon/kunghap_ehon_3/kunghap_ehon_3_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
+
             {/* 합·충 종합 분석 */}
             {computedDesc && (
               <section className="pb-4">
