@@ -732,7 +732,7 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
               <span className="font-bold" style={{ color: TEXT_CLR }}>{name}님의 </span>
               <span className="font-bold">사주팔자이오</span>
             </h2>
-            <div className="grid grid-cols-4 gap-2 rounded-2xl p-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="grid grid-cols-4 gap-2 rounded-2xl p-4 mb-4" style={{ backgroundColor: "rgba(255,255,255,0.05)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.08)" }}>
               {(pillars ?? Array(4).fill(null)).map((p, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <p className="text-[15px] font-medium tracking-wide" style={{ color: "#8a8a8a" }}>{PILLAR_LABELS_JW[i]}</p>
@@ -746,6 +746,12 @@ function StepConcern({ onPrev, onSubmit, initial, date, btime, calendar, name, i
                   <span className="text-[15px]" style={{ color: LABEL_CLR }}>{p?.branchSs || "-"}</span>
                 </div>
               ))}
+            </div>
+            <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: "rgba(78,158,255,0.07)", border: "1px solid rgba(78,158,255,0.25)" }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                홍연이 <span style={{ color: TEXT_CLR, fontWeight: 700 }}>{name}님</span>의 사주팔자를 살펴봤소.
+                {isPartner ? " 두 사람의 사주를 함께 보아 사업 인연의 깊이와 동업의 흐름을 풀어드리겠소이다." : " 이 여덟 글자 안에 그대의 사업 인연과 동업자 복, 앞으로의 비즈니스 흐름이 담겨 있소이다."}
+              </p>
             </div>
           </div>
         )}
