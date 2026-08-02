@@ -2926,7 +2926,7 @@ function CompatEnergyBarChart({ view, partnerView }: { view: MyeongsikView | nul
 }
 
 // 미니 십성표 (내 명식 속 십성: 천간/지지 글자 + 천간십성/지지십성)
-function SipseongMini({ view }: { view: MyeongsikView | null }) {
+function SipseongMini({ view, label }: { view: MyeongsikView | null; label?: string }) {
   if (!view) return null;
   const ps = view.pillars;
   const cols: [string, string][] = [["시", ""], ["일", ""], ["월", ""], ["년", ""]];
@@ -2942,7 +2942,7 @@ function SipseongMini({ view }: { view: MyeongsikView | null }) {
   );
   return (
     <div className="rounded-2xl p-3.5 mb-4" style={{ background: WHITE, border: `1px solid ${INK}12` }}>
-      <p className="text-[11px] font-bold mb-2" style={{ color: MUTE }}>내 명식 속 십성</p>
+      <p className="text-[11px] font-bold mb-2" style={{ color: MUTE }}>{label ?? "내 명식 속 십성"}</p>
       <div className="grid" style={{ gridTemplateColumns: GC }}>
         <div />
         {cols.map(([h]) => <div key={h} className="py-1 text-center text-[11px] font-bold" style={{ color: MUTE }}>{h}</div>)}
