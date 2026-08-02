@@ -6676,9 +6676,14 @@ function ReportPreviewInner() {
               );
             })()}
 
-            {/* ── 구분선 ── */}
-            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
-              <div style={{ width: 1, height: 40, background: "#ccc" }} />
+            {/* ── 제1장 삽화1 ── */}
+            <div className="relative overflow-hidden" style={{ height: 340, marginTop: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_1/kunghap_jaehwe_1_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
+              <div style={{ width: 1, height: 48, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
             </div>
 
             {/* ── AI 사주화 ── */}
