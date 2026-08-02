@@ -2566,7 +2566,7 @@ const CHAPTER_TITLES: Record<string, string> = {
   "1":  "제1장 · 나는 어떤 사람인가",
   "2":  "제2장 · 상대는 어떤 사람인가",
   "3":  "제3장 · 두 사람 글자들의 합과 충",
-  "4":  "제4장 · 두사람,\n함께 일할 수 있는 인연인가",
+  "4":  "제4장 · 함께 일할 수 있는 인연인가",
   "5":  "제5장 · 함께 일하면\n어떤 파트너가 될까",
   "6":  "제6장 · 비즈니스 스타일의 차이",
   "7":  "제7장 · 이 파트너십의 빛과 그림자",
@@ -3758,7 +3758,7 @@ const TOC_A: TocEntry[] = [
   { disp: "제1장",  chip: "나의 사주팔자", title: "나는 어떤 사람인가",                no: "1" },
   { disp: "제2장",  chip: "상대방 사주팔자", title: "상대는 어떤 사람인가",            no: "2" },
   { disp: "제3장",  chip: "글자들의 합과 충", title: "두 사람 글자들의 합과 충",        no: "3" },
-  { disp: "제4장",  chip: "인연",    title: "두 사람, 함께 일할 수 있는 인연인가",      no: "4" },
+  { disp: "제4장",  chip: "인연",    title: "함께 일할 수 있는 인연인가",      no: "4" },
   { disp: "제5장",  chip: "역할분담", title: "함께 일하면 어떤 파트너가 될까",           no: "5" },
   { disp: "제6장",  chip: "스타일",  title: "비즈니스 스타일의 차이",                   no: "6" },
   { disp: "제7장",  chip: "빛그림자", title: "이 파트너십의 빛과 그림자",              no: "7" },
@@ -7374,7 +7374,7 @@ function ReportPreviewInner() {
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
               <p className="text-[10px] tracking-[0.25em] mb-2" style={{ color: "rgba(255,255,255,0.5)", fontFamily: SERIF }}>제 4 장 · 비즈니스 인연</p>
-              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>두사람,<br />함께 일할 수 있는 인연인가</h1>
+              <h1 className="text-[20px] font-black leading-snug" style={{ color: "#fff", fontFamily: SERIF }}>함께 일할 수 있는 인연인가</h1>
             </div>
             <div className="relative overflow-hidden" style={{ height: 520 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
