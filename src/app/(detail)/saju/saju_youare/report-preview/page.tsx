@@ -4596,6 +4596,9 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "18%", left: "75%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -4641,6 +4644,9 @@ function ReportPreviewInner() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_2.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "18%", left: "30%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -4912,6 +4918,9 @@ function ReportPreviewInner() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_3.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            <div className="absolute pointer-events-none" style={{ top: "18%", left: "72%", transform: "translate(-50%, -50%)" }}>
+              <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+            </div>
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
             <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5102,6 +5111,9 @@ function ReportPreviewInner() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/report/saju_youare/saju_youare_2/saju_youare_2_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  <div className="absolute pointer-events-none" style={{ top: "22%", left: "30%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                  </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                   <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5228,6 +5240,9 @@ function ReportPreviewInner() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/report/saju_youare/saju_youare_3/saju_youare_3_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  <div className="absolute pointer-events-none" style={{ top: "23%", left: "70%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                  </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                   <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5329,6 +5344,9 @@ function ReportPreviewInner() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/report/saju_youare/saju_youare_4/saju_youare_4_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  <div className="absolute pointer-events-none" style={{ top: "25%", left: "70%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                  </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                   <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5557,6 +5575,9 @@ function ReportPreviewInner() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                  </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                   <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
@@ -5678,6 +5699,9 @@ function ReportPreviewInner() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+                  <div className="absolute pointer-events-none" style={{ top: "23%", left: "35%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                  </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
                   <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
