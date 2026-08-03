@@ -1287,7 +1287,7 @@ function ReviewBox() {
     );
   }
   return (
-    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1.5px solid ${MAROON}`, boxShadow: `0 0 6px ${MAROON}80, 0 0 16px ${MAROON}40, 0 0 32px ${MAROON}20` }}>
+    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: "1.5px solid #e4d1b2", boxShadow: "0 0 6px #e4d1b280, 0 0 16px #e4d1b240, 0 0 32px #e4d1b220" }}>
       
       <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>그대의 진솔한 이야기가<br />누군가의 첫 발걸음이 되오.</h3>
       <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>매월 열분을 추첨하여 환급해드리겠소.</p>
@@ -4592,9 +4592,9 @@ function ReportPreviewInner() {
               <Heading>아이의 타고난 성향과 기질</Heading>
               <P>{(jc.wonguk as { intro?: string } | undefined)?.intro}</P>
             </div>
-            <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+            <div className="relative w-full mt-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+              <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
             </div>
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -4637,9 +4637,9 @@ function ReportPreviewInner() {
           </section>
 
           {/* 오행 분석 + 도넛 */}
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_2.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -4908,9 +4908,9 @@ function ReportPreviewInner() {
 
           </section>
 
-          <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+          <div className="relative w-full mt-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_3.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+            <img src="/media/report/saju_youare/saju_youare_1/saju_youare_1_3.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
           </div>
           <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5098,9 +5098,9 @@ function ReportPreviewInner() {
                 </section>
 
                 {/* ③ 취약 신체 부위 카드 */}
-                <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                <div className="relative w-full mt-8">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/media/report/saju_youare/saju_youare_2/saju_youare_2_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                  <img src="/media/report/saju_youare/saju_youare_2/saju_youare_2_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5224,9 +5224,9 @@ function ReportPreviewInner() {
                 )}
 
                 {/* ④ 실천 양육 팁 — 번호형 스텝 카드 */}
-                <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                <div className="relative w-full mt-8">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/media/report/saju_youare/saju_youare_3/saju_youare_3_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                  <img src="/media/report/saju_youare/saju_youare_3/saju_youare_3_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5325,9 +5325,9 @@ function ReportPreviewInner() {
                 )}
 
                 {/* ④ 재능 키우는 방법 — tipCards형 */}
-                <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                <div className="relative w-full mt-8">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/media/report/saju_youare/saju_youare_4/saju_youare_4_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                  <img src="/media/report/saju_youare/saju_youare_4/saju_youare_4_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5553,9 +5553,9 @@ function ReportPreviewInner() {
                 )}
 
                 {/* ⑤ 양육 팁 */}
-                <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                <div className="relative w-full mt-8">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                  <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5674,9 +5674,9 @@ function ReportPreviewInner() {
                 </section>
 
                 {/* ② 개운법 카드 */}
-                <div className="relative overflow-hidden mt-8" style={{ height: 340 }}>
+                <div className="relative w-full mt-8">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: "center center" }} />
+                  <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
