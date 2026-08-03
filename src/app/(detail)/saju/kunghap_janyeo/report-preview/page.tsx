@@ -1348,7 +1348,7 @@ function ReviewBox() {
     );
   }
   return (
-    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: `1.5px solid ${MAROON}`, boxShadow: `0 0 6px ${MAROON}80, 0 0 16px ${MAROON}40, 0 0 32px ${MAROON}20` }}>
+    <div className="rounded-2xl p-5 mx-6 mb-8" style={{ background: WHITE, border: "1.5px solid #00b4d8", boxShadow: "0 0 6px #00b4d880, 0 0 16px #00b4d840, 0 0 32px #00b4d820" }}>
       
       <h3 className="text-center text-[17px] font-black mt-1" style={{ color: INK }}>그대의 진솔한 이야기가<br />누군가의 첫 발걸음이 되오.</h3>
       <p className="text-center text-[12px] mt-1 mb-4" style={{ color: MUTE }}>매월 열분을 추첨하여 환급해드리겠소.</p>
@@ -6892,9 +6892,13 @@ function ReportPreviewInner() {
             })()}
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_1/kunghap_janyeo_1_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_1/kunghap_janyeo_1_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "18%", left: "43%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -6999,9 +7003,13 @@ function ReportPreviewInner() {
             })()}
 
             {/* ── 삽화2 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_1/kunghap_janyeo_1_2.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_1/kunghap_janyeo_1_2.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "19%", left: "62%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7109,9 +7117,13 @@ function ReportPreviewInner() {
             </span>{" 버튼을 누르면\n언제든 다시 꺼내볼 수 있소."}</Quote>
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "70%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7216,9 +7228,13 @@ function ReportPreviewInner() {
             })()}
 
             {/* ── 삽화2 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_2.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_2.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "18%", left: "40%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7321,9 +7337,13 @@ function ReportPreviewInner() {
             </section>
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "30%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7340,9 +7360,13 @@ function ReportPreviewInner() {
             )}
 
             {/* ── 삽화2 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_2.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_2.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "17%", left: "75%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7368,9 +7392,13 @@ function ReportPreviewInner() {
             )}
 
             {/* ── 삽화3 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_3.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_3.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "30%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7444,9 +7472,13 @@ function ReportPreviewInner() {
             <BondScoreCard score={score} paragraphs={scorePara} />
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "70%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7459,9 +7491,13 @@ function ReportPreviewInner() {
             <BondTypeCard data={bondType} myName={myName} childName={childName} />
 
             {/* ── 삽화2 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_2.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_4/kunghap_janyeo_4_2.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "22%", left: "35%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7539,9 +7575,13 @@ function ReportPreviewInner() {
             />
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_5/kunghap_janyeo_5_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_5/kunghap_janyeo_5_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "23%", left: "33%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7642,9 +7682,13 @@ function ReportPreviewInner() {
             )}
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_6/kunghap_janyeo_6_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_6/kunghap_janyeo_6_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "65%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7706,9 +7750,13 @@ function ReportPreviewInner() {
             )}
 
             {/* ── 삽화2 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_6/kunghap_janyeo_6_2.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_6/kunghap_janyeo_6_2.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "18%", left: "45%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -7979,9 +8027,13 @@ function ReportPreviewInner() {
             )}
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_8/kunghap_janyeo_8_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_8/kunghap_janyeo_8_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -8306,9 +8358,13 @@ function ReportPreviewInner() {
             })()}
 
             {/* ── 삽화1 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_1.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "25%", left: "65%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
@@ -8326,9 +8382,13 @@ function ReportPreviewInner() {
 
 
             {/* ── 삽화2 ── */}
-            <div style={{ position: "relative", height: 340, marginTop: 8, overflow: "hidden" }}>
-              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_2.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to bottom, transparent, rgba(253,248,244,1))" }} />
+            <div className="relative w-full mt-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/kunghap_janyeo/kunghap_janyeo_7/kunghap_janyeo_7_2.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "42%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 48, background: "#ccc" }} />
