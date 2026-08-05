@@ -4757,14 +4757,14 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_1.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
             <div className="absolute pointer-events-none" style={{ top: "25%", left: "65%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+              <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>신강한가, 신약한가.<br />이 기운이 재물운을<br />좌우하오.</p>
             </div>
           </div>
           <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
 
           {/* 신강·신약 지수 */}
           <section className="px-6 pt-2 pb-0">
-            <Heading>{name.slice(1) || name}님의 기운은 얼마나 강한가</Heading>
+
           </section>
           <div className="px-5 mt-2">
             <SinStrengthGauge view={report?.view ?? null} />
@@ -4813,12 +4813,12 @@ function ReportPreviewInner() {
                 <img src="/media/report/saju_jaemul/saju_jaemul_1/saju_jaemul_1_2.jpg" alt="" className="w-full block" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
                 <div className="absolute pointer-events-none" style={{ top: "30%", left: "33%", transform: "translate(-50%, -50%)" }}>
-                  <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                  <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>사주 속 격국이<br />그대의 재물 그릇을<br />결정하오.</p>
                 </div>
               </div>
               <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
               <section className="px-6 pt-2 pb-4">
-                <Heading>{name.slice(1) || name}님의 사주를 대표하는 격국</Heading>
+
               </section>
               <div className="mx-6 mb-6 rounded-2xl overflow-hidden relative" style={{ background: "#fff", border: "1.5px solid #e8dfd0" }}>
                 <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none select-none" style={{ opacity: 0.06 }}>
@@ -4963,12 +4963,12 @@ function ReportPreviewInner() {
                     <img src="/media/report/saju_jaemul/saju_jaemul_2/saju_jaemul_2_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
                     <div className="absolute pointer-events-none" style={{ top: "18%", left: "45%", transform: "translate(-50%, -50%)" }}>
-                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                      <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>돈을 다루는 기질,<br />타고나는 것이오.<br />그대의 성향을 알려드리겠소.</p>
                     </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-2">
-                    <Heading>돈 성향 지수</Heading>
+
                     <div className="rounded-2xl px-5 py-4 mt-2 space-y-4" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
                       {ws.traits!.map((t, i) => (
                         <div key={i}>
@@ -5128,7 +5128,7 @@ function ReportPreviewInner() {
                   <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
                   <div className="absolute pointer-events-none" style={{ top: "22%", left: "66%", transform: "translate(-50%, -50%)" }}>
-                    <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                    <p className="text-[15px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>모든 사람에게<br />맞는 투자법은 없소.<br />그대만의 방식이 있소.</p>
                   </div>
                 </div>
                 <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
@@ -5156,7 +5156,7 @@ function ReportPreviewInner() {
                   const dataPath = dataPoints.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" ") + "Z";
                   return (
                     <section className="px-6 pt-6 pb-2">
-                      <Heading>{`${name.slice(1) || name}님에게 맞는 투자방식`}</Heading>
+
                       {/* 레이더 차트 카드 */}
                       <div className="mt-3 rounded-2xl overflow-hidden" style={{ background: WHITE, border: `1px solid ${INK}10` }}>
                         <div className="flex items-center gap-4 px-4 pt-4 pb-2">
@@ -5290,12 +5290,12 @@ function ReportPreviewInner() {
                     <img src="/media/report/saju_jaemul/saju_jaemul_4/saju_jaemul_4_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
                     <div className="absolute pointer-events-none" style={{ top: "18%", left: "57%", transform: "translate(-50%, -50%)" }}>
-                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                      <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>사주가 말하는<br />{name.slice(1) || name}님에게 어울리는<br />직군이 따로 있소.</p>
                     </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
                   <section className="px-6 pt-2 pb-6">
-                    <Heading>{name.slice(1)}님에게 어울리는 직군</Heading>
+
                     <JobFitTabs clusters={jf.clusters as JobClusterTab[]} />
                   </section>
                   </>
@@ -5405,7 +5405,7 @@ function ReportPreviewInner() {
                     <img src="/media/report/saju_jaemul/saju_jaemul_5/saju_jaemul_5_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
                     <div className="absolute pointer-events-none" style={{ top: "30%", left: "31%", transform: "translate(-50%, -50%)" }}>
-                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                      <p className="text-[15px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>{name.slice(1) || name}님의 사주 속에<br />재물이 활짝 열리는<br />황금기가 새겨져 있소.</p>
                     </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
@@ -5614,7 +5614,7 @@ function ReportPreviewInner() {
                     <img src="/media/report/saju_jaemul/saju_jaemul_6/saju_jaemul_6_1.jpg" alt="" className="w-full block" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
                     <div className="absolute pointer-events-none" style={{ top: "15%", left: "62%", transform: "translate(-50%, -50%)" }}>
-                      <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                      <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>재물은 전략 없이<br />오래 지속되지 않소.<br />{name.slice(1) || name}님만의 방법이 있소.</p>
                     </div>
                   </div>
                   <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
