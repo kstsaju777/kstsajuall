@@ -5139,7 +5139,7 @@ function ReportPreviewInner() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_2.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-            <div className="absolute pointer-events-none" style={{ top: "13%", left: "72%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "13%", left: "70%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>이 아이를 대표하는<br />사주의 결이 있소.</p>
             </div>
           </div>
