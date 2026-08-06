@@ -4935,7 +4935,6 @@ function ReportPreviewInner() {
 
           {/* 십성 분석 + 레이더 */}
           <section className="px-6 pt-2 pb-4">
-            <Heading>아이의 타고난 능력치</Heading>
             {(report?.view?.pillars?.length ?? 0) > 0 && (
               <AbilityRadar pillars={(report!.view.pillars as { sipTop: string; sipBot: string; ganEl: string; jiEl: string }[])} />
             )}
