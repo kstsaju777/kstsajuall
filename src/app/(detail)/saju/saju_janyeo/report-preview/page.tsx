@@ -5071,7 +5071,7 @@ function ReportPreviewInner() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_1.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-            <div className="absolute pointer-events-none" style={{ top: "22%", left: "30%", transform: "translate(-50%, -50%)" }}>
+            <div className="absolute pointer-events-none" style={{ top: "22%", left: "35%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>아이의 사주에<br />힘을 주는 기운과<br />해가 되는 기운이 있소.</p>
             </div>
           </div>
