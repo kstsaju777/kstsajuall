@@ -6599,9 +6599,6 @@ function ReportPreviewInner() {
 
             {/* ── 기질 카드 ── */}
             <section className="pt-4 pb-2">
-              <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
-              </div>
               <NatureCard data={nature} />
             </section>
 
@@ -6798,9 +6795,6 @@ function ReportPreviewInner() {
 
             {/* ── 기질 카드 ── */}
             <section className="pt-4 pb-2">
-              <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
-              </div>
               <NatureCard data={partnerNature} color={CH2_COLOR} />
             </section>
 
@@ -7184,7 +7178,6 @@ function ReportPreviewInner() {
             {/* 합·충 종합 분석 */}
             {computedDesc && (
               <section className="pb-4">
-                <div className="px-5"><Heading>합·충 종합 분석</Heading></div>
                 <div className="mx-5 rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
                   <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{computedDesc}</p>
                 </div>
@@ -7288,7 +7281,6 @@ function ReportPreviewInner() {
             {/* 스타일 차이 분석 + 조율법 */}
             {styleGap && (
               <section className="pb-4">
-                <div className="px-5"><Heading>두 사람 연애스타일 총평</Heading></div>
                 <StyleGapCard data={styleGap} color={CH7_COLOR} pale={CH7_PALE} />
               </section>
             )}
@@ -7376,7 +7368,6 @@ function ReportPreviewInner() {
             {/* 균형 잡는 법 */}
             {balance && (
               <section className="pb-4">
-                <div className="px-5"><Heading>빛과 그림자의 균형</Heading></div>
                 <LightShadowBalanceCard data={balance} />
               </section>
             )}
