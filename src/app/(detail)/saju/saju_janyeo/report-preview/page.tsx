@@ -4596,23 +4596,21 @@ function ReportPreviewInner() {
             </span>{` 버튼을 누르면\n언제든 다시 꺼내볼 수 있소.`}</Quote>
 
           {/* 원국 분석 */}
-          <div className="relative w-full mt-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" alt="" className="w-full block" />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-            <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
-            </div>
-          </div>
-          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
-            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
-          </div>
           <section className="pt-6 pb-12">
             <div className="px-6">
               <Heading>아이의 타고난 성향과 기질</Heading>
               <P>{c.wonguk.intro}</P>
             </div>
-            <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${honorShort}의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+            <p className="px-8 mb-8 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${honorShort}의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+            {/* 삽화 — AI 생성이미지 바로 위 */}
+            <div className="relative w-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" alt="" className="w-full block" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+            </div>
+            <div className="flex justify-center" style={{ paddingTop: 44, paddingBottom: 44 }}>
+              <div style={{ width: 1, height: 72, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
+            </div>
             {report?.sajuImageUrl ? (
               <div className="px-5">
                 <div style={{
