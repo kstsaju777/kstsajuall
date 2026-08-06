@@ -4608,9 +4608,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
             </div>
-            <div className="flex justify-center" style={{ paddingTop: 44, paddingBottom: 44 }}>
-              <div style={{ width: 1, height: 72, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
-            </div>
+            <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
             {report?.sajuImageUrl ? (
               <div className="px-5">
                 <div style={{
