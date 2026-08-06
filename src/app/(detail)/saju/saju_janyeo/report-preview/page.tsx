@@ -4601,12 +4601,14 @@ function ReportPreviewInner() {
               <Heading>아이의 타고난 성향과 기질</Heading>
               <P>{c.wonguk.intro}</P>
             </div>
-            <p className="px-8 mb-8 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${honorShort}의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
             {/* 삽화 — AI 생성이미지 바로 위 */}
             <div className="relative w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>{honorShort}의 사주팔자로<br />한폭의 그림을 그려봤소.</p>
+              </div>
             </div>
             <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
             {report?.sajuImageUrl ? (
