@@ -4606,7 +4606,7 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/saju_janyeo/saju_janyeo_1/saju_janyeo_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "15%", left: "25%", transform: "translate(-50%, -50%)" }}>
+              <div className="absolute pointer-events-none" style={{ top: "17%", left: "30%", transform: "translate(-50%, -50%)" }}>
                 <p className="text-[15px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>{honorShort}의 사주팔자로<br />한폭의 그림을 그려봤소.</p>
               </div>
             </div>
