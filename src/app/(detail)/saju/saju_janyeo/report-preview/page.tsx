@@ -5140,12 +5140,10 @@ function ReportPreviewInner() {
             <img src="/media/report/saju_janyeo/saju_janyeo_2/saju_janyeo_2_2.jpg" alt="" className="w-full block" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
             <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+              <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>이 아이를 대표하는<br />사주의 결이 있소.</p>
             </div>
           </div>
-          <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
-            <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
-          </div>
+          <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
 
           {/* 격국 */}
           <section className="px-6 pt-2 pb-4">
