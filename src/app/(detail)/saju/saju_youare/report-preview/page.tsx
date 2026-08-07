@@ -5119,7 +5119,6 @@ function ReportPreviewInner() {
                 </div>
                 {hl.weakPoints && hl.weakPoints.length > 0 && (
                   <section className="px-6 pt-0 pb-4">
-                    <Heading>주의할 신체 부위</Heading>
                     <div className="space-y-3 mt-3">
                       {hl.weakPoints.map((wp, i) => (
                         <div key={i} className="rounded-2xl p-4 flex gap-3 items-start" style={{ background: `${WARN_RED}08`, border: `1.5px solid ${WARN_RED}28` }}>
