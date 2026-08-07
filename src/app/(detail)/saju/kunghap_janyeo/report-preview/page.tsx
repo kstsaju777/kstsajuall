@@ -7117,7 +7117,7 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_2/kunghap_janyeo_2_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "20%", left: "70%", transform: "translate(-50%, -50%)" }}>
+              <div className="absolute pointer-events-none" style={{ top: "22%", left: "69%", transform: "translate(-50%, -50%)" }}>
                 <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{childFirstName}{childHonorific}의 사주팔자로<br />한폭의 그림을<br />그려봤소.</p>
               </div>
             </div>
