@@ -7494,7 +7494,6 @@ function ReportPreviewInner() {
 
             {/* 인연의 사주 근거 섹션 */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>두 사람 인연의 사주적 근거</Heading>
               <P>두 사람의 인연 점수와 유형이 어떤 사주적 원리에서 비롯되었는지 살펴보겠소. 일간 오행의 상생·상극 관계, 지지의 합·충 구조, 그리고 천간의 작용이 두 사람의 관계 패턴을 만들어내오. 이 근거를 이해하면 관계에서 반복되는 흐름의 이유가 보이오.</P>
             </section>
             <BondReasonCard data={bondReason} color={JN3_COLOR} pale={JN3_PALE} />
