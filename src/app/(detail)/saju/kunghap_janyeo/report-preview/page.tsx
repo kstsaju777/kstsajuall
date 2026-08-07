@@ -7357,7 +7357,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_janyeo/kunghap_janyeo_3/kunghap_janyeo_3_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "17%", left: "75%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>그대와 아이 사이,<br />특히 잘 통하는<br />부분들이 있소.</p>
+                <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>그대와 아이 사이,<br />특히 잘 통하는<br />부분들이 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
