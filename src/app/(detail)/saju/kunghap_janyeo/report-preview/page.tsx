@@ -8360,7 +8360,6 @@ function ReportPreviewInner() {
 
             {/* ── 자녀의 비전·재능·방향 ── */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>{honorShort7}의 비전과 가능성</Heading>
               <P>{honorShort7}의 사주 원국에는 고유한 재능과 가능성이 깃들어 있소. 그 빛이 어떤 방향으로 뻗어나갈지, 홍연이 살펴드리겠소.</P>
             </section>
             {visions.length > 0
