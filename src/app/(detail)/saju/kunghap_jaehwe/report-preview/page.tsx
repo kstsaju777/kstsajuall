@@ -6846,7 +6846,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_2/kunghap_jaehwe_2_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "25%", left: "32%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{pLabel}님의 사주팔자로<br />한폭의 그림을 그려봤소.</p>
+                <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{pLabel}님의 사주팔자로<br />한폭의 그림을 그려봤소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
