@@ -7145,7 +7145,6 @@ function ReportPreviewInner() {
 
             {/* 이 이별이 생겨난 구조 */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>이 이별이 생겨난 구조</Heading>
             </section>
             <BreakupPatternCard data={bp} />
 
