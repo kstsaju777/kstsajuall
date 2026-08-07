@@ -7013,7 +7013,6 @@ function ReportPreviewInner() {
             {/* 합·충 종합 분석 */}
             {computedDesc && (
               <section className="pb-4">
-                <div className="px-5"><Heading>합·충 종합 분석</Heading></div>
                 <div className="mx-5 rounded-2xl px-5 py-4" style={{ background: WHITE, border: `1px solid ${CH6_COLOR}15`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
                   <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, fontFamily: SERIF }}>{computedDesc}</p>
                 </div>
