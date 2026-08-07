@@ -4603,7 +4603,7 @@ function ReportPreviewInner() {
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
             </div>
-            <p className="px-8 mb-5 text-[18px] text-center leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${honorShort}의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
+
             {report?.sajuImageUrl ? (
               <div className="px-5">
                 <div style={{
