@@ -7629,9 +7629,6 @@ function ReportPreviewInner() {
             </div>
 
             {/* 재회 후 흐름과 미래 — 단락형 */}
-            <section className="px-6 pt-4 pb-2">
-              <Heading>재회 후의 시간, 그리고 두 사람의 미래</Heading>
-            </section>
             <section className="px-7 pb-4">
               {futureParagraphs.map((p, i) => <P key={i}>{p}</P>)}
             </section>
