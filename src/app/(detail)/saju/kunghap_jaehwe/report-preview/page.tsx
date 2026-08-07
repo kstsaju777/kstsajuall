@@ -6856,9 +6856,6 @@ function ReportPreviewInner() {
             {/* ── AI 사주화 ── */}
             {report?.partnerSajuImageUrl && (
               <div>
-                <div className="px-6 text-center mb-3">
-                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${pLabel}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
-                </div>
                 <div className="px-5">
                   <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
                     <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
