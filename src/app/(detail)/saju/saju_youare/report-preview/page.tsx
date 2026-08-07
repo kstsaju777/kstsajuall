@@ -5711,9 +5711,11 @@ function ReportPreviewInner() {
                         <div key={i} className="rounded-2xl overflow-hidden flex" style={{ border: `1.5px solid ${FOREST}28` }}>
                           <div className="flex-shrink-0 w-14 flex flex-col items-center justify-center gap-1 py-3" style={{ background: `${FOREST}10` }}>
                             <span className="text-[22px]">{r.icon}</span>
-                            <span className="font-black px-1.5 py-0.5 rounded-full" style={{ background: FOREST, color: "#fff", fontSize: 11 }}>{r.category}</span>
                           </div>
                           <div className="flex-1 p-3.5" style={{ background: `${FOREST}05` }}>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-black px-2 py-0.5 rounded-full text-[11px]" style={{ background: FOREST, color: "#fff" }}>{r.category}</span>
+                            </div>
                             <p className="text-[13px] font-black mb-1" style={{ color: FOREST }}>{r.title}</p>
                             <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{r.desc}</p>
                           </div>
