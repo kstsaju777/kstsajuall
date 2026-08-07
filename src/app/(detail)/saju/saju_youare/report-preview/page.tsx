@@ -5698,7 +5698,7 @@ function ReportPreviewInner() {
                   <img src="/media/report/saju_youare/saju_youare_6/saju_youare_6_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                   <div className="absolute pointer-events-none" style={{ top: "23%", left: "35%", transform: "translate(-50%, -50%)" }}>
-                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>일상 속 작은 습관이<br />이 아이의 기운을<br />바꿔주오.</p>
                   </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
