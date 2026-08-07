@@ -7477,9 +7477,6 @@ function ReportPreviewInner() {
             </div>
 
             {/* 인연 유형 섹션 */}
-            <section className="px-6 pt-8 pb-0">
-              <Heading>우리는 어떤 인연인가</Heading>
-            </section>
             <BondTypeCard data={bondType} myName={myName} childName={childName} />
 
             {/* ── 삽화2 ── */}
