@@ -5706,7 +5706,6 @@ function ReportPreviewInner() {
                 </div>
                 {rd.remedies && rd.remedies.length > 0 && (
                   <section className="px-6 pt-0 pb-4">
-                    <Heading>아이를 위한 개운법</Heading>
                     <div className="space-y-2.5 mt-3">
                       {rd.remedies.map((r, i) => (
                         <div key={i} className="rounded-2xl overflow-hidden flex" style={{ border: `1.5px solid ${FOREST}28` }}>
