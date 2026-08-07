@@ -8383,7 +8383,6 @@ function ReportPreviewInner() {
 
             {/* ── 부모의 역할 & 홍연의 마지막 당부 ── */}
             <section className="px-6 pt-4 pb-2">
-              <Heading>부모로서의 역할</Heading>
               <P>{honorShort7}에게 {myName}님은 단순한 보호자가 아니라 사주가 정한 인연의 동반자이오. 이 인연을 잘 살리려면 어떤 역할이 필요한지 홍연이 일러드리겠소.</P>
             </section>
             {roles.length > 0
