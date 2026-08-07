@@ -2961,7 +2961,7 @@ function JYSipseongCard({ myIlgan, partnerIlgan, myName, partnerName, myGender, 
       <div className="px-5 py-5" style={{ background: `linear-gradient(135deg, ${color}10 0%, ${color}04 100%)`, borderBottom: `1px solid ${color}15` }}>
         <div className="flex items-center justify-center gap-3">
           <div className="flex flex-col items-center gap-1">
-            <p className="text-[13px] font-bold mb-1" style={{ color: myGenderColor }}>{myName ?? "나"}님</p>
+            <p className="text-[13px] font-bold mb-1" style={{ color: myGenderColor }}>{myName ?? "나"}</p>
             <div className="w-12 h-12 flex items-center justify-center">
               {myIlgan
                 ? <img src={ganCharImage(myIlgan)} alt={myIlgan} className="w-full h-full object-contain" />
@@ -7543,7 +7543,7 @@ function ReportPreviewInner() {
             <JYSipseongCard
               myIlgan={report?.view?.pillars?.[1]?.gan}
               partnerIlgan={report?.partnerView?.pillars?.[1]?.gan}
-              myName={myFirstName5} partnerName={childFirstName5}
+              myName={`${myFirstName5}님`} partnerName={`${childFirstName5}${childHon5}`}
               myGender={report?.gender} partnerGender={childGender}
               viewData={myView}
               color={(() => { const ss = (report?.view?.pillars?.[1]?.gan && report?.partnerView?.pillars?.[1]?.gan) ? sipseongOfStem(report.view.pillars[1].gan, report.partnerView.pillars[1].gan) : ""; return JY_SIPSEONG_COLOR_MAP[ss] ?? JN4_MY; })()}
@@ -7556,7 +7556,7 @@ function ReportPreviewInner() {
             <JYSipseongCard
               myIlgan={report?.partnerView?.pillars?.[1]?.gan}
               partnerIlgan={report?.view?.pillars?.[1]?.gan}
-              myName={childFirstName5} partnerName={myFirstName5}
+              myName={`${childFirstName5}${childHon5}`} partnerName={`${myFirstName5}님`}
               myGender={childGender} partnerGender={report?.gender}
               viewData={childViewDesc}
               color={(() => { const ss = (report?.partnerView?.pillars?.[1]?.gan && report?.view?.pillars?.[1]?.gan) ? sipseongOfStem(report.partnerView.pillars[1].gan, report.view.pillars[1].gan) : ""; return JY_SIPSEONG_COLOR_MAP[ss] ?? JN4_CH; })()}
