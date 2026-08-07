@@ -5574,7 +5574,7 @@ function ReportPreviewInner() {
                   <img src="/media/report/saju_youare/saju_youare_5/saju_youare_5_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                   <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{honorShort}의 부모님께<br />아이 육아에 필요한 조언을<br />알려줄테니 들어보시오.</p>
                   </div>
                 </div>
                 <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
