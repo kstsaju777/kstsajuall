@@ -3516,6 +3516,27 @@ const SAMPLE_CONTENT = {
       "힘든 날도 그냥 날씨 같은 거예요. 바람 불다가도 또 햇살이 비추기도 하거든요. 그러니 늘 스스로를 믿고 당당하게 걸어가세요.",
     ],
   },
+  remedy: {
+    intro: "부족한 기운을 채우는 생활 속 작은 실천이 건강의 시작이오.",
+    callout: "용신의 기운을 일상에서 꾸준히 보강하면 몸과 마음이 함께 안정되오.",
+    paragraphs: [
+      "사주에서 부족한 기운을 파악하면 어떤 환경과 음식, 생활 습관이 몸에 맞는지 알 수 있소. 개운법은 거창한 것이 아니라 매일의 작은 선택을 바꾸는 것에서 시작되오. 부족한 오행을 채우는 방향으로 식사와 환경을 조율하면 기운의 균형이 서서히 회복되오.",
+      "생활 환경을 조율하고 음식과 색상, 방향을 활용하여 기운을 보완하는 것이 효과적이오. 이 사람의 사주 구조에 맞는 개운법을 꾸준히 실천하면 면역력과 회복력이 높아지오. 무리하지 않는 선에서 규칙적으로 실천하는 것이 핵심이오.",
+      "개운법은 단번에 효과가 나타나는 것이 아니오. 꾸준한 실천이 쌓여 체질이 바뀌고 사주의 기운이 안정되는 것이오. 서두르지 말고 오늘 하루 한 가지씩 몸에 익혀가시오.",
+    ],
+    remedies: [
+      { icon: "🌿", category: "생활습관", title: "규칙적 수면", desc: "일정한 시간에 잠들고 일어나는 것이 기운을 안정시키는 가장 기본적인 개운법이오. 수면 부족은 오행의 균형을 흔들고 면역력을 약화시키오. 취침 전 1시간은 스마트폰을 멀리하고 조용히 몸을 이완하는 시간을 갖는 것이 좋소. 꾸준한 수면 루틴이 몸의 자연 치유력을 높여주오." },
+      { icon: "🧘", category: "마음·명상", title: "명상과 호흡", desc: "하루 10분 깊은 호흡과 명상은 흐트러진 기운을 모아주오. 숨을 천천히 들이쉬고 내쉬며 몸 안의 긴장을 풀어주는 것이 중요하오. 마음이 고요해질 때 몸의 기운도 안정되오. 아침 기상 직후나 취침 전에 실천하면 더욱 효과적이오." },
+      { icon: "🥗", category: "음식·약재", title: "체질 맞춤 식사", desc: "용신 오행에 해당하는 식재료를 꾸준히 섭취하면 부족한 기운을 채울 수 있소. 자신에게 맞는 계절 채소와 곡물을 중심으로 식단을 구성하시오. 자극적이거나 차가운 음식은 줄이고, 따뜻하게 조리된 음식을 드시는 것이 좋소. 규칙적인 식사 시간을 지키는 것도 기운 안정에 도움이 되오." },
+      { icon: "🚶", category: "생활습관", title: "가벼운 산책", desc: "하루 30분 이상 햇살 아래 걷는 것이 기운을 순환시키고 몸의 균형을 바로잡아주오. 자연 속 걷기는 특히 목·화 기운을 보충하는 데 효과적이오. 무리한 운동보다 지속 가능한 산책을 꾸준히 이어가는 것이 중요하오. 걷는 동안 긍정적인 생각을 떠올리면 마음의 기운도 함께 정화되오." },
+    ],
+    remedyCats: [
+      { icon: "🏃", category: "생활", items: ["매일 30분 이상 걷기", "규칙적인 수면 시간 지키기", "하루 물 2리터 이상 마시기", "과도한 음주·야식 줄이기"] },
+      { icon: "🌿", category: "환경", items: ["자연 채광이 드는 공간에서 생활하기", "식물 키우기로 목 기운 보강", "정돈된 공간 유지로 기운 순환", "용신 색상 소품 활용하기"] },
+      { icon: "🧘", category: "마음", items: ["하루 10분 명상·호흡 실천", "걱정을 일기로 내보내기", "감사한 것 3가지 떠올리기", "무리한 계획 줄이고 여유 갖기"] },
+    ],
+    remedyAdvice: "그대의 사주가 원하는 기운을 매일 조금씩 채워가시오. 개운이란 거창한 것이 아니라 오늘 하루 몸과 마음에 맞는 선택을 하는 것이오. 꾸준함이 쌓이면 반드시 건강한 변화가 찾아올 것이오.",
+  },
 };
 
 // ─── 섹션 컴포넌트 ────────────────────────────────────────────────
@@ -4971,15 +4992,13 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_1/saju_health_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "20%", left: "45%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[20px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{name.slice(1) || name}님의 몸 안에<br />흐르는 기운의<br />강약을 보겠소.</p>
               </div>
             </div>
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
               <div style={{ width: 1, height: 60, background: "linear-gradient(to bottom, rgba(180,120,100,0.3), rgba(180,120,100,0.6))" }} />
             </div>
-            <section className="px-6 pt-6 pb-0">
-              <Heading>{name.slice(1) || name}님의 기운은 강한가 약한가</Heading>
-            </section>
+            <div className="px-5"></div>
             <section className="px-5">
               <SinStrengthGauge view={report?.view ?? null} />
             </section>
@@ -4999,7 +5018,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_1/saju_health_1_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "22%", left: "70%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{name.slice(1) || name}님의 몸에<br />필요한 기운과<br />피해야 할 기운이 있소.</p>
               </div>
             </div>
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5229,7 +5248,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_2/saju_health_2_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "20%", left: "55%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[20px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>타고난 기운으로<br />주의해야 할<br />신체 부위가 있소.</p>
               </div>
             </div>
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5419,7 +5438,7 @@ function ReportPreviewInner() {
               <img src="/media/report/saju_health/saju_health_3/saju_health_3_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "22%", left: "35%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>알고만 있으면<br />아무것도 바뀌지 않소.<br />실천이 답이오.</p>
               </div>
             </div>
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
@@ -5466,13 +5485,14 @@ function ReportPreviewInner() {
                 "생활습관": "#eef7f2", "환경·공간": "#eef0f9", "마음·명상": "#f9eef6",
                 "음식·약재": "#f7f4ee", "색상·방향": "#f5f0fa",
               };
-              const rem3 = (jc.remedy as { remedies?: { icon?: string; category?: string; title?: string; desc?: string }[] } | undefined) ?? {};
-              if (!rem3.remedies || rem3.remedies.length === 0) return null;
+              const rem3 = ((jc.remedy ?? (c as Record<string, unknown>).remedy) as { remedies?: { icon?: string; category?: string; title?: string; desc?: string }[] } | undefined) ?? {};
+              const validRemedies = (rem3.remedies ?? []).filter(r => r.title && r.desc);
+              if (validRemedies.length === 0) return null;
               return (
                 <section className="px-6 pb-6">
                   <Heading>나에게 맞는 개운법</Heading>
                   <div className="flex flex-col gap-3">
-                    {rem3.remedies.map((r, i) => {
+                    {validRemedies.map((r, i) => {
                       const cat = r.category ?? "생활습관";
                       const cColor = CAT_COLOR[cat] ?? PURP;
                       const cBg = CAT_BG[cat] ?? PURP_LIGHT;
@@ -5502,7 +5522,7 @@ function ReportPreviewInner() {
             {(() => {
               const PURP = "#5a3d7a";
               const PURP_LIGHT = "#f5f0fa";
-              const rem3c = (jc.remedy as { remedyCats?: { icon?: string; category?: string; items?: string[] }[] } | undefined) ?? {};
+              const rem3c = ((jc.remedy ?? (c as Record<string, unknown>).remedy) as { remedyCats?: { icon?: string; category?: string; items?: string[] }[] } | undefined) ?? {};
               if (!rem3c.remedyCats || rem3c.remedyCats.length === 0) return null;
               return (
                 <section className="px-6 pb-6">
@@ -5597,8 +5617,8 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/saju_health/saju_health_4/saju_health_4_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "20%", left: "33%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              <div className="absolute pointer-events-none" style={{ top: "21%", left: "33%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>건강을 지키는<br />가장 좋은 약은<br />미리 아는 것이오.</p>
               </div>
             </div>
             <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
