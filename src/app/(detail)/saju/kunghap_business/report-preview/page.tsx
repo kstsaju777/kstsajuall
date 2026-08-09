@@ -6884,8 +6884,8 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_business/kunghap_business_1/kunghap_business_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "22%", left: "70%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              <div className="absolute pointer-events-none" style={{ top: "22%", left: "69%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{name.slice(1) || name}님의 사주팔자로<br />한폭의 그림을<br />그려봤소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6895,9 +6895,6 @@ function ReportPreviewInner() {
             {/* ── AI 사주화 ── */}
             {report?.sajuImageUrl && (
               <div>
-                <div className="px-6 text-center mb-3">
-                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${firstName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
-                </div>
                 <div className="px-5">
                   <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
                     <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
@@ -6980,7 +6977,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_1/kunghap_business_1_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "18%", left: "40%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[1.6] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{firstName}님 사주에는<br />비즈니스할 때에<br />빛나는 기질과<br />조심할 기질이 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6989,9 +6986,6 @@ function ReportPreviewInner() {
 
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
-              <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
-              </div>
               <GNatureCard data={nature} color={MAROON} label="나를 대표하는 기질" />
             </section>
 
@@ -7089,8 +7083,8 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_business/kunghap_business_2/kunghap_business_2_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "20%", left: "60%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              <div className="absolute pointer-events-none" style={{ top: "20%", left: "62%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{partnerFirstName}님의 사주팔자로<br />한폭의 그림을 그려봤소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7100,9 +7094,6 @@ function ReportPreviewInner() {
             {/* ── AI 사주화 ── */}
             {report?.partnerSajuImageUrl && (
               <div>
-                <div className="px-6 text-center mb-3">
-                  <p className="text-[18px] leading-[2] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{`${partnerFirstName}님의 사주팔자로\n한폭의 그림을 그려봤소.`}</p>
-                </div>
                 <div className="px-5">
                   <div style={{ position: "relative", padding: "16px", background: "linear-gradient(145deg, #f0d060 0%, #c89020 18%, #a07018 38%, #c89828 58%, #7a5010 78%, #c09828 100%)", boxShadow: ["0 6px 16px rgba(0,0,0,0.3)", "inset 0 3px 0 rgba(255,245,130,0.85)", "inset 3px 0 0 rgba(255,240,110,0.5)", "inset 0 -3px 0 rgba(0,0,0,0.65)", "inset -3px 0 0 rgba(0,0,0,0.45)"].join(", ") }}>
                     <div style={{ position: "relative", overflow: "hidden", aspectRatio: "4/3" }}>
@@ -7185,7 +7176,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_2/kunghap_business_2_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "18%", left: "44%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[1.6] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{partnerFirstName}님 사주에도<br />비즈니스할 때에<br />빛나는 기질과<br />조심할 기질이 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7194,9 +7185,6 @@ function ReportPreviewInner() {
 
             {/* ── 빛과 그림자 ── */}
             <section className="pt-4 pb-2">
-              <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
-              </div>
               <GNatureCard data={nature} color={NAVY} label={`${partnerFirstName}님을 대표하는 기질`} />
             </section>
 
@@ -7314,7 +7302,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_3/kunghap_business_3_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "23%", left: "33%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>비즈니스 파트너로서<br />두 사람 사주 글자끼리<br />맞닿는 기운이 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7345,7 +7333,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_3/kunghap_business_3_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "22%", left: "68%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>비즈니스 파트너로서<br />두 사람 사주 글자끼리<br />충돌하는 기운도 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7468,7 +7456,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_4/kunghap_business_4_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "20%", left: "65%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>두 사람의<br />강점은 더 빛나게 하고<br />약점은 잘 보완케 하는<br />방법을 알려주겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7478,10 +7466,7 @@ function ReportPreviewInner() {
             {/* 균형 잡기 가이드 */}
             {bal && (
               <>
-                <section className="px-6 pt-4 pb-2">
-                  <Heading>강점을 살리고 약점을 보완하는 법</Heading>
-                  <P>강점을 더 빛나게 하고 약점을 지혜롭게 보완하는 구체적인 방법이오.</P>
-                </section>
+                <div className="px-5"></div>
                 <BusinessBalancePanel data={bal} />
               </>
             )}
@@ -7536,7 +7521,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_5/kunghap_business_5_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "22%", left: "75%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[14px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>사주가 다르면<br />잘하는 것도 다르오.<br />그것이 파트너십이오.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7629,7 +7614,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_6/kunghap_business_6_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "23%", left: "68%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>함께 일하는 방식,<br />서로를 알아야<br />잘 맞출 수 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7703,8 +7688,8 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_business/kunghap_business_7/kunghap_business_7_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "17%", left: "67%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              <div className="absolute pointer-events-none" style={{ top: "17%", left: "65%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>밝은 면과 어두운 면,<br />둘 다 알아야<br />진짜 파트너요.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7779,8 +7764,8 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "22%", left: "35%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              <div className="absolute pointer-events-none" style={{ top: "22%", left: "34%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[17px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>어떤 해, 어떤 달에<br />기운이 오르고 내리는지<br />말해주겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7805,7 +7790,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>함께 펼칠 사업,<br />성공 가능성을<br />점쳐보겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7824,7 +7809,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_business/kunghap_business_8/kunghap_business_8_3.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "15%", left: "65%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>알고 실천하면<br />사업의 흐름이<br />달라지오.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
