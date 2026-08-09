@@ -6183,8 +6183,8 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_banryeo/kunghap_banryeo_1/kunghap_banryeo_1_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "20%", left: "70%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              <div className="absolute pointer-events-none" style={{ top: "22%", left: "70%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>보호자의 사주 속에<br />타고난 기운의<br />뿌리가 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6267,7 +6267,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_banryeo/kunghap_banryeo_1/kunghap_banryeo_1_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "18%", left: "40%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>보호자 타고난 사주에<br />빛과 그림자가 있소.<br />함께 살펴보겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6276,9 +6276,7 @@ function ReportPreviewInner() {
 
             {/* ── 기질 카드 ── */}
             <section className="pt-4 pb-2">
-              <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
-              </div>
+              <div className="px-5"></div>
               <MyNatureBr1Card data={nature} />
             </section>
 
@@ -6379,7 +6377,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_banryeo/kunghap_banryeo_2/kunghap_banryeo_2_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "20%", left: "62%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>이 아이가 품고 태어난<br />오행의 기운을<br />살펴보겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6404,8 +6402,8 @@ function ReportPreviewInner() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/media/report/kunghap_banryeo/kunghap_banryeo_2/kunghap_banryeo_2_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-              <div className="absolute pointer-events-none" style={{ top: "18%", left: "45%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+              <div className="absolute pointer-events-none" style={{ top: "18%", left: "43%", transform: "translate(-50%, -50%)" }}>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>이 아이가 타고난<br />빛과 그림자를<br />살펴보겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6414,9 +6412,7 @@ function ReportPreviewInner() {
 
             {/* ── 기질 카드 ── */}
             <section className="pt-4 pb-2">
-              <div className="px-5 mb-3">
-                <h2 className="text-[19px] font-black" style={{ color: INK }}>빛과 그림자</h2>
-              </div>
+              <div className="px-5"></div>
               <PetNatureBr2Card data={petNature} />
             </section>
 
@@ -6495,7 +6491,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_banryeo/kunghap_banryeo_3/kunghap_banryeo_3_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "17%", left: "45%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>보호자와 이 아이가<br />처음 만났을 때<br />느낀 기운이 있소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6592,7 +6588,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_banryeo/kunghap_banryeo_4/kunghap_banryeo_4_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "20%", left: "55%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>이 아이의 오행이<br />신체 어느 곳과<br />연결되는지 보겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6625,7 +6621,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_banryeo/kunghap_banryeo_4/kunghap_banryeo_4_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "22%", left: "35%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>이 아이가 타고난<br />기질과 건강의<br />뿌리를 보겠소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6764,8 +6760,8 @@ function ReportPreviewInner() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/report/kunghap_banryeo/kunghap_banryeo_5/kunghap_banryeo_5_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-                  <div className="absolute pointer-events-none" style={{ top: "20%", left: "32%", transform: "translate(-50%, -50%)" }}>
-                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                  <div className="absolute pointer-events-none" style={{ top: "22%", left: "32%", transform: "translate(-50%, -50%)" }}>
+                    <p className="text-[16px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>이 아이가 편안하게<br />지낼 수 있는 환경이<br />사주에 담겨 있소.</p>
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -6929,7 +6925,7 @@ function ReportPreviewInner() {
                   <img src="/media/report/kunghap_banryeo/kunghap_banryeo_6/kunghap_banryeo_6_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
                   <div className="absolute pointer-events-none" style={{ top: "17%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>텍스트를<br />입력하시오.</p>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>이 아이에게 맞는<br />행운의 기운이<br />따로 있소.</p>
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
