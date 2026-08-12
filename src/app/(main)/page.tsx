@@ -6,11 +6,11 @@ import { HomeClient } from "./HomeClient";
 // 60초마다 재빌드 — 매 요청마다 Supabase 쿼리 실행하지 않음
 export const revalidate = 60;
 
-const ADMIN_EMAIL = "admin@hongyeondang.com";
+const ADMIN_EMAILS = ["admin@hongyeondang.com", "semiadmin@hongyeondang.com"];
 
 export default async function HomePage() {
   const user = isSupabaseConfigured() ? await getCurrentUser() : null;
-  const isAdmin = !!user && user.email === ADMIN_EMAIL;
+  const isAdmin = !!user && ADMIN_EMAILS.includes(user.email ?? "");
 
   const service = createServiceClient();
   let query = service

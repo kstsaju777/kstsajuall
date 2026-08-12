@@ -8,7 +8,7 @@ async function isAdmin(request: Request) {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    return !!user && user.email === "admin@hongyeondang.com";
+    return !!user && ["admin@hongyeondang.com", "semiadmin@hongyeondang.com"].includes(user.email ?? "");
   } catch {
     return false;
   }
