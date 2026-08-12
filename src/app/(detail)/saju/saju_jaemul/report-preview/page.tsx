@@ -678,7 +678,7 @@ function WealthLineChart({ view }: { view: MyeongsikView | null }) {
     return { year: y, gz, score: Math.min(95, Math.max(40, raw)) };
   });
 
-  const W = 320, H = 160, padX = 20, padTop = 20, padBot = 30;
+  const W = 320, H = 190, padX = 20, padTop = 20, padBot = 62;
   const n = data.length;
   const minS = Math.min(...data.map(d => d.score));
   const maxS = Math.max(...data.map(d => d.score));
@@ -687,30 +687,36 @@ function WealthLineChart({ view }: { view: MyeongsikView | null }) {
   const y = (v: number) => padTop + (H - padTop - padBot) * (1 - (v - minS) / range);
   const pts = data.map((d, i) => `${x(i)},${y(d.score)}`).join(" ");
   const area = `${x(0)},${y(minS - range * 0.1)} ${pts} ${x(n-1)},${y(minS - range * 0.1)}`;
-  const peakI = data.reduce((m, d, i) => (d.score > data[m].score ? i : m), 0);
+  const boxW = 24, boxH = 28;
 
   return (
     <div className="rounded-2xl p-4 mt-2 mb-5" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ overflow: "visible" }}>
         <defs>
-          <linearGradient id="wealthArea" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id="wealthAreaJ" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={GOLD} stopOpacity="0.25" />
             <stop offset="100%" stopColor={GOLD} stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        {[0,1,2,3].map(i => {
-          const yy = padTop + ((H - padTop - padBot) * i) / 3;
-          return <line key={i} x1={padX} x2={W - padX} y1={yy} y2={yy} stroke={`${INK}0d`} strokeWidth="1" />;
-        })}
-        <polygon points={area} fill="url(#wealthArea)" />
+        <polygon points={area} fill="url(#wealthAreaJ)" />
         <polyline points={pts} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        {data.map((d, i) => (
-          <g key={i}>
-            <circle cx={x(i)} cy={y(d.score)} r={3} fill={WHITE} stroke={GOLD} strokeWidth="2" />
-            <text x={x(i)} y={H - 12} fontSize="8" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
-            <text x={x(i)} y={H - 3} fontSize="7" fill={MUTE} textAnchor="middle">{d.gz}</text>
-          </g>
-        ))}
+        {data.map((d, i) => {
+          const cx = x(i);
+          const boxY = H - padBot + 18;
+          return (
+            <g key={i}>
+              <circle cx={cx} cy={y(d.score)} r={3} fill={WHITE} stroke={GOLD} strokeWidth="2" />
+              {/* 세로 점선 */}
+              <line x1={cx} y1={y(d.score) + 5} x2={cx} y2={boxY - 3} stroke={`${GOLD}55`} strokeWidth="1" strokeDasharray="2,2" />
+              {/* 라운딩 박스 */}
+              <rect x={cx - boxW / 2} y={boxY} width={boxW} height={boxH} rx={4} ry={4} fill="none" stroke={`${GOLD}55`} strokeWidth="0.8" />
+              {/* 년도 (뒤 두 자리) */}
+              <text x={cx} y={boxY + 11} fontSize="12" fontWeight="700" fill={INK_SOFT} textAnchor="middle">{String(d.year).slice(2)}</text>
+              {/* 간지 */}
+              <text x={cx} y={boxY + 24} fontSize="9" fontWeight="600" fill={INK_SOFT} textAnchor="middle">{d.gz}</text>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
@@ -5354,7 +5360,6 @@ function ReportPreviewInner() {
                     <Heading>{name.slice(1)}님의 시기별 재물운</Heading>
                     {/* 재물운 꺾은선 차트 */}
                     <div className="mb-2">
-                      <p className="text-[11px] mb-1" style={{ color: "#9a8a7a" }}>📈 2024–2033 재물운 흐름 (세운 십성 기반)</p>
                       <WealthLineChart view={report?.view ?? null} />
                     </div>
                     <div className="relative">
