@@ -8,12 +8,12 @@ import { FooterLegal } from "@/components/layout/FooterLegal";
 import { NavTabs } from "@/components/layout/NavTabs";
 import { CategoryProvider } from "@/components/layout/CategoryContext";
 
-const ADMIN_EMAIL = "admin@hongyeondang.com";
+const ADMIN_EMAILS = ["admin@hongyeondang.com", "semiadmin@hongyeondang.com"];
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const user = isSupabaseConfigured() ? await getCurrentUser() : null;
   const isLoggedIn = !!user;
-  const isAdmin = !!user && user.email === ADMIN_EMAIL;
+  const isAdmin = !!user && ADMIN_EMAILS.includes(user.email ?? "");
 
   return (
     <CategoryProvider>
