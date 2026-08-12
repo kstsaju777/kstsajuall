@@ -41,7 +41,7 @@ export async function setAdminCookie(id: string, password: string): Promise<bool
 
   if (id === "admin" && password === env.ADMIN_PASSWORD) {
     token = ADMIN_TOKEN;
-  } else if (id === env.COWORKER_ID && password === env.COWORKER_PASSWORD) {
+  } else if (id === "semiadmin" && password === env.COWORKER_PASSWORD) {
     token = COWORKER_TOKEN;
   }
 
