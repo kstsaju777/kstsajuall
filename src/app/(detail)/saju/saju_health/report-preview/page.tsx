@@ -3242,6 +3242,8 @@ const SAMPLE_CONTENT = {
     bars: [
       { label: "호흡기", value: 80 }, { label: "피부", value: 60 }, { label: "관절", value: 85 }, { label: "수면", value: 70 },
     ],
+    face: [],
+    categories: [],
   },
   riskTime: {
     intro: "선우님이 특별히 건강에 주의하고 사고수를 조심하셔야 할 구체적인 시기와 상황들을 짚어드릴게요.",
