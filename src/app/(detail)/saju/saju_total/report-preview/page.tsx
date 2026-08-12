@@ -5739,9 +5739,7 @@ function ReportPreviewInner() {
             </div>
           </Illust>
           <div style={{ width: 1, height: 48, background: "#ccc", margin: "24px auto" }} />
-          <section className="px-6 pt-2 pb-4">
-            <Heading>그대를 대표하는 사주의 격</Heading>
-          </section>
+          <div className="px-5"></div>
 
           {/* 격국 카드 */}
           {c.gyeokguk.gyeokgukName && (
