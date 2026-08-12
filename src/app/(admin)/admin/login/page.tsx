@@ -16,10 +16,11 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: S
 
   async function login(formData: FormData) {
     "use server";
+    const id = String(formData.get("id") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const fromField = String(formData.get("from") ?? "/admin");
     const target = fromField.startsWith("/") ? fromField : "/";
-    const ok = await setAdminCookie(password);
+    const ok = await setAdminCookie(id, password);
     if (!ok) {
       redirect(`/admin/login?from=${encodeURIComponent(target)}&error=1`);
     }
@@ -33,10 +34,6 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: S
       <header className="mb-8">
         <p className="text-xs font-mono text-mute mb-2">ADMIN</p>
         <h1 className="text-2xl font-semibold tracking-tight">관리자 로그인</h1>
-        <p className="mt-2 text-sm text-body">
-          <code className="font-mono text-ink">.env.local</code> 에 설정한{" "}
-          <code className="font-mono text-ink">ADMIN_PASSWORD</code> 를 입력하세요.
-        </p>
       </header>
 
       {unconfigured === "1" || !configured ? (
@@ -52,15 +49,26 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: S
         <input type="hidden" name="from" value={dest} />
         <div>
           <Input
-            type="password"
-            name="password"
-            placeholder="관리자 비밀번호"
+            type="text"
+            name="id"
+            placeholder="ID"
             required
             autoFocus
+            autoComplete="username"
+            disabled={!configured}
+          />
+        </div>
+        <div>
+          <Input
+            type="password"
+            name="password"
+            placeholder="비밀번호"
+            required
+            autoComplete="current-password"
             disabled={!configured}
           />
           {error === "1" ? (
-            <p className="mt-2 text-xs text-red-600">비밀번호가 일치하지 않습니다.</p>
+            <p className="mt-2 text-xs text-red-600">ID 또는 비밀번호가 일치하지 않습니다.</p>
           ) : null}
         </div>
         <Button type="submit" className="w-full" disabled={!configured}>
