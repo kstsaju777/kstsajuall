@@ -927,25 +927,7 @@ function CrisisCard({ item }: { item: Record<string, unknown> }) {
       </div>
       {/* 본문 */}
       <div className="px-4 py-3.5" style={{ background: WHITE }}>
-        <p className="text-[14.5px] leading-[1.95] mb-3 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
-        {/* 사주 근거 */}
-        {basis && (
-          <div className="mb-2.5 px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${GCH9_CRISIS}08` }}>
-            <span className="text-[12px] shrink-0 mt-0.5">🔍</span>
-            <p className="text-[12px] leading-relaxed" style={{ color: GCH9_CRISIS }}>
-              <span className="font-black">사주 근거 </span>{basis}
-            </p>
-          </div>
-        )}
-        {/* 위기 신호 */}
-        {signal && (
-          <div className="px-3 py-2 rounded-xl flex items-start gap-2" style={{ background: `${GOLD}10`, border: `1px solid ${GOLD}30` }}>
-            <span className="text-[12px] shrink-0 mt-0.5">📡</span>
-            <p className="text-[12px] leading-relaxed font-bold" style={{ color: GCH8_SOFT }}>
-              <span style={{ color: GOLD }}>위기 신호 </span>{signal}
-            </p>
-          </div>
-        )}
+        <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
       </div>
     </div>
   );
@@ -1694,7 +1676,7 @@ function ChildGenderGauge({ data }: { data: Record<string, unknown> | null }) {
     <div className="mx-5 mb-4 rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH8_COLOR}28` }}>
       <div className="px-5 pt-4 pb-1" style={{ background: WHITE }}>
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[11px] font-black w-6 text-right flex-shrink-0" style={{ color: SON_C }}>아들</span>
+          <span className="text-[14px] font-black w-8 text-right flex-shrink-0" style={{ color: SON_C }}>아들</span>
           <div className="flex-1 flex rounded-full overflow-hidden relative" style={{ height: 26 }}>
             <div className="flex items-center justify-start pl-2.5" style={{ width: `${sonRatio}%`, background: SON_C, transition: "width 0.4s" }}>
               {sonRatio >= 20 && <span className="text-[10px] font-black" style={{ color: WHITE }}>{sonRatio}%</span>}
@@ -1703,7 +1685,7 @@ function ChildGenderGauge({ data }: { data: Record<string, unknown> | null }) {
               {dlgRatio >= 20 && <span className="text-[10px] font-black" style={{ color: WHITE }}>{dlgRatio}%</span>}
             </div>
           </div>
-          <span className="text-[11px] font-black w-4 flex-shrink-0" style={{ color: DLG_C }}>딸</span>
+          <span className="text-[14px] font-black w-6 flex-shrink-0" style={{ color: DLG_C }}>딸</span>
         </div>
         {basis && <p className="text-[13px] leading-relaxed mb-2" style={{ color: INK_SOFT, fontFamily: SERIF }}>{basis}</p>}
         {note && <p className="text-[11px] mb-3" style={{ color: MUTE, fontFamily: SERIF }}>{note}</p>}
