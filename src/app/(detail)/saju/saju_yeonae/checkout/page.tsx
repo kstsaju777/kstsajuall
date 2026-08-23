@@ -572,6 +572,8 @@ function CheckoutContent() {
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
         </div>
 
+        <div className="h-8" />
+
         {/* ④ FAQ */}
         <FAQSection />
 
