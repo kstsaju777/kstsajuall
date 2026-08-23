@@ -566,7 +566,10 @@ function CheckoutContent() {
           <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
           <img src="/media/checkout/saju_jaemul/s2.jpg" alt="" className="w-full block" />
         </div>
-        <img src="/media/checkout/saju_jaemul/s3.jpg" alt="" className="w-full block" />
+        <div className="relative">
+          <img src="/media/checkout/saju_jaemul/s3.jpg" alt="" className="w-full block" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+        </div>
 
         {/* ④ FAQ */}
         <FAQSection />
