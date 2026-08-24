@@ -92,7 +92,7 @@ export default function BusinessPage() {
       <button onClick={()=>router.back()} className="fixed z-50 w-9 h-9 rounded-full flex items-center justify-center" style={{top:"16px",left:"max(16px,calc(50vw - 224px))",backgroundColor:"rgba(0,0,0,0.5)"}}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
-      <video src="/media/cards/kunghap_business/business-0.mp4" autoPlay muted loop playsInline style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
+      <img src="/media/cards/kunghap_business/business-0.jpg" alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
       <style>{`
         @keyframes cardAppear { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @keyframes floatA{0%,100%{transform:translateY(0px) rotate(-2deg)}50%{transform:translateY(-8px) rotate(-2deg)}}
@@ -101,7 +101,7 @@ export default function BusinessPage() {
       `}</style>
       {[
         {top:"72px",left:"5%",appearDelay:"1s",floatDelay:"1.6s",floatAnim:"floatA",name:"정*훈",stars:5,text:"동업자랑 궁합 봤는데 진짜 맞더라고요 신기했어요 💼"},
-        {top:"24%",left:"52%",appearDelay:"2s",floatDelay:"2.6s",floatAnim:"floatB",name:"박*영",stars:5,text:"거래처 사람이랑 왜 잘 안 풀렸는지 이유 알았어요!"},
+        {top:"34%",left:"52%",appearDelay:"2s",floatDelay:"2.6s",floatAnim:"floatB",name:"박*영",stars:5,text:"거래처 사람이랑 왜 잘 안 풀렸는지 이유 알았어요!"},
         {top:"45%",left:"4%",appearDelay:"3s",floatDelay:"3.6s",floatAnim:"floatC",name:"최*수",stars:5,text:"창업 파트너 구하기 전에 봤더니 확신이 생겼어요 ㅎㅎ"},
       ].map((r,i)=>(
         <div key={i} style={{position:"absolute",top:r.top,left:r.left,animation:`cardAppear 0.6s ease ${r.appearDelay} forwards, ${r.floatAnim} 3.8s ease-in-out ${r.floatDelay} infinite`,animationFillMode:"both",opacity:0,backgroundColor:"rgba(255,255,255,0.3)",backdropFilter:"blur(6px)",border:"1px solid rgba(255,255,255,0.3)",borderRadius:"14px",padding:"8px 12px",maxWidth:"185px",zIndex:42,pointerEvents:"none"}}>

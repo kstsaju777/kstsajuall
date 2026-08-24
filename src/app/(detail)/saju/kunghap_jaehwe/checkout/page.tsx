@@ -102,11 +102,6 @@ function MyeongsikSection({
           />
         </div>
       </div>
-      <div className="relative">
-        <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
-        <img src="/media/checkout/kunghap_jaehwe/s2.jpg" alt="" className="w-full block" />
-        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
-      </div>
       <div className="pb-2">
         <MyeongsikTable view={partnerMsView} name={partnerName} birth={null}
           rows={["sipTop", "gan", "ji", "sipBot", "jijang", "sinsal"]}
@@ -118,7 +113,10 @@ function MyeongsikSection({
           }
         />
       </div>
-      <div className="h-4" />
+      <div className="relative">
+        <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
+        <img src="/media/checkout/kunghap_jaehwe/s2.jpg" alt="" className="w-full block" />
+      </div>
     </div>
   );
 }
@@ -545,7 +543,6 @@ function CheckoutContent() {
         />
 
         <div className="relative">
-          <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
           <img src="/media/checkout/kunghap_jaehwe/s3.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
         </div>
