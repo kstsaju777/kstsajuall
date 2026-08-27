@@ -7692,7 +7692,7 @@ function ReportPreviewInner() {
             {/* ③ 학습 특성 */}
             {ss6.styleCards && ss6.styleCards.length > 0 && (
               <section className="px-6 pt-0 pb-2">
-                <Heading>이 아이의 학습 특성</Heading>
+                <Heading>{honorShort6}의 학습 특성</Heading>
                 <div className="mt-3 space-y-2.5">
                   {ss6.styleCards.map((card, i) => (
                     <div key={i} className="rounded-2xl overflow-hidden flex" style={{ border: `1.5px solid ${"#3f7d6b"}30` }}>
