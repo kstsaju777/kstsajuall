@@ -19,6 +19,7 @@ import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/re
 import { isBanryeoKunghapChapterReady, BANRYEO_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_banryeo-report-content";
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
+import { fixJosa } from "@/lib/utils/fix-josa";
 import { sipseongOfStem, sipseongOfBranch, unseongOf } from "@/lib/saju/sipseong-calc";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────
@@ -3155,7 +3156,7 @@ function PetEnvTipsBr6Card({ tips, petName }: {
   return (
     <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR6_COLOR}20`, boxShadow: "0 2px 14px rgba(42,106,74,0.08)" }}>
       <div className="px-5 py-3" style={{ background: `linear-gradient(90deg, ${BR6_COLOR}, ${BR6_ACCENT})` }}>
-        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🏡 {petName}을 위한 환경 조성 포인트</p>
+        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🏡 {fixJosa(`${petName}을 위한 환경 조성 포인트`)}</p>
       </div>
       <div className="divide-y" style={{ borderColor: `${BR6_COLOR}10` }}>
         {tips.map((tip, i) => {
@@ -3285,7 +3286,7 @@ function ReconcileTipsBr7Card({ tips, name, petName }: {
   return (
     <div className="mx-5 mb-5 rounded-2xl overflow-hidden" style={{ border: `1px solid ${BR7_COLOR}20`, boxShadow: "0 2px 14px rgba(122,58,26,0.08)" }}>
       <div className="px-5 py-3" style={{ background: `linear-gradient(90deg, ${BR7_COLOR}, ${BR7_ACCENT})` }}>
-        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🤝 {name}님과 {petName}을 위한 공존 처방</p>
+        <p className="text-[11px] font-black tracking-widest" style={{ color: "#fff" }}>🤝 {fixJosa(`${name}님과 ${petName}을 위한 공존 처방`)}</p>
       </div>
       <div className="divide-y" style={{ borderColor: `${BR7_COLOR}10` }}>
         {tips.map((tip, i) => {
@@ -6768,7 +6769,7 @@ function ReportPreviewInner() {
                   <div style={{ height: 48, width: 1, background: "#ccc" }} />
                 </div>
                 <div className="px-5 mb-3">
-                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}을 위한 환경 만들기</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{fixJosa(`${petName}을 위한 환경 만들기`)}</h2>
                 </div>
                 <PetEnvTipsBr6Card tips={tipItems} petName={petName} />
               </section>
@@ -6778,7 +6779,7 @@ function ReportPreviewInner() {
             {careTips.length > 0 && (
               <section className="pt-2 pb-4">
                 <div className="px-5 mb-3">
-                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{petName}을 위한 건강 돌봄</h2>
+                  <h2 className="text-[19px] font-black" style={{ color: INK }}>{fixJosa(`${petName}을 위한 건강 돌봄`)}</h2>
                 </div>
                 <PetCareTipsBr5Card tips={careTips} petName={petName} />
               </section>
