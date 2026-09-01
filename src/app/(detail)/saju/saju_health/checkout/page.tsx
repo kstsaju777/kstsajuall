@@ -549,12 +549,35 @@ function CheckoutContent() {
   return (
     <div className="w-full h-full" style={{ backgroundColor: WHITE }}>
       <div className="w-full h-full overflow-y-auto" style={{ scrollbarWidth: "none", paddingBottom: 80 }}>
-        <style>{`div::-webkit-scrollbar{display:none}`}</style>
+        <style>{`div::-webkit-scrollbar{display:none} @font-face{font-family:'GmarketSans';font-weight:700;src:url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff2') format('woff2');}`}</style>
 
         {/* ① 상단 이미지 */}
         <div className="relative">
           <img src="/media/checkout/saju_health/s1.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "26%", left: "69%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "33%", left: "42%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "54.8%", left: "42%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "58.5%", left: "70%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "95.5%", left: "60%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+          </div>
         </div>
 
         {/* ② 명식 */}
@@ -564,10 +587,52 @@ function CheckoutContent() {
         <div className="relative">
           <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
           <img src="/media/checkout/saju_health/s2.jpg" alt="" className="w-full block" />
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "13.5%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "19.8%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "31.3%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "44.7%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "54.5%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "66%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "4.7%", left: "65%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+          </div>
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "91.2%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
+          <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "81.7%", left: "35%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+          </div>
         </div>
         <div className="relative">
           <img src="/media/checkout/saju_health/s3.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
+          <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "2.5%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+          </div>
         </div>
 
         {/* ④ FAQ */}
