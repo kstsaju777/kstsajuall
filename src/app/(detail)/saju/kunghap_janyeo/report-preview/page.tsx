@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -7039,7 +7040,7 @@ function ReportPreviewInner() {
       {/* ═══════════ 제2장 · 자녀는 어떤 아이인가? ═══════════ */}
       {ch === "2" && (() => {
         const childName        = report?.partnerName || "자녀";
-        const childFirstName   = childName.length > 1 ? childName.slice(1) : childName;
+        const childFirstName   = stripSurname(childName);
         const childGender      = report?.partnerGender ?? "male";
         const childHonorific   = childGender === "female" ? "양" : "군";
         const childWonguk      = (jc.childWonguk      as Record<string, unknown> | undefined) ?? {};
@@ -7513,8 +7514,8 @@ function ReportPreviewInner() {
         const myName      = name || "나";
         const childName   = report?.partnerName || "자녀";
         const childGender = report?.partnerGender ?? "";
-        const myFirstName5    = myName.length > 1 ? myName.slice(1) : myName;
-        const childFirstName5 = childName.length > 1 ? childName.slice(1) : childName;
+        const myFirstName5    = stripSurname(myName);
+        const childFirstName5 = stripSurname(childName);
         const childHon5 = childGender === "female" || childGender === "여성" || childGender === "여아" ? "양" : childGender === "male" || childGender === "남성" || childGender === "남아" ? "군" : "님";
         const myFull5    = `${myFirstName5}님`;
         const childFull5 = `${childFirstName5}${childHon5}`;
@@ -7597,7 +7598,7 @@ function ReportPreviewInner() {
         const myName      = name || "나";
         const childName   = report?.partnerName || "자녀";
         const childGender6 = report?.partnerGender ?? "";
-        const childFirstName6 = childName.length > 1 ? childName.slice(1) : childName;
+        const childFirstName6 = stripSurname(childName);
         const childHon6 = childGender6 === "female" || childGender6 === "여성" || childGender6 === "여아" ? "양" : childGender6 === "male" || childGender6 === "남성" || childGender6 === "남아" ? "군" : "님";
         const childHeading6 = `${childFirstName6}${childHon6}`;
         const honorShort6 = childHeading6;
@@ -7839,7 +7840,7 @@ function ReportPreviewInner() {
       {ch === "8" && (() => {
         const childName8 = report?.partnerName || "자녀";
         const childGender8 = report?.partnerGender ?? "";
-        const childFirstName8 = childName8.length > 1 ? childName8.slice(1) : childName8;
+        const childFirstName8 = stripSurname(childName8);
         const childHon8 = childGender8 === "female" || childGender8 === "여성" || childGender8 === "여아" ? "양" : childGender8 === "male" || childGender8 === "남성" || childGender8 === "남아" ? "군" : "님";
         const honor8 = `${childFirstName8}${childHon8}`;
         const pf8 = (jc.parentingFlow as {
@@ -8062,7 +8063,7 @@ function ReportPreviewInner() {
         const myName    = name || "나";
         const childName = report?.partnerName || "자녀";
         const childGender7 = report?.partnerGender ?? "";
-        const childFirstName7 = childName.length > 1 ? childName.slice(1) : childName;
+        const childFirstName7 = stripSurname(childName);
         const childHon7 = childGender7 === "female" || childGender7 === "여성" || childGender7 === "여아" ? "양" : childGender7 === "male" || childGender7 === "남성" || childGender7 === "남아" ? "군" : "님";
         const honorShort7 = `${childFirstName7}${childHon7}`;
         const future = (jc.futureFlow    as Record<string, unknown> | undefined) ?? null;
@@ -8419,8 +8420,8 @@ function ReportPreviewInner() {
               const concern = report?.concern ?? "";
               const caParas = (c as unknown as Record<string, { paragraphs?: string[] }>).concernAdvice?.paragraphs ?? [];
               if (!concern || caParas.length === 0) return null;
-              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
-              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              const name1 = stripSurname((report?.name ?? ""));
+              const partnerName1 = stripSurname((report?.partnerName ?? ""));
               return (
                 <div className="mb-8">
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>

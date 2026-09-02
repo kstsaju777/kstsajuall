@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -6984,7 +6985,7 @@ function ReportPreviewInner() {
             <section className="px-6 pt-10 pb-8">
               {(() => {
                 const name7 = report?.name?.trim() || "";
-                const name1_7 = name7.length > 1 ? name7.slice(1) : name7;
+                const name1_7 = stripSurname(name7);
                 const concernParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
                 const hasConcern = !!report?.concern;
                 return (

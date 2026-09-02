@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 // 정통사주 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
@@ -166,7 +167,7 @@ async function generateConcernAdvice(id: string) {
   }
   if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
 
-  const name1 = name.length > 1 ? name.slice(1) : name;
+  const name1 = stripSurname(name);
 
   // 현재 대운 코드 계산 (종합사주와 동일 — AI 오판 방지)
   let daeunNote = "";
@@ -449,7 +450,7 @@ async function generateChapter(body: unknown) {
         }
       }
     }
-    const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
+    const myLabel = stripSurname((stored?.name ?? ""));
     const myGender: "male" | "female" = stored?.gender === "female" ? "female" : "male";
     const myHonorific = myGender === "female" ? "양" : "군";
     const sections = fixNamesInValue(obj, myLabel, null, "님", myHonorific) as typeof obj;

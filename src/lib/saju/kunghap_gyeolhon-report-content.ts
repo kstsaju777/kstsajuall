@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 // 결혼궁합 결과지 — 장별 풀이 프롬프트 & 구조
 // =====================================================
@@ -858,8 +859,8 @@ export function buildGyeolhonKunghapChapterPrompt(
   const myGenderLabel = gender === "female" ? "여성" : "남성";
   const partnerGenderLabel = partnerGender === "female" ? "여성" : "남성";
 
-  const firstName = name ? (name.length > 1 ? name.slice(1) : name) : name;
-  const partnerFirstName = partnerName ? (partnerName.length > 1 ? partnerName.slice(1) : partnerName) : partnerName;
+  const firstName = name ? (stripSurname(name)) : name;
+  const partnerFirstName = partnerName ? (stripSurname(partnerName)) : partnerName;
   const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
 의뢰인을 부를 때 반드시 아래 중 하나를 그대로 복사해 사용하오:
   "${firstName}님은"  "${firstName}님이"  "${firstName}님을"  "${firstName}님과"  "${firstName}님에게"  "${firstName}님으로"  "${firstName}님의"  "${firstName}님"

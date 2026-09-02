@@ -1,5 +1,7 @@
 "use client";
 
+import { stripSurname } from "@/lib/utils/strip-surname";
+
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { calcSaju } from "@/lib/saju/local-manseryeok";
@@ -527,7 +529,7 @@ function StepLoading({ name, date, time, calendar, gender, email, concern, phone
   const [msg, setMsg] = useState("그대의 사주팔자를 세우고 있어요...");
   const doneRef = useRef(false);
   const suffix = gender === "남성" || gender === "남아" || gender === "male" ? "군" : gender === "여성" || gender === "여아" || gender === "female" ? "양" : "님";
-  const displayName = name.length > 1 ? name.slice(1) : name;
+  const displayName = stripSurname(name);
 
   const MSGS = [
     "그대의 사주팔자를 세우고 있어요...",

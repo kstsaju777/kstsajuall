@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -7621,8 +7622,8 @@ function ReportPreviewInner() {
               const concern = report?.concern ?? "";
               const caParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
               if (!concern || caParas.length === 0) return null;
-              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
-              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              const name1 = stripSurname((report?.name ?? ""));
+              const partnerName1 = stripSurname((report?.partnerName ?? ""));
               return (
                 <div className="mb-8">
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>

@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// 자녀사주 결과지 생성 + 저장 API
 // POST {name,date,time,calendar,gender,email,concern} → createReport
 // POST {id, chapter}                                  → generateChapter
@@ -257,7 +258,7 @@ async function generateChapter(body: unknown) {
       sajuText: stored.sajuText ?? "",
       concern:  stored.concern ?? "",
     });
-    const myLabel = (stored.name ?? "").length > 1 ? (stored.name ?? "").slice(1) : (stored.name ?? "");
+    const myLabel = stripSurname((stored.name ?? ""));
     const sections = fixNamesInValue(rawSections, myLabel, null, "님") as typeof rawSections;
     return NextResponse.json({ sections });
   } catch (err) {

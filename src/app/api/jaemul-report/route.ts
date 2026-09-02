@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 // 재물운사주 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
@@ -145,7 +146,7 @@ async function generateConcernAdvice(id: string) {
   if (!manseryeokText) return NextResponse.json({ error: "명식 정보 없음" }, { status: 500 });
 
   const name: string = stored?.name ?? "";
-  const name1 = name.length > 1 ? name.slice(1) : name;
+  const name1 = stripSurname(name);
   const gender: "male" | "female" = stored?.gender === "female" ? "female" : "male";
 
   // 현재 대운 코드 계산 (종합사주와 동일 — AI 오판 방지)
@@ -407,7 +408,7 @@ async function generateChapter(body: unknown) {
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
       concern: effectiveConcern || undefined,
     });
-    const myLabel = (stored?.name ?? "").length > 1 ? (stored?.name ?? "").slice(1) : (stored?.name ?? "");
+    const myLabel = stripSurname((stored?.name ?? ""));
     const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;
     return NextResponse.json({ sections });
   } catch (err) {

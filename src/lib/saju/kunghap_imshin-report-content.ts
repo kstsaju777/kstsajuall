@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 임신궁합 결과지 — 장별 콘텐츠 타입 / 프롬프트 빌더
 // =====================================================
@@ -76,8 +77,8 @@ export function buildImshinKunghapChapterPrompt(
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
   const partnerGenderLabel = input.partnerGender === "male" ? "남성" : "여성";
-  const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
-  const partnerLabel = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
+  const myLabel = stripSurname(input.name);
+  const partnerLabel = stripSurname(input.partnerName);
   const honorificBlock = `\n\n[호칭 토큰 규칙 — 반드시 준수]
 풀이 본문에서 이름을 쓸 때 아래 토큰만 사용하오. 절대 실제 이름을 직접 쓰지 마오.
   의뢰인 → __MY__ 사용

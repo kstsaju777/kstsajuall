@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 // 유아사주 결과지 — 장별 풀이 프롬프트 & 구조
 // =====================================================
@@ -531,7 +532,7 @@ export function buildYouareChapterPrompt(
 ): { system: string; user: string } {
   const theme = YOUARE_CH_THEME[chapter] ?? `[제${chapter}장]`;
   const schema = YOUARE_CH_SCHEMA[chapter] ?? "{}";
-  const givenName = input.name.length > 1 ? input.name.slice(1) : input.name;
+  const givenName = stripSurname(input.name);
   const honorSuffix = input.gender === "female" ? "양" : "군";
   const honor = givenName ? `${givenName}${honorSuffix}` : "이 아이";
   const childLabel = honor;

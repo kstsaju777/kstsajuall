@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 // 연애궁합 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
@@ -174,8 +175,8 @@ async function genChapterContent(chapter: number, input: {
       }
       if (isYeonaeKunghapChapterReady(obj, chapter)) {
         obj = fixJosaDeep(obj) as Record<string, unknown>;
-        const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
-        const ptLabel = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
+        const myLabel = stripSurname(input.name);
+        const ptLabel = stripSurname(input.partnerName);
         obj = fixNamesInValue(obj, myLabel, ptLabel, "님") as Record<string, unknown>;
         const SIPSEONG_ALL = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
         function fixSipseongInText(text: string, correct: string): string {
@@ -265,8 +266,8 @@ async function generateConcernAdvice(id: string) {
   const partnerManseryeokText: string = stored?.partnerManseryeokText ?? "";
   const name: string = stored?.name ?? "";
   const partnerName: string = stored?.partnerName ?? "";
-  const name1 = name.length > 1 ? name.slice(1) : name;
-  const partnerName1 = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+  const name1 = stripSurname(name);
+  const partnerName1 = stripSurname(partnerName);
 
   const ilganFull: string = stored?.view?.ilgan ?? "";
   const partnerIlganFull: string = stored?.partnerView?.ilgan ?? "";

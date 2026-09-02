@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -2874,8 +2875,8 @@ function HealingPathCard({ data, myGender, partnerGender, myName, partnerName }:
   const BLUE = { text: "#1a4a9e", bg: "linear-gradient(to bottom, #e8f0fc 0%, #b8d0f0 40%, #a0c0ec 60%, #d0e4f8 100%)", border: "#1a4a9e" };
   const PINK = { text: "#c0306a", bg: "linear-gradient(to bottom, #fce8f0 0%, #f0b8d0 40%, #eaa0c4 60%, #f8d0e4 100%)", border: "#c0306a" };
   const isFem = (g?: string) => g === "female" || g === "여성" || g === "여자";
-  const myDisp      = myName      ? `${myName.length > 1 ? myName.slice(1) : myName}님` : "나";
-  const partnerDisp = partnerName ? `${partnerName.length > 1 ? partnerName.slice(1) : partnerName}님` : "상대방";
+  const myDisp      = myName      ? `${stripSurname(myName)}님` : "나";
+  const partnerDisp = partnerName ? `${stripSurname(partnerName)}님` : "상대방";
   const myTheme      = isFem(myGender)      ? PINK : BLUE;
   const partnerTheme = isFem(partnerGender) ? PINK : BLUE;
   const activeTheme  = activeTab === "my" ? myTheme : partnerTheme;
@@ -6767,7 +6768,7 @@ function ReportPreviewInner() {
       {/* ═══════════ 제2장 · 상대는 어떤 사람인가 ═══════════ */}
       {ch === "2" && (() => {
         const partnerName          = report?.partnerName || "상대방";
-        const pLabel               = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+        const pLabel               = stripSurname(partnerName);
         const partnerWonguk        = (jc.partnerWonguk        as Record<string, unknown> | undefined) ?? {};
         const partnerNature        = (jc.partnerNature        as Record<string, unknown> | undefined) ?? null;
         const partnerRelationStyle = (jc.partnerRelationStyle as Record<string, unknown> | undefined) ?? null;
@@ -7062,8 +7063,8 @@ function ReportPreviewInner() {
 
             {/* 신청자가 밝힌 이별 정보 — 홍연 서술문 */}
             {hasBreakupInfo && (() => {
-              const myDisplay      = `${myName.length > 1 ? myName.slice(1) : myName}님`;
-              const partnerDisplay = `${partnerName.length > 1 ? partnerName.slice(1) : partnerName}님`;
+              const myDisplay      = `${stripSurname(myName)}님`;
+              const partnerDisplay = `${stripSurname(partnerName)}님`;
               const r = storedBreakupReason ?? "";
               const w = storedWhoEnded ?? "";
               let mainSentence = "";
@@ -7339,7 +7340,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_jaehwe/kunghap_jaehwe_6/kunghap_jaehwe_6_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "25%", left: "32%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{(partnerName.length > 1 ? partnerName.slice(1) : partnerName)}님은<br />헤어진 후에 지금,<br />이런 마음일 것이오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{(stripSurname(partnerName))}님은<br />헤어진 후에 지금,<br />이런 마음일 것이오.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7667,8 +7668,8 @@ function ReportPreviewInner() {
               const concern = report?.concern ?? "";
               const caParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
               if (!concern || caParas.length === 0) return null;
-              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
-              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              const name1 = stripSurname((report?.name ?? ""));
+              const partnerName1 = stripSurname((report?.partnerName ?? ""));
               return (
                 <div className="mb-8">
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>

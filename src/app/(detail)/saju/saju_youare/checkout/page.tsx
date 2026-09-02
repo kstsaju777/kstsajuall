@@ -1,5 +1,7 @@
 "use client";
 
+import { stripSurname } from "@/lib/utils/strip-surname";
+
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { TossWidget } from "@/components/checkout/TossWidget";
@@ -105,7 +107,7 @@ function MyeongsikSection({
   const isFemale = gender === "female" || gender === "여자" || gender === "여성" || gender === "여아";
   const genderLabel = isFemale ? "여아" : "남아";
   const honorific = isFemale ? "양" : "군";
-  const displayName = name.length > 1 ? name.slice(1) : name;
+  const displayName = stripSurname(name);
   const dateLabel = dateFormatted ? `${calLabel} ${dateFormatted}${genderLabel ? ` (${genderLabel})` : ""}` : "";
 
   return (

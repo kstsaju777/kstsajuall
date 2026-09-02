@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -6948,9 +6949,9 @@ function ReportPreviewInner() {
 
 
   const name = report?.name?.trim() || nameParam.trim() || "고객";
-  const firstName = name.length > 1 ? name.slice(1) : name;
+  const firstName = stripSurname(name);
   const effectivePartnerName = report?.partnerName?.trim() || partnerName || "상대방";
-  const partnerFirstName = effectivePartnerName.length > 1 ? effectivePartnerName.slice(1) : effectivePartnerName;
+  const partnerFirstName = stripSurname(effectivePartnerName);
   const normName = (text: string) =>
     text.replace(new RegExp(name + "님", "g"), `${firstName}님`)
         .replace(new RegExp(name, "g"), `${firstName}님`);
@@ -7819,7 +7820,7 @@ function ReportPreviewInner() {
         const roleItems = (rb?.items as Record<string, unknown>[] | undefined) ?? [];
         const clipItems = (dl?.clips as Record<string, unknown>[] | undefined) ?? [];
         const myFirstName      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
-        const partnerFirstName = report?.partnerName ? (report.partnerName.length > 1 ? report.partnerName.slice(1) : report.partnerName) : "상대";
+        const partnerFirstName = report?.partnerName ? (stripSurname(report.partnerName)) : "상대";
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -8008,7 +8009,7 @@ function ReportPreviewInner() {
         const hl = (jc.homeLife   as Record<string, unknown> | undefined) ?? null;
         const wt = (jc.wealthTips as Record<string, unknown> | undefined) ?? null;
         const myFirstName7      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
-        const partnerFirstName7 = report?.partnerName ? (report.partnerName.length > 1 ? report.partnerName.slice(1) : report.partnerName) : "상대";
+        const partnerFirstName7 = report?.partnerName ? (stripSurname(report.partnerName)) : "상대";
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -8086,7 +8087,7 @@ function ReportPreviewInner() {
         const cf = (jc.childFlow as Record<string,unknown>|undefined) ?? null;
         const ct = (jc.childTips as Record<string,unknown>|undefined) ?? null;
         const myFirstName8      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
-        const partnerFirstName8 = report?.partnerName ? (report.partnerName.length > 1 ? report.partnerName.slice(1) : report.partnerName) : "상대";
+        const partnerFirstName8 = report?.partnerName ? (stripSurname(report.partnerName)) : "상대";
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -8319,8 +8320,8 @@ function ReportPreviewInner() {
               const concern = report?.concern ?? "";
               const caParas = (jc.concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
               if (!concern || caParas.length === 0) return null;
-              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
-              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              const name1 = stripSurname((report?.name ?? ""));
+              const partnerName1 = stripSurname((report?.partnerName ?? ""));
               return (
                 <div className="mb-8">
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>

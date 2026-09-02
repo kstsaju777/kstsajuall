@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// 연애궁합 결과지 생성 + 저장 API
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
@@ -255,8 +256,8 @@ async function generateChapter(body: unknown) {
       partnerName: stored.partnerName ?? "", partnerGender: stored.partnerGender ?? "", partnerSajuText: stored.partnerSajuText ?? "",
       concern: stored.concern ?? "",
     });
-    const myLabel = (stored.name ?? "").length > 1 ? (stored.name ?? "").slice(1) : (stored.name ?? "");
-    const ptLabel = (stored.partnerName ?? "").length > 1 ? (stored.partnerName ?? "").slice(1) : (stored.partnerName ?? "");
+    const myLabel = stripSurname((stored.name ?? ""));
+    const ptLabel = stripSurname((stored.partnerName ?? ""));
     const sections = fixNamesInValue(rawSections, myLabel, ptLabel || null, "님") as typeof rawSections;
     return NextResponse.json({ sections });
   } catch (err) {

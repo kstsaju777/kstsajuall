@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -4111,7 +4112,7 @@ function ReportPreviewInner() {
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
   const honor = name ? (effectiveGender === "female" ? `${name}양` : `${name}군`) : "아이";
-  const givenName = name.length > 1 ? name.slice(1) : name;
+  const givenName = stripSurname(name);
   const honorShort = givenName ? (effectiveGender === "female" ? `${givenName}양` : `${givenName}군`) : "아이";
   // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
   const c = { ...SAMPLE_CONTENT, ...(report?.content ?? {}) } as ReportContent;

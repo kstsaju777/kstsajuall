@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 정통사주 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
@@ -447,7 +448,7 @@ async function generateChapter(body: unknown) {
     }
 
     const storedName: string = stored?.["{이름1}"] || stored?.name || "";
-    const myLabel = storedName.length > 1 ? storedName.slice(1) : storedName;
+    const myLabel = stripSurname(storedName);
     const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;
     return NextResponse.json({ sections });
   } catch (err) {

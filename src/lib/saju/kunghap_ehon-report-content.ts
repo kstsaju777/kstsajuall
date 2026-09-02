@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 이혼궁합 결과지 — 장별 풀이 프롬프트 & 구조
 // =====================================================
@@ -608,8 +609,8 @@ export function buildEhonKunghapChapterPrompt(
     partnerIlgan?: string;
   }
 ): { system: string; user: string } {
-  const myLabel = input.name ? (input.name.length > 1 ? input.name.slice(1) : input.name) : "의뢰인";
-  const partnerLabel = input.partnerName ? (input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName) : "상대방";
+  const myLabel = input.name ? (stripSurname(input.name)) : "의뢰인";
+  const partnerLabel = input.partnerName ? (stripSurname(input.partnerName)) : "상대방";
   const myGenderLabel = input.gender === "female" ? "여자" : "남자";
   const partnerGenderLabel = input.partnerGender === "female" ? "여자" : "남자";
 

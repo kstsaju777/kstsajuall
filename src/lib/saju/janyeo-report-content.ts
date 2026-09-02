@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 // 자녀사주 결과지 — 장별 풀이 프롬프트 & 구조
 // =====================================================
@@ -537,7 +538,7 @@ export function buildJanyeoChapterPrompt(
   const theme = JANYEO_CH_THEME[chapter] ?? `[제${chapter}장]`;
   const guide = JANYEO_CH_GUIDE[chapter] ?? "";
   const schema = JANYEO_CH_SCHEMA[chapter] ?? "{}";
-  const givenName = input.name.length > 1 ? input.name.slice(1) : input.name;
+  const givenName = stripSurname(input.name);
   const honor = givenName
     ? input.gender === "female" ? `${givenName}양` : `${givenName}군`
     : "이 아이";

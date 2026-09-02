@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -6416,9 +6417,9 @@ function ReportPreviewInner() {
 
 
   const name = report?.name?.trim() || nameParam.trim() || "고객";
-  const firstName = name.length > 1 ? name.slice(1) : name;
+  const firstName = stripSurname(name);
   const effectivePartnerName = report?.partnerName?.trim() || partnerName || "상대방";
-  const partnerFirstName = effectivePartnerName.length > 1 ? effectivePartnerName.slice(1) : effectivePartnerName;
+  const partnerFirstName = stripSurname(effectivePartnerName);
   const normText = (text: string) =>
     text.replace(/__MY__님/g, `${firstName}님`).replace(/__MY__/g, `${firstName}님`)
         .replace(/__PT__님/g, `${partnerFirstName}님`).replace(/__PT__/g, `${partnerFirstName}님`);
@@ -7207,9 +7208,9 @@ function ReportPreviewInner() {
 
       {/* ═══════════ 제3장 · 합과 충 ═══════════ */}
       {ch === "3" && (() => {
-        const myShort      = name.length > 1 ? name.slice(1) : name;
+        const myShort      = stripSurname(name);
         const ptName       = report?.partnerName || partnerName || "상대방";
-        const partnerShort = ptName.length > 1 ? ptName.slice(1) : ptName;
+        const partnerShort = stripSurname(ptName);
 
         const crossRels     = report?.view && report?.partnerView
           ? calcCrossRelationsBiz(report.view, report.partnerView)
@@ -7488,9 +7489,9 @@ function ReportPreviewInner() {
         const dl = (jc.workLife   as Record<string, unknown> | undefined) ?? null;
         const roleItems = (rb?.items as Record<string, unknown>[] | undefined) ?? [];
         const clipItems = (dl?.clips as Record<string, unknown>[] | undefined) ?? [];
-        const myFirstName      = name.length > 1 ? name.slice(1) : name;
+        const myFirstName      = stripSurname(name);
         const ptName           = report?.partnerName || partnerName || "상대방";
-        const partnerFirstName = ptName.length > 1 ? ptName.slice(1) : ptName;
+        const partnerFirstName = stripSurname(ptName);
         return (
           <>
             <div className="text-center px-6 py-4" style={{ background: "#111" }}>
@@ -7717,7 +7718,7 @@ function ReportPreviewInner() {
         const bf = (jc.bizFutureFlow as Record<string,unknown>|undefined) ?? null;
         const bt = (jc.bizFutureTips as Record<string,unknown>|undefined) ?? null;
         const myFirstName11      = report?.name        ? (report.name.length        > 1 ? report.name.slice(1)        : report.name)        : "나";
-        const partnerFirstName11 = report?.partnerName ? (report.partnerName.length > 1 ? report.partnerName.slice(1) : report.partnerName) : "상대";
+        const partnerFirstName11 = report?.partnerName ? (stripSurname(report.partnerName)) : "상대";
         const myYs11 = (jc.myYongsin      as Record<string, string> | undefined) ?? {};
         const ptYs11 = (jc.partnerYongsin as Record<string, string> | undefined) ?? {};
         const myYE11 = myYs11.yongsinEl ?? ""; const myHE11 = myYs11.heusinEl ?? ""; const myGE11 = myYs11.gisinEl ?? "";
@@ -7851,8 +7852,8 @@ function ReportPreviewInner() {
               const concern = report?.concern ?? "";
               const caParas = ((c as unknown as Record<string, { paragraphs?: string[] }>).concernAdvice)?.paragraphs ?? [];
               if (!concern || caParas.length === 0) return null;
-              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
-              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              const name1 = stripSurname((report?.name ?? ""));
+              const partnerName1 = stripSurname((report?.partnerName ?? ""));
               return (
                 <div className="mb-8">
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>

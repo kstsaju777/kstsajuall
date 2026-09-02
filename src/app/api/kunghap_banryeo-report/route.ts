@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 연애궁합 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
@@ -62,7 +63,7 @@ async function genChapterContent(chapter: number, input: {
   const fullName   = input.name        ?? "";
   const ptFullName = input.partnerName ?? "";
   const myLabel    = fullName.length  > 1 ? fullName.slice(1)   : fullName;
-  const ptLabel    = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
+  const ptLabel    = stripSurname(ptFullName);
 
 
   const { system, user } = buildBanryeoKunghapChapterPrompt(chapter, input);
@@ -133,7 +134,7 @@ async function generateConcernAdvice(id: string) {
   const partnerManseryeokText: string = stored?.partnerManseryeokText ?? stored?.["{명식표2}"] ?? "";
   const name: string = stored?.name ?? stored?.["{이름1}"] ?? "";
   const partnerName: string = stored?.partnerName ?? stored?.["{이름2}"] ?? "";
-  const name1 = name.length > 1 ? name.slice(1) : name;
+  const name1 = stripSurname(name);
   const petName = partnerName; // 반려동물 이름
 
   const ilganFull: string = stored?.view?.ilgan ?? "";

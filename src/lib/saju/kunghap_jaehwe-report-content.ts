@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 재회궁합 결과지 — 장별 콘텐츠 타입 / 프롬프트 빌더
 // =====================================================
@@ -75,8 +76,8 @@ export function buildJaehweKunghapChapterPrompt(
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
   const partnerGenderLabel = input.partnerGender === "male" ? "남성" : "여성";
-  const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
-  const partnerLabel = input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName;
+  const myLabel = stripSurname(input.name);
+  const partnerLabel = stripSurname(input.partnerName);
   const honorificBlock = `\n\n[호칭 토큰 규칙 — 반드시 준수]
 풀이 본문에서 이름을 쓸 때 아래 토큰만 사용하오. 절대 실제 이름을 직접 쓰지 마오.
   의뢰인 → __MY__ 사용
@@ -629,7 +630,7 @@ score에 따라 감정 탭 tone이 자동 결정됩니다. 아래 표를 참고�
     - 신청자가 이별을 통보한 경우(whoEnded="${input.name}"): 차인 상대방이 미련을 더 가질 가능성이 높으므로 기본 점수에서 10~20점 상향 조정.
     - 합의 이별 또는 불명확한 경우: 사주 구조 그대로 반영.
 - label: 이 점수 구간을 한 줄로 요약하는 상태 문장. 예: "아직 그 마음이 남아있소", "서서히 비워지는 중이오". 15자 이내.
-- paragraphs 2개: 호칭은 반드시 성을 제외한 이름+님(예: ${input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName}님)으로 표기. "상대방"이라는 표현 사용 금지.
+- paragraphs 2개: 호칭은 반드시 성을 제외한 이름+님(예: ${stripSurname(input.partnerName)}님)으로 표기. "상대방"이라는 표현 사용 금지.
   ①이 점수가 의미하는 바 — 미련의 깊이와 성격. 아직 ${input.name}님을 그리워하는지, 정리 중인지. 4~5문장.
   ②사주 오행이 이 미련을 어떻게 만드는지 — 어떤 오행·신살이 집착·그리움을 강화하거나 약화하는지. 4~5문장.
 
@@ -653,7 +654,7 @@ score에 따라 감정 탭 tone이 자동 결정됩니다. 아래 표를 참고�
 [partnerHeartDesc 섹션 — 상대방 마음의 구조]
 - intro: ${input.partnerName}님이 ${input.name}님을 바라보는 마음의 본질 한 문장. 이탤릭 인용.
 - callout: 사주가 말하는 마음 구조의 핵심 통찰 한 문장. 재회 접근에서 가장 중요하게 알아야 할 것.
-- paragraphs 3개: 호칭은 반드시 성을 제외한 이름+님(예: ${input.partnerName.length > 1 ? input.partnerName.slice(1) : input.partnerName}님)으로. "상대방"이라는 표현 사용 금지.
+- paragraphs 3개: 호칭은 반드시 성을 제외한 이름+님(예: ${stripSurname(input.partnerName)}님)으로. "상대방"이라는 표현 사용 금지.
   ①연애관·집착 경향의 사주적 형성 — 일간 오행과 관성·재성 구조가 ${input.name}님에 대한 감정을 어떻게 붙들고 있는지. 4~5문장.
   ②이별 후 감정 처리 방식 — 빨리 정리하는 편인지 오래 붙드는 편인지, 현재 감정이 어느 단계에 있는지. 4~5문장.
   ③재회 접근 가이드 — 이 마음 구조를 알았다면 어떤 방식·타이밍·언어로 접근해야 하는지. 움직이는 조건. 홍연의 따뜻한 조언. 4~5문장.

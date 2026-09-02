@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 반려궁합 결과지 — 장별 콘텐츠 타입 / 프롬프트 빌더
 // =====================================================
@@ -70,7 +71,7 @@ export function buildBanryeoKunghapChapterPrompt(
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
   const petGenderLabel = input.partnerGender === "male" ? "수컷" : "암컷";
-  const myLabel = input.name.length > 1 ? input.name.slice(1) : input.name;
+  const myLabel = stripSurname(input.name);
   const honorificBlock = `\n\n[호칭 토큰 규칙 — 반드시 준수]
 풀이 본문에서 이름을 쓸 때 아래 토큰만 사용하오. 절대 실제 이름을 직접 쓰지 마오.
   의뢰인 → __MY__ 사용

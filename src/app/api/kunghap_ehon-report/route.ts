@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 연애궁합 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
@@ -282,8 +283,8 @@ async function generateConcernAdvice(id: string) {
   const partnerManseryeokText: string = stored?.partnerManseryeokText ?? stored?.["{명식표2}"] ?? "";
   const name: string = stored?.name ?? stored?.["{이름1}"] ?? "";
   const partnerName: string = stored?.partnerName ?? stored?.["{이름2}"] ?? "";
-  const name1 = name.length > 1 ? name.slice(1) : name;
-  const partnerName1 = partnerName.length > 1 ? partnerName.slice(1) : partnerName;
+  const name1 = stripSurname(name);
+  const partnerName1 = stripSurname(partnerName);
 
   const ilganFull: string = stored?.view?.ilgan ?? "";
   const partnerIlganFull: string = stored?.partnerView?.ilgan ?? "";
@@ -705,7 +706,7 @@ async function generateChapter(body: unknown) {
     const fullName  = stored?.name        ?? "";
     const ptFullName = stored?.partnerName ?? "";
     const myLabel   = fullName.length  > 1 ? fullName.slice(1)   : fullName;
-    const ptLabel   = ptFullName.length > 1 ? ptFullName.slice(1) : ptFullName;
+    const ptLabel   = stripSurname(ptFullName);
 
     const ilgan: string | undefined = (stored?.view?.ilgan as string | undefined)?.split(" ")[0];
     const partnerIlgan: string | undefined = (stored?.partnerView?.ilgan as string | undefined)?.split(" ")[0];

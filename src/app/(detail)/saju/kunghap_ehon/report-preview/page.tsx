@@ -1,3 +1,4 @@
+import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
 
 // =====================================================
@@ -7108,7 +7109,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_ehon/kunghap_ehon_2/kunghap_ehon_2_1.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "18%", left: "44%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{(partnerName.length > 1 ? partnerName.slice(1) : partnerName)}님의 사주팔자로<br />한폭의 그림을 그려봤소.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{(stripSurname(partnerName))}님의 사주팔자로<br />한폭의 그림을 그려봤소.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7155,7 +7156,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_ehon/kunghap_ehon_2/kunghap_ehon_2_2.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "19%", left: "61%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[18px] font-bold leading-[1.5] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{(partnerName.length > 1 ? partnerName.slice(1) : partnerName)}님의<br />기질 속에도<br />빛과 그림자가<br />공존하오.</p>
+                <p className="text-[18px] font-bold leading-[1.5] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>{(stripSurname(partnerName))}님의<br />기질 속에도<br />빛과 그림자가<br />공존하오.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
@@ -7815,8 +7816,8 @@ function ReportPreviewInner() {
               const concern = report?.concern ?? "";
               const caParas = ((c as unknown as Record<string, { paragraphs?: string[] }>).concernAdvice as { paragraphs?: string[] } | undefined)?.paragraphs ?? [];
               if (!concern || caParas.length === 0) return null;
-              const name1 = (report?.name ?? "").length > 1 ? (report?.name ?? "").slice(1) : (report?.name ?? "");
-              const partnerName1 = (report?.partnerName ?? "").length > 1 ? (report?.partnerName ?? "").slice(1) : (report?.partnerName ?? "");
+              const name1 = stripSurname((report?.name ?? ""));
+              const partnerName1 = stripSurname((report?.partnerName ?? ""));
               return (
                 <div className="mb-8">
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>
