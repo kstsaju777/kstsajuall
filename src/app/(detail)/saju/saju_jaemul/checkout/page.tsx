@@ -7,6 +7,7 @@ import { calcSaju, type LocalSajuResult } from "@/lib/saju/local-manseryeok";
 import { MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
+import { stripSurname } from "@/lib/utils/strip-surname";
 
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM    = "#fdf8f4";
@@ -557,27 +558,26 @@ function CheckoutContent() {
           <img src="/media/checkout/saju_jaemul/s1.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "26%", left: "69%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{stripSurname(name)}님</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>만나서 반갑소.</p>
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "33%", left: "42%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>소인은,</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>조선의 명리대가</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>홍연이라고 하오.</p>
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "54.8%", left: "42%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>재물운 풀이에 앞서,</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{`${stripSurname(name)}님의 사주팔자가`}</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>어떻게 생겼는지 봐야하오.</p>
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "58.5%", left: "70%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>자,</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>어디보자...</p>
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "95.5%", left: "60%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>자, 한번 보시오.</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>{`${stripSurname(name)}님의 사주팔자요.`}</p>
           </div>
         </div>
 
@@ -589,54 +589,56 @@ function CheckoutContent() {
           <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-10" style={{ background: `linear-gradient(to top, transparent, ${WHITE})` }} />
           <img src="/media/checkout/saju_jaemul/s2.jpg" alt="" className="w-full block" />
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "14.7%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님 사주가 과연`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>신강한지 신약한지</p>
           </div>
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "21.6%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님 사주에`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>재물이 얼마나 들어와 있는지</p>
           </div>
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "31.6%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님 인생흐름에`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>언제가 가장 황금기일지</p>
           </div>
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "39%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>재물과 돈에 있어서</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>어떤 능력치와 유형을 띄는지</p>
           </div>
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "47.8%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님의 재물흐름과`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>시기별 주의할점과 조언들</p>
           </div>
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "56.7%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님 사주가 과연`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>직장인인지 사업가인지</p>
           </div>
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "63%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님이 사회생활에 있어`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>어떤 분야가 잘 맞는지까지</p>
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "80%", left: "34%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>이뿐이겠소?</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>&nbsp;</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>아주 극히 일부만</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>보여줬을 뿐이오.</p>
           </div>
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "90.5%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님의 재물운을 높혀줄`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>사주 개운법과 비방책까지</p>
           </div>
           <div className="absolute flex flex-col items-center gap-1 pointer-events-none" style={{ top: "5.1%", left: "65%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap" }}>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오2</p>
-            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>텍스트를 입력하시오3</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>어떤 내용들인지</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>일부만 말해주겠소.</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>&nbsp;</p>
+            <p style={{ fontSize: 22, fontWeight: 400, color: "#000000" }}>놀라운 것들이 보이는군.</p>
           </div>
         </div>
         <div className="relative">
           <img src="/media/checkout/saju_jaemul/s3.jpg" alt="" className="w-full block" />
           <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" style={{ background: `linear-gradient(to bottom, transparent, ${WHITE})` }} />
           <div className="absolute flex flex-col items-center pointer-events-none" style={{ top: "2.5%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", whiteSpace: "nowrap", fontFamily: "'GmarketSans', sans-serif", fontWeight: 700 }}>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오1</p>
-            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>텍스트를 입력하시오2</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>{`${stripSurname(name)}님의 재물운에 대해`}</p>
+            <p style={{ fontSize: 22, color: "#000000", lineHeight: 1.4 }}>모든걸 파헤쳐 주겠소.</p>
           </div>
         </div>
 
