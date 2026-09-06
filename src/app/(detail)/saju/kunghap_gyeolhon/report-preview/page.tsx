@@ -1,5 +1,5 @@
-import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿"use client";
+import { stripSurname } from "@/lib/utils/strip-surname";
 
 // =====================================================
 // 결과지 디자인 스캐폴드 (정적 미리보기) — 문학형 프리미엄 레이아웃
