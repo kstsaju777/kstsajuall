@@ -1130,7 +1130,7 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
   const [imgErr, setImgErr] = useState(false);
   return (
     <a href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
-      style={{ width: "42vw", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" , textDecoration: "none" }}>
+      style={{ width: "min(42vw, 180px)", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" , textDecoration: "none" }}>
       {imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
       ) : (
