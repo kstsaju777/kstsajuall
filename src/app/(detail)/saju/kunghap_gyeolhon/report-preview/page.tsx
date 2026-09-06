@@ -3786,13 +3786,14 @@ const RECO_TAG_COLORS_G: Record<string, string> = {
   "BEST": "#b47221", "FREE": "#555",
 };
 
-function RecoProductCard({ card }: { card: CategoryCard }) {
+function RecoProductCard({ card, justDragged }: { card: CategoryCard; justDragged: React.MutableRefObject<boolean> }) {
   const imgSrc = card.thumbnail ?? card.image;
   const [imgErr, setImgErr] = useState(false);
   const tag = card.tag;
   return (
     <a href={card.href} className="block rounded-2xl overflow-hidden relative flex-shrink-0"
-      style={{ width: "min(42vw, 180px)", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" , textDecoration: "none" }}>
+      style={{ width: "min(42vw, 180px)", aspectRatio: "3/4", backgroundColor: "#1a1a1a", scrollSnapAlign: "start" , textDecoration: "none" }}
+      onClick={(e) => { if (justDragged.current) e.preventDefault(); }}>
       {imgErr ? (
         <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2a1a2a,#1a1a3a)" }} />
       ) : (
@@ -3837,6 +3838,7 @@ function sortByG(cards: CategoryCard[], order: string[]) {
 }
 
 function RecoGrid() {
+  const justDragged = useRef(false);
   const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("kunghap_gyeolhon") && !RECO_EXCLUDE_G.has(c.name));
   const sajuCards    = sortByG(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER_G);
   const kunghapCards = sortByG(all.filter((c) => c.href.includes("kunghap")),  KUNGHAP_ORDER_G);
@@ -3874,15 +3876,14 @@ function RecoGrid() {
             el.style.scrollSnapType = prevSnap;
             document.body.style.userSelect = prevSelect;
             if (dragged) {
-              const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
-              document.addEventListener("click", preventClick, true);
-              setTimeout(() => document.removeEventListener("click", preventClick, true), 300);
+              justDragged.current = true;
+              setTimeout(() => { justDragged.current = false; }, 300);
             }
           };
           document.addEventListener("mousemove", onMove);
           document.addEventListener("mouseup", onUp);
         }}>
-        {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
+        {cards.map((c, i) => <RecoProductCard key={i} card={c} justDragged={justDragged} />)}
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ const TAG_ANIMATIONS = `
   @keyframes hotSubFlicker { 0%, 100% { opacity: 1; color: #ff6a00; } 50% { opacity: 0.7; color: #ffd700; } }
 `;
 
-function HotCarousel({ children, cardW, gap }: { children: React.ReactNode[]; cardW: string; gap: number }) {
+function HotCarousel({ children, cardW, gap, justDraggedRef }: { children: React.ReactNode[]; cardW: string; gap: number; justDraggedRef: React.MutableRefObject<boolean> }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const isPaused = useRef(false);
   const rafRef = useRef<number | null>(null);
@@ -88,9 +88,8 @@ function HotCarousel({ children, cardW, gap }: { children: React.ReactNode[]; ca
       document.body.style.userSelect = prevSelect;
       resume();
       if (dragged) {
-        const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
-        document.addEventListener("click", preventClick, true);
-        setTimeout(() => document.removeEventListener("click", preventClick, true), 300);
+        justDraggedRef.current = true;
+        setTimeout(() => { justDraggedRef.current = false; }, 300);
       }
     };
     document.addEventListener("mousemove", onMove);
@@ -197,6 +196,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
   const [slideIndex, setSlideIndex] = useState(0);
   const slideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const router = useRouter();
+  const justDraggedRef = useRef(false);
 
   const getHref = (slug: string) => `/saju/${slug}`;
 
@@ -327,7 +327,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
 
                 </div>
                 {isHot ? (
-                <HotCarousel cardW={cardW} gap={10}>
+                <HotCarousel cardW={cardW} gap={10} justDraggedRef={justDraggedRef}>
                   {catProducts.map((product, i) => {
                     const _hc = SLUG_CARD_MAP[product.slug];
                     const imageUrl = _hc?.videoUrl ?? _hc?.image ?? product.image_url;
@@ -341,7 +341,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, margin: "0 0 1px" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 800, fontSize: 25, lineHeight: 1.3, margin: 0 }}>{n}</p> : <p style={{ fontSize: 25, lineHeight: 1.3, margin: 0 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
                       </div>
                     </>;
-                    return <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle}>{inner}</Link>;
+                    return <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle} onClick={(e) => { if (justDraggedRef.current) e.preventDefault(); }}>{inner}</Link>;
                   })}
                 </HotCarousel>
                 ) : (
@@ -372,9 +372,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                       el.style.scrollSnapType = prevSnap;
                       document.body.style.userSelect = prevSelect;
                       if (dragged) {
-                        const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
-                        document.addEventListener("click", preventClick, true);
-                        setTimeout(() => document.removeEventListener("click", preventClick, true), 300);
+                        justDraggedRef.current = true;
+                        setTimeout(() => { justDraggedRef.current = false; }, 300);
                       }
                     };
                     document.addEventListener("mousemove", onMove);
@@ -409,7 +408,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                         {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={badgeFontSize} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: isBig ? 11 : 8, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 800, fontSize, lineHeight: 1.3, margin: 0 }}>{n}</p> : <p style={{ fontSize, lineHeight: 1.3, margin: 0 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: isBig ? 12 : 9, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
                       </div>
                     </>;
-                    return <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle}>{inner}</Link>;
+                    return <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle} onClick={(e) => { if (justDraggedRef.current) e.preventDefault(); }}>{inner}</Link>;
                   })}
                 </div>
                 )}
