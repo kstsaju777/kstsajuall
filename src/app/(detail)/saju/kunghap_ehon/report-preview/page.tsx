@@ -1261,7 +1261,7 @@ function RecoProductCard({ card }: { card: CategoryCard }) {
 }
 
 const RECO_EXCLUDE_E = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주", "잘살아라 이혼궁합"]);
-const SAJU_ORDER_E   = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주", "돈버는 재물사주"];
+const SAJU_ORDER_E   = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주", "대박이야 재물사주"];
 const KUNGHAP_ORDER_E = ["찰떡콩떡 연애궁합", "평생내짝 결혼궁합", "말좀듣자 자녀궁합", "똥멍냥이 반려궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
 
 function sortByE(cards: CategoryCard[], order: string[]) {

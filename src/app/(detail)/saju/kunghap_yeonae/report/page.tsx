@@ -971,7 +971,7 @@ function EventBox() {
 // 추천 상품(크로스셀) 그리드 (마무리)
 const RECO_EXCLUDE_Y = new Set(["찰떡콩떡 연애궁합"]);
 const KUNGHAP_ORDER_Y = ["말좀듣자 자녀궁합", "평생내짝 결혼궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "득남득녀 임신궁합", "보고싶어 재회궁합"];
-const SAJU_ORDER_Y = ["정통명리 종합사주", "나만솔로? 연애사주", "영재발굴 자녀사주", "오래살자 건강사주", "우리아가 유아사주"];
+const SAJU_ORDER_Y = ["정통명리 종합사주", "대박이야 재물사주", "나만솔로? 연애사주", "영재발굴 자녀사주", "오래살자 건강사주", "우리아가 유아사주"];
 const RECO_TAG_COLORS_Y: Record<string, string> = { "HOT": "#ff4500", "BEST": "#b47221", "FREE": "#555" };
 const RECO_BADGE_COLORS_Y: Record<string, string> = { "사주": "#711b20", "궁합": "#1b4b71", "자미두수": "#2d3a8c", "유아": "#e8c84a", "재물": "#4a8c3a" };
 function sortByY(cards: CategoryCard[], order: string[]) {

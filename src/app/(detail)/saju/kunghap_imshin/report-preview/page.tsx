@@ -1099,7 +1099,7 @@ const RECO_TAG_COLORS: Record<string, string> = {
   "재회": "#7b2fff", "추천": "#00ff73", "인기": "#c0392b", "NEW": "#4fd5e8",
 };
 const RECO_EXCLUDE = new Set(["정통사주 맛보기", "재회 사주", "배우자 사주", "우리 아이 사주"]);
-const SAJU_ORDER_IM = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주", "팔자도둑 재물사주"];
+const SAJU_ORDER_IM = ["정통명리 종합사주", "영재발굴 자녀사주", "나만솔로? 연애사주", "우리아가 유아사주", "오래살자 건강사주", "대박이야 재물사주"];
 const KUNGHAP_ORDER_IM = ["말좀듣자 자녀궁합", "평생내짝 결혼궁합", "찰떡콩떡 연애궁합", "똥멍냥이 반려궁합", "잘살아라 이혼궁합", "돈되는 비즈니스궁합", "보고싶어 재회궁합"];
 
 function sortByIm(cards: CategoryCard[], order: string[]) {
