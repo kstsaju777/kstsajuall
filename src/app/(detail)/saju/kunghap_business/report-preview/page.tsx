@@ -1298,6 +1298,7 @@ function RecoProductCard({ card, justDragged }: { card: CategoryCard; justDragge
         // eslint-disable-next-line @next/next/no-img-element
         <img src={imgSrc} alt={card.name} className="w-full h-full object-cover" loading="lazy" onError={() => setImgErr(true)} />
       )}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)" }} />
       <div className="absolute bottom-0 left-0 right-0 px-3 pb-3">
         <div className="flex gap-1 flex-wrap" style={{ marginBottom: 3 }}>
           {card.tag && (
