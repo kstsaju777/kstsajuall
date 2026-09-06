@@ -1593,7 +1593,7 @@ const RECO_EXCLUDE = new Set(["정통사주 맛보기", "재회 사주", "배우
 
 function RecoGrid() {
   const justDragged = useRef(false);
-  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !RECO_EXCLUDE.has(c.name));
+  const all = (CATEGORY_CARDS["전체"] ?? []).filter((c) => !c.href.includes("/saju/total") && !RECO_EXCLUDE.has(c.name));
   const sajuCards = sortBy(all.filter((c) => !c.href.includes("kunghap")), SAJU_ORDER);
   const kunghapCards = sortBy(all.filter((c) => c.href.includes("kunghap")), KUNGHAP_ORDER);
 
