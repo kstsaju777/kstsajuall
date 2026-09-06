@@ -1071,7 +1071,29 @@ function RecoGrid() {
         <p className="text-[11px] font-bold mb-0.5" style={{ color: MUTE }}>다른 풀이 보기</p>
         <h3 className="text-[16px] font-black" style={{ color: INK }}>{title}</h3>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}>
+      <div className="flex gap-3 overflow-x-auto pb-2" style={{ paddingLeft: 20, scrollSnapType: "x mandatory", scrollPaddingLeft: 20, WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none", cursor: "grab" }}
+        onMouseDown={(e) => {
+          const el = e.currentTarget;
+          const startX = e.pageX - el.offsetLeft;
+          const startScroll = el.scrollLeft;
+          let dragged = false;
+          const onMove = (ev: MouseEvent) => {
+            const x = ev.pageX - el.offsetLeft;
+            const walk = x - startX;
+            if (Math.abs(walk) > 5) dragged = true;
+            el.scrollLeft = startScroll - walk;
+          };
+          const onUp = () => {
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+            if (dragged) {
+              const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
+              document.addEventListener("click", preventClick, true);
+            }
+          };
+          document.addEventListener("mousemove", onMove);
+          document.addEventListener("mouseup", onUp);
+        }}>
         {cards.map((c, i) => <RecoProductCard key={i} card={c} />)}
       </div>
     </div>
