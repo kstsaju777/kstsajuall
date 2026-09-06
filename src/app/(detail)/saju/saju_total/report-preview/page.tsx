@@ -1606,16 +1606,27 @@ function RecoGrid() {
           const el = e.currentTarget;
           const startX = e.pageX - el.offsetLeft;
           const startScroll = el.scrollLeft;
+          const prevSnap = el.style.scrollSnapType;
+          const prevSelect = document.body.style.userSelect;
+          el.style.scrollSnapType = "none";
+          document.body.style.userSelect = "none";
           let dragged = false;
+          let raf = 0;
+          let pendingLeft = startScroll;
+          const applyScroll = () => { el.scrollLeft = pendingLeft; raf = 0; };
           const onMove = (ev: MouseEvent) => {
             const x = ev.pageX - el.offsetLeft;
             const walk = x - startX;
             if (Math.abs(walk) > 5) dragged = true;
-            el.scrollLeft = startScroll - walk;
+            pendingLeft = startScroll - walk;
+            if (!raf) raf = requestAnimationFrame(applyScroll);
           };
           const onUp = () => {
             document.removeEventListener("mousemove", onMove);
             document.removeEventListener("mouseup", onUp);
+            if (raf) cancelAnimationFrame(raf);
+            el.style.scrollSnapType = prevSnap;
+            document.body.style.userSelect = prevSelect;
             if (dragged) {
               const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
               document.addEventListener("click", preventClick, true);
