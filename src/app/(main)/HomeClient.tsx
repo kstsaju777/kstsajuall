@@ -189,9 +189,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           {category} <span style={{ color: "rgba(255,255,255,0.3)" }}>· {cards.length}개</span>
         </p>
         <div className="flex flex-col gap-3">
-          {cards.map((card, i) => {
-            const isDev = card.href !== "/saju/total" && !isAdmin;
-            const cardInner = <>
+          {cards.map((card, i) => (
+            <Link key={i} href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ backgroundColor: "#1a1a1a", aspectRatio: "4/3" }}>
               {card.videoUrl || card.type === "video" ? (
                 <video src={card.videoUrl ?? card.image} className="w-full h-full object-cover" autoPlay muted loop playsInline />
               ) : (
@@ -212,17 +211,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                 })()}
                 <p className="leading-snug" style={{ fontSize: 15, color: "rgba(255,255,255,0.5)" }}>{card.desc}</p>
               </div>
-              {isDev && (
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
-                  <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
-                  <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
-                </div>
-              )}
-            </>;
-            return isDev
-              ? <div key={i} className="block rounded-2xl overflow-hidden relative" style={{ backgroundColor: "#1a1a1a", aspectRatio: "4/3", cursor: "default" }}>{cardInner}</div>
-              : <Link key={i} href={card.href} className="block rounded-2xl overflow-hidden relative" style={{ backgroundColor: "#1a1a1a", aspectRatio: "4/3" }}>{cardInner}</Link>;
-          })}
+            </Link>
+          ))}
         </div>
       </div>
     );
@@ -310,24 +300,15 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const imageUrl = _hc?.videoUrl ?? _hc?.image ?? product.image_url;
                     const isDummy = !imageUrl;
                     const isVideo = !!_hc?.videoUrl;
-                    const isDev = product.slug !== "total" && !isAdmin;
-                    const cardStyle: React.CSSProperties = { display: "block", flexShrink: 0, width: cardW, height: cardH, borderRadius: 16, overflow: "hidden", position: "relative", cursor: isDev ? "default" : "pointer", background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined };
+                    const cardStyle: React.CSSProperties = { display: "block", flexShrink: 0, width: cardW, height: cardH, borderRadius: 16, overflow: "hidden", position: "relative", cursor: "pointer", background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined };
                     const inner = <>
                       {!isDummy && (isVideo ? <video src={imageUrl!} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} autoPlay muted loop playsInline preload="none" /> : <img src={imageUrl!} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />)}
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85))" }} />
                       <div style={{ position: "absolute", bottom: 12, left: 12, right: 12 }}>
                         {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, margin: "0 0 1px" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 800, fontSize: 25, lineHeight: 1.3, margin: 0 }}>{n}</p> : <p style={{ fontSize: 25, lineHeight: 1.3, margin: 0 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 12, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
                       </div>
-                      {isDev && (
-                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 20, gap: 4 }}>
-                          <p style={{ color: "#fff", fontWeight: 800, fontSize: 15, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
-                          <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 12, margin: 0 }}>Coming Soon..</p>
-                        </div>
-                      )}
                     </>;
-                    return isDev
-                      ? <div key={product.id} style={cardStyle}>{inner}</div>
-                      : <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle}>{inner}</Link>;
+                    return <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle}>{inner}</Link>;
                   })}
                 </HotCarousel>
                 ) : (
@@ -337,11 +318,10 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const imageUrl = (_card?.smallImage ?? _card?.image) ?? product.image_url;
                     const isDummy = !imageUrl;
                     const isVideo = _card?.type === "video";
-                    const isDev = product.slug !== "total" && !isAdmin;
                     const cardStyle: React.CSSProperties = {
                       display: "block",
                       flexShrink: 0, width: cardW, height: cardH, borderRadius: isBig ? 16 : 12,
-                      overflow: "hidden", position: "relative", cursor: isDev ? "default" : "pointer",
+                      overflow: "hidden", position: "relative", cursor: "pointer",
                       scrollSnapAlign: "start",
                       background: isDummy ? DUMMY_GRADIENTS[i % DUMMY_GRADIENTS.length] : undefined,
                       opacity: 1,
@@ -361,16 +341,8 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                       <div style={{ position: "absolute", bottom: isBig ? 12 : 8, left: isBig ? 12 : 8, right: isBig ? 12 : 8 }}>
                         {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={badgeFontSize} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: isBig ? 11 : 8, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 800, fontSize, lineHeight: 1.3, margin: 0 }}>{n}</p> : <p style={{ fontSize, lineHeight: 1.3, margin: 0 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.shortDesc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: isBig ? 12 : 9, margin: "2px 0 0" }}>{c?.shortDesc ?? product.description}</p>}</>; })()}
                       </div>
-                      {isDev && (
-                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, gap: 3 }}>
-                          <p style={{ color: "#fff", fontWeight: 800, fontSize: isBig ? 14 : 11, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
-                          <p style={{ color: "#FFD700", fontWeight: 500, fontSize: isBig ? 12 : 9, margin: 0 }}>Coming Soon..</p>
-                        </div>
-                      )}
                     </>;
-                    return isDev
-                      ? <div key={product.id} style={cardStyle}>{inner}</div>
-                      : <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle}>{inner}</Link>;
+                    return <Link key={product.id} href={`/saju/${product.slug}`} prefetch={true} style={cardStyle}>{inner}</Link>;
                   })}
                 </div>
                 )}
@@ -398,7 +370,6 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
           const isVideo = _c?.type === "video";
           const imageUrl = _c?.image ?? product.image_url;
           const isDummy = !imageUrl;
-          const isDev = product.slug !== "total" && !isAdmin;
           const cardInner = <>
             {!isDummy && (isVideo ? (
               <video src={imageUrl!} className="w-full h-full object-cover" autoPlay muted loop playsInline preload="none" />
@@ -409,22 +380,13 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
             <div className="absolute left-0 right-0" style={{ bottom: -12, padding: "0 16px 16px" }}>
               {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={10} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px", fontStyle: "normal" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p className="text-white font-bold text-[30px] leading-tight">{n}</p> : <p style={{ fontSize: 30, lineHeight: 1.25 }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 800 }}>{n.slice(i+1)}</span></p>; })()}{(c?.desc ?? product.description) && <p className="text-white/80 text-[15px] mt-0.5">{c?.desc ?? product.description}</p>}</>; })()}
             </div>
-            {isDev && (
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4 }}>
-                <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
-                <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
-              </div>
-            )}
           </>;
           const cardClass = "block w-full rounded-2xl overflow-hidden relative";
           const cardStyle: React.CSSProperties = { aspectRatio: "4/3", background: isDummy ? DUMMY_GRADIENTS[index % DUMMY_GRADIENTS.length] : undefined };
 
           return (
             <div key={product.id} className="relative">
-              {isDev
-                ? <div className={cardClass} style={{ ...cardStyle, cursor: "default" }}>{cardInner}</div>
-                : <Link href={href} className={cardClass} style={cardStyle}>{cardInner}</Link>
-              }
+              <Link href={href} className={cardClass} style={cardStyle}>{cardInner}</Link>
             </div>
           );
         })}
@@ -605,13 +567,7 @@ function AdminSlider({ products, slideIndex, setSlideIndex, slideTimer, getHref,
               <div style={{ position: "absolute", bottom: 16, left: 14, right: 14 }}>
                 {(() => { const c = SLUG_CARD_MAP[product.slug]; return <><BadgeTag badge={c?.badge ?? product.badge} tag={c?.tag ?? product.tag} tag2={c?.tag2} size={12} />{c?.tagline && <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, margin: "0 0 1px" }}>{c.tagline}</p>}{(() => { const n = c?.name ?? product.name; const i = n.indexOf(" "); return i === -1 ? <p style={{ color: "#fff", fontWeight: 900, fontSize: 30, lineHeight: 1.3, margin: "0 0 1px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}>{n}</p> : <p style={{ fontSize: 30, lineHeight: 1.3, margin: "0 0 1px", textShadow: "0 2px 6px rgba(0,0,0,0.8)" }}><span style={{ color: "#fff", fontWeight: 400 }}>{n.slice(0,i)} </span><span style={{ color: "#fff", fontWeight: 900 }}>{n.slice(i+1)}</span></p>; })()}{isCurrent && (c?.desc ?? product.description) && <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, margin: 0, marginTop: 1 }}>{c?.desc ?? product.description}</p>}</>; })()}
               </div>
-              {isCurrent && !isAdmin && product.slug !== "total" && (
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 65%, transparent 100%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 24, gap: 4, pointerEvents: "none" }}>
-                  <p style={{ color: "#fff", fontWeight: 800, fontSize: 16, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>🛠️ 열심히 개발중</p>
-                  <p style={{ color: "#FFD700", fontWeight: 500, fontSize: 13, margin: 0 }}>Coming Soon..</p>
-                </div>
-              )}
-              {isCurrent && !(product.slug !== "total" && !isAdmin) && (
+              {isCurrent && (
                 <Link href={href} prefetch={true} style={{ position: "absolute", inset: 0 }} onClick={e => { if (isDragging.current) e.preventDefault(); }} />
               )}
             </div>
