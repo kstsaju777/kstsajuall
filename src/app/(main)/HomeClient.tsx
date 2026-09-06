@@ -62,15 +62,42 @@ function HotCarousel({ children, cardW, gap }: { children: React.ReactNode[]; ca
   const pause = () => { isPaused.current = true; };
   const resume = () => { isPaused.current = false; };
 
+  const dragState = useRef<{ startX: number; startScroll: number; dragged: boolean } | null>(null);
+  const onMouseDown = (e: React.MouseEvent) => {
+    pause();
+    const el = outerRef.current;
+    if (!el) return;
+    dragState.current = { startX: e.pageX - el.offsetLeft, startScroll: el.scrollLeft, dragged: false };
+  };
+  const onMouseMove = (e: React.MouseEvent) => {
+    const el = outerRef.current;
+    const st = dragState.current;
+    if (!el || !st) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = x - st.startX;
+    if (Math.abs(walk) > 5) st.dragged = true;
+    el.scrollLeft = st.startScroll - walk;
+  };
+  const onMouseUpOrLeave = () => {
+    const st = dragState.current;
+    dragState.current = null;
+    resume();
+    if (st?.dragged) {
+      const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
+      document.addEventListener("click", preventClick, true);
+    }
+  };
+
   return (
     <div
       ref={outerRef}
       onTouchStart={pause}
       onTouchEnd={resume}
-      onMouseDown={pause}
-      onMouseUp={resume}
-      onMouseLeave={resume}
-      style={{ display: "flex", gap, overflowX: "auto", paddingLeft: 10, paddingBottom: 4, scrollbarWidth: "none", WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUpOrLeave}
+      onMouseLeave={onMouseUpOrLeave}
+      style={{ display: "flex", gap, overflowX: "auto", paddingLeft: 10, paddingBottom: 4, scrollbarWidth: "none", WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1, cursor: "grab" }}
     >
       {children}
       {children}
@@ -312,7 +339,29 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                   })}
                 </HotCarousel>
                 ) : (
-                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 10, paddingRight: 10, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", scrollPaddingLeft: 10, WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
+                <div style={{ display: "flex", gap: isBig ? 10 : 8, overflowX: "auto", paddingLeft: 10, paddingRight: 10, paddingBottom: 4, scrollbarWidth: "none", scrollSnapType: "x mandatory", scrollPaddingLeft: 10, WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1, cursor: "grab" }}
+                  onMouseDown={(e) => {
+                    const el = e.currentTarget;
+                    const startX = e.pageX - el.offsetLeft;
+                    const startScroll = el.scrollLeft;
+                    let dragged = false;
+                    const onMove = (ev: MouseEvent) => {
+                      const x = ev.pageX - el.offsetLeft;
+                      const walk = x - startX;
+                      if (Math.abs(walk) > 5) dragged = true;
+                      el.scrollLeft = startScroll - walk;
+                    };
+                    const onUp = () => {
+                      document.removeEventListener("mousemove", onMove);
+                      document.removeEventListener("mouseup", onUp);
+                      if (dragged) {
+                        const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
+                        document.addEventListener("click", preventClick, true);
+                      }
+                    };
+                    document.addEventListener("mousemove", onMove);
+                    document.addEventListener("mouseup", onUp);
+                  }}>
                   {catProducts.map((product, i) => {
                     const _card = SLUG_CARD_MAP[product.slug];
                     const imageUrl = (_card?.smallImage ?? _card?.image) ?? product.image_url;
