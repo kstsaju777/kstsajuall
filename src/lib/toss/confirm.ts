@@ -29,7 +29,7 @@ export async function confirmTossPayment(
   isLive: boolean,
 ): Promise<{ ok: true; data: TossConfirmResponse } | { ok: false; error: TossErrorResponse }> {
   const env = serverEnv();
-  const secretKey = isLive ? env.TOSS_SECRET_KEY_LIVE : env.TOSS_SECRET_KEY_TEST;
+  const secretKey = isLive ? env.TOSS_SECRET_KEY_LIVE : env.TOSS_SECRET_KEY;
   const auth = Buffer.from(`${secretKey}:`).toString("base64");
 
   const res = await fetch(TOSS_CONFIRM_URL, {
