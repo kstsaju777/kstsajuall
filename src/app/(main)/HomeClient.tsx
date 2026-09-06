@@ -77,7 +77,7 @@ function HotCarousel({ children, cardW, gap }: { children: React.ReactNode[]; ca
     const onMove = (ev: MouseEvent) => {
       const x = ev.pageX - el.offsetLeft;
       const walk = x - startX;
-      if (Math.abs(walk) > 5) dragged = true;
+      if (Math.abs(walk) > 2) dragged = true;
       pendingLeft = startScroll - walk;
       if (!raf) raf = requestAnimationFrame(applyScroll);
     };
@@ -90,6 +90,7 @@ function HotCarousel({ children, cardW, gap }: { children: React.ReactNode[]; ca
       if (dragged) {
         const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
         document.addEventListener("click", preventClick, true);
+        setTimeout(() => document.removeEventListener("click", preventClick, true), 300);
       }
     };
     document.addEventListener("mousemove", onMove);
@@ -360,7 +361,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                     const onMove = (ev: MouseEvent) => {
                       const x = ev.pageX - el.offsetLeft;
                       const walk = x - startX;
-                      if (Math.abs(walk) > 5) dragged = true;
+                      if (Math.abs(walk) > 2) dragged = true;
                       pendingLeft = startScroll - walk;
                       if (!raf) raf = requestAnimationFrame(applyScroll);
                     };
@@ -373,6 +374,7 @@ export function HomeClient({ initialProducts, isAdmin }: { initialProducts: Prod
                       if (dragged) {
                         const preventClick = (ce: MouseEvent) => { ce.preventDefault(); ce.stopPropagation(); document.removeEventListener("click", preventClick, true); };
                         document.addEventListener("click", preventClick, true);
+                        setTimeout(() => document.removeEventListener("click", preventClick, true), 300);
                       }
                     };
                     document.addEventListener("mousemove", onMove);
