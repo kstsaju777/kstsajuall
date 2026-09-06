@@ -22,11 +22,21 @@ export function TossWidget({ orderId, amount, customerKey, productName, customer
   const widgetsRef = useRef<Awaited<ReturnType<typeof loadWidgets>> | null>(null);
   const [ready, setReady] = useState(false);
   const [paying, setPaying] = useState(false);
+  // null = 어드민 여부 확인 중 — 확인 전에는 위젯을 로드하지 않음 (테스트/라이브 키 오적용 방지)
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
+    fetch("/api/admin/check")
+      .then((r) => r.json())
+      .then((d) => setIsAdmin(!!d.isAdmin))
+      .catch(() => setIsAdmin(false));
+  }, []);
+
+  useEffect(() => {
+    if (isAdmin === null) return;
     let canceled = false;
     (async () => {
-      const widgets = await loadWidgets(customerKey);
+      const widgets = await loadWidgets(customerKey, !isAdmin);
       if (canceled) return;
       widgetsRef.current = widgets;
       await widgets.setAmount({ currency: "KRW", value: amount });
@@ -41,7 +51,7 @@ export function TossWidget({ orderId, amount, customerKey, productName, customer
     return () => {
       canceled = true;
     };
-  }, [amount, customerKey]);
+  }, [amount, customerKey, isAdmin]);
 
   async function handlePay() {
     const widgets = widgetsRef.current;

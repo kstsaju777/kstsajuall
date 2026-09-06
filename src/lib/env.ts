@@ -3,7 +3,9 @@ import { z } from "zod";
 const serverSchema = z.object({
   // sb_secret_... (구 service_role JWT 도 동작 — 2026 말 deprecated)
   SUPABASE_SECRET_KEY: z.string().min(1),
-  TOSS_SECRET_KEY: z.string().min(1),
+  // 어드민 로그인 상태에서는 TEST, 그 외(비로그인/일반회원)에는 LIVE 키로 결제 승인
+  TOSS_SECRET_KEY_TEST: z.string().min(1),
+  TOSS_SECRET_KEY_LIVE: z.string().min(1),
   MANSERYEOK_API_URL: z.string().url().optional().or(z.literal("")),
   MANSERYEOK_API_KEY: z.string().optional(),
   SAJU_API_URL: z.string().url().optional().or(z.literal("")),
@@ -23,14 +25,17 @@ const publicSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   // sb_publishable_... (구 anon JWT 도 동작 — 2026 말 deprecated)
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  NEXT_PUBLIC_TOSS_CLIENT_KEY: z.string().min(1),
+  // 어드민 로그인 상태에서는 TEST, 그 외(비로그인/일반회원)에는 LIVE 키로 결제 위젯 로드
+  NEXT_PUBLIC_TOSS_CLIENT_KEY_TEST: z.string().min(1),
+  NEXT_PUBLIC_TOSS_CLIENT_KEY_LIVE: z.string().min(1),
 });
 
 export const publicEnv = publicSchema.parse({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  NEXT_PUBLIC_TOSS_CLIENT_KEY: process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY,
+  NEXT_PUBLIC_TOSS_CLIENT_KEY_TEST: process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY_TEST,
+  NEXT_PUBLIC_TOSS_CLIENT_KEY_LIVE: process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY_LIVE,
 });
 
 // .env.example 그대로(placeholder)면 false — DB 호출을 우회해 데모 모드로 동작
@@ -48,7 +53,8 @@ export function serverEnv() {
   if (!_serverEnv) {
     _serverEnv = serverSchema.parse({
       SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-      TOSS_SECRET_KEY: process.env.TOSS_SECRET_KEY,
+      TOSS_SECRET_KEY_TEST: process.env.TOSS_SECRET_KEY_TEST,
+      TOSS_SECRET_KEY_LIVE: process.env.TOSS_SECRET_KEY_LIVE,
       MANSERYEOK_API_URL: process.env.MANSERYEOK_API_URL,
       MANSERYEOK_API_KEY: process.env.MANSERYEOK_API_KEY,
       SAJU_API_URL: process.env.SAJU_API_URL,

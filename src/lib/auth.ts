@@ -8,6 +8,14 @@ export const getCurrentUser = cache(async () => {
   return user;
 });
 
+// /api/admin/check 와 동일 기준 — 토스 결제 테스트/라이브 키 분기 등에도 재사용
+export const ADMIN_EMAILS = ["admin@hongyeondang.com", "semiadmin@hongyeondang.com"];
+
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  const user = await getCurrentUser();
+  return !!user && ADMIN_EMAILS.includes(user.email ?? "");
+}
+
 export async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

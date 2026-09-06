@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { confirmTossPayment } from "@/lib/toss/confirm";
+import { isCurrentUserAdmin } from "@/lib/auth";
 import { isSajuApiConfigured, fetchSajuAnalysis, formatSajuToManseryeok, type BirthInfo } from "@/lib/saju/saju-api";
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
@@ -37,7 +38,8 @@ export async function POST(request: NextRequest) {
   }
   if (order.amount !== amount) return NextResponse.json({ error: "금액이 일치하지 않습니다" }, { status: 400 });
 
-  const toss = await confirmTossPayment({ paymentKey, orderId, amount });
+  const isLive = !(await isCurrentUserAdmin());
+  const toss = await confirmTossPayment({ paymentKey, orderId, amount }, isLive);
   if (!toss.ok) {
     await service.from("orders").update({ status: "failed" }).eq("id", order.id);
     return NextResponse.json({ error: toss.error.message, code: toss.error.code }, { status: 402 });

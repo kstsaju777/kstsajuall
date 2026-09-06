@@ -23,10 +23,13 @@ export type TossErrorResponse = {
   message: string;
 };
 
+// isLive: false(기본) → TEST 시크릿키(어드민), true → LIVE 시크릿키(그 외 모든 사용자)
 export async function confirmTossPayment(
   body: TossConfirmRequest,
+  isLive: boolean,
 ): Promise<{ ok: true; data: TossConfirmResponse } | { ok: false; error: TossErrorResponse }> {
-  const secretKey = serverEnv().TOSS_SECRET_KEY;
+  const env = serverEnv();
+  const secretKey = isLive ? env.TOSS_SECRET_KEY_LIVE : env.TOSS_SECRET_KEY_TEST;
   const auth = Buffer.from(`${secretKey}:`).toString("base64");
 
   const res = await fetch(TOSS_CONFIRM_URL, {
