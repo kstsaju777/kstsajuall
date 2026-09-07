@@ -38,9 +38,21 @@ export default async function MyOrdersPage() {
   const resultMap = new Map((results ?? []).map((r) => [r.order_id, r.id]));
 
   const { data: inputs } = orderIds.length
-    ? await service.from("saju_inputs").select("order_id, name, birth_date, birth_time, calendar, gender").in("order_id", orderIds)
+    ? await service.from("saju_inputs").select("order_id, name, birth_date, birth_time, calendar, gender, concerns").in("order_id", orderIds)
     : { data: [] };
   const inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i]));
+
+  // 궁합 상품은 상대방 이름이 concerns 배열 마지막 요소(JSON)에 들어있음
+  function getPartnerName(concerns: unknown): string {
+    const arr = (concerns as string[] | null) ?? [];
+    const raw = arr.at(-1) ?? "{}";
+    try {
+      const parsed = JSON.parse(raw);
+      return typeof parsed?.partnerName === "string" ? parsed.partnerName : "";
+    } catch {
+      return "";
+    }
+  }
 
   const { data: reviews } = orderIds.length
     ? await service.from("reviews").select("order_id").in("order_id", orderIds)
@@ -83,12 +95,22 @@ export default async function MyOrdersPage() {
               }
             }
 
+            const partnerName = product?.slug?.startsWith("kunghap_") ? getPartnerName(input?.concerns) : "";
+            const applicantLabel = input?.name
+              ? partnerName
+                ? `${input.name}님 · ${partnerName}님`
+                : `${input.name}님`
+              : "";
+
             return (
               <li key={o.id} className="py-5 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-medium text-ink truncate">
                     {product?.name ?? "-"}
                   </p>
+                  {applicantLabel && (
+                    <p className="text-xs text-body mt-1 truncate">{applicantLabel}</p>
+                  )}
                   <p className="text-xs text-body mt-1">
                     {formatDate(o.created_at)} · <span className="font-mono">{formatKRW(o.amount)}</span>
                   </p>
