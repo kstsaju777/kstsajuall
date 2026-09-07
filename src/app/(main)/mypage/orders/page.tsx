@@ -78,8 +78,8 @@ export default async function MyOrdersPage() {
                   gender: input.gender,
                 });
                 reportHref = `/saju/saju_total/report-preview?${p.toString()}`;
-              } else if (resultId) {
-                reportHref = `/results/${resultId}`;
+              } else if (resultId && product?.slug) {
+                reportHref = `/saju/${product.slug}/report-preview?id=${resultId}`;
               }
             }
 
