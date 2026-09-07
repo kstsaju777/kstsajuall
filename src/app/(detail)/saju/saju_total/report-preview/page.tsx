@@ -4645,7 +4645,7 @@ function ReportPreviewInner() {
     if (!id) return;
     setGenerating(true);
     const abort = new AbortController();
-    const timer = setTimeout(() => abort.abort(), 90_000); // 90초 타임아웃
+    const timer = setTimeout(() => abort.abort(), 180_000); // 180초 타임아웃 (Claude 등 느린 모델 응답 대응)
     // 2장: 컴포넌트와 동일한 로직으로 득령·득지·득시·득세 계산 → 서버에 전달
     let deungResult: Record<string, unknown> | undefined;
     if (toApiChapter(n) === 2 && report?.view?.pillars && report.view.pillars.length >= 4) {

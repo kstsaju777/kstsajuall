@@ -22,7 +22,7 @@ export type LlmResponse = {
   model: string;
 };
 
-const GLOBAL_GRAMMAR_RULES = `\n\n⚠️ [전역 문법 규칙 — 모든 출력에 반드시 준수]\n· 권고·조언 문장에서 동사 현재형 수식절은 반드시 '-는 것이' 형태 사용. '-은 것이'(완료형 수식)를 미래·현재 권고에 쓰는 것 절대 금지. (예: '다듬는 것이 좋겠소' ○ / '다듬은 것이 좋겠소' ✗)`;
+const GLOBAL_GRAMMAR_RULES = `\n\n⚠️ [전역 문법 규칙 — 모든 출력에 반드시 준수]\n· 권고·조언 문장에서 동사 현재형 수식절은 반드시 '-는 것이' 형태 사용. '-은 것이'(완료형 수식)를 미래·현재 권고에 쓰는 것 절대 금지. (예: '다듬는 것이 좋겠소' ○ / '다듬은 것이 좋겠소' ✗)\n· 한자 표기 절대 금지. 한글에 괄호로 한자를 병기하지 마오 (예: '창직(創職)' ✗, '창직' 또는 더 쉬운 표현 O).\n· 일반 독자가 바로 이해하기 어려운 전문 용어·한자어는 피하고, 반드시 쉬운 일상 표현으로 풀어 쓰오 (예: '창직' 대신 '새로운 직업을 만드는 일', '스스로 일자리를 개척하는 것' 등).`;
 
 export async function generateInterpretation(req: LlmRequest): Promise<LlmResponse> {
   const env = serverEnv();

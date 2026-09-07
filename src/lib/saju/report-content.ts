@@ -726,6 +726,22 @@ Composition: cinematic wide landscape, dramatic natural lighting, volumetric atm
 const GAN_KR: Record<string, string> = { 甲:"갑", 乙:"을", 丙:"병", 丁:"정", 戊:"무", 己:"기", 庚:"경", 辛:"신", 壬:"임", 癸:"계" };
 const JI_KR: Record<string, string> = { 子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
 
+// 오행 상생·상극 서버 계산 — LLM이 표를 보고 직접 판단하다 오답을 내는 것을 막기 위해
+// 천간·지지 오행 관계를 미리 계산해 프롬프트에 정답으로 박아넣는다.
+const OHAENG_GEN: [string, string][] = [["목","화"],["화","토"],["토","금"],["금","수"],["수","목"]]; // 상생 순환
+const OHAENG_CTRL: [string, string][] = [["목","토"],["토","수"],["수","화"],["화","금"],["금","목"]]; // 상극 순환
+function ohaengRelation(a: string, b: string): string {
+  if (!a || !b) return "";
+  if (a === b) return `비화(같은 오행: ${a})`;
+  for (const [x, y] of OHAENG_GEN) {
+    if ((a === x && b === y) || (a === y && b === x)) return `상생(${x}생${y})`;
+  }
+  for (const [x, y] of OHAENG_CTRL) {
+    if ((a === x && b === y) || (a === y && b === x)) return `상극(${x}극${y})`;
+  }
+  return "";
+}
+
 export function buildChapterPrompt(chapter: number, input: ReportPromptInput): { system: string; user: string; compatTags?: string[][]; ch6RankData?: DescRankData[]; ch6Pillars?: { nyeon:{gan:string;ji:string;ganEl:string;jiEl:string}; wol:{gan:string;ji:string;ganEl:string;jiEl:string}; il:{gan:string;ji:string;ganEl:string;jiEl:string}; si:{gan:string;ji:string;ganEl:string;jiEl:string}; birthDate:string; siName:string; tags:string[] }[] } {
   const honor = input.name?.trim() ? `${input.name}님` : "이분";
 
@@ -783,7 +799,8 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
       if (!p) return null;
       const ganKr = `${GAN_KR[p.gan] ?? p.gan}${p.ganEl}`;
       const jiKr = `${JI_KR[p.ji] ?? p.ji}${p.jiEl}`;
-      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})  ${SECTION_LABEL[pos] ?? ""}`;
+      const relation = ohaengRelation(p.ganEl, p.jiEl);
+      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})  ${SECTION_LABEL[pos] ?? ""}${relation ? ` / 오행관계(서버 확정값, 재계산 금지): ${relation}` : ""}`;
     }).filter(Boolean);
     const wolju = byPos["월주"];
     const woljiKr = wolju ? `${JI_KR[wolju.ji] ?? wolju.ji}${wolju.jiEl}` : "";
@@ -802,7 +819,7 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
       "술토": "가을 끝 건조하게 마른 기운",
     };
     const seasonDesc = woljiSeason[woljiKr] ?? "";
-    pillarTable = `\n[기둥별 십성 확인표 — 반드시 이 값만 사용하고 임의 추론 금지]\n${rows.join("\n")}\n`;
+    pillarTable = `\n[기둥별 십성 확인표 — 반드시 이 값만 사용하고 임의 추론 금지]\n${rows.join("\n")}\n※ 각 기둥의 '오행관계'는 서버가 미리 계산한 정답이오. 상생/상극 여부를 직접 판단하거나 다른 오행 조합으로 착각하지 말고, 위에 표기된 오행관계 값을 그대로 반영해 서술하오.\n`;
     if (seasonDesc) {
       pillarTable += `\n[월지 계절 정보 — wonguk intro 첫 문장에서 반드시 이 표현을 그대로 사용]\n월지: ${woljiKr} → 태어난 계절·기후: "${seasonDesc}"\n첫 문장 형식: "${seasonDesc} 속에서 태어난 [이름]은 ~"\n`;
     }
