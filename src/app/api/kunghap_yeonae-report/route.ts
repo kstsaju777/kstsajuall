@@ -113,6 +113,9 @@ function computeOhaengSummary(pillars: Array<{ gan?: string; ji?: string }> | un
 }
 
 const PRODUCT_SLUG = "kunghap_yeonae";
+
+// 텍스트 풀이를 Claude Haiku 4.5로 전환 (이미지 생성은 gpt-image-1 유지)
+const TEXT_LLM_OVERRIDE = { provider: "anthropic" as const, model: "claude-haiku-4-5" };
 const PRODUCT_NAME = "연애궁합";
 const PRODUCT_PRICE = 29900;
 const REPORT_PATH = "saju/kunghap_yeonae/report-preview";
@@ -159,7 +162,7 @@ async function genChapterContent(chapter: number, input: {
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
-      const llm = await generateInterpretation({ system, user, json: true });
+      const llm = await generateInterpretation({ system, user, json: true , ...TEXT_LLM_OVERRIDE });
       meta = { provider: llm.provider, model: llm.model };
       let obj: Record<string, unknown>;
       try {
@@ -387,7 +390,7 @@ async function generateConcernAdvice(id: string) {
 
   for (let i = 0; i < 3; i++) {
     try {
-      const llm = await generateInterpretation({ system, user, json: true });
+      const llm = await generateInterpretation({ system, user, json: true , ...TEXT_LLM_OVERRIDE });
       const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
       const paras = obj?.concernAdvice?.paragraphs;
       if (Array.isArray(paras) && paras.length > 0) {

@@ -29,6 +29,9 @@ import { fixNamesInValue } from "@/lib/saju/fix-names";
 export const maxDuration = 300;
 
 const PRODUCT_SLUG = "saju_health";
+
+// 텍스트 풀이를 Claude Haiku 4.5로 전환 (이미지 생성은 gpt-image-1 유지)
+const TEXT_LLM_OVERRIDE = { provider: "anthropic" as const, model: "claude-haiku-4-5" };
 const PRODUCT_NAME = "건강사주";
 const PRODUCT_PRICE = 19900;
 const REPORT_PATH = "saju/saju_health/report-preview";
@@ -49,7 +52,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
-      const llm = await generateInterpretation({ system, user, json: true });
+      const llm = await generateInterpretation({ system, user, json: true , ...TEXT_LLM_OVERRIDE });
       meta = { provider: llm.provider, model: llm.model };
       let obj: Record<string, unknown>;
       try {
@@ -188,7 +191,7 @@ async function generateConcernAdvice(id: string) {
 
   for (let i = 0; i < 3; i++) {
     try {
-      const llm = await generateInterpretation({ system, user, json: true });
+      const llm = await generateInterpretation({ system, user, json: true , ...TEXT_LLM_OVERRIDE });
       const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
       const paras = obj?.concernAdvice?.paragraphs;
       if (paras && paras.length > 0) {
@@ -391,7 +394,7 @@ async function generateChapter(body: unknown) {
     if (chapter === 2) {
       try {
         const { system: ps, user: pu } = buildHealthCh2ParagraphsPrompt(chapterInput);
-        const paraLlm = await generateInterpretation({ system: ps, user: pu, json: true });
+        const paraLlm = await generateInterpretation({ system: ps, user: pu, json: true , ...TEXT_LLM_OVERRIDE });
         const paraObj = parseContentJson(paraLlm.text) as Record<string, unknown>;
         const paraParagraphs = (paraObj?.weakParts as Record<string, unknown> | undefined)?.paragraphs;
         if (Array.isArray(paraParagraphs) && paraParagraphs.length > 0) {
@@ -417,7 +420,7 @@ async function generateChapter(body: unknown) {
         const { system: rs, user: ru } = buildHealthRemedyPrompt(chapterInput);
         for (let i = 0; i < 3; i++) {
           try {
-            const rllm = await generateInterpretation({ system: rs, user: ru, json: true });
+            const rllm = await generateInterpretation({ system: rs, user: ru, json: true , ...TEXT_LLM_OVERRIDE });
             const rObj = parseContentJson(rllm.text) as Record<string, unknown>;
             if (rObj?.remedy) { Object.assign(obj, rObj); break; }
           } catch { /* 재시도 */ }
