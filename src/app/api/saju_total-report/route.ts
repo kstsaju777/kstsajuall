@@ -30,6 +30,9 @@ export const maxDuration = 300;
 const PRODUCT_SLUG = "total";
 const PRODUCT_NAME = "정통사주";
 const PRODUCT_PRICE = 24900;
+
+// 종합사주만 텍스트 풀이를 Claude Sonnet 5로 (이미지 생성은 그대로 gpt-image-1 유지)
+const TEXT_LLM_OVERRIDE = { provider: "anthropic" as const, model: "claude-haiku-4-5" };
 const REPORT_PATH = "saju/saju_total/report-preview";
 
 const createSchema = z.object({
@@ -74,7 +77,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
     try {
-      const llm = await generateInterpretation({ system, user, json: true });
+      const llm = await generateInterpretation({ system, user, json: true, ...TEXT_LLM_OVERRIDE });
       meta = { provider: llm.provider, model: llm.model };
       let obj: Record<string, unknown>;
       try {
@@ -106,7 +109,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
           const { system: ds, user: du } = buildCompatDescPrompt(idx, honor, personLabel, rankData, system);
           for (let r = 0; r < 2; r++) {
             try {
-              const descLlm = await generateInterpretation({ system: ds, user: du, json: false });
+              const descLlm = await generateInterpretation({ system: ds, user: du, json: false, ...TEXT_LLM_OVERRIDE });
               cj[idx].desc = descLlm.text.trim();
               break;
             } catch { /* 재시도 */ }

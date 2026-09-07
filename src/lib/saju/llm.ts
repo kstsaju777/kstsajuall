@@ -5,11 +5,15 @@
 // 각 SDK는 lazy import 하여 미사용 패키지의 init 비용을 줄임.
 
 import { serverEnv } from "@/lib/env";
+import type Anthropic from "@anthropic-ai/sdk"; // 타입 전용 — 런타임 lazy import와 무관
 
 export type LlmRequest = {
   system: string;
   user: string;
   json?: boolean; // true 면 JSON 형식 강제 (OpenAI json_object 모드)
+  // 특정 상품만 전역 LLM_PROVIDER/LLM_MODEL과 다른 모델을 쓰고 싶을 때 지정 (예: 종합사주만 Claude로)
+  provider?: "openai" | "anthropic" | "gemini";
+  model?: string;
 };
 
 export type LlmResponse = {
@@ -22,14 +26,16 @@ const GLOBAL_GRAMMAR_RULES = `\n\n⚠️ [전역 문법 규칙 — 모든 출력
 
 export async function generateInterpretation(req: LlmRequest): Promise<LlmResponse> {
   const env = serverEnv();
+  const provider = req.provider ?? env.LLM_PROVIDER;
+  const model = req.model ?? env.LLM_MODEL;
   const reqWithRules: LlmRequest = { ...req, system: req.system + GLOBAL_GRAMMAR_RULES };
-  switch (env.LLM_PROVIDER) {
+  switch (provider) {
     case "openai":
-      return callOpenAI(reqWithRules, env.LLM_MODEL, env.OPENAI_API_KEY);
+      return callOpenAI(reqWithRules, model, env.OPENAI_API_KEY);
     case "anthropic":
-      return callAnthropic(reqWithRules, env.LLM_MODEL, env.ANTHROPIC_API_KEY);
+      return callAnthropic(reqWithRules, model, env.ANTHROPIC_API_KEY);
     case "gemini":
-      return callGemini(reqWithRules, env.LLM_MODEL, env.GOOGLE_GENERATIVE_AI_API_KEY);
+      return callGemini(reqWithRules, model, env.GOOGLE_GENERATIVE_AI_API_KEY);
   }
 }
 
@@ -54,12 +60,17 @@ async function callAnthropic(req: LlmRequest, model: string, key: string | undef
   if (!key) throw new Error("ANTHROPIC_API_KEY is required when LLM_PROVIDER=anthropic");
   const Anthropic = (await import("@anthropic-ai/sdk")).default;
   const client = new Anthropic({ apiKey: key });
+  // thinking: 설치된 SDK(0.30.1) 타입 정의엔 없지만 API는 지원.
+  // Sonnet/Opus 계열은 기본이 적응형 씽킹이라 콘텐츠 생성용으로는 꺼서 토큰 소진 문제 방지.
+  // Haiku 등은 기본이 씽킹 off라 disabled를 보내면 오히려 거부될 수 있어 아예 생략.
+  const supportsThinkingToggle = /sonnet|opus|fable|mythos/i.test(model);
   const message = await client.messages.create({
     model,
-    max_tokens: 2048,
+    max_tokens: 16000,
+    ...(supportsThinkingToggle ? { thinking: { type: "disabled" } } : {}),
     system: req.system,
     messages: [{ role: "user", content: req.user }],
-  });
+  } as Anthropic.MessageCreateParamsNonStreaming);
   const text = message.content
     .map((b) => (b.type === "text" ? b.text : ""))
     .join("\n");
