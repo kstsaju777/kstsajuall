@@ -742,6 +742,12 @@ function ohaengRelation(a: string, b: string): string {
   return "";
 }
 
+// 간여지동(干與支同) 서버 계산 — 천간·지지의 오행·음양이 완전히 같은 12개 조합
+const GANYEOJIDONG_SET = new Set(["甲寅","乙卯","丙午","丁巳","戊辰","戊戌","己丑","己未","庚申","辛酉","壬子","癸亥"]);
+function isGanyeojidong(gan: string, ji: string): boolean {
+  return GANYEOJIDONG_SET.has(`${gan}${ji}`);
+}
+
 export function buildChapterPrompt(chapter: number, input: ReportPromptInput): { system: string; user: string; compatTags?: string[][]; ch6RankData?: DescRankData[]; ch6Pillars?: { nyeon:{gan:string;ji:string;ganEl:string;jiEl:string}; wol:{gan:string;ji:string;ganEl:string;jiEl:string}; il:{gan:string;ji:string;ganEl:string;jiEl:string}; si:{gan:string;ji:string;ganEl:string;jiEl:string}; birthDate:string; siName:string; tags:string[] }[] } {
   const honor = input.name?.trim() ? `${input.name}님` : "이분";
 
@@ -800,7 +806,10 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
       const ganKr = `${GAN_KR[p.gan] ?? p.gan}${p.ganEl}`;
       const jiKr = `${JI_KR[p.ji] ?? p.ji}${p.jiEl}`;
       const relation = ohaengRelation(p.ganEl, p.jiEl);
-      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})  ${SECTION_LABEL[pos] ?? ""}${relation ? ` / 오행관계(서버 확정값, 재계산 금지): ${relation}` : ""}`;
+      const ganyeojidong = isGanyeojidong(p.gan, p.ji)
+        ? ` / 간여지동(서버 확정값 — 천간·지지 오행·음양 완전히 같음. 자아가 강하고 독립적이며 해당 육친과의 관계에서 갈등·긴장 소지가 있는 특수 조합. 반드시 '간여지동'이라는 명칭을 언급하며 이 의미를 반영해 서술하오)`
+        : "";
+      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})  ${SECTION_LABEL[pos] ?? ""}${relation ? ` / 오행관계(서버 확정값, 재계산 금지): ${relation}` : ""}${ganyeojidong}`;
     }).filter(Boolean);
     const wolju = byPos["월주"];
     const woljiKr = wolju ? `${JI_KR[wolju.ji] ?? wolju.ji}${wolju.jiEl}` : "";
