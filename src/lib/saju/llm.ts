@@ -64,13 +64,27 @@ async function callAnthropic(req: LlmRequest, model: string, key: string | undef
   // Sonnet/Opus 계열은 기본이 적응형 씽킹이라 콘텐츠 생성용으로는 꺼서 토큰 소진 문제 방지.
   // Haiku 등은 기본이 씽킹 off라 disabled를 보내면 오히려 거부될 수 있어 아예 생략.
   const supportsThinkingToggle = /sonnet|opus|fable|mythos/i.test(model);
+  // 프롬프트 캐싱: system 프롬프트는 상품별로 고정 텍스트(GLOBAL_GRAMMAR_RULES 포함)라
+  // 매 장(chapter)·매 신청자마다 동일하게 재전송됨 — cache_control로 캐싱해 반복 비용을 절감.
+  // (5분 TTL 내 동일 system이면 캐시 히트 — 입력 토큰의 최대 90%까지 절감)
   const message = await client.messages.create({
     model,
     max_tokens: 16000,
     ...(supportsThinkingToggle ? { thinking: { type: "disabled" } } : {}),
-    system: req.system,
+    system: [{ type: "text", text: req.system, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: req.user }],
-  } as Anthropic.MessageCreateParamsNonStreaming);
+  } as unknown as Anthropic.MessageCreateParamsNonStreaming);
+  if (process.env.NODE_ENV !== "production") {
+    const u = message.usage as unknown as {
+      cache_creation_input_tokens?: number;
+      cache_read_input_tokens?: number;
+      input_tokens: number;
+      output_tokens: number;
+    };
+    console.log(
+      `[claude usage] model=${model} input=${u.input_tokens} output=${u.output_tokens} cache_write=${u.cache_creation_input_tokens ?? 0} cache_read=${u.cache_read_input_tokens ?? 0}`
+    );
+  }
   const text = message.content
     .map((b) => (b.type === "text" ? b.text : ""))
     .join("\n");
