@@ -1,6 +1,11 @@
 import { DetailHeader } from "@/components/layout/DetailHeader";
+import { getCurrentUser } from "@/lib/auth";
+import { isSupabaseConfigured } from "@/lib/env";
 
-export default function DetailLayout({ children }: { children: React.ReactNode }) {
+export default async function DetailLayout({ children }: { children: React.ReactNode }) {
+  const user = isSupabaseConfigured() ? await getCurrentUser() : null;
+  const isLoggedIn = !!user;
+
   return (
     <>
       {/*
@@ -16,7 +21,7 @@ export default function DetailLayout({ children }: { children: React.ReactNode }
           left: "max(0px, calc(50vw - 240px))",
         }}
       >
-        <DetailHeader />
+        <DetailHeader isLoggedIn={isLoggedIn} />
         <main className="flex-1 overflow-y-auto min-h-0" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           <style>{`main::-webkit-scrollbar { display: none; }`}</style>
           {children}

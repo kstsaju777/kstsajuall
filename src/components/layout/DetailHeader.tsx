@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 
-export function DetailHeader() {
+export function DetailHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -80,13 +80,17 @@ export function DetailHeader() {
 
         {/* 로그인 배너 */}
         <Link
-          href="/login"
+          href={isLoggedIn ? "/mypage" : "/login"}
           onClick={() => setOpen(false)}
           className="flex items-center justify-between px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
         >
           <div>
-            <p className="text-[16px] font-bold text-black">로그인해 주세요</p>
-            <p className="text-[12px] text-gray-400 mt-0.5">사주정보를 간편히 관리하세요</p>
+            <p className="text-[16px] font-bold text-black">
+              {isLoggedIn ? "마이페이지" : "로그인해 주세요"}
+            </p>
+            <p className="text-[12px] text-gray-400 mt-0.5">
+              {isLoggedIn ? "내 정보 및 주문 확인" : "사주정보를 간편히 관리하세요"}
+            </p>
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6"/>
