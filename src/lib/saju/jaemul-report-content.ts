@@ -551,9 +551,9 @@ export function buildJaemulChapterPrompt(
     }
   }
 
-  // ch1 전용: 오행 분포표 생성 → ohaengDesc 풀이에 주입
+  // 오행 분포표 생성 — 모든 장 공통 주입(서버 확정값). 명식에 없는 오행 상징 오용 방지.
   let ohaengTable = "";
-  if (chapter === 1 && input.pillars && input.pillars.length >= 4) {
+  if (input.pillars && input.pillars.length >= 4) {
     const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
     for (const p of input.pillars) {
       if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
@@ -561,7 +561,8 @@ export function buildJaemulChapterPrompt(
     }
     const total = Object.values(cnt).reduce((a, b) => a + b, 0) || 1;
     const sorted = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
-    ohaengTable = `\n[오행 분포 — ohaengDesc 풀이에서 반드시 이 수치를 기반으로 서술]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n`;
+    const zeroEls = sorted.filter(([, n]) => n === 0).map(([el]) => el);
+    ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n`;
   }
 
   // ch3 전용: 재성 강도 서버 계산 → 프롬프트 주입
@@ -719,7 +720,7 @@ ${ohaengTable}
 ${siksangJaeFlow}
 ${jaemulScoreBlock}
 ${wealthScoreBlock}
-${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
+${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

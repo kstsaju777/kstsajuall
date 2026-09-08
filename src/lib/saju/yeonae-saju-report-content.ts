@@ -526,9 +526,9 @@ export function buildYeonaeSajuChapterPrompt(
     }
   }
 
-  // ch1 전용: 오행 분포 계산 → 프롬프트 주입
+  // 오행 분포 계산 → 모든 장 공통 주입(서버 확정값). 명식에 없는 오행 상징 오용 방지.
   let ohaengTable = "";
-  if (chapter === 1 && input.pillars && input.pillars.length >= 4) {
+  if (input.pillars && input.pillars.length >= 4) {
     const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
     for (const p of input.pillars) {
       if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
@@ -536,7 +536,8 @@ export function buildYeonaeSajuChapterPrompt(
     }
     const total = Object.values(cnt).reduce((a, b) => a + b, 0) || 1;
     const sorted = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
-    ohaengTable = `\n[오행 분포 — ohaengDesc 풀이에서 반드시 이 수치를 기반으로 서술]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n`;
+    const zeroEls = sorted.filter(([, n]) => n === 0).map(([el]) => el);
+    ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n`;
   }
 
   // ch4 전용: LoveLineChart와 동일한 로직으로 연도별 연애운 점수 계산 → 프롬프트 주입
@@ -1056,7 +1057,7 @@ export function buildYeonaeSajuChapterPrompt(
 
 ※ 위 오행 근거를 reason에 반드시 언급하오. 임의로 다른 오행이나 십성을 근거로 삼지 마오.`;
 
-      compatPillarBlock = `\n[기둥별 십성 확인표 — 3장 연애 풀이에서 반드시 이 값만 사용, 임의 추론 금지]\n${rows3.join("\n")}\n\n[인연성 분석 결과 — 반드시 이 결과를 그대로 사용하오]\n${loveStarResult3}\n\n[2024~2033 세운별 연애운 점수표 — loveFlow 풀이에서 반드시 이 수치 기반으로만 서술]\n${loveRows3.join("\n")}\n연애운 1위(정점): ${lovePeakYear3}년 ${lovePeakGz3} (점수=${sortedLove3[0].score})\n연애운 상위: ${sortedLove3.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n연애운 하위: ${sortedLove3.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n[연도 표기] '○○년 갑진년은' 형식. '가장' 최상급은 1위 연도(${lovePeakYear3}년)에만 사용.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n\n[일주 명칭 — 반드시 이 표현 그대로 사용]\n이 사주의 일주: ${ilJuName3} (일간 ${ilGanKr3}${ilP3?.ganEl ?? ""} / 일지 ${ilJiKr3}${ilP3?.jiEl ?? ""})\n\n[지지 합·충·형 실제 목록 — 없는 합충형을 언급하면 절대 안 되오. 아래 목록에 있는 것만 언급하오]\n${hapChungHyeong3}\n\n[리포트 생성 기준일 — 절대 규칙, 위반 시 탈락]\n오늘: ${refYear3}년 ${refMonth3}월\n\n【시제 적용 — 연도별 예시】\n- ${refYear3 - 2}년, ${refYear3 - 1}년 → 이미 지난 해 → 반드시 과거형: "~이었소", "~았소", "~높았소"\n- ${refYear3}년 → 지금 이 해 → 반드시 현재형: "~이오", "~하오", "~있소"\n- ${refYear3 + 1}년 이후 → 아직 오지 않은 해 → 반드시 미래형: "~될 것이오", "~찾아오겠소"\n\n[잘 맞는 사주팔자 TOP 3 — 만세력 실존 날짜 기반 / 순서 절대 변경 금지]\n※ 아래 순위 순서는 알고리즘 확정값이오. LLM이 임의로 순서를 바꾸는 것은 절대 금지. 반드시 1순위→2순위→3순위 순서 그대로 compatibleJuju 배열에 채울 것.\n※ desc 서술 시 상대방을 지칭할 때 '이 사람', '상대방' 등의 표현을 절대 쓰지 마오. 반드시 '${personLabel3}'로만 표현하오.\n${compatTable3}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n피해야 할 상대 띠: ${avoidTtiStr}\n${compatTypesBlock}\n\n${pillarRows3}\n`;
+      compatPillarBlock = `\n[기둥별 십성 확인표 — 3장 연애 풀이에서 반드시 이 값만 사용, 임의 추론 금지]\n${rows3.join("\n")}\n\n[인연성 분석 결과 — 반드시 이 결과를 그대로 사용하오]\n${loveStarResult3}\n\n[2024~2033 세운별 연애운 점수표 — loveFlow 풀이에서 반드시 이 수치 기반으로만 서술]\n${loveRows3.join("\n")}\n연애운 1위(정점): ${lovePeakYear3}년 ${lovePeakGz3} (점수=${sortedLove3[0].score})\n연애운 상위: ${sortedLove3.slice(1,3).map(x => `${2024+x.i}년`).join(", ")}\n연애운 하위: ${sortedLove3.slice(-3).reverse().map(x => `${2024+x.i}년`).join(", ")}\n[연도 표기] '○○년 갑진년은' 형식. '가장' 최상급은 1위 연도(${lovePeakYear3}년)에만 사용.\n※ 이 점수표와 다른 연도를 정점/저점으로 서술하면 절대 안 되오.\n\n[일주 명칭 — 반드시 이 표현 그대로 사용]\n이 사주의 일주: ${ilJuName3} (일간 ${ilGanKr3}${ilP3?.ganEl ?? ""} / 일지 ${ilJiKr3}${ilP3?.jiEl ?? ""})\n\n[지지 합·충·형 실제 목록 — 없는 합충형을 언급하면 절대 안 되오. 아래 목록에 있는 것만 언급하오]\n${hapChungHyeong3}\n\n[리포트 생성 기준일 — 절대 규칙, 위반 시 탈락]\n오늘: ${refYear3}년 ${refMonth3}월\n\n【시제 적용 — 연도별 예시】\n- ${refYear3 - 2}년, ${refYear3 - 1}년 → 이미 지난 해 → 반드시 과거형: "~이었소", "~았소", "~높았소"\n- ${refYear3}년 → 지금 이 해 → 반드시 현재형: "~이오", "~하오", "~있소"\n- ${refYear3 + 1}년 이후 → 아직 오지 않은 해 → 반드시 미래형: "~될 것이오", "~찾아오겠소"\n\n[잘 맞는 사주팔자 TOP 3 — 만세력 실존 날짜 기반 / 순서 절대 변경 금지]\n※ 아래 순위 순서는 알고리즘 확정값이오. LLM이 임의로 순서를 바꾸는 것은 절대 금지. 반드시 1순위→2순위→3순위 순서 그대로 compatibleJuju 배열에 채울 것.\n※ desc 서술 시 상대방을 지칭할 때 '이 사람', '상대방' 등의 표현을 절대 쓰지 마오. 반드시 '${personLabel3}'로만 표현하오. ⚠️ 이어지는 문장에서 다시 지칭할 때도 절대 '그' 또는 '그녀'를 쓰지 마오(성별과 반대로 틀리게 쓰는 오류가 자주 발생하므로 아예 금지) — 계속 '${personLabel3}'를 반복 사용하거나 주어를 생략하오.\n${compatTable3}\n용신: ${yongsinEl} / 희신: ${heesinEl}\n피해야 할 상대 띠: ${avoidTtiStr}\n${compatTypesBlock}\n\n${pillarRows3}\n`;
     }
   }
 
@@ -1069,7 +1070,7 @@ export function buildYeonaeSajuChapterPrompt(
 
   const user = `아래는 ${honor}의 사주 명식입니다.
 
-${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
+${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

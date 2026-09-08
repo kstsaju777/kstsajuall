@@ -4,6 +4,7 @@ import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 
 import { SYSTEM } from "./report-prompts";
+import { sipseongOfStem, sipseongOfBranch } from "./sipseong-calc";
 
 // ── 장별 필수 섹션 키 ──
 export const YOUARE_CHAPTER_SECTIONS: Record<number, string[]> = {
@@ -470,9 +471,9 @@ function computeGrowthData(ilganChar: string, birthYear: number, seunData: { lab
 
   const lines = AGES.map((age, i) => {
     const gz = getGz(birthYear + age);
-    const sEl = STEM_EL[gz[0]]; const bEl = BRANCH_EL[gz[1]];
-    const sipS = sEl ? toSip(ilEl, sEl) : "비겁";
-    const sipB = bEl ? toSip(ilEl, bEl) : "비겁";
+    // 서버 확정값: 음양까지 반영한 정확한 십성(편재/정재 등) — sipseong-calc 재사용
+    const sipS = gz[0] ? (sipseongOfStem(ilganChar, gz[0]) || "비견") : "비견";
+    const sipB = gz[1] ? (sipseongOfBranch(ilganChar, gz[1]) || "비견") : "비견";
     const sign = normalized[i] >= 0 ? "+" : "−";
     return `만 ${age}세 (${birthYear + age}년 ${gz}): ${sign}${sign === "+" ? "순탄" : "주의"} / 천간십성:${sipS} 지지십성:${sipB}`;
   });
@@ -586,7 +587,7 @@ export function buildYouareChapterPrompt(
 
   const user = `아래는 ${childLabel}의 사주 명식입니다.
 
-${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
+${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 ${graphData}${ohaengCountNote}${abilityData}${yongsinNote}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

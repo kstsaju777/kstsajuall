@@ -45,6 +45,11 @@ export function sipseongOfBranch(ilgan: string, branch: string): string {
   return main ? sipseong(ilgan, main) : "";
 }
 
+/** 천간 한자 → 오행 (예: 丁 → "화") — 일간 표기에 오행을 함께 명시해 착각 방지용 */
+export function stemElement(stem: string): string {
+  return STEM[stem]?.[0] ?? "";
+}
+
 // ── 십이운성(十二運星) ──
 // 일간 기준 어떤 지지가 어느 단계(장생~양)에 있는지. 양간 順行 / 음간 逆行.
 const UNSEONG_STAGES = ["장생", "목욕", "관대", "건록", "제왕", "쇠", "병", "사", "묘", "절", "태", "양"];

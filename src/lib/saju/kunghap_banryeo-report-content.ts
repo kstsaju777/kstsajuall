@@ -4,6 +4,7 @@ import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 
 import { SYSTEM } from "./report-prompts";
+import { stemElement } from "./sipseong-calc";
 import { parseContentJson } from "./report-content";
 export { parseContentJson };
 export { SYSTEM };
@@ -84,8 +85,8 @@ export function buildBanryeoKunghapChapterPrompt(
 예시: "__MY__은 반려자와의 인연이 깊소. __PT__과의 결합은..."
 ⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 절대 변형 금지.
 ⚠️ 한국어 합성어의 글자를 절대 변형하지 마오. 조사 규칙(와/과, 이/가)을 단어 내부에 적용하면 절대 안 되오. 예: "효과적"을 "효와적"으로, "결과"를 "결와"로 쓰지 마오. 단어 자체의 철자는 그대로 유지하오.`;
-  const myIlganNote = input.ilgan ? `\n⚑ 일간(일주 천간): ${input.ilgan}` : "";
-  const ptIlganNote = input.partnerIlgan ? `\n⚑ 일간(일주 천간): ${input.partnerIlgan}` : "";
+  const myIlganNote = input.ilgan ? `\n⚑ 일간(일주 천간): ${input.ilgan} — 오행: ${stemElement(input.ilgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
+  const ptIlganNote = input.partnerIlgan ? `\n⚑ 일간(일주 천간): ${input.partnerIlgan} — 오행: ${stemElement(input.partnerIlgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
   const intro = `보호자 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}\n${input.manseryeokText}\n\n반려동물 정보:\n이름: ${input.partnerName}（${petGenderLabel}）${ptIlganNote}\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {

@@ -715,7 +715,7 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
 
 【호칭 규칙】 풀이 본문에서 이 아이를 지칭할 때는 반드시 "${honor}"라는 호칭을 사용하시오. "그", "그녀", "그대", "당신"은 절대 쓰지 마시오. 호칭이 반복되어 어색하면 "이 아이"로 대체하시오.
 
-${pillarTable}${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}\n` : ""}${input.manseryeokText}${honorificBlock}
+${pillarTable}${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}${ageGuide}${deungTable}${abilityData}${ohaengCountNote}${seunDaeunNote}${chapter >= 3 && input.yongsinEl ? `\n[확정 오행 — 반드시 그대로 사용]\n용신: ${input.yongsinEl} / 희신: ${input.heusinEl ?? ""} / 기신: ${input.gisinEl ?? ""}\n` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
