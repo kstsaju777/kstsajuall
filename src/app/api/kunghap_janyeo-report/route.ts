@@ -228,7 +228,8 @@ async function generateConcernAdvice(id: string) {
       const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
       const paras = obj?.concernAdvice?.paragraphs;
       if (Array.isArray(paras) && paras.length > 0) {
-        const fixed = fixNamesInValue({ concernAdvice: obj.concernAdvice }, name1, partnerName1, "님") as { concernAdvice: { paragraphs: string[] } };
+        const ptHonorific = stored?.partnerGender === "male" ? "군" : "양";
+        const fixed = fixNamesInValue({ concernAdvice: obj.concernAdvice }, name1, partnerName1, ptHonorific) as { concernAdvice: { paragraphs: string[] } };
         obj.concernAdvice = fixed.concernAdvice;
         let existing: Record<string, unknown> = {};
         try { existing = JSON.parse(data.interpretation_md || "{}") || {}; } catch { existing = {}; }
