@@ -130,6 +130,8 @@ async function generateConcernAdvice(id: string) {
   if (!concern) return NextResponse.json({ concernAdvice: { paragraphs: [] } });
 
   const name1 = stripSurname(name);
+  const childHonorific = stored?.gender === "female" ? "양" : "군";
+  const childHonor = `${name1}${childHonorific}`;
 
   // 현재 대운 코드 계산 (종합사주와 동일 — AI 오판 방지)
   let daeunNote = "";
@@ -187,12 +189,13 @@ async function generateConcernAdvice(id: string) {
   } catch { /* 무시 */ }
 
   const system = `당신은 홍연당의 사주 풀이 AI이오. 고민에 대한 명리학적 조언을 JSON으로만 답하오. 절대 JSON 외 텍스트를 출력하지 마오.`;
-  const user = `다음은 ${name1}의 유아사주 만세력이오.\n\n${manseryeokText}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}${prevChapterContext}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n반드시 위 '이미 분석된 핵심 결과'의 내용과 모순되지 않는 조언을 작성하오.\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "고민을 아이의 명식(일간·오행·십성)과 연결한 풀이 — 이 고민이 왜 생겼는지 명식 구조로 설명 (4~5문장, 200자 이상)",\n      "위에 제공된 현재 대운·세운 고정값과 이미 분석된 결과를 기준으로, 이 흐름이 고민에 어떤 영향을 주는지 분석 — 구체적 시기를 리포트 내용과 일치하게 언급 (4~5문장, 200자 이상)",\n      "지금 당장 부모님이 실천할 수 있는 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n고민의 주제(발달·건강·기질·교육 등)에 상관없이 반드시 작성하오. 홍연 말투(~이오/~하오/~겠소).`;
+  const user = `다음은 ${childHonor}의 유아사주 만세력이오.\n\n${manseryeokText}${daeunSeunBlock ? "\n\n" + daeunSeunBlock : ""}${prevChapterContext}\n\n[고민에 대한 명리학적 조언 작성]\n고민: "${concern}"\n\n반드시 위 '이미 분석된 핵심 결과'의 내용과 모순되지 않는 조언을 작성하오.\n\n아래 JSON 형식으로만 답하오:\n{\n  "concernAdvice": {\n    "paragraphs": [\n      "고민을 아이의 명식(일간·오행·십성)과 연결한 풀이 — 이 고민이 왜 생겼는지 명식 구조로 설명 (4~5문장, 200자 이상)",\n      "위에 제공된 현재 대운·세운 고정값과 이미 분석된 결과를 기준으로, 이 흐름이 고민에 어떤 영향을 주는지 분석 — 구체적 시기를 리포트 내용과 일치하게 언급 (4~5문장, 200자 이상)",\n      "지금 당장 부모님이 실천할 수 있는 조언과 마음가짐 (3~4문장, 150자 이상)"\n    ]\n  }\n}\n\n고민의 주제(발달·건강·기질·교육 등)에 상관없이 반드시 작성하오. 홍연 말투(~이오/~하오/~겠소). ⚠️ 호칭은 반드시 "${childHonor}"로만 부르고, "${name1}님"·"당신"·"그대"는 절대 쓰지 마오.`;
 
   for (let i = 0; i < 3; i++) {
     try {
       const llm = await generateInterpretation({ system, user, json: true , ...TEXT_LLM_OVERRIDE });
-      const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
+      const rawObj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
+      const obj = fixNamesInValue({ concernAdvice: rawObj.concernAdvice }, name1, null, "님", childHonorific) as { concernAdvice?: { paragraphs?: string[] } };
       const paras = obj?.concernAdvice?.paragraphs;
       if (paras && paras.length > 0) {
         let existing: Record<string, unknown> = {};
@@ -427,7 +430,8 @@ async function generateChapter(body: unknown) {
     }
 
     const myLabel = stripSurname((stored?.name ?? ""));
-    const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;
+    const myHonorific = stored?.gender === "female" ? "양" : "군";
+    const sections = fixNamesInValue(obj, myLabel, null, "님", myHonorific) as typeof obj;
     return NextResponse.json({ sections });
   } catch (err) {
     return NextResponse.json({ error: "장 생성 실패", detail: err instanceof Error ? err.message : String(err) }, { status: 500 });
