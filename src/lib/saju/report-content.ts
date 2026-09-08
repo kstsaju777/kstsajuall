@@ -1624,6 +1624,8 @@ export function buildCompatDescPrompt(rank: number, honor: string, personLabel: 
 
 [테마: ${RANK_ANGLE.title}]
 
+⚠️ 상대방을 다시 지칭할 때 절대 '그' 또는 '그녀'를 쓰지 마오 (성별과 반대로 틀리게 쓰는 오류가 자주 발생하므로 아예 금지). 반드시 '${personLabel}' 표현을 반복 사용하거나, 주어를 생략하고 서술형으로 이어 쓰오.
+
 다섯 파트를 문단 구분 없이 자연스럽게 이어 작성하오. 총 600자 이상.
 
 ①왜 찰떡인가(150자 이상): 첫 문장은 반드시 "${d.iKr}일주를 가진 ${personLabel}"로 시작. 찰떡인 이유(${d.reasons})를 쉬운 말로 풀어 실제 감각으로 묘사.
