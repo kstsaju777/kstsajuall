@@ -900,8 +900,9 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     }
   }
 
+  // 오행 분포 — 모든 장 공통 주입(서버 확정값). 명식에 실제로 없는 오행의 상징을 있는 것처럼 언급하는 오류 방지.
   let ohaengTable = "";
-  if (chapter === 3 && input.pillars && input.pillars.length >= 4) {
+  if (input.pillars && input.pillars.length >= 4) {
     const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
     const sip: Record<string, number> = {};
     for (const p of input.pillars) {
@@ -911,18 +912,22 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     }
     const total = Object.values(cnt).reduce((a, b) => a + b, 0) || 1;
     const sorted = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
-    const g2 = (keys: string[]) => keys.reduce((a, k) => a + (sip[k] ?? 0), 0);
-    const bigeop    = g2(["비견","겁재"]);
-    const siksang   = g2(["식신","상관"]);
-    const jaeseong  = g2(["편재","정재"]);
-    const gwanseong = g2(["편관","정관"]);
-    const inseong   = g2(["편인","정인"]);
-    const computedMbti =
-      ((bigeop + siksang) >= (inseong + gwanseong) ? "E" : "I") +
-      ((inseong + siksang) >= (jaeseong + gwanseong) ? "N" : "S") +
-      ((siksang + inseong) >= (gwanseong + jaeseong) ? "F" : "T") +
-      ((siksang + bigeop) >= gwanseong ? "P" : "J");
-    ohaengTable = `\n[오행 분포 — ohaengDesc 풀이에서 반드시 이 수치를 기반으로 서술]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n\n[MBTI 매칭 결과 — answer 풀이에서 반드시 이 유형에 대해서만 서술]\n사주 십성 분포로 도출된 MBTI 유형: ${computedMbti}\n이 유형의 특성·강점·약점을 사주 명식과 연결하여 홍연 말투로 풀이하오. mbtiType 필드값도 반드시 "${computedMbti}"로 설정하오.\n`;
+    const zeroEls = sorted.filter(([, n]) => n === 0).map(([el]) => el);
+    ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징(예: 화=표현·창의, 목=성장 등)을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n`;
+    if (chapter === 3) {
+      const g2 = (keys: string[]) => keys.reduce((a, k) => a + (sip[k] ?? 0), 0);
+      const bigeop    = g2(["비견","겁재"]);
+      const siksang   = g2(["식신","상관"]);
+      const jaeseong  = g2(["편재","정재"]);
+      const gwanseong = g2(["편관","정관"]);
+      const inseong   = g2(["편인","정인"]);
+      const computedMbti =
+        ((bigeop + siksang) >= (inseong + gwanseong) ? "E" : "I") +
+        ((inseong + siksang) >= (jaeseong + gwanseong) ? "N" : "S") +
+        ((siksang + inseong) >= (gwanseong + jaeseong) ? "F" : "T") +
+        ((siksang + bigeop) >= gwanseong ? "P" : "J");
+      ohaengTable += `\n[MBTI 매칭 결과 — answer 풀이에서 반드시 이 유형에 대해서만 서술]\n사주 십성 분포로 도출된 MBTI 유형: ${computedMbti}\n이 유형의 특성·강점·약점을 사주 명식과 연결하여 홍연 말투로 풀이하오. mbtiType 필드값도 반드시 "${computedMbti}"로 설정하오.\n`;
+    }
   }
 
   // chapter 6: 연애/결혼 — 기둥별 십성 확인표 주입 (인연성 위치 오류 방지)
