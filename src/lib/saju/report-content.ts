@@ -1544,7 +1544,10 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
   // ── 프롬프트 변수 정의 ──
   // CH_GUIDE가 {명식표1}로 시작하는 새 형식이면, 명식표1에 서버 계산값도 포함
   const isNewStyleGuide = (CH_GUIDE[chapter]?.trimStart() ?? "").startsWith("{명식표1}");
-  const ilganNote = input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar}` : "";
+  const ilganElForNote = input.pillars?.find(p => p.pos === "일주")?.ganEl ?? "";
+  const ilganNote = input.ilganChar
+    ? `⚑ 일간(일주 천간): ${input.ilganChar}(${GAN_KR[input.ilganChar] ?? ""}) — 오행: ${ilganElForNote || "?"} [서버 확정값, 다른 오행으로 착각 금지. 예: 丁/정은 화, 辛/신은 금 — 혼동하지 마오]`
+    : "";
   const manseryeokFull = isNewStyleGuide
     ? [pillarTable, ilganNote, input.manseryeokText, ageGuide, deungTable, ohaengTable, wealthTable, healthTable, guiinTable].filter(Boolean).join("\n")
     : [ilganNote, input.manseryeokText].filter(Boolean).join("\n");
