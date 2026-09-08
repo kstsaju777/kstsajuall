@@ -44,6 +44,11 @@ export function fixJosa(text: string): string {
   // 동사 활용 오류 교정
   text = text.replace(/있은/g, "있는");
   text = text.replace(/없은/g, "없는");
+  // '-았은/-었은' → '-았는/-었는' (예: '가져다주었은지' → '가져다주었는지') — 모든 동사에 적용되는 일반 오류
+  text = text.replace(/았은/g, "았는");
+  text = text.replace(/었은/g, "었는");
+  // '것인이' → '것인지' (예: '견뎌내셨을 것인이' → '견뎌내셨을 것인지') — '-ㄴ지' 종결을 '-ㄴ이'로 잘못 쓰는 오류
+  text = text.replace(/것인이/g, "것인지");
 
   return text;
 }
