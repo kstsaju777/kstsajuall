@@ -467,6 +467,7 @@ export function buildJaemulChapterPrompt(
     pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[];
     birthYear?: number;
     seun?: { label: string; gz: string; active?: boolean }[];
+    daeun?: { label: string; gz: string; active?: boolean }[];
     ilganChar?: string;
     concern?: string;
   }
@@ -704,6 +705,24 @@ export function buildJaemulChapterPrompt(
       rows.join("\n") +
       `\n\n[구간별 추세 요약 — warningFlow items는 이 구간 단위로 작성]\n` +
       groupRows.join("\n") + "\n";
+
+    // 실제 대운 전환 시점(서버 확정값) — 세운(매년 바뀌는 간지)과 대운(10년 단위) 혼동 방지.
+    // 이 표에 없는 해에 "OO대운으로 접어들며" 식으로 대운 전환을 언급하면 절대 안 됨.
+    if (input.daeun && input.daeun.length > 0 && input.birthYear) {
+      const sortedDaeun = [...input.daeun].sort((a, b) => Number(a.label) - Number(b.label));
+      const daeunRanges = sortedDaeun.map((d, i) => {
+        const startAge = Number(d.label);
+        const endAge = sortedDaeun[i + 1] ? Number(sortedDaeun[i + 1].label) - 1 : startAge + 9;
+        const startYear = input.birthYear! + startAge;
+        const endYear = input.birthYear! + endAge;
+        return { gz: d.gz, startYear, endYear };
+      }).filter(r => r.endYear >= 2024 && r.startYear <= 2033);
+      if (daeunRanges.length > 0) {
+        wealthScoreBlock += `\n[실제 대운 전환 시점 — 서버 확정값, 2024~2033년 구간에 걸친 대운만. 절대 재계산·추측 금지]\n` +
+          daeunRanges.map(r => `${r.gz} 대운: ${r.startYear}년~${r.endYear}년`).join("\n") +
+          `\n⚠️ 세운(매년 바뀌는 간지)과 대운(10년 단위 흐름)은 다른 개념이오. 위 표에 명시된 해가 아니면 "OO 대운으로 접어들며/바뀌며" 같은 대운 전환 표현을 절대 쓰지 마오. 단순히 연도가 바뀌는 것은 세운 변화이지 대운 변화가 아니오.\n`;
+      }
+    }
   }
 
   const honorificBlock = `\n\n[호칭 — 아래 형태만 그대로 사용, 절대 변형 금지]
