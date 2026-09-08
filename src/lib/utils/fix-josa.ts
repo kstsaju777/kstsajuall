@@ -1,6 +1,6 @@
 /** 한국어 조사 자동 교정 유틸 */
 
-function hasBatchim(char: string): boolean {
+export function hasBatchim(char: string): boolean {
   const code = char.charCodeAt(0);
   if (code < 0xAC00 || code > 0xD7A3) return false;
   return (code - 0xAC00) % 28 !== 0;

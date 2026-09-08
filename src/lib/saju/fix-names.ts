@@ -1,3 +1,5 @@
+import { hasBatchim } from "@/lib/utils/fix-josa";
+
 /**
  * LLM 생성 텍스트에서 이름 변형 교정.
  * __MY__ / __PT__ 토큰을 실제 이름+호칭으로 치환하고,
@@ -23,12 +25,25 @@ export function fixNamesInText(
 
   // 2. 조사 포함 __PT__ 토큰 치환
   if (ptFull) {
-    r = r.replace(/__PT_는__/g, `${ptFull}는`);
-    r = r.replace(/__PT_가__/g, `${ptFull}가`);
-    r = r.replace(/__PT_를__/g, `${ptFull}를`);
-    r = r.replace(/__PT_와__/g, `${ptFull}와`);
-    r = r.replace(/__PT_에게__/g, `${ptFull}에게`);
-    r = r.replace(/__PT__/g, ptFull);
+    if (ptHonorific === "") {
+      // 호칭 없이 이름 그대로(예: 반려동물) — 토큰에 붙은 '님 받침 기준' 조사를
+      // 이름 자체의 받침 유무에 맞게 다시 골라줌
+      const b = hasBatchim(ptFull[ptFull.length - 1]);
+      r = r.replace(/__PT__(은|는)/g, `${ptFull}${b ? "은" : "는"}`);
+      r = r.replace(/__PT__(이|가)/g, `${ptFull}${b ? "이" : "가"}`);
+      r = r.replace(/__PT__(을|를)/g, `${ptFull}${b ? "을" : "를"}`);
+      r = r.replace(/__PT__(과|와)/g, `${ptFull}${b ? "과" : "와"}`);
+      r = r.replace(/__PT__에게/g, `${ptFull}에게`);
+      r = r.replace(/__PT__으로/g, `${ptFull}${b ? "으로" : "로"}`);
+      r = r.replace(/__PT__/g, ptFull);
+    } else {
+      r = r.replace(/__PT_는__/g, `${ptFull}는`);
+      r = r.replace(/__PT_가__/g, `${ptFull}가`);
+      r = r.replace(/__PT_를__/g, `${ptFull}를`);
+      r = r.replace(/__PT_와__/g, `${ptFull}와`);
+      r = r.replace(/__PT_에게__/g, `${ptFull}에게`);
+      r = r.replace(/__PT__/g, ptFull);
+    }
   }
 
   // 3. "본인" → 이름+님
@@ -46,8 +61,8 @@ export function fixNamesInText(
     }
   }
 
-  // 5. 상대방 이름 변형 교정
-  if (ptLabel && ptLabel.length >= 2) {
+  // 5. 상대방 이름 변형 교정 (호칭 없음 대상, 예: 반려동물은 호칭 자체를 붙이지 않으므로 제외)
+  if (ptLabel && ptLabel.length >= 2 && ptHonorific !== "") {
     const stem = ptLabel.slice(0, -1);
     const esc = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     for (const hon of ["님", "양", "군"]) {
@@ -59,9 +74,17 @@ export function fixNamesInText(
   }
 
   // 6. 이름+호칭 뒤 중복 호칭 제거 (예: 채은양양 → 채은양, 채은양군 → 채은양)
+  //    호칭 없음 대상은 반대로 LLM이 실수로 붙인 님/양/군을 제거함
   if (ptFull) {
-    for (const hon of ["님", "양", "군"]) {
-      r = r.replace(new RegExp(`${ptFull.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${hon}`, "g"), ptFull);
+    if (ptHonorific === "") {
+      const escFull = ptFull.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      for (const hon of ["님", "양", "군"]) {
+        r = r.replace(new RegExp(`${escFull}${hon}`, "g"), ptFull);
+      }
+    } else {
+      for (const hon of ["님", "양", "군"]) {
+        r = r.replace(new RegExp(`${ptFull.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${hon}`, "g"), ptFull);
+      }
     }
   }
   const myFull = `${myLabel}${myHonorific}`;

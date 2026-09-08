@@ -77,7 +77,7 @@ async function genChapterContent(chapter: number, input: {
       meta = { provider: llm.provider, model: llm.model };
       let obj: Record<string, unknown>;
       try {
-        obj = fixNamesInValue(parseContentJson(llm.text), myLabel, ptLabel, "님") as Record<string, unknown>;
+        obj = fixNamesInValue(parseContentJson(llm.text), myLabel, ptLabel, "") as Record<string, unknown>;
       } catch (parseErr) {
         console.error(`[kunghap_banryeo] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         if (chapter === 12) {
@@ -197,7 +197,7 @@ async function generateConcernAdvice(id: string) {
       const obj = parseContentJson(llm.text) as { concernAdvice?: { paragraphs?: string[] } };
       const paras = obj?.concernAdvice?.paragraphs;
       if (Array.isArray(paras) && paras.length > 0) {
-        const fixed = fixNamesInValue({ concernAdvice: obj.concernAdvice }, name1, petName || null, "님") as { concernAdvice: { paragraphs: string[] } };
+        const fixed = fixNamesInValue({ concernAdvice: obj.concernAdvice }, name1, petName || null, "") as { concernAdvice: { paragraphs: string[] } };
         obj.concernAdvice = fixed.concernAdvice;
         let existing: Record<string, unknown> = {};
         try { existing = JSON.parse(data.interpretation_md || "{}") || {}; } catch { existing = {}; }
