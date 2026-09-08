@@ -11,6 +11,7 @@
 
 import { SYSTEM, CH_THEME, CH_GUIDE } from "./report-prompts";
 import { fixJosaInObject } from "../utils/fix-josa";
+import { sipseongOfStem, sipseongOfBranch } from "./sipseong-calc";
 
 export type ReportSection = {
   intro: string;        // 도입 문단
@@ -1413,21 +1414,10 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
   if (chapter === 5 && input.pillars && input.pillars.length >= 2) {
     const byPos5: Record<string, typeof input.pillars[0]> = {};
     for (const p of input.pillars) byPos5[p.pos] = p;
-    const ilEl5 = byPos5["일주"]?.ganEl ?? "목";
-    const STEM_EL5: Record<string, string> = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
-    const BRANCH_EL5: Record<string, string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
-    const GEN5: Record<string,string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
-    const CTL5: Record<string,string> = { 목:"토",화:"금",토:"수",금:"목",수:"화" };
+    const ilganHanja5 = byPos5["일주"]?.gan ?? "甲";
+    // 서버 확정값: 음양까지 반영한 정확한 십성(편재/정재 등) 계산 — 명식표와 동일한 sipseong-calc 함수 재사용
     const SIP_SCORE5: Record<string, number> = { 재성:88,편재:90,정재:86,식신:80,상관:78,인성:65,편인:62,정인:68,비겁:55,비견:56,겁재:54,관성:60,편관:58,정관:62 };
     const SIP_NAME5: Record<string, string> = { 재성:"재성",편재:"편재",정재:"정재",식신:"식신",상관:"상관",인성:"인성",편인:"편인",정인:"정인",비겁:"비겁",비견:"비견",겁재:"겁재",관성:"관성",편관:"편관",정관:"정관" };
-    function toSip5(ilEl: string, tEl: string): string {
-      if (ilEl === tEl) return "비겁";
-      if (GEN5[ilEl] === tEl) return "식상";
-      if (CTL5[ilEl] === tEl) return "재성";
-      if (CTL5[tEl] === ilEl) return "관성";
-      if (GEN5[tEl] === ilEl) return "인성";
-      return "비겁";
-    }
     const GANJIS5 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
     const BASE_IDX5 = GANJIS5.indexOf("甲辰"); // 2024년
     const GAN_KR5: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
@@ -1437,9 +1427,8 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
       const year = 2024 + yi;
       const gz = GANJIS5[(BASE_IDX5 + yi) % 60];
       const stem = gz[0]; const branch = gz[1];
-      const sEl = STEM_EL5[stem]; const bEl = BRANCH_EL5[branch];
-      const sip_t = sEl ? toSip5(ilEl5, sEl) : "비겁";
-      const sip_b = bEl ? toSip5(ilEl5, bEl) : "비겁";
+      const sip_t = sipseongOfStem(ilganHanja5, stem) || "비견";
+      const sip_b = sipseongOfBranch(ilganHanja5, branch) || "비견";
       const score = Math.round((SIP_SCORE5[sip_t] ?? 55) * 0.6 + (SIP_SCORE5[sip_b] ?? 55) * 0.4);
       const gzKr = `${GAN_KR5[stem] ?? stem}${JI_KR5[branch] ?? branch}년`;
       rows5.push(`${year}년 ${gzKr}: 천간=${SIP_NAME5[sip_t] ?? sip_t}, 지지=${SIP_NAME5[sip_b] ?? sip_b}, 재물점수=${score}`);
