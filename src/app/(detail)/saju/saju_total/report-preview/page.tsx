@@ -2661,12 +2661,12 @@ const PILLAR_ORDER: Record<string, number> = { "시주": 0, "일주": 1, "월주
 function buildRelDesc(r: Rel, view: MyeongsikView): string {
   const ps = view.pillars;
 
-  const locate = (kor: string): { posKey: string; label: string; order: number } => {
+  const locate = (kor: string): { posKey: string; label: string; order: number; el: string } => {
     for (const p of ps) {
-      if (toKor(p.gan) === kor) return { posKey: `${p.pos}천간`, label: POS_MEANING[`${p.pos}천간`] ?? p.pos, order: PILLAR_ORDER[p.pos] ?? 0 };
-      if (toKor(p.ji)  === kor) return { posKey: `${p.pos}지지`, label: POS_MEANING[`${p.pos}지지`] ?? p.pos, order: PILLAR_ORDER[p.pos] ?? 0 };
+      if (toKor(p.gan) === kor) return { posKey: `${p.pos}천간`, label: POS_MEANING[`${p.pos}천간`] ?? p.pos, order: PILLAR_ORDER[p.pos] ?? 0, el: p.ganEl ?? "" };
+      if (toKor(p.ji)  === kor) return { posKey: `${p.pos}지지`, label: POS_MEANING[`${p.pos}지지`] ?? p.pos, order: PILLAR_ORDER[p.pos] ?? 0, el: p.jiEl ?? "" };
     }
-    return { posKey: "", label: "", order: 0 };
+    return { posKey: "", label: "", order: 0, el: "" };
   };
 
   const located = r.chars.map(c => ({ char: c, ...locate(c) }));
@@ -2714,6 +2714,24 @@ function buildRelDesc(r: Rel, view: MyeongsikView): string {
     const matchKey = allKeys.find(k => [...k.match(/.{1}/g)!].sort().join("") === sorted || k.split("").every(c => r.chars.includes(c)));
     const resultEl = matchKey ? SAM_HAP_RESULT[matchKey] : undefined;
     if (resultEl) extra = makeHapExtra(resultEl);
+  } else if (["천간충", "충", "형", "파", "해", "원진"].includes(r.kind) && located.length === 2 && located[0].el && located[1].el) {
+    // 충돌 계열 관계 — 두 글자의 오행 관계 + 일간 기준 십성으로 구체적 의미 보강
+    const [el1, el2] = [located[0].el, located[1].el];
+    const elRelDesc =
+      el1 === el2 ? `같은 '${el1}' 오행끼리 부딪히는 관계` :
+      EL_GENERATES[el1] === el2 ? `'${el1}'이(가) '${el2}'을(를) 낳아주는 상생 관계임에도 정면으로 부딪히는 것이라 더욱 안타까운 형국` :
+      EL_GENERATES[el2] === el1 ? `'${el2}'이(가) '${el1}'을(를) 낳아주는 상생 관계임에도 정면으로 부딪히는 것이라 더욱 안타까운 형국` :
+      EL_CONTROLS[el1] === el2 ? `'${el1}'이(가) '${el2}'을(를) 억누르는 상극 관계` :
+      EL_CONTROLS[el2] === el1 ? `'${el2}'이(가) '${el1}'을(를) 억누르는 상극 관계` :
+      `'${el1}'과(와) '${el2}'이(가) 서로 다른 결의 기운으로 부딪히는 관계`;
+    const sip1 = hapResultSipseong(ilganEl, el1);
+    const sip2 = hapResultSipseong(ilganEl, el2);
+    const sipLine = sip1 && sip2
+      ? (sip1 === sip2
+          ? `일간(${ilganEl}) 기준으로 둘 다 ${sip1}에 해당하는 기운이라, 이 영역에서 비슷한 성질의 기운끼리 부딪혀 갈등이 배가되는 형국이오.`
+          : `일간(${ilganEl}) 기준으로 ${sip1}과(와) ${sip2}이(가) 부딪히는 셈이라, 서로 다른 삶의 영역(성향)이 충돌하며 갈등이 생기오.`)
+      : "";
+    extra = `\n\n【오행으로 본 충돌】 ${elRelDesc}이오.${sipLine ? " " + sipLine : ""}`;
   }
   return `${parts.join("과 ")}${subjectParticle} ${km.verb.replace(/^이 /,"")}\n\n${km.effect}${extra}\n\n【${influence.label}】 ${influence.desc}`;
 }
