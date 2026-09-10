@@ -368,11 +368,12 @@ async function generateChapter(body: unknown) {
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
     const pillars = applyLocalSinsal(stored?.view?.pillars ?? []);
 
-    // 1장 생성 후 저장된 용신/희신/기신/격국 읽기 (2장~에 주입)
-    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
-    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
-    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
-    const gyeokguk: string | undefined = (stored?.gyeokguk as string | undefined) || undefined;
+    // 용신/희신/기신/격국 — 사주 API가 억부법으로 계산한 확정값(view.gyeokguk) 최우선, 없으면 1장 LLM 판단 값으로 폴백
+    const apiGyeokguk = stored?.view?.gyeokguk as { name?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined;
+    const yongsinEl: string | undefined = apiGyeokguk?.yongsinEl || (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = apiGyeokguk?.heusinEl || (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = apiGyeokguk?.gisinEl || (stored?.gisinEl as string | undefined) || undefined;
+    const gyeokguk: string | undefined = apiGyeokguk?.name || (stored?.gyeokguk as string | undefined) || undefined;
 
     const chapterInput = {
       name: stored?.name ?? "",

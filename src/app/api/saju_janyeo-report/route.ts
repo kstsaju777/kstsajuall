@@ -400,10 +400,11 @@ async function generateChapter(body: unknown) {
     const seunWithSip = rawSeun.map(s => ({ ...s, ...computeSipseong(ilgan, s.gz), krName: gzToKr(s.gz) }));
     const daeunWithSip = rawDaeun.map(d => ({ ...d, ...computeSipseong(ilgan, d.gz), krName: gzToKr(d.gz) }));
 
-    // ch2 생성 후 저장된 용신/희신/기신 읽기 (ch3~에 주입)
-    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
-    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
-    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
+    // 용신/희신/기신 — 사주 API가 억부법으로 계산한 확정값(view.gyeokguk) 최우선, 없으면 LLM 판단 폴백
+    const apiGyeokguk = stored?.view?.gyeokguk as { name?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined;
+    const yongsinEl: string | undefined = apiGyeokguk?.yongsinEl || (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = apiGyeokguk?.heusinEl || (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = apiGyeokguk?.gisinEl || (stored?.gisinEl as string | undefined) || undefined;
 
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",

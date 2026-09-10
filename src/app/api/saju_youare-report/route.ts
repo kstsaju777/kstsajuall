@@ -371,10 +371,11 @@ async function generateChapter(body: unknown) {
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
     const pillars = applyLocalSinsal(stored?.view?.pillars ?? []);
 
-    // 6장에서 확정된 용신 오행 읽기 (재생성 시 일관성 유지)
-    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
-    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
-    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
+    // 용신/희신/기신 — 사주 API가 억부법으로 계산한 확정값(view.gyeokguk) 최우선, 없으면 6장 LLM 판단 값으로 폴백
+    const apiGyeokguk = stored?.view?.gyeokguk as { name?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined;
+    const yongsinEl: string | undefined = apiGyeokguk?.yongsinEl || (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = apiGyeokguk?.heusinEl || (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = apiGyeokguk?.gisinEl || (stored?.gisinEl as string | undefined) || undefined;
 
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
