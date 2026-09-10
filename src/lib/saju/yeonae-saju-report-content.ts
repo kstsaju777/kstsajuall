@@ -768,14 +768,18 @@ export function buildYeonaeSajuChapterPrompt(
       ].filter(Boolean));
       const avoidTtiStr = [...avoidNyeonJi].map(j => JI_띠[j] ?? j).join(", ") || "없음";
 
-      const GANJIS_60 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
-      const myNyeonGz3   = `${byPos3["년주"]?.gan ?? ""}${myNyeonJi3}`;
-      const gjIdx3       = GANJIS_60.indexOf(myNyeonGz3);
+      // 기준 생년 — 반드시 실제 입력 생년 사용 (서버 확정값).
+      // ⚠️ 년주 간지만으로 60년 주기 중 "가장 최근 해"를 역산하면 간지가 60년마다 반복되므로
+      // (예: 1963년생과 2023년생 모두 계묘년) 60살 차이로 완전히 잘못 추정되는 버그가 있었음.
       const nowYear3     = new Date().getFullYear();
-      let myBirthYear3   = nowYear3 - 30;
-      if (gjIdx3 >= 0) {
-        const candidate = nowYear3 - ((nowYear3 - (1924 + gjIdx3)) % 60 + 60) % 60;
-        myBirthYear3 = candidate;
+      let myBirthYear3   = input.birthYear ?? nowYear3 - 30;
+      if (!input.birthYear) {
+        const GANJIS_60 = ["甲子","乙丑","丙寅","丁卯","戊辰","己巳","庚午","辛未","壬申","癸酉","甲戌","乙亥","丙子","丁丑","戊寅","己卯","庚辰","辛巳","壬午","癸未","甲申","乙酉","丙戌","丁亥","戊子","己丑","庚寅","辛卯","壬辰","癸巳","甲午","乙未","丙申","丁酉","戊戌","己亥","庚子","辛丑","壬寅","癸卯","甲辰","乙巳","丙午","丁未","戊申","己酉","庚戌","辛亥","壬子","癸丑","甲寅","乙卯","丙辰","丁巳","戊午","己未","庚申","辛酉","壬戌","癸亥"];
+        const myNyeonGz3   = `${byPos3["년주"]?.gan ?? ""}${myNyeonJi3}`;
+        const gjIdx3       = GANJIS_60.indexOf(myNyeonGz3);
+        if (gjIdx3 >= 0) {
+          myBirthYear3 = nowYear3 - ((nowYear3 - (1924 + gjIdx3)) % 60 + 60) % 60;
+        }
       }
 
       const SAMHAP3C: Record<string, string[]> = {
