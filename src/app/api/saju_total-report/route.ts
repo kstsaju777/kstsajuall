@@ -339,11 +339,13 @@ async function generateChapter(body: unknown) {
     const birthDateStr: string = stored?.birth?.date ?? ""; // "yyyy.mm.dd"
     const birthYear = birthDateStr ? Number(birthDateStr.split(".")[0]) : undefined;
 
-    // myeongsik에 저장된 확정 용신 오행 읽기 (2장 생성 후 업데이트됨)
-    const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
-    const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
-    const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
-    const gyeokgukName: string | undefined = (stored?.gyeokgukName as string | undefined) || undefined;
+    // 용신·희신·기신·격국명 — 사주 API가 억부법으로 이미 확정 계산한 값(view.gyeokguk)을 최우선 사용.
+    // 없으면(구버전 결과 등) 2장 LLM 판단 후 myeongsik에 저장된 값으로 폴백.
+    const apiGyeokguk = stored?.view?.gyeokguk as { name?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined;
+    const yongsinEl: string | undefined = apiGyeokguk?.yongsinEl || (stored?.yongsinEl as string | undefined) || undefined;
+    const heusinEl: string | undefined = apiGyeokguk?.heusinEl || (stored?.heusinEl as string | undefined) || undefined;
+    const gisinEl: string | undefined = apiGyeokguk?.gisinEl || (stored?.gisinEl as string | undefined) || undefined;
+    const gyeokgukName: string | undefined = apiGyeokguk?.name || (stored?.gyeokgukName as string | undefined) || undefined;
 
     // pillars fallback: view.pillars가 없으면 manseryeokText에서 재계산
     let pillars = stored?.view?.pillars ?? [];

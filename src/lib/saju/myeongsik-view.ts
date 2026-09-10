@@ -21,6 +21,15 @@ export type MsPillar = {
 export type MsFlowItem = { label: string; gz: string; active: boolean; sipTop?: string; sipBot?: string };
 export type MsDaeunItem = MsFlowItem & { yearStart: number }; // 대운 시작 연도(드릴다운용)
 
+export type MsGyeokguk = {
+  name: string;       // 격국명 (한자 제거, 예: "건록격")
+  yongsinEl: string;  // 용신 오행 (억부법)
+  heusinEl: string;   // 희신 오행
+  gisinEl: string;    // 기신 오행
+  gusinEl?: string;   // 구신 오행
+  reason?: string;    // API가 제공하는 판단 근거 요약
+};
+
 export type MyeongsikView = {
   ilgan: string; // "庚 (경금)"
   pillars: MsPillar[]; // 시 → 일 → 월 → 년 순
@@ -30,6 +39,7 @@ export type MyeongsikView = {
   currentYear: number; // 현재 세운 연도 (기본 선택/강조)
   currentMonth: number; // 현재 월운 월 (1~12)
   sinStrength?: { score: number; strength: string; level: number }; // 신강/신약 (0~100점, 라벨, 7단계)
+  gyeokguk?: MsGyeokguk; // API가 억부법으로 계산한 확정 격국·용신·희신·기신 (LLM 재판단 금지용)
 };
 
 // ── 로컬 신살 계산표 ──────────────────────────────────────────────────────────
@@ -361,5 +371,18 @@ export function buildMyeongsikView(a: any): MyeongsikView {
     ? { score: Number(ss.score ?? 50), strength: String(ss.strength ?? "중화"), level: Number(ss.level ?? 4) }
     : undefined;
 
-  return { ilgan, pillars, daeun, seun, weolun, currentYear, currentMonth, sinStrength };
+  // 격국·용신·희신·기신 — API가 억부법으로 이미 확정 계산한 값(한자 제거 후 사용)
+  const gk = a?.gyeokguk;
+  const gyeokguk: MsGyeokguk | undefined = gk
+    ? {
+        name: String(gk.name ?? "").replace(/[()（）][^()（）]*[()（）]/g, "").trim(),
+        yongsinEl: String(gk.yongsin?.오행 ?? ""),
+        heusinEl: String(gk.희신오행 ?? ""),
+        gisinEl: String(gk.기신오행 ?? ""),
+        gusinEl: gk.구신오행 ? String(gk.구신오행) : undefined,
+        reason: gk.yongsin?.reason ? String(gk.yongsin.reason) : undefined,
+      }
+    : undefined;
+
+  return { ilgan, pillars, daeun, seun, weolun, currentYear, currentMonth, sinStrength, gyeokguk };
 }
