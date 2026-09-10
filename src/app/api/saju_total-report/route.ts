@@ -71,8 +71,8 @@ function fixEomiInObj(obj: unknown): unknown {
 }
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 1회 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string; daeunNote?: string }, prevChapterContext?: string) {
-  const { system, user: userRaw, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, deungResult: input.deungResult, daeunNote: input.daeunNote });
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; concern?: string; yongsinEl?: string; heusinEl?: string; gisinEl?: string; gyeokgukName?: string; deungResult?: { deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean; ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number }; ilganChar?: string; daeunNote?: string }, prevChapterContext?: string) {
+  const { system, user: userRaw, compatTags, ch6RankData, ch6Pillars } = buildChapterPrompt(chapter, { ...input, concern: input.concern, yongsinEl: input.yongsinEl, heusinEl: input.heusinEl, gisinEl: input.gisinEl, gyeokgukName: input.gyeokgukName, deungResult: input.deungResult, daeunNote: input.daeunNote });
   const user = prevChapterContext ? userRaw + prevChapterContext : userRaw;
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -343,6 +343,7 @@ async function generateChapter(body: unknown) {
     const yongsinEl: string | undefined = (stored?.yongsinEl as string | undefined) || undefined;
     const heusinEl: string | undefined = (stored?.heusinEl as string | undefined) || undefined;
     const gisinEl: string | undefined = (stored?.gisinEl as string | undefined) || undefined;
+    const gyeokgukName: string | undefined = (stored?.gyeokgukName as string | undefined) || undefined;
 
     // pillars fallback: view.pillars가 없으면 manseryeokText에서 재계산
     let pillars = stored?.view?.pillars ?? [];
@@ -436,16 +437,22 @@ async function generateChapter(body: unknown) {
       yongsinEl,
       heusinEl,
       gisinEl,
+      gyeokgukName,
       deungResult: deungResult ?? undefined,
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
       daeunNote,
     }, prevChapterContext);
 
-    // 2장 생성 완료 시 용신 오행을 myeongsik에 즉시 저장 (이후 모든 장에서 참조)
+    // 2장 생성 완료 시 용신 오행·격국명을 myeongsik에 즉시 저장 (이후 모든 장에서 참조 — 장 간 불일치 방지)
     if (chapter === 2) {
       const y = (obj as Record<string, unknown>).yongsin as Record<string, unknown> | undefined;
-      if (y?.yongsinEl) {
-        const updatedMyeongsik = { ...stored, yongsinEl: y.yongsinEl, heusinEl: y.heusinEl ?? "", gisinEl: y.gisinEl ?? "" };
+      const gk = (obj as Record<string, unknown>).gyeokguk as Record<string, unknown> | undefined;
+      if (y?.yongsinEl || gk?.gyeokgukName) {
+        const updatedMyeongsik = {
+          ...stored,
+          ...(y?.yongsinEl ? { yongsinEl: y.yongsinEl, heusinEl: y.heusinEl ?? "", gisinEl: y.gisinEl ?? "" } : {}),
+          ...(gk?.gyeokgukName ? { gyeokgukName: gk.gyeokgukName } : {}),
+        };
         await service.from("saju_results").update({ myeongsik: updatedMyeongsik as never }).eq("id", id);
       }
     }

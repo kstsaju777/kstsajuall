@@ -162,6 +162,7 @@ export type ReportPromptInput = {
   yongsinEl?: string; // 확정 용신 오행 — 2장 생성 후 myeongsik에 저장, 모든 장에 주입
   heusinEl?: string;  // 확정 희신 오행
   gisinEl?: string;   // 확정 기신 오행
+  gyeokgukName?: string; // 확정 격국명 — 2장 생성 후 myeongsik에 저장, 모든 장에 주입 (장 간 불일치 방지)
   deungResult?: {     // 클라이언트가 계산한 득령·득지·득시·득세 (컴포넌트와 동일 값 보장)
     deungnyeong: boolean; deungji: boolean; deungsi: boolean; deungse: boolean;
     ilganEl: string; woljiEl: string; iljiEl: string; sijiEl: string; seCount: number;
@@ -337,7 +338,7 @@ const CH_SCHEMA: Record<number, string> = {
     "paragraphs": ["강한 오행들이 삶에서 어떻게 드러나는지 2~3문장","부족한 오행으로 인한 빈자리와 보완 방향 1~2문장"]
   },
   "balance": {
-    "intro": "【필수】'사회적 활동 영역을 상징하는 월주를 보면 [기둥별 십성 확인표]에서 확인한 격국명의 특성이 강하게 나타나오.' 형식으로 시작하여, 이 격국이 직업·재능 면에서 어떤 방향을 암시하는지 1~2문장으로 서술하오.",
+    "intro": "【필수】'사회적 활동 영역을 상징하는 월주를 보면 [확정 격국명]에서 확인한 [격국명]의 특성이 강하게 나타나오.' 형식으로 시작하여, 이 격국이 직업·재능 면에서 어떤 방향을 암시하는지 1~2문장으로 서술하오. 격국명은 반드시 위에 주입된 [확정 격국명] 값을 그대로 쓰고, 2장과 다른 격국명을 새로 판단하면 절대 안 되오.",
     "callout": "【필수】'월간에 떠 있는 [월주 천간 글자명] [월주 천간 십성]의 기운은 ~' 형식으로 월간 천간 십성이 사회적 활동에서 어떻게 발현되는지 구체적으로 짚는 한 문장",
     "paragraphs": ["이 격국과 월간 십성에 최적화된 직업·분야를 구체적으로 나열하오 (창의적 기획, 특수 기술, 전문 상담 등 본인의 개성이 드러나는 분야 위주)", "해당 기운이 과할 때 나타나는 주의점과 보완 방향으로 마무리하오"],
     "spectrum": { "label": "혼자 힘으로 살아가는 나", "value": 30 }
@@ -1575,6 +1576,9 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
   const yongsinBlock = input.yongsinEl
     ? `\n[확정 용신·희신·기신 — 전 결과지 통일 필수]\n용신: ${input.yongsinEl}오행 / 희신: ${input.heusinEl || "미정"}오행 / 기신: ${input.gisinEl || "미정"}오행\n이 오행은 이 결과지 전체에서 확정된 값이오. 이 장에서 용신·희신·기신을 언급할 때는 반드시 위 값을 그대로 사용하오. 독자적으로 재산출하거나 다른 오행으로 바꾸는 것은 절대 금지하오.\n`
     : "";
+  const gyeokgukBlock = input.gyeokgukName
+    ? `\n[확정 격국명 — 전 결과지 통일 필수]\n격국: ${input.gyeokgukName}\n이 결과지 전체에서 확정된 격국명이오. 이 장에서 격국을 언급할 때는 반드시 이 이름을 그대로 사용하오. 독자적으로 다시 판단하거나 다른 격국명으로 바꾸는 것은 절대 금지하오.\n`
+    : "";
 
   // 새 형식(CH_GUIDE가 {명식표1}로 시작): CH_GUIDE가 전체 프롬프트 역할
   const tenseReminder = `\n⚠️ 최종 확인: chonyeongi(초년기)를 제외한 모든 섹션의 종결어미는 반드시 현재형(~하오, ~이오, ~겠소)만 사용하오. ~하였소, ~했소, ~되었소, ~이었소 등 과거형 어미가 단 하나라도 있으면 오류이오.\n`;
@@ -1582,7 +1586,7 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
   const daeunReminder = input.daeunNote ? `\n${input.daeunNote}\n` : "";
 
   const PROMPT_TEMPLATE = isNewStyleGuide
-    ? `{장가이드}${yongsinBlock}${concernBlock}
+    ? `{장가이드}${yongsinBlock}${gyeokgukBlock}${concernBlock}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
 ${daeunReminder}${tenseReminder}${investReminder}
 {스키마}`
@@ -1592,7 +1596,7 @@ ${pillarTable}【 사주 명식 】
 {명식표1}
 ${ageGuide}${deungTable}${ohaengTable}${wealthTable}${healthTable}${guiinTable}
 위 명식을 근거로, {호칭1}의 {장주제} 에 대한 결과지 콘텐츠를 작성하세요.
-${vars.장가이드 ? `\n[이 장에서 특히 신경 쓸 것]\n{장가이드}\n` : ""}${yongsinBlock}${concernBlock}
+${vars.장가이드 ? `\n[이 장에서 특히 신경 쓸 것]\n{장가이드}\n` : ""}${yongsinBlock}${gyeokgukBlock}${concernBlock}
 아래 JSON 스키마를 정확히 채워 **유효한 JSON 만** 출력하세요 (주석/코드펜스/설명 금지, 주석(//)은 빼고 값만 채우기):
 ${daeunReminder}${tenseReminder}${investReminder}
 {스키마}`;
