@@ -17,17 +17,15 @@ const RIEUL = 8; // ㄹ 받침 인덱스
 export function fixJosa(text: string): string {
   if (!text) return text;
 
-  // 을/를
-  text = text.replace(/([가-힣])(을|를)/g, (_, p) => p + (hasBatchim(p) ? "을" : "를"));
+  // ※ '을/를', '과/와'는 "효과·결과·성과·사과·가을·마을" 같은 받침 없는 글자로 끝나는
+  // 고정 한자어·명사와 글자를 공유해서, 받침 기준 일괄 교정 시 이런 단어들을 "효와·결와·성와·
+  // 사와·초가를·마를"처럼 깨뜨리는 오탐이 더 잦아 제거함 (은/는, 이/가와 동일한 이유).
 
   // 으로/로 — ㄹ받침·받침없음 → 로, 나머지 받침 → 으로
   text = text.replace(/([가-힣])(으로|로)/g, (_, p) => {
     const b = getBatchimIndex(p);
     return p + (b === 0 || b === RIEUL ? "로" : "으로");
   });
-
-  // 과/와
-  text = text.replace(/([가-힣])(과|와)/g, (_, p) => p + (hasBatchim(p) ? "과" : "와"));
 
   // 이라/라 — 공백·구두점 앞에만
   text = text.replace(/([가-힣])(이라|라)(?=[\s,\.!\?"'·\n\r]|$)/g, (_, p) => p + (hasBatchim(p) ? "이라" : "라"));
