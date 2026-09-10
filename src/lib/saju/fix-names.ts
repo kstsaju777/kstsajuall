@@ -46,6 +46,24 @@ export function fixNamesInText(
     }
   }
 
+  // 2.5. "당신"/"그대" → 이름+호칭 강제 치환 (전역 프롬프트 규칙 미준수 시 안전장치 —
+  //      LLM이 지시를 놓치고 이 대명사를 쓰더라도 결과물엔 절대 남지 않도록 확정 교정)
+  {
+    const myFullEarly = `${myLabel}${myHonorific}`;
+    const bMy = hasBatchim(myFullEarly[myFullEarly.length - 1]);
+    for (const word of ["당신", "그대"]) {
+      r = r
+        .replace(new RegExp(`${word}(은|는)`, "g"), `${myFullEarly}${bMy ? "은" : "는"}`)
+        .replace(new RegExp(`${word}(이|가)`, "g"), `${myFullEarly}${bMy ? "이" : "가"}`)
+        .replace(new RegExp(`${word}(을|를)`, "g"), `${myFullEarly}${bMy ? "을" : "를"}`)
+        .replace(new RegExp(`${word}(과|와)`, "g"), `${myFullEarly}${bMy ? "과" : "와"}`)
+        .replace(new RegExp(`${word}(으로|로)`, "g"), `${myFullEarly}${bMy ? "으로" : "로"}`)
+        .replace(new RegExp(`${word}에게`, "g"), `${myFullEarly}에게`)
+        .replace(new RegExp(`${word}의`, "g"), `${myFullEarly}의`)
+        .replace(new RegExp(word, "g"), myFullEarly); // 남은 단독 사용(조사 없음)
+    }
+  }
+
   // 3. "본인" → 이름+님
   r = r.replace(/본인/g, `${myLabel}님`);
 
