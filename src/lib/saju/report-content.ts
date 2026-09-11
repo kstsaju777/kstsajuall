@@ -1067,7 +1067,19 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
       const BRANCH_EL_C: Record<string,string> = { 子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수" };
       const GAN_KR_C: Record<string,string> = { 甲:"갑",乙:"을",丙:"병",丁:"정",戊:"무",己:"기",庚:"경",辛:"신",壬:"임",癸:"계" };
       const JI_KR_C: Record<string,string> = { 子:"자",丑:"축",寅:"인",卯:"묘",辰:"진",巳:"사",午:"오",未:"미",申:"신",酉:"유",戌:"술",亥:"해" };
-      const JI_띠: Record<string,string> = { 子:"자(쥐)띠",丑:"축(소)띠",寅:"인(호랑이)띠",卯:"묘(토끼)띠",辰:"진(용)띠",巳:"사(뱀)띠",午:"오(말)띠",未:"미(양)띠",申:"신(원숭이)띠",酉:"유(닭)띠",戌:"술(개)띠",亥:"해(돼지)띠" };
+      const JI_띠: Record<string,string> = { 子:"쥐띠",丑:"소띠",寅:"호랑이띠",卯:"토끼띠",辰:"용띠",巳:"뱀띠",午:"말띠",未:"양띠",申:"원숭이띠",酉:"닭띠",戌:"개띠",亥:"돼지띠" };
+      const JI_ORDER_C = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+      // 2020년=庚子(쥐)년 기준으로 특정 지지에 해당하는 연도들을 신청자 나이대(±15세) 범위에서 계산
+      function ttiYears(j: string): string {
+        const idx = JI_ORDER_C.indexOf(j);
+        if (idx < 0) return "";
+        const base = input.birthYear ?? new Date().getFullYear() - 30;
+        const years: number[] = [];
+        for (let y = base - 15; y <= base + 15; y++) {
+          if (((((y - 2020) % 12) + 12) % 12) === idx) years.push(y);
+        }
+        return years.length > 0 ? `(${years.join("·")}년생)` : "";
+      }
       const CHEONGAN_HAP_PARTNER: Record<string,string> = { 甲:"己",己:"甲",乙:"庚",庚:"乙",丙:"辛",辛:"丙",丁:"壬",壬:"丁",戊:"癸",癸:"戊" };
       const YUKAP_PARTNER: Record<string,string> = { 子:"丑",丑:"子",寅:"亥",亥:"寅",卯:"戌",戌:"卯",辰:"酉",酉:"辰",巳:"申",申:"巳",午:"未",未:"午" };
       const CHUNG_PARTNER: Record<string,string> = { 子:"午",午:"子",丑:"未",未:"丑",寅:"申",申:"寅",卯:"酉",酉:"卯",辰:"戌",戌:"辰",巳:"亥",亥:"巳" };
@@ -1099,7 +1111,7 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
         CHUNG_PARTNER[myNyeonJi6],
         WONJIN_PARTNER[myNyeonJi6],
       ].filter(Boolean));
-      const avoidTtiStr = [...avoidNyeonJi].map(j => JI_띠[j] ?? j).join(", ") || "없음";
+      const avoidTtiStr = [...avoidNyeonJi].map(j => `${JI_띠[j] ?? j}${ttiYears(j)}`).join(", ") || "없음";
 
       // 기준 사주 생년 — 반드시 실제 입력 생년을 사용 (서버 확정값).
       // ⚠️ 예전엔 년주 간지만으로 60년 주기 중 "가장 최근 해"를 역산했는데, 간지는 60년마다
