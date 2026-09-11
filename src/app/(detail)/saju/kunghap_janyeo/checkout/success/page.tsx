@@ -58,9 +58,9 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
       </div>
       <div className="w-full max-w-[280px] mt-5 px-4 py-3 rounded-xl text-center"
         style={{ background: "rgba(0,180,216,0.15)", border: "1px solid rgba(0,180,216,0.4)" }}>
-        <p className="text-[15px] font-semibold mb-1" style={{ color: "#33ccee" }}>⚠️ 주의</p>
+        <p className="text-[15px] font-semibold mb-1" style={{ color: "#33ccee" }}>⚠️ 절대 새로고침 금지</p>
         <p className="text-[13px] leading-relaxed" style={{ color: "#33ccee" }}>
-          풀이 중 새로고침 하시면<br />처음부터 다시 시작됩니다
+          결과지 생성에 최대 5분 정도 걸릴 수 있어요.<br />오래 걸려도 정상이니 그대로 기다려 주세요.<br />새로고침하면 처음부터 다시 생성되어 시간이 더 걸립니다.
         </p>
       </div>
       <p className="text-[13px] text-center leading-relaxed mt-4" style={{ color: "#00b4d899" }}>
