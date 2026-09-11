@@ -916,7 +916,9 @@ nonyeongi(말년기) 풀이: 반드시 ${tenseOf.nonyeongi}으로만 작성\n`;
     const zeroEls = sorted.filter(([, n]) => n === 0).map(([el]) => el);
     const SIP_ORDER = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
     const sipCounts = SIP_ORDER.map(s => `${s}: ${sip[s] ?? 0}개`).join(" / ");
-    ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징(예: 화=표현·창의, 목=성장 등)을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n\n[십성 분포 — 서버 확정값, 8개 천간·지지 전체 기준 정확한 개수. 모든 장 공통]\n${sipCounts}\n⚠️ "정관이 2개 자리한" 등 개수를 언급할 때는 반드시 위 숫자를 그대로 쓰고, 명식표를 보고 직접 세지 마오. 0개인 십성은 없는 것으로 서술하오.\n`;
+    const sipTotalCount = Object.values(sip).reduce((a, b) => a + b, 0);
+    const hasSiju = !!(input.pillars.find(p => p.pos === "시주")?.sipTop && input.pillars.find(p => p.pos === "시주")?.sipTop !== "—");
+    ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징(예: 화=표현·창의, 목=성장 등)을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n\n[십성 분포 — 서버 확정값, 정확한 개수. 모든 장 공통]\n${sipCounts}\n총 ${sipTotalCount}개 (일간 자리는 십성이 없어 항상 제외, ${hasSiju ? "시주 포함 총 7자리 중 일치" : "출생시간 미상으로 시주 2자리가 없어 5자리 중 일치"})\n⚠️ "정관이 2개 자리한" 등 개수를 언급할 때는 반드시 위 숫자를 그대로 쓰고, 명식표를 보고 직접 세지 마오. 특정 십성 두 개(예: 편관·정관)를 "OO이 O개씩"처럼 묶어서 같은 개수인 것처럼 잘못 서술하지 말고, 각각의 정확한 개수를 따로 말하오. 0개인 십성은 없는 것으로 서술하오.\n`;
     if (chapter === 3) {
       const g2 = (keys: string[]) => keys.reduce((a, k) => a + (sip[k] ?? 0), 0);
       const bigeop    = g2(["비견","겁재"]);
