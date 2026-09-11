@@ -315,8 +315,9 @@ export function buildHealthChapterPrompt(
     const elSorted = Object.entries(elCnt).sort((a, b) => b[1] - a[1]);
     const strong = elSorted.filter(([, v]) => v >= 2).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
     const weak   = elSorted.filter(([, v]) => v <= 1).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
-    const sipLines = Object.entries(sipCnt).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}×${v}`).join(" / ");
-    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성: ${sipLines || "없음"}\n`;
+    const SIP_ORDER_HL = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
+    const sipLines = SIP_ORDER_HL.map(k => `${k}×${sipCnt[k] ?? 0}`).join(" / ");
+    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성(정확한 개수, 0인 것은 없는 것): ${sipLines}\n`;
   }
 
   // 확정된 용신/희신/기신/격국 주입 (1장 생성 후 myeongsik에 저장된 값)
@@ -450,8 +451,9 @@ export function buildHealthRemedyPrompt(
     const elSorted = Object.entries(elCnt).sort((a, b) => b[1] - a[1]);
     const strong = elSorted.filter(([, v]) => v >= 2).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
     const weak   = elSorted.filter(([, v]) => v <= 1).map(([k, v]) => `${k}(${v}개, ${Math.round(v/elTotal*100)}%)`).join("·") || "없음";
-    const sipLines = Object.entries(sipCnt).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}×${v}`).join(" / ");
-    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성: ${sipLines || "없음"}\n`;
+    const SIP_ORDER_HL = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
+    const sipLines = SIP_ORDER_HL.map(k => `${k}×${sipCnt[k] ?? 0}`).join(" / ");
+    ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성(정확한 개수, 0인 것은 없는 것): ${sipLines}\n`;
   }
 
   let yongsinNote = "";

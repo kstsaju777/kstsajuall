@@ -559,14 +559,18 @@ export function buildJaemulChapterPrompt(
   let ohaengTable = "";
   if (input.pillars && input.pillars.length >= 4) {
     const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+    const sip: Record<string, number> = {};
     for (const p of input.pillars) {
       if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
       if (p.jiEl  && cnt[p.jiEl]  !== undefined) cnt[p.jiEl]++;
+      for (const s of [p.sipTop, p.sipBot]) if (s && s !== "일간(나)" && s !== "—") sip[s] = (sip[s] ?? 0) + 1;
     }
     const total = Object.values(cnt).reduce((a, b) => a + b, 0) || 1;
     const sorted = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
     const zeroEls = sorted.filter(([, n]) => n === 0).map(([el]) => el);
-    ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n`;
+    const SIP_ORDER = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
+    const sipCounts = SIP_ORDER.map(s => `${s}: ${sip[s] ?? 0}개`).join(" / ");
+    ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n\n[십성 분포 — 서버 확정값, 정확한 개수. 모든 장 공통]\n${sipCounts}\n⚠️ 십성 개수를 언급할 때는 반드시 위 숫자를 그대로 쓰고, 명식표를 보고 직접 세지 마오. 0개인 십성은 없는 것으로 서술하오.\n`;
   }
 
   // ch3 전용: 재성 강도 서버 계산 → 프롬프트 주입

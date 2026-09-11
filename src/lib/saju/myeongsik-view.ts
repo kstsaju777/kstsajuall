@@ -387,18 +387,23 @@ export function buildMyeongsikView(a: any): MyeongsikView {
   return { ilgan, pillars, daeun, seun, weolun, currentYear, currentMonth, sinStrength, gyeokguk };
 }
 
-/** 오행 분포·신강신약 서버 확정값 안내문 생성 — LLM이 8글자를 직접 세지 않도록 함 */
+const SIP_ORDER_COMMON = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
+
+/** 오행 분포·십성 개수·신강신약 서버 확정값 안내문 생성 — LLM이 8글자를 직접 세거나 십성을 지어내지 않도록 함 */
 export function buildOhaengSinStrengthNote(
-  pillars: Array<{ ganEl?: string; jiEl?: string }> | undefined,
+  pillars: Array<{ ganEl?: string; jiEl?: string; sipTop?: string; sipBot?: string }> | undefined,
   sinStrength: { strength?: string; score?: number } | undefined,
 ): string {
   if (!pillars || pillars.length === 0) return "";
   const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  const sip: Record<string, number> = {};
   for (const p of pillars) {
     if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
     if (p.jiEl && cnt[p.jiEl] !== undefined) cnt[p.jiEl]++;
+    for (const s of [p.sipTop, p.sipBot]) if (s && s !== "일간(나)" && s !== "—") sip[s] = (sip[s] ?? 0) + 1;
   }
   const dist = Object.entries(cnt).map(([el, n]) => `${el} ${n}개`).join(" / ");
+  const sipDist = SIP_ORDER_COMMON.map(s => `${s} ${sip[s] ?? 0}개`).join(" / ");
   const strengthLine = sinStrength?.strength ? `신강/신약(서버 확정값, 재판단 금지): ${sinStrength.strength}` : "";
-  return `\n[오행 분포 — 서버 확정값, 직접 세지 말고 그대로 사용]\n${dist}\n${strengthLine}\n`;
+  return `\n[오행 분포 — 서버 확정값, 직접 세지 말고 그대로 사용]\n${dist}\n${strengthLine}\n[십성 분포 — 서버 확정값, 정확한 개수. 직접 세지 말고 그대로 사용, 0개인 십성은 없는 것으로 서술]\n${sipDist}\n`;
 }
