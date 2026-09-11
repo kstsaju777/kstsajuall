@@ -104,8 +104,8 @@ const JAEMUL_CH_GUIDE: Record<number, string> = {
   癸(계수): 자연물=샘물·이슬·빗물. 음수(陰水). 기질=깊은 직관·예리함·조용한 침투력. 재물패턴=타이밍과 직관으로 기회를 포착, 남이 모를 때 먼저 움직임. 약점=불안과 의심이 지나쳐 좋은 기회를 스스로 걷어냄.
 
 [geokguk 섹션 — 격국]
-이 사람의 격국(格局)을 월지 기준으로 판단하여 아래 형식으로 출력하오.
-- name: 격국 이름 (예: "편인격", "정관격", "식신격", "재격" 등).
+위에 [확정 격국명]이 주입되어 있으면 반드시 그 이름을 그대로 사용하오 (독자적으로 다시 판단·변경 금지). 주입되어 있지 않을 때만 월지 기준으로 직접 판단하시오.
+- name: [확정 격국명]이 있으면 그 값 그대로. 없을 때만 직접 판단 (예: "편인격", "정관격", "식신격", "재격" 등).
 - keyword: 이 격이 가진 핵심 특성 키워드 2~3개를 "·"로 구분 (예: "직관·창의·독립").
 - intro: 【필수】'격국으로는 [격국명]에 해당하여 ~' 형식으로 시작하여, 이 격국이 재물과 연결되는 핵심 능력·특성 2가지를 자연스럽게 서술하오. (3~4문장, 150자 이상)
 - callout: 이 격국에 어울리는 재물 획득 방식·분야(직업·기술·사업 등)를 구체적으로 나열하는 한 문장.
@@ -470,6 +470,7 @@ export function buildJaemulChapterPrompt(
     daeun?: { label: string; gz: string; active?: boolean }[];
     ilganChar?: string;
     concern?: string;
+    gyeokgukName?: string;
   }
 ): { system: string; user: string } {
   const theme = JAEMUL_CH_THEME[chapter] ?? `[제${chapter}장]`;
@@ -522,7 +523,8 @@ export function buildJaemulChapterPrompt(
   const pillarSipseong = input.pillars && input.pillars.length > 0
     ? `\n[기둥별 십성 — 반드시 이 목록만 참고할 것. 임의로 십성을 계산하거나 추정하지 말 것]\n` +
       input.pillars.map(p => `  ${p.pos}: 천간 ${p.gan}(${p.sipTop}) / 지지 ${p.ji}(${p.sipBot})`).join("\n") +
-      `\n  ※ 재성(정재·편재) 위치: ${jaeSungPositions || "없음"} — 이 외의 자리에 재성이 있다고 절대 쓰지 말 것`
+      `\n  ※ 재성(정재·편재) 위치: ${jaeSungPositions || "없음"} — 이 외의 자리에 재성이 있다고 절대 쓰지 말 것` +
+      `\n  ⚠️ 이 결과지 전체에서 특정 십성(예: 정관·편관·식신 등)이 "있다"고 언급할 때는 반드시 위 목록에서 실제로 확인한 뒤에만 쓰시오. 목록에 없는 십성을 있는 것처럼 지어내면 절대 안 되오.`
     : "";
 
   // ch1 전용: 득령·득지·득시·득세 판정표 생성 → sinStrength.intro 첫 문장 고정
@@ -732,6 +734,10 @@ export function buildJaemulChapterPrompt(
 ⚠️ 이름을 직접 조합하거나 추론하지 마오. 반드시 위 형태 중 하나를 그대로 쓰오.
 ⚠️ 계절 단어("봄" "여름" "가을" "겨울")는 고유 단어이오. 절대 변형 금지.`;
 
+  const gyeokgukBlock = input.gyeokgukName
+    ? `\n[확정 격국명 — 서버 확정값, 재판단 금지]\n격국: ${input.gyeokgukName}\ngeokguk.name은 반드시 이 값을 그대로 사용하고, 독자적으로 다시 판단하거나 다른 격국명으로 바꾸지 마오.\n`
+    : "";
+
   const user = `아래는 ${honor}의 사주 명식입니다.
 ${pillarSipseong}
 ${deungTable}
@@ -739,6 +745,7 @@ ${ohaengTable}
 ${siksangJaeFlow}
 ${jaemulScoreBlock}
 ${wealthScoreBlock}
+${gyeokgukBlock}
 ${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 

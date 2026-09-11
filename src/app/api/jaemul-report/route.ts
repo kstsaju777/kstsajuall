@@ -48,7 +48,7 @@ const createSchema = z.object({
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[]; daeun?: { label: string; gz: string; active?: boolean }[]; ilganChar?: string; concern?: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[]; daeun?: { label: string; gz: string; active?: boolean }[]; ilganChar?: string; concern?: string; gyeokgukName?: string }) {
   const { system, user } = buildJaemulChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   // 7장: letter만 있는 최선 결과를 보관 (concernAdvice 재시도 실패 시 fallback으로 반환)
@@ -411,6 +411,7 @@ async function generateChapter(body: unknown) {
       daeun: stored?.view?.daeun ?? [],
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
       concern: effectiveConcern || undefined,
+      gyeokgukName: (stored?.view?.gyeokguk as { name?: string } | undefined)?.name || undefined,
     });
     const myLabel = stripSurname((stored?.name ?? ""));
     const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;
