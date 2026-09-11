@@ -201,7 +201,18 @@ async function generateConcernAdvice(id: string) {
     const ptGanSip=sipseongOfStem(partnerIlgan,seunGan); const ptJiSip=sipseongOfBranch(partnerIlgan,seunJi);
     seunLine+=`\n${name1}님: 천간→${myGanSip} / 지지→${myJiSip}\n${partnerName1}(자녀): 천간→${ptGanSip} / 지지→${ptJiSip}`;
   }
-  const daeunSeunBlock = [daeunNote, partnerDaeunNote, seunLine].filter(Boolean).join("\n\n");
+  // 용신·희신·기신 — 사주 API 확정값(view.gyeokguk) 사용. 리포트 전체 통일을 위해 반드시 이 값만 참조.
+  const apiGyeokguk = stored?.view?.gyeokguk as { yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined;
+  const partnerApiGyeokguk = stored?.partnerView?.gyeokguk as { yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined;
+  let yongsinNote = "";
+  if (apiGyeokguk?.yongsinEl && apiGyeokguk?.heusinEl && apiGyeokguk?.gisinEl) {
+    yongsinNote += `[${name1}님 확정 용신·희신·기신 — 반드시 이 값만 사용, 재판단 금지]\n용신: ${apiGyeokguk.yongsinEl} / 희신: ${apiGyeokguk.heusinEl} / 기신: ${apiGyeokguk.gisinEl}`;
+  }
+  if (partnerApiGyeokguk?.yongsinEl && partnerApiGyeokguk?.heusinEl && partnerApiGyeokguk?.gisinEl) {
+    yongsinNote += `${yongsinNote ? "\n" : ""}[${partnerName1}(자녀) 확정 용신·희신·기신 — 반드시 이 값만 사용, 재판단 금지]\n용신: ${partnerApiGyeokguk.yongsinEl} / 희신: ${partnerApiGyeokguk.heusinEl} / 기신: ${partnerApiGyeokguk.gisinEl}`;
+  }
+
+  const daeunSeunBlock = [daeunNote, partnerDaeunNote, seunLine, yongsinNote].filter(Boolean).join("\n\n");
 
   let prevChapterContext = "";
   try {

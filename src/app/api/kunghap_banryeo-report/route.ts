@@ -175,7 +175,13 @@ async function generateConcernAdvice(id: string) {
     const myGanSip=sipseongOfStem(ilgan,seunGan); const myJiSip=sipseongOfBranch(ilgan,seunJi);
     seunLine+=`\n${name1}님: 천간→${myGanSip} / 지지→${myJiSip}`;
   }
-  const daeunSeunBlock = [daeunNote, seunLine].filter(Boolean).join("\n\n");
+  // 용신·희신·기신 — 사주 API 확정값(view.gyeokguk) 사용. 리포트 전체 통일을 위해 반드시 이 값만 참조.
+  const apiGyeokguk = stored?.view?.gyeokguk as { yongsinEl?: string; heusinEl?: string; gisinEl?: string } | undefined;
+  const yongsinNote = (apiGyeokguk?.yongsinEl && apiGyeokguk?.heusinEl && apiGyeokguk?.gisinEl)
+    ? `[확정 용신·희신·기신 — 반드시 이 값만 사용, 다른 오행으로 재판단 금지]\n용신: ${apiGyeokguk.yongsinEl} / 희신: ${apiGyeokguk.heusinEl} / 기신: ${apiGyeokguk.gisinEl}`
+    : "";
+
+  const daeunSeunBlock = [daeunNote, seunLine, yongsinNote].filter(Boolean).join("\n\n");
 
   let prevChapterContext = "";
   try {
