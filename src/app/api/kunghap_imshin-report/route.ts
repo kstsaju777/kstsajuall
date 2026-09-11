@@ -15,7 +15,7 @@ import {
   formatSajuToManseryeok,
   type BirthInfo,
 } from "@/lib/saju/saju-api";
-import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
+import { buildMyeongsikView, buildOhaengSinStrengthNote } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
 import { buildImshinKunghapChapterPrompt, isImshinKunghapChapterReady, IMSHIN_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_imshin-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
@@ -65,6 +65,8 @@ async function genChapterContent(chapter: number, input: {
   partnerYongsinEl?: string;
   partnerHeusinEl?: string;
   partnerGisinEl?: string;
+  myOhaengNote?: string;
+  partnerOhaengNote?: string;
 }) {
   const myLabel = input.name.length  > 1 ? input.name.slice(1)        : input.name;
   const ptLabel = stripSurname(input.partnerName);
@@ -446,6 +448,14 @@ async function generateChapter(body: unknown) {
   const partnerYongsinEl: string | undefined = partnerApiGyeokguk?.yongsinEl || (stored?.partnerYongsinEl as string | undefined) || undefined;
   const partnerHeusinEl: string | undefined = partnerApiGyeokguk?.heusinEl || (stored?.partnerHeusinEl as string | undefined) || undefined;
   const partnerGisinEl: string | undefined = partnerApiGyeokguk?.gisinEl || (stored?.partnerGisinEl as string | undefined) || undefined;
+  const myOhaengNote = buildOhaengSinStrengthNote(
+    stored?.view?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+    stored?.view?.sinStrength as { strength?: string; score?: number } | undefined
+  );
+  const partnerOhaengNote = buildOhaengSinStrengthNote(
+    stored?.partnerView?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+    stored?.partnerView?.sinStrength as { strength?: string; score?: number } | undefined
+  );
 
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
@@ -468,6 +478,8 @@ async function generateChapter(body: unknown) {
       partnerYongsinEl,
       partnerHeusinEl,
       partnerGisinEl,
+      myOhaengNote,
+      partnerOhaengNote,
     });
 
     // 용신 오행 추출 헬퍼

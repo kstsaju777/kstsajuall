@@ -15,7 +15,7 @@ import {
   formatSajuToManseryeok,
   type BirthInfo,
 } from "@/lib/saju/saju-api";
-import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
+import { buildMyeongsikView, buildOhaengSinStrengthNote } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
 import { buildBusinessKunghapChapterPrompt, isBusinessKunghapChapterReady, BUSINESS_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_business-report-content";
 import { calcCrossRelations, REL_SCORE } from "@/lib/saju/kunghap-cross-relations";
@@ -68,6 +68,8 @@ async function genChapterContent(chapter: number, input: {
   partnerYongsinEl?: string;
   partnerHeusinEl?: string;
   partnerGisinEl?: string;
+  myOhaengNote?: string;
+  partnerOhaengNote?: string;
 }) {
   const { system, user } = buildBusinessKunghapChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
@@ -488,6 +490,16 @@ async function generateChapter(body: unknown) {
     const partnerHeusinEl: string | undefined = partnerApiGyeokguk?.heusinEl || (stored?.partnerHeusinEl as string | undefined) || undefined;
     const partnerGisinEl: string | undefined = partnerApiGyeokguk?.gisinEl || (stored?.partnerGisinEl as string | undefined) || undefined;
 
+    // 오행 분포·신강신약 — 서버 확정값(사주 API 결과) 계산. LLM이 8글자를 직접 세지 않도록 함.
+    const myOhaengNote = buildOhaengSinStrengthNote(
+      stored?.view?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+      stored?.view?.sinStrength as { strength?: string; score?: number } | undefined
+    );
+    const partnerOhaengNote = buildOhaengSinStrengthNote(
+      stored?.partnerView?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+      stored?.partnerView?.sinStrength as { strength?: string; score?: number } | undefined
+    );
+
     const { obj: rawObj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
       gender: stored?.gender === "female" ? "female" : "male",
@@ -506,6 +518,8 @@ async function generateChapter(body: unknown) {
       partnerYongsinEl,
       partnerHeusinEl,
       partnerGisinEl,
+      myOhaengNote,
+      partnerOhaengNote,
     });
     const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;
 

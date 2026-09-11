@@ -15,7 +15,7 @@ import {
   formatSajuToManseryeok,
   type BirthInfo,
 } from "@/lib/saju/saju-api";
-import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
+import { buildMyeongsikView, buildOhaengSinStrengthNote } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
 import { buildBanryeoKunghapChapterPrompt, isBanryeoKunghapChapterReady, BANRYEO_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_banryeo-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
@@ -62,6 +62,8 @@ async function genChapterContent(chapter: number, input: {
   yongsinEl?: string;
   heusinEl?: string;
   gisinEl?: string;
+  myOhaengNote?: string;
+  partnerOhaengNote?: string;
 }) {
   const fullName   = input.name        ?? "";
   const ptFullName = input.partnerName ?? "";
@@ -423,6 +425,14 @@ async function generateChapter(body: unknown) {
   const yongsinEl: string | undefined = apiGyeokguk?.yongsinEl || (stored?.yongsinEl as string | undefined) || undefined;
   const heusinEl: string | undefined = apiGyeokguk?.heusinEl || (stored?.heusinEl as string | undefined) || undefined;
   const gisinEl: string | undefined = apiGyeokguk?.gisinEl || (stored?.gisinEl as string | undefined) || undefined;
+  const myOhaengNote = buildOhaengSinStrengthNote(
+    stored?.view?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+    stored?.view?.sinStrength as { strength?: string; score?: number } | undefined
+  );
+  const partnerOhaengNote = buildOhaengSinStrengthNote(
+    stored?.partnerView?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+    stored?.partnerView?.sinStrength as { strength?: string; score?: number } | undefined
+  );
 
   try {
     const birthDateStr: string = stored?.birth?.date ?? "";
@@ -442,6 +452,8 @@ async function generateChapter(body: unknown) {
       yongsinEl,
       heusinEl,
       gisinEl,
+      myOhaengNote,
+      partnerOhaengNote,
     });
 
     // ch1: myYongsin 용신/희신/기신 십성→오행 변환 후 myeongsik에 저장

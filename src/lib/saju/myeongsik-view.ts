@@ -386,3 +386,19 @@ export function buildMyeongsikView(a: any): MyeongsikView {
 
   return { ilgan, pillars, daeun, seun, weolun, currentYear, currentMonth, sinStrength, gyeokguk };
 }
+
+/** 오행 분포·신강신약 서버 확정값 안내문 생성 — LLM이 8글자를 직접 세지 않도록 함 */
+export function buildOhaengSinStrengthNote(
+  pillars: Array<{ ganEl?: string; jiEl?: string }> | undefined,
+  sinStrength: { strength?: string; score?: number } | undefined,
+): string {
+  if (!pillars || pillars.length === 0) return "";
+  const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  for (const p of pillars) {
+    if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
+    if (p.jiEl && cnt[p.jiEl] !== undefined) cnt[p.jiEl]++;
+  }
+  const dist = Object.entries(cnt).map(([el, n]) => `${el} ${n}개`).join(" / ");
+  const strengthLine = sinStrength?.strength ? `신강/신약(서버 확정값, 재판단 금지): ${sinStrength.strength}` : "";
+  return `\n[오행 분포 — 서버 확정값, 직접 세지 말고 그대로 사용]\n${dist}\n${strengthLine}\n`;
+}

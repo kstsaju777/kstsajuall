@@ -15,7 +15,7 @@ import {
   formatSajuToManseryeok,
   type BirthInfo,
 } from "@/lib/saju/saju-api";
-import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
+import { buildMyeongsikView, buildOhaengSinStrengthNote } from "@/lib/saju/myeongsik-view";
 import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
 import { buildJaehweKunghapChapterPrompt, isJaehweKunghapChapterReady, JAEHWE_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_jaehwe-report-content";
 import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
@@ -130,6 +130,8 @@ async function genChapterContent(chapter: number, input: {
   timingScores?: Array<{ year: number; month: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }>;
   ilgan?: string;
   partnerIlgan?: string;
+  myOhaengNote?: string;
+  partnerOhaengNote?: string;
 }) {
   const myLabel    = input.name.length        > 1 ? input.name.slice(1)        : input.name;
   const ptLabel    = stripSurname(input.partnerName);
@@ -558,6 +560,14 @@ async function generateChapter(body: unknown) {
 
     const ilgan: string | undefined = (stored?.view?.ilgan as string | undefined)?.split(" ")[0];
     const partnerIlgan: string | undefined = (stored?.partnerView?.ilgan as string | undefined)?.split(" ")[0];
+    const myOhaengNote = buildOhaengSinStrengthNote(
+      stored?.view?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+      stored?.view?.sinStrength as { strength?: string; score?: number } | undefined
+    );
+    const partnerOhaengNote = buildOhaengSinStrengthNote(
+      stored?.partnerView?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined,
+      stored?.partnerView?.sinStrength as { strength?: string; score?: number } | undefined
+    );
 
     const { obj } = await genChapterContent(chapter, {
       name: stored?.name ?? "",
@@ -568,6 +578,8 @@ async function generateChapter(body: unknown) {
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
       partnerManseryeokText: stored?.partnerManseryeokText ?? "",
       partnerIlgan,
+      myOhaengNote,
+      partnerOhaengNote,
       birthYear: birthYear || undefined,
       breakupReason: stored?.breakupReason || undefined,
       whoEnded: stored?.whoEnded || undefined,

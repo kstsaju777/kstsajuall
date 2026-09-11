@@ -71,6 +71,8 @@ export function buildBusinessKunghapChapterPrompt(
     partnerYongsinEl?: string;
     partnerHeusinEl?: string;
     partnerGisinEl?: string;
+    myOhaengNote?: string;
+    partnerOhaengNote?: string;
   },
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
@@ -91,7 +93,7 @@ export function buildBusinessKunghapChapterPrompt(
 ⚠️ 한국어 합성어의 글자를 절대 변형하지 마오. 조사 규칙(와/과, 이/가)을 단어 내부에 적용하면 절대 안 되오. 예: "효과적"을 "효와적"으로, "결과"를 "결와"로 쓰지 마오. 단어 자체의 철자는 그대로 유지하오.`;
   const myIlganNote = input.ilgan ? `\n⚑ 일간(일주 천간): ${input.ilgan} — 오행: ${stemElement(input.ilgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
   const ptIlganNote = input.partnerIlgan ? `\n⚑ 일간(일주 천간): ${input.partnerIlgan} — 오행: ${stemElement(input.partnerIlgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
-  const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}\n${input.manseryeokText}\n\n파트너 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）${ptIlganNote}\n${input.partnerManseryeokText}`;
+  const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}${input.myOhaengNote ?? ""}\n${input.manseryeokText}\n\n파트너 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）${ptIlganNote}${input.partnerOhaengNote ?? ""}\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
     1: `{"myWonguk":{"intro":"","callout":"","singang":"","dominantEl":"","paragraphs":[]},"myNature":{"keywords":[],"strengthDesc":"","shadowDesc":""},"myYongsin":{"yongsinEl":"","heusinEl":"","gisinEl":"","yongsinReason":"","heusinReason":"","gisinReason":"","desc":""},"myBusinessStyle":{"intro":"","patternType":"","patternIcon":"💼","paragraphs":[]}}`,
@@ -108,13 +110,10 @@ export function buildBusinessKunghapChapterPrompt(
   const questions: Record<number, string> = {
     1: `아래는 __MY__님의 사주 명식 데이터를 바탕으로 네 개 섹션을 작성하는 지시사항이오.
 
-⚠️ 반드시 위 【본인】 만세력 텍스트에서 다음 항목을 직접 읽어 풀이에 반영하시오:
+⚠️ 반드시 위 【본인】 정보에 주입된 [오행 분포 — 서버 확정값] 데이터를 그대로 사용하시오. 직접 세거나 재계산하지 마시오:
   - 일간(日干): 사주팔자는 년주·월주·일주·시주 순서로 나열되오. 반드시 세 번째 기둥(일주)의 천간이 일간이오. 년주·월주·시주의 천간과 혼동하지 마시오.
-  - 오행 분포: 8글자(천간 4자 + 지지 4자) 전체에서 각 글자의 오행을 아래 기준으로 변환한 뒤, 목·화·토·금·수 각각의 정확한 개수를 세시오.
-    천간: 甲乙=목, 丙丁=화, 戊己=토, 庚辛=금, 壬癸=수
-    지지: 寅卯=목, 巳午=화, 辰戌丑未=토, 申酉=금, 亥子=수
-    반드시 8글자를 하나씩 확인하여 집계하시오. 틀린 개수를 풀이에 쓰는 것은 절대 금지.
-  - 신강·신약: 일간을 생조하는 글자(비겁+인성)가 4개 이상이면 신강, 그 미만이면 신약으로 판단하시오.
+  - 오행 분포: 위 [오행 분포 — 서버 확정값]에 명시된 목·화·토·금·수 각각의 개수를 그대로 사용하시오. 절대 직접 세지 말고, 다른 개수를 지어내지 마시오.
+  - 신강·신약: 위 [오행 분포 — 서버 확정값]의 "신강/신약(서버 확정값)" 줄을 그대로 사용하시오. 임의로 재판단하지 마시오.
   - 이 구체적 데이터를 근거로 intro·callout·singang·dominantEl·paragraphs를 작성하시오. 데이터와 다른 해석 금지.
 
 ━━━ [myWonguk] __MY__님의 원국 ━━━
@@ -132,7 +131,7 @@ __MY__님의 타고난 사주 기운을 깊이 풀이하시오.
 
 ━━━ [myYongsin] __MY__님의 용신/희신/기신 ━━━
 ⚠ 이 섹션은 __MY__님 본인의 사주에 대한 내용이오. 상대방 얘기를 섞지 마시오.
-- yongsinEl: 격국·억부 원리에 따라 이 사주의 용신 오행 1개 (목/화/토/금/수 중 택1).
+- yongsinEl: 위에 [확정 오행 — 용신·희신·기신] 값이 있으면 그대로 사용(재판단 금지), 없을 때만 격국·억부 원리로 직접 판단 (목/화/토/금/수 중 택1).
 - heusinEl: 용신을 도와 운의 흐름을 부드럽게 하는 희신 오행 1개.
 - gisinEl: 이 사주에서 꺼리는 기신 오행 1개.
 - yongsinReason: 용신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
@@ -150,13 +149,10 @@ __MY__님의 타고난 사주 기운을 깊이 풀이하시오.
   ③ 비즈니스에서 주의해야 할 점과 이 패턴을 인식했을 때 달라지는 것 (5~7문장, 220자+).`,
     2: `아래는 파트너 정보 섹션 데이터를 바탕으로 네 개 섹션을 작성하는 지시사항이오.
 
-⚠️ 반드시 위 【파트너】 만세력 텍스트에서 다음 항목을 직접 읽어 풀이에 반영하시오:
+⚠️ 반드시 위 【파트너】 정보에 주입된 [오행 분포 — 서버 확정값] 데이터를 그대로 사용하시오. 직접 세거나 재계산하지 마시오:
   - 일간(日干): 사주팔자는 년주·월주·일주·시주 순서로 나열되오. 반드시 세 번째 기둥(일주)의 천간이 일간이오. 파트너 정보 섹션의 "⚑ 일간(일주 천간):" 값과 대조하여 확인하시오.
-  - 오행 분포: 파트너의 8글자(천간 4자 + 지지 4자) 전체에서 각 글자의 오행을 아래 기준으로 변환한 뒤, 목·화·토·금·수 각각의 정확한 개수를 세시오.
-    천간: 甲乙=목, 丙丁=화, 戊己=토, 庚辛=금, 壬癸=수
-    지지: 寅卯=목, 巳午=화, 辰戌丑未=토, 申酉=금, 亥子=수
-    반드시 8글자를 하나씩 확인하여 집계하시오. 틀린 개수를 풀이에 쓰는 것은 절대 금지.
-  - 신강·신약: 일간을 생조하는 글자(비겁+인성)가 4개 이상이면 신강, 그 미만이면 신약으로 판단하시오.
+  - 오행 분포: 위 [오행 분포 — 서버 확정값]에 명시된 목·화·토·금·수 각각의 개수를 그대로 사용하시오. 절대 직접 세지 말고, 다른 개수를 지어내지 마시오.
+  - 신강·신약: 위 [오행 분포 — 서버 확정값]의 "신강/신약(서버 확정값)" 줄을 그대로 사용하시오. 임의로 재판단하지 마시오.
   - 이 구체적 데이터를 근거로 intro·callout·singang·dominantEl·paragraphs를 작성하시오. 데이터와 다른 해석 금지.
 
 [partnerWonguk 섹션 — 상대 원국 풀이]
@@ -173,7 +169,7 @@ __MY__님의 타고난 사주 기운을 깊이 풀이하시오.
 
 [partnerYongsin 섹션 — 상대방의 용신/희신/기신]
 ⚠ 이 섹션은 상대방 본인의 사주에 대한 내용이오. __MY__님 얘기를 섞지 마시오.
-- yongsinEl: 격국·억부 원리에 따라 이 사주의 용신 오행 1개 (목/화/토/금/수 중 택1).
+- yongsinEl: 위에 [확정 오행 — 용신·희신·기신] 값이 있으면 그대로 사용(재판단 금지), 없을 때만 격국·억부 원리로 직접 판단 (목/화/토/금/수 중 택1).
 - heusinEl: 용신을 도와 운의 흐름을 부드럽게 하는 희신 오행 1개.
 - gisinEl: 이 사주에서 꺼리는 기신 오행 1개.
 - yongsinReason: 용신 오행이 이 사주에서 어떤 역할을 하는지 한 줄 (15자 이내, 비즈니스 관점).
@@ -289,10 +285,10 @@ balance: 빛 비율(lightRatio 0-100)+풀이단락(2-3개, 각 5~7문장 200자+
   };
 
   let yongsinNote = "";
-  if (chapter !== 1 && input.yongsinEl && input.heusinEl && input.gisinEl) {
+  if (input.yongsinEl && input.heusinEl && input.gisinEl) {
     yongsinNote += `\n[확정 오행 — 나의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n나의 용신: ${input.yongsinEl} / 희신: ${input.heusinEl} / 기신: ${input.gisinEl}\n`;
   }
-  if (chapter > 2 && input.partnerYongsinEl && input.partnerHeusinEl && input.partnerGisinEl) {
+  if (input.partnerYongsinEl && input.partnerHeusinEl && input.partnerGisinEl) {
     yongsinNote += `[확정 오행 — 상대방의 용신·희신·기신은 반드시 아래 값을 그대로 사용하시오. 임의로 변경 금지]\n상대방 용신: ${input.partnerYongsinEl} / 희신: ${input.partnerHeusinEl} / 기신: ${input.partnerGisinEl}\n`;
   }
 

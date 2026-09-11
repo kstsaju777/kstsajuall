@@ -66,6 +66,8 @@ export function buildJaehweKunghapChapterPrompt(
     partnerGender: "male" | "female";
     partnerManseryeokText: string;
     partnerIlgan?: string;
+    myOhaengNote?: string;
+    partnerOhaengNote?: string;
     birthYear?: number;
     breakupReason?: string;
     whoEnded?: string;
@@ -103,7 +105,7 @@ export function buildJaehweKunghapChapterPrompt(
     : "";
   const myIlganNote = input.ilgan ? `\n⚑ 본인 일간(일주 천간): ${input.ilgan} — 오행: ${stemElement(input.ilgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
   const ptIlganNote = input.partnerIlgan ? `\n⚑ 상대방 일간(일주 천간): ${input.partnerIlgan} — 오행: ${stemElement(input.partnerIlgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
-  const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}\n${input.manseryeokText}\n\n상대방 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）${ptIlganNote}\n${input.partnerManseryeokText}${overallScoreBlock}`;
+  const intro = `본인 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}${input.myOhaengNote ?? ""}\n${input.manseryeokText}\n\n상대방 정보:\n이름: ${input.partnerName}（${partnerGenderLabel}）${ptIlganNote}${input.partnerOhaengNote ?? ""}\n${input.partnerManseryeokText}${overallScoreBlock}`;
 
   const schemas: Record<number, string> = {
     1: `{

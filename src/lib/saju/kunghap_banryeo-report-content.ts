@@ -68,6 +68,8 @@ export function buildBanryeoKunghapChapterPrompt(
     yongsinEl?: string;
     heusinEl?: string;
     gisinEl?: string;
+    myOhaengNote?: string;
+    partnerOhaengNote?: string;
   },
 ): { system: string; user: string } {
   const genderLabel = input.gender === "male" ? "남성" : "여성";
@@ -89,7 +91,7 @@ export function buildBanryeoKunghapChapterPrompt(
 ⚠️ 한국어 합성어의 글자를 절대 변형하지 마오. 조사 규칙(와/과, 이/가)을 단어 내부에 적용하면 절대 안 되오. 예: "효과적"을 "효와적"으로, "결과"를 "결와"로 쓰지 마오. 단어 자체의 철자는 그대로 유지하오.`;
   const myIlganNote = input.ilgan ? `\n⚑ 일간(일주 천간): ${input.ilgan} — 오행: ${stemElement(input.ilgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
   const ptIlganNote = input.partnerIlgan ? `\n⚑ 일간(일주 천간): ${input.partnerIlgan} — 오행: ${stemElement(input.partnerIlgan) || "?"} [서버 확정값, 다른 오행으로 착각 금지]` : "";
-  const intro = `보호자 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}\n${input.manseryeokText}\n\n반려동물 정보:\n이름: ${input.partnerName}（${petGenderLabel}）${ptIlganNote}\n${input.partnerManseryeokText}`;
+  const intro = `보호자 정보:\n이름: ${input.name}（${genderLabel}）${myIlganNote}${input.myOhaengNote ?? ""}\n${input.manseryeokText}\n\n반려동물 정보:\n이름: ${input.partnerName}（${petGenderLabel}）${ptIlganNote}${input.partnerOhaengNote ?? ""}\n${input.partnerManseryeokText}`;
 
   const schemas: Record<number, string> = {
     1: `{
@@ -256,7 +258,7 @@ export function buildBanryeoKunghapChapterPrompt(
 [myWonguk — 나의 원국 풀이]
 보호자의 사주팔자(일간·월령·연주·시주)를 종합 분석하여 기운의 구성을 설명하시오.
 - callout: 보호자의 사주 핵심을 단번에 꿰뚫는 한 문장 (예: "壬水 일간, 가을 금기(金氣)의 힘을 빌어 흐르는 사람이오.")
-- paragraphs[0]: 일간의 특성, 오행 분포, 신강·신약 여부 등 원국의 뼈대를 설명하는 단락 (6~8문장, 260자 이상)
+- paragraphs[0]: 일간의 특성, 오행 분포, 신강·신약 여부 등 원국의 뼈대를 설명하는 단락 — 위에 주입된 [오행 분포 — 서버 확정값]을 그대로 사용하고 직접 세지 말 것 (6~8문장, 260자 이상)
 - paragraphs[1]: 용신·희신의 흐름, 삶 전반에 흐르는 기운의 패턴을 서술하는 단락 (6~8문장, 260자 이상)
 - paragraphs[2]: 이 사주의 기운이 반려동물 돌봄과 어떻게 연결되는지 — 돌보는 방식·감정 표현·교감 패턴을 기운으로 풀어내는 단락 (6~8문장, 260자 이상)
 홍연 말투(~이오/~하오/~겠소) 유지.
@@ -293,7 +295,7 @@ export function buildBanryeoKunghapChapterPrompt(
 [petWonguk — 반려동물의 원국 풀이]
 ${input.partnerName}의 사주팔자(일간·월령·연주·시주)를 종합 분석하시오.
 - callout: 이 아이의 사주 핵심을 단번에 꿰뚫는 한 문장 (예: "木 기운이 넘치는, 생명력 가득한 아이이오.")
-- paragraphs[0]: 일간의 특성, 오행 분포, 신강·신약 여부 등 원국의 뼈대를 설명하는 단락 (6~8문장, 260자 이상)
+- paragraphs[0]: 일간의 특성, 오행 분포, 신강·신약 여부 등 원국의 뼈대를 설명하는 단락 — 위에 주입된 [오행 분포 — 서버 확정값]을 그대로 사용하고 직접 세지 말 것 (6~8문장, 260자 이상)
 - paragraphs[1]: 이 기운이 반려동물의 본능·행동 방식·감수성에 어떻게 나타나는지 서술하는 단락 (6~8문장, 260자 이상)
 - paragraphs[2]: 보호자와의 교감·돌봄 관계에서 이 아이의 기운이 어떻게 드러나는지 — 애정 표현 방식·반응 패턴·함께할 때의 분위기를 기운으로 풀어내는 단락 (6~8문장, 260자 이상)
 홍연 말투(~이오/~하오/~겠소) 유지.
