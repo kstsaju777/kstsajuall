@@ -6,32 +6,14 @@ export function hasBatchim(char: string): boolean {
   return (code - 0xAC00) % 28 !== 0;
 }
 
-function getBatchimIndex(char: string): number {
-  const code = char.charCodeAt(0);
-  if (code < 0xAC00 || code > 0xD7A3) return -1;
-  return (code - 0xAC00) % 28;
-}
-
-const RIEUL = 8; // ㄹ 받침 인덱스
-
 export function fixJosa(text: string): string {
   if (!text) return text;
 
-  // ※ '을/를', '과/와'는 "효과·결과·성과·사과·가을·마을" 같은 받침 없는 글자로 끝나는
-  // 고정 한자어·명사와 글자를 공유해서, 받침 기준 일괄 교정 시 이런 단어들을 "효와·결와·성와·
-  // 사와·초가를·마를"처럼 깨뜨리는 오탐이 더 잦아 제거함 (은/는, 이/가와 동일한 이유).
-
-  // 으로/로 — ㄹ받침·받침없음 → 로, 나머지 받침 → 으로
-  text = text.replace(/([가-힣])(으로|로)/g, (_, p) => {
-    const b = getBatchimIndex(p);
-    return p + (b === 0 || b === RIEUL ? "로" : "으로");
-  });
-
-  // 이라/라 — 공백·구두점 앞에만
-  text = text.replace(/([가-힣])(이라|라)(?=[\s,\.!\?"'·\n\r]|$)/g, (_, p) => p + (hasBatchim(p) ? "이라" : "라"));
-
-  // 이며/며
-  text = text.replace(/([가-힣])(이며|며)/g, (_, p) => p + (hasBatchim(p) ? "이며" : "며"));
+  // ※ '을/를', '과/와', '으로/로', '이라/라', '이며/며'는 받침 기준 일괄 교정 시
+  // "효과·결과·성과·사과·가을·마을" 같은 고정 단어를 깨뜨리거나("효와", "초가를"),
+  // 어색한 말투 artifact("되겠소이오" 등)를 만드는 오탐이 더 잦아 전부 제거함
+  // (은/는, 이/가와 동일한 이유). LLM 자체 문법 능력에 맡기고, 실제 확인된 구체적
+  // 오류만 아래처럼 콕 집어 교정.
 
   // ※ '은/는', '이/가'는 명사 주격·보조사(받침 유무로 결정)와 동사·형용사 어미
   // (-는다/-는가/-ㄴ가/-는지 등, 받침과 무관하게 항상 같은 형태)가 똑같은 글자를 공유해서
