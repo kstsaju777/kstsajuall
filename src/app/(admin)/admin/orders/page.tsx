@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { formatKRW, formatDate } from "@/lib/utils";
 import { ConcernCell } from "@/components/admin/ConcernCell";
+import { CopyableText } from "@/components/admin/CopyableText";
 
 export const metadata = { title: "관리자 - 결제 내역" };
 
@@ -373,7 +374,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               return (
                 <tr key={o.id} style={{ borderBottom: "1px solid #f2f2f2" }}>
                   <td style={{ padding: "10px 14px", color: "#888", whiteSpace: "nowrap" }}>{formatDate(o.created_at)}</td>
-                  <td style={{ padding: "10px 14px", fontFamily: "ui-monospace, monospace", fontSize: 12, color: "#555" }}>{o.order_id}</td>
+                  <td style={{ padding: "10px 14px" }}><CopyableText text={o.order_id} /></td>
                   <td style={{ padding: "10px 14px", color: "#111", whiteSpace: "nowrap" }}>{product?.name ?? "-"}</td>
                   <td style={{ padding: "10px 14px", color: "#333", whiteSpace: "nowrap" }}>{applicantLabel}</td>
                   <td style={{ padding: "10px 14px", color: "#555", whiteSpace: "nowrap", fontSize: 12 }}>{formatBirth(input)}</td>
@@ -381,7 +382,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                     <ConcernCell text={firstConcern(input)} />
                   </td>
                   <td style={{ padding: "10px 14px", color: "#999", whiteSpace: "nowrap" }}>{o.user_id ? "회원" : o.guest_email}</td>
-                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "ui-monospace, monospace", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "'Malgun Gothic', sans-serif", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
                   <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
                     {reportHref ? (
                       <Link href={reportHref} target="_blank" style={{ fontSize: 12, fontWeight: 600, color: "#111", textDecoration: "underline" }}>
