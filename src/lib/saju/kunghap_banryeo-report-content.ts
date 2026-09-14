@@ -5,6 +5,7 @@ import { stripSurname } from "@/lib/utils/strip-surname";
 
 import { SYSTEM } from "./report-prompts";
 import { stemElement } from "./sipseong-calc";
+import { hasBatchim } from "@/lib/utils/fix-josa";
 import { parseContentJson } from "./report-content";
 export { parseContentJson };
 export { SYSTEM };
@@ -75,6 +76,10 @@ export function buildBanryeoKunghapChapterPrompt(
   const genderLabel = input.gender === "male" ? "남성" : "여성";
   const petGenderLabel = input.partnerGender === "male" ? "수컷" : "암컷";
   const myLabel = stripSurname(input.name);
+  const ptBatchim = hasBatchim(input.partnerName[input.partnerName.length - 1]);
+  const ptEunNeun = ptBatchim ? "은" : "는";
+  const ptIga = ptBatchim ? "이" : "가";
+  const ptGwaWa = ptBatchim ? "과" : "와";
   const honorificBlock = `\n\n[호칭 토큰 규칙 — 반드시 준수]
 풀이 본문에서 이름을 쓸 때 아래 토큰만 사용하오. 절대 실제 이름을 직접 쓰지 마오.
   의뢰인 → __MY__ 사용
@@ -451,7 +456,7 @@ ${input.partnerName}의 사주에서 고유한 성격 유형을 뽑아내시오.
 
 ⚠️ 반드시 지킬 것:
 - 이것은 보호자와 반려동물 사이의 이야기이오. "두 분", "두 사람", "함께 만들어갈 이야기" 같은 인간 대 인간 표현 절대 금지.
-- ${input.partnerName}은(는) 반려동물이오. 반드시 동물의 몸·감각·행동 언어로 서술하시오. 사람처럼 묘사 금지.
+- ${input.partnerName}${ptEunNeun} 반려동물이오. 반드시 동물의 몸·감각·행동 언어로 서술하시오. 사람처럼 묘사 금지.
 - 오행·십성 이론 용어를 직접 노출하지 마시오. 풀이는 하되 용어는 숨길 것.
 - 이것은 분석이 아닌 편지이오. 앞 장에서 이미 모든 분석은 끝났소. 재설명 금지.
 - 보호자를 ${input.name}님으로, 반려동물을 ${input.partnerName}(으)로 이름을 직접 불러주시오.
@@ -459,11 +464,11 @@ ${input.partnerName}의 사주에서 고유한 성격 유형을 뽑아내시오.
 작성 규칙:
 - letter.paragraphs: 5개 단락. 각 단락 최소 9~12문장(500자 이상). 분량을 절대 아끼지 마시오.
 - 각 단락 방향:
-  ① 홍연이 이 인연의 사주를 처음 마주했을 때의 감상. ${input.name}님이 어떤 사람인지, ${input.partnerName}이(가) 어떤 기운을 타고난 아이인지 따뜻한 시선으로 소개하시오.
-  ② 이 둘이 만났을 때 생기는 특별한 기운 — ${input.partnerName}이(가) ${input.name}님의 곁에 있을 때 달라지는 것들, 이 작은 생명이 보호자의 삶에 가져온 변화를 감성적으로 그려주시오.
+  ① 홍연이 이 인연의 사주를 처음 마주했을 때의 감상. ${input.name}님이 어떤 사람인지, ${input.partnerName}${ptIga} 어떤 기운을 타고난 아이인지 따뜻한 시선으로 소개하시오.
+  ② 이 둘이 만났을 때 생기는 특별한 기운 — ${input.partnerName}${ptIga} ${input.name}님의 곁에 있을 때 달라지는 것들, 이 작은 생명이 보호자의 삶에 가져온 변화를 감성적으로 그려주시오.
   ③ 보호자로서 맞닥뜨릴 수 있는 어려움에 대한 당부. 이 아이의 기질상 보호자가 더 세심하게 살펴야 할 것들. 겁주는 것이 아니라 더 잘 돌봐주길 바라는 마음으로.
-  ④ ${input.partnerName}과(와) 남은 시간을 어떻게 보내면 좋을지 — 이 아이의 기질에 맞게 사랑을 표현하는 구체적인 방법, 일상에서 이 인연을 더 빛나게 할 수 있는 한 가지.
-  ⑤ 홍연의 마지막 인사. ${input.name}님과 ${input.partnerName}이(가) 함께하는 날들이 오래도록 따뜻하기를 바라는 진심 어린 축원으로 마무리하시오.
+  ④ ${input.partnerName}${ptGwaWa} 남은 시간을 어떻게 보내면 좋을지 — 이 아이의 기질에 맞게 사랑을 표현하는 구체적인 방법, 일상에서 이 인연을 더 빛나게 할 수 있는 한 가지.
+  ⑤ 홍연의 마지막 인사. ${input.name}님과 ${input.partnerName}${ptIga} 함께하는 날들이 오래도록 따뜻하기를 바라는 진심 어린 축원으로 마무리하시오.
 
 - 바로 본론으로 시작하여 따뜻한 마무리로 끝내시오.
 - 홍연 말투(~이오/~하오/~겠소/~했소) 유지.`,
