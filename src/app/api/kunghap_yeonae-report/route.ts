@@ -771,13 +771,14 @@ async function generateChapter(body: unknown) {
         const ptSeunJiSip  = sipseongOfBranch(partnerIlgan, tJi) || "—";
 
         // 서버가 desc 첫 문단을 직접 작성 → LLM 십성 오류 원천 차단
+        const eunNeun = (word: string) => (hasBatchim(word[word.length - 1]) ? "은" : "는");
         const myDescSentence = myD
-          ? `${myFirstName}님은 ${myD.gz[0] ? myD.ganKor : ""}${myD.gz[1] ? myD.jiKor : ""}(${myD.gz}) 대운 ${myD.position}에 해당하는 해이오. 대운 천간 ${myD.ganKor}(${myD.gz[0]})은(는) ${myD.ganSip}, 지지 ${myD.jiKor}(${myD.gz[1]})은(는) ${myD.jiSip}의 기운이오.`
+          ? `${myFirstName}님은 ${myD.gz[0] ? myD.ganKor : ""}${myD.gz[1] ? myD.jiKor : ""}(${myD.gz}) 대운 ${myD.position}에 해당하는 해이오. 대운 천간 ${myD.ganKor}(${myD.gz[0]})${eunNeun(myD.ganKor)} ${myD.ganSip}, 지지 ${myD.jiKor}(${myD.gz[1]})${eunNeun(myD.jiKor)} ${myD.jiSip}의 기운이오.`
           : "";
         const ptDescSentence = ptD
-          ? `${ptFirstName}님 또한 ${ptD.gz[0] ? ptD.ganKor : ""}${ptD.gz[1] ? ptD.jiKor : ""}(${ptD.gz}) 대운 ${ptD.position}에 해당하며, 천간 ${ptD.ganKor}(${ptD.gz[0]})은(는) ${ptD.ganSip}, 지지 ${ptD.jiKor}(${ptD.gz[1]})은(는) ${ptD.jiSip}의 기운이 흐르오.`
+          ? `${ptFirstName}님 또한 ${ptD.gz[0] ? ptD.ganKor : ""}${ptD.gz[1] ? ptD.jiKor : ""}(${ptD.gz}) 대운 ${ptD.position}에 해당하며, 천간 ${ptD.ganKor}(${ptD.gz[0]})${eunNeun(ptD.ganKor)} ${ptD.ganSip}, 지지 ${ptD.jiKor}(${ptD.gz[1]})${eunNeun(ptD.jiKor)} ${ptD.jiSip}의 기운이 흐르오.`
           : "";
-        const seunDescSentence = `${targetYear}년 세운은 ${tGanKor}${tJiKor}(${tGan}${tJi})년이오. 이 해의 세운 천간 ${tGanKor}(${tGan})은(는) ${myFirstName}님께 ${mySeunGanSip}, ${ptFirstName}님께 ${ptSeunGanSip}으로 작용하오. 세운 지지 ${tJiKor}(${tJi})은(는) ${myFirstName}님께 ${mySeunJiSip}, ${ptFirstName}님께 ${ptSeunJiSip}의 기운이오.`;
+        const seunDescSentence = `${targetYear}년 세운은 ${tGanKor}${tJiKor}(${tGan}${tJi})년이오. 이 해의 세운 천간 ${tGanKor}(${tGan})${eunNeun(tGanKor)} ${myFirstName}님께 ${mySeunGanSip}, ${ptFirstName}님께 ${ptSeunGanSip}으로 작용하오. 세운 지지 ${tJiKor}(${tJi})${eunNeun(tJiKor)} ${myFirstName}님께 ${mySeunJiSip}, ${ptFirstName}님께 ${ptSeunJiSip}의 기운이오.`;
 
         const descFirstLines = [myDescSentence, ptDescSentence, seunDescSentence].filter(Boolean).join(" ");
 

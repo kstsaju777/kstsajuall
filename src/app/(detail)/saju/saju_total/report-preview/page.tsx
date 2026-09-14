@@ -2719,17 +2719,17 @@ function buildRelDesc(r: Rel, view: MyeongsikView): string {
     const [el1, el2] = [located[0].el, located[1].el];
     const elRelDesc =
       el1 === el2 ? `같은 '${el1}' 오행끼리 부딪히는 관계` :
-      EL_GENERATES[el1] === el2 ? `'${el1}'이(가) '${el2}'을(를) 낳아주는 상생 관계임에도 정면으로 부딪히는 것이라 더욱 안타까운 형국` :
-      EL_GENERATES[el2] === el1 ? `'${el2}'이(가) '${el1}'을(를) 낳아주는 상생 관계임에도 정면으로 부딪히는 것이라 더욱 안타까운 형국` :
-      EL_CONTROLS[el1] === el2 ? `'${el1}'이(가) '${el2}'을(를) 억누르는 상극 관계` :
-      EL_CONTROLS[el2] === el1 ? `'${el2}'이(가) '${el1}'을(를) 억누르는 상극 관계` :
-      `'${el1}'과(와) '${el2}'이(가) 서로 다른 결의 기운으로 부딪히는 관계`;
+      EL_GENERATES[el1] === el2 ? `'${el1}'${josa(el1,"이","가")} '${el2}'${josa(el2,"을","를")} 낳아주는 상생 관계임에도 정면으로 부딪히는 것이라 더욱 안타까운 형국` :
+      EL_GENERATES[el2] === el1 ? `'${el2}'${josa(el2,"이","가")} '${el1}'${josa(el1,"을","를")} 낳아주는 상생 관계임에도 정면으로 부딪히는 것이라 더욱 안타까운 형국` :
+      EL_CONTROLS[el1] === el2 ? `'${el1}'${josa(el1,"이","가")} '${el2}'${josa(el2,"을","를")} 억누르는 상극 관계` :
+      EL_CONTROLS[el2] === el1 ? `'${el2}'${josa(el2,"이","가")} '${el1}'${josa(el1,"을","를")} 억누르는 상극 관계` :
+      `'${el1}'${josa(el1,"과","와")} '${el2}'${josa(el2,"이","가")} 서로 다른 결의 기운으로 부딪히는 관계`;
     const sip1 = hapResultSipseong(ilganEl, el1);
     const sip2 = hapResultSipseong(ilganEl, el2);
     const sipLine = sip1 && sip2
       ? (sip1 === sip2
           ? `일간(${ilganEl}) 기준으로 둘 다 ${sip1}에 해당하는 기운이라, 이 영역에서 비슷한 성질의 기운끼리 부딪혀 갈등이 배가되는 형국이오.`
-          : `일간(${ilganEl}) 기준으로 ${sip1}과(와) ${sip2}이(가) 부딪히는 셈이라, 서로 다른 삶의 영역(성향)이 충돌하며 갈등이 생기오.`)
+          : `일간(${ilganEl}) 기준으로 ${sip1}${josa(sip1,"과","와")} ${sip2}${josa(sip2,"이","가")} 부딪히는 셈이라, 서로 다른 삶의 영역(성향)이 충돌하며 갈등이 생기오.`)
       : "";
     extra = `\n\n【오행으로 본 충돌】 ${elRelDesc}이오.${sipLine ? " " + sipLine : ""}`;
   }
