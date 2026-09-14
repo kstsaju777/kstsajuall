@@ -5290,24 +5290,44 @@ function ReportPreviewInner() {
             return (
               <>
                 {/* ① 직장인형 vs 사업가형 판정 */}
-                {sp.leftLabel && (
+                {sp.leftLabel && (() => {
+                  const leftPct = sp.left ?? 0;
+                  const rightPct = sp.right ?? 0;
+                  const dominant = rightPct >= leftPct
+                    ? { label: sp.rightLabel, pct: rightPct, color: GOLD }
+                    : { label: sp.leftLabel, pct: leftPct, color: "#2a6080" };
+                  return (
                   <section className="px-6 pt-2 pb-6">
                     <Heading>직장인형 vs 사업가형</Heading>
-                    {/* 비율 바 */}
-                    <div className="rounded-full overflow-hidden h-2 flex mt-3">
-                      <div style={{ width: `${sp.left ?? 0}%`, background: "#2a6080" }} />
-                      <div style={{ flex: 1, background: GOLD }} />
-                    </div>
-                    <div className="flex justify-between mt-1.5 mb-5">
-                      <span className="text-[11px] font-semibold" style={{ color: "#2a6080" }}>{sp.leftLabel} {sp.left ?? 0}%</span>
-                      <span className="text-[11px] font-semibold" style={{ color: GOLD }}>{sp.rightLabel} {sp.right ?? 0}%</span>
+                    <div className="rounded-2xl p-5 mt-3" style={{ background: WHITE, border: `1px solid ${INK}12`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+                      {/* 헤더 — 우세 유형 강조 배지 */}
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-[18px] font-black" style={{ color: INK }}>{dominant.label} 우세</h3>
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: `${dominant.color}1f`, border: `1.5px solid ${dominant.color}88` }}>
+                          <span className="text-[18px] font-black" style={{ color: dominant.color }}>{dominant.pct}%</span>
+                        </div>
+                      </div>
+                      {/* 두꺼운 비율 바 */}
+                      <div className="rounded-full overflow-hidden h-5 flex" style={{ background: "#eee" }}>
+                        <div className="flex items-center justify-center" style={{ width: `${leftPct}%`, background: "#2a6080" }}>
+                          {leftPct >= 20 && <span className="text-[11px] font-bold text-white">{leftPct}%</span>}
+                        </div>
+                        <div className="flex items-center justify-center" style={{ flex: 1, background: GOLD }}>
+                          {rightPct >= 20 && <span className="text-[11px] font-bold text-white">{rightPct}%</span>}
+                        </div>
+                      </div>
+                      <div className="flex justify-between mt-2.5">
+                        <span className="text-[13px] font-bold" style={{ color: "#2a6080" }}>{sp.leftLabel}</span>
+                        <span className="text-[13px] font-bold" style={{ color: GOLD }}>{sp.rightLabel}</span>
+                      </div>
                     </div>
                     {/* 풀이 — verdict를 첫 문장으로 합침 */}
                     {(sp.verdict || sp.verdictDesc) && (
-                      <P>{[sp.verdict, sp.verdictDesc].filter(Boolean).join(" ")}</P>
+                      <div className="mt-4"><P>{[sp.verdict, sp.verdictDesc].filter(Boolean).join(" ")}</P></div>
                     )}
                   </section>
-                )}
+                  );
+                })()}
 
                 {/* ② 천직 방향 */}
                 <section className="px-6 pt-2 pb-6">
