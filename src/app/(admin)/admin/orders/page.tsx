@@ -393,8 +393,16 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "'Malgun Gothic', sans-serif", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
                   <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
                     {reportHref ? (
-                      <Link href={reportHref} target="_blank" style={{ fontSize: 12, fontWeight: 600, color: "#111", textDecoration: "underline" }}>
-                        보기 ↗
+                      <Link
+                        href={reportHref}
+                        target="_blank"
+                        style={{
+                          display: "inline-block", padding: "3px 10px", borderRadius: 6,
+                          fontSize: 11, fontWeight: 600, color: "#9b2335",
+                          background: "#fdf1f2", border: "1px solid #f3c6cc", textDecoration: "none",
+                        }}
+                      >
+                        결과지
                       </Link>
                     ) : (
                       <span style={{ fontSize: 12, color: "#ccc" }}>-</span>
