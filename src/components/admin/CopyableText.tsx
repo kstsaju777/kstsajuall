@@ -31,10 +31,7 @@ export function CopyableText({ text }: { text: string }) {
       {copied ? (
         <>✓ 복사됨</>
       ) : (
-        <>
-          <span aria-hidden>📋</span>
-          {text}
-        </>
+        <>{text}</>
       )}
     </button>
   );
