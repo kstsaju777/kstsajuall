@@ -5788,15 +5788,6 @@ function ReportPreviewInner() {
                   </section>
                 )}
 
-                {/* ⑤ 홍연의 당부 */}
-                {rd.remedyAdvice && (
-                  <section className="px-6 pt-2 pb-8">
-                    <div className="rounded-2xl px-5 py-5" style={{ background: `linear-gradient(135deg, ${FOREST}10 0%, ${FOREST}05 100%)`, border: `1.5px solid ${FOREST}28` }}>
-                      <p className="text-[10px] tracking-[0.2em] font-bold mb-3" style={{ color: FOREST, fontFamily: SERIF }}>홍 연 의 당 부</p>
-                      <p className="text-[12.5px] leading-[1.85]" style={{ color: INK_SOFT }}>{rd.remedyAdvice}</p>
-                    </div>
-                  </section>
-                )}
               </>
             );
           })()}
