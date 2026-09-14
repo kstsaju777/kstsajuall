@@ -3,6 +3,7 @@ import { requireAdminPassword } from "@/lib/admin-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { formatKRW, formatDate } from "@/lib/utils";
+import { ADMIN_EMAILS } from "@/lib/auth";
 import { ConcernCell } from "@/components/admin/ConcernCell";
 import { CopyableText } from "@/components/admin/CopyableText";
 
@@ -183,7 +184,9 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i as InputRow]));
 
     // 어드민 계정으로 결제된 건 = 테스트결제로 간주하여 매출 집계에서 제외
-    const { data: admins } = await service.from("profiles").select("id").eq("is_admin", true);
+    // ⚠️ profiles.is_admin 컬럼은 실제로 채워져 있지 않아(예: admin@hongyeondang.com도 false) 신뢰할 수 없음.
+    // 실제 결제 시 테스트/라이브 키를 가르는 기준과 동일하게 lib/auth.ts의 ADMIN_EMAILS 목록으로 판별한다.
+    const { data: admins } = await service.from("profiles").select("id").in("email", ADMIN_EMAILS);
     adminUserIds = new Set((admins ?? []).map((a) => a.id));
   }
 
