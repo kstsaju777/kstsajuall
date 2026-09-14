@@ -16,10 +16,10 @@ export function ConcernCell({ text }: { text: string }) {
         style={{
           display: "inline-block", padding: "4px 10px", borderRadius: 999,
           fontSize: 11, fontWeight: 600, color: "#2563eb", background: "#eff6ff",
-          border: "1px solid #bfdbfe", cursor: "pointer", whiteSpace: "nowrap",
+          border: "1px solid #bfdbfe", cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
         }}
       >
-        고민보기
+        고민
       </button>
 
       {open && (

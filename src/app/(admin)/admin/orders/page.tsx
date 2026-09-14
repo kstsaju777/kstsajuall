@@ -377,7 +377,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "10px 14px", color: "#111", whiteSpace: "nowrap" }}>{product?.name ?? "-"}</td>
                   <td style={{ padding: "10px 14px", color: "#333", whiteSpace: "nowrap" }}>{applicantLabel}</td>
                   <td style={{ padding: "10px 14px", color: "#555", whiteSpace: "nowrap", fontSize: 12 }}>{formatBirth(input)}</td>
-                  <td style={{ padding: "10px 14px" }}>
+                  <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
                     <ConcernCell text={firstConcern(input)} />
                   </td>
                   <td style={{ padding: "10px 14px", color: "#999", whiteSpace: "nowrap" }}>{o.user_id ? "회원" : o.guest_email}</td>
