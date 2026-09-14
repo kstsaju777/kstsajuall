@@ -5606,55 +5606,55 @@ function ReportPreviewInner() {
                   .flatMap((p) => (p.sinsal ?? "").split(/[,\s·]+/).filter((s) => s && !SINSAL_EXCLUDE.has(s)))
               )];
               if (items.length === 0) return null;
-              const SIZES  = [34, 20, 28, 18, 32, 22, 26, 18, 30, 22, 24, 18, 28, 20, 28];
-              const COLORS = ["#39ff14","#ff6fff","#00f0ff","#ffe033","#ff4d4d","#b8ff57","#ff9500","#c77dff","#00ffb3","#ff2d78","#ffffff","#ffec3d","#44d9ff","#ff6b35","#a0ff6f"];
-              const ROTATES = [-2, 1.5, -1, 2.5, -1.5, 1, -2.5, 1.5, -1, 2, -1.5, 1, -2, 1.5, -1];
-              const ALIGNS = ["flex-start", "center", "flex-end", "center", "flex-start", "flex-end"];
-              // 3~4개씩 줄 나누기
-              const rows: string[][] = [];
-              let idx = 0;
-              const rowSizes = [2, 3, 2, 3, 2, 3];
-              for (const sz of rowSizes) {
-                if (idx >= items.length) break;
-                rows.push(items.slice(idx, idx + sz));
-                idx += sz;
-              }
-              if (idx < items.length) rows.push(items.slice(idx));
+              // 길신(귀인·록)은 금빛, 흉살(살)은 톤 다운된 홍색 계열 — 색만 봐도 좋은 기운/조심할 기운이 구분되게
+              const isGilsin = (s: string) => s.endsWith("귀인") || s.endsWith("록");
               const DURS   = [3.2, 2.6, 3.8, 2.4, 3.5, 2.9, 4.1, 2.7, 3.3, 2.5, 3.9, 2.8, 3.6, 2.3, 4.0];
               const DELAYS = [0, 0.6, 1.2, 0.3, 0.9, 1.5, 0.2, 0.8, 1.4, 0.5, 1.1, 0.4, 1.0, 0.7, 1.3];
-              const FLOATS = ["floatS0","floatS1","floatS2"];
+              const FLOATS = ["floatS0", "floatS1", "floatS2"];
               return (
                 <>
                   <style>{`
-                    @keyframes floatS0 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-4px)} }
-                    @keyframes floatS1 { 0%,100%{transform:translateY(-3px)} 50%{transform:translateY(3px)} }
-                    @keyframes floatS2 { 0%,100%{transform:translateY(2px)} 50%{transform:translateY(-4px)} }
+                    @keyframes floatS0 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-3px)} }
+                    @keyframes floatS1 { 0%,100%{transform:translateY(-2px)} 50%{transform:translateY(2px)} }
+                    @keyframes floatS2 { 0%,100%{transform:translateY(1.5px)} 50%{transform:translateY(-2.5px)} }
                   `}</style>
-                  <div className="my-4 mx-1 rounded-2xl" style={{ background: "#0f0f0f", aspectRatio: "16/9", display: "flex", flexDirection: "column", justifyContent: "space-evenly", padding: "20px 20px" }}>
-                    {rows.map((row, ri) => (
-                      <div key={ri} style={{ display: "flex", justifyContent: ALIGNS[ri % ALIGNS.length], alignItems: "center", gap: 14 }}>
-                        {row.map((sal) => {
-                          const i = items.indexOf(sal);
-                          const color = COLORS[i % COLORS.length];
-                          return (
-                            <span key={sal} style={{
-                              fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
-                              fontWeight: 900,
-                              fontSize: SIZES[i % SIZES.length],
-                              color,
-                              display: "inline-block",
-                              lineHeight: 1.1,
-                              letterSpacing: "-0.02em",
-                              whiteSpace: "nowrap",
-                              textShadow: `0 0 16px ${color}88`,
-                              animation: `${FLOATS[i % 3]} ${DURS[i % DURS.length]}s ease-in-out ${DELAYS[i % DELAYS.length]}s infinite`,
-                            }}>
-                              {sal}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    ))}
+                  <div className="my-4 mx-1 rounded-2xl" style={{ background: CREAM, border: `1px solid ${GOLD}55`, padding: "20px 18px" }}>
+                    <div style={{ display: "flex", gap: 12, marginBottom: 14, fontSize: 11, color: INK_SOFT, fontFamily: SERIF }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 99, background: GOLD, display: "inline-block" }} />
+                        길신(귀인) — 도움이 되는 기운
+                      </span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 99, background: MAROON, display: "inline-block" }} />
+                        조심할 기운
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {items.map((sal, i) => {
+                        const gilsin = isGilsin(sal);
+                        const fg = gilsin ? "#8a6a1c" : MAROON;
+                        const bg = gilsin ? "#f6ecd2" : PINK_PALE;
+                        const border = gilsin ? `${GOLD}88` : `${MAROON}55`;
+                        return (
+                          <span key={sal} style={{
+                            fontFamily: SERIF,
+                            fontWeight: 700,
+                            fontSize: 14,
+                            color: fg,
+                            background: bg,
+                            border: `1px solid ${border}`,
+                            borderRadius: 999,
+                            padding: "6px 14px",
+                            display: "inline-block",
+                            lineHeight: 1.2,
+                            whiteSpace: "nowrap",
+                            animation: `${FLOATS[i % 3]} ${DURS[i % DURS.length]}s ease-in-out ${DELAYS[i % DELAYS.length]}s infinite`,
+                          }}>
+                            {sal}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
                 </>
               );
