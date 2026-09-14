@@ -64,7 +64,7 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
         style={{ background: "rgba(228,209,178,0.15)", border: "1px solid rgba(228,209,178,0.4)" }}>
         <p className="text-[15px] font-semibold mb-1" style={{ color: "#e4d1b2" }}>⚠️ 절대 새로고침 금지</p>
         <p className="text-[13px] leading-relaxed" style={{ color: "#e4d1b2" }}>
-          결과지 생성에 최대 5분 정도 걸릴 수 있어요.<br />오래 걸려도 정상이니 그대로 기다려 주세요.<br />새로고침하면 처음부터 다시 생성되어 시간이 더 걸립니다.
+          결과지 생성에 최대 5분 정도 걸릴 수 있소.<br />오래 걸려도 정상이니 그대로 기다려 주시오.<br />새로고침하면 처음부터 다시 시작되어<br />시간이 더 걸리게 되오.
         </p>
       </div>
       <p className="text-[13px] text-center leading-relaxed mt-4" style={{ color: "#806840" }}>
