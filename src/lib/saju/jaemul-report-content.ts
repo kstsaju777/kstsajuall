@@ -711,7 +711,8 @@ export function buildJaemulChapterPrompt(
     wealthScoreBlock = `\n[연도별 재물운 추세 — 화면 꺾은선 차트와 동일한 계산. warningFlow의 각 시기 설명은 아래 추세와 반드시 일치해야 함]\n` +
       rows.join("\n") +
       `\n\n[구간별 추세 요약 — warningFlow items는 이 구간 단위로 작성]\n` +
-      groupRows.join("\n") + "\n";
+      groupRows.join("\n") + "\n" +
+      `\n[시제 규칙 — 절대 규칙, 위반 시 탈락] 지금 실제 현재 연도는 ${currentYear}년이오. ${currentYear}년보다 이전 연도(${TARGET_YEARS.filter(y => y < currentYear).join(", ") || "없음"})를 다루는 구간은 반드시 과거형(~했소/~였소/~좋았소 등)으로 서술하고, 그 시기를 '현재 시점'·'지금'이라고 부르면 절대 안 되오 — 이미 지나간 시기이니 회고하듯 서술하시오. ${currentYear}년이 포함된 구간만 현재형(~이오/~하오)으로 쓰고, ${currentYear}년보다 이후 연도만 미래형(~것이오/~하겠소)으로 쓰시오.\n`;
 
     // 실제 대운 전환 시점(서버 확정값) — 세운(매년 바뀌는 간지)과 대운(10년 단위) 혼동 방지.
     // 이 표에 없는 해에 "OO대운으로 접어들며" 식으로 대운 전환을 언급하면 절대 안 됨.
