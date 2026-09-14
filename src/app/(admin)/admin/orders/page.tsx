@@ -47,6 +47,13 @@ function toKstMonthKey(iso: string): string {
   return toKstDateKey(iso).slice(0, 7);
 }
 
+// 정식 오픈(실결제 집계 시작) 기준일 — 이 시점 이전 주문은 전부 개발 중 테스트결제로 간주해 매출 집계에서 제외
+// 정식 오픈일이 정해지면 이 값만 바꿔주면 됨
+const REVENUE_START_AT = "2026-09-14T00:00:00+09:00";
+
+// 오픈 이전에 발생했지만 지인에게 부탁한 실제 결제라 매출에 포함시키는 예외 이메일
+const REAL_PAYMENT_WHITELIST_EMAILS = new Set(["star960313@gmail.com", "chaeni10@naver.com"]);
+
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdminPassword("/admin/orders");
 
@@ -91,7 +98,15 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     adminUserIds = new Set((admins ?? []).map((a) => a.id));
   }
 
-  const isTestOrder = (o: OrderRow) => !!o.user_id && adminUserIds.has(o.user_id);
+  const revenueStartAt = new Date(REVENUE_START_AT).getTime();
+  // 실결제 판정: (1) 오픈 기준일 이후 && 어드민 계정이 아님, 또는 (2) 오픈 전이라도 화이트리스트에 등록된 지인 결제
+  const isRealOrder = (o: OrderRow) => {
+    const isAdmin = !!o.user_id && adminUserIds.has(o.user_id);
+    if (isAdmin) return false;
+    if (o.guest_email && REAL_PAYMENT_WHITELIST_EMAILS.has(o.guest_email)) return true;
+    return new Date(o.created_at).getTime() >= revenueStartAt;
+  };
+  const isTestOrder = (o: OrderRow) => !isRealOrder(o);
 
   const paidOrders = allOrders.filter((o) => o.status === "paid");
   const realOrders = paidOrders.filter((o) => !isTestOrder(o));
@@ -175,7 +190,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       ) : null}
 
       <p style={{ fontSize: 12, color: "#aaa", margin: "0 0 20px", lineHeight: 1.6 }}>
-        ※ 어드민 계정으로 결제한 건(테스트결제)은 아래 매출·집계에서 모두 자동 제외됩니다.
+        ※ {REVENUE_START_AT.slice(0, 10)} 이전 주문(개발 중 테스트결제) 및 어드민 계정 결제는 매출 집계에서 제외됩니다. (지인에게 부탁한 사전 실결제 {REAL_PAYMENT_WHITELIST_EMAILS.size}건은 예외로 포함)
         {totalTestPaid > 0 && <> (제외된 테스트결제 {totalTestPaid}건)</>}
       </p>
 
