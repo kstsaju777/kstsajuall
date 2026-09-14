@@ -8,6 +8,17 @@ import { CopyableText } from "@/components/admin/CopyableText";
 
 export const metadata = { title: "관리자 - 결제 내역" };
 
+// 사주 상품 카드에 쓸 표시명 및 정렬 순서 (요청된 순서: 종합→재물→연애→건강→자녀→유아)
+const SAJU_DISPLAY_ORDER = ["total", "saju_jaemul", "saju_yeonae", "saju_health", "saju_janyeo", "saju_youare"];
+const SAJU_DISPLAY_NAME: Record<string, string> = {
+  total: "종합사주",
+  saju_jaemul: "재물사주",
+  saju_yeonae: "연애사주",
+  saju_health: "건강사주",
+  saju_janyeo: "자녀사주",
+  saju_youare: "유아사주",
+};
+
 type SearchParams = Promise<{ product?: string; month?: string }>;
 
 type OrderRow = {
@@ -298,7 +309,14 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       {/* 상품별 집계 카드 — 사주 상품 / 궁합 상품으로 구분, 작은 블록으로 한눈에 보이게 */}
       <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>상품별 누적 매출 · 탭하면 아래 목록이 해당 상품으로 필터링됩니다</p>
       {(() => {
-        const sajuStats = productStats.filter((s) => !s.slug?.startsWith("kunghap_"));
+        const sajuStats = productStats
+          .filter((s) => !s.slug?.startsWith("kunghap_"))
+          .map((s) => ({ ...s, name: (s.slug && SAJU_DISPLAY_NAME[s.slug]) ?? s.name }))
+          .sort((a, b) => {
+            const ai = a.slug ? SAJU_DISPLAY_ORDER.indexOf(a.slug) : -1;
+            const bi = b.slug ? SAJU_DISPLAY_ORDER.indexOf(b.slug) : -1;
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+          });
         const kunghapStats = productStats.filter((s) => s.slug?.startsWith("kunghap_"));
 
         const renderCard = (s: ProductStat) => {
