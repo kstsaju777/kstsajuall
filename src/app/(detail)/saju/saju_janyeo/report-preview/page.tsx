@@ -5894,8 +5894,8 @@ function ReportPreviewInner() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src="/media/report/saju_janyeo/saju_janyeo_6/saju_janyeo_6_1.jpg" alt="" className="w-full block" />
                       <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
-                      <div className="absolute pointer-events-none" style={{ top: "20%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                        <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF }}>텍스트를<br />입력하시오.</p>
+                      <div className="absolute pointer-events-none" style={{ top: "25%", left: "70%", transform: "translate(-50%, -50%)" }}>
+                        <p className="text-[18px] font-bold leading-[2] text-center" style={{ color: "#2a2320", fontFamily: SERIF, whiteSpace: "nowrap" }}>{`${honor}이 자라는 길목마다`}<br />{`필요한 것을 알려드리겠소.`}</p>
                       </div>
                     </div>
                     <div className="flex justify-center" style={{ paddingTop: 40, paddingBottom: 32 }}>
