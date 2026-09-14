@@ -726,7 +726,7 @@ Composition: cinematic wide landscape, dramatic natural lighting, volumetric atm
 
 // 사주화(원국 이미지) 아래 "왜 이렇게 그려졌는지" 설명 — buildSajuImagePrompt와 동일한 매핑을
 // 그대로 재사용해 한국어로 풀어쓴 것이라, 실제 그려진 그림과 항상 정확히 일치한다 (LLM 생성 아님).
-export function buildSajuImageMeaning(pillars: { gan: string; ji: string }[]): string {
+export function buildSajuImageMeaning(pillars: { gan: string; ji: string }[], honorific: string): string {
   const [, il, wol] = pillars;
 
   const ILGAN_SUBJECT_KR: Record<string, string> = {
@@ -779,10 +779,10 @@ export function buildSajuImageMeaning(pillars: { gan: string; ji: string }[]): s
   if (!subject || !season) return "";
 
   const animalLine = animal
-    ? ` 그리고 일지(태어난 날의 지지)에 해당하는 ${color} ${animal}을(를) 그림 속에 함께 담아, 이 사람만의 기질을 은유적으로 표현했소.`
+    ? ` 그리고 일지(태어난 날의 지지)에 해당하는 ${color} ${animal}을(를) 그림 속에 함께 담아, ${honorific}만의 기질을 은유적으로 표현했소.`
     : "";
 
-  return `이 그림은 신청자의 사주팔자를 그대로 옮겨 그린 것이오. 일간(태어난 날의 천간)이 상징하는 "${subject}"을(를) 중심 소재로 삼았고, 월지(태어난 달의 지지)가 나타내는 "${season}"을 배경으로 삼았소.${animalLine} 사주팔자에 담긴 오행의 기운을 하나의 풍경으로 형상화한 그림이니, 그림 속 사물과 계절, 동물 하나하나가 모두 이 사람의 타고난 기운을 뜻하는 것이오.`;
+  return `이 그림은 ${honorific}의 사주팔자를 그대로 옮겨 그린 것이오. 일간(태어난 날의 천간)이 상징하는 "${subject}"을(를) 중심 소재로 삼았고, 월지(태어난 달의 지지)가 나타내는 "${season}"을 배경으로 삼았소.${animalLine} 사주팔자에 담긴 오행의 기운을 하나의 풍경으로 형상화한 그림이니, 그림 속 사물과 계절, 동물 하나하나가 모두 ${honorific}의 타고난 기운을 뜻하는 것이오.`;
 }
 
 // 한 장(chapter)의 콘텐츠만 생성하는 프롬프트 (장별 병렬 호출용)
