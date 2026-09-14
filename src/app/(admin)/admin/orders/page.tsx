@@ -295,10 +295,13 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         )}
       </div>
 
-      {/* 상품별 집계 카드 — 작은 블록으로 한눈에 보이게 */}
+      {/* 상품별 집계 카드 — 사주 상품 / 궁합 상품으로 구분, 작은 블록으로 한눈에 보이게 */}
       <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>상품별 누적 매출 · 탭하면 아래 목록이 해당 상품으로 필터링됩니다</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(112px, 1fr))", gap: 8, marginBottom: 28 }}>
-        {productStats.map((s) => {
+      {(() => {
+        const sajuStats = productStats.filter((s) => !s.slug?.startsWith("kunghap_"));
+        const kunghapStats = productStats.filter((s) => s.slug?.startsWith("kunghap_"));
+
+        const renderCard = (s: ProductStat) => {
           const active = productFilter === s.productId;
           return (
             <Link
@@ -321,11 +324,26 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               </p>
             </Link>
           );
-        })}
-        {productStats.length === 0 && (
-          <p style={{ gridColumn: "1 / -1", textAlign: "center", padding: "24px 0", fontSize: 13, color: "#aaa" }}>아직 주문이 없습니다.</p>
-        )}
-      </div>
+        };
+
+        const groupGrid = (list: ProductStat[]) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(112px, 1fr))", gap: 8 }}>
+            {list.map(renderCard)}
+            {list.length === 0 && (
+              <p style={{ gridColumn: "1 / -1", textAlign: "center", padding: "16px 0", fontSize: 13, color: "#aaa" }}>주문이 없습니다.</p>
+            )}
+          </div>
+        );
+
+        return (
+          <div style={{ marginBottom: 28 }}>
+            <p style={{ fontSize: 11, color: "#aaa", margin: "0 0 6px", fontWeight: 600 }}>사주 상품</p>
+            {groupGrid(sajuStats)}
+            <p style={{ fontSize: 11, color: "#aaa", margin: "18px 0 6px", fontWeight: 600 }}>궁합 상품</p>
+            {groupGrid(kunghapStats)}
+          </div>
+        );
+      })()}
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 10 }}>
         <p style={{ fontSize: 12, color: "#aaa", margin: 0 }}>실결제 {filteredOrders.length}건 표시 중</p>
