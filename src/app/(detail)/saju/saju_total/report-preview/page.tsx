@@ -2873,7 +2873,7 @@ function GanjiRelation({ view }: { view: MyeongsikView | null }) {
         <div className="text-[22px] animate-bounce">👇</div>
         <div>
           <p className="text-[12px] font-bold mb-0.5" style={{ color: MAROON }}>합·충·형·해·파·원진 해설</p>
-          <p className="text-[11px]" style={{ color: MUTE }}>아래 버튼을 눌러 상세 해설을 확인하오.</p>
+          <p className="text-[11px]" style={{ color: MUTE }}>아래 버튼을 눌러 상세 해설을 확인하시오.</p>
         </div>
       </div>
 
