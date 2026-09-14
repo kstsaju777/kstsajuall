@@ -598,11 +598,18 @@ function SeunTableWithDetail({ view, yongsinEl, heusinEl, gisinEl }: {
   const para2 = elMsg(ganEl, ganCls);
   const para3 = applyTense(`지지에는 ${jiInfo.kw}의 결을 지닌 ${jiSip}이 자리하며, 운성으로는 '${uns}'에 해당하오. ${_DE_UNS_INFO[uns] ?? ""} ${jiInfo.good}`);
   const para4 = elMsg(jiEl, jiCls);
+  // ⚠️ 이 해에 실제로 있는 신(용신/희신/기신)만 언급하도록 동적으로 구성 —
+  // "길운"이라고 해서 무조건 "용신·희신 둘 다"라고 뭉뚱그리면, 실제론 하나만 있거나
+  // 아예 없는데도 있다고 잘못 말하는 오류가 생기므로 반드시 실제 존재하는 신만 나열한다.
+  const presentRoles = [...new Set([ganCls, jiCls].filter((c): c is "yong" | "heu" | "gi" => c === "yong" || c === "heu" || c === "gi"))];
+  const roleName = (r: "yong" | "heu" | "gi") => r === "yong" ? "용신" : r === "heu" ? "희신" : "기신";
+  const goodRoles = presentRoles.filter(r => r !== "gi");
+  const goodRoleStr = goodRoles.length > 0 ? goodRoles.map(roleName).join("·") : "";
   const para5 = applyTense(tier === "good"
-    ? `이 한 해를 종합해보면, 용신·희신의 기운이 든든하게 뒷받침해주는 길운의 해요. 노력한 것들이 결실로 돌아올 수 있으니, 이 흐름을 믿고 과감하게 나아가시오.`
+    ? `이 한 해를 종합해보면, ${goodRoleStr ? `${goodRoleStr}의 기운이` : "이로운 기운이"} 든든하게 뒷받침해주는 길운의 해요. 노력한 것들이 결실로 돌아올 수 있으니, 이 흐름을 믿고 과감하게 나아가시오.`
     : tier === "caution"
     ? `이 한 해를 종합해보면, 기신의 기운이 섞여 들어와 사주 균형이 흔들릴 수 있는 때요. 그러니 큰 결정보다는 내실을 다지고, 소비와 감정 관리에 더 신경 쓰는 것이 현명하오.`
-    : `이 한 해를 종합해보면, 용신과 기신이 서로 뒤섞인 평온한 흐름의 시기요. 극적인 변화보다는 꾸준한 걸음이 중심이 되는 해이니, 자신만의 속도로 묵묵히 걸어가시오.`);
+    : `이 한 해를 종합해보면, 여러 기운이 서로 뒤섞인 평온한 흐름의 시기요. 극적인 변화보다는 꾸준한 걸음이 중심이 되는 해이니, 자신만의 속도로 묵묵히 걸어가시오.`);
   const paras = [para1, para2, para3, para4, para5].filter(Boolean);
 
   const CLS_STYLE = {
