@@ -82,15 +82,12 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       : { data: [] };
     productMap = new Map((products ?? []).map((p) => [p.id, { name: p.name, slug: p.slug }]));
 
-    const orderIds = allOrders.map((o) => o.id);
-    const { data: results } = orderIds.length
-      ? await service.from("saju_results").select("id, order_id").in("order_id", orderIds)
-      : { data: [] };
+    // 주문이 많을 땐 .in() 에 uuid를 수백~수천 개 나열하면 요청 URL이 너무 길어져
+    // 조용히 실패(빈 배열 반환)할 수 있어, 필터 없이 전체를 가져와 메모리에서 매칭한다.
+    const { data: results } = await service.from("saju_results").select("id, order_id").limit(10000);
     resultMap = new Map((results ?? []).map((r) => [r.order_id, r.id]));
 
-    const { data: inputs } = orderIds.length
-      ? await service.from("saju_inputs").select("order_id, name, concerns").in("order_id", orderIds)
-      : { data: [] };
+    const { data: inputs } = await service.from("saju_inputs").select("order_id, name, concerns").limit(10000);
     inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i as InputRow]));
 
     // 어드민 계정으로 결제된 건 = 테스트결제로 간주하여 매출 집계에서 제외
