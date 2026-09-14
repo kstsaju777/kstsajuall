@@ -5741,15 +5741,17 @@ function ReportPreviewInner() {
                 수: { hanja: "水", color: "#222", bg: "#e3f2fd", desc: "지혜·유연" },
               };
               // LLM이 yongsinEl 등 필드를 빠뜨린 경우 텍스트에서 추출
-              const OHAENG_LIST = ["금", "목", "화", "토", "수"] as const;
               const yText = [c.yongsin.callout, c.yongsin.intro, ...(c.yongsin.paragraphs ?? [])].filter(Boolean).join(" ");
               const extractEl = (role: string, text: string) => {
                 const m = text.match(new RegExp(`${role}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`));
                 return m?.[1] ?? "";
               };
-              const yongsinEl = c.yongsin.yongsinEl || extractEl("용신", yText) || (() => { const f: string[] = []; for (const ch of yText) { if ((OHAENG_LIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length) return f[0]; } return ""; })();
-              const heusinEl  = c.yongsin.heusinEl  || extractEl("희신", yText) || (() => { const f: string[] = []; for (const ch of yText) { if ((OHAENG_LIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 2) return f[1]; } return ""; })();
-              const gisinEl   = c.yongsin.gisinEl   || extractEl("기신", yText) || (() => { const f: string[] = []; for (const ch of yText) { if ((OHAENG_LIST as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 3) return f[2]; } return ""; })();
+              // ⚠️ 예전에는 이마저 실패하면 본문에서 아무 오행 글자나 순서대로 주워와 억지로
+              // 채워 넣었는데, 실제로 해당 신이 없는 경우(예: 희신 없음)에도 엉뚱한 오행을
+              // "희신"이라고 표시하는 오류가 있어 그 마지막 추측 로직은 제거함 — 못 찾으면 빈 값으로 둔다.
+              const yongsinEl = c.yongsin.yongsinEl || extractEl("용신", yText);
+              const heusinEl  = c.yongsin.heusinEl  || extractEl("희신", yText);
+              const gisinEl   = c.yongsin.gisinEl   || extractEl("기신", yText);
               const rows = [
                 { role: "용신", el: yongsinEl, reason: c.yongsin.yongsinReason, badge: { bg: "#fff3cd", border: "#e6a817", text: "#7a4f00", label: "★★★" } },
                 { role: "희신", el: heusinEl,  reason: c.yongsin.heusinReason,  badge: { bg: "#e8f5e9", border: "#43a047", text: "#1b5e20", label: "★★" } },
@@ -6213,12 +6215,13 @@ function ReportPreviewInner() {
           <section className="px-6 pt-2 pb-4">
             <Heading>대운으로 보는 인생의 큰 흐름</Heading>
             {(() => {
-              const OHAENG_LIST2 = ["금", "목", "화", "토", "수"] as const;
               const yText2 = [c.yongsin.callout, c.yongsin.intro, ...(c.yongsin.paragraphs ?? [])].filter(Boolean).join(" ");
               const extractEl2 = (role: string, text: string) => { const m = text.match(new RegExp(`${role}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`)); return m?.[1] ?? ""; };
-              const ye = c.yongsin.yongsinEl || extractEl2("용신", yText2) || (() => { const f: string[] = []; for (const ch of yText2) { if ((OHAENG_LIST2 as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length) return f[0]; } return ""; })();
-              const he = c.yongsin.heusinEl  || extractEl2("희신", yText2) || (() => { const f: string[] = []; for (const ch of yText2) { if ((OHAENG_LIST2 as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 2) return f[1]; } return ""; })();
-              const ge = c.yongsin.gisinEl   || extractEl2("기신", yText2) || (() => { const f: string[] = []; for (const ch of yText2) { if ((OHAENG_LIST2 as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 3) return f[2]; } return ""; })();
+              // ⚠️ 못 찾으면 본문에서 아무 오행 글자나 순서대로 주워오던 마지막 추측 로직 제거 —
+              // 실제로 없는 신(예: 희신 없음)을 엉뚱한 오행으로 잘못 표시하는 오류를 막기 위함.
+              const ye = c.yongsin.yongsinEl || extractEl2("용신", yText2);
+              const he = c.yongsin.heusinEl  || extractEl2("희신", yText2);
+              const ge = c.yongsin.gisinEl   || extractEl2("기신", yText2);
               return <DaeunTableWithDetail view={report?.view ?? null} yongsinEl={ye} heusinEl={he} gisinEl={ge} />;
             })()}
           </section>
@@ -6235,12 +6238,13 @@ function ReportPreviewInner() {
           <section className="px-6 pt-2 pb-4">
             <Heading>세운으로 보는 해마다의 운</Heading>
             {(() => {
-              const OHAENG_LIST2 = ["금", "목", "화", "토", "수"] as const;
               const yText2 = [c.yongsin.callout, c.yongsin.intro, ...(c.yongsin.paragraphs ?? [])].filter(Boolean).join(" ");
               const extractEl2 = (role: string, text: string) => { const m = text.match(new RegExp(`${role}[은이가]?\\s*(?:오행인\\s*)?(금|목|화|토|수)`)); return m?.[1] ?? ""; };
-              const ye = c.yongsin.yongsinEl || extractEl2("용신", yText2) || (() => { const f: string[] = []; for (const ch of yText2) { if ((OHAENG_LIST2 as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length) return f[0]; } return ""; })();
-              const he = c.yongsin.heusinEl  || extractEl2("희신", yText2) || (() => { const f: string[] = []; for (const ch of yText2) { if ((OHAENG_LIST2 as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 2) return f[1]; } return ""; })();
-              const ge = c.yongsin.gisinEl   || extractEl2("기신", yText2) || (() => { const f: string[] = []; for (const ch of yText2) { if ((OHAENG_LIST2 as readonly string[]).includes(ch) && !f.includes(ch)) f.push(ch); if (f.length >= 3) return f[2]; } return ""; })();
+              // ⚠️ 못 찾으면 본문에서 아무 오행 글자나 순서대로 주워오던 마지막 추측 로직 제거 —
+              // 실제로 없는 신(예: 희신 없음)을 엉뚱한 오행으로 잘못 표시하는 오류를 막기 위함.
+              const ye = c.yongsin.yongsinEl || extractEl2("용신", yText2);
+              const he = c.yongsin.heusinEl  || extractEl2("희신", yText2);
+              const ge = c.yongsin.gisinEl   || extractEl2("기신", yText2);
               return <SeunTableWithDetail view={report?.view ?? null} yongsinEl={ye} heusinEl={he} gisinEl={ge} />;
             })()}
           </section>
