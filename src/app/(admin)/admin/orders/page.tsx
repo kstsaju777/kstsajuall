@@ -24,6 +24,24 @@ const KUNGHAP_DISPLAY_ORDER = [
   "kunghap_yeonae", "kunghap_gyeolhon", "kunghap_ehon", "kunghap_jaehwe",
   "kunghap_janyeo", "kunghap_imshin", "kunghap_business", "kunghap_banryeo",
 ];
+// 각 상품 상세페이지에서 쓰는 시그니처 컬러 (ACCENT/PINK 상수 값 그대로)
+const PRODUCT_COLOR: Record<string, string> = {
+  total: "#9b2335",
+  saju_jaemul: "#f9dc64",
+  saju_yeonae: "#e9bdae",
+  saju_health: "#ca884b",
+  saju_janyeo: "#5bbfea",
+  saju_youare: "#e4d1b2",
+  kunghap_yeonae: "#ff6b9d",
+  kunghap_gyeolhon: "#e1337d",
+  kunghap_ehon: "#7c6af7",
+  kunghap_jaehwe: "#9b2335",
+  kunghap_janyeo: "#00b4d8",
+  kunghap_imshin: "#738e6f",
+  kunghap_business: "#4e9eff",
+  kunghap_banryeo: "#b47221",
+};
+
 const KUNGHAP_DISPLAY_NAME: Record<string, string> = {
   kunghap_yeonae: "연애궁합",
   kunghap_gyeolhon: "결혼궁합",
@@ -344,6 +362,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
 
         const renderCard = (s: ProductStat) => {
           const active = productFilter === s.productId;
+          const signatureColor = (s.slug && PRODUCT_COLOR[s.slug]) ?? "#111";
           return (
             <Link
               key={s.productId}
@@ -352,10 +371,11 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                 display: "block", padding: "10px 12px", borderRadius: 10, textDecoration: "none",
                 background: active ? "#111" : "#fff",
                 border: `1px solid ${active ? "#111" : "#e8e8e8"}`,
+                borderLeft: `3px solid ${signatureColor}`,
                 boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               }}
             >
-              <p style={{ fontSize: 12, fontWeight: 700, margin: "0 0 4px", color: active ? "#fff" : "#111", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.name}</p>
+              <p style={{ fontSize: 12, fontWeight: 700, margin: "0 0 4px", color: signatureColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.name}</p>
               <p style={{ fontSize: 14, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 4px", color: active ? "#fff" : "#111", whiteSpace: "nowrap" }}>
                 {formatKRW(s.revenue)}
               </p>
