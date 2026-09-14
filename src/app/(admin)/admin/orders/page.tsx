@@ -53,6 +53,16 @@ const KUNGHAP_DISPLAY_NAME: Record<string, string> = {
   kunghap_banryeo: "반려궁합",
 };
 
+// 배경색 밝기에 따라 검정/흰색 중 가독성 좋은 글자색 선택 (YIQ 공식)
+function contrastTextColor(hex: string): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 150 ? "#111" : "#fff";
+}
+
 type SearchParams = Promise<{ product?: string; month?: string }>;
 
 type OrderRow = {
@@ -362,26 +372,32 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
 
         const renderCard = (s: ProductStat) => {
           const active = productFilter === s.productId;
-          const signatureColor = (s.slug && PRODUCT_COLOR[s.slug]) ?? "#111";
+          const signatureColor = (s.slug && PRODUCT_COLOR[s.slug]) ?? "#fff";
+          const badgeTextColor = contrastTextColor(signatureColor);
           return (
             <Link
               key={s.productId}
               href={buildHref({ product: active ? "" : s.productId })}
               style={{
                 display: "block", padding: "10px 12px", borderRadius: 10, textDecoration: "none",
-                background: active ? "#111" : "#fff",
-                border: `1px solid ${active ? "#111" : "#e8e8e8"}`,
-                borderLeft: `3px solid ${signatureColor}`,
-                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                background: "#111",
+                border: `1px solid ${active ? signatureColor : "#111"}`,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
               }}
             >
-              <p style={{ fontSize: 12, fontWeight: 700, margin: "0 0 4px", color: signatureColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.name}</p>
-              <p style={{ fontSize: 14, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 4px", color: active ? "#fff" : "#111", whiteSpace: "nowrap" }}>
+              <span style={{
+                display: "inline-block", padding: "3px 8px", borderRadius: 6, marginBottom: 6,
+                fontSize: 11, fontWeight: 700, background: signatureColor, color: badgeTextColor,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%",
+              }}>
+                {s.name}
+              </span>
+              <p style={{ fontSize: 14, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 4px", color: "#fff", whiteSpace: "nowrap" }}>
                 {formatKRW(s.revenue)}
               </p>
               <p style={{ fontSize: 10, margin: 0, whiteSpace: "nowrap" }}>
-                <span style={{ color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>실결제 {s.real}</span>
-                {s.test > 0 && <span style={{ color: active ? "#c7d2fe" : "#6366f1" }}> · 테스트 {s.test}</span>}
+                <span style={{ color: "#6ee7b7", fontWeight: 600 }}>실결제 {s.real}</span>
+                {s.test > 0 && <span style={{ color: "#a5b4fc" }}> · 테스트 {s.test}</span>}
               </p>
             </Link>
           );
