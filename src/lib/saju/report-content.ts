@@ -724,6 +724,67 @@ SECONDARY ELEMENTS to blend naturally into the scene: ${secondaryElements || "no
 Composition: cinematic wide landscape, dramatic natural lighting, volumetric atmosphere, painterly and luminous, ultra-detailed, emotionally resonant.`;
 }
 
+// 사주화(원국 이미지) 아래 "왜 이렇게 그려졌는지" 설명 — buildSajuImagePrompt와 동일한 매핑을
+// 그대로 재사용해 한국어로 풀어쓴 것이라, 실제 그려진 그림과 항상 정확히 일치한다 (LLM 생성 아님).
+export function buildSajuImageMeaning(pillars: { gan: string; ji: string }[]): string {
+  const [, il, wol] = pillars;
+
+  const ILGAN_SUBJECT_KR: Record<string, string> = {
+    甲: "하늘을 향해 곧게 뻗은 거목",
+    乙: "바람에 유연하게 흔들리는 넝쿨과 풀",
+    丙: "사방을 환히 비추는 태양",
+    丁: "은은하게 주변을 밝히는 촛불",
+    戊: "묵직하게 자리를 지키는 산",
+    己: "만물을 길러내는 기름진 땅",
+    庚: "단단하고 흔들림 없는 바위",
+    辛: "정교하게 다듬어진 보석과 금속",
+    壬: "넓게 흘러가는 바다",
+    癸: "맑고 조용한 샘물과 이슬",
+  };
+  const WOLJI_SEASON_KR: Record<string, string> = {
+    寅: "이른 봄, 얼었던 땅에서 막 온기가 올라오는 계절",
+    卯: "봄이 한창 무르익어 생동감 넘치는 계절",
+    辰: "봄이 저물며 습한 기운이 짙어지는 계절",
+    巳: "초여름 더위가 피어오르는 계절",
+    午: "한여름 뙤약볕이 내리쬐는 계절",
+    未: "늦여름 무더위가 잦아드는 계절",
+    申: "초가을 서늘한 기운이 시작되는 계절",
+    酉: "가을이 한창 무르익어 청량한 계절",
+    戌: "늦가을 메마른 기운이 감도는 계절",
+    亥: "초겨울 첫서리가 내리는 계절",
+    子: "한겨울 달빛이 눈 쌓인 땅을 비추는 계절",
+    丑: "겨울이 저물며 언 땅이 녹기를 기다리는 계절",
+  };
+  const ILGAN_COLOR_KR: Record<string, string> = {
+    甲: "선명한 초록빛", 乙: "부드러운 연둣빛",
+    丙: "강렬한 붉은빛", 丁: "짙은 진홍빛",
+    戊: "황금빛", 己: "따뜻한 갈빛",
+    庚: "순백색", 辛: "은빛",
+    壬: "짙은 검은빛", 癸: "짙은 남빛",
+  };
+  const ILJI_ANIMAL_KR: Record<string, string> = {
+    子: "쥐", 丑: "소", 寅: "호랑이", 卯: "토끼",
+    辰: "용", 巳: "뱀", 午: "말", 未: "양",
+    申: "원숭이", 酉: "닭", 戌: "개", 亥: "돼지",
+  };
+
+  const ilgan = il?.gan ?? "";
+  const ilji = il?.ji ?? "";
+  const wolji = wol?.ji ?? "";
+  const subject = ILGAN_SUBJECT_KR[ilgan];
+  const season = WOLJI_SEASON_KR[wolji];
+  const color = ILGAN_COLOR_KR[ilgan];
+  const animal = ILJI_ANIMAL_KR[ilji];
+
+  if (!subject || !season) return "";
+
+  const animalLine = animal
+    ? ` 그리고 일지(태어난 날의 지지)에 해당하는 ${color} ${animal}을(를) 그림 속에 함께 담아, 이 사람만의 기질을 은유적으로 표현했소.`
+    : "";
+
+  return `이 그림은 신청자의 사주팔자를 그대로 옮겨 그린 것이오. 일간(태어난 날의 천간)이 상징하는 "${subject}"을(를) 중심 소재로 삼았고, 월지(태어난 달의 지지)가 나타내는 "${season}"을 배경으로 삼았소.${animalLine} 사주팔자에 담긴 오행의 기운을 하나의 풍경으로 형상화한 그림이니, 그림 속 사물과 계절, 동물 하나하나가 모두 이 사람의 타고난 기운을 뜻하는 것이오.`;
+}
+
 // 한 장(chapter)의 콘텐츠만 생성하는 프롬프트 (장별 병렬 호출용)
 const GAN_KR: Record<string, string> = { 甲:"갑", 乙:"을", 丙:"병", 丁:"정", 戊:"무", 己:"기", 庚:"경", 辛:"신", 壬:"임", 癸:"계" };
 const JI_KR: Record<string, string> = { 子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
