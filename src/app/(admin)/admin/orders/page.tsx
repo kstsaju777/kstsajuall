@@ -381,7 +381,15 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
                     <ConcernCell text={firstConcern(input)} />
                   </td>
-                  <td style={{ padding: "10px 14px", color: "#999", whiteSpace: "nowrap" }}>{o.user_id ? "회원" : o.guest_email}</td>
+                  <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
+                    {o.user_id ? (
+                      <span style={{ color: "#999" }}>회원</span>
+                    ) : o.guest_email ? (
+                      <CopyableText text={o.guest_email} color="green" />
+                    ) : (
+                      <span style={{ color: "#999" }}>-</span>
+                    )}
+                  </td>
                   <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "'Malgun Gothic', sans-serif", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
                   <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
                     {reportHref ? (
