@@ -57,10 +57,15 @@ export function fixNamesInText(
         .replace(new RegExp(`${word}(이|가)`, "g"), `${myFullEarly}${bMy ? "이" : "가"}`)
         .replace(new RegExp(`${word}(을|를)`, "g"), `${myFullEarly}${bMy ? "을" : "를"}`)
         .replace(new RegExp(`${word}(과|와)`, "g"), `${myFullEarly}${bMy ? "과" : "와"}`)
-        .replace(new RegExp(`${word}(으로|로)`, "g"), `${myFullEarly}${bMy ? "으로" : "로"}`)
+        // ⚠️ '그대로'는 '그대(그 사람)로'가 아니라 '있는 그대로' 할 때의 고정 부사이므로
+        // '그대' + (으로|로) 치환 규칙에서는 반드시 제외해야 함 (예: '그대로 따르기보다'가
+        // '선우님으로 따르기보다'로 잘못 바뀌는 오류 방지). '당신'은 이런 충돌 단어가 없어 그대로 적용.
+        .replace(new RegExp(`${word}(으로|로)`, "g"), (m, josa) => (word === "그대" && josa === "로" ? m : `${myFullEarly}${bMy ? "으로" : "로"}`))
         .replace(new RegExp(`${word}에게`, "g"), `${myFullEarly}에게`)
         .replace(new RegExp(`${word}의`, "g"), `${myFullEarly}의`)
-        .replace(new RegExp(word, "g"), myFullEarly); // 남은 단독 사용(조사 없음)
+        // 남은 단독 사용(조사 없음) — '그대'는 '그대로'의 일부를 잘못 물지 않도록 뒤에 '로'가
+        // 오는 경우는 제외(위에서 이미 보존 처리된 '그대로' 재훼손 방지)
+        .replace(new RegExp(word === "그대" ? `그대(?!로)` : word, "g"), myFullEarly);
     }
   }
 
