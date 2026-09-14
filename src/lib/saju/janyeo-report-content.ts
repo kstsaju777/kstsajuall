@@ -575,12 +575,16 @@ export function buildJanyeoChapterPrompt(
       "일주": "← jungnyeongi(중년기) 풀이에서 사용할 십성",
       "시주": "← nonyeongi(말년기) 풀이에서 사용할 십성",
     };
+    const GANYEOJIDONG_SET_JY0 = new Set(["甲寅","乙卯","丙午","丁巳","戊辰","戊戌","己丑","己未","庚申","辛酉","壬子","癸亥"]);
     const rows = ORDER.map(pos => {
       const p = byPos[pos];
       if (!p) return null;
       const ganKr = `${GAN_KR[p.gan] ?? p.gan}${p.ganEl}`;
       const jiKr = `${JI_KR[p.ji] ?? p.ji}${p.jiEl}`;
-      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})  ${SECTION_LABEL[pos] ?? ""}`;
+      const ganyeojidong = GANYEOJIDONG_SET_JY0.has(`${p.gan}${p.ji}`)
+        ? ` / 간여지동(서버 확정값 — 천간·지지 오행·음양 완전히 같음. 자아가 강하고 독립적이며 해당 육친과의 관계에서 갈등·긴장 소지가 있는 특수 조합. 반드시 '간여지동'이라는 명칭을 언급하며 이 의미를 반영해 서술하오)`
+        : "";
+      return `${pos}: 천간 ${ganKr}(${p.sipTop}) / 지지 ${jiKr}(${p.sipBot})  ${SECTION_LABEL[pos] ?? ""}${ganyeojidong}`;
     }).filter(Boolean);
     pillarTable = `\n[기둥별 십성 확인표 — 반드시 이 값만 사용하고 임의 추론 금지]\n${rows.join("\n")}\n`;
     // 신살 목록
@@ -603,14 +607,6 @@ export function buildJanyeoChapterPrompt(
     const seasonDesc = woljiSeason[woljiKr] ?? "";
     if (seasonDesc) {
       pillarTable += `\n[월지 계절 정보 — wonguk intro 첫 문장에서 반드시 이 표현을 그대로 사용, 다른 계절로 착각 금지]\n월지: ${woljiKr} → 태어난 계절·기후: "${seasonDesc}"\n첫 문장 형식: "${seasonDesc} 속에서 태어난 {이름1}님은 ~"\n`;
-    }
-
-    // 간여지동(干與支同) — 일주 천간·지지의 오행·음양이 완전히 같은 특수 조합. jungnyeongi(일주 기반) 풀이에서 반드시 언급해야 하는데 누락되는 경우가 많아 서버가 확정 판정
-    const GANYEOJIDONG_SET_JY = new Set(["甲寅","乙卯","丙午","丁巳","戊辰","戊戌","己丑","己未","庚申","辛酉","壬子","癸亥"]);
-    const ilju = byPos["일주"];
-    if (ilju && GANYEOJIDONG_SET_JY.has(`${ilju.gan}${ilju.ji}`)) {
-      const iljuKr = `${JI_KR[ilju.ji] ?? ilju.ji}${ilju.jiEl}`;
-      pillarTable += `\n[간여지동(干與支同) — 서버 확정값, jungnyeongi 풀이에서 반드시 이 명칭을 언급하며 의미를 반영할 것]\n이 일주(${iljuKr})는 천간·지지의 오행·음양이 완전히 같은 간여지동 조합이오. 자아가 강하고 독립적이며, 배우자·파트너와의 관계에서 갈등·긴장 소지가 있는 특수한 구조이니 이 특성을 중년기 풀이에 반드시 담으시오.\n`;
     }
   }
   if (chapter === 1 && input.birthYear) {
