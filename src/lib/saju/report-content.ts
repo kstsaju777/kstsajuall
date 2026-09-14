@@ -10,7 +10,7 @@
 // ※ 풀이 프롬프트(말투·주제·지시문)는 ./report-prompts.ts 에서 관리합니다.
 
 import { SYSTEM, CH_THEME, CH_GUIDE } from "./report-prompts";
-import { fixJosaInObject } from "../utils/fix-josa";
+import { fixJosaInObject, hasBatchim } from "../utils/fix-josa";
 import { sipseongOfStem, sipseongOfBranch } from "./sipseong-calc";
 
 export type ReportSection = {
@@ -786,8 +786,9 @@ export function buildSajuImageMeaning(pillars: { gan: string; ji: string }[], ho
   if (!temperament || !mood) return "";
 
   const traitLine = trait ? ` 사람을 대할 때는 ${trait}` : "";
+  const eunNeun = hasBatchim(honorific[honorific.length - 1]) ? "은" : "는";
 
-  return `이 그림 속에는 ${honorific}의 기질이 그대로 담겨 있소. ${honorific}은(는) ${temperament}. 또한 ${mood}.${traitLine} 그림을 가만히 들여다보면, 그 안에서 ${honorific}의 타고난 모습이 자연스레 겹쳐 보일 것이오.`;
+  return `이 그림 속에는 ${honorific}의 기질이 그대로 담겨 있소. ${honorific}${eunNeun} ${temperament}. 또한 ${mood}.${traitLine} 그림을 가만히 들여다보면, 그 안에서 ${honorific}의 타고난 모습이 자연스레 겹쳐 보일 것이오.`;
 }
 
 // 한 장(chapter)의 콘텐츠만 생성하는 프롬프트 (장별 병렬 호출용)
