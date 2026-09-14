@@ -47,7 +47,7 @@ const createSchema = z.object({
 const chapterSchema = z.object({ id: z.string().min(1), chapter: z.number().int().min(1).max(30), force: z.boolean().optional().default(false) });
 
 // 한 장 생성 (JSON 모드 + 출력 검증 + 재시도). 실패 시 throw.
-async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[]; ilganChar?: string }) {
+async function genChapterContent(chapter: number, input: { name: string; gender: "male" | "female"; manseryeokText: string; pillars?: { pos: string; gan: string; ganEl: string; ji: string; jiEl: string; sipTop: string; sipBot: string; sinsal?: string }[]; birthYear?: number; seun?: { label: string; gz: string; active?: boolean }[]; ilganChar?: string; yongsinEl?: string }) {
   const { system, user, ch3Pillars, ch3RankData } = buildYeonaeSajuChapterPrompt(chapter, input);
   let meta = { provider: "", model: "" };
   for (let i = 0; i < 3; i++) {
@@ -401,6 +401,7 @@ async function generateChapter(body: unknown) {
       birthYear: birthYear || undefined,
       seun: stored?.view?.seun ?? [],
       ilganChar: (stored?.view?.ilgan as string | undefined)?.[0] || undefined,
+      yongsinEl: stored?.view?.gyeokguk?.yongsinEl || undefined,
     });
     const myLabel = stripSurname((stored?.name ?? ""));
     const sections = fixNamesInValue(obj, myLabel, null, "님") as typeof obj;

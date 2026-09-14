@@ -255,8 +255,8 @@ loveFlow 차트에서 "인연 절정" 또는 가장 높은 시기를 기준으�
   6: `※ 말투 필수: 모든 문장은 반드시 "~이오 / ~하오 / ~겠소 / ~했소 / ~보오" 로 끝낼 것. "~다 / ~요 / ~입니다" 절대 금지.
 
 [loveCare 섹션 — 연애 개운법]
-- element: 보강해야 할 오행 이름 (반드시 "금", "목", "화", "토", "수" 중 하나만 출력)
-- elementDesc: 이 명식에서 왜 이 오행이 부족한지 그 원인과 결과를 서술하고, 보강했을 때 연애운에 어떤 변화가 오는지 설명. 반드시 3문장, 각 문장 40자 이상. ① 이 명식에서 해당 오행이 부족하여 연애 흐름에 구체적으로 어떤 약점이 생기는지 (감정 표현 약화·인연 연결력 부족·관계 지속력 저하 등 오행 특성에 맞게). ② 그 약점이 실제 연애에서 어떤 상황으로 반복되는지 독자가 "내 얘기"처럼 느낄 수 있도록 체감 언어로 묘사. ③ 이 오행을 보강하면 연애에 구체적으로 어떤 변화가 찾아오는지 희망적으로 마무리. 홍연 화자. 호칭 사용.
+- element: 보강해야 할 오행 이름. 【필수】위에 [확정 용신 오행]이 주입되어 있으면 반드시 그 오행을 그대로 사용하시오(독자적으로 다시 판단·변경 금지) — 이 리포트 전체에서 말하는 "용신"과 다른 오행을 여기서 제시하면 절대 안 되오. 주입된 값이 없을 때만 오행 분포를 보고 직접 판단하시오. (반드시 "금", "목", "화", "토", "수" 중 하나만 출력)
+- elementDesc: 이 명식에서 왜 이 오행(용신)이 보강되면 좋은지 그 원인과 결과를 서술하고, 보강했을 때 연애운에 어떤 변화가 오는지 설명. 반드시 3문장, 각 문장 40자 이상. ① 이 명식에서 해당 오행이 부족하거나 약해서 연애 흐름에 구체적으로 어떤 약점이 생기는지 (감정 표현 약화·인연 연결력 부족·관계 지속력 저하 등 오행 특성에 맞게) — 실제 오행 분포상 이 오행이 이미 충분한 경우에는 "부족하다"고 지어내지 말고, 대신 이 오행(용신)의 기운을 "더 활발히 살리고 다스리면" 좋은 이유로 서술하시오. ② 그 약점 또는 활용 포인트가 실제 연애에서 어떤 상황으로 반복되는지 독자가 "내 얘기"처럼 느낄 수 있도록 체감 언어로 묘사. ③ 이 오행을 보강하면 연애에 구체적으로 어떤 변화가 찾아오는지 희망적으로 마무리. 홍연 화자. 호칭 사용.
 - tips: 연애 개운 실천법 5~6개. 각 tip:
   - icon: 관련 이모지 1개
   - category: 실천 분야 (예: "색상", "방향", "음식", "습관", "공간", "인간관계")
@@ -491,6 +491,7 @@ export function buildYeonaeSajuChapterPrompt(
     birthYear?: number;
     seun?: { label: string; gz: string; active?: boolean }[];
     ilganChar?: string;
+    yongsinEl?: string;
   }
 ): { system: string; user: string; ch3Pillars?: CompatPillarObj[]; ch3RankData?: DescRankDataLocal[] } {
   const theme = YEONAE_CH_THEME[chapter] ?? `[제${chapter}장]`;
@@ -544,6 +545,12 @@ export function buildYeonaeSajuChapterPrompt(
     const sipCounts = SIP_ORDER.map(s => `${s}: ${sip[s] ?? 0}개`).join(" / ");
     ohaengTable = `\n[오행 분포 — 서버 확정값, 이 사주에 실제 있는 오행 비율. 모든 장 공통]\n${sorted.map(([el, n]) => `${el}: ${Math.round((n / total) * 100)}% (${n}개)`).join(" / ")}\n${zeroEls.length > 0 ? `⚠️ 이 명식에 없는 오행(0%): ${zeroEls.join(", ")} — 오행을 근거로 성격·재능·강점을 설명할 때 이 없는 오행의 상징을 이 사람에게 있는 것처럼 언급하면 절대 안 되오. 실제 있는 오행만 근거로 삼으오.` : ""}\n\n[십성 분포 — 서버 확정값, 정확한 개수. 모든 장 공통]\n${sipCounts}\n⚠️ 십성 개수를 언급할 때는 반드시 위 숫자를 그대로 쓰고, 명식표를 보고 직접 세지 마오. 0개인 십성은 없는 것으로 서술하오.\n`;
   }
+
+  // ch6 개운법 — API가 억부법으로 확정한 용신 오행을 그대로 사용 (리포트 전체 일관성 유지,
+  // "부족한 오행 보강"이라는 별개 개념으로 LLM이 임의로 다시 판단하지 않도록)
+  const yongsinBlock = input.yongsinEl
+    ? `\n[확정 용신 오행 — 서버 확정값, 개운법(loveCare.element)은 반드시 이 오행을 그대로 사용, 재판단 금지]\n용신: ${input.yongsinEl}오행\n`
+    : "";
 
   // ch4 전용: LoveLineChart와 동일한 로직으로 연도별 연애운 점수 계산 → 프롬프트 주입
   let loveScoreBlock = "";
@@ -1091,7 +1098,7 @@ export function buildYeonaeSajuChapterPrompt(
 
   const user = `아래는 ${honor}의 사주 명식입니다.
 
-${deungTable}${ohaengTable}${loveScoreBlock}${compatPillarBlock}${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
+${deungTable}${ohaengTable}${yongsinBlock}${loveScoreBlock}${compatPillarBlock}${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
