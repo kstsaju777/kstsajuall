@@ -2,17 +2,16 @@ import Link from "next/link";
 import { requireAdminPassword } from "@/lib/admin-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
-import { Badge } from "@/components/ui/badge";
 import { formatKRW, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "관리자 - 결제 내역" };
 
 type SearchParams = Promise<{ status?: string; product?: string }>;
 
-const STATUS_LABEL: Record<string, string> = {
-  paid: "결제완료",
-  pending: "결제대기",
-  failed: "실패",
+const STATUS_META: Record<string, { label: string; bg: string; fg: string }> = {
+  paid: { label: "결제완료", bg: "#d1fae5", fg: "#047857" },
+  pending: { label: "결제대기", bg: "#fef3c7", fg: "#b45309" },
+  failed: { label: "실패", bg: "#fee2e2", fg: "#b91c1c" },
 };
 
 type OrderRow = {
@@ -59,7 +58,6 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   if (!demoMode) {
     const service = createServiceClient();
 
-    // 상품별 집계 카드용 — 필터와 무관하게 전체를 한 번 가져옴
     const { data: allData } = await service
       .from("orders")
       .select("id, order_id, amount, status, created_at, user_id, guest_email, product_id, toss_payment_key")
@@ -85,30 +83,28 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i as InputRow]));
   }
 
-  // ── 상품별 집계 (필터와 무관하게 전체 기준) ──
-  type ProductStat = { productId: string; name: string; slug: string | null; count: number; paidCount: number; revenue: number };
+  // ── 상품별 집계 (필터와 무관하게 항상 전체 기준으로 계산) ──
+  type ProductStat = { productId: string; name: string; slug: string | null; total: number; paid: number; pending: number; failed: number; revenue: number };
   const statsMap = new Map<string, ProductStat>();
   for (const o of allOrders) {
     const p = productMap.get(o.product_id);
     const key = o.product_id;
     if (!statsMap.has(key)) {
-      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, count: 0, paidCount: 0, revenue: 0 });
+      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, total: 0, paid: 0, pending: 0, failed: 0, revenue: 0 });
     }
     const s = statsMap.get(key)!;
-    s.count += 1;
-    if (o.status === "paid") {
-      s.paidCount += 1;
-      s.revenue += o.amount;
-    }
+    s.total += 1;
+    if (o.status === "paid") { s.paid += 1; s.revenue += o.amount; }
+    else if (o.status === "pending") s.pending += 1;
+    else if (o.status === "failed") s.failed += 1;
   }
-  const productStats = Array.from(statsMap.values()).sort((a, b) => b.paidCount - a.paidCount);
+  const productStats = Array.from(statsMap.values()).sort((a, b) => b.paid - a.paid);
 
   const totalPaid = allOrders.filter((o) => o.status === "paid").length;
   const totalRevenue = allOrders.filter((o) => o.status === "paid").reduce((sum, o) => sum + o.amount, 0);
   const totalPending = allOrders.filter((o) => o.status === "pending").length;
   const totalFailed = allOrders.filter((o) => o.status === "failed").length;
 
-  // ── 화면에 표시할 목록: 상태 + 상품 필터 적용 ──
   const filteredOrders = allOrders.filter((o) => {
     if (status && ["pending", "paid", "failed"].includes(status) && o.status !== status) return false;
     if (productFilter && o.product_id !== productFilter) return false;
@@ -133,80 +129,81 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   };
 
   return (
-    <div className="container py-12">
-      <header className="mb-8">
-        <p className="text-xs font-mono text-mute mb-2">ADMIN / ORDERS</p>
-        <h1 className="text-2xl font-semibold tracking-tight">결제 내역</h1>
-      </header>
+    <div style={{ maxWidth: 960, margin: "0 auto", padding: "40px 20px", fontFamily: "system-ui, sans-serif" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
+        <Link href="/admin" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>← 대시보드</Link>
+        <span style={{ color: "#ddd" }}>|</span>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111", margin: 0 }}>결제 내역</h1>
+      </div>
 
       {demoMode ? (
-        <div className="mb-6 rounded-lg border border-hairline bg-canvas p-4 text-xs text-body leading-relaxed">
-          <p className="font-semibold text-ink mb-1">데모 모드 — DB 미연결</p>
-          <code className="font-mono text-ink">.env.local</code> 의 <code className="font-mono text-ink">NEXT_PUBLIC_SUPABASE_URL</code> 가 placeholder 입니다.
-          실제 결제 내역을 보려면 Supabase 프로젝트를 연결하고 마이그레이션을 적용하세요.
+        <div style={{ marginBottom: 24, padding: "14px 18px", background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 12, fontSize: 13, color: "#9a3412", lineHeight: 1.6 }}>
+          <strong>데모 모드 — DB 미연결.</strong> .env.local 의 Supabase 설정을 확인하세요.
         </div>
       ) : null}
 
       {/* 전체 요약 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 28 }}>
         {[
-          { label: "결제완료", value: totalPaid, tone: "text-ink" },
-          { label: "결제대기", value: totalPending, tone: "text-amber-600" },
-          { label: "실패", value: totalFailed, tone: "text-red-600" },
-          { label: "총 매출", value: formatKRW(totalRevenue), tone: "text-ink" },
+          { label: "결제완료", value: totalPaid.toLocaleString(), color: "#047857" },
+          { label: "결제대기", value: totalPending.toLocaleString(), color: "#b45309" },
+          { label: "실패", value: totalFailed.toLocaleString(), color: "#b91c1c" },
+          { label: "총 매출 (결제완료 기준)", value: formatKRW(totalRevenue), color: "#111" },
         ].map((s) => (
-          <div key={s.label} className="rounded-lg border border-hairline bg-canvas px-4 py-3">
-            <p className="text-[11px] font-mono uppercase tracking-wider text-mute mb-1">{s.label}</p>
-            <p className={`text-lg font-semibold font-mono ${s.tone}`}>{s.value}</p>
+          <div key={s.label} style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+            <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>{s.label}</p>
+            <p style={{ fontSize: 18, fontWeight: 700, color: s.color, margin: 0 }}>{s.value}</p>
           </div>
         ))}
       </div>
 
-      {/* 상품별 집계 카드 — 클릭하면 해당 상품으로 필터링 */}
-      <div className="mb-8">
-        <p className="text-xs font-mono text-mute mb-3">상품별 주문 현황 (클릭하여 필터)</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {productStats.map((s) => {
-            const active = productFilter === s.productId;
-            return (
-              <Link
-                key={s.productId}
-                href={buildHref({ product: active ? "" : s.productId })}
-                className={`rounded-lg border p-4 transition-colors ${
-                  active ? "border-ink bg-ink text-canvas" : "border-hairline bg-canvas hover:border-ink"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <p className={`text-sm font-semibold truncate ${active ? "text-canvas" : "text-ink"}`}>{s.name}</p>
-                  <span className={`shrink-0 text-[11px] font-mono ${active ? "text-canvas/70" : "text-mute"}`}>
-                    {s.paidCount}/{s.count}건
-                  </span>
-                </div>
-                <p className={`text-base font-mono font-semibold ${active ? "text-canvas" : "text-ink"}`}>
-                  {formatKRW(s.revenue)}
-                </p>
-                <p className={`text-[11px] mt-1 ${active ? "text-canvas/70" : "text-mute"}`}>결제완료 매출 기준</p>
-              </Link>
-            );
-          })}
-          {productStats.length === 0 && (
-            <div className="col-span-full text-center py-10 text-sm text-mute border border-dashed border-hairline rounded-lg">
-              아직 주문이 없습니다.
-            </div>
-          )}
-        </div>
+      {/* 상품별 집계 카드 */}
+      <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>상품별 주문 현황 · 클릭하면 아래 목록이 해당 상품으로 필터링됩니다</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10, marginBottom: 28 }}>
+        {productStats.map((s) => {
+          const active = productFilter === s.productId;
+          return (
+            <Link
+              key={s.productId}
+              href={buildHref({ product: active ? "" : s.productId })}
+              style={{
+                display: "block", padding: "16px 18px", borderRadius: 12, textDecoration: "none",
+                background: active ? "#111" : "#fff",
+                border: `1px solid ${active ? "#111" : "#e8e8e8"}`,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
+            >
+              <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 8px", color: active ? "#fff" : "#111" }}>{s.name}</p>
+              <p style={{ fontSize: 17, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 6px", color: active ? "#fff" : "#111" }}>
+                {formatKRW(s.revenue)}
+              </p>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 11, color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>결제완료 {s.paid}건</span>
+                {s.pending > 0 && <span style={{ fontSize: 11, color: active ? "#fef3c7" : "#b45309" }}>대기 {s.pending}건</span>}
+                {s.failed > 0 && <span style={{ fontSize: 11, color: active ? "#fee2e2" : "#b91c1c" }}>실패 {s.failed}건</span>}
+              </div>
+            </Link>
+          );
+        })}
+        {productStats.length === 0 && (
+          <p style={{ gridColumn: "1 / -1", textAlign: "center", padding: "24px 0", fontSize: 13, color: "#aaa" }}>아직 주문이 없습니다.</p>
+        )}
       </div>
 
       {/* 상태 필터 */}
-      <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
-        <div className="flex gap-2">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 8 }}>
           {statusFilters.map((f) => {
             const active = (status ?? "") === f.key;
             return (
               <Link
                 key={f.key || "all"}
                 href={buildHref({ status: f.key })}
-                className={`px-4 h-8 inline-flex items-center rounded-full text-sm border transition-colors ${active ? "bg-ink text-canvas border-ink" : "border-hairline text-ink hover:border-ink"}`}
+                style={{
+                  padding: "6px 14px", borderRadius: 999, fontSize: 13, textDecoration: "none",
+                  background: active ? "#111" : "#fff", color: active ? "#fff" : "#555",
+                  border: `1px solid ${active ? "#111" : "#e0e0e0"}`,
+                }}
               >
                 {f.label}
               </Link>
@@ -214,31 +211,29 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
           })}
         </div>
         {productFilter && (
-          <Link href={buildHref({ product: "" })} className="text-xs text-mute underline underline-offset-2">
+          <Link href={buildHref({ product: "" })} style={{ fontSize: 12, color: "#888", textDecoration: "underline" }}>
             상품 필터 해제 ({productMap.get(productFilter)?.name ?? productFilter})
           </Link>
         )}
       </div>
 
-      <p className="text-xs text-mute font-mono mb-3">{filteredOrders.length} ROWS</p>
+      <p style={{ fontSize: 12, color: "#aaa", margin: "0 0 10px" }}>{filteredOrders.length}건 표시 중</p>
 
-      <div className="border border-hairline rounded-lg overflow-hidden overflow-x-auto">
+      <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, overflow: "hidden" }}>
         {filteredOrders.length === 0 ? (
-          <div className="py-16 text-center text-sm text-mute">
+          <div style={{ padding: "48px 0", textAlign: "center", fontSize: 13, color: "#aaa" }}>
             {demoMode ? "데모 모드에서는 결제 내역이 비어 있습니다." : "조건에 맞는 결제 내역이 없습니다."}
           </div>
         ) : (
-        <table className="w-full text-sm">
+        <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
-            <tr className="border-b border-hairline bg-surface-soft">
-              <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">생성일</th>
-              <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">주문번호</th>
-              <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">상품</th>
-              <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">신청자</th>
-              <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">고객 계정</th>
-              <th className="px-4 py-3 text-right text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">금액</th>
-              <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">상태</th>
-              <th className="px-4 py-3 text-left text-[11px] font-mono uppercase tracking-wider text-mute whitespace-nowrap">결과</th>
+            <tr style={{ background: "#fafafa", borderBottom: "1px solid #eee" }}>
+              {["생성일", "주문번호", "상품", "신청자", "고객 계정", "금액", "상태", "결과지"].map((h, i) => (
+                <th key={h} style={{ padding: "10px 14px", textAlign: i === 5 ? "right" : "left", fontSize: 11, color: "#999", fontWeight: 600, whiteSpace: "nowrap" }}>
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -254,35 +249,31 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
 
               const partnerName = product?.slug?.startsWith("kunghap_") ? getPartnerName(input?.concerns) : "";
               const applicantLabel = input?.name
-                ? partnerName
-                  ? `${input.name}님 · ${partnerName}님`
-                  : `${input.name}님`
+                ? partnerName ? `${input.name}님 · ${partnerName}님` : `${input.name}님`
                 : "-";
 
+              const meta = STATUS_META[o.status] ?? { label: o.status, bg: "#f0f0f0", fg: "#666" };
+
               return (
-                <tr key={o.id} className="border-b border-hairline last:border-0 hover:bg-surface-soft/60 transition-colors">
-                  <td className="px-4 py-3 text-xs text-body whitespace-nowrap">{formatDate(o.created_at)}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{o.order_id}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{product?.name ?? "-"}</td>
-                  <td className="px-4 py-3 text-xs whitespace-nowrap">{applicantLabel}</td>
-                  <td className="px-4 py-3 text-xs text-mute whitespace-nowrap">{o.user_id ? "회원" : o.guest_email}</td>
-                  <td className="px-4 py-3 text-right font-mono whitespace-nowrap">{formatKRW(o.amount)}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <Badge
-                      variant={
-                        o.status === "paid" ? "success" : o.status === "failed" ? "destructive" : "secondary"
-                      }
-                    >
-                      {STATUS_LABEL[o.status] ?? o.status}
-                    </Badge>
+                <tr key={o.id} style={{ borderBottom: "1px solid #f2f2f2" }}>
+                  <td style={{ padding: "10px 14px", color: "#888", whiteSpace: "nowrap" }}>{formatDate(o.created_at)}</td>
+                  <td style={{ padding: "10px 14px", fontFamily: "ui-monospace, monospace", fontSize: 12, color: "#555" }}>{o.order_id}</td>
+                  <td style={{ padding: "10px 14px", color: "#111", whiteSpace: "nowrap" }}>{product?.name ?? "-"}</td>
+                  <td style={{ padding: "10px 14px", color: "#333", whiteSpace: "nowrap" }}>{applicantLabel}</td>
+                  <td style={{ padding: "10px 14px", color: "#999", whiteSpace: "nowrap" }}>{o.user_id ? "회원" : o.guest_email}</td>
+                  <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "ui-monospace, monospace", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
+                  <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
+                    <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 600, background: meta.bg, color: meta.fg }}>
+                      {meta.label}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
                     {reportHref ? (
-                      <Link href={reportHref} target="_blank" className="text-xs font-medium underline underline-offset-2 text-ink">
+                      <Link href={reportHref} target="_blank" style={{ fontSize: 12, fontWeight: 600, color: "#111", textDecoration: "underline" }}>
                         보기 ↗
                       </Link>
                     ) : (
-                      <span className="text-xs text-mute">-</span>
+                      <span style={{ fontSize: 12, color: "#ccc" }}>-</span>
                     )}
                   </td>
                 </tr>
@@ -290,6 +281,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
             })}
           </tbody>
         </table>
+        </div>
         )}
       </div>
     </div>
