@@ -14,13 +14,12 @@ export function ConcernCell({ text }: { text: string }) {
       <button
         onClick={() => setOpen(true)}
         style={{
-          all: "unset", cursor: "pointer", display: "block", maxWidth: 260,
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          fontSize: 12, color: "#2563eb", textDecoration: "underline",
+          display: "inline-block", padding: "4px 10px", borderRadius: 999,
+          fontSize: 11, fontWeight: 600, color: "#2563eb", background: "#eff6ff",
+          border: "1px solid #bfdbfe", cursor: "pointer", whiteSpace: "nowrap",
         }}
-        title="클릭해서 전체 보기"
       >
-        {text}
+        고민보기
       </button>
 
       {open && (
