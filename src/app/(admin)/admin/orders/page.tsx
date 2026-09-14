@@ -6,13 +6,7 @@ import { formatKRW, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "관리자 - 결제 내역" };
 
-type SearchParams = Promise<{ status?: string; product?: string }>;
-
-const STATUS_META: Record<string, { label: string; bg: string; fg: string }> = {
-  paid: { label: "결제완료", bg: "#d1fae5", fg: "#047857" },
-  pending: { label: "결제대기", bg: "#fef3c7", fg: "#b45309" },
-  failed: { label: "실패", bg: "#fee2e2", fg: "#b91c1c" },
-};
+type SearchParams = Promise<{ product?: string }>;
 
 type OrderRow = {
   id: string;
@@ -47,7 +41,7 @@ function getPartnerName(concerns: unknown): string {
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdminPassword("/admin/orders");
 
-  const { status, product: productFilter } = await searchParams;
+  const { product: productFilter } = await searchParams;
   const demoMode = !isSupabaseConfigured();
 
   let allOrders: OrderRow[] = [];
@@ -83,46 +77,34 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i as InputRow]));
   }
 
-  // ── 상품별 집계 (필터와 무관하게 항상 전체 기준으로 계산) ──
-  type ProductStat = { productId: string; name: string; slug: string | null; total: number; paid: number; pending: number; failed: number; revenue: number };
+  const paidOrders = allOrders.filter((o) => o.status === "paid");
+  const totalPaid = paidOrders.length;
+  const totalRevenue = paidOrders.reduce((sum, o) => sum + o.amount, 0);
+
+  // ── 상품별 집계 (결제완료 건 기준) ──
+  type ProductStat = { productId: string; name: string; slug: string | null; paid: number; revenue: number };
   const statsMap = new Map<string, ProductStat>();
-  for (const o of allOrders) {
+  for (const o of paidOrders) {
     const p = productMap.get(o.product_id);
     const key = o.product_id;
     if (!statsMap.has(key)) {
-      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, total: 0, paid: 0, pending: 0, failed: 0, revenue: 0 });
+      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, paid: 0, revenue: 0 });
     }
     const s = statsMap.get(key)!;
-    s.total += 1;
-    if (o.status === "paid") { s.paid += 1; s.revenue += o.amount; }
-    else if (o.status === "pending") s.pending += 1;
-    else if (o.status === "failed") s.failed += 1;
+    s.paid += 1;
+    s.revenue += o.amount;
   }
   const productStats = Array.from(statsMap.values()).sort((a, b) => b.paid - a.paid);
 
-  const totalPaid = allOrders.filter((o) => o.status === "paid").length;
-  const totalRevenue = allOrders.filter((o) => o.status === "paid").reduce((sum, o) => sum + o.amount, 0);
-  const totalPending = allOrders.filter((o) => o.status === "pending").length;
-  const totalFailed = allOrders.filter((o) => o.status === "failed").length;
-
-  const filteredOrders = allOrders.filter((o) => {
-    if (status && ["pending", "paid", "failed"].includes(status) && o.status !== status) return false;
+  // 결제완료 건만 표시 (결제대기·실패는 디스플레이하지 않음)
+  const filteredOrders = paidOrders.filter((o) => {
     if (productFilter && o.product_id !== productFilter) return false;
     return true;
   });
 
-  const statusFilters = [
-    { key: "", label: "전체 상태" },
-    { key: "paid", label: "결제완료" },
-    { key: "pending", label: "결제대기" },
-    { key: "failed", label: "실패" },
-  ];
-
-  const buildHref = (next: { status?: string; product?: string }) => {
+  const buildHref = (next: { product?: string }) => {
     const p = new URLSearchParams();
-    const s = next.status !== undefined ? next.status : (status ?? "");
     const pr = next.product !== undefined ? next.product : (productFilter ?? "");
-    if (s) p.set("status", s);
     if (pr) p.set("product", pr);
     const qs = p.toString();
     return qs ? `/admin/orders?${qs}` : "/admin/orders";
@@ -142,13 +124,11 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         </div>
       ) : null}
 
-      {/* 전체 요약 */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 28 }}>
+      {/* 전체 요약 (결제완료 기준) */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 28 }}>
         {[
-          { label: "결제완료", value: totalPaid.toLocaleString(), color: "#047857" },
-          { label: "결제대기", value: totalPending.toLocaleString(), color: "#b45309" },
-          { label: "실패", value: totalFailed.toLocaleString(), color: "#b91c1c" },
-          { label: "총 매출 (결제완료 기준)", value: formatKRW(totalRevenue), color: "#111" },
+          { label: "결제완료 건수", value: totalPaid.toLocaleString(), color: "#047857" },
+          { label: "총 매출", value: formatKRW(totalRevenue), color: "#111" },
         ].map((s) => (
           <div key={s.label} style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
             <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>{s.label}</p>
@@ -177,11 +157,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               <p style={{ fontSize: 17, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 6px", color: active ? "#fff" : "#111" }}>
                 {formatKRW(s.revenue)}
               </p>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 11, color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>결제완료 {s.paid}건</span>
-                {s.pending > 0 && <span style={{ fontSize: 11, color: active ? "#fef3c7" : "#b45309" }}>대기 {s.pending}건</span>}
-                {s.failed > 0 && <span style={{ fontSize: 11, color: active ? "#fee2e2" : "#b91c1c" }}>실패 {s.failed}건</span>}
-              </div>
+              <span style={{ fontSize: 11, color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>결제완료 {s.paid}건</span>
             </Link>
           );
         })}
@@ -190,34 +166,14 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         )}
       </div>
 
-      {/* 상태 필터 */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
-        <div style={{ display: "flex", gap: 8 }}>
-          {statusFilters.map((f) => {
-            const active = (status ?? "") === f.key;
-            return (
-              <Link
-                key={f.key || "all"}
-                href={buildHref({ status: f.key })}
-                style={{
-                  padding: "6px 14px", borderRadius: 999, fontSize: 13, textDecoration: "none",
-                  background: active ? "#111" : "#fff", color: active ? "#fff" : "#555",
-                  border: `1px solid ${active ? "#111" : "#e0e0e0"}`,
-                }}
-              >
-                {f.label}
-              </Link>
-            );
-          })}
-        </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 10 }}>
+        <p style={{ fontSize: 12, color: "#aaa", margin: 0 }}>결제완료 {filteredOrders.length}건 표시 중</p>
         {productFilter && (
           <Link href={buildHref({ product: "" })} style={{ fontSize: 12, color: "#888", textDecoration: "underline" }}>
             상품 필터 해제 ({productMap.get(productFilter)?.name ?? productFilter})
           </Link>
         )}
       </div>
-
-      <p style={{ fontSize: 12, color: "#aaa", margin: "0 0 10px" }}>{filteredOrders.length}건 표시 중</p>
 
       <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, overflow: "hidden" }}>
         {filteredOrders.length === 0 ? (
@@ -229,7 +185,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: "#fafafa", borderBottom: "1px solid #eee" }}>
-              {["생성일", "주문번호", "상품", "신청자", "고객 계정", "금액", "상태", "결과지"].map((h, i) => (
+              {["생성일", "주문번호", "상품", "신청자", "고객 계정", "금액", "결과지"].map((h, i) => (
                 <th key={h} style={{ padding: "10px 14px", textAlign: i === 5 ? "right" : "left", fontSize: 11, color: "#999", fontWeight: 600, whiteSpace: "nowrap" }}>
                   {h}
                 </th>
@@ -243,7 +199,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               const resultId = resultMap.get(o.id);
 
               let reportHref: string | null = null;
-              if (o.status === "paid" && resultId && product?.slug) {
+              if (resultId && product?.slug) {
                 reportHref = `/saju/${product.slug}/report-preview?id=${resultId}`;
               }
 
@@ -251,8 +207,6 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               const applicantLabel = input?.name
                 ? partnerName ? `${input.name}님 · ${partnerName}님` : `${input.name}님`
                 : "-";
-
-              const meta = STATUS_META[o.status] ?? { label: o.status, bg: "#f0f0f0", fg: "#666" };
 
               return (
                 <tr key={o.id} style={{ borderBottom: "1px solid #f2f2f2" }}>
@@ -262,11 +216,6 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "10px 14px", color: "#333", whiteSpace: "nowrap" }}>{applicantLabel}</td>
                   <td style={{ padding: "10px 14px", color: "#999", whiteSpace: "nowrap" }}>{o.user_id ? "회원" : o.guest_email}</td>
                   <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "ui-monospace, monospace", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
-                  <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
-                    <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 600, background: meta.bg, color: meta.fg }}>
-                      {meta.label}
-                    </span>
-                  </td>
                   <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
                     {reportHref ? (
                       <Link href={reportHref} target="_blank" style={{ fontSize: 12, fontWeight: 600, color: "#111", textDecoration: "underline" }}>
