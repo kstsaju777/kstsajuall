@@ -6437,7 +6437,7 @@ function ReportPreviewInner() {
           <Illust src="/media/report/total/total-6/total-6-3.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "16%", left: "50%", transform: "translate(-50%, -50%)" }}>
               <p className="text-[16px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                {name.slice(1) || name}님의 연애운도 다 살펴봤소.<br />사랑은 준비된 자에게 오는것이오.<br /><br /><span style={{ fontSize: 18 }}>잘 기억하고 준비하시오.</span>
+                {name.slice(1) || name}님의 연애운도 다 살펴봤소.<br />사랑은 준비된 자에게 오는것이오.<br /><br /><span style={{ fontSize: 21 }}>잘 기억하고 준비하시오.</span>
               </p>
             </div>
           </Illust>
