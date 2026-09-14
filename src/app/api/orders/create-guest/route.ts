@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 const bodySchema = z.object({
   productSlug: z.string(),
@@ -44,6 +44,12 @@ export async function POST(request: NextRequest) {
 
   const service = createServiceClient();
 
+  // 이름과 달리 "게스트 결제"용 라우트지만, 실제로는 로그인한 상태(예: 어드민 계정)로
+  // 결제하는 경우도 이 라우트를 그대로 타므로, 로그인 세션이 있으면 user_id를 함께 기록한다.
+  // (그래야 어드민 계정 결제가 매출 집계에서 정상적으로 자동 제외된다.)
+  const supabaseAuth = await createClient();
+  const { data: { user: loggedInUser } } = await supabaseAuth.auth.getUser();
+
   const { data: product } = await service
     .from("products")
     .select("id, price, is_active")
@@ -60,7 +66,7 @@ export async function POST(request: NextRequest) {
     .from("orders")
     .insert({
       order_id: orderId,
-      user_id: null,
+      user_id: loggedInUser?.id ?? null,
       guest_email: body.email,
       product_id: product.id,
       amount: product.price,
