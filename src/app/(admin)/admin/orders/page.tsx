@@ -19,6 +19,22 @@ const SAJU_DISPLAY_NAME: Record<string, string> = {
   saju_youare: "유아사주",
 };
 
+// 궁합 상품 카드에 쓸 표시명 및 정렬 순서
+const KUNGHAP_DISPLAY_ORDER = [
+  "kunghap_yeonae", "kunghap_gyeolhon", "kunghap_ehon", "kunghap_jaehwe",
+  "kunghap_janyeo", "kunghap_imshin", "kunghap_business", "kunghap_banryeo",
+];
+const KUNGHAP_DISPLAY_NAME: Record<string, string> = {
+  kunghap_yeonae: "연애궁합",
+  kunghap_gyeolhon: "결혼궁합",
+  kunghap_ehon: "이혼궁합",
+  kunghap_jaehwe: "재회궁합",
+  kunghap_janyeo: "자녀궁합",
+  kunghap_imshin: "임신궁합",
+  kunghap_business: "비즈궁합",
+  kunghap_banryeo: "반려궁합",
+};
+
 type SearchParams = Promise<{ product?: string; month?: string }>;
 
 type OrderRow = {
@@ -317,7 +333,14 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
             const bi = b.slug ? SAJU_DISPLAY_ORDER.indexOf(b.slug) : -1;
             return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
           });
-        const kunghapStats = productStats.filter((s) => s.slug?.startsWith("kunghap_"));
+        const kunghapStats = productStats
+          .filter((s) => s.slug?.startsWith("kunghap_"))
+          .map((s) => ({ ...s, name: (s.slug && KUNGHAP_DISPLAY_NAME[s.slug]) ?? s.name }))
+          .sort((a, b) => {
+            const ai = a.slug ? KUNGHAP_DISPLAY_ORDER.indexOf(a.slug) : -1;
+            const bi = b.slug ? KUNGHAP_DISPLAY_ORDER.indexOf(b.slug) : -1;
+            return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+          });
 
         const renderCard = (s: ProductStat) => {
           const active = productFilter === s.productId;
