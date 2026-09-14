@@ -6405,7 +6405,7 @@ function ReportPreviewInner() {
           {/* 시기별 연애 흐름 */}
           <Illust src="/media/report/total/total-6/total-6-1.jpg" noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "25%", left: "32%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[15px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+              <p className="text-[18px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
                 사랑도 때가 있소.<br /><br />{name.slice(1) || name}님의 연애 흐름을<br />그래프로 보여드리겠소.
               </p>
             </div>
