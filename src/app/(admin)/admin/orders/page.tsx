@@ -3,6 +3,7 @@ import { requireAdminPassword } from "@/lib/admin-auth";
 import { createServiceClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { formatKRW, formatDate } from "@/lib/utils";
+import { ConcernCell } from "@/components/admin/ConcernCell";
 
 export const metadata = { title: "관리자 - 결제 내역" };
 
@@ -30,11 +31,25 @@ type InputRow = {
   calendar: string | null;
 };
 
+// 12지지 시진(자시~해시) — 23:00~01:00 = 자시, 이후 2시간씩
+const SIJIN_NAMES = ["자시", "축시", "인시", "묘시", "진시", "사시", "오시", "미시", "신시", "유시", "술시", "해시"];
+function toSijinName(hhmm: string): string {
+  const [hStr] = hhmm.split(":");
+  const h = parseInt(hStr, 10);
+  if (Number.isNaN(h)) return "";
+  const idx = Math.floor(((h + 1) % 24) / 2);
+  return SIJIN_NAMES[idx] ?? "";
+}
+
 function formatBirth(input: InputRow | undefined): string {
   if (!input?.birth_date) return "-";
   const cal = input.calendar === "lunar" ? "음력" : "양력";
-  const time = input.time_unknown || !input.birth_time ? "시간모름" : input.birth_time.slice(0, 5);
-  return `${input.birth_date} (${cal}) · ${time}`;
+  if (input.time_unknown || !input.birth_time) {
+    return `${input.birth_date} (${cal}) · 시간모름`;
+  }
+  const hhmm = input.birth_time.slice(0, 5);
+  const sijin = toSijinName(hhmm);
+  return `${input.birth_date} (${cal}) · ${hhmm}${sijin ? ` (${sijin})` : ""}`;
 }
 
 function firstConcern(input: InputRow | undefined): string {
@@ -362,8 +377,8 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "10px 14px", color: "#111", whiteSpace: "nowrap" }}>{product?.name ?? "-"}</td>
                   <td style={{ padding: "10px 14px", color: "#333", whiteSpace: "nowrap" }}>{applicantLabel}</td>
                   <td style={{ padding: "10px 14px", color: "#555", whiteSpace: "nowrap", fontSize: 12 }}>{formatBirth(input)}</td>
-                  <td style={{ padding: "10px 14px", color: "#888", fontSize: 12, maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={firstConcern(input)}>
-                    {firstConcern(input)}
+                  <td style={{ padding: "10px 14px" }}>
+                    <ConcernCell text={firstConcern(input)} />
                   </td>
                   <td style={{ padding: "10px 14px", color: "#999", whiteSpace: "nowrap" }}>{o.user_id ? "회원" : o.guest_email}</td>
                   <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "ui-monospace, monospace", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
