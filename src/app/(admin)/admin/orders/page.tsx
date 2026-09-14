@@ -6,7 +6,7 @@ import { formatKRW, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "관리자 - 결제 내역" };
 
-type SearchParams = Promise<{ product?: string }>;
+type SearchParams = Promise<{ product?: string; month?: string }>;
 
 type OrderRow = {
   id: string;
@@ -38,16 +38,26 @@ function getPartnerName(concerns: unknown): string {
   }
 }
 
+// KST 기준 YYYY-MM-DD / YYYY-MM
+function toKstDateKey(iso: string): string {
+  const d = new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000);
+  return d.toISOString().slice(0, 10);
+}
+function toKstMonthKey(iso: string): string {
+  return toKstDateKey(iso).slice(0, 7);
+}
+
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdminPassword("/admin/orders");
 
-  const { product: productFilter } = await searchParams;
+  const { product: productFilter, month: monthFilter } = await searchParams;
   const demoMode = !isSupabaseConfigured();
 
   let allOrders: OrderRow[] = [];
   let productMap = new Map<string, { name: string; slug: string | null }>();
   let resultMap = new Map<string, string>();
   let inputMap = new Map<string, InputRow>();
+  let adminUserIds = new Set<string>();
 
   if (!demoMode) {
     const service = createServiceClient();
@@ -56,7 +66,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       .from("orders")
       .select("id, order_id, amount, status, created_at, user_id, guest_email, product_id, toss_payment_key")
       .order("created_at", { ascending: false })
-      .limit(2000);
+      .limit(5000);
     allOrders = (allData ?? []) as OrderRow[];
 
     const productIds = Array.from(new Set(allOrders.map((o) => o.product_id)));
@@ -75,37 +85,77 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       ? await service.from("saju_inputs").select("order_id, name, concerns").in("order_id", orderIds)
       : { data: [] };
     inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i as InputRow]));
+
+    // 어드민 계정으로 결제된 건 = 테스트결제로 간주하여 매출 집계에서 제외
+    const { data: admins } = await service.from("profiles").select("id").eq("is_admin", true);
+    adminUserIds = new Set((admins ?? []).map((a) => a.id));
   }
 
-  const paidOrders = allOrders.filter((o) => o.status === "paid");
-  const totalPaid = paidOrders.length;
-  const totalRevenue = paidOrders.reduce((sum, o) => sum + o.amount, 0);
+  const isTestOrder = (o: OrderRow) => !!o.user_id && adminUserIds.has(o.user_id);
 
-  // ── 상품별 집계 (결제완료 건 기준) ──
-  type ProductStat = { productId: string; name: string; slug: string | null; paid: number; revenue: number };
+  const paidOrders = allOrders.filter((o) => o.status === "paid");
+  const realOrders = paidOrders.filter((o) => !isTestOrder(o));
+  const testOrders = paidOrders.filter((o) => isTestOrder(o));
+
+  const totalRealPaid = realOrders.length;
+  const totalTestPaid = testOrders.length;
+  const totalRevenue = realOrders.reduce((sum, o) => sum + o.amount, 0);
+
+  // ── 상품별 집계 (실결제 매출 기준) ──
+  type ProductStat = { productId: string; name: string; slug: string | null; real: number; test: number; revenue: number };
   const statsMap = new Map<string, ProductStat>();
   for (const o of paidOrders) {
     const p = productMap.get(o.product_id);
     const key = o.product_id;
     if (!statsMap.has(key)) {
-      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, paid: 0, revenue: 0 });
+      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, real: 0, test: 0, revenue: 0 });
     }
     const s = statsMap.get(key)!;
-    s.paid += 1;
-    s.revenue += o.amount;
+    if (isTestOrder(o)) { s.test += 1; }
+    else { s.real += 1; s.revenue += o.amount; }
   }
-  const productStats = Array.from(statsMap.values()).sort((a, b) => b.paid - a.paid);
+  const productStats = Array.from(statsMap.values()).sort((a, b) => b.revenue - a.revenue);
 
-  // 결제완료 건만 표시 (결제대기·실패는 디스플레이하지 않음)
-  const filteredOrders = paidOrders.filter((o) => {
+  // ── 월별 집계 (실결제만) ──
+  type MonthStat = { month: string; count: number; revenue: number };
+  const monthMap = new Map<string, MonthStat>();
+  for (const o of realOrders) {
+    const key = toKstMonthKey(o.created_at);
+    if (!monthMap.has(key)) monthMap.set(key, { month: key, count: 0, revenue: 0 });
+    const m = monthMap.get(key)!;
+    m.count += 1;
+    m.revenue += o.amount;
+  }
+  const monthStats = Array.from(monthMap.values()).sort((a, b) => b.month.localeCompare(a.month));
+
+  // ── 일별 집계 (실결제만, 선택된 월 또는 최근 월 기준) ──
+  const activeMonth = monthFilter || monthStats[0]?.month || toKstMonthKey(new Date().toISOString());
+  type DayStat = { day: string; count: number; revenue: number; byProduct: Map<string, number> };
+  const dayMap = new Map<string, DayStat>();
+  for (const o of realOrders) {
+    const dayKey = toKstDateKey(o.created_at);
+    if (!dayKey.startsWith(activeMonth)) continue;
+    if (!dayMap.has(dayKey)) dayMap.set(dayKey, { day: dayKey, count: 0, revenue: 0, byProduct: new Map() });
+    const d = dayMap.get(dayKey)!;
+    d.count += 1;
+    d.revenue += o.amount;
+    const pname = productMap.get(o.product_id)?.name ?? "알 수 없음";
+    d.byProduct.set(pname, (d.byProduct.get(pname) ?? 0) + o.amount);
+  }
+  const dayStats = Array.from(dayMap.values()).sort((a, b) => b.day.localeCompare(a.day));
+
+  // ── 화면에 표시할 목록: 실결제 + 상품 필터 ──
+  const filteredOrders = realOrders.filter((o) => {
     if (productFilter && o.product_id !== productFilter) return false;
     return true;
   });
 
-  const buildHref = (next: { product?: string }) => {
+  const buildHref = (next: { product?: string; month?: string }) => {
     const p = new URLSearchParams();
     const pr = next.product !== undefined ? next.product : (productFilter ?? "");
+    const mo = next.month !== undefined ? next.month : (monthFilter ?? "");
     if (pr) p.set("product", pr);
+    if (mo) p.set("month", mo);
     const qs = p.toString();
     return qs ? `/admin/orders?${qs}` : "/admin/orders";
   };
@@ -115,7 +165,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
         <Link href="/admin" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>← 대시보드</Link>
         <span style={{ color: "#ddd" }}>|</span>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111", margin: 0 }}>결제 내역</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111", margin: 0 }}>결제 내역 · 매출 집계</h1>
       </div>
 
       {demoMode ? (
@@ -124,21 +174,85 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         </div>
       ) : null}
 
-      {/* 전체 요약 (결제완료 기준) */}
+      <p style={{ fontSize: 12, color: "#aaa", margin: "0 0 20px", lineHeight: 1.6 }}>
+        ※ 어드민 계정으로 결제한 건(테스트결제)은 아래 매출·집계에서 모두 자동 제외됩니다.
+        {totalTestPaid > 0 && <> (제외된 테스트결제 {totalTestPaid}건)</>}
+      </p>
+
+      {/* 전체 요약 */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 28 }}>
-        {[
-          { label: "결제완료 건수", value: totalPaid.toLocaleString(), color: "#047857" },
-          { label: "총 매출", value: formatKRW(totalRevenue), color: "#111" },
-        ].map((s) => (
-          <div key={s.label} style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-            <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>{s.label}</p>
-            <p style={{ fontSize: 18, fontWeight: 700, color: s.color, margin: 0 }}>{s.value}</p>
-          </div>
-        ))}
+        <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>실결제 건수</p>
+          <p style={{ fontSize: 18, fontWeight: 700, color: "#047857", margin: 0 }}>{totalRealPaid.toLocaleString()}</p>
+        </div>
+        <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>누적 총 매출</p>
+          <p style={{ fontSize: 18, fontWeight: 700, color: "#111", margin: 0 }}>{formatKRW(totalRevenue)}</p>
+        </div>
+      </div>
+
+      {/* 월별 매출 */}
+      <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>월별 매출 · 클릭하면 아래 일별 집계가 해당 월로 전환됩니다</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10, marginBottom: 28 }}>
+        {monthStats.map((m) => {
+          const active = activeMonth === m.month;
+          return (
+            <Link
+              key={m.month}
+              href={buildHref({ month: m.month })}
+              style={{
+                display: "block", padding: "14px 16px", borderRadius: 12, textDecoration: "none",
+                background: active ? "#111" : "#fff",
+                border: `1px solid ${active ? "#111" : "#e8e8e8"}`,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
+            >
+              <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 6px", color: active ? "#fff" : "#888" }}>{m.month}</p>
+              <p style={{ fontSize: 15, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: 0, color: active ? "#fff" : "#111" }}>{formatKRW(m.revenue)}</p>
+              <p style={{ fontSize: 11, margin: "4px 0 0", color: active ? "#d1fae5" : "#047857" }}>{m.count}건</p>
+            </Link>
+          );
+        })}
+        {monthStats.length === 0 && (
+          <p style={{ gridColumn: "1 / -1", textAlign: "center", padding: "24px 0", fontSize: 13, color: "#aaa" }}>실결제 내역이 없습니다.</p>
+        )}
+      </div>
+
+      {/* 일별 매출 (선택된 월) */}
+      <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>{activeMonth} 일별 매출</p>
+      <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, overflow: "hidden", marginBottom: 28 }}>
+        {dayStats.length === 0 ? (
+          <div style={{ padding: "32px 0", textAlign: "center", fontSize: 13, color: "#aaa" }}>해당 월 실결제 내역이 없습니다.</div>
+        ) : (
+        <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: "#fafafa", borderBottom: "1px solid #eee" }}>
+              <th style={{ padding: "8px 14px", textAlign: "left", fontSize: 11, color: "#999", fontWeight: 600 }}>날짜</th>
+              <th style={{ padding: "8px 14px", textAlign: "right", fontSize: 11, color: "#999", fontWeight: 600 }}>건수</th>
+              <th style={{ padding: "8px 14px", textAlign: "right", fontSize: 11, color: "#999", fontWeight: 600 }}>매출</th>
+              <th style={{ padding: "8px 14px", textAlign: "left", fontSize: 11, color: "#999", fontWeight: 600 }}>상품별 내역</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dayStats.map((d) => (
+              <tr key={d.day} style={{ borderBottom: "1px solid #f2f2f2" }}>
+                <td style={{ padding: "8px 14px", color: "#333", whiteSpace: "nowrap" }}>{d.day}</td>
+                <td style={{ padding: "8px 14px", textAlign: "right", color: "#333" }}>{d.count}건</td>
+                <td style={{ padding: "8px 14px", textAlign: "right", fontFamily: "ui-monospace, monospace", color: "#111", fontWeight: 600, whiteSpace: "nowrap" }}>{formatKRW(d.revenue)}</td>
+                <td style={{ padding: "8px 14px", color: "#888", fontSize: 12 }}>
+                  {Array.from(d.byProduct.entries()).map(([name, rev]) => `${name} ${formatKRW(rev)}`).join(" · ")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+        )}
       </div>
 
       {/* 상품별 집계 카드 */}
-      <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>상품별 주문 현황 · 클릭하면 아래 목록이 해당 상품으로 필터링됩니다</p>
+      <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>상품별 누적 매출 · 클릭하면 아래 목록이 해당 상품으로 필터링됩니다</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10, marginBottom: 28 }}>
         {productStats.map((s) => {
           const active = productFilter === s.productId;
@@ -157,7 +271,10 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               <p style={{ fontSize: 17, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 6px", color: active ? "#fff" : "#111" }}>
                 {formatKRW(s.revenue)}
               </p>
-              <span style={{ fontSize: 11, color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>결제완료 {s.paid}건</span>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 11, color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>실결제 {s.real}건</span>
+                {s.test > 0 && <span style={{ fontSize: 11, color: active ? "#c7d2fe" : "#6366f1" }}>테스트 {s.test}건</span>}
+              </div>
             </Link>
           );
         })}
@@ -167,7 +284,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 10 }}>
-        <p style={{ fontSize: 12, color: "#aaa", margin: 0 }}>결제완료 {filteredOrders.length}건 표시 중</p>
+        <p style={{ fontSize: 12, color: "#aaa", margin: 0 }}>실결제 {filteredOrders.length}건 표시 중</p>
         {productFilter && (
           <Link href={buildHref({ product: "" })} style={{ fontSize: 12, color: "#888", textDecoration: "underline" }}>
             상품 필터 해제 ({productMap.get(productFilter)?.name ?? productFilter})
