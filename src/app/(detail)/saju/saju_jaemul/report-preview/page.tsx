@@ -5165,7 +5165,7 @@ function ReportPreviewInner() {
                   <img src="/media/report/saju_jaemul/saju_jaemul_3/saju_jaemul_3_1.jpg" alt="" className="w-full block" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 60%, #fffaf7 100%)", pointerEvents: "none" }} />
                   <div className="absolute pointer-events-none" style={{ top: "22%", left: "66%", transform: "translate(-50%, -50%)" }}>
-                    <p className="text-[15px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>모든 사람에게<br />맞는 투자법은 없소.<br />그대만의 방식이 있소.</p>
+                    <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: SERIF }}>모든 사람에게<br />맞는 투자법은 없소.<br />그대만의 방식이 있소.</p>
                   </div>
                 </div>
                 <div style={{ width: 1, height: 48, background: "#ccc", margin: "28px auto" }} />
