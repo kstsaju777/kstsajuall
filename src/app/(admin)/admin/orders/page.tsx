@@ -141,6 +141,11 @@ const REVENUE_START_AT = "2026-09-14T00:00:00+09:00";
 // 오픈 이전에 발생했지만 지인에게 부탁한 실제 결제라 매출에 포함시키는 예외 이메일
 const REAL_PAYMENT_WHITELIST_EMAILS = new Set(["star960313@gmail.com", "chaeni10@naver.com"]);
 
+// 어드민 본인 테스트 전용 이메일 — 게스트 결제 라우트의 user_id 미기록 버그로 인해
+// 로그인해서 결제해도 어드민 필터에 안 걸렸던 과거 주문들을 소급 제외하기 위한 블랙리스트.
+// (버그 수정 이후엔 로그인만 하면 user_id로 자동 제외되므로 이 목록은 더 늘어날 필요가 없음)
+const TEST_EMAIL_BLACKLIST = new Set(["kimguback@gmail.com"]);
+
 export default async function AdminOrdersPage({ searchParams }: { searchParams: SearchParams }) {
   await requireAdminPassword("/admin/orders");
 
@@ -187,6 +192,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   const isRealOrder = (o: OrderRow) => {
     const isAdmin = !!o.user_id && adminUserIds.has(o.user_id);
     if (isAdmin) return false;
+    if (o.guest_email && TEST_EMAIL_BLACKLIST.has(o.guest_email)) return false;
     if (o.guest_email && REAL_PAYMENT_WHITELIST_EMAILS.has(o.guest_email)) return true;
     return new Date(o.created_at).getTime() >= revenueStartAt;
   };
