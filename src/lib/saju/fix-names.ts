@@ -46,28 +46,9 @@ export function fixNamesInText(
     }
   }
 
-  // 2.5. "당신"/"그대" → 이름+호칭 강제 치환 (전역 프롬프트 규칙 미준수 시 안전장치 —
-  //      LLM이 지시를 놓치고 이 대명사를 쓰더라도 결과물엔 절대 남지 않도록 확정 교정)
-  {
-    const myFullEarly = `${myLabel}${myHonorific}`;
-    const bMy = hasBatchim(myFullEarly[myFullEarly.length - 1]);
-    for (const word of ["당신", "그대"]) {
-      r = r
-        .replace(new RegExp(`${word}(은|는)`, "g"), `${myFullEarly}${bMy ? "은" : "는"}`)
-        .replace(new RegExp(`${word}(이|가)`, "g"), `${myFullEarly}${bMy ? "이" : "가"}`)
-        .replace(new RegExp(`${word}(을|를)`, "g"), `${myFullEarly}${bMy ? "을" : "를"}`)
-        .replace(new RegExp(`${word}(과|와)`, "g"), `${myFullEarly}${bMy ? "과" : "와"}`)
-        // ⚠️ '그대로'는 '그대(그 사람)로'가 아니라 '있는 그대로' 할 때의 고정 부사이므로
-        // '그대' + (으로|로) 치환 규칙에서는 반드시 제외해야 함 (예: '그대로 따르기보다'가
-        // '선우님으로 따르기보다'로 잘못 바뀌는 오류 방지). '당신'은 이런 충돌 단어가 없어 그대로 적용.
-        .replace(new RegExp(`${word}(으로|로)`, "g"), (m, josa) => (word === "그대" && josa === "로" ? m : `${myFullEarly}${bMy ? "으로" : "로"}`))
-        .replace(new RegExp(`${word}에게`, "g"), `${myFullEarly}에게`)
-        .replace(new RegExp(`${word}의`, "g"), `${myFullEarly}의`)
-        // 남은 단독 사용(조사 없음) — '그대'는 '그대로'의 일부를 잘못 물지 않도록 뒤에 '로'가
-        // 오는 경우는 제외(위에서 이미 보존 처리된 '그대로' 재훼손 방지)
-        .replace(new RegExp(word === "그대" ? `그대(?!로)` : word, "g"), myFullEarly);
-    }
-  }
+  // ※ "당신"/"그대" → 이름 강제 치환 안전장치는 제거함. 정규식 기반 일괄 치환이
+  // "그대로"(고정 부사) 같은 고정 단어를 오탐으로 훼손하는 부작용이 있어,
+  // GLOBAL_GRAMMAR_RULES의 프롬프트 지시(당신/그대 사용 금지)에만 맡긴다.
 
   // 3. "본인" → 이름+님
   r = r.replace(/본인/g, `${myLabel}님`);
