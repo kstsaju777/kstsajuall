@@ -266,9 +266,9 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         )}
       </div>
 
-      {/* 상품별 집계 카드 */}
-      <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>상품별 누적 매출 · 클릭하면 아래 목록이 해당 상품으로 필터링됩니다</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10, marginBottom: 28 }}>
+      {/* 상품별 집계 카드 — 작은 블록으로 한눈에 보이게 */}
+      <p style={{ fontSize: 12, color: "#888", margin: "0 0 10px" }}>상품별 누적 매출 · 탭하면 아래 목록이 해당 상품으로 필터링됩니다</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(112px, 1fr))", gap: 8, marginBottom: 28 }}>
         {productStats.map((s) => {
           const active = productFilter === s.productId;
           return (
@@ -276,20 +276,20 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               key={s.productId}
               href={buildHref({ product: active ? "" : s.productId })}
               style={{
-                display: "block", padding: "16px 18px", borderRadius: 12, textDecoration: "none",
+                display: "block", padding: "10px 12px", borderRadius: 10, textDecoration: "none",
                 background: active ? "#111" : "#fff",
                 border: `1px solid ${active ? "#111" : "#e8e8e8"}`,
                 boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               }}
             >
-              <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 8px", color: active ? "#fff" : "#111" }}>{s.name}</p>
-              <p style={{ fontSize: 17, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 6px", color: active ? "#fff" : "#111" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, margin: "0 0 4px", color: active ? "#fff" : "#111", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.name}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, fontFamily: "ui-monospace, monospace", margin: "0 0 4px", color: active ? "#fff" : "#111", whiteSpace: "nowrap" }}>
                 {formatKRW(s.revenue)}
               </p>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 11, color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>실결제 {s.real}건</span>
-                {s.test > 0 && <span style={{ fontSize: 11, color: active ? "#c7d2fe" : "#6366f1" }}>테스트 {s.test}건</span>}
-              </div>
+              <p style={{ fontSize: 10, margin: 0, whiteSpace: "nowrap" }}>
+                <span style={{ color: active ? "#d1fae5" : "#047857", fontWeight: 600 }}>실결제 {s.real}</span>
+                {s.test > 0 && <span style={{ color: active ? "#c7d2fe" : "#6366f1" }}> · 테스트 {s.test}</span>}
+              </p>
             </Link>
           );
         })}
