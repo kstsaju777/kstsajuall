@@ -68,8 +68,7 @@ const YOUARE_CH_GUIDE: Record<number, string> = {
 wonguk, ohaeng 섹션을 작성하세요.
 
 [wonguk] — {이름1}님의 타고난 기운
-먼저 월주 지지(월지) 글자를 확인해 태어난 계절과 기후를 파악하세요.
-  월지별 계절·기후: 子=한겨울 칼바람 / 亥=초겨울 냉기 / 丑=겨울 끝 습한 냉기 / 寅=이른 봄 온기 / 卯=봄 한창 생동감 / 辰=봄 끝 습한 기운 / 巳=초여름 더위 / 午=한여름 뜨거운 열기 / 未=여름 끝 건조한 더위 / 申=초가을 서늘한 기운 / 酉=가을 한창 청량함 / 戌=가을 끝 건조한 기운
+【필수】위에 [월지 계절 정보]가 주입되어 있으면, 거기 적힌 계절·기후 표현을 글자 하나 바꾸지 말고 그대로 사용하시오. 월지를 보고 직접 계절을 판단하거나 다른 계절로 착각하면 절대 안 되오 (예: 12월생인데 "봄"이라고 쓰면 절대 안 됨).
 그 계절·기후와 일간 오행을 연결해 자연 이미지로 {이름1}님을 묘사하세요.
   일간 오행 이미지: 갑목·을목→푸른 나무 / 병화·정화→불꽃·빛 / 무토·기토→대지·흙 / 경금·신금→금빛·서릿발 / 임수·계수→깊은 물·물결
   예) 월지=子, 일간=甲 → "차가운 한겨울 냉기 속에서 홀로 꼿꼿하게 서 있는 푸른 나무와 같은 기운을 타고났소."
@@ -562,6 +561,24 @@ export function buildYouareChapterPrompt(
     ohaengCountNote = `\n[사주 실제 구성 — 반드시 이 값 그대로 사용하시오. 다르게 서술하는 것은 절대 금지]\n오행: 강한 오행(2개 이상)=${strong} / 약한 오행(0~1개)=${weak}\n십성(정확한 개수, 0인 것은 없는 것): ${sipLines}\n`;
   }
 
+  // ch1: 월지 계절 — LLM이 표를 보고 직접 찾다가 다른 계절로 착각하는 오류를 막기 위해 서버가 확정 계산해서 주입
+  let seasonNote = "";
+  if (chapter === 1 && input.pillars && input.pillars.length > 0) {
+    const JI_KR_YA: Record<string, string> = { 子:"자", 丑:"축", 寅:"인", 卯:"묘", 辰:"진", 巳:"사", 午:"오", 未:"미", 申:"신", 酉:"유", 戌:"술", 亥:"해" };
+    const wolju = input.pillars.find(p => p.pos === "월주");
+    const woljiKr = wolju ? `${JI_KR_YA[wolju.ji] ?? wolju.ji}${wolju.jiEl}` : "";
+    const woljiSeason: Record<string, string> = {
+      "자수": "한겨울 칼바람이 몰아치는 냉기", "해수": "초겨울 스며드는 냉기", "축토": "겨울 끝 습하고 차가운 냉기",
+      "인목": "이른 봄 온기가 막 시작되는 기운", "묘목": "봄 한창 생동감 넘치는 기운", "진토": "봄 끝 습기 가득한 기운",
+      "사화": "초여름 달아오르는 더위", "오화": "한여름 뜨겁게 타오르는 열기", "미토": "여름 끝 건조하고 무더운 기운",
+      "신금": "초가을 서늘한 금기운", "유금": "가을 한창 청량하고 맑은 기운", "술토": "가을 끝 건조하게 마른 기운",
+    };
+    const seasonDesc = woljiSeason[woljiKr] ?? "";
+    if (seasonDesc) {
+      seasonNote = `\n[월지 계절 정보 — wonguk intro 첫 문장에서 반드시 이 표현을 그대로 사용, 다른 계절로 착각 금지]\n월지: ${woljiKr} → 태어난 계절·기후: "${seasonDesc}"\n첫 문장 형식: "${seasonDesc} 속에서 태어난 {이름1}님은 ~"\n`;
+    }
+  }
+
   // ch1: 능력치 점수를 프롬프트에 주입 (차트와 풀이 일치)
   let abilityData = "";
   if (chapter === 1 && input.pillars && input.pillars.length > 0) {
@@ -590,7 +607,7 @@ export function buildYouareChapterPrompt(
 
 ${input.ilganChar ? `⚑ 일간(일주 천간): ${input.ilganChar} — 오행: ${input.pillars?.find(p => p.pos === "일주")?.ganEl || "?"} [서버 확정값, 다른 오행으로 착각 금지]\n` : ""}${input.manseryeokText}${honorificBlock}
 ${input.birthYear ? `\n출생연도: ${input.birthYear}년 / 현재연도: ${currentYear}년` : `\n현재연도: ${currentYear}년`}
-${graphData}${ohaengCountNote}${abilityData}${yongsinNote}
+${graphData}${ohaengCountNote}${seasonNote}${abilityData}${yongsinNote}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 이번 장의 주제: ${theme}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
