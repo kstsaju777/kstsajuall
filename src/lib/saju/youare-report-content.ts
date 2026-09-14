@@ -112,6 +112,7 @@ chonyeongi, cheongneongi, jungnyeongi, nonyeongi 섹션을 작성하세요.
 
 [jungnyeongi] — 중년기 (일주 기반, 40~60세)
 일주 천간(일간)과 지지 십성을 확인해 아래 내용을 풀이하세요.
+⚠️ 위에 [간여지동] 확정값이 주입되어 있으면, 반드시 "간여지동"이라는 명칭을 언급하며 그 의미(강한 자아·독립성, 배우자와의 갈등 소지)를 이 풀이에 담으시오. 주입되어 있지 않으면 언급하지 마시오.
 - 일간의 본질적 기질, 중년기에 꽃피는 분야
 - 일지 십성 기반 배우자·인간관계 패턴, 결혼생활 기운
 - 이 시기 전성기가 되는 조건과 주의해야 할 점
@@ -576,6 +577,14 @@ export function buildYouareChapterPrompt(
     const seasonDesc = woljiSeason[woljiKr] ?? "";
     if (seasonDesc) {
       seasonNote = `\n[월지 계절 정보 — wonguk intro 첫 문장에서 반드시 이 표현을 그대로 사용, 다른 계절로 착각 금지]\n월지: ${woljiKr} → 태어난 계절·기후: "${seasonDesc}"\n첫 문장 형식: "${seasonDesc} 속에서 태어난 {이름1}님은 ~"\n`;
+    }
+
+    // 간여지동(干與支同) — 일주 천간·지지의 오행·음양이 완전히 같은 특수 조합. jungnyeongi(일주 기반) 풀이에서 반드시 언급해야 하는데 누락되는 경우가 많아 서버가 확정 판정
+    const GANYEOJIDONG_SET_YA = new Set(["甲寅","乙卯","丙午","丁巳","戊辰","戊戌","己丑","己未","庚申","辛酉","壬子","癸亥"]);
+    const ilju = input.pillars.find(p => p.pos === "일주");
+    if (ilju && GANYEOJIDONG_SET_YA.has(`${ilju.gan}${ilju.ji}`)) {
+      const iljuKr = `${JI_KR_YA[ilju.ji] ?? ilju.ji}${ilju.jiEl}`;
+      seasonNote += `\n[간여지동(干與支同) — 서버 확정값, jungnyeongi 풀이에서 반드시 이 명칭을 언급하며 의미를 반영할 것]\n이 일주(${iljuKr})는 천간·지지의 오행·음양이 완전히 같은 간여지동 조합이오. 자아가 강하고 독립적이며, 배우자·파트너와의 관계에서 갈등·긴장 소지가 있는 특수한 구조이니 이 특성을 중년기 풀이에 반드시 담으시오.\n`;
     }
   }
 
