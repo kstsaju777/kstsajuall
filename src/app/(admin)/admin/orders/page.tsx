@@ -24,7 +24,23 @@ type InputRow = {
   order_id: string;
   name: string | null;
   concerns: string[] | null;
+  birth_date: string | null;
+  birth_time: string | null;
+  time_unknown: boolean | null;
+  calendar: string | null;
 };
+
+function formatBirth(input: InputRow | undefined): string {
+  if (!input?.birth_date) return "-";
+  const cal = input.calendar === "lunar" ? "음력" : "양력";
+  const time = input.time_unknown || !input.birth_time ? "시간모름" : input.birth_time.slice(0, 5);
+  return `${input.birth_date} (${cal}) · ${time}`;
+}
+
+function firstConcern(input: InputRow | undefined): string {
+  const c = input?.concerns?.[0];
+  return c ? c : "-";
+}
 
 // 궁합 상품은 상대방 이름이 concerns 배열 마지막 요소(JSON)에 들어있음
 function getPartnerName(concerns: unknown): string {
@@ -87,7 +103,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     const { data: results } = await service.from("saju_results").select("id, order_id").limit(10000);
     resultMap = new Map((results ?? []).map((r) => [r.order_id, r.id]));
 
-    const { data: inputs } = await service.from("saju_inputs").select("order_id, name, concerns").limit(10000);
+    const { data: inputs } = await service.from("saju_inputs").select("order_id, name, concerns, birth_date, birth_time, time_unknown, calendar").limit(10000);
     inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i as InputRow]));
 
     // 어드민 계정으로 결제된 건 = 테스트결제로 간주하여 매출 집계에서 제외
@@ -314,8 +330,8 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
             <tr style={{ background: "#fafafa", borderBottom: "1px solid #eee" }}>
-              {["생성일", "주문번호", "상품", "신청자", "고객 계정", "금액", "결과지"].map((h, i) => (
-                <th key={h} style={{ padding: "10px 14px", textAlign: i === 5 ? "right" : "left", fontSize: 11, color: "#999", fontWeight: 600, whiteSpace: "nowrap" }}>
+              {["생성일", "주문번호", "상품", "신청자", "생년월일/시", "고민", "고객 계정", "금액", "결과지"].map((h, i) => (
+                <th key={h} style={{ padding: "10px 14px", textAlign: i === 7 ? "right" : "left", fontSize: 11, color: "#999", fontWeight: 600, whiteSpace: "nowrap" }}>
                   {h}
                 </th>
               ))}
@@ -327,9 +343,11 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               const input = inputMap.get(o.id);
               const resultId = resultMap.get(o.id);
 
+              // DB의 products.slug 는 종합사주풀이만 "total" 이고, 실제 라우트 폴더는 "saju_total" 이라 매핑이 필요함
+              const routeSlug = product?.slug === "total" ? "saju_total" : product?.slug;
               let reportHref: string | null = null;
-              if (resultId && product?.slug) {
-                reportHref = `/saju/${product.slug}/report-preview?id=${resultId}`;
+              if (resultId && routeSlug) {
+                reportHref = `/saju/${routeSlug}/report-preview?id=${resultId}`;
               }
 
               const partnerName = product?.slug?.startsWith("kunghap_") ? getPartnerName(input?.concerns) : "";
@@ -343,6 +361,10 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "10px 14px", fontFamily: "ui-monospace, monospace", fontSize: 12, color: "#555" }}>{o.order_id}</td>
                   <td style={{ padding: "10px 14px", color: "#111", whiteSpace: "nowrap" }}>{product?.name ?? "-"}</td>
                   <td style={{ padding: "10px 14px", color: "#333", whiteSpace: "nowrap" }}>{applicantLabel}</td>
+                  <td style={{ padding: "10px 14px", color: "#555", whiteSpace: "nowrap", fontSize: 12 }}>{formatBirth(input)}</td>
+                  <td style={{ padding: "10px 14px", color: "#888", fontSize: 12, maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={firstConcern(input)}>
+                    {firstConcern(input)}
+                  </td>
                   <td style={{ padding: "10px 14px", color: "#999", whiteSpace: "nowrap" }}>{o.user_id ? "회원" : o.guest_email}</td>
                   <td style={{ padding: "10px 14px", textAlign: "right", fontFamily: "ui-monospace, monospace", color: "#111", whiteSpace: "nowrap" }}>{formatKRW(o.amount)}</td>
                   <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
