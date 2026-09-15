@@ -4182,7 +4182,7 @@ function ReunionTimingLineChart({ data }: { data: Record<string, unknown> | null
             }}>
               <div className="flex items-center gap-2.5 px-3.5 pt-2.5 pb-2" style={{ background: toneBg(d.tone) }}>
                 <span className="text-[13px]">{toneIcon(d.tone)}</span>
-                <p className="text-[12.5px] font-black" style={{ color: col }}>20{d.shortYear}년 {d.zodiac}</p>
+                <p className="text-[12.5px] font-black" style={{ color: col }}>{d.label}</p>
                 <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: col, color: WHITE }}>{i === maxIdx ? "최적" : "길함"}</span>
                 <span className="ml-auto text-[12px] font-black tabular-nums" style={{ color: col }}>{d.score}점</span>
               </div>
