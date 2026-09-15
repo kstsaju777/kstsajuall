@@ -305,7 +305,7 @@ function FutureVisionBanner({ data }: { data: Record<string, unknown> | null }) 
           <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH11_COLOR }}>{callout}</p>
         </div>
       )}
-      {intro && <p className="text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      {intro && <p className="text-[14px] leading-[1.85]" style={{ color: INK }}>{intro}</p>}
     </div>
   );
 }
@@ -358,7 +358,7 @@ function FutureFlowLineChart({ data }: { data: Record<string, unknown> | null })
 
   return (
     <div className="mx-5 mb-5">
-      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK }}>{intro}</p>}
 
       {/* 차트 카드 */}
       <div className="rounded-2xl p-4 mb-5" style={{ background: WHITE, border: `1px solid ${GCH11_COLOR}18`, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
@@ -431,7 +431,7 @@ function FutureFlowLineChart({ data }: { data: Record<string, unknown> | null })
                 <span className="ml-auto text-[11px] font-black px-2 py-0.5 rounded-full shrink-0" style={{ background: `${col}18`, color: col }}>{toneLabel(d.tone)}</span>
               </div>
               <div className="px-3.5 pt-2.5 pb-2">
-                <p className="text-[13px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{d.text}</p>
+                <p className="text-[13px] leading-[1.85]" style={{ color: INK }}>{d.text}</p>
               </div>
               {d.tip && (
                 <div className="mx-3.5 mb-3 rounded-lg px-3 py-2" style={{ background: `${col}08`, border: `1px solid ${col}18` }}>
@@ -476,7 +476,7 @@ function LongTermOutlookPanel({ data }: { data: Record<string, unknown> | null }
                 {/* 본문 */}
                 <div className="flex-1 px-4 py-3.5" style={{ background: WHITE }}>
                   <p className="text-[13px] font-black mb-1" style={{ color: GCH11_COLOR }}>{msTitle}</p>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{msDesc}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{msDesc}</p>
                 </div>
               </div>
             );
@@ -484,7 +484,7 @@ function LongTermOutlookPanel({ data }: { data: Record<string, unknown> | null }
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
     </div>
   );
@@ -527,7 +527,7 @@ function OldAgeRelationCard({ data }: { data: Record<string, unknown> | null }) 
                 <span className="text-[18px] leading-none shrink-0 mt-0.5">{trIcon}</span>
                 <div>
                   <p className="text-[12.5px] font-black mb-0.5" style={{ color: GCH11_WARM }}>{trTitle}</p>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{trDesc}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{trDesc}</p>
                 </div>
               </div>
             );
@@ -535,7 +535,7 @@ function OldAgeRelationCard({ data }: { data: Record<string, unknown> | null }) 
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
     </div>
   );
@@ -567,14 +567,14 @@ function FinalAdvicePanel({ data }: { data: Record<string, unknown> | null }) {
             return (
               <div key={i} className="px-4 py-3.5 flex items-start gap-3" style={{ background: WHITE, borderTop: i > 0 ? `1px solid ${GCH11_WARM}0c` : "none" }}>
                 <span className="text-[18px] leading-none shrink-0 mt-0.5">{wsIcon}</span>
-                <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK, wordBreak: "keep-all" }}>{wsText}</p>
+                <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK }}>{wsText}</p>
               </div>
             );
           })}
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
     </div>
   );
@@ -771,7 +771,7 @@ function BestTimingBanner({ data }: { data: Record<string, unknown> | null }) {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
     </div>
   );
@@ -790,7 +790,7 @@ function TimingScoreCard({ data }: { data: Record<string, unknown> | null }) {
   };
   return (
     <div className="mx-5 mb-5">
-      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      {intro && <p className="text-[14px] leading-[1.85] mb-4" style={{ color: INK }}>{intro}</p>}
       <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${GCH10_COLOR}18` }}>
         <div className="px-4 py-2.5" style={{ background: `${GCH10_COLOR}0e` }}>
           <p className="text-[11px] font-black" style={{ color: GCH10_COLOR }}>연도별 결혼 에너지</p>
@@ -816,7 +816,7 @@ function TimingScoreCard({ data }: { data: Record<string, unknown> | null }) {
               <div className="w-full rounded-full overflow-hidden mb-2" style={{ height: 5, background: `${GCH10_COLOR}12` }}>
                 <div style={{ width: `${score}%`, height: "100%", background: `linear-gradient(90deg, ${cfg.bar}80 0%, ${cfg.bar} 100%)`, borderRadius: 9999 }} />
               </div>
-              {desc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>}
+              {desc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>}
             </div>
           );
         })}
@@ -847,7 +847,7 @@ function TimingCautionCard({ data }: { data: Record<string, unknown> | null }) {
               <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: CAUTION_RED, color: WHITE }}>주의</span>
             </div>
             <div className="px-3.5 pt-2.5 pb-3">
-              <p className="text-[13px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF, wordBreak: "keep-all" }}>{desc}</p>
+              <p className="text-[13px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
             </div>
           </div>
         );
@@ -873,7 +873,7 @@ function TimingAdvicePanel({ data }: { data: Record<string, unknown> | null }) {
               <p className="text-[13px] font-black" style={{ color: "#d4547a" }}>{ttitle}</p>
             </div>
             <div className="px-4 py-3" style={{ background: WHITE }}>
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{tdesc}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tdesc}</p>
             </div>
           </div>
         );
@@ -908,7 +908,7 @@ function CrisisBanner({ data }: { data: Record<string, unknown> | null }) {
           <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH9_CRISIS, fontFamily: SERIF }}>{callout}</p>
         </div>
       )}
-      {intro && <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{intro}</p>}
+      {intro && <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{intro}</p>}
     </div>
   );
 }
@@ -929,7 +929,7 @@ function CrisisCard({ item }: { item: Record<string, unknown> }) {
       </div>
       {/* 본문 */}
       <div className="px-4 py-3.5" style={{ background: WHITE }}>
-        <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
+        <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -953,7 +953,7 @@ function OvercomeCard({ item, idx }: { item: Record<string, unknown>; idx: numbe
         </div>
       </div>
       <div className="px-4 py-3.5" style={{ background: WHITE }}>
-        <p className="text-[14.5px] leading-[1.95] mb-2.5" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
+        <p className="text-[14.5px] leading-[1.95] mb-2.5" style={{ color: INK, fontFamily: SERIF }}>{desc}</p>
         {tip && (
           <div className="px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${col}0a`, border: `1px solid ${col}18` }}>
             <span className="text-[13px] shrink-0">✅</span>
@@ -992,7 +992,7 @@ function CrisisRecoveryGuide({ data }: { data: Record<string, unknown> | null })
                 <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-black" style={{ background: GCH9_SOLVE, color: WHITE }}>{num}</div>
                 <div>
                   <p className="text-[12px] font-black mb-1" style={{ color: GCH9_SOLVE }}>{ptitle}</p>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{pdesc}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{pdesc}</p>
                 </div>
               </div>
             );
@@ -1027,7 +1027,7 @@ function OvercomeTipPanel({ data }: { data: Record<string, unknown> | null }) {
               <p className="text-[14px] font-black" style={{ color: GCH9_SOLVE }}>{title}</p>
             </div>
             <div className="px-4 py-3" style={{ background: WHITE }}>
-              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
+              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, fontFamily: SERIF }}>{desc}</p>
               {tip && (
                 <div className="px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${GCH9_SOLVE}0a`, border: `1px solid ${GCH9_SOLVE}18` }}>
                   <span className="text-[13px] shrink-0">✅</span>
@@ -1104,7 +1104,7 @@ function ChildCompatDetailPanel({ data }: { data: Record<string, unknown> | null
   return (
     <div className="mx-5 mb-4">
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
       {caution && (
         <div className="px-4 py-3 rounded-xl flex items-start gap-2" style={{ background: `${GOLD}10`, borderLeft: `3px solid ${GOLD}` }}>
@@ -1174,7 +1174,7 @@ function ChildTimingCard({ data }: { data: Record<string, unknown> | null }) {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
       {/* 준비 조언 */}
       {prepAdvice && (
@@ -1224,7 +1224,7 @@ function ChildStyleCard({ data }: { data: Record<string, unknown> | null }) {
                 <span className="text-[18px] leading-none shrink-0 mt-0.5">{trIcon}</span>
                 <div>
                   <p className="text-[12px] font-black mb-0.5" style={{ color: GCH8_COLOR }}>{trLabel}</p>
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{trDesc}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{trDesc}</p>
                 </div>
               </div>
             );
@@ -1242,7 +1242,7 @@ function ChildStyleCard({ data }: { data: Record<string, unknown> | null }) {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
     </div>
   );
@@ -1502,7 +1502,7 @@ function HomeLifeCard({ data }: { data: Record<string, unknown> | null }) {
       {/* 단락 */}
       <div className="px-6">
         {paragraphs.map((p, i) => (
-          <p key={i} className="mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK, fontFamily: SERIF, wordBreak: "keep-all", textAlign: "justify" }}>{p}</p>
+          <p key={i} className="mb-4 text-[13.5px] leading-[1.85]" style={{ color: INK, fontFamily: SERIF, textAlign: "justify" }}>{p}</p>
         ))}
       </div>
     </div>
@@ -1775,7 +1775,7 @@ function GHapCard({ item, index }: { item: Record<string, unknown>; index: numbe
       </div>
       {desc && (
         <div className="px-5 py-3.5" style={{ borderBottom: effect ? `1px solid ${INK}06` : "none" }}>
-          <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+          <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
         </div>
       )}
       {effect && (
@@ -1820,7 +1820,7 @@ function GChungCard({ item, index }: { item: Record<string, unknown>; index: num
       </div>
       {desc && (
         <div className="px-5 py-3.5" style={{ borderBottom: (effect || overcome) ? `1px solid ${INK}06` : "none" }}>
-          <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+          <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
         </div>
       )}
       {effect && (
@@ -1908,7 +1908,7 @@ function GHapChungScoreCard({ data, hapCount, chungCount }: { data: Record<strin
       {paragraphs.length > 0 && (
         <div className="px-5 pb-5">
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-[13.5px] leading-[1.8] mb-3 last:mb-0" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{p}</p>
+            <p key={i} className="text-[13.5px] leading-[1.8] mb-3 last:mb-0" style={{ color: INK_SOFT }}>{p}</p>
           ))}
         </div>
       )}
@@ -1939,7 +1939,7 @@ function MarriageStrengthCard({ item, index }: { item: Record<string, unknown>; 
       )}
       {/* 본문 */}
       <div className="px-4 pt-2.5 pb-3">
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
       </div>
     </div>
   );
@@ -1967,7 +1967,7 @@ function MarriageWeaknessCard({ item, index }: { item: Record<string, unknown>; 
       )}
       {/* 본문 */}
       <div className="px-4 pt-2.5 pb-3">
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
       </div>
     </div>
   );
@@ -1996,7 +1996,7 @@ function BalanceGuidePanel({ data }: { data: Record<string, unknown> | null }) {
               <p className="text-[13px] font-black" style={{ color: GCH5_BAL }}>{title}</p>
             </div>
             <div className="px-4 py-3">
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
             </div>
           </div>
         );
@@ -2063,7 +2063,7 @@ function RoleBalanceCard({ item, index }: { item: Record<string, unknown>; index
         </div>
       </div>
       <div className="px-4 py-3" style={{ background: WHITE }}>
-        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
       </div>
     </div>
   );
@@ -2223,7 +2223,7 @@ function ConflictPatternCard({ data }: { data: Record<string, unknown> | null })
                 <span className="text-[14px]">{icon}</span>
                 <p className="text-[13px] font-black" style={{ color: CONFLICT_RED }}>{title}</p>
               </div>
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
             </div>
           );
         })}
@@ -2322,7 +2322,7 @@ function MarriageEvidenceCard({ item, index }: { item: Record<string, unknown>; 
         </div>
       </div>
       <div className="px-4 py-3" style={{ background: cardPale }}>
-        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
       </div>
     </div>
   );
@@ -2345,7 +2345,7 @@ function MarriageVerdictPanel({ data }: { data: Record<string, unknown> | null }
         <p className="mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{intro}"</p>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK }}>{p}</p>
       ))}
     </div>
   );
