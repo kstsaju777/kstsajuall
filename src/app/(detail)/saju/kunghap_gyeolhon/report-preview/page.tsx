@@ -1621,8 +1621,8 @@ function ChildFlowGraph({ data, myName, partnerName }: { data: Record<string, un
         {labelYears.map(y => (
           <g key={y}>
             <line x1={xOf(y)} y1={PT + CH} x2={xOf(y)} y2={PT + CH + 4} stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
-            <rect x={xOf(y) - 14} y={PT + CH + 6} width={28} height={16} rx={5} ry={5} fill="rgba(0,0,0,0.04)" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
-            <text x={xOf(y)} y={PT + CH + 17} textAnchor="middle" fontSize="8.5" fontWeight="600" fill={MUTE}>{String(y).slice(2)}</text>
+            <rect x={xOf(y) - 16} y={PT + CH + 6} width={32} height={16} rx={5} ry={5} fill="rgba(0,0,0,0.04)" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
+            <text x={xOf(y)} y={PT + CH + 17} textAnchor="middle" fontSize="9" fontWeight="600" fill={MUTE}>{y}</text>
           </g>
         ))}
       </svg>
