@@ -4704,7 +4704,7 @@ function TimingAdvicePanel({ data }: { data: Record<string, unknown> | null }) {
               <p className="text-[13px] font-black" style={{ color: ECH5_COLOR }}>{ttitle}</p>
             </div>
             <div className="px-4 py-3" style={{ background: WHITE }}>
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{tdesc}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tdesc}</p>
             </div>
           </div>
         );
