@@ -24,6 +24,14 @@ export function fixJosa(text: string): string {
   text = text.replace(/(신강|신약|중화|중강)\(\d+점\)/g, "$1");
   text = text.replace(/(신강|신약|중화|중강)\s*\d+점/g, "$1");
 
+  // '정재이란' 같은 받침 불일치 — '이란/란'도 은/는처럼 받침에 따라 갈리는 조사인데
+  // GLOBAL_GRAMMAR_RULES로 명시했음에도 계속 새어나와 기계적으로 교정한다. '이란'(나라 이름)과
+  // 우연히 겹칠 위험은 이 서비스 문맥상 사실상 없다.
+  text = text.replace(/([가-힣])(이란|란)(?=[\s.,!?)]|$)/g, (m, ch: string, particle: string) => {
+    const expected = hasBatchim(ch) ? "이란" : "란";
+    return particle === expected ? m : `${ch}${expected}`;
+  });
+
   return text;
 }
 
