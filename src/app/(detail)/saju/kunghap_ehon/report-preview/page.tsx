@@ -7337,7 +7337,7 @@ function ReportPreviewInner() {
               <img src="/media/report/kunghap_ehon/kunghap_ehon_4/kunghap_ehon_4_3.jpg" alt="" className="w-full block" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 50%, rgba(253,248,244,1) 100%)" }} />
               <div className="absolute pointer-events-none" style={{ top: "18%", left: "25%", transform: "translate(-50%, -50%)" }}>
-                <p className="text-[15px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>반복되는 싸움,<br />끊으려면<br />뿌리를 알아야 하오.</p>
+                <p className="text-[18px] font-bold leading-[2] text-center whitespace-nowrap" style={{ color: "#2a2320", fontFamily: "'Nanum Myeongjo', 'Apple SD Gothic Neo', serif" }}>반복되는 싸움,<br />끊으려면<br />뿌리를 알아야 하오.</p>
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "center", paddingTop: 40, paddingBottom: 32 }}>
