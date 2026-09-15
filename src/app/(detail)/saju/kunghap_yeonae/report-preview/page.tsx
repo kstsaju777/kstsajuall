@@ -18,6 +18,7 @@ import { CATEGORY_CARDS, type CategoryCard } from "@/config/category-cards";
 import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { applyLocalSinsal } from "@/lib/saju/myeongsik-view";
 import type { ReportContent, ReportSection, ReportFlowItem } from "@/lib/saju/report-content";
+import { buildSajuImageMeaning } from "@/lib/saju/report-content";
 import { isYeonaeKunghapChapterReady, YEONAE_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_yeonae-report-content";
 import { MyeongsikModalView, MyeongsikTable } from "@/components/saju/MyeongsikModal";
 import { ganCharImage, jiCharImage } from "@/lib/saju/char-image";
@@ -6594,6 +6595,17 @@ function ReportPreviewInner() {
                       </p>
                     </div>
                   </div>
+                  {/* 그림 해설 — 왜 이렇게 그려졌는지 */}
+                  {(() => {
+                    const meaning = buildSajuImageMeaning(report?.view?.pillars ?? [], `${name.slice(1) || name}님`);
+                    if (!meaning) return null;
+                    return (
+                      <div style={{ maxWidth: 420, margin: "16px auto 0", padding: "14px 16px", background: "#faf6ea", border: "1px solid #e5d9b0", borderRadius: 8 }}>
+                        <p style={{ fontSize: 11, color: "#a07018", fontWeight: 700, letterSpacing: "0.08em", margin: "0 0 6px", fontFamily: SERIF }}>이 그림이 담고 있는 뜻</p>
+                        <p style={{ fontSize: 13, lineHeight: 1.7, color: "#3a2e18", margin: 0, fontFamily: SERIF }}>{meaning}</p>
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <WongukIllustration
@@ -6790,6 +6802,17 @@ function ReportPreviewInner() {
                       </p>
                     </div>
                   </div>
+                  {/* 그림 해설 — 왜 이렇게 그려졌는지 */}
+                  {(() => {
+                    const meaning = buildSajuImageMeaning(report?.partnerView?.pillars ?? [], `${partnerFirstName}님`);
+                    if (!meaning) return null;
+                    return (
+                      <div style={{ maxWidth: 420, margin: "16px auto 0", padding: "14px 16px", background: "#faf6ea", border: "1px solid #e5d9b0", borderRadius: 8 }}>
+                        <p style={{ fontSize: 11, color: "#a07018", fontWeight: 700, letterSpacing: "0.08em", margin: "0 0 6px", fontFamily: SERIF }}>이 그림이 담고 있는 뜻</p>
+                        <p style={{ fontSize: 13, lineHeight: 1.7, color: "#3a2e18", margin: 0, fontFamily: SERIF }}>{meaning}</p>
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <WongukIllustration
