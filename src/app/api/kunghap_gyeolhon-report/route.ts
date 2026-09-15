@@ -636,17 +636,20 @@ async function generateChapter(body: unknown) {
       return p ? `${p.gan ?? ""}${p.ji ?? ""}` : undefined;
     })();
 
-    // 오행 요약
-    const ohaengSummary: string | undefined = (() => {
-      const dist = stored?.view?.ohaengDist as Record<string,number> | undefined;
-      if (!dist) return undefined;
-      return Object.entries(dist).map(([k,v]) => `${k}:${v}`).join(" ");
-    })();
-    const partnerOhaengSummary: string | undefined = (() => {
-      const dist = stored?.partnerView?.ohaengDist as Record<string,number> | undefined;
-      if (!dist) return undefined;
-      return Object.entries(dist).map(([k,v]) => `${k}:${v}`).join(" ");
-    })();
+    // 오행 요약 — stored.view.ohaengDist는 실제로 존재하지 않는 필드라 항상 undefined였고,
+    // 그 결과 "⛔ 오행 분포 확정값" 안내문이 매번 조용히 빠져서 LLM이 원문 명식표에서
+    // 직접 세다가 개수를 틀리는 사고가 반복됐다. pillars의 ganEl/jiEl에서 직접 집계한다.
+    const computeOhaengDist = (pillars: Array<{ ganEl?: string; jiEl?: string }> | undefined): string | undefined => {
+      if (!pillars || pillars.length === 0) return undefined;
+      const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+      for (const p of pillars) {
+        if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
+        if (p.jiEl && cnt[p.jiEl] !== undefined) cnt[p.jiEl]++;
+      }
+      return Object.entries(cnt).map(([k, v]) => `${k}:${v}`).join(" ");
+    };
+    const ohaengSummary: string | undefined = computeOhaengDist(stored?.view?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined);
+    const partnerOhaengSummary: string | undefined = computeOhaengDist(stored?.partnerView?.pillars as Array<{ ganEl?: string; jiEl?: string }> | undefined);
 
     // 십성 요약 (내 일간 기준 상대방 기둥 십성)
     const mySipseong: string | undefined = (() => {
