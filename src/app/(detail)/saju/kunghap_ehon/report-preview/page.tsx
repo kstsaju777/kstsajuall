@@ -3315,7 +3315,7 @@ function DivorcePatternCard({ data, color, pale }: { data: Record<string, unknow
               <span className="text-[15px] font-black" style={{ color }}>{patternType}</span>
             </div>
           )}
-          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic", fontFamily: SERIF }}>"{intro}"</p>}
         </div>
       )}
       {paragraphs.map((p, i) => (
@@ -3414,7 +3414,7 @@ function DivorceVerdictPanel({ data }: { data: Record<string, unknown> | null })
         <p className="mb-3 text-[13px] leading-relaxed italic" style={{ color: INK_SOFT }}>"{intro}"</p>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -3543,7 +3543,7 @@ function ConflictAvoidancePanel({ data, myName, partnerName }: {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="text-[14px] leading-[1.85] mb-4" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -3576,7 +3576,7 @@ function DivorceMainCauseCard({ item, index }: { item: Record<string, unknown>; 
         </span>
       </div>
       <div className="px-4 py-4" style={{ background: lv.pale }}>
-        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -3605,7 +3605,7 @@ function DeeperIssueCard({ item, index }: { item: Record<string, unknown>; index
       {/* 실제 원인 */}
       <div className="px-4 py-4" style={{ background: ECH5_DEEP_P }}>
         <p className="text-[10px] font-black mb-1.5 tracking-wider" style={{ color: ECH5_DEEP }}>사주가 말하는 진짜 원인</p>
-        <p className="text-[13.5px] leading-relaxed" style={{ color: INK, wordBreak: "keep-all" }}>{actual}</p>
+        <p className="text-[13.5px] leading-relaxed" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{actual}</p>
       </div>
     </div>
   );
@@ -3644,10 +3644,10 @@ function RootCausePanel({ data }: { data: Record<string, unknown> | null }) {
       )}
       {/* 근본 원인 설명 */}
       {desc && (
-        <p className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -3691,7 +3691,7 @@ function EhonHapCard({ item, index }: { item: Record<string, unknown>; index: nu
       )}
       {/* 풀이 */}
       <div className="px-4 py-4" style={{ background: ECH6_HAP_P }}>
-        <p className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -3733,7 +3733,7 @@ function EhonChungCard({ item, index }: { item: Record<string, unknown>; index: 
       )}
       {/* 풀이 */}
       <div className="px-4 py-4" style={{ background: ECH6_CHUNG_P }}>
-        <p className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -3802,7 +3802,7 @@ function HapChungSummaryPanel({ data, hapCount, chungCount }: {
       )}
       {/* 풀이 단락 */}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -4168,13 +4168,13 @@ function EmotionalWoundCard({ item, index }: { item: Record<string, unknown>; in
           {myImpact && (
             <div className="flex-1 px-4 py-3" style={{ background: WHITE }}>
               <p className="text-[10px] font-black mb-1.5" style={{ color: MUTE }}>나에게 남기는 것</p>
-              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{myImpact}</p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{myImpact}</p>
             </div>
           )}
           {partnerImpact && (
             <div className="flex-1 px-4 py-3" style={{ background: dv.pale }}>
               <p className="text-[10px] font-black mb-1.5" style={{ color: MUTE }}>상대에게 남기는 것</p>
-              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{partnerImpact}</p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{partnerImpact}</p>
             </div>
           )}
         </div>
@@ -4182,7 +4182,7 @@ function EmotionalWoundCard({ item, index }: { item: Record<string, unknown>; in
       {/* 사주 근거 + 회복 단서 풀이 */}
       {desc && (
         <div className="px-4 py-4" style={{ background: dv.pale, borderTop: `1px solid ${dv.color}0c` }}>
-          <p className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+          <p className="text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
         </div>
       )}
     </div>
@@ -4218,7 +4218,7 @@ function HealingPathCard({ data, myName, partnerName }: {
                 🌱 {myKey}
               </span>
             )}
-            {myHealing && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{myHealing}</p>}
+            {myHealing && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{myHealing}</p>}
           </div>
           {/* 상대방 */}
           <div className="flex-1 px-4 py-4" style={{ background: ECH8_HEAL_P }}>
@@ -4228,7 +4228,7 @@ function HealingPathCard({ data, myName, partnerName }: {
                 🌱 {partnerKey}
               </span>
             )}
-            {partnerHealing && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{partnerHealing}</p>}
+            {partnerHealing && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{partnerHealing}</p>}
           </div>
         </div>
       </div>
@@ -4244,7 +4244,7 @@ function HealingPathCard({ data, myName, partnerName }: {
       )}
       {/* 풀이 단락 */}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -4280,7 +4280,7 @@ function RecoveryStylePanel({ data, myName, partnerName }: {
                 {myStyleKey}
               </span>
             )}
-            {myStyle && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{myStyle}</p>}
+            {myStyle && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{myStyle}</p>}
           </div>
           {/* 상대방 */}
           <div className="flex-1 px-4 py-4" style={{ background: ECH8_PALE }}>
@@ -4290,7 +4290,7 @@ function RecoveryStylePanel({ data, myName, partnerName }: {
                 {partnerStyleKey}
               </span>
             )}
-            {partnerStyle && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{partnerStyle}</p>}
+            {partnerStyle && <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{partnerStyle}</p>}
           </div>
         </div>
         {/* 스타일 충돌 경고 */}
@@ -4312,7 +4312,7 @@ function RecoveryStylePanel({ data, myName, partnerName }: {
       )}
       {/* 풀이 단락 */}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -4467,7 +4467,7 @@ function ReconcileTipCard({ item, index }: { item: Record<string, unknown>; inde
         {title && <p className="text-[13.5px] font-black leading-tight" style={{ color: tm.color }}>{title}</p>}
       </div>
       <div className="px-4 py-4" style={{ background: tm.pale }}>
-        <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{tip}</p>
+        <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{tip}</p>
       </div>
     </div>
   );
@@ -4961,7 +4961,7 @@ function NewBeginningCard({ data, myName, partnerName }: {
           </div>
         )}
         {love.split('\n\n').map((para, i) => (
-          <p key={i} className="text-[14px] leading-[1.85] mb-3" style={{ color: INK, wordBreak: "break-all" }}>{para}</p>
+          <p key={i} className="text-[14px] leading-[1.85] mb-3" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{para}</p>
         ))}
       </div>
       {/* 어떤 사람 + 만남 방식 — 보조 파트: 흰색 배경 */}
@@ -4971,7 +4971,7 @@ function NewBeginningCard({ data, myName, partnerName }: {
             <div className="px-4 pt-4 pb-3" style={{ background: WHITE, borderBottom: meetHow ? `1px solid ${color}14` : undefined }}>
               <SectionLabel label="어떤 사람이 오는가" color={color} />
               {personType.split('\n\n').map((para, i) => (
-                <p key={i} className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{para}</p>
+                <p key={i} className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{para}</p>
               ))}
             </div>
           )}
@@ -4979,7 +4979,7 @@ function NewBeginningCard({ data, myName, partnerName }: {
             <div className="px-4 pt-4 pb-3" style={{ background: WHITE }}>
               <SectionLabel label="어떤 방식으로 만나는가" color={color} />
               {meetHow.split('\n\n').map((para, i) => (
-                <p key={i} className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{para}</p>
+                <p key={i} className="text-[13.5px] leading-[1.85] mb-3" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{para}</p>
               ))}
             </div>
           )}
@@ -5019,7 +5019,7 @@ function FinalAdvicePanel({ data, myName, partnerName }: {
             <p className="text-[14px] font-black" style={{ color: ECH11_MY }}>{myName}님에게</p>
           </div>
           <div className="px-4 py-4" style={{ background: ECH11_MY_P }}>
-            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{myAdvice}</p>
+            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{myAdvice}</p>
           </div>
         </div>
       )}
@@ -5030,7 +5030,7 @@ function FinalAdvicePanel({ data, myName, partnerName }: {
             <p className="text-[14px] font-black" style={{ color: ECH11_PT }}>{partnerName}님에게</p>
           </div>
           <div className="px-4 py-4" style={{ background: ECH11_PT_P }}>
-            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{partnerAdvice}</p>
+            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{partnerAdvice}</p>
           </div>
         </div>
       )}
@@ -7880,7 +7880,7 @@ function ReportPreviewInner() {
                   <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
                     <div className="flex justify-center mb-4"><span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span></div>
                     {caParas.map((p, i) => (
-                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
                     ))}
                   </div>
                   <div className="mt-8 mb-8" style={{ height: 1, background: `${INK}12` }} />
