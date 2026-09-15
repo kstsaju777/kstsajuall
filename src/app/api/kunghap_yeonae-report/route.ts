@@ -1,4 +1,5 @@
 import { stripSurname } from "@/lib/utils/strip-surname";
+import { fixJosaInObject, hasBatchim } from "@/lib/utils/fix-josa";
 // =====================================================
 // 연애궁합 결과지 생성 + 저장 API (장별 온디맨드)
 // =====================================================
@@ -65,34 +66,14 @@ function calcHapChungScore(myView: { pillars: Array<{gan:string;ji:string}> }, p
   return Math.min(100, Math.max(0, raw));
 }
 
-// 한국어 조사 자동 교정
-function hasBatchim(ch: string): boolean {
-  const code = ch.charCodeAt(0) - 0xAC00;
-  if (code < 0 || code > 11171) return false;
-  return code % 28 !== 0;
-}
-function fixJosa(text: string): string {
-  if (!text) return text;
-  return text
-    .replace(/([가-힣])(은|는)/g, (_, w, j) => w + (hasBatchim(w) ? "은" : "는"))
-    .replace(/([가-힣])(이|가)(?=[ .,·\n'"」』\)]|$)/g, (_, w) => w + (hasBatchim(w) ? "이" : "가"))
-    .replace(/([가-힣])(을|를)/g, (_, w) => w + (hasBatchim(w) ? "을" : "를"))
-    .replace(/([가-힣])(과|와)/g, (_, w) => w + (hasBatchim(w) ? "과" : "와"))
-    .replace(/([가-힣])(으로|로)(?!서)/g, (_, w) => {
-      const code = w.charCodeAt(0) - 0xAC00;
-      const batchim = code % 28;
-      return w + (batchim === 0 || batchim === 8 ? "로" : "으로"); // 받침없거나 ㄹ → 로
-    });
-}
-function fixJosaDeep(obj: unknown): unknown {
-  if (typeof obj === "string") return fixJosa(obj);
-  if (Array.isArray(obj)) return obj.map(fixJosaDeep);
-  if (obj && typeof obj === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(obj)) result[k] = fixJosaDeep(v);
-    return result;
-  }
-  return obj;
+// 한국어 조사 자동 교정 — 공용 유틸(src/lib/utils/fix-josa.ts) 사용.
+// (이 파일에만 남아있던 구버전 은/는/이/가/을/를/으로 받침 추측 로직은 제거함.
+// 해당 방식은 다른 모든 상품에서 이미 폐기됐고 — 문맥에 맞는 조사 선택은 LLM과
+// GLOBAL_GRAMMAR_RULES에 맡기기로 함 — parseContentJson()이 이미 공용 fixJosaInObject를
+// 적용하므로 이 파일에서 또 적용할 필요도 없었음. 한자/신강점수/이란·란/있은·없은 등
+// 안전한 후처리는 fixJosaInObject 쪽에서 전부 처리됨.)
+function fixJosaDeep<T>(obj: T): T {
+  return fixJosaInObject(obj);
 }
 
 // 오행 사전 계산 유틸
