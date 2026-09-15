@@ -3391,7 +3391,7 @@ function DivorceReasonCard({ item }: { item: Record<string, unknown> }) {
         </div>
       )}
       <div className="px-4 pt-2.5 pb-3">
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
