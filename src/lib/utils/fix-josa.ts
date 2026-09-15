@@ -33,6 +33,12 @@ export function fixJosa(text: string): string {
     return particle === expected ? m : `${ch}${expected}`;
   });
 
+  // '있은'/'없은' — 한국어에 존재하지 않는 활용형('있는'/'없는'이 맞음)인데
+  // GLOBAL_GRAMMAR_RULES로 여러 차례 금지했음에도 계속 새어나온다. 이 조합은
+  // 정상적인 한국어 어디에도 없으므로(관형사형 '-은'은 동사 '있다/없다'에 붙지 않음)
+  // 기계적으로 교정해도 오탐 위험이 없다.
+  text = text.replace(/(있|없)은/g, "$1는");
+
   return text;
 }
 
