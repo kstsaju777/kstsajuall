@@ -47,6 +47,16 @@ export function fixJosa(text: string): string {
   // 무관한 정상 단어와 겹칠 위험은 없다.
   text = text.replace(/(았|었|했|였)은이/g, "$1는지");
 
+  // 마크다운 굵게(**) 표시 — 이 텍스트는 화면에 그대로 렌더링되는 일반 문자열이라
+  // GLOBAL_GRAMMAR_RULES로 금지했음에도 별표가 그대로 노출되는 경우가 있다. 정상적인
+  // 한국어 문장에 별표 2개가 붙어 나올 일이 없으므로 안전하게 제거한다.
+  text = text.replace(/\*\*/g, "");
+
+  // 문장 중간의 줄표(—, ㅡ) — GLOBAL_GRAMMAR_RULES에서 금지했음에도 계속 새어나온다.
+  // 정상적인 한국어 문장에 이 기호가 필요한 경우가 없으므로, 두 절을 자연스럽게 잇는
+  // 쉼표로 안전하게 치환한다.
+  text = text.replace(/\s*[—ㅡ]\s*/g, ", ");
+
   return text;
 }
 
