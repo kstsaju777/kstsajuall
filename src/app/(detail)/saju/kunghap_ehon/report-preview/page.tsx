@@ -1559,7 +1559,7 @@ function TrapBox({ trap }: { trap: { title: string; desc: string; items: { title
     <div className="rounded-2xl p-5 mb-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}33` }}>
       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${WARN}16`, color: WARN }}>조심할 시기의 함정</span>
       <p className="mt-3 text-[17px] font-black leading-snug" style={{ color: INK }}>{trap.title}</p>
-      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{trap.desc}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{trap.desc}</p>
       <div className="mt-3">
         {trap.items.map((it, i) => (
           <div key={i} className="flex gap-2.5 items-start py-3" style={{ borderTop: `1px solid ${WARN}1c` }}>
@@ -3281,7 +3281,7 @@ function ENatureCard({ data, color, label }: { data: Record<string, unknown> | n
             <span className="text-[14px]">✨</span>
             <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{strengthDesc}</p>
         </div>
       )}
       {shadowDesc && (
@@ -3290,7 +3290,7 @@ function ENatureCard({ data, color, label }: { data: Record<string, unknown> | n
             <span className="text-[14px]">🌙</span>
             <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>갈등 상황의 그림자</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{shadowDesc}</p>
         </div>
       )}
     </div>
@@ -3528,7 +3528,7 @@ function ConflictAvoidancePanel({ data, myName, partnerName }: {
                 <div className="w-2 h-2 rounded-full" style={{ background: ECH4_MY }} />
                 <p className="text-[11px] font-black" style={{ color: ECH4_MY }}>{myName}이 바꿔야 할 것</p>
               </div>
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{myTip}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{myTip}</p>
             </div>
           )}
           {partnerTip && (
@@ -3537,7 +3537,7 @@ function ConflictAvoidancePanel({ data, myName, partnerName }: {
                 <div className="w-2 h-2 rounded-full" style={{ background: ECH4_PT }} />
                 <p className="text-[11px] font-black" style={{ color: ECH4_PT }}>{partnerName}이 바꿔야 할 것</p>
               </div>
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{partnerTip}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerTip}</p>
             </div>
           )}
         </div>
@@ -3599,7 +3599,7 @@ function DeeperIssueCard({ item, index }: { item: Record<string, unknown>; index
       {surface && (
         <div className="px-4 py-3" style={{ background: WHITE, borderBottom: `1px solid ${ECH5_DEEP}0c` }}>
           <p className="text-[10px] font-black mb-1.5 tracking-wider" style={{ color: MUTE }}>겉으로 보이는 것</p>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{surface}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{surface}</p>
         </div>
       )}
       {/* 실제 원인 */}
@@ -3994,11 +3994,11 @@ function ShiningPathCard({ data, myName, partnerName }: {
             <div className="flex divide-x" style={{ borderColor: "#e8e4de" }}>
               <div className="flex-1 px-4 py-4" style={{ background: "#f0f4fc" }}>
                 <p className="text-[10px] font-black mb-2" style={{ color: MY_C }}>{myName}님</p>
-                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT }}>{myPath}</p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{myPath}</p>
               </div>
               <div className="flex-1 px-4 py-4" style={{ background: "#fdf0f0" }}>
                 <p className="text-[10px] font-black mb-2" style={{ color: PT_C }}>{partnerName}님</p>
-                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT }}>{partnerPath}</p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerPath}</p>
               </div>
             </div>
           </div>
@@ -4045,7 +4045,7 @@ function PropertyFlowCard({ data, myName, partnerName }: {
         </div>
         {myDesc && (
           <div className="px-4 py-4" style={{ background: WHITE }}>
-            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT }}>{myDesc}</p>
+            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{myDesc}</p>
           </div>
         )}
       </div>
@@ -4062,7 +4062,7 @@ function PropertyFlowCard({ data, myName, partnerName }: {
         </div>
         {partnerDesc && (
           <div className="px-4 py-4" style={{ background: WHITE }}>
-            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT }}>{partnerDesc}</p>
+            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerDesc}</p>
           </div>
         )}
       </div>
@@ -4106,7 +4106,7 @@ function ChildCustodyCard({ data, myName, partnerName }: {
         </div>
         {mySuitability && (
           <div className="px-4 py-4" style={{ background: WHITE }}>
-            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT }}>{mySuitability}</p>
+            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{mySuitability}</p>
           </div>
         )}
       </div>
@@ -4123,7 +4123,7 @@ function ChildCustodyCard({ data, myName, partnerName }: {
         </div>
         {partnerSuitability && (
           <div className="px-4 py-4" style={{ background: WHITE }}>
-            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT }}>{partnerSuitability}</p>
+            <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerSuitability}</p>
           </div>
         )}
       </div>
@@ -4363,7 +4363,7 @@ function ReconcileScoreGauge({ score, label, basis }: { score: number; label: st
       )}
       {basis && (
         <div className="px-5 py-3" style={{ background: WHITE, borderTop: `1px solid ${COLOR}12` }}>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{basis}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{basis}</p>
         </div>
       )}
     </div>
@@ -4397,7 +4397,7 @@ function ReconcileFactorCard({ data }: { data: Record<string, unknown> | null })
                   <span className="mt-0.5 text-[11px] font-black flex-shrink-0" style={{ color: ECH9_YES }}>✓</span>
                   <div>
                     {title && <p className="text-[13px] font-bold leading-snug mb-1" style={{ color: ECH9_YES }}>{title}</p>}
-                    {desc  && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>}
+                    {desc  && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>}
                   </div>
                 </div>
               );
@@ -4421,7 +4421,7 @@ function ReconcileFactorCard({ data }: { data: Record<string, unknown> | null })
                   <span className="mt-0.5 text-[11px] font-black flex-shrink-0" style={{ color: ECH9_NO }}>✗</span>
                   <div>
                     {title && <p className="text-[13px] font-bold leading-snug mb-1" style={{ color: ECH9_NO }}>{title}</p>}
-                    {desc  && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>}
+                    {desc  && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>}
                   </div>
                 </div>
               );
@@ -6347,7 +6347,7 @@ function SummaryCard({ title, items }: { title: string; items: { title: string; 
             <p className="text-[14px] font-black mb-1 inline-block px-1.5 rounded" style={{ color: INK, background: "#f1e2e4" }}>
               {it.title}
             </p>
-            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>
               {it.desc}
             </p>
           </div>
@@ -7875,7 +7875,7 @@ function ReportPreviewInner() {
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>
                   <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${ROSE}09`, borderLeft: `3px solid ${ROSE}55` }}>
                     <p className="text-[11px] font-bold mb-1" style={{ color: ROSE, opacity: 0.7 }}>남겨주신 고민</p>
-                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{concern}&rdquo;</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>&ldquo;{concern}&rdquo;</p>
                   </div>
                   <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
                     <div className="flex justify-center mb-4"><span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span></div>
