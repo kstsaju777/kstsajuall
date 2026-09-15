@@ -4251,7 +4251,7 @@ function BusinessStrengthCard({ item, index }: { item: Record<string, unknown>; 
         </div>
       )}
       <div className="px-4 pt-2.5 pb-3">
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -4272,7 +4272,7 @@ function BusinessWeaknessCard({ item, index }: { item: Record<string, unknown>; 
         </div>
       )}
       <div className="px-4 pt-2.5 pb-3">
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -4298,7 +4298,7 @@ function BusinessBalancePanel({ data }: { data: Record<string, unknown> | null }
               <p className="text-[13px] font-black" style={{ color: BCH4_BAL }}>{title}</p>
             </div>
             <div className="px-4 py-3">
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
             </div>
           </div>
         );
@@ -4806,7 +4806,7 @@ function BizConflictPatternCard({ data }: { data: Record<string, unknown> | null
                 <span className="text-[14px]">{icon}</span>
                 <p className="text-[12.5px] font-black" style={{ color: BIZ_CONFLICT_RED }}>{title}</p>
               </div>
-              <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+              <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
             </div>
           );
         })}
@@ -4814,7 +4814,7 @@ function BizConflictPatternCard({ data }: { data: Record<string, unknown> | null
       {reconcile && (
         <div className="mx-4 mb-3 px-3.5 py-3 rounded-xl" style={{ background: `${BIZ_CONFLICT_RED}08`, border: `1px solid ${BIZ_CONFLICT_RED}20` }}>
           <p className="text-[11px] font-black mb-1" style={{ color: BIZ_CONFLICT_RED }}>💞 해소 방식</p>
-          <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{reconcile}</p>
+          <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{reconcile}</p>
           {growthTip && (
             <div className="flex items-start gap-1.5 mt-2 pt-2" style={{ borderTop: `1px dashed ${BIZ_CONFLICT_RED}20` }}>
               <span className="text-[11px] mt-0.5">🌱</span>
@@ -4840,7 +4840,7 @@ function BizCrisisCard({ item }: { item: Record<string, unknown> }) {
         <p className="text-[14px] font-black" style={{ color: BCH9_CRISIS }}>{title}</p>
       </div>
       <div className="px-4 py-3.5" style={{ background: WHITE }}>
-        <p className="text-[14.5px] leading-[1.95] mb-3 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[14.5px] leading-[1.95] mb-3 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
         {basis && (
           <div className="mb-2.5 px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${BCH9_CRISIS}08` }}>
             <span className="text-[12px] shrink-0 mt-0.5">🔍</span>
@@ -4880,7 +4880,7 @@ function BizOvercomeTipPanel({ data }: { data: Record<string, unknown> | null })
               <p className="text-[14px] font-black" style={{ color: BCH9_SOLVE }}>{title}</p>
             </div>
             <div className="px-4 py-3" style={{ background: WHITE }}>
-              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
               {tip && (
                 <div className="px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${BCH9_SOLVE}0a`, border: `1px solid ${BCH9_SOLVE}18` }}>
                   <span className="text-[13px] shrink-0">✅</span>
@@ -4921,7 +4921,7 @@ function BizCrisisRecoveryGuide({ data }: { data: Record<string, unknown> | null
                 <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-black" style={{ background: BCH9_SOLVE, color: WHITE }}>{num}</div>
                 <div>
                   <p className="text-[12.5px] font-black mb-0.5" style={{ color: BCH9_SOLVE }}>{ptitle}</p>
-                  <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{pdesc}</p>
+                  <p className="text-[14px] leading-[1.9]" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{pdesc}</p>
                 </div>
               </div>
             );
@@ -6156,7 +6156,7 @@ function BusinessPatternCard({ data, color = MAROON, pale = CALLOUT_BG }: {
               <span className="text-[15px] font-black" style={{ color }}>{patternType}</span>
             </div>
           )}
-          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>"{intro}"</p>}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic", fontFamily: SERIF }}>"{intro}"</p>}
         </div>
       )}
       {paragraphs.map((p, i) => (
@@ -6170,7 +6170,7 @@ function BusinessPatternCard({ data, color = MAROON, pale = CALLOUT_BG }: {
 function Callout({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-xl px-4 py-3.5 mb-4" style={{ background: CALLOUT_BG, borderLeft: `3px solid ${ROSE}` }}>
-      <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+      <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
         {children}
       </p>
     </div>
@@ -7921,7 +7921,7 @@ function ReportPreviewInner() {
                       <span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span>
                     </div>
                     {caParas.map((p, i) => (
-                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
                     ))}
                   </div>
                   {/* 구분선 */}

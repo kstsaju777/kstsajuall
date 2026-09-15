@@ -2617,7 +2617,7 @@ function ParentStyleCard({ data, color, pale }: {
               <span className="text-[15px] font-black" style={{ color }}>{patternType}</span>
             </div>
           )}
-          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>&#8220;{intro}&#8221;</p>}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic", fontFamily: SERIF }}>&#8220;{intro}&#8221;</p>}
         </div>
       )}
       {callout && (
@@ -2626,7 +2626,7 @@ function ParentStyleCard({ data, color, pale }: {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -3578,7 +3578,7 @@ function PregnancyScoreCard({ score, tier, label, paragraphs }: {
       <p className="text-center text-[14px] font-black pb-2" style={{ color: arcColor, fontFamily: SERIF }}>{label}</p>
       <div className="px-5 pb-5 pt-2" style={{ borderTop: `1px solid ${IM3_COLOR}15` }}>
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13.5px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+          <p key={i} className="text-[13.5px] leading-[1.85] mb-3 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
         ))}
       </div>
     </div>
@@ -3626,7 +3626,7 @@ function PregnancyReasonCard({ intro, callout, reasons, paragraphs }: {
         </div>
       )}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[13.5px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+        <p key={i} className="text-[13.5px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -8079,7 +8079,7 @@ function ReportPreviewInner() {
                   <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
                     <div className="flex justify-center mb-4"><span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span></div>
                     {caParas.map((p, i) => (
-                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
                     ))}
                   </div>
                   <div className="mt-8 mb-8" style={{ height: 1, background: `${INK}12` }} />
