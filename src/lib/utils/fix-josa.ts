@@ -16,7 +16,15 @@ export function hasBatchim(char: string): boolean {
 // 정상적인 한국어에 없으므로 오탐 위험이 없다.
 export function fixJosa(text: string): string {
   if (!text) return text;
-  return text.replace(/([가-힣])\([一-鿿]+\)/g, "$1");
+  text = text.replace(/([가-힣])\([一-鿿]+\)/g, "$1");
+
+  // '신강(71점)', '신약 65점'처럼 신강/신약/중화/중강 뒤에 점수 숫자를 괄호 또는 그대로
+  // 붙이는 패턴 — GLOBAL_GRAMMAR_RULES로 여러 차례 금지했음에도 계속 새어나와, 이 정성적
+  // 표현 뒤에 오는 숫자+'점' 표기를 기계적으로 제거한다. 정상적인 문장에 없는 조합이라 안전하다.
+  text = text.replace(/(신강|신약|중화|중강)\(\d+점\)/g, "$1");
+  text = text.replace(/(신강|신약|중화|중강)\s*\d+점/g, "$1");
+
+  return text;
 }
 
 // 객체·배열 내 모든 문자열에 재귀 적용 (현재는 통과만 시킴 — 위 설명 참고)
