@@ -3503,7 +3503,7 @@ function ConflictTriggerCard({ item, index }: { item: Record<string, unknown>; i
         <span className="px-2.5 py-1 rounded-full text-[10px] font-black" style={{ background: `${t.color}18`, color: t.color }}>{t.label}</span>
       </div>
       <div className="px-4 py-3.5">
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
