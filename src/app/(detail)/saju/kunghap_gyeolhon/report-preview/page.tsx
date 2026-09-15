@@ -929,7 +929,7 @@ function CrisisCard({ item }: { item: Record<string, unknown> }) {
       </div>
       {/* 본문 */}
       <div className="px-4 py-3.5" style={{ background: WHITE }}>
-        <p className="text-[13.5px] leading-[1.85] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.85] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -2223,7 +2223,7 @@ function ConflictPatternCard({ data }: { data: Record<string, unknown> | null })
                 <span className="text-[14px]">{icon}</span>
                 <p className="text-[13px] font-black" style={{ color: CONFLICT_RED }}>{title}</p>
               </div>
-              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{desc}</p>
+              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
             </div>
           );
         })}
@@ -2232,7 +2232,7 @@ function ConflictPatternCard({ data }: { data: Record<string, unknown> | null })
       {reconcile && (
         <div className="mx-4 mb-3 px-3.5 py-3 rounded-xl" style={{ background: `${CONFLICT_RED}08`, border: `1px solid ${CONFLICT_RED}20` }}>
           <p className="text-[11px] font-black mb-1" style={{ color: CONFLICT_RED }}>💞 화해 방식</p>
-          <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{reconcile}</p>
+          <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{reconcile}</p>
           {growthTip && (
             <div className="flex items-start gap-1.5 mt-2 pt-2" style={{ borderTop: `1px dashed ${CONFLICT_RED}20` }}>
               <span className="text-[11px] mt-0.5">🌱</span>
