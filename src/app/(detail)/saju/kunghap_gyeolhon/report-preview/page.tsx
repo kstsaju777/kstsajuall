@@ -899,13 +899,13 @@ function CrisisBanner({ data }: { data: Record<string, unknown> | null }) {
           <span className="text-[32px] leading-none">{crisisIcon}</span>
           <div>
             <p className="text-[10px] font-bold mb-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>이 부부의 위기 유형</p>
-            <p className="text-[18px] font-black leading-tight" style={{ color: WHITE }}>{crisisType}</p>
+            <p className="text-[18px] font-black leading-tight" style={{ color: WHITE, fontFamily: SERIF }}>{crisisType}</p>
           </div>
         </div>
       )}
       {callout && (
         <div className="mb-3 px-4 py-3 rounded-xl" style={{ background: `${GCH9_CRISIS}10`, borderLeft: `3px solid ${GCH9_CRISIS}` }}>
-          <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH9_CRISIS }}>{callout}</p>
+          <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH9_CRISIS, fontFamily: SERIF }}>{callout}</p>
         </div>
       )}
       {intro && <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{intro}</p>}
