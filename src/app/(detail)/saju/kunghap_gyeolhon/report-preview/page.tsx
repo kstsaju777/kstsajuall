@@ -908,7 +908,7 @@ function CrisisBanner({ data }: { data: Record<string, unknown> | null }) {
           <p className="text-[13.5px] font-black leading-relaxed" style={{ color: GCH9_CRISIS }}>{callout}</p>
         </div>
       )}
-      {intro && <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{intro}</p>}
+      {intro && <p className="text-[14.5px] leading-[1.95] whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{intro}</p>}
     </div>
   );
 }
@@ -1027,7 +1027,7 @@ function OvercomeTipPanel({ data }: { data: Record<string, unknown> | null }) {
               <p className="text-[14px] font-black" style={{ color: GCH9_SOLVE }}>{title}</p>
             </div>
             <div className="px-4 py-3" style={{ background: WHITE }}>
-              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all" }}>{desc}</p>
+              <p className="text-[14.5px] leading-[1.95] mb-2.5 whitespace-pre-line" style={{ color: INK, wordBreak: "keep-all", fontFamily: SERIF }}>{desc}</p>
               {tip && (
                 <div className="px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${GCH9_SOLVE}0a`, border: `1px solid ${GCH9_SOLVE}18` }}>
                   <span className="text-[13px] shrink-0">✅</span>
