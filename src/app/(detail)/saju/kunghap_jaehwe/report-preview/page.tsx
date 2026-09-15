@@ -3485,7 +3485,7 @@ function EmotionFlowTimeline({ data, myName, partnerName, gender }: { data: Reco
                 border: `1px solid ${themeColor}${String(Math.round(opacity * 30)).padStart(2, "0")}`,
               }}
             >
-              <p className="text-[12px] font-black mb-1" style={{ color: themeColor }}>{phase}</p>
+              <p className="text-[15px] font-black mb-1" style={{ color: themeColor }}>{phase}</p>
               {desc && <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>}
             </div>
             {!isLast && (
