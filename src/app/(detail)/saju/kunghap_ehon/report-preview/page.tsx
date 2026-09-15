@@ -3452,7 +3452,7 @@ function ConflictStyleBanner({ data, myName, partnerName, myGender, partnerGende
             <p className="text-[13px] font-black" style={{ color: INK }}>{myIcon && <span className="mr-1">{myIcon}</span>}{myType}</p>
           </div>
           <div className="px-4 pt-3 pb-4">
-            {myDesc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{myDesc}</p>}
+            {myDesc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{myDesc}</p>}
           </div>
         </div>
       )}
@@ -3470,7 +3470,7 @@ function ConflictStyleBanner({ data, myName, partnerName, myGender, partnerGende
             <p className="text-[13px] font-black" style={{ color: INK }}>{ptIcon && <span className="mr-1">{ptIcon}</span>}{ptType}</p>
           </div>
           <div className="px-4 pt-3 pb-4">
-            {ptDesc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{ptDesc}</p>}
+            {ptDesc && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{ptDesc}</p>}
           </div>
         </div>
       )}
