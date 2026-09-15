@@ -100,7 +100,7 @@ const CH_GUIDE: Record<number, string> = {
 - singang: "신강" 또는 "신약"
 - dominantEl: 확정값에서 가장 많은 오행 한 글자 (목/화/토/금/수 중 하나)
 - paragraphs 3개 (각 6~8문장, 260자+, 홍연 말투):
-  ① {이름1}님의 일간 오행(반드시 실제 글자 명시)이 인생에 새긴 기운 — 근본 성질과 삶을 대하는 방식을 깊고 풍부하게.
+  ① {이름1}님의 일간 오행(반드시 실제 글자 명시)이 인생에 새긴 기운 — 근본 성질과 삶을 대하는 방식을 깊고 풍부하게. 태어난 계절·기후를 언급할 경우 {명식표1}에 주입된 "월지 계절 정보" 확정값을 반드시 그대로 쓰고, 월지 글자를 보고 직접 판단해 다른 계절로 착각하는 것 절대 금지.
   ② 오행 분포 확정값 숫자를 근거로 강한 기운·부족한 기운이 성격과 관계 방식에 드러나는 방식.
   ③ 신강·신약 판단 근거(비겁·인성 개수 등 확정 데이터)와 결혼·가정에서 드러나는 본바탕 — 감정 처리, 의존성, 자기 표현 방식까지.
 
@@ -129,7 +129,7 @@ const CH_GUIDE: Record<number, string> = {
 - callout: 실제 오행 분포와 신강·신약 판단 근거를 담은 핵심 한 문장.
 - singang: "신강" 또는 "신약" (만세력 데이터 기반 판단)
 - dominantEl: 8글자에서 가장 많은 오행 한 글자 (예: "목", "화", "토", "금", "수")
-- paragraphs 3개: ①위에서 확인한 상대의 일간 오행(반드시 실제 일간 글자 언급)이 인생 전반에 새긴 기운과 타고난 에너지의 결 — 이 사람의 근본 성질과 삶을 대하는 방식을 깊고 풍부하게(6~8문장, 260자+) ②실제 오행 분포 숫자를 근거로 강한 기운·부족한 기운이 성격과 관계 방식에 어떻게 드러나는지(6~8문장, 260자+) ③신강·신약 판단 근거(비겁·인성 개수 등 실제 데이터)와 결혼·가정에서 고스란히 드러나는 본바탕 — 감정 처리 방식, 의존성, 자기 표현 방식까지(6~8문장, 260자+). 홍연 말투(~이오/~하오/~겠소) 사용.
+- paragraphs 3개: ①위에서 확인한 상대의 일간 오행(반드시 실제 일간 글자 언급)이 인생 전반에 새긴 기운과 타고난 에너지의 결 — 이 사람의 근본 성질과 삶을 대하는 방식을 깊고 풍부하게(6~8문장, 260자+). 태어난 계절·기후를 언급할 경우 {명식표2}에 주입된 "월지 계절 정보" 확정값을 반드시 그대로 쓰고, 월지 글자를 보고 직접 판단해 다른 계절로 착각하는 것 절대 금지. ②실제 오행 분포 숫자를 근거로 강한 기운·부족한 기운이 성격과 관계 방식에 어떻게 드러나는지(6~8문장, 260자+) ③신강·신약 판단 근거(비겁·인성 개수 등 실제 데이터)와 결혼·가정에서 고스란히 드러나는 본바탕 — 감정 처리 방식, 의존성, 자기 표현 방식까지(6~8문장, 260자+). 홍연 말투(~이오/~하오/~겠소) 사용.
 
 [partnerNature 섹션 — 상대방의 기질]
 - keywords: 상대를 대표하는 기질 키워드 4~5개. (예: "섬세한", "의지 강한", "따뜻한", "현실적인")
@@ -881,9 +881,28 @@ export function buildGyeolhonKunghapChapterPrompt(
   const myPillarTable = ilgan && myPillars?.length ? buildKunghapPillarTable(ilgan, myPillars, `${firstName}님`) : "";
   const partnerPillarTable = partnerIlgan && partnerPillars?.length ? buildKunghapPillarTable(partnerIlgan, partnerPillars, `${partnerFirstName}님`) : "";
 
+  // 월지 계절 — LLM이 월지 글자를 보고 직접 계절을 판단하다가 다른 계절로 착각하는 오류를
+  // 막기 위해 서버가 확정 계산해서 주입 (youare-report-content.ts와 동일한 방식)
+  const JI_SEASON_GY: Record<string, string> = {
+    子: "한겨울 칼바람이 몰아치는 냉기", 丑: "겨울 끝 습하고 차가운 냉기",
+    寅: "이른 봄 온기가 막 시작되는 기운", 卯: "봄 한창 생동감 넘치는 기운", 辰: "봄 끝 습기 가득한 기운",
+    巳: "초여름 달아오르는 더위", 午: "한여름 뜨겁게 타오르는 열기", 未: "여름 끝 건조하고 무더운 기운",
+    申: "초가을 서늘한 금기운", 酉: "가을 한창 청량하고 맑은 기운", 戌: "가을 끝 건조하게 마른 기운",
+    亥: "초겨울 스며드는 냉기",
+  };
+  const buildSeasonNote = (pillars: PillarItem[] | undefined, personLabel: string): string => {
+    const wolju = pillars?.find(p => p.pos === "월주");
+    const desc = wolju?.ji ? JI_SEASON_GY[wolju.ji] : undefined;
+    if (!desc) return "";
+    return `⛔ 월지 계절 정보(서버 확정값 — 월지: ${wolju!.ji ? (JI_KOR_P[wolju!.ji] ?? wolju!.ji) : "?"}): "${desc}" — 풀이에서 ${personLabel}의 태어난 계절·기후를 언급할 때 반드시 이 표현을 그대로 쓰고, 월지를 직접 보고 다른 계절로 착각하는 것 절대 금지.`;
+  };
+  const mySeasonNote = buildSeasonNote(myPillars, `${firstName}님`);
+  const partnerSeasonNote = buildSeasonNote(partnerPillars, `${partnerFirstName}님`);
+
   const myDataBlock = [
     ilgan ? `⛔ 일간(日干) 확정값: ${ilganFull || ilgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지.` : "",
     ohaengSummary ? `⛔ 오행 분포 확정값(서버 계산): ${ohaengSummary} — 이 숫자와 다른 개수를 풀이에 쓰는 것 절대 금지. 직접 세지 마시오.` : "",
+    mySeasonNote,
     myPillarTable,
     mySipseong ? `내 일간 기준 상대방 십성(서버 계산 확정값): ${mySipseong} ← 절대 바꾸지 마시오.` : "",
   ].filter(Boolean).join("\n");
@@ -891,6 +910,7 @@ export function buildGyeolhonKunghapChapterPrompt(
   const partnerDataBlock = [
     partnerIlgan ? `⛔ 상대방 일간(日干) 확정값: ${partnerIlganFull || partnerIlgan} — 풀이에서 이 일간을 다른 글자로 쓰는 것 절대 금지.` : "",
     partnerOhaengSummary ? `⛔ 상대방 오행 분포 확정값(서버 계산): ${partnerOhaengSummary} — 이 숫자와 다른 개수를 풀이에 쓰는 것 절대 금지. 직접 세지 마시오.` : "",
+    partnerSeasonNote,
     partnerPillarTable,
     partnerSipseong ? `상대방 일간 기준 내 십성(서버 계산 확정값): ${partnerSipseong} ← 절대 바꾸지 마시오.` : "",
   ].filter(Boolean).join("\n");
