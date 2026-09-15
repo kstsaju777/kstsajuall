@@ -3962,7 +3962,7 @@ function FutureFlowCard({ data, name, color }: {
       </div>
       {desc && (
         <div className="px-4 py-4" style={{ background: WHITE }}>
-          <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT }}>{desc}</p>
+          <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
         </div>
       )}
     </div>
