@@ -2208,7 +2208,7 @@ function ConflictPatternCard({ data }: { data: Record<string, unknown> | null })
         <span className="text-[22px]">{triggerIcon}</span>
         <div>
           <p className="text-[14px] font-black" style={{ color: CONFLICT_RED }}>{triggerType}</p>
-          {callout && <p className="text-[12.5px] leading-snug mt-0.5" style={{ color: INK_SOFT, fontFamily: SERIF }}>{callout}</p>}
+          {callout && <p className="text-[12.5px] leading-relaxed mt-0.5" style={{ color: INK_SOFT, fontFamily: SERIF }}>{callout}</p>}
         </div>
       </div>
       {/* 갈등 패턴 목록 */}
