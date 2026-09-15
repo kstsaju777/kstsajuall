@@ -2764,7 +2764,7 @@ function JWongukCard({ data, color, pale }: { data: Record<string, unknown> | nu
       )}
       {/* paragraphs — 오행·신강신약·일간 중심의 상세 풀이 */}
       {paragraphs.map((p, i) => (
-        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all" }}>{p}</p>
+        <p key={i} className="mb-4 text-[14px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
       ))}
     </div>
   );
@@ -2838,7 +2838,7 @@ function RelationStyleCard({ data, color, pale }: { data: Record<string, unknown
               <span className="text-[15px] font-black" style={{ color }}>{styleType}</span>
             </div>
           )}
-          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic" }}>&ldquo;{intro}&rdquo;</p>}
+          {intro && <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontStyle: "italic", fontFamily: SERIF }}>&ldquo;{intro}&rdquo;</p>}
         </div>
       )}
       {/* 풀이 단락 — 이 스타일이 재회를 앞두고 어떻게 작동하는지 상세 분석 */}
@@ -2872,7 +2872,7 @@ function BreakupCauseCard({ item, index }: { item: Record<string, unknown>; inde
         </div>
       </div>
       <div className="px-4 pb-4">
-        <p className="text-[13.5px] leading-[1.9] pt-3" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.9] pt-3" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -2940,14 +2940,14 @@ function HealingPathCard({ data, myGender, partnerGender, myName, partnerName }:
         </div>
         {/* 풀이 */}
         <div className="px-4 py-4" style={{ background: `${activeTheme.text}18` }}>
-          <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{activeHealing}</p>
+          <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{activeHealing}</p>
         </div>
       </div>
       {/* 공통 회복 경로 */}
       {sharedPath && (
         <div className="mb-4 rounded-2xl px-5 py-4" style={{ background: `linear-gradient(135deg, ${JCH3_HEAL}0e 0%, ${JCH3_HEAL_P} 100%)`, border: `1px solid ${JCH3_HEAL}22` }}>
           <p className="text-[12px] font-black mb-2" style={{ color: JCH3_HEAL }}>두 사람이 함께 걸어야 할 길</p>
-          <p className="text-[13.5px] leading-[1.8]" style={{ color: INK, wordBreak: "break-all" }}>{sharedPath}</p>
+          <p className="text-[13.5px] leading-[1.8]" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{sharedPath}</p>
         </div>
       )}
       {/* 풀이 단락 */}
@@ -3027,7 +3027,7 @@ function MyLongingGauge({ score, label, paragraphs, gender }: { score?: number; 
       {paragraphs && paragraphs.length > 0 && (
         <div className="px-5 pb-5 pt-2">
           {paragraphs.map((p, i) => (
-            <p key={i} className="mb-3 text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+            <p key={i} className="mb-3 text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
           ))}
         </div>
       )}
@@ -3117,7 +3117,7 @@ function MyEmotionList({ items, score, gender }: { items: Array<Record<string, u
       </div>
       {/* 콘텐츠 영역 */}
       <div className="px-4 py-4" style={{ background: WHITE, border: `1px solid ${TAB_BORDER}`, borderTop: `2px solid ${TAB_ACTIVE}`, borderRadius: "0 0 12px 12px", position: "relative", zIndex: 0 }}>
-        <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -3199,7 +3199,7 @@ function PartnerLongingGauge({ score, label, paragraphs, gender }: { score?: num
       {paragraphs && paragraphs.length > 0 && (
         <div className="px-5 pb-5 pt-2">
           {paragraphs.map((p, i) => (
-            <p key={i} className="mb-3 text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+            <p key={i} className="mb-3 text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
           ))}
         </div>
       )}
@@ -3258,7 +3258,7 @@ function PartnerEmotionList({ items, score, gender }: { items: Array<Record<stri
       </div>
       {/* 콘텐츠 영역 */}
       <div className="px-4 py-4" style={{ background: WHITE, border: `1px solid ${TAB_BORDER}`, borderTop: `2px solid ${TAB_ACTIVE}`, borderRadius: "0 0 12px 12px", position: "relative", zIndex: 0 }}>
-        <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13px] leading-[1.9] whitespace-pre-line" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
     </div>
   );
@@ -3321,7 +3321,7 @@ function JHapCard({ item, index }: { item: Record<string, unknown>; index: numbe
       </div>
       {/* 합의 의미 */}
       <div className="px-4 pt-3 pb-3" style={{ borderBottom: reunionMeaning ? `1px solid ${JCH6_COLOR}0c` : "none" }}>
-        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
       {/* 재회 맥락 — 이 합이 재회·재결합에 어떤 의미를 갖는지 */}
       {reunionMeaning && (
@@ -3374,7 +3374,7 @@ function JChungCard({ item, index }: { item: Record<string, unknown>; index: num
       </div>
       {/* 충의 의미 */}
       <div className="px-4 pt-3 pb-3" style={{ borderBottom: riskDesc ? `1px solid ${sm.color}0c` : "none" }}>
-        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
       {/* 재회 주의점 — 이 충이 재회·재결합 과정에서 어떻게 폭발할 수 있는지, 어떻게 다뤄야 하는지 */}
       {riskDesc && (
@@ -3448,7 +3448,7 @@ function HapChungSummaryCard({ data }: { data: Record<string, unknown> | null; }
           </div>
         )}
         {paragraphs.map((p, i) => (
-          <p key={i} className="mb-3 text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all" }}>{p}</p>
+          <p key={i} className="mb-3 text-[13.5px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
         ))}
       </div>
     </div>
@@ -3487,7 +3487,7 @@ function EmotionFlowTimeline({ data, myName, partnerName, gender }: { data: Reco
               }}
             >
               <p className="text-[12px] font-black mb-1" style={{ color: themeColor }}>{phase}</p>
-              {desc && <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>}
+              {desc && <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>}
             </div>
             {!isLast && (
               <div className="flex items-center justify-center py-1" style={{ opacity: arrowOpacity }}>
@@ -3522,7 +3522,7 @@ function TrustRebuildCard({ item, index }: { item: Record<string, unknown>; inde
       <div style={{ height: 1, background: `${JCH7_COLOR}10`, margin: "0 20px" }} />
       {/* 상세 설명 */}
       <div className="px-5 pt-3 pb-3">
-        <p className="text-[13px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
       {/* 사주 근거 */}
       {sajuBasis && (
@@ -3563,7 +3563,7 @@ function ReconcileGuideCard({ data }: { data: Record<string, unknown> | null }) 
             </div>
             <div className="flex-1 min-w-0">
               {tipTitle && <p className="text-[13px] font-black mb-1" style={{ color: JCH7_COLOR }}>{tipTitle}</p>}
-              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{tipText}</p>
+              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{tipText}</p>
             </div>
           </div>
         );
@@ -3638,7 +3638,7 @@ function ReunionGauge({ score, label, paragraphs }: { score: number; label: stri
       {paragraphs && paragraphs.length > 0 && (
         <div className="mt-1">
           {paragraphs.map((p, i) => (
-            <p key={i} className="mb-3 text-[13px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all" }}>{p}</p>
+            <p key={i} className="mb-3 text-[13px] leading-[1.85]" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
           ))}
         </div>
       )}
@@ -3684,7 +3684,7 @@ function ReunionSignCard({ item, index }: { item: Record<string, unknown>; index
       </div>
       {/* 징조 설명 */}
       <div className="px-4 pt-3 pb-3" style={{ borderBottom: sajuBasis ? `1px solid ${themeColor}0c` : "none" }}>
-        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
       {/* 사주 근거 */}
       {sajuBasis && (
@@ -3747,7 +3747,7 @@ function ReunionSceneCard({ data, myName, partnerName }: { data: Record<string, 
             </div>
             {/* 장면 묘사 */}
             <div className="px-4 py-3">
-              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+              <p className="text-[13.5px] leading-[1.85]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
             </div>
           </div>
         );
@@ -3791,7 +3791,7 @@ function ReunionDynamicCard({ data }: { data: Record<string, unknown> | null }) 
                   <p className="text-[11px] font-black leading-tight" style={{ color: JCH9_HOPE }}>{(s.title as string | undefined) ?? ""}</p>
                 </div>
                 <div className="px-3 py-2.5 flex-1" style={{ background: JCH9_HOPE_P }}>
-                  <p className="text-[11.5px] leading-relaxed" style={{ color: INK, wordBreak: "break-all" }}>{(s.desc as string | undefined) ?? ""}</p>
+                  <p className="text-[11.5px] leading-relaxed" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{(s.desc as string | undefined) ?? ""}</p>
                 </div>
               </div>
             ) : <div />}
@@ -3803,7 +3803,7 @@ function ReunionDynamicCard({ data }: { data: Record<string, unknown> | null }) 
                   <p className="text-[11px] font-black leading-tight" style={{ color: JCH9_COLOR }}>{(c.title as string | undefined) ?? ""}</p>
                 </div>
                 <div className="px-3 py-2.5 flex-1" style={{ background: JCH9_PALE }}>
-                  <p className="text-[11.5px] leading-relaxed" style={{ color: INK, wordBreak: "break-all" }}>{(c.desc as string | undefined) ?? ""}</p>
+                  <p className="text-[11.5px] leading-relaxed" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{(c.desc as string | undefined) ?? ""}</p>
                 </div>
               </div>
             ) : <div />}
@@ -3854,7 +3854,7 @@ function ReunionOutlookCard({ data }: { data: Record<string, unknown> | null }) 
             </div>
             {/* 전망 설명 */}
             <div className="px-4 pt-3 pb-3" style={{ borderBottom: tip ? `1px solid ${mm.color}0c` : "none" }}>
-              <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+              <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
             </div>
             {/* 이 시기의 핵심 팁 */}
             {tip && (
@@ -3872,7 +3872,7 @@ function ReunionOutlookCard({ data }: { data: Record<string, unknown> | null }) 
       {/* 마무리 문장 */}
       {closing && (
         <div className="px-4 py-3 rounded-xl" style={{ background: `linear-gradient(135deg, ${JCH9_COLOR}10 0%, ${JCH9_PALE} 100%)`, border: `1px solid ${JCH9_COLOR}20` }}>
-          <p className="text-[13.5px] leading-[1.8] font-bold text-center" style={{ color: JCH9_COLOR, wordBreak: "break-all" }}>{closing}</p>
+          <p className="text-[13.5px] leading-[1.8] font-bold text-center" style={{ color: JCH9_COLOR, wordBreak: "break-all", fontFamily: SERIF }}>{closing}</p>
         </div>
       )}
     </div>
@@ -3930,7 +3930,7 @@ function TimingWindowCard({ item, index }: { item: Record<string, unknown>; inde
       </div>
       {/* 시기 특성 설명 */}
       <div className="px-4 pt-3 pb-3" style={{ borderBottom: sajuBasis ? `1px solid ${qm.color}0c` : "none" }}>
-        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13.5px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
       {/* 사주 근거 — 왜 이 시기가 좋은지(또는 주의인지)의 오행·운 근거 */}
       {sajuBasis && (
@@ -3960,7 +3960,7 @@ function TimingReasonCard({ data }: { data: Record<string, unknown> | null }) {
       {intro && (
         <div className="rounded-2xl px-5 py-4 mb-4" style={{ background: `linear-gradient(135deg, ${JCH10_COLOR}12 0%, ${JCH10_PALE} 100%)`, border: `1px solid ${JCH10_COLOR}20` }}>
           <span className="text-[22px] mb-1 block" style={{ opacity: 0.4 }}>&ldquo;</span>
-          <p className="text-[14px] leading-relaxed font-bold" style={{ color: JCH10_COLOR, fontStyle: "italic", wordBreak: "break-all" }}>{intro}</p>
+          <p className="text-[14px] leading-relaxed font-bold" style={{ color: JCH10_COLOR, fontStyle: "italic", wordBreak: "break-all", fontFamily: SERIF }}>{intro}</p>
           <span className="text-[22px] block text-right" style={{ opacity: 0.4 }}>&rdquo;</span>
         </div>
       )}
@@ -3981,7 +3981,7 @@ function TimingReasonCard({ data }: { data: Record<string, unknown> | null }) {
             </div>
             <div className="flex-1 min-w-0">
               {title && <p className="text-[13px] font-black mb-1" style={{ color: JCH10_COLOR }}>{title}</p>}
-              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+              <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
             </div>
           </div>
         );
@@ -4008,7 +4008,7 @@ function TimingActionGuide({ data, myName, partnerName }: { data: Record<string,
             <span className="text-[16px]">🎯</span>
             <p className="text-[11px] font-black" style={{ color: JCH10_GOOD }}>실전 행동 가이드</p>
           </div>
-          <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK, wordBreak: "break-all" }}>{intro}</p>
+          <p className="text-[13.5px] leading-relaxed font-bold" style={{ color: INK, wordBreak: "break-all", fontFamily: SERIF }}>{intro}</p>
         </div>
       )}
       {callout && (
@@ -4040,7 +4040,7 @@ function TimingActionGuide({ data, myName, partnerName }: { data: Record<string,
                   <span className="text-[11px]">✅</span>
                   <p className="text-[11px] font-black" style={{ color: JCH10_GOOD }}>이렇게 하시오</p>
                 </div>
-                <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{action}</p>
+                <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{action}</p>
               </div>
             )}
             {/* 하지 말아야 할 것 */}
@@ -4050,7 +4050,7 @@ function TimingActionGuide({ data, myName, partnerName }: { data: Record<string,
                   <span className="text-[11px]">🚫</span>
                   <p className="text-[11px] font-black" style={{ color: JCH10_WARN }}>이것은 피하시오</p>
                 </div>
-                <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{avoid}</p>
+                <p className="text-[13px] leading-[1.75]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{avoid}</p>
               </div>
             )}
           </div>
@@ -4244,7 +4244,7 @@ function ReunionTimingAdvicePanel({ data }: { data: Record<string, unknown> | nu
               <p className="text-[13px] font-black" style={{ color: JCH8_COLOR }}>{ttitle}</p>
             </div>
             <div className="px-4 py-3" style={{ background: WHITE }}>
-              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all" }}>{tdesc}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, wordBreak: "keep-all", fontFamily: SERIF }}>{tdesc}</p>
             </div>
           </div>
         );
@@ -4294,13 +4294,13 @@ function FutureStageCard({ item, index }: { item: Record<string, unknown>; index
       </div>
       {/* 본문 */}
       <div className="px-4 pt-3 pb-3">
-        <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+        <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
       </div>
       {/* 이 시기를 잘 넘기기 위한 팁 */}
       {tip && (
         <div className="mx-4 mb-4 px-3 py-2.5 rounded-xl flex items-start gap-2" style={{ background: `${m.color}08`, border: `1px solid ${m.color}14` }}>
           <span className="text-[13px] flex-shrink-0 mt-0.5">💡</span>
-          <p className="text-[12px] leading-[1.7]" style={{ color: m.color, fontWeight: 700, wordBreak: "break-all" }}>{tip}</p>
+          <p className="text-[12px] leading-[1.7]" style={{ color: m.color, fontWeight: 700, wordBreak: "break-all", fontFamily: SERIF }}>{tip}</p>
         </div>
       )}
     </div>
@@ -4340,7 +4340,7 @@ function FutureVisionCard({ data, myName, partnerName }: { data: Record<string, 
                 <p className="text-[13.5px] font-black" style={{ color: JCH11_COLOR }}>{title}</p>
               </div>
               <div className="px-4 py-3">
-                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{desc}</p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{desc}</p>
               </div>
             </div>
           );
@@ -4374,7 +4374,7 @@ function FinalMessageCard({ data, myName, partnerName }: { data: Record<string, 
       </div>
       {/* 단락들 */}
       {paragraphs.map((p, i) => (
-        <p key={i} className="text-[13px] leading-[1.9] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+        <p key={i} className="text-[13px] leading-[1.9] mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
       ))}
       {/* 클로징 명언 */}
       {closing && (
@@ -7217,7 +7217,7 @@ function ReportPreviewInner() {
             {/* 치유와 회복의 경로 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>치유와 회복의 경로</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>이별의 상처를 치유하지 않고 재회한다면, 같은 이별을 반복하게 되오. 두 사람 각각, 그리고 함께 걸어야 할 치유의 길을 안내하겠소.</span>
               </p>
             </section>
@@ -7452,7 +7452,7 @@ function ReportPreviewInner() {
             {/* 재회 가능성 종합 점수 */}
             <section className="px-6 pt-2 pb-2">
               <Heading>재회 가능성 종합 점수</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>앞선 장들에서 살핀 합충·감정 흐름·이별 패턴·두 사람의 미련을 모두 종합하여 재회 가능성 점수를 내겠소. 이 수치는 운명이 아닌 현재의 사주 기운이오.</span>
               </p>
             </section>
@@ -7514,7 +7514,7 @@ function ReportPreviewInner() {
             {/* 실전 행동 가이드 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>이 시기, 실전 행동 가이드</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>좋은 시기를 알았다면 어떻게 움직여야 하는가. {myName}님이 {partnerName}님에게 다가가는 구체적 행동 단계요.</span>
               </p>
             </section>
@@ -7563,7 +7563,7 @@ function ReportPreviewInner() {
             {/* 월별 재회 에너지 꺾은선 차트 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>두 사람의 월별 재회 에너지</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>두 사람의 사주팔자와 월운의 흐름을 분석하여, 지금부터 12개월간의 재회 에너지를 그래프로 나타내 주겠소. 재회하기 가장 좋은 달이 언제인지 확인해 보시오.</span>
               </p>
             </section>
@@ -7572,7 +7572,7 @@ function ReportPreviewInner() {
             {/* 피해야 할 시기 */}
             <section className="px-6 pt-10 pb-2">
               <Heading>두 사람의 재회에 주의할 시기</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>좋은 때가 있다면 조심해야 할 때도 있소. 이 시기들은 사주의 흐름이 재회의 기운과 충돌하니, 가급적 피하거나 신중하게 판단하시오.</span>
               </p>
             </section>
@@ -7594,7 +7594,7 @@ function ReportPreviewInner() {
             {/* 재회 준비 조언 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>재회를 앞두고 준비할 것들</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>좋은 시기를 알았다면, 그 시기를 어떻게 준비하고 맞이할지도 중요하오. 두 사람이 재회를 앞두고 챙겨야 할 실천 조언을 드리겠소.</span>
               </p>
             </section>
@@ -7640,7 +7640,7 @@ function ReportPreviewInner() {
             {/* 재회 후 관계 장면 */}
             <section className="px-6 pt-2 pb-2">
               <Heading>재회 후 두 사람의 모습</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>다시 만난 {myName}님과 {partnerName}님은 어떤 모습일까요. 사주가 그리는 재회 후의 장면들이오.</span>
               </p>
             </section>
@@ -7662,7 +7662,7 @@ function ReportPreviewInner() {
             {/* 재회 후 관계 역학 */}
             <section className="px-6 pt-4 pb-2">
               <Heading>재회가 만드는 것과 남겨진 것</Heading>
-              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all" }}>
+              <p className="text-[13px] leading-relaxed mb-4" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>
                 <span style={{ fontFamily: SERIF }}>재회한다고 모든 것이 해결되는 건 아니오. 재회가 새롭게 만들어내는 강점과, 여전히 함께 풀어야 할 과제를 나란히 살펴보겠소.</span>
               </p>
             </section>
@@ -7736,7 +7736,7 @@ function ReportPreviewInner() {
                       <span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span>
                     </div>
                     {caParas.map((p, i) => (
-                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all" }}>{p}</p>
+                      <p key={i} className="text-[14px] leading-[1.85] mb-4 last:mb-0" style={{ color: INK_SOFT, wordBreak: "break-all", fontFamily: SERIF }}>{p}</p>
                     ))}
                   </div>
                   {/* 구분선 */}
