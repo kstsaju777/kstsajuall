@@ -1433,7 +1433,7 @@ function TrapBox({ trap }: { trap: { title: string; desc: string; items: { title
     <div className="rounded-2xl p-5 mb-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}33` }}>
       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${WARN}16`, color: WARN }}>조심할 시기의 함정</span>
       <p className="mt-3 text-[17px] font-black leading-snug" style={{ color: INK }}>{trap.title}</p>
-      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{trap.desc}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{trap.desc}</p>
       <div className="mt-3">
         {trap.items.map((it, i) => (
           <div key={i} className="flex gap-2.5 items-start py-3" style={{ borderTop: `1px solid ${WARN}1c` }}>
@@ -2547,7 +2547,7 @@ function MyNatureBr1Card({ data }: { data: Record<string, unknown> | null }) {
             <span className="text-[14px]">✨</span>
             <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{strengthDesc}</p>
         </div>
       )}
       {shadowDesc && (
@@ -2556,7 +2556,7 @@ function MyNatureBr1Card({ data }: { data: Record<string, unknown> | null }) {
             <span className="text-[14px]">🌙</span>
             <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{shadowDesc}</p>
         </div>
       )}
     </div>
@@ -2720,7 +2720,7 @@ function PetNatureBr2Card({ data }: { data: Record<string, unknown> | null }) {
             <span className="text-[14px]">🐾</span>
             <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 아이의 사랑스러운 면</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{strengthDesc}</p>
         </div>
       )}
       {shadowDesc && (
@@ -2729,7 +2729,7 @@ function PetNatureBr2Card({ data }: { data: Record<string, unknown> | null }) {
             <span className="text-[14px]">🌙</span>
             <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>보호자가 이해해야 할 부분</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{shadowDesc}</p>
         </div>
       )}
     </div>
@@ -2975,12 +2975,12 @@ function ViewMirrorBr4({ mySummary, petSummary, myName, petName }:
         {/* 보호자 시선 */}
         <div className="px-4 py-4" style={{ background: BR4_MY_P, borderRight: `1px solid ${INK}08` }}>
           <p className="text-[10px] font-black mb-1.5" style={{ color: BR4_MY }}>{myName}의 눈</p>
-          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{mySummary}</p>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{mySummary}</p>
         </div>
         {/* 반려동물 시선 */}
         <div className="px-4 py-4" style={{ background: BR4_PET_P }}>
           <p className="text-[10px] font-black mb-1.5" style={{ color: BR4_PET }}>{petName}의 느낌</p>
-          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{petSummary}</p>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{petSummary}</p>
         </div>
       </div>
       <div className="py-2 text-center" style={{ background: WHITE, borderTop: `1px solid ${INK}08` }}>
@@ -3050,7 +3050,7 @@ function PetHabitsBr5Card({ items }: {
           </div>
           <div className="flex-1">
             <p className="text-[13px] font-black mb-1" style={{ color: BR5_COLOR }}>{item.title}</p>
-            <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+            <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
           </div>
         </div>
       ))}
@@ -3083,7 +3083,7 @@ function PetCareTipsBr5Card({ tips, petName }: {
             </div>
             <div className="flex-1">
               {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR5_COLOR }}>{tip.title}</p>}
-              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
             </div>
             {i === tips.length - 1 && (
               <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR5_ACCENT, color: "#fff" }}>핵심</span>
@@ -3163,7 +3163,7 @@ function PetLifeStyleBr6Card({ items }: {
             </div>
             <div className="flex-1">
               <p className="text-[13px] font-black mb-1" style={{ color: BR6_COLOR }}>{item.title}</p>
-              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
             </div>
           </div>
         </div>
@@ -3202,7 +3202,7 @@ function PetEnvTipsBr6Card({ tips, petName }: {
               </div>
               <div className="flex-1">
                 {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR6_COLOR }}>{tip.title}</p>}
-                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
               </div>
               {isLast && (
                 <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR6_ACCENT, color: "#fff" }}>핵심</span>
@@ -3252,7 +3252,7 @@ function ConflictPointBr7Card({ items }: {
                     <span className="px-2 py-0.5 rounded-full text-[9px] font-black" style={{ background: ist.bg, color: ist.color }}>{item.intensity}</span>
                   )}
                 </div>
-                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
               </div>
             </div>
           </div>
@@ -3332,7 +3332,7 @@ function ReconcileTipsBr7Card({ tips, name, petName }: {
               </div>
               <div className="flex-1">
                 {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR7_COLOR }}>{tip.title}</p>}
-                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
               </div>
               {isLast && (
                 <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR7_ACCENT, color: "#fff" }}>핵심</span>
@@ -3383,7 +3383,7 @@ function GaeunMethodBr8Card({ intro, callout, items, petName }:
             </div>
             <div className="flex-1">
               <p className="text-[13px] font-black mb-1" style={{ color: BR8_COLOR }}>{item.title}</p>
-              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
             </div>
           </div>
         ))}
@@ -3469,7 +3469,7 @@ function GaeunTimingBr8Card({ callout, items }: {
                     {isGood ? "개운" : "주의"}
                   </span>
                 </div>
-                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
               </div>
             </div>
           );
@@ -3577,7 +3577,7 @@ function TogetherPhasesBr9Card({ items }: {
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-black" style={{ background: st.badge, color: st.badgeText }}>{st.label}</span>
                   <p className="text-[13px] font-black ml-auto" style={{ color: BR9_COLOR }}>{item.title}</p>
                 </div>
-                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
               </div>
             </div>
           );
@@ -3620,7 +3620,7 @@ function BondKeepTipsBr9Card({ tips, petName }: {
               </div>
               <div className="flex-1">
                 {tip.title && <p className="text-[12px] font-black mb-0.5" style={{ color: BR9_COLOR }}>{tip.title}</p>}
-                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{tip.desc}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
               </div>
               {isLast && (
                 <span className="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black self-start mt-1" style={{ background: BR9_ACCENT, color: "#fff" }}>핵심</span>
@@ -5303,7 +5303,7 @@ function RunFlowChart({ flow }: { flow: ReportFlowItem[] }) {
               <span className="flex-shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${c}14`, color: c, minWidth: 56, textAlign: "center" }}>
                 {d.label}
               </span>
-              <span className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{d.text}</span>
+              <span className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{d.text}</span>
             </div>
           );
         })}
@@ -5325,7 +5325,7 @@ function SummaryCard({ title, items }: { title: string; items: { title: string; 
             <p className="text-[14px] font-black mb-1 inline-block px-1.5 rounded" style={{ color: INK, background: "#f1e2e4" }}>
               {it.title}
             </p>
-            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>
               {it.desc}
             </p>
           </div>
@@ -6751,7 +6751,7 @@ function ReportPreviewInner() {
                         </div>
                       </div>
                       <div className="px-4 py-3" style={{ background: FOREST_LIGHT5 }}>
-                        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -6918,7 +6918,7 @@ function ReportPreviewInner() {
                                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "#f0f0f0", color: MUTE }}>{f.category}</span>
                                 )}
                               </div>
-                              {f.benefit && <p className="text-[12px] leading-relaxed" style={{ color: INK }}>{f.benefit}</p>}
+                              {f.benefit && <p className="text-[12px] leading-relaxed" style={{ color: INK, fontFamily: SERIF }}>{f.benefit}</p>}
                             </div>
                           </div>
                         ))}
@@ -7033,7 +7033,7 @@ function ReportPreviewInner() {
                           <Heading>{name1_7}님의 고민에 대한 조언</Heading>
                           <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${ROSE}09`, borderLeft: `3px solid ${ROSE}55` }}>
                             <p className="text-[11px] font-bold mb-1" style={{ color: ROSE, opacity: 0.7 }}>남겨주신 고민</p>
-                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{report?.concern}&rdquo;</p>
+                            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>&ldquo;{report?.concern}&rdquo;</p>
                           </div>
                           <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
                             <div className="flex justify-center mb-4"><span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span></div>

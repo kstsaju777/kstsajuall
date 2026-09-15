@@ -1457,7 +1457,7 @@ function TrapBox({ trap }: { trap: { title: string; desc: string; items: { title
     <div className="rounded-2xl p-5 mb-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}33` }}>
       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${WARN}16`, color: WARN }}>조심할 시기의 함정</span>
       <p className="mt-3 text-[17px] font-black leading-snug" style={{ color: INK }}>{trap.title}</p>
-      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{trap.desc}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{trap.desc}</p>
       <div className="mt-3">
         {trap.items.map((it, i) => (
           <div key={i} className="flex gap-2.5 items-start py-3" style={{ borderTop: `1px solid ${WARN}1c` }}>
@@ -2574,7 +2574,7 @@ function NatureCard({ data, color = JN1_COLOR }: { data: Record<string, unknown>
             <span className="text-[14px]">✨</span>
             <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{strengthDesc}</p>
         </div>
       )}
       {shadowDesc && (
@@ -2583,7 +2583,7 @@ function NatureCard({ data, color = JN1_COLOR }: { data: Record<string, unknown>
             <span className="text-[14px]">🌙</span>
             <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{shadowDesc}</p>
         </div>
       )}
     </div>
@@ -2649,7 +2649,7 @@ function JNatureCard({ data, color, label, shadowLabel }: {
             <span className="text-[14px]">✨</span>
             <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{strengthDesc}</p>
         </div>
       )}
       {shadowDesc && (
@@ -2658,7 +2658,7 @@ function JNatureCard({ data, color, label, shadowLabel }: {
             <span className="text-[14px]">🌙</span>
             <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>{shadowLabel}</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{shadowDesc}</p>
         </div>
       )}
     </div>
@@ -2945,7 +2945,7 @@ function BondReasonCard({ data, color, pale }: {
                 <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black mt-0.5" style={{ background: color, color: "#fff" }}>{i + 1}</span>
                 <div>
                   <p className="text-[12.5px] font-bold mb-1" style={{ color }}>{r.title}</p>
-                  <p className="text-[13px] leading-[1.8]" style={{ color: INK }}>{r.desc}</p>
+                  <p className="text-[13px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{r.desc}</p>
                 </div>
               </div>
             ))}
@@ -3180,7 +3180,7 @@ function ChildTemperCard({ data, childName }: {
               <span className="text-[14px]">☀️</span>
               <p className="text-[11px] font-bold tracking-wider" style={{ color: JN5_STRG }}>이 기질의 빛</p>
             </div>
-            <p className="text-[13.5px] leading-[1.8]" style={{ color: INK }}>{strengthDesc}</p>
+            <p className="text-[13.5px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{strengthDesc}</p>
           </div>
         )}
         {/* 그림자 섹션 */}
@@ -3190,7 +3190,7 @@ function ChildTemperCard({ data, childName }: {
               <span className="text-[14px]">🌑</span>
               <p className="text-[11px] font-bold tracking-wider" style={{ color: JN5_SHDW }}>이 기질의 그림자</p>
             </div>
-            <p className="text-[13.5px] leading-[1.8]" style={{ color: INK }}>{shadowDesc}</p>
+            <p className="text-[13.5px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{shadowDesc}</p>
           </div>
         )}
         {/* 감정·행동 패턴 리스트 */}
@@ -3203,7 +3203,7 @@ function ChildTemperCard({ data, childName }: {
                   <span className="text-[20px] shrink-0">{ep.emoji}</span>
                   <div>
                     <p className="text-[12px] font-bold mb-0.5" style={{ color: JN5_COLOR }}>{ep.situation}</p>
-                    <p className="text-[13px] leading-[1.75]" style={{ color: INK }}>{ep.reaction}</p>
+                    <p className="text-[13px] leading-[1.75]" style={{ color: INK, fontFamily: SERIF }}>{ep.reaction}</p>
                   </div>
                 </div>
               ))}
@@ -3281,7 +3281,7 @@ function ChildNeedsCard({ items, tip, childName }: {
         {tip && (
           <div className="px-4 py-3 rounded-xl" style={{ background: `${JN5_COLOR}0e`, border: `1px dashed ${JN5_COLOR}40` }}>
             <p className="text-[11.5px] font-bold mb-1" style={{ color: JN5_COLOR }}>홍연의 한마디</p>
-            <p className="text-[13px] leading-[1.8]" style={{ color: INK }}>{tip}</p>
+            <p className="text-[13px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{tip}</p>
           </div>
         )}
       </div>
@@ -3407,7 +3407,7 @@ function ChungListCard({ items, myName, childName }: {
               {item.resolve && (
                 <div className="px-3 py-2.5 rounded-lg" style={{ background: `${JN6_HAP}0c`, borderLeft: `2px solid ${JN6_HAP}` }}>
                   <p className="text-[11.5px] font-bold mb-0.5" style={{ color: JN6_HAP }}>이렇게 다루시오</p>
-                  <p className="text-[12.5px] leading-[1.75]" style={{ color: INK }}>{item.resolve}</p>
+                  <p className="text-[12.5px] leading-[1.75]" style={{ color: INK, fontFamily: SERIF }}>{item.resolve}</p>
                 </div>
               )}
             </div>
@@ -3937,7 +3937,7 @@ function LivingTipsCard({ items, closing, myName, childName }: {
         {closing && (
           <div className="px-4 py-3 rounded-xl" style={{ background: `${JN7_TIP}0c`, border: `1px dashed ${JN7_TIP}40` }}>
             <p className="text-[11.5px] font-bold mb-1" style={{ color: JN7_TIP }}>홍연의 한마디</p>
-            <p className="text-[13px] leading-[1.8]" style={{ color: INK }}>{closing}</p>
+            <p className="text-[13px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{closing}</p>
           </div>
         )}
       </div>
@@ -4006,7 +4006,7 @@ function EducationStyleCard({ data, childName }: {
               </div>
               <div className="px-3 py-2.5 space-y-1.5" style={{ background: "#fff" }}>
                 {doList.map((d, i) => (
-                  <p key={i} className="text-[12px] leading-[1.7]" style={{ color: INK }}>· {d}</p>
+                  <p key={i} className="text-[12px] leading-[1.7]" style={{ color: INK, fontFamily: SERIF }}>· {d}</p>
                 ))}
               </div>
             </div>
@@ -4017,7 +4017,7 @@ function EducationStyleCard({ data, childName }: {
               </div>
               <div className="px-3 py-2.5 space-y-1.5" style={{ background: "#fff" }}>
                 {dontList.map((d, i) => (
-                  <p key={i} className="text-[12px] leading-[1.7]" style={{ color: INK }}>· {d}</p>
+                  <p key={i} className="text-[12px] leading-[1.7]" style={{ color: INK, fontFamily: SERIF }}>· {d}</p>
                 ))}
               </div>
             </div>
@@ -4117,7 +4117,7 @@ function EducationTipsCard({ items, caution, childName }: {
               <span className="text-[16px]">⚠️</span>
               <p className="text-[12px] font-black" style={{ color: JN8_DONT }}>반드시 피해야 할 교육 방식</p>
             </div>
-            <p className="text-[13px] leading-[1.8]" style={{ color: INK }}>{caution}</p>
+            <p className="text-[13px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{caution}</p>
           </div>
         )}
       </div>
@@ -4211,7 +4211,7 @@ function CrisisScoreCard({ score, level, label, crisisWindows, paragraphs }: {
                   <p className="text-[12px] font-black leading-snug" style={{ color: riskColor(w.risk) }}>{w.period}</p>
                   <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: `${riskColor(w.risk)}15`, color: riskColor(w.risk) }}>{w.risk}</span>
                 </div>
-                <p className="text-[12.5px] leading-[1.75]" style={{ color: INK }}>{w.desc}</p>
+                <p className="text-[12.5px] leading-[1.75]" style={{ color: INK, fontFamily: SERIF }}>{w.desc}</p>
               </div>
             ))}
           </div>
@@ -4273,7 +4273,7 @@ function CrisisReasonCard({ data, myName, childName }: {
                     <p className="text-[13px] font-black" style={{ color: JN9_WARN }}>{t.trigger}</p>
                   </div>
                   <div className="px-4 pb-3 pt-1" style={{ background: `${JN9_WARN}07` }}>
-                    <p className="text-[12.5px] leading-[1.75]" style={{ color: INK }}>→ {t.effect}</p>
+                    <p className="text-[12.5px] leading-[1.75]" style={{ color: INK, fontFamily: SERIF }}>→ {t.effect}</p>
                   </div>
                 </div>
               ))}
@@ -4336,7 +4336,7 @@ function CrisisTipsCard({ items, healing, myName, childName }: {
               <span className="text-[16px]">🌅</span>
               <p className="text-[12px] font-black" style={{ color: JN9_CALM }}>위기 이후 — 관계 회복의 길</p>
             </div>
-            <p className="text-[13px] leading-[1.8]" style={{ color: INK }}>{healing}</p>
+            <p className="text-[13px] leading-[1.8]" style={{ color: INK, fontFamily: SERIF }}>{healing}</p>
           </div>
         )}
       </div>
@@ -4362,7 +4362,7 @@ function GoodTimeFlowCard({ intro, items, myName, childName }: {
     <div className="mx-6 mb-5 rounded-3xl overflow-hidden" style={{ background: JN10_GOLD_P, border: `1.5px solid ${JN10_GOLD}30` }}>
       <div className="px-5 pt-5 pb-3">
         <p className="text-[11px] font-bold tracking-widest mb-2" style={{ color: JN10_GOLD }}>⏳ 좋은 시기 흐름</p>
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{intro.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{intro.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
       </div>
       <div className="px-5 pb-5 relative">
         {/* 타임라인 연결선 */}
@@ -4381,7 +4381,7 @@ function GoodTimeFlowCard({ intro, items, myName, childName }: {
                   {item.peak && <span className="text-[10px] font-bold" style={{ color: JN10_SUN }}>★ 절정</span>}
                 </div>
                 <p className="text-[12px] font-bold mb-1" style={{ color: item.peak ? JN10_SUN : JN10_GOLD }}>{item.label}</p>
-                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
               </div>
             </div>
           ))}
@@ -4409,7 +4409,7 @@ function GoodTimeReasonCard({ intro, items, myName, childName }: {
     <div className="mx-6 mb-5 rounded-3xl overflow-hidden" style={{ background: JN10_GREEN_P, border: `1.5px solid ${JN10_GREEN}30` }}>
       <div className="px-5 pt-5 pb-3">
         <p className="text-[11px] font-bold tracking-widest mb-2" style={{ color: JN10_GREEN }}>🌱 좋은 시기의 사주 근거</p>
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{intro.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{intro.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
       </div>
       <div className="px-5 pb-5 flex flex-col gap-3">
         {items.map((item, i) => (
@@ -4417,7 +4417,7 @@ function GoodTimeReasonCard({ intro, items, myName, childName }: {
             <div className="text-[22px] flex-shrink-0 mt-0.5">{item.icon}</div>
             <div>
               <p className="text-[13px] font-bold mb-1" style={{ color: JN10_GREEN }}>{item.title}</p>
-              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
             </div>
           </div>
         ))}
@@ -4451,7 +4451,7 @@ function TimingAdviceCard({ advice, blessing, myName, childName }: {
             <div className="text-[22px] flex-shrink-0 mt-0.5">{a.icon}</div>
             <div>
               <p className="text-[13px] font-bold mb-1" style={{ color: JN10_SUN }}>{a.title}</p>
-              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{a.desc.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
+              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{a.desc.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
             </div>
           </div>
         ))}
@@ -4485,7 +4485,7 @@ function ChildFutureFlowCard({ intro, items, childName }: {
     <div className="mx-6 mb-5 rounded-3xl overflow-hidden" style={{ background: JN11_NAVY_P, border: `1.5px solid ${JN11_NAVY}30` }}>
       <div className="px-5 pt-5 pb-3">
         <p className="text-[11px] font-bold tracking-widest mb-2" style={{ color: JN11_NAVY }}>🔭 미래 흐름</p>
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{intro.replace(/\{childName\}/g, childName)}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{intro.replace(/\{childName\}/g, childName)}</p>
       </div>
       <div className="px-5 pb-5 relative">
         <div className="absolute left-[28px] top-0 bottom-5 w-[2px]" style={{ background: `linear-gradient(to bottom, ${JN11_NAVY}70, ${JN11_NAVY}10)` }} />
@@ -4502,7 +4502,7 @@ function ChildFutureFlowCard({ intro, items, childName }: {
                   {item.milestone && <span className="text-[10px] font-bold" style={{ color: JN11_NAVY }}>★ 전환점</span>}
                 </div>
                 <p className="text-[12px] font-bold mb-1" style={{ color: JN11_NAVY }}>{item.label}</p>
-                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
               </div>
             </div>
           ))}
@@ -4532,7 +4532,7 @@ function ChildVisionCard({ intro, visions, closing, childName }: {
     <div className="mx-6 mb-5 rounded-3xl overflow-hidden" style={{ background: JN11_HOPE_P, border: `1.5px solid ${JN11_HOPE}30` }}>
       <div className="px-5 pt-5 pb-3">
         <p className="text-[11px] font-bold tracking-widest mb-2" style={{ color: JN11_HOPE }}>🌟 자녀의 비전</p>
-        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{intro.replace(/\{childName\}/g, childName)}</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{intro.replace(/\{childName\}/g, childName)}</p>
       </div>
       <div className="px-5 pb-4 flex flex-col gap-3">
         {visions.map((v, i) => (
@@ -4540,7 +4540,7 @@ function ChildVisionCard({ intro, visions, closing, childName }: {
             <div className="text-[22px] flex-shrink-0 mt-0.5">{v.icon}</div>
             <div>
               <p className="text-[13px] font-bold mb-1" style={{ color: JN11_HOPE }}>{v.title}</p>
-              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{v.desc.replace(/\{childName\}/g, childName)}</p>
+              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{v.desc.replace(/\{childName\}/g, childName)}</p>
             </div>
           </div>
         ))}
@@ -4580,7 +4580,7 @@ function ParentRoleCard({ roles, closing, myName, childName }: {
             <div className="text-[22px] flex-shrink-0 mt-0.5">{r.icon}</div>
             <div>
               <p className="text-[13px] font-bold mb-1" style={{ color: JN11_ROLE }}>{r.title}</p>
-              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{r.desc.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
+              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{r.desc.replace(/\{myName\}/g, myName).replace(/\{childName\}/g, childName)}</p>
             </div>
           </div>
         ))}
@@ -6270,7 +6270,7 @@ function RunFlowChart({ flow }: { flow: ReportFlowItem[] }) {
               <span className="flex-shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${c}14`, color: c, minWidth: 56, textAlign: "center" }}>
                 {d.label}
               </span>
-              <span className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{d.text}</span>
+              <span className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{d.text}</span>
             </div>
           );
         })}
@@ -6292,7 +6292,7 @@ function SummaryCard({ title, items }: { title: string; items: { title: string; 
             <p className="text-[14px] font-black mb-1 inline-block px-1.5 rounded" style={{ color: INK, background: "#f1e2e4" }}>
               {it.title}
             </p>
-            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>
               {it.desc}
             </p>
           </div>
@@ -7351,14 +7351,14 @@ function ReportPreviewInner() {
                     <span className="text-[16px]">🌿</span>
                     <p className="text-[12px] font-black" style={{ color: HAP_COLOR }}>합(合)</p>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 서로 끌어당겨 하나가 되는 것. 관계를 깊게 하고 안정감을 주오. 합이 많을수록 두 사람은 자연스럽게 가까워지오.</p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>두 기운이 서로 끌어당겨 하나가 되는 것. 관계를 깊게 하고 안정감을 주오. 합이 많을수록 두 사람은 자연스럽게 가까워지오.</p>
                 </div>
                 <div className="flex-1 px-4 py-4" style={{ background: `${CHUNG_COLOR}08` }}>
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <span className="text-[16px]">⚡</span>
                     <p className="text-[12px] font-black" style={{ color: CHUNG_COLOR }}>충(沖)</p>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 정면으로 충돌하는 것. 갈등과 자극을 동시에 주오. 충이 있다고 나쁜 것만은 아니니 서로를 깨어나게 하는 힘이오.</p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>두 기운이 정면으로 충돌하는 것. 갈등과 자극을 동시에 주오. 충이 있다고 나쁜 것만은 아니니 서로를 깨어나게 하는 힘이오.</p>
                 </div>
               </div>
             </div>
@@ -7755,7 +7755,7 @@ function ReportPreviewInner() {
                       </div>
                       <div className="flex-1 p-3" style={{ background: "#3f7d6b08" }}>
                         <p className="text-[12.5px] font-black mb-1" style={{ color: "#3f7d6b" }}>{card.title}</p>
-                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{card.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -7782,7 +7782,7 @@ function ReportPreviewInner() {
                       </div>
                       <div className="flex-1 p-3" style={{ background: "#2563eb08" }}>
                         <p className="text-[12.5px] font-black mb-1" style={{ color: "#2563eb" }}>{card.title}</p>
-                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{card.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -7840,7 +7840,7 @@ function ReportPreviewInner() {
                                   ))}
                                 </div>
                               )}
-                              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{f.desc}</p>
+                              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{f.desc}</p>
                             </div>
                           </div>
                         ))}
@@ -7868,7 +7868,7 @@ function ReportPreviewInner() {
                             </div>
                             <div className="flex-1 p-3" style={{ background: "#ffd35708" }}>
                               <p className="text-[12.5px] font-black mb-1" style={{ color: "#b8860b" }}>{card.title}</p>
-                              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                              <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{card.desc}</p>
                             </div>
                           </div>
                         ))}
@@ -8093,7 +8093,7 @@ function ReportPreviewInner() {
                       </div>
                       <div className="flex-1 p-3" style={{ background: `${TEAL8}08` }}>
                         <p className="text-[12.5px] font-black mb-1" style={{ color: TEAL8 }}>{card.title}</p>
-                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{card.desc}</p>
+                        <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{card.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -8479,7 +8479,7 @@ function ReportPreviewInner() {
                   <Heading>{name1}님 &amp; {partnerName1}님의 고민에 대한 조언</Heading>
                   <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${ROSE}09`, borderLeft: `3px solid ${ROSE}55` }}>
                     <p className="text-[11px] font-bold mb-1" style={{ color: ROSE, opacity: 0.7 }}>남겨주신 고민</p>
-                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{concern}&rdquo;</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>&ldquo;{concern}&rdquo;</p>
                   </div>
                   <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
                     <div className="flex justify-center mb-4"><span style={{ fontSize: 28, lineHeight: 1 }}>✉️</span></div>

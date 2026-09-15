@@ -1617,7 +1617,7 @@ function TrapBox({ trap }: { trap: { title: string; desc: string; items: { title
     <div className="rounded-2xl p-5 mb-4" style={{ background: `${WARN}08`, border: `1px solid ${WARN}33` }}>
       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: `${WARN}16`, color: WARN }}>조심할 시기의 함정</span>
       <p className="mt-3 text-[17px] font-black leading-snug" style={{ color: INK }}>{trap.title}</p>
-      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{trap.desc}</p>
+      <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{trap.desc}</p>
       <div className="mt-3">
         {trap.items.map((it, i) => (
           <div key={i} className="flex gap-2.5 items-start py-3" style={{ borderTop: `1px solid ${WARN}1c` }}>
@@ -4385,7 +4385,7 @@ function BizRoleBalanceSplit({ items, myName, partnerName, myGender, partnerGend
             </div>
             {desc && (
               <div className="px-4 pb-3 pt-1">
-                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+                <p className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
               </div>
             )}
           </div>
@@ -5854,7 +5854,7 @@ function BizStyleCard({
       </div>
       {styleDesc && (
         <div className="px-5 py-4" style={{ borderBottom: (strengthStyle || shadowStyle) ? `1px solid ${INK}08` : "none" }}>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{styleDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{styleDesc}</p>
         </div>
       )}
       {strengthStyle && (
@@ -5863,7 +5863,7 @@ function BizStyleCard({
             <span className="text-[13px]">✨</span>
             <p className="text-[11px] font-black" style={{ color: HAP_COLOR }}>파트너십에서 빛나는 점</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthStyle}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{strengthStyle}</p>
         </div>
       )}
       {shadowStyle && (
@@ -5872,7 +5872,7 @@ function BizStyleCard({
             <span className="text-[13px]">⚠️</span>
             <p className="text-[11px] font-black" style={{ color: WARN }}>주의해야 할 스타일 패턴</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowStyle}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{shadowStyle}</p>
         </div>
       )}
     </div>
@@ -5938,7 +5938,7 @@ function BizStyleGapCard({ data }: { data: Record<string, unknown> | null }) {
                   </div>
                 )}
                 <div className="px-4 py-3">
-                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{desc}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
                 </div>
               </div>
             );
@@ -6087,7 +6087,7 @@ function BizLightShadowBalanceCard({ data }: { data: Record<string, unknown> | n
             {tips.map((tip, i) => (
               <div key={i} className="flex items-start gap-2.5">
                 <span className="text-[13px] font-black flex-shrink-0 mt-0.5" style={{ color: BCH8_COLOR }}>{i + 1}</span>
-                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT }}>{tip}</p>
+                <p className="text-[12px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip}</p>
               </div>
             ))}
           </div>
@@ -6122,7 +6122,7 @@ function GNatureCard({ data, color = MAROON, label = "나를 대표하는 기질
             <span className="text-[14px]">✨</span>
             <p className="text-[12px] font-black" style={{ color: "#2d6a4f" }}>이 기질의 빛</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{strengthDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{strengthDesc}</p>
         </div>
       )}
       {shadowDesc && (
@@ -6131,7 +6131,7 @@ function GNatureCard({ data, color = MAROON, label = "나를 대표하는 기질
             <span className="text-[14px]">🌙</span>
             <p className="text-[12px] font-black" style={{ color: "#9b3535" }}>주의해야 할 그림자</p>
           </div>
-          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>{shadowDesc}</p>
+          <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{shadowDesc}</p>
         </div>
       )}
     </div>
@@ -6249,7 +6249,7 @@ function RunFlowChart({ flow }: { flow: ReportFlowItem[] }) {
               <span className="flex-shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${c}14`, color: c, minWidth: 56, textAlign: "center" }}>
                 {d.label}
               </span>
-              <span className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT }}>{d.text}</span>
+              <span className="text-[12.5px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>{d.text}</span>
             </div>
           );
         })}
@@ -6271,7 +6271,7 @@ function SummaryCard({ title, items }: { title: string; items: { title: string; 
             <p className="text-[14px] font-black mb-1 inline-block px-1.5 rounded" style={{ color: INK, background: "#f1e2e4" }}>
               {it.title}
             </p>
-            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>
               {it.desc}
             </p>
           </div>
@@ -7305,14 +7305,14 @@ function ReportPreviewInner() {
                     <span className="text-[16px]">🌿</span>
                     <p className="text-[12px] font-black" style={{ color: HAP_COLOR }}>합(合)</p>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 서로 끌어당겨 하나가 되는 것. 관계를 깊게 하고 안정감을 주오. 합이 많을수록 두 사람은 자연스럽게 가까워지오.</p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>두 기운이 서로 끌어당겨 하나가 되는 것. 관계를 깊게 하고 안정감을 주오. 합이 많을수록 두 사람은 자연스럽게 가까워지오.</p>
                 </div>
                 <div className="flex-1 px-4 py-4" style={{ background: `${CHUNG_COLOR}08` }}>
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <span className="text-[16px]">⚡</span>
                     <p className="text-[12px] font-black" style={{ color: CHUNG_COLOR }}>충(沖)</p>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT }}>두 기운이 정면으로 충돌하는 것. 갈등과 자극을 동시에 주오. 충이 있다고 나쁜 것만은 아니니 서로를 깨어나게 하는 힘이오.</p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>두 기운이 정면으로 충돌하는 것. 갈등과 자극을 동시에 주오. 충이 있다고 나쁜 것만은 아니니 서로를 깨어나게 하는 힘이오.</p>
                 </div>
               </div>
             </div>
@@ -7913,7 +7913,7 @@ function ReportPreviewInner() {
                   {/* 고민 인용구 */}
                   <div className="mb-5 px-4 py-3 rounded-xl" style={{ background: `${ROSE}09`, borderLeft: `3px solid ${ROSE}55` }}>
                     <p className="text-[11px] font-bold mb-1" style={{ color: ROSE, opacity: 0.7 }}>남겨주신 고민</p>
-                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT }}>&ldquo;{concern}&rdquo;</p>
+                    <p className="text-[13px] leading-relaxed" style={{ color: INK_SOFT, fontFamily: SERIF }}>&ldquo;{concern}&rdquo;</p>
                   </div>
                   {/* 편지형 박스 */}
                   <div className="rounded-2xl px-5 pt-6 pb-4 mb-2 relative" style={{ background: WHITE, border: `1px solid ${INK_SOFT}10`, boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>

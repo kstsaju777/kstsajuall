@@ -3667,7 +3667,7 @@ function ChildEnergyCard({ energyType, energyIcon, keywords, desc, color, pale }
         ))}
       </div>
       {/* 기운 설명 */}
-      <p className="px-5 py-4 text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{desc}</p>
+      <p className="px-5 py-4 text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{desc}</p>
     </div>
   );
 }
@@ -3747,7 +3747,7 @@ function ParenthoodTipsCard({ tips, greenColor, greenPale }: {
             {/* 텍스트 */}
             <div className="flex-1">
               <p className="text-[13px] font-bold mb-1" style={{ color: greenColor }}>{tip.title}</p>
-              <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              <p className="text-[12px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
             </div>
           </div>
         ))}
@@ -3803,7 +3803,7 @@ function TimingFlowCard({ items, color, pale, goldColor, goldPale }: {
                     <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${goldColor}20`, color: goldColor }}>✨ 최적</span>
                   )}
                 </div>
-                <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
               </div>
             </div>
           );
@@ -3841,7 +3841,7 @@ function BestMonthsCard({ items, color, pale }: {
           <div key={i} className="p-3 rounded-2xl" style={{ background: "#fff", border: `1px solid ${color}20` }}>
             {item.season && <div className="text-[22px] mb-1.5 text-center">{item.season}</div>}
             <p className="text-[12px] font-bold text-center mb-2" style={{ color }}>{item.title}</p>
-            <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{item.desc}</p>
+            <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
           </div>
         ))}
       </div>
@@ -3879,7 +3879,7 @@ function TimingAdviceCard({ headline, callout, paragraphs, goldColor, goldPale }
       {/* 단락 */}
       <div className="px-5 pb-5 space-y-3">
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
         ))}
       </div>
     </div>
@@ -3917,7 +3917,7 @@ function IHapCard({ item }: {
         </div>
       )}
       {/* 풀이 */}
-      <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+      <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
     </div>
   );
 }
@@ -3953,7 +3953,7 @@ function IChungCard({ item }: {
         </div>
       )}
       {/* 풀이 */}
-      <p className="px-4 pt-3 pb-2 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+      <p className="px-4 pt-3 pb-2 text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
       {/* resolve — 다스리는 법 */}
       {item.resolve && (
         <div className="mx-4 mb-3 pl-3 py-2 rounded-lg" style={{ background: `${IM6_HAP}10`, borderLeft: `3px solid ${IM6_HAP}` }}>
@@ -4014,7 +4014,7 @@ function HapChungSummaryCard({ score, tier, label, hapCount, chungCount, paragra
       {/* 종합 단락 */}
       <div className="px-5 py-4 space-y-3">
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
         ))}
       </div>
     </div>
@@ -4364,7 +4364,7 @@ function HealthPersonCard({ name, role, constitution, items, color, pale }: {
               </div>
             )}
             {/* 풀이 */}
-            <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+            <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
           </div>
         ))}
       </div>
@@ -4397,7 +4397,7 @@ function HealthTipsCard({ tips, color, pale }: {
             <span className="text-[22px] leading-none shrink-0 mt-0.5">{tip.icon}</span>
             <div className="flex-1">
               <p className="text-[13px] font-bold mb-1" style={{ color }}>{tip.title}</p>
-              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
             </div>
           </div>
         ))}
@@ -4434,7 +4434,7 @@ function EmotionalBondCard({ bondType, bondIcon, intro, callout, paragraphs }: {
       {/* 단락들 */}
       <div className="px-5 pt-5 pb-5 space-y-3">
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
         ))}
       </div>
     </div>
@@ -4470,7 +4470,7 @@ function SupportStyleCard({ myName, partnerName, myStyle, partnerStyle, bridgeDe
             <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_BOND}99` }}>{myName}님</p>
             <p className="text-[12px] font-black" style={{ color: IM8_BOND }}>{myStyle.style}</p>
           </div>
-          <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{myStyle.desc}</p>
+          <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{myStyle.desc}</p>
         </div>
         {/* 배우자 */}
         <div className="rounded-2xl p-3" style={{ background: IM8_SUP_P, border: `1px solid ${IM8_SUP}20` }}>
@@ -4479,7 +4479,7 @@ function SupportStyleCard({ myName, partnerName, myStyle, partnerStyle, bridgeDe
             <p className="text-[10px] font-bold mt-0.5" style={{ color: `${IM8_SUP}99` }}>{partnerName}님</p>
             <p className="text-[12px] font-black" style={{ color: IM8_SUP }}>{partnerStyle.style}</p>
           </div>
-          <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT }}>{partnerStyle.desc}</p>
+          <p className="text-[11px] leading-[1.75]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{partnerStyle.desc}</p>
         </div>
       </div>
       {/* 연결 메시지 */}
@@ -4515,7 +4515,7 @@ function CoupleTipsCard({ tips }: {
             <span className="text-[22px] leading-none shrink-0 mt-0.5">{tip.icon}</span>
             <div className="flex-1">
               <p className="text-[13px] font-bold mb-1" style={{ color: IM8_SUP }}>{tip.title}</p>
-              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
             </div>
           </div>
         ))}
@@ -4555,7 +4555,7 @@ function ChallengeItemCard({ item }: {
         </div>
       )}
       {/* 풀이 */}
-      <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+      <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
     </div>
   );
 }
@@ -4595,7 +4595,7 @@ function ChallengeReasonCard({ intro, callout, paragraphs }: {
       {/* 단락들 */}
       <div className="px-5 pb-5 space-y-3">
         {paragraphs.map((p, i) => (
-          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT }}>{p}</p>
+          <p key={i} className="text-[13px] leading-[1.9]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{p}</p>
         ))}
       </div>
     </div>
@@ -4632,7 +4632,7 @@ function OvercomeTipsCard({ tips }: {
             <span className="text-[22px] leading-none shrink-0 mt-0.5">{tip.icon}</span>
             <div className="flex-1">
               <p className="text-[13px] font-bold mb-1" style={{ color: IM9_GOLD }}>{tip.title}</p>
-              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{tip.desc}</p>
+              <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{tip.desc}</p>
             </div>
           </div>
         ))}
@@ -4689,7 +4689,7 @@ function GoodTimeFlowCard({ items }: {
                     <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: `${IM10_STAR}20`, color: IM10_STAR }}>🌟 황금 창</span>
                   )}
                 </div>
-                <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT }}>{item.desc}</p>
+                <p className="text-[12px] leading-[1.8]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
               </div>
             </div>
           );
@@ -4729,7 +4729,7 @@ function GoodTimeReasonCard({ items }: {
               {item.icon && <span className="text-[16px]">{item.icon}</span>}
               <p className="text-[13px] font-bold" style={{ color: IM10_TEAL }}>{item.title}</p>
             </div>
-            <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT }}>{item.desc}</p>
+            <p className="px-4 py-3 text-[12px] leading-[1.85]" style={{ color: INK_SOFT, fontFamily: SERIF }}>{item.desc}</p>
           </div>
         ))}
       </div>
