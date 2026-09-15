@@ -47,6 +47,27 @@ export function fixJosa(text: string): string {
   // 무관한 정상 단어와 겹칠 위험은 없다.
   text = text.replace(/(았|었|했|였)은이/g, "$1는지");
 
+  // '요구한다오', '있다오', '만들었다오', '때문이다오'처럼 '-다'체 어미를 홍연 말투로
+  // 고치라는 지시를 어간부터 고치지 않고 그냥 뒤에 '오'만 붙여 만든 '-다오' 오류 —
+  // GLOBAL_GRAMMAR_RULES에서 명시적으로 금지했음에도 계속 새어나온다. '-다오'는
+  // 정상적인 한국어에서 '~해다오'(부탁형)처럼 동사 어간에 곧바로 붙을 때만 쓰이고,
+  // 시제·서술 어미(이/았/었/였/ㄴ) 뒤에는 절대 오지 않으므로 이 조합만 안전하게 교정한다.
+  text = text.replace(/이다오/g, "이오");
+  text = text.replace(/(았|었|였)다오/g, "$1소");
+  text = text.replace(/있다오/g, "있소");
+  text = text.replace(/없다오/g, "없소");
+  // '한다오'류(동사 어간+ㄴ다오) — 어간의 받침(ㄴ)을 떼어 '~오'로 바꾼다.
+  // 예: 한다오→하오, 만든다오→만드오, 간다오→가오.
+  text = text.replace(/([가-힣])다오/g, (m, ch: string) => {
+    const code = ch.charCodeAt(0) - 0xAC00;
+    if (code < 0 || code > 11171) return m;
+    const jong = code % 28;
+    // 종성이 'ㄴ'(4)인 경우만 대상 — 그 외 종성은 다른 활용 규칙이라 손대지 않는다.
+    if (jong !== 4) return m;
+    const stripped = String.fromCharCode(ch.charCodeAt(0) - jong);
+    return `${stripped}오`;
+  });
+
   // 마크다운 굵게(**) 표시 — 이 텍스트는 화면에 그대로 렌더링되는 일반 문자열이라
   // GLOBAL_GRAMMAR_RULES로 금지했음에도 별표가 그대로 노출되는 경우가 있다. 정상적인
   // 한국어 문장에 별표 2개가 붙어 나올 일이 없으므로 안전하게 제거한다.
