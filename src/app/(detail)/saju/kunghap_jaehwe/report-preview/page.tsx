@@ -3483,7 +3483,6 @@ function EmotionFlowTimeline({ data, myName, partnerName, gender }: { data: Reco
               style={{
                 background: `${themeColor}${String(bgAlpha).padStart(2, "0")}`,
                 border: `1px solid ${themeColor}${String(Math.round(opacity * 30)).padStart(2, "0")}`,
-                opacity,
               }}
             >
               <p className="text-[12px] font-black mb-1" style={{ color: themeColor }}>{phase}</p>
