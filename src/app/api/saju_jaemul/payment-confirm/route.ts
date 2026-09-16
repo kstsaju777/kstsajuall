@@ -28,6 +28,12 @@ async function generateReportInBackground(resultId: string) {
       body: JSON.stringify({ id: resultId }),
     }).catch((e) => console.error(`[bg-gen] ${resultId} 이미지 생성 실패:`, e));
 
+    fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: resultId, concernOnly: true }),
+    }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
+
     await Promise.all(
       Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
         try {
