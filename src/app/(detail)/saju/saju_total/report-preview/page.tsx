@@ -4741,8 +4741,12 @@ function ReportPreviewInner() {
   const concern = report?.concern || "";
   const rawGender = report?.gender || gender;
   const effectiveGender: "female" | "male" = (rawGender === "female" || rawGender === "여자") ? "female" : "male";
-  // 누락 섹션은 샘플로 폴백 (단, 실제 결제자는 needGen 으로 막아 샘플 표시 안 함)
-  const c = { ...SAMPLE_CONTENT, ...(report?.content ?? {}) } as ReportContent;
+  // 누락 섹션은 샘플로 폴백 — 단, id가 있는 실제 결제자에게는 절대 샘플을 섞지 않는다.
+  // (예전엔 needGen/showLoading 게이트에만 의존했는데, 생성이 조용히 실패하고
+  // generatedRef만 true로 넘어가는 경우 이 게이트를 그냥 통과해버려 실제 결제자에게
+  // '선우님'같은 샘플 데이터가 실제 결과인 것처럼 노출된 사고가 있었음. id 유무로
+  // 이중 방어한다 — 미리보기(파라미터 없음)일 때만 샘플을 쓴다.)
+  const c = (id ? (report?.content ?? {}) : { ...SAMPLE_CONTENT, ...(report?.content ?? {}) }) as ReportContent;
   // 실제 결제자(id 있음)인데 현재 장이 아직 생성 안 됨 → 샘플 대신 로딩/에러 표시
   const needGen = !!id && !!CHAPTER_SECTIONS[chNum] && !isChapterReady(report?.content as Record<string, unknown>, chNum);
   const showLoading = generating || (needGen && !generatedRef.current); // 일괄 생성 중/직전
