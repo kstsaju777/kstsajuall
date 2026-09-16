@@ -1,4 +1,4 @@
-﻿import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest, after } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { confirmTossPayment } from "@/lib/toss/confirm";
@@ -13,11 +13,59 @@ import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const PRODUCT_NAME = "정통사주";
 const PRODUCT_PRICE = 24900;
 const REPORT_PATH = "saju/saju_total/report-preview";
+const SITE_ORIGIN = "https://www.hongyeondang.com";
+const TOTAL_CHAPTERS = 10; // saju_total CHAPTER_SECTIONS 1~10
+
+// 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업.
+// 예전엔 고객 브라우저가 12(→10)개 장을 다 모아서 한 번에 저장해야만 완성/알림톡이
+// 발송되는 구조라, 로딩 중 고객이 화면을 벗어나면(흔한 일) 저장 자체가 아예 안 되는
+// 사고가 있었음(기노현님 건). 장이 끝나는 즉시 하나씩 저장해서, 이 백그라운드 작업이
+// 중간에 죽어도 이미 만든 것까지는 안전하게 남고, 나머지는 고객이 결과지를 열 때
+// 기존 클라이언트 쪽 자동 생성 로직이 이어서 채운다(안전망 그대로 유지).
+async function generateReportInBackground(resultId: string) {
+  try {
+    // 1) 사주화 이미지 생성 (기존 PATCH 엔드포인트 그대로 재사용)
+    fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: resultId }),
+    }).catch((e) => console.error(`[bg-gen] ${resultId} 이미지 생성 실패:`, e));
+
+    // 2) 장별 생성 — 끝나는 즉시 그 장만 바로 저장(전부 모아서 한 번에 저장하지 않음)
+    await Promise.all(
+      Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
+        try {
+          const genRes = await fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: resultId, chapter }),
+          });
+          const genJson = await genRes.json().catch(() => null);
+          const sections = genJson?.sections;
+          if (!sections) {
+            console.error(`[bg-gen] ${resultId} ${chapter}장 생성 실패:`, genJson?.error ?? genRes.status);
+            return;
+          }
+          const saveRes = await fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: resultId, content: sections }),
+          });
+          if (!saveRes.ok) console.error(`[bg-gen] ${resultId} ${chapter}장 저장 실패:`, saveRes.status);
+        } catch (e) {
+          console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
+        }
+      }),
+    );
+  } catch (e) {
+    console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
+  }
+}
 
 const bodySchema = z.object({
   paymentKey: z.string().min(1),
@@ -148,6 +196,10 @@ export async function POST(request: NextRequest) {
       sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE }),
       order.guest_email ? sendOrderEmail({ customerEmail: order.guest_email, customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl }) : Promise.resolve(),
     ]);
+
+    // 결제 확인 응답은 즉시 내려주고, 실제 10개 장 생성은 응답 이후 백그라운드에서
+    // 계속 진행한다(고객이 결과지 로딩 화면을 벗어나도 서버가 끝까지 만들어 저장함).
+    after(() => generateReportInBackground(result.id));
 
     return NextResponse.json({
       resultId: result.id,
