@@ -56,6 +56,21 @@ async function generateReportInBackground(resultId: string) {
         }
       }),
     );
+
+    // 9개 장이 거의 동시에(병렬로) 저장되다 보니, 각 저장 시점에 "지금 전부
+    // 완성됐나?" 체크가 자기 직전 스냅샷 기준이라 서로 타이밍이 어긋나면 어느
+    // 저장 호출도 완성 시점을 못 잡아 알림톡이 끝내 발송되지 않는 경쟁 상태가
+    // 있었다(자녀궁합 사고로 확인). 전부 저장된 뒤 빈 content로 한 번 더
+    // 저장 호출을 보내 최신 상태를 다시 읽고 완성 여부를 재확인시킨다.
+    try {
+      await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
+      });
+    } catch (e) {
+      console.error(`[bg-gen] ${resultId} 최종 완료 재확인 실패:`, e);
+    }
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
   }

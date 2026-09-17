@@ -62,6 +62,16 @@ async function generateReportInBackground(resultId: string) {
         }
       }),
     );
+
+    try {
+      await fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
+      });
+    } catch (e) {
+      console.error(`[bg-gen] ${resultId} 최종 완료 재확인 실패:`, e);
+    }
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
   }
