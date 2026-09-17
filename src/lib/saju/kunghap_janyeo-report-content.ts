@@ -127,7 +127,7 @@ export function buildJanyeoKunghapChapterPrompt(
   const crossHapItems = crossRels.filter(r => HAP_KINDS.includes(r.kind));
   const crossChungItems = crossRels.filter(r => !HAP_KINDS.includes(r.kind));
   const crossRelsBlock = crossRels.length > 0
-    ? `\n⚑ 아래는 두 사주 사이에서 로컬 계산으로 확정된 합·충 목록이오. 이 목록을 그대로 사용하고, 목록에 없는 합·충을 추가하거나 목록에 있는 것을 누락하지 마시오.\n합(合): ${crossHapItems.length > 0 ? crossHapItems.map(r => `${r.label}(${r.chars.join("")})`).join(", ") : "없음"}\n충·형·파·해·원진: ${crossChungItems.length > 0 ? crossChungItems.map(r => `${r.label}(${r.chars.join("")})`).join(", ") : "없음"}\n`
+    ? `\n⚑ 아래는 두 사주 사이에서 로컬 계산으로 확정된 합·충 목록이오. 이 목록을 그대로 사용하고, 목록에 없는 합·충을 추가하거나 목록에 있는 것을 누락하지 마시오.\n합: ${crossHapItems.length > 0 ? crossHapItems.map(r => `${r.label}(${r.chars.join("")})`).join(", ") : "없음"}\n충·형·파·해·원진: ${crossChungItems.length > 0 ? crossChungItems.map(r => `${r.label}(${r.chars.join("")})`).join(", ") : "없음"}\n`
     : "";
 
   const schemas: Record<number, string> = {
@@ -210,7 +210,7 @@ export function buildJanyeoKunghapChapterPrompt(
     "items": [
       {
         "glyph": "합을 이루는 두 글자 한자 표기 (예: '寅亥', '子丑'). 없으면 빈 문자열.",
-        "type": "합 종류 (예: '인해합목(寅亥合木)', '자축합토(子丑合土)', '천간 갑기합토(甲己合土)')",
+        "type": "합 종류 (예: '인해합목', '자축합토', '천간 갑기합토'. 한자 절대 쓰지 말 것)",
         "strength": "강도 — '강한 합' / '보통 합' / '약한 합' 중 택1",
         "effect": "이 합의 긍정 효과 한 줄 (예: '두 사람의 감정이 자연스럽게 하나가 되는 자리이오')",
         "desc": "이 합이 부모-자녀 관계에서 구체적으로 어떻게 나타나는지 2~3문장."
@@ -221,7 +221,7 @@ export function buildJanyeoKunghapChapterPrompt(
     "items": [
       {
         "glyph": "충을 이루는 두 글자 한자 표기 (예: '子午', '卯酉'). 없으면 빈 문자열.",
-        "type": "충 종류 (예: '자오충(子午沖)', '묘유충(卯酉沖)', '천간 갑경충(甲庚沖)')",
+        "type": "충 종류 (예: '자오충', '묘유충', '천간 갑경충'. 한자 절대 쓰지 말 것)",
         "strength": "강도 — '강한 충' / '보통 충' / '약한 충' 중 택1",
         "impact": "이 충이 관계에서 만들어내는 주요 긴장 한 줄",
         "desc": "이 충이 부모-자녀 관계에서 구체적으로 어떻게 나타나는지. 어떤 상황에서 마찰이 생기는지 2~3문장.",
@@ -488,11 +488,11 @@ export function buildJanyeoKunghapChapterPrompt(
 ⚑ 풀이 텍스트(intro, callout, paragraphs, strengthDesc, shadowDesc 등 모든 문장)에 한자를 사용하지 마시오. 천간·지지·오행 명칭은 한글로만 표기하시오 (예: 甲 → 갑, 乙 → 을, 木 → 목).`,
     3: `[제3장 — 궁합의 핵심: 합과 충] ${input.name}(부모)와 ${input.partnerName}(${childGenderLabel})의 두 사주에서 합과 충을 분석하고 종합 궁합 점수를 산출하시오.
 ${crossRelsBlock}
-[hapList 섹션 — 합(合) 목록]
+[hapList 섹션 — 합 목록]
 위 확정 목록의 합만 기록하시오. 합이 없으면 items를 빈 배열로.
 각 합: glyph(두 글자 한자) + type(합 종류 전체명) + strength(강도) + effect(긍정 효과 한 줄, 반드시 15자 이내) + desc(부모-자녀 관계에서 어떻게 나타나는지 2~3문장).
 
-[chungList 섹션 — 충(沖) 목록]
+[chungList 섹션 — 충 목록]
 위 확정 목록의 충·형·파·해·원진만 기록하시오. 없으면 items를 빈 배열로.
 각 충: glyph(두 글자 한자) + type(충 종류 전체명) + strength(강도) + impact(관계 긴장 한 줄, 반드시 15자 이내) + desc(어떤 상황에서 마찰이 생기는지 2~3문장) + resolve(이 충을 순화하는 방법 1~2문장).
 
