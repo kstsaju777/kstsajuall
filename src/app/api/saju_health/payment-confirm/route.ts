@@ -18,6 +18,7 @@ const TOTAL_CHAPTERS = 5;
 // 발송되지 않는 사고가 있어(자녀궁합 건), 전부 병렬 생성만 해두고 다 모인 뒤
 // 딱 한 번만 합쳐서 저장한다. 클라이언트 쪽 자동 생성 로직은 안전망으로 유지.
 async function generateReportInBackground(resultId: string) {
+  console.log(`[bg-gen] ${resultId} generateReportInBackground 진입`);
   try {
     // 이미지 생성은 챕터와 독립적으로 병렬 진행 (완료 여부는 알림톡 게이트에서 서버가 자체 확인)
     fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
@@ -60,14 +61,19 @@ async function generateReportInBackground(resultId: string) {
       }),
     );
 
+    console.log(`[bg-gen] ${resultId} 합본 저장 시도, keys=`, Object.keys(merged));
     if (Object.keys(merged).length > 0) {
       const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: resultId, content: merged }),
       });
+      console.log(`[bg-gen] ${resultId} 합본 저장 응답:`, saveRes.status);
       if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
+    } else {
+      console.error(`[bg-gen] ${resultId} merged가 비어있음 - 모든 챕터 생성 실패`);
     }
+    console.log(`[bg-gen] ${resultId} generateReportInBackground 함수 끝까지 도달`);
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
   }
