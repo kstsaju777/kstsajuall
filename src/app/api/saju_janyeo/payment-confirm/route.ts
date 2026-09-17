@@ -24,11 +24,26 @@ const REPORT_PATH = "saju/saju_janyeo/report-preview";
 // 클라이언트(checkout/success)는 더 이상 생성을 직접 하지 않고 진행률만 폴링한다.
 async function generateReportInBackground(resultId: string) {
   try {
-    const imageTask = fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: resultId }),
-    }).catch((e) => console.error(`[bg-gen] ${resultId} 이미지 생성 실패:`, e));
+    // 이미지 생성 요청 하나가 실패하면(OpenAI 이미지 API 일시 오류 등) 그대로 포기
+    // → 이미지 완료를 기다리는 상품은 알림톡이 영구히 막히는 사고로 이어진다.
+    // 한 번의 긴 요청 안에서 재시도하면(예전 시도) after() 백그라운드 실행 시간
+    // 제한에 걸려 오히려 더 자주 실패했으므로, 짧은 요청을 최대 2번 더(총 3회)
+    // 별도의 왕복으로 재시도한다.
+    const imageTask = (async () => {
+      for (let i = 0; i < 3; i++) {
+        try {
+          const res = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: resultId }),
+          });
+          if (res.ok) return;
+          console.error(`[bg-gen] ${resultId} 이미지 생성 실패 (시도${i + 1}):`, res.status);
+        } catch (e) {
+          console.error(`[bg-gen] ${resultId} 이미지 생성 예외 (시도${i + 1}):`, e);
+        }
+      }
+    })();
 
     fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
       method: "POST",
