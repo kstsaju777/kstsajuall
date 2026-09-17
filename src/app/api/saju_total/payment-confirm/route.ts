@@ -14,33 +14,42 @@ import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
 export const maxDuration = 300;
+const SITE_ORIGIN = "https://www.hongyeondang.com";
+const API_ROUTE = "/api/saju_total-report";
+const TOTAL_CHAPTERS = 10;
 
 const PRODUCT_NAME = "정통사주";
 const PRODUCT_PRICE = 24900;
 const REPORT_PATH = "saju/saju_total/report-preview";
-const SITE_ORIGIN = "https://www.hongyeondang.com";
-const TOTAL_CHAPTERS = 10; // saju_total CHAPTER_SECTIONS 1~10
 
 // 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업.
-// 예전엔 고객 브라우저가 12(→10)개 장을 다 모아서 한 번에 저장해야만 완성/알림톡이
+// 예전엔 고객 브라우저가 10개 장을 다 모아서 한 번에 저장해야만 완성/알림톡이
 // 발송되는 구조라, 로딩 중 고객이 화면을 벗어나면(흔한 일) 저장 자체가 아예 안 되는
-// 사고가 있었음(기노현님 건). 장이 끝나는 즉시 하나씩 저장해서, 이 백그라운드 작업이
-// 중간에 죽어도 이미 만든 것까지는 안전하게 남고, 나머지는 고객이 결과지를 열 때
-// 기존 클라이언트 쪽 자동 생성 로직이 이어서 채운다(안전망 그대로 유지).
+// 사고가 있었음(기노현님 건). 장별로 개별 저장하는 방식으로 한 번 바꿨다가, 여러
+// 장이 거의 동시에 저장되며 "전부 완성됐나" 체크가 서로 다른 스냅샷을 보는 경쟁
+// 상태로 알림톡이 끝내 안 나가는 사고가 다시 있었음(자녀궁합 건). 그래서 10개
+// 장을 전부 병렬 생성만 해두고, 다 모인 뒤 딱 한 번만 합쳐서 저장한다 — 저장이
+// 정확히 한 번만 일어나 경쟁 상태 자체가 생기지 않는다. 클라이언트 쪽 자동 생성
+// 로직은 안전망으로 그대로 유지(이미 저장된 장은 재생성 안 함).
 async function generateReportInBackground(resultId: string) {
   try {
-    // 1) 사주화 이미지 생성 (기존 PATCH 엔드포인트 그대로 재사용)
-    fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
+    fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: resultId }),
     }).catch((e) => console.error(`[bg-gen] ${resultId} 이미지 생성 실패:`, e));
 
-    // 2) 장별 생성 — 끝나는 즉시 그 장만 바로 저장(전부 모아서 한 번에 저장하지 않음)
+    fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: resultId, concernOnly: true }),
+    }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
+
+    const merged: Record<string, unknown> = {};
     await Promise.all(
       Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
         try {
-          const genRes = await fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
+          const genRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: resultId, chapter }),
@@ -51,26 +60,20 @@ async function generateReportInBackground(resultId: string) {
             console.error(`[bg-gen] ${resultId} ${chapter}장 생성 실패:`, genJson?.error ?? genRes.status);
             return;
           }
-          const saveRes = await fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, content: sections }),
-          });
-          if (!saveRes.ok) console.error(`[bg-gen] ${resultId} ${chapter}장 저장 실패:`, saveRes.status);
+          Object.assign(merged, sections);
         } catch (e) {
           console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
         }
       }),
     );
 
-    try {
-      await fetch(`${SITE_ORIGIN}/api/saju_total-report`, {
+    if (Object.keys(merged).length > 0) {
+      const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: {} }),
+        body: JSON.stringify({ id: resultId, content: merged }),
       });
-    } catch (e) {
-      console.error(`[bg-gen] ${resultId} 최종 완료 재확인 실패:`, e);
+      if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
     }
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);

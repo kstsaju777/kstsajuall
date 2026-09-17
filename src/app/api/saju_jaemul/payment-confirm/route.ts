@@ -18,8 +18,9 @@ const API_ROUTE = "/api/jaemul-report";
 const TOTAL_CHAPTERS = 7;
 
 // 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업 (saju_total과 동일 패턴).
-// 장이 끝나는 즉시 그 장만 바로 저장 — 중간에 죽어도 이미 만든 것까지는 안전하게 남고,
-// 나머지는 고객이 결과지를 열 때 기존 클라이언트 쪽 자동 생성 로직이 이어서 채운다.
+// 장별로 개별 저장하면 여러 장이 거의 동시에 저장되며 경쟁 상태로 알림톡이 끝내
+// 발송되지 않는 사고가 있어(자녀궁합 건), 전부 병렬 생성만 해두고 다 모인 뒤
+// 딱 한 번만 합쳐서 저장한다. 클라이언트 쪽 자동 생성 로직은 안전망으로 유지.
 async function generateReportInBackground(resultId: string) {
   try {
     fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
@@ -34,6 +35,7 @@ async function generateReportInBackground(resultId: string) {
       body: JSON.stringify({ id: resultId, concernOnly: true }),
     }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
 
+    const merged: Record<string, unknown> = {};
     await Promise.all(
       Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
         try {
@@ -48,26 +50,20 @@ async function generateReportInBackground(resultId: string) {
             console.error(`[bg-gen] ${resultId} ${chapter}장 생성 실패:`, genJson?.error ?? genRes.status);
             return;
           }
-          const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, content: sections }),
-          });
-          if (!saveRes.ok) console.error(`[bg-gen] ${resultId} ${chapter}장 저장 실패:`, saveRes.status);
+          Object.assign(merged, sections);
         } catch (e) {
           console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
         }
       }),
     );
 
-    try {
-      await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+    if (Object.keys(merged).length > 0) {
+      const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: {} }),
+        body: JSON.stringify({ id: resultId, content: merged }),
       });
-    } catch (e) {
-      console.error(`[bg-gen] ${resultId} 최종 완료 재확인 실패:`, e);
+      if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
     }
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);

@@ -15,10 +15,12 @@ const API_ROUTE = "/api/kunghap_business-report";
 const TOTAL_CHAPTERS = 9;
 
 // 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업 (saju_total과 동일 패턴).
-// 장이 끝나는 즉시 그 장만 바로 저장 — 중간에 죽어도 이미 만든 것까지는 안전하게 남고,
-// 나머지는 고객이 결과지를 열 때 기존 클라이언트 쪽 자동 생성 로직이 이어서 채운다.
+// 장별로 개별 저장하면 여러 장이 거의 동시에 저장되며 경쟁 상태로 알림톡이 끝내
+// 발송되지 않는 사고가 있어(자녀궁합 건), 전부 병렬 생성만 해두고 다 모인 뒤
+// 딱 한 번만 합쳐서 저장한다. 클라이언트 쪽 자동 생성 로직은 안전망으로 유지.
 async function generateReportInBackground(resultId: string) {
   try {
+    // 이미지 생성은 챕터와 독립적으로 병렬 진행 (완료 여부는 알림톡 게이트에서 서버가 자체 확인)
     fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -31,6 +33,13 @@ async function generateReportInBackground(resultId: string) {
       body: JSON.stringify({ id: resultId, concernOnly: true }),
     }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
 
+    // 장별로 생성될 때마다 개별 저장하면 여러 장이 거의 동시에 저장을 시도하면서
+    // "지금 전부 완성됐나?" 체크가 서로 다른 스냅샷을 보게 되는 경쟁 상태가 생겨
+    // 알림톡이 끝내 발송되지 않는 사고가 있었다(자녀궁합, 2026-09-17). 대신 전부
+    // 병렬로 생성만 해두고, 다 모인 뒤 딱 한 번만 합쳐서 저장한다 — 저장이 정확히
+    // 한 번만 일어나므로 경쟁 상태 자체가 생기지 않고, 완성 여부 판단도 그 한 번의
+    // 저장 시점에 정확하게 이루어진다.
+    const merged: Record<string, unknown> = {};
     await Promise.all(
       Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
         try {
@@ -45,31 +54,20 @@ async function generateReportInBackground(resultId: string) {
             console.error(`[bg-gen] ${resultId} ${chapter}장 생성 실패:`, genJson?.error ?? genRes.status);
             return;
           }
-          const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, content: sections }),
-          });
-          if (!saveRes.ok) console.error(`[bg-gen] ${resultId} ${chapter}장 저장 실패:`, saveRes.status);
+          Object.assign(merged, sections);
         } catch (e) {
           console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
         }
       }),
     );
 
-    // 9개 장이 거의 동시에(병렬로) 저장되다 보니, 각 저장 시점에 "지금 전부
-    // 완성됐나?" 체크가 자기 직전 스냅샷 기준이라 서로 타이밍이 어긋나면 어느
-    // 저장 호출도 완성 시점을 못 잡아 알림톡이 끝내 발송되지 않는 경쟁 상태가
-    // 있었다(자녀궁합 사고로 확인). 전부 저장된 뒤 빈 content로 한 번 더
-    // 저장 호출을 보내 최신 상태를 다시 읽고 완성 여부를 재확인시킨다.
-    try {
-      await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+    if (Object.keys(merged).length > 0) {
+      const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: {} }),
+        body: JSON.stringify({ id: resultId, content: merged }),
       });
-    } catch (e) {
-      console.error(`[bg-gen] ${resultId} 최종 완료 재확인 실패:`, e);
+      if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
     }
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
