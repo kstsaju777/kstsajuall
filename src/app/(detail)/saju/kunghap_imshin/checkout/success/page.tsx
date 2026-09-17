@@ -11,8 +11,7 @@ const CHAPTER_TITLES = [
 ];
 const TOTAL = 12;
 
-function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; currentChapter: number }) {
-  const pct = Math.round((doneCount / TOTAL) * 100);
+function CreatingScreen({ doneCount, currentChapter, pct }: { doneCount: number; currentChapter: number; pct: number }) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center z-50 px-8"
       style={{ background: "radial-gradient(ellipse at 50% 40%, #0a1209 0%, #060a05 100%)" }}>
@@ -104,6 +103,22 @@ function SuccessInner() {
   const router = useRouter();
   const search = useSearchParams();
   const [doneCount, setDoneCount] = useState(0);
+  const [pct, setPct] = useState(0);
+  const startedAtRef = useRef(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => {
+      setPct((prev) => {
+        if (prev >= 96) return prev;
+        const elapsedSec = (Date.now() - startedAtRef.current) / 1000;
+        const timeBased = Math.min(90, elapsedSec * 2.5); // 대략 36초에 90%까지 서서히
+        const realBased = (doneCount / TOTAL) * 96;
+        const target = Math.min(96, Math.max(timeBased, realBased));
+        return prev + (target - prev) * 0.12;
+      });
+    }, 150);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doneCount]);
   const [currentChapter, setCurrentChapter] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
@@ -162,6 +177,8 @@ function SuccessInner() {
         return;
       }
 
+      setPct(100);
+      await new Promise((res) => setTimeout(res, 350));
       navigatingRef.current = true;
       router.push(`/saju/kunghap_imshin/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName ?? "")}&partnerGender=${encodeURIComponent(partnerGender ?? "")}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });
@@ -170,5 +187,5 @@ function SuccessInner() {
 
   if (error) return <ErrorScreen message={error} />;
   if (timedOut) return <TimedOutScreen />;
-  return <CreatingScreen doneCount={doneCount} currentChapter={currentChapter} />;
+  return <CreatingScreen doneCount={doneCount} currentChapter={currentChapter} pct={Math.round(pct)} />;
 }
