@@ -37,10 +37,15 @@ export function fixNamesInText(
       r = r.replace(/__PT__으로/g, `${ptFull}${b ? "으로" : "로"}`);
       r = r.replace(/__PT__/g, ptFull);
     } else {
-      r = r.replace(/__PT_는__/g, `${ptFull}는`);
-      r = r.replace(/__PT_가__/g, `${ptFull}가`);
-      r = r.replace(/__PT_를__/g, `${ptFull}를`);
-      r = r.replace(/__PT_와__/g, `${ptFull}와`);
+      // '님'·'군'·'양' 호칭은 전부 받침이 있는 글자(ㅁ/ㄴ/ㅇ)라서 이름+호칭은 항상
+      // 받침 있는 조사(은/이/을/과)를 써야 한다. 그런데 LLM이 문장을 쓸 때 실제
+      // 이름을 모르는 채로 __PT_는__ / __PT_가__ 같은 받침 없는 조사 토큰을 골라
+      // '채은양는'처럼 틀린 조사가 그대로 노출되는 사고가 있었다. 토큰에 어떤 조사가
+      // 적혀있든 무시하고, 항상 받침 있는 조사로 통일해서 치환한다.
+      r = r.replace(/__PT_(는|은)__/g, `${ptFull}은`);
+      r = r.replace(/__PT_(가|이)__/g, `${ptFull}이`);
+      r = r.replace(/__PT_(를|을)__/g, `${ptFull}을`);
+      r = r.replace(/__PT_(와|과)__/g, `${ptFull}과`);
       r = r.replace(/__PT_에게__/g, `${ptFull}에게`);
       r = r.replace(/__PT__/g, ptFull);
     }
