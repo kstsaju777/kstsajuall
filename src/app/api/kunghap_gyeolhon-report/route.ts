@@ -777,7 +777,8 @@ export async function GET(request: NextRequest) {
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
   const totalChapters = Object.keys(GYEOLHON_KUNGHAP_CHAPTER_SECTIONS).map(Number);
   const doneCount = totalChapters.filter(n => isGyeolhonKunghapChapterReady(content, n)).length;
-  const ready = doneCount === totalChapters.length;
+  const needsImage2 = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
+  const ready = doneCount === totalChapters.length && (!needsImage2 || (!!stored?.sajuImageUrl && !!stored?.partnerSajuImageUrl));
   return NextResponse.json({
     view: stored?.view ?? stored,
     name: stored?.["{이름1}"] || stored?.name || "",

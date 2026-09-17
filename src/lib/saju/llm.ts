@@ -107,14 +107,24 @@ export async function generateSajuImage(prompt: string, apiKey: string | undefin
   if (!apiKey) throw new Error("OPENAI_API_KEY is required for image generation");
   const { default: OpenAI } = await import("openai");
   const client = new OpenAI({ apiKey });
-  const res = await client.images.generate({
-    model: "gpt-image-1",
-    prompt,
-    n: 1,
-    size: "1536x1024",
-    quality: "medium",
-  });
-  const b64 = res.data?.[0]?.b64_json;
-  if (!b64) throw new Error("이미지 데이터 없음");
-  return Buffer.from(b64, "base64");
+
+  let lastErr: unknown = null;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const res = await client.images.generate({
+        model: "gpt-image-1",
+        prompt,
+        n: 1,
+        size: "1536x1024",
+        quality: "medium",
+      });
+      const b64 = res.data?.[0]?.b64_json;
+      if (!b64) throw new Error("이미지 데이터 없음");
+      return Buffer.from(b64, "base64");
+    } catch (e) {
+      lastErr = e;
+      console.error(`[이미지생성] 시도${i + 1} 실패:`, e);
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
 }
