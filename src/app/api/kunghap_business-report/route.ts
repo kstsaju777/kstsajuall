@@ -665,22 +665,6 @@ export async function PATCH(request: NextRequest) {
     const partnerSajuImageUrl = up2.error ? null : service.storage.from("saju-images").getPublicUrl(`wonguk/${ts}-${r2}.png`).data.publicUrl;
     await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl, partnerSajuImageUrl } }).eq("id", id);
 
-    // 이미지 저장 후 알림톡 발송 (챕터가 모두 완료된 경우)
-    const { data: resultRow } = await service.from("saju_results").select("interpretation_md, order_id").eq("id", id).maybeSingle();
-    if (resultRow?.order_id && sajuImageUrl && partnerSajuImageUrl) {
-      let content: Record<string, unknown> = {};
-      try { content = JSON.parse(resultRow.interpretation_md) || {}; } catch { content = {}; }
-      const totalChapters = Object.keys(BUSINESS_KUNGHAP_CHAPTER_SECTIONS).map(Number);
-      const allDone = totalChapters.every(n => isBusinessKunghapChapterReady(content, n));
-      if (allDone) {
-        const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", resultRow.order_id).maybeSingle();
-        if (si?.phone) {
-          const reportUrl = `https://www.hongyeondang.com/saju/kunghap_business/report-preview?id=${id}`;
-          await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
-        }
-      }
-    }
-
     return NextResponse.json({ sajuImageUrl, partnerSajuImageUrl });
   } catch (e) {
     return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
