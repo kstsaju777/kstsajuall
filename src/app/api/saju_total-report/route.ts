@@ -481,7 +481,10 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.["{이름1}"] || stored?.name || "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern: stored?.["{고민}"] || stored?.concern || "", content });
+  const totalChapters = Object.keys(CHAPTER_SECTIONS).map(Number);
+  const doneCount = totalChapters.filter(n => isChapterReady(content, n)).length;
+  const ready = doneCount === totalChapters.length;
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.["{이름1}"] || stored?.name || "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern: stored?.["{고민}"] || stored?.concern || "", content, doneCount, totalCount: totalChapters.length, ready });
 }
 
 // ── 이미지 재생성 ──

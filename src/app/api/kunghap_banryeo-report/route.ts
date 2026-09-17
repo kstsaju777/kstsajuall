@@ -519,6 +519,9 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
+  const totalChapters = Object.keys(BANRYEO_KUNGHAP_CHAPTER_SECTIONS).map(Number);
+  const doneCount = totalChapters.filter(n => isBanryeoKunghapChapterReady(content, n)).length;
+  const ready = doneCount === totalChapters.length;
   return NextResponse.json({
     view: stored?.view ?? stored,
     name: stored?.name ?? "",
@@ -532,6 +535,7 @@ export async function GET(request: NextRequest) {
     partnerGender: stored?.partnerGender ?? "",
     partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null,
     concern: stored?.["{고민}"] ?? stored?.concern ?? "",
+    doneCount, totalCount: totalChapters.length, ready,
   });
 }
 

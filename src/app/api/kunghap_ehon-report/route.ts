@@ -756,6 +756,9 @@ export async function GET(request: NextRequest) {
   const stored = data.myeongsik as any;
   let content;
   try { content = JSON.parse(data.interpretation_md); } catch { content = null; }
+  const totalChapters = Object.keys(EHON_KUNGHAP_CHAPTER_SECTIONS).map(Number);
+  const doneCount = totalChapters.filter(n => isEhonKunghapChapterReady(content, n)).length;
+  const ready_ = doneCount === totalChapters.length;
   let concern: string = stored?.["{고민}"] ?? stored?.concern ?? "";
   if (!concern && data.order_id) {
     const { data: si } = await service.from("saju_inputs").select("concerns").eq("order_id", data.order_id).maybeSingle();
@@ -775,6 +778,7 @@ export async function GET(request: NextRequest) {
     partnerGender: stored?.partnerGender ?? "",
     partnerSajuImageUrl: stored?.partnerSajuImageUrl ?? null,
     concern,
+    doneCount, totalCount: totalChapters.length, ready: ready_,
   });
 }
 

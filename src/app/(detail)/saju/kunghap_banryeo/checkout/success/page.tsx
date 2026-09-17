@@ -120,28 +120,26 @@ function SuccessInner() {
       }
       const { resultId, name, gender, partnerName, partnerGender } = await confirmRes.json();
 
-      const chapters = [1,2,3,4,5,6,7,8,9,10,11,12];
-      let done = 0;
-      const allContent: Record<string, unknown> = {};
-
-      await Promise.all(chapters.map(async (ch) => {
-        try {
-          const r = await fetch("/api/kunghap_banryeo-report", {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, chapter: ch }),
-          });
-          const data = await r.json();
-          if (data.sections) Object.assign(allContent, data.sections);
-        } catch { /* 실패해도 계속 */ }
-        done++;
-        setDoneCount(done);
-        setCurrentChapter(Math.min(done + 1, TOTAL));
-      }));
-
-      await fetch("/api/kunghap_banryeo-report", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: allContent }),
-      });
+      // 실제 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
+      // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장하고 알림톡까지 보낸다.
+      // 여기서는 화면에 진행률을 보여주기 위해 저장 상태를 주기적으로 조회만 한다.
+      let cancelled = false;
+      const poll = async () => {
+        for (let i = 0; i < 150; i++) { // 최대 5분(2초 간격)
+          if (cancelled) return;
+          try {
+            const r = await fetch(`/api/kunghap_banryeo-report?id=${encodeURIComponent(resultId)}`);
+            const d = await r.json();
+            if (typeof d.doneCount === "number") {
+              setDoneCount(d.doneCount);
+              setCurrentChapter(Math.min(d.doneCount + 1, TOTAL));
+            }
+            if (d.ready) break;
+          } catch { /* 무시하고 계속 폴링 */ }
+          await new Promise((res) => setTimeout(res, 2000));
+        }
+      };
+      await poll();
 
       navigatingRef.current = true;
       router.push(`/saju/kunghap_banryeo/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName ?? "")}&partnerGender=${encodeURIComponent(partnerGender ?? "")}`);

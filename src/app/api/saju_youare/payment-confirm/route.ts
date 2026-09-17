@@ -1,4 +1,4 @@
-﻿import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest, after } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { confirmTossPayment } from "@/lib/toss/confirm";
@@ -8,11 +8,68 @@ import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
+const SITE_ORIGIN = "https://www.hongyeondang.com";
+const API_ROUTE = "/api/saju_youare-report";
+const TOTAL_CHAPTERS = 7;
 
 const PRODUCT_NAME = "유아사주";
 const PRODUCT_PRICE = 19900;
 const REPORT_PATH = "saju/saju_youare/report-preview";
+
+// 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업.
+// 이 상품은 이미지 완성 후에만 알림톡을 보내므로(WAIT_FOR_IMAGE), 이미지 생성도
+// 챕터 생성과 함께 Promise.all로 묶어서 반드시 끝난 뒤에 합본 저장을 한다 -
+// 그래야 저장 시점에 이미지가 이미 준비돼 있어 알림톡 게이트를 확실히 통과한다.
+// 클라이언트(checkout/success)는 더 이상 생성을 직접 하지 않고 진행률만 폴링한다.
+async function generateReportInBackground(resultId: string) {
+  try {
+    const imageTask = fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: resultId }),
+    }).catch((e) => console.error(`[bg-gen] ${resultId} 이미지 생성 실패:`, e));
+
+    fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: resultId, concernOnly: true }),
+    }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
+
+    const merged = {};
+    const chapterTasks = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
+      try {
+        const genRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: resultId, chapter }),
+        });
+        const genJson = await genRes.json().catch(() => null);
+        const sections = genJson?.sections;
+        if (!sections) {
+          console.error(`[bg-gen] ${resultId} ${chapter}장 생성 실패:`, genJson?.error ?? genRes.status);
+          return;
+        }
+        Object.assign(merged, sections);
+      } catch (e) {
+        console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
+      }
+    });
+
+    await Promise.all([imageTask, ...chapterTasks]);
+
+    if (Object.keys(merged).length > 0) {
+      const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: merged }),
+      });
+      if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
+    }
+  } catch (e) {
+    console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
+  }
+}
 
 const bodySchema = z.object({
   paymentKey: z.string().min(1),
@@ -95,6 +152,8 @@ export async function POST(request: NextRequest) {
       sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE }),
       order.guest_email ? sendOrderEmail({ customerEmail: order.guest_email, customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl }) : Promise.resolve(),
     ]);
+
+    after(() => generateReportInBackground(result.id));
 
     return NextResponse.json({ resultId: result.id, name: input.name ?? "", gender: input.gender ?? "male" });
   } catch (err) {
