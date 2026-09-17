@@ -470,22 +470,17 @@ export async function PATCH(request: NextRequest) {
   const stored = data.myeongsik as any;
   const pillars = stored?.view?.pillars ?? [];
 
-  const imagePrompt = buildSajuImagePrompt(pillars);
-  let lastErr: unknown = null;
-  for (let i = 0; i < 3; i++) {
-    try {
-      const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
-      const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-      const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
-      if (uploadErr) throw uploadErr;
-      const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
-      const sajuImageUrl = pubData.publicUrl;
-      await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
-      return NextResponse.json({ sajuImageUrl });
-    } catch (e) {
-      lastErr = e;
-      console.error(`[이미지생성] ${id} 시도${i + 1} 실패:`, e);
-    }
+  try {
+    const imagePrompt = buildSajuImagePrompt(pillars);
+    const imgBuffer = await generateSajuImage(imagePrompt, process.env.OPENAI_API_KEY!);
+    const imgPath = `wonguk/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+    const { error: uploadErr } = await service.storage.from("saju-images").upload(imgPath, imgBuffer, { contentType: "image/png", upsert: false });
+    if (uploadErr) throw uploadErr;
+    const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
+    const sajuImageUrl = pubData.publicUrl;
+    await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
+    return NextResponse.json({ sajuImageUrl });
+  } catch (e) {
+    return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
   }
-  return NextResponse.json({ error: "이미지 생성 실패", detail: String(lastErr) }, { status: 500 });
 }
