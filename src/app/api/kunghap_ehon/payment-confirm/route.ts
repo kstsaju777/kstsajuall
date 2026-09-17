@@ -18,33 +18,14 @@ const PRODUCT_PRICE = 29900;
 const REPORT_PATH = "saju/kunghap_ehon/report-preview";
 
 // 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업.
-// 이 상품은 이미지 완성 후에만 알림톡을 보내므로(WAIT_FOR_IMAGE), 이미지 생성도
-// 챕터 생성과 함께 Promise.all로 묶어서 반드시 끝난 뒤에 합본 저장을 한다 -
-// 그래야 저장 시점에 이미지가 이미 준비돼 있어 알림톡 게이트를 확실히 통과한다.
-// 클라이언트(checkout/success)는 더 이상 생성을 직접 하지 않고 진행률만 폴링한다.
+// 챕터 생성은 여기서 안정적으로 완료된다(실측 확인). 반면 AI 사주화 이미지
+// 생성(OpenAI 호출, 20~30초)은 after() 백그라운드 컨텍스트 안에서는 원인 불명의
+// 이유로 계속 실패해서, 이미지는 checkout/success 화면(브라우저)이 직접
+// 요청하도록 분리했고, 혹시 놓치더라도 1분마다 도는 예약 작업(/api/cron/
+// complete-images)이 마저 완성시킨다. 클라이언트는 챕터는 직접 생성하지 않고
+// 진행률만 폴링한다.
 async function generateReportInBackground(resultId: string) {
   try {
-    // 이미지 생성 요청 하나가 실패하면(OpenAI 이미지 API 일시 오류 등) 그대로 포기
-    // → 이미지 완료를 기다리는 상품은 알림톡이 영구히 막히는 사고로 이어진다.
-    // 한 번의 긴 요청 안에서 재시도하면(예전 시도) after() 백그라운드 실행 시간
-    // 제한에 걸려 오히려 더 자주 실패했으므로, 짧은 요청을 최대 2번 더(총 3회)
-    // 별도의 왕복으로 재시도한다.
-    const imageTask = (async () => {
-      for (let i = 0; i < 3; i++) {
-        try {
-          const res = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId }),
-          });
-          if (res.ok) return;
-          console.error(`[bg-gen] ${resultId} 이미지 생성 실패 (시도${i + 1}):`, res.status);
-        } catch (e) {
-          console.error(`[bg-gen] ${resultId} 이미지 생성 예외 (시도${i + 1}):`, e);
-        }
-      }
-    })();
-
     fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -71,7 +52,7 @@ async function generateReportInBackground(resultId: string) {
       }
     });
 
-    await Promise.all([imageTask, ...chapterTasks]);
+    await Promise.all(chapterTasks);
 
     if (Object.keys(merged).length > 0) {
       const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {

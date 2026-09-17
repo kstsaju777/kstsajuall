@@ -151,6 +151,16 @@ function SuccessInner() {
       // 실제 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
       // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장하고 알림톡까지 보낸다.
       // 여기서는 화면에 진행률을 보여주기 위해 저장 상태를 주기적으로 조회만 한다.
+      // 챕터 생성은 서버 백그라운드가 안정적으로 처리한다(이탈해도 항상 완료).
+      // AI 사주화 이미지는 after() 백그라운드 안에서는 원인 불명의 이유로 계속
+      // 실패해서, 이 화면이 직접 요청한다 - 예전부터 안정적으로 작동하던 방식.
+      // 고객이 이 화면을 완전히 벗어나면 이 요청도 취소되지만, 1분마다 도는
+      // 예약 작업이 놓친 이미지를 마저 완성시키니 알림톡은 결국 정상 발송된다.
+      const imageTask = fetch("/api/kunghap_gyeolhon-report", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId }),
+      }).then((r) => r.ok).catch(() => false);
+
       let cancelled = false;
       let becameReady = false;
       const poll = async () => {
@@ -169,6 +179,7 @@ function SuccessInner() {
         }
       };
       await poll();
+      await imageTask;
 
       // 이미지까지 전부 완성됐을 때만 결과 페이지로 이동한다. 아직 완성되지
       // 않았다면 미완성 결과지를 보여주는 대신 계속 기다리는 화면을 유지한다.
@@ -176,6 +187,13 @@ function SuccessInner() {
         setTimedOut(true);
         return;
       }
+
+      // 챕터 합본 저장은 이미지가 아직 없을 때 이미 끝났을 수 있어(알림톡 스킵됨),
+      // 이미지까지 확인된 지금 시점에 한 번 더 재확인시켜 알림톡을 발송시킨다.
+      await fetch("/api/kunghap_gyeolhon-report", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
+      }).catch(() => {});
 
       setPct(100);
       await new Promise((res) => setTimeout(res, 350));
