@@ -260,6 +260,7 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
   const { data } = await service.from("saju_results").select("interpretation_md, order_id, myeongsik").eq("id", id).maybeSingle();
   let existing: Record<string, unknown> = {};
   try { existing = JSON.parse(data?.interpretation_md || "{}") || {}; } catch { existing = {}; }
+  const alreadySent = existing.__alimtalkSent === true;
   const merged = { ...existing, ...content };
   await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
   const totalChapters = Object.keys(BUSINESS_KUNGHAP_CHAPTER_SECTIONS).map(Number);
@@ -267,11 +268,19 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
   const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const imageReady = !!storedMyeongsik?.sajuImageUrl && !!storedMyeongsik?.partnerSajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
-  if (!skipAlimtalk && allDone && (!needsImage || imageReady) && data?.order_id) {
-    const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
-    if (si?.phone) {
+  if (!skipAlimtalk && !alreadySent && allDone && (!needsImage || imageReady) && data?.order_id) {
+    const { data: claimed } = await service
+      .from("saju_results")
+      .update({ interpretation_md: JSON.stringify({ ...merged, __alimtalkSent: true }) })
+      .eq("id", id)
+      .not("interpretation_md", "ilike", "%__alimtalkSent%")
+      .select("id");
+    if (claimed && claimed.length > 0) {
+      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
+      if (si?.phone) {
       const reportUrl = `https://www.hongyeondang.com/saju/kunghap_business/report-preview?id=${id}`;
       await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
+      }
     }
   }
   return NextResponse.json({ ok: true });

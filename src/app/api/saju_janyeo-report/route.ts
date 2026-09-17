@@ -262,6 +262,7 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
   const { data } = await service.from("saju_results").select("interpretation_md, order_id, myeongsik").eq("id", id).maybeSingle();
   let existing: Record<string, unknown> = {};
   try { existing = JSON.parse(data?.interpretation_md || "{}") || {}; } catch { existing = {}; }
+  const alreadySent = existing.__alimtalkSent === true;
   const merged = { ...existing, ...content };
   await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
   const totalChapters = Object.keys(JANYEO_CHAPTER_SECTIONS).map(Number);
@@ -269,11 +270,22 @@ async function saveContent(id: string, content: Record<string, unknown>, skipAli
   const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const imageReady = !!storedMyeongsik?.sajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
-  if (!skipAlimtalk && allDone && (!needsImage || imageReady) && data?.order_id) {
-    const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
-    if (si?.phone) {
-      const reportUrl = `https://www.hongyeondang.com/saju/saju_janyeo/report-preview?id=${id}`;
-      await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
+  // 여러 경로(클라이언트 재확인 호출, 1분 예약 작업)가 거의 동시에 "완성됐다"고
+  // 판단해 각자 알림톡을 보내려 할 수 있다. DB의 현재 행을 조건으로 건 원자적
+  // UPDATE로 "이미 보냈다" 표시를 선점한 호출 하나만 실제로 발송하게 한다.
+  if (!skipAlimtalk && !alreadySent && allDone && (!needsImage || imageReady) && data?.order_id) {
+    const { data: claimed } = await service
+      .from("saju_results")
+      .update({ interpretation_md: JSON.stringify({ ...merged, __alimtalkSent: true }) })
+      .eq("id", id)
+      .not("interpretation_md", "ilike", "%__alimtalkSent%")
+      .select("id");
+    if (claimed && claimed.length > 0) {
+      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
+      if (si?.phone) {
+        const reportUrl = `https://www.hongyeondang.com/saju/saju_janyeo/report-preview?id=${id}`;
+        await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
+      }
     }
   }
   return NextResponse.json({ ok: true });
