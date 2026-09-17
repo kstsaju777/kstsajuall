@@ -77,6 +77,19 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
   );
 }
 
+function TimedOutScreen() {
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center px-8 text-center"
+      style={{ background: "#0a0002" }}>
+      <p className="text-[18px] font-bold mb-3" style={{ color: "#fff5f5" }}>결과지가 예상보다 오래 걸리고 있소</p>
+      <p className="text-[13px] leading-relaxed mb-6" style={{ color: "#e8a0a8" }}>
+        완성되는 대로 카카오 알림톡으로 결과지 링크를 보내드리오.<br />이 창은 이제 닫으셔도 되오.
+      </p>
+      <p className="text-[12px]" style={{ color: "#886677" }}>계속 오지 않으면 고객센터로 문의해 주시오: hongyeon@hongyeondang.com</p>
+    </div>
+  );
+}
+
 function ErrorScreen({ message }: { message: string }) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center px-8 text-center"
@@ -103,6 +116,7 @@ function SuccessInner() {
   const [doneCount, setDoneCount] = useState(0);
   const [currentChapter, setCurrentChapter] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [timedOut, setTimedOut] = useState(false);
   const navigatingRef = useRef(false);
 
   useEffect(() => {
@@ -139,65 +153,36 @@ function SuccessInner() {
       }
       const { resultId, name, gender } = await confirmRes.json();
 
-      // 2. 장별 생성 (checkout/page.tsx 와 동일 로직)
-      const FIRST = [2];
-      const REST  = [1,3,4,5,6,7,8,9,10];
-      let done = 0;
-      const allContent: Record<string, unknown> = {};
+      // 실제 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
+      // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장하고 알림톡까지 보낸다.
+      // 여기서는 화면에 진행률을 보여주기 위해 저장 상태를 주기적으로 조회만 한다.
+      let cancelled = false;
+      let becameReady = false;
+      const poll = async () => {
+        for (let i = 0; i < 150; i++) { // 최대 5분(2초 간격)
+          if (cancelled) return;
+          try {
+            const r = await fetch(`/api/saju_total-report?id=${encodeURIComponent(resultId)}`);
+            const d = await r.json();
+            if (typeof d.doneCount === "number") {
+              setDoneCount(d.doneCount);
+              setCurrentChapter(Math.min(d.doneCount + 1, TOTAL));
+            }
+            if (d.ready) { becameReady = true; break; }
+          } catch { /* 무시하고 계속 폴링 */ }
+          await new Promise((res) => setTimeout(res, 2000));
+        }
+      };
+      await poll();
 
-      for (const ch of FIRST) {
-        try {
-          const r = await fetch("/api/saju_total-report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, chapter: ch }),
-          });
-          const data = await r.json();
-          if (data.sections) Object.assign(allContent, data.sections);
-        } catch { /* 실패해도 계속 */ }
-        done++;
-        setDoneCount(done);
-        setCurrentChapter(Math.min(done + 1, TOTAL));
+      // 이미지까지 전부 완성됐을 때만 결과 페이지로 이동한다. 시간이 오래 걸려
+      // 아직 완성되지 않았다면 미완성 결과지를 보여주는 대신 계속 기다리는
+      // 화면을 유지한다 — 완성되면 알림톡이 갈 것이다.
+      if (!becameReady) {
+        setTimedOut(true);
+        return;
       }
 
-      await Promise.all(REST.map(async (ch) => {
-        try {
-          const r = await fetch("/api/saju_total-report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, chapter: ch }),
-          });
-          const data = await r.json();
-          if (data.sections) Object.assign(allContent, data.sections);
-        } catch { /* 장 실패해도 계속 */ }
-        done++;
-        setDoneCount(done);
-        setCurrentChapter(Math.min(done + 1, TOTAL));
-      }));
-
-      // 3. 합본 저장
-      await fetch("/api/saju_total-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: allContent }),
-      });
-
-      // 4. 이미지 생성
-      await fetch("/api/saju_total-report", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId }),
-      }).catch(() => {});
-
-      // 4.5 이미지까지 완료된 시점에 완성 여부 재확인 → 알림톡 발송 (이 상품은 이미지
-      // 완료 후에만 알림톡을 보내므로, 챕터 합본 저장 시점엔 이미지가 아직 없어 스킵됨)
-      await fetch("/api/saju_total-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: {} }),
-      }).catch(() => {});
-
-      // 5. 결과 페이지로 이동
       navigatingRef.current = true;
       router.push(
         `/saju/saju_total/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`
@@ -209,5 +194,6 @@ function SuccessInner() {
   }, []);
 
   if (error) return <ErrorScreen message={error} />;
+  if (timedOut) return <TimedOutScreen />;
   return <CreatingScreen doneCount={doneCount} currentChapter={currentChapter} />;
 }

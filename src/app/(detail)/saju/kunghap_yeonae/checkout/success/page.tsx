@@ -70,6 +70,18 @@ function CreatingScreen({ doneCount, currentChapter }: { doneCount: number; curr
   );
 }
 
+function TimedOutScreen() {
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center px-8 text-center" style={{ background: "#0a0002" }}>
+      <p className="text-[18px] font-bold mb-3" style={{ color: "#fff5f5" }}>결과지가 예상보다 오래 걸리고 있소</p>
+      <p className="text-[13px] leading-relaxed mb-6" style={{ color: "#886677" }}>
+        완성되는 대로 카카오 알림톡으로 결과지 링크를 보내드리오.<br />이 창은 이제 닫으셔도 되오.
+      </p>
+      <p className="text-[12px]" style={{ color: "#886677" }}>계속 오지 않으면 고객센터로 문의해 주시오: hongyeon@hongyeondang.com</p>
+    </div>
+  );
+}
+
 function ErrorScreen({ message }: { message: string }) {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center px-8 text-center" style={{ background: "#0a0002" }}>
@@ -94,6 +106,7 @@ function SuccessInner() {
   const [doneCount, setDoneCount] = useState(0);
   const [currentChapter, setCurrentChapter] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [timedOut, setTimedOut] = useState(false);
   const navigatingRef = useRef(false);
 
   useEffect(() => {
@@ -124,6 +137,7 @@ function SuccessInner() {
       // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장하고 알림톡까지 보낸다.
       // 여기서는 화면에 진행률을 보여주기 위해 저장 상태를 주기적으로 조회만 한다.
       let cancelled = false;
+      let becameReady = false;
       const poll = async () => {
         for (let i = 0; i < 150; i++) { // 최대 5분(2초 간격)
           if (cancelled) return;
@@ -134,12 +148,19 @@ function SuccessInner() {
               setDoneCount(d.doneCount);
               setCurrentChapter(Math.min(d.doneCount + 1, TOTAL));
             }
-            if (d.ready) break;
+            if (d.ready) { becameReady = true; break; }
           } catch { /* 무시하고 계속 폴링 */ }
           await new Promise((res) => setTimeout(res, 2000));
         }
       };
       await poll();
+
+      // 이미지까지 전부 완성됐을 때만 결과 페이지로 이동한다. 아직 완성되지
+      // 않았다면 미완성 결과지를 보여주는 대신 계속 기다리는 화면을 유지한다.
+      if (!becameReady) {
+        setTimedOut(true);
+        return;
+      }
 
       navigatingRef.current = true;
       router.push(`/saju/kunghap_yeonae/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName ?? "")}&partnerGender=${encodeURIComponent(partnerGender ?? "")}`);
@@ -148,5 +169,6 @@ function SuccessInner() {
   }, []);
 
   if (error) return <ErrorScreen message={error} />;
+  if (timedOut) return <TimedOutScreen />;
   return <CreatingScreen doneCount={doneCount} currentChapter={currentChapter} />;
 }
