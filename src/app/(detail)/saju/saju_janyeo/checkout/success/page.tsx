@@ -152,9 +152,20 @@ function SuccessInner() {
       }
       const { resultId, name, gender } = await confirmRes.json();
 
-      // 실제 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
-      // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장하고 알림톡까지 보낸다.
-      // 여기서는 화면에 진행률을 보여주기 위해 저장 상태를 주기적으로 조회만 한다.
+      // 챕터 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
+      // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장한다(항상 안정적으로
+      // 완료됨, 실측 확인). 반면 AI 사주화 이미지 생성(OpenAI 호출, 20~30초)은
+      // after() 백그라운드 안에서는 원인 불명의 이유로 계속 실패했다(자기 자신
+      // HTTP 재호출이든 직접 함수 호출이든 동일 - 수동 curl 호출만 매번 성공).
+      // 그래서 이미지만은 이 화면(브라우저)이 직접 요청한다 - 이건 예전부터
+      // 안정적으로 작동하던 방식이다. 고객이 이 화면을 완전히 벗어나면 그 순간엔
+      // 이미지가 안 만들어질 수 있지만, "이미지까지 갖춰져야만 결과지를 연다"는
+      // 안전장치가 있어 깨진 결과지를 보는 일은 없다.
+      const imageTask = fetch("/api/saju_janyeo-report", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId }),
+      }).then((r) => r.ok).catch(() => false);
+
       let cancelled = false;
       let becameReady = false;
       const poll = async () => {
@@ -173,6 +184,7 @@ function SuccessInner() {
         }
       };
       await poll();
+      await imageTask;
 
       // 이미지까지 전부 완성됐을 때만 결과 페이지로 이동한다. 아직 완성되지
       // 않았다면 미완성 결과지를 보여주는 대신 계속 기다리는 화면을 유지한다.
@@ -180,6 +192,13 @@ function SuccessInner() {
         setTimedOut(true);
         return;
       }
+
+      // 챕터 합본 저장은 이미지가 아직 없을 때 이미 끝났을 수 있어(알림톡 스킵됨),
+      // 이미지까지 확인된 지금 시점에 한 번 더 재확인시켜 알림톡을 발송시킨다.
+      await fetch("/api/saju_janyeo-report", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
+      }).catch(() => {});
 
       setPct(100);
       await new Promise((res) => setTimeout(res, 350));

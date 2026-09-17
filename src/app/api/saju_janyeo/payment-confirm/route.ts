@@ -7,7 +7,6 @@ import { isSajuApiConfigured, fetchSajuAnalysis, formatSajuToManseryeok, type Bi
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
-import { generateAndSaveImage } from "@/app/api/saju_janyeo-report/route";
 
 export const maxDuration = 300;
 const SITE_ORIGIN = "https://www.hongyeondang.com";
@@ -19,28 +18,14 @@ const PRODUCT_PRICE = 19900;
 const REPORT_PATH = "saju/saju_janyeo/report-preview";
 
 // 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업.
-// 이 상품은 이미지 완성 후에만 알림톡을 보내므로(WAIT_FOR_IMAGE), 이미지 생성도
-// 챕터 생성과 함께 Promise.all로 묶어서 반드시 끝난 뒤에 합본 저장을 한다 -
-// 그래야 저장 시점에 이미지가 이미 준비돼 있어 알림톡 게이트를 확실히 통과한다.
-// 클라이언트(checkout/success)는 더 이상 생성을 직접 하지 않고 진행률만 폴링한다.
+// 챕터 생성은 여기서 안정적으로 완료된다(실측 확인 - 실패한 적 없음). 반면
+// AI 사주화 이미지 생성(OpenAI 호출, 20~30초)은 after() 백그라운드 컨텍스트
+// 안에서는 self-fetch든 직접 함수 호출이든 원인 불명의 이유로 계속 실패했다
+// (수동 curl 호출만 매번 성공) - 그래서 이미지는 이 배경 작업에서 더 이상
+// 시도하지 않고, checkout/success 화면(브라우저)이 직접 요청하도록 분리했다.
+// 클라이언트는 더 이상 챕터를 직접 생성하지 않고 진행률만 폴링한다.
 async function generateReportInBackground(resultId: string) {
   try {
-    // 자기 자신을 HTTP로 재호출(self-fetch)하면 after() 백그라운드 컨텍스트
-    // 안에서 원인 불명의 이유로 계속 실패했다(수동 curl 호출은 항상 바로 성공).
-    // 같은 프로세스 안의 함수를 직접 호출해 이 왕복 자체를 없앤다. 그래도 실패
-    // 하면(OpenAI 이미지 API 자체 오류) 짧게 2번 더 재시도한다.
-    const imageTask = (async () => {
-      for (let i = 0; i < 3; i++) {
-        try {
-          const result = await generateAndSaveImage(resultId);
-          if (result.sajuImageUrl) return;
-          console.error(`[bg-gen] ${resultId} 이미지 생성 실패 (시도${i + 1}):`, result.error);
-        } catch (e) {
-          console.error(`[bg-gen] ${resultId} 이미지 생성 예외 (시도${i + 1}):`, e);
-        }
-      }
-    })();
-
     fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -67,7 +52,7 @@ async function generateReportInBackground(resultId: string) {
       }
     });
 
-    await Promise.all([imageTask, ...chapterTasks]);
+    await Promise.all(chapterTasks);
 
     if (Object.keys(merged).length > 0) {
       const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
