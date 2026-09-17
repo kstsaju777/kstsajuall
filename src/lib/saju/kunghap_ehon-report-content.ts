@@ -182,7 +182,7 @@ const CH_GUIDE: Record<number, string> = {
 두 사람 사주에서 발견되는 합(合) 2~4개.
 - intro: 이 장에서 합을 살피는 이유 한 문장 — 이혼 맥락에서 합이 갖는 의미(왜 헤어지기 어려운가).
 - items: 각 합에 대해:
-    · type: 합의 종류 (예: 甲己합, 자축합 등)
+    · type: 합의 종류 (예: 갑기합, 자축합 등. 한자 절대 쓰지 말고 한글로만 표기)
     · desc: 이 합이 두 사람 관계에 미치는 영향 3~4문장 — 이혼 과정에서 어떻게 발현되는지 구체적으로.
     · strength: "강함" | "보통" | "약함"
     · meaning: 이혼 맥락 태그 5자 이내 (예: "집착의 끈", "미련 유발", "감정 묶임", "재결합 유혹")
@@ -536,16 +536,16 @@ const CH_SCHEMA: Record<number, string> = {
   "timingItems": {
     "intro": "연도별 이혼 에너지 흐름 개요 (150자+)",
     "items": [
-      { "label": "2026년 丙午年", "score": 70, "tone": "good",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2027년 丁未年", "score": 90, "tone": "best",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2028년 戊申年", "score": 35, "tone": "caution","heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2029년 己酉年", "score": 55, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2030년 庚戌年", "score": 60, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2031년 辛亥年", "score": 75, "tone": "good",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2032년 壬子年", "score": 50, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2033년 癸丑年", "score": 40, "tone": "caution","heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2034년 甲寅年", "score": 65, "tone": "good",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
-      { "label": "2035년 乙卯年", "score": 55, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" }
+      { "label": "2026년 병오년", "score": 70, "tone": "good",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2027년 정미년", "score": 90, "tone": "best",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2028년 무신년", "score": 35, "tone": "caution","heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2029년 기유년", "score": 55, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2030년 경술년", "score": 60, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2031년 신해년", "score": 75, "tone": "good",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2032년 임자년", "score": 50, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2033년 계축년", "score": 40, "tone": "caution","heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2034년 갑인년", "score": 65, "tone": "good",   "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" },
+      { "label": "2035년 을묘년", "score": 55, "tone": "normal", "heading": "이 시기의 성격", "desc": "사주 흐름 5~6문장 300자+" }
     ]
   },
   "timingAdvice": {
