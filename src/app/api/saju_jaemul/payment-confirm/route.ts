@@ -1,4 +1,4 @@
-﻿import { NextResponse, type NextRequest, after } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { confirmTossPayment } from "@/lib/toss/confirm";
@@ -8,73 +8,11 @@ import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 const PRODUCT_NAME = "재물사주";
 const PRODUCT_PRICE = 19900;
 const REPORT_PATH = "saju/saju_jaemul/report-preview";
-const SITE_ORIGIN = "https://www.hongyeondang.com";
-const API_ROUTE = "/api/jaemul-report";
-const TOTAL_CHAPTERS = 7;
-
-// 결제 직후 서버가 알아서 전체 리포트를 만들어두는 백그라운드 작업 (saju_total과 동일 패턴).
-// 장별로 개별 저장하면 여러 장이 거의 동시에 저장되며 경쟁 상태로 알림톡이 끝내
-// 발송되지 않는 사고가 있어(자녀궁합 건), 전부 병렬 생성만 해두고 다 모인 뒤
-// 딱 한 번만 합쳐서 저장한다. 클라이언트 쪽 자동 생성 로직은 안전망으로 유지.
-async function generateReportInBackground(resultId: string) {
-  console.log(`[bg-gen] ${resultId} generateReportInBackground 진입`);
-  try {
-    fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: resultId }),
-    }).catch((e) => console.error(`[bg-gen] ${resultId} 이미지 생성 실패:`, e));
-
-    fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: resultId, concernOnly: true }),
-    }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
-
-    const merged: Record<string, unknown> = {};
-    await Promise.all(
-      Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
-        try {
-          const genRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: resultId, chapter }),
-          });
-          const genJson = await genRes.json().catch(() => null);
-          const sections = genJson?.sections;
-          if (!sections) {
-            console.error(`[bg-gen] ${resultId} ${chapter}장 생성 실패:`, genJson?.error ?? genRes.status);
-            return;
-          }
-          Object.assign(merged, sections);
-        } catch (e) {
-          console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
-        }
-      }),
-    );
-
-    console.log(`[bg-gen] ${resultId} 합본 저장 시도, keys=`, Object.keys(merged));
-    if (Object.keys(merged).length > 0) {
-      const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: merged }),
-      });
-      console.log(`[bg-gen] ${resultId} 합본 저장 응답:`, saveRes.status);
-      if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
-    } else {
-      console.error(`[bg-gen] ${resultId} merged가 비어있음 - 모든 챕터 생성 실패`);
-    }
-    console.log(`[bg-gen] ${resultId} generateReportInBackground 함수 끝까지 도달`);
-  } catch (e) {
-    console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
-  }
-}
 
 const bodySchema = z.object({
   paymentKey: z.string().min(1),
@@ -158,8 +96,6 @@ export async function POST(request: NextRequest) {
       sendOrderSms({ customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE }),
       order.guest_email ? sendOrderEmail({ customerEmail: order.guest_email, customerName: input.name ?? "고객", productName: PRODUCT_NAME, price: PRODUCT_PRICE, reportUrl }) : Promise.resolve(),
     ]);
-
-    after(() => generateReportInBackground(result.id));
 
     return NextResponse.json({ resultId: result.id, name: input.name ?? "", gender: input.gender ?? "male" });
   } catch (err) {
