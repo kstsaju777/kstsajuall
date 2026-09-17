@@ -504,7 +504,7 @@ export async function GET(request: NextRequest) {
 // 안에서 이 API를 fetch로 다시 부르면 원인 불명의 이유로 자동 실행 경로에서만
 // 계속 실패하는 사고가 있었다(수동 curl 호출은 항상 성공) - 자기 자신을 향한
 // 아웃바운드 HTTPS 왕복 자체가 after() 안에서 불안정한 것으로 추정된다.
-export async function generateAndSaveImage(id: string): Promise<{ sajuImageUrl?: string; error?: string }> {
+async function generateAndSaveImage(id: string): Promise<{ sajuImageUrl?: string; error?: string }> {
   if (!process.env.OPENAI_API_KEY) return { error: "OpenAI 키 없음" };
 
   const service = createServiceClient();
