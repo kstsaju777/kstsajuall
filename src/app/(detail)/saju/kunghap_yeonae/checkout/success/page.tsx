@@ -143,10 +143,16 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId, content: allContent }),
       });
 
-      // AI 이미지 생성 완료 후 결과 페이지 이동 (카카오 알림톡도 이미지 완료 후 발송됨)
+      // AI 이미지 생성 완료 후 결과 페이지 이동
       await fetch("/api/kunghap_yeonae-report", {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: resultId }),
+      }).catch(() => {});
+
+      // 이미지까지 완료된 시점에 완성 여부 재확인 → 알림톡 발송
+      await fetch("/api/kunghap_yeonae-report", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
       }).catch(() => {});
 
       navigatingRef.current = true;

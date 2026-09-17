@@ -165,6 +165,12 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId }),
       }).catch(() => {});
 
+      // 이미지까지 완료된 시점에 완성 여부 재확인 → 알림톡 발송
+      await fetch("/api/saju_janyeo-report", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
+      }).catch(() => {});
+
       navigatingRef.current = true;
       router.push(`/saju/saju_janyeo/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}`);
     })().catch((err) => { setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."); });

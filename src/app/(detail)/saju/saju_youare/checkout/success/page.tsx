@@ -159,10 +159,16 @@ function SuccessInner() {
         }
       } catch { /* 실패해도 계속 */ }
 
-      // 이미지 생성 완료까지 대기 (알림톡은 PATCH 완료 후 서버에서 발송)
+      // 이미지 생성 완료까지 대기
       await fetch("/api/saju_youare-report", {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: resultId }),
+      }).catch(() => {});
+
+      // 이미지까지 완료된 시점에 완성 여부 재확인 → 알림톡 발송
+      await fetch("/api/saju_youare-report", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
       }).catch(() => {});
 
       navigatingRef.current = true;

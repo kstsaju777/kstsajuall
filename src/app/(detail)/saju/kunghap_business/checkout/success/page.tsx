@@ -144,6 +144,8 @@ function SuccessInner() {
       });
 
       await fetch("/api/kunghap_business-report", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resultId }) }).catch(() => {});
+      // 이미지까지 완료된 시점에 완성 여부 재확인 → 알림톡 발송
+      await fetch("/api/kunghap_business-report", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: resultId, content: {} }) }).catch(() => {});
 
       navigatingRef.current = true;
       router.push(`/saju/kunghap_business/report-preview?id=${resultId}&gender=${encodeURIComponent(gender)}&name=${encodeURIComponent(name)}&partnerName=${encodeURIComponent(partnerName ?? "")}&partnerGender=${encodeURIComponent(partnerGender ?? "")}`);

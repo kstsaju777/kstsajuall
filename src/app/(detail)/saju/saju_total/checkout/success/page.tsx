@@ -189,6 +189,14 @@ function SuccessInner() {
         body: JSON.stringify({ id: resultId }),
       }).catch(() => {});
 
+      // 4.5 이미지까지 완료된 시점에 완성 여부 재확인 → 알림톡 발송 (이 상품은 이미지
+      // 완료 후에만 알림톡을 보내므로, 챕터 합본 저장 시점엔 이미지가 아직 없어 스킵됨)
+      await fetch("/api/saju_total-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: resultId, content: {} }),
+      }).catch(() => {});
+
       // 5. 결과 페이지로 이동
       navigatingRef.current = true;
       router.push(
