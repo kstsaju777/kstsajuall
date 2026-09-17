@@ -157,6 +157,16 @@ async function genChapterContent(chapter: number, input: {
           continue;
         }
       }
+      // 10장: bestPeriod 뱃지와 desc 본문이 서로 다른 연도를 가리키는 불일치 방지.
+      // desc가 확정 시기({{BEST_TIMING_PERIOD}} 치환값)를 그대로 언급하지 않으면
+      // LLM이 다른 연도로 서술한 것이므로 재시도한다.
+      if (chapter === 10 && input.bestTimingPeriod && isYeonaeKunghapChapterReady(obj, chapter)) {
+        const timing = obj.marriageTiming as { desc?: string; bestPeriod?: string } | undefined;
+        if (timing?.desc && !timing.desc.includes(input.bestTimingPeriod)) {
+          console.error(`[kunghap_yeonae] 10장 결혼시기 불일치 (시도${i+1}): bestPeriod=${input.bestTimingPeriod} 이지만 desc에 해당 연도 언급 없음`);
+          continue;
+        }
+      }
       if (isYeonaeKunghapChapterReady(obj, chapter)) {
         obj = fixJosaDeep(obj) as Record<string, unknown>;
         const myLabel = stripSurname(input.name);
@@ -180,6 +190,12 @@ async function genChapterContent(chapter: number, input: {
           const ps = obj.partnerSipseong as Record<string, unknown>;
           ps.sipseong = input.partnerSipseong;
           if (typeof ps.desc === "string") ps.desc = fixSipseongInText(ps.desc, input.partnerSipseong);
+        }
+        // 10장: bestPeriod/cautionPeriod 뱃지는 항상 서버 확정값으로 강제 고정
+        if (chapter === 10 && obj.marriageTiming && typeof obj.marriageTiming === "object") {
+          const mt = obj.marriageTiming as Record<string, unknown>;
+          if (input.bestTimingPeriod) mt.bestPeriod = input.bestTimingPeriod;
+          if (input.worstTimingPeriod) mt.cautionPeriod = input.worstTimingPeriod;
         }
         return { obj, ...meta };
       }
