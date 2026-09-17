@@ -448,7 +448,11 @@ export async function GET(request: NextRequest) {
     concern = (si?.concerns as string[] | null)?.[0] ?? "";
   }
 
-  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern, content });
+  const totalChapters = Object.keys(JAEMUL_CHAPTER_SECTIONS).map(Number);
+  const doneCount = totalChapters.filter(n => isJaemulChapterReady(content, n)).length;
+  const ready = doneCount === totalChapters.length;
+
+  return NextResponse.json({ view: stored?.view ?? stored, name: stored?.name ?? "", birth: stored?.birth ?? null, gender: stored?.gender ?? "", sajuImageUrl: stored?.sajuImageUrl ?? null, concern, content, doneCount, totalCount: totalChapters.length, ready });
 }
 
 // ── 이미지 재생성 ──
