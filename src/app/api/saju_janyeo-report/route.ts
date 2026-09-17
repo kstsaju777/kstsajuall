@@ -499,15 +499,17 @@ export async function GET(request: NextRequest) {
 }
 
 // ── 이미지 재생성 ──
-export async function PATCH(request: NextRequest) {
-  const { id } = await request.json().catch(() => ({}));
-  if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
-
-  if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: "OpenAI 키 없음" }, { status: 503 });
+// payment-confirm의 백그라운드 작업이 자기 자신을 HTTP로 재호출(self-fetch)하는
+// 대신 직접 함수 호출로 이미지를 생성할 수 있도록 노출한다. after() 컨텍스트
+// 안에서 이 API를 fetch로 다시 부르면 원인 불명의 이유로 자동 실행 경로에서만
+// 계속 실패하는 사고가 있었다(수동 curl 호출은 항상 성공) - 자기 자신을 향한
+// 아웃바운드 HTTPS 왕복 자체가 after() 안에서 불안정한 것으로 추정된다.
+export async function generateAndSaveImage(id: string): Promise<{ sajuImageUrl?: string; error?: string }> {
+  if (!process.env.OPENAI_API_KEY) return { error: "OpenAI 키 없음" };
 
   const service = createServiceClient();
   const { data, error } = await service.from("saju_results").select("myeongsik").eq("id", id).maybeSingle();
-  if (error || !data) return NextResponse.json({ error: "결과를 찾을 수 없습니다." }, { status: 404 });
+  if (error || !data) return { error: "결과를 찾을 수 없습니다." };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stored = data.myeongsik as any;
@@ -522,9 +524,16 @@ export async function PATCH(request: NextRequest) {
     const { data: pubData } = service.storage.from("saju-images").getPublicUrl(imgPath);
     const sajuImageUrl = pubData.publicUrl;
     await service.from("saju_results").update({ myeongsik: { ...stored, sajuImageUrl } }).eq("id", id);
-
-    return NextResponse.json({ sajuImageUrl });
+    return { sajuImageUrl };
   } catch (e) {
-    return NextResponse.json({ error: "이미지 생성 실패", detail: String(e) }, { status: 500 });
+    return { error: String(e) };
   }
+}
+
+export async function PATCH(request: NextRequest) {
+  const { id } = await request.json().catch(() => ({}));
+  if (!id) return NextResponse.json({ error: "id 누락" }, { status: 400 });
+  const result = await generateAndSaveImage(id);
+  if (result.error) return NextResponse.json({ error: "이미지 생성 실패", detail: result.error }, { status: 500 });
+  return NextResponse.json({ sajuImageUrl: result.sajuImageUrl });
 }
