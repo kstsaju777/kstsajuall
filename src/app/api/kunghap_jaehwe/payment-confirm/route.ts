@@ -7,11 +7,12 @@ import { isSajuApiConfigured, fetchSajuAnalysis, formatSajuToManseryeok, type Bi
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
+import { JAEHWE_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_jaehwe-report-content";
 
 export const maxDuration = 300;
 const SITE_ORIGIN = "https://www.hongyeondang.com";
 const API_ROUTE = "/api/kunghap_jaehwe-report";
-const TOTAL_CHAPTERS = 10;
+const CHAPTER_NUMBERS = Object.keys(JAEHWE_KUNGHAP_CHAPTER_SECTIONS).map(Number);
 
 const PRODUCT_NAME = "재회궁합";
 const PRODUCT_PRICE = 29900;
@@ -33,7 +34,7 @@ async function generateReportInBackground(resultId: string) {
     }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
 
     const merged = {};
-    const chapterTasks = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
+    const chapterTasks = CHAPTER_NUMBERS.map(async (chapter) => {
       try {
         const genRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
           method: "POST",

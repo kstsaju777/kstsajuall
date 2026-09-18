@@ -7,11 +7,12 @@ import { isSajuApiConfigured, fetchSajuAnalysis, formatSajuToManseryeok, type Bi
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
 import { serverEnv } from "@/lib/env";
 import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
+import { BANRYEO_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_banryeo-report-content";
 
 export const maxDuration = 300;
 const SITE_ORIGIN = "https://www.hongyeondang.com";
 const API_ROUTE = "/api/kunghap_banryeo-report";
-const TOTAL_CHAPTERS = 9;
+const CHAPTER_NUMBERS = Object.keys(BANRYEO_KUNGHAP_CHAPTER_SECTIONS).map(Number);
 
 const PRODUCT_NAME = "반려궁합";
 const PRODUCT_PRICE = 29900;
@@ -37,7 +38,7 @@ async function generateReportInBackground(resultId: string) {
 
     const merged = {};
     await Promise.all(
-      Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
+      CHAPTER_NUMBERS.map(async (chapter) => {
         try {
           const genRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
             method: "POST",
