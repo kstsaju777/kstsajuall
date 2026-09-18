@@ -68,7 +68,8 @@ async function genChapterContent(chapter: number, input: {
   const fullName   = input.name        ?? "";
   const ptFullName = input.partnerName ?? "";
   const myLabel    = fullName.length  > 1 ? fullName.slice(1)   : fullName;
-  const ptLabel    = stripSurname(ptFullName);
+  // 반려동물은 사람과 달리 성이 없으니 이름을 그대로 다 쓰시오(성 떼는 로직 적용 금지).
+  const ptLabel    = ptFullName;
 
 
   const { system, user } = buildBanryeoKunghapChapterPrompt(chapter, input);
