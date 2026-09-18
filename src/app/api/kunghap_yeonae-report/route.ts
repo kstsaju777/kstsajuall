@@ -158,12 +158,18 @@ async function genChapterContent(chapter: number, input: {
         }
       }
       // 10장: bestPeriod 뱃지와 desc 본문이 서로 다른 연도를 가리키는 불일치 방지.
-      // desc가 확정 시기({{BEST_TIMING_PERIOD}} 치환값)를 그대로 언급하지 않으면
-      // LLM이 다른 연도로 서술한 것이므로 재시도한다.
+      // 단순히 desc 어딘가에 확정 연도가 한 번이라도 등장하는지만 보면, 본문
+      // 중간에 스쳐가듯 언급만 되고 정작 결론은 다른 연도를 가리켜도 통과해
+      // 버린다. desc에 등장하는 모든 "○○○○년" 표기를 뽑아, 확정 연도와 다른
+      // 연도가 하나라도 있으면 불일치로 보고 재시도한다.
       if (chapter === 10 && input.bestTimingPeriod && isYeonaeKunghapChapterReady(obj, chapter)) {
         const timing = obj.marriageTiming as { desc?: string; bestPeriod?: string } | undefined;
-        if (timing?.desc && !timing.desc.includes(input.bestTimingPeriod)) {
-          console.error(`[kunghap_yeonae] 10장 결혼시기 불일치 (시도${i+1}): bestPeriod=${input.bestTimingPeriod} 이지만 desc에 해당 연도 언급 없음`);
+        const confirmedYear = input.bestTimingPeriod.match(/\d{4}/)?.[0];
+        const mentionedYears = timing?.desc?.match(/\d{4}(?=년)/g) ?? [];
+        const hasConfirmedYear = confirmedYear ? timing?.desc?.includes(input.bestTimingPeriod) : true;
+        const hasWrongYear = confirmedYear ? mentionedYears.some((y) => y !== confirmedYear) : false;
+        if (!hasConfirmedYear || hasWrongYear) {
+          console.error(`[kunghap_yeonae] 10장 결혼시기 불일치 (시도${i+1}): 확정=${input.bestTimingPeriod}, desc에 언급된 연도=${mentionedYears.join(",")}`);
           continue;
         }
       }
