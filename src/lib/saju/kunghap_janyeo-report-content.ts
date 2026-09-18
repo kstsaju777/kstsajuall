@@ -33,6 +33,10 @@ export function isJanyeoKunghapChapterReady(
     if (v == null) return false;
     if (typeof v === "object") {
       const obj = v as Record<string, unknown>;
+      // hapList/chungList는 실제로 합·충이 없으면 빈 배열이 정상 응답이라고
+      // 프롬프트에서 허용하는데, 아래 일반 규칙(items.length > 0)이 빈 배열을
+      // "미완성"으로 오판해 매번 재시도만 하다 끝내 실패하는 사고가 있었다.
+      if ((k === "hapList" || k === "chungList") && Array.isArray(obj.items)) return true;
       if (Array.isArray(obj.paragraphs)) return obj.paragraphs.length > 0;
       if (Array.isArray(obj.items)) return obj.items.length > 0;
       if (Array.isArray(obj.tips)) return obj.tips.length > 0;

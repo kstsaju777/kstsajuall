@@ -39,6 +39,10 @@ export function isEhonKunghapChapterReady(
       if (k === "divorceScore") return paras.length >= 4;
       return true;
     }
+    // hapList/chungList는 실제로 합·충이 없으면 빈 배열이 정상 응답이라고
+    // 프롬프트에서 허용하는데, 아래 일반 규칙(items.length > 0)이 빈 배열을
+    // "미완성"으로 오판해 매번 재시도만 하다 끝내 실패하는 사고가 있었다.
+    if ((k === "hapList" || k === "chungList") && "items" in v) return Array.isArray(v.items);
     if ("items"     in v) return Array.isArray(v.items)     && (v.items     as unknown[]).length > 0;
     if ("keywords"  in v) return Array.isArray(v.keywords)  && (v.keywords  as unknown[]).length > 0;
     if ("tips"      in v) return Array.isArray(v.tips)      && (v.tips      as unknown[]).length > 0;
