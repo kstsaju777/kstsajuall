@@ -16,7 +16,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, buildOhaengSinStrengthNote } from "@/lib/saju/myeongsik-view";
-import { parseContentJson, buildSajuImagePrompt, buildLetterFallback } from "@/lib/saju/report-content";
+import { parseContentJson, buildSajuImagePrompt, buildLetterFallback, hasCorruptedText } from "@/lib/saju/report-content";
 import { buildImshinKunghapChapterPrompt, isImshinKunghapChapterReady, IMSHIN_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_imshin-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
@@ -87,6 +87,10 @@ async function genChapterContent(chapter: number, input: {
         } else { continue; }
       }
       const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;
+      if (hasCorruptedText(obj)) {
+        console.error(`[kunghap_imshin] ${chapter}장 응답 손상(깨진 문자) 감지 (시도${i+1}):`, JSON.stringify(rawObj).slice(0, 300));
+        continue;
+      }
       if (isImshinKunghapChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[kunghap_imshin] ${chapter}장 ready 실패 (시도${i+1}):`, JSON.stringify(rawObj).slice(0, 500));
     } catch (e) {

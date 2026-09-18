@@ -1733,6 +1733,22 @@ export function buildCompatDescPrompt(rank: number, honor: string, personLabel: 
 
 export type { DescRankData };
 
+// LLM이 드물게 한글 텍스트를 깨진 바이트(U+FFFD 대체 문자, 혹은 "?"만 반복)로
+// 내놓는 경우가 있다(json_object 모드에서 CJK 디코딩 실패로 추정). 완성도 검사
+// (isXChapterReady)는 필드 존재 여부만 보고 내용의 정상성은 보지 않아 이런
+// 손상된 응답도 "완료"로 통과시켜버린다 — 재시도 루프에서 걸러내기 위한 검사.
+export function hasCorruptedText(value: unknown): boolean {
+  if (typeof value === "string") {
+    if (value.includes("�")) return true;
+    const qCount = (value.match(/\?{2,}/g) || []).length;
+    if (qCount > 0 && value.length < 200) return true;
+    return false;
+  }
+  if (Array.isArray(value)) return value.some(hasCorruptedText);
+  if (value && typeof value === "object") return Object.values(value).some(hasCorruptedText);
+  return false;
+}
+
 export function parseContentJson(text: string): Record<string, unknown> {
   let t = text.trim();
   t = t.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
