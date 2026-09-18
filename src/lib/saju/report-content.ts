@@ -1742,3 +1742,28 @@ export function parseContentJson(text: string): Record<string, unknown> {
   const parsed = JSON.parse(t) as Record<string, unknown>;
   return fixJosaInObject(parsed);
 }
+
+// 마지막 장(편지)의 JSON 파싱이 실패했을 때 쓰는 안전망. 예전엔 그냥 줄바꿈
+// 기준으로 쪼개서 각 조각을 문단으로 썼는데, LLM이 JSON을 쓰다 만 경우
+// {"letter":{"paragraphs":[ 같은 구문 잔여물이 그대로 문단에 섞여 고객에게
+// 노출되는 사고가 있었다(자녀사주 신고 확인). 먼저 paragraphs 배열만이라도
+// 온전히 살릴 수 있는지 시도하고, 그것도 안 되면 조각마다 JSON 잔여 구문을
+// 벗겨내고 그래도 JSON처럼 보이는 조각은 버린다.
+export function buildLetterFallback(text: string): string[] {
+  const raw = text.trim();
+  const arrMatch = raw.match(/"paragraphs"\s*:\s*\[([\s\S]*?)\]/i);
+  if (arrMatch) {
+    try {
+      const arr = JSON.parse(`[${arrMatch[1]}]`) as unknown[];
+      const strs = arr.filter((v): v is string => typeof v === "string" && v.trim().length > 10);
+      if (strs.length > 0) return strs.map((s) => s.trim());
+    } catch { /* 무시하고 아래로 */ }
+  }
+  const paras = raw
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .map((p) => p.replace(/^[{[]+\s*"?(letter|paragraphs)"?\s*:\s*[{[]*\s*"?/i, "").trim())
+    .map((p) => p.replace(/"?\s*[}\]]+\s*$/, "").trim())
+    .filter((p) => p.length > 5 && !/^["'{}[\]:,]+$/.test(p) && !/^"?(letter|paragraphs)"?\s*:/i.test(p));
+  return paras.length > 0 ? paras : [raw];
+}

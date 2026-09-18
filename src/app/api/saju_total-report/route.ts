@@ -17,7 +17,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
-import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData } from "@/lib/saju/report-content";
+import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData , buildLetterFallback } from "@/lib/saju/report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -86,8 +86,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
         console.error(`[jeongtong] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         // 16장(편지): JSON 파싱 실패시 텍스트를 paragraphs로 fallback
         if (chapter === 10) {
-          const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
-          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
+          obj = { letter: { paragraphs: buildLetterFallback(llm.text) } };
         } else {
           continue;
         }

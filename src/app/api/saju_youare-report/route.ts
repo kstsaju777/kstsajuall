@@ -17,7 +17,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
-import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
+import { parseContentJson, buildSajuImagePrompt, buildLetterFallback } from "@/lib/saju/report-content";
 import { buildYouareChapterPrompt, isYouareChapterReady, YOUARE_CHAPTER_SECTIONS } from "@/lib/saju/youare-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
@@ -60,8 +60,7 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
       } catch (parseErr) {
         console.error(`[saju_youare] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         if (chapter === 8) {
-          const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
-          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
+          obj = { letter: { paragraphs: buildLetterFallback(llm.text) } };
         } else {
           continue;
         }

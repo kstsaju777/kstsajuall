@@ -16,7 +16,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView } from "@/lib/saju/myeongsik-view";
-import { parseContentJson, buildSajuImagePrompt } from "@/lib/saju/report-content";
+import { parseContentJson, buildSajuImagePrompt, buildLetterFallback } from "@/lib/saju/report-content";
 import { buildJanyeoKunghapChapterPrompt, isJanyeoKunghapChapterReady, JANYEO_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_janyeo-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
@@ -91,8 +91,7 @@ async function genChapterContent(chapter: number, input: {
       } catch (parseErr) {
         console.error(`[kunghap_janyeo] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
         if (chapter === 12) {
-          const paras = llm.text.trim().split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
-          obj = { letter: { paragraphs: paras.length > 0 ? paras : [llm.text.trim()] } };
+          obj = { letter: { paragraphs: buildLetterFallback(llm.text) } };
         } else { continue; }
       }
       obj = fixNamesInValue(obj, myLabel, ptLabel, ptHonorific) as Record<string, unknown>;
