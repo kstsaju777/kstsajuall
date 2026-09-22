@@ -16,7 +16,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, buildOhaengSinStrengthNote } from "@/lib/saju/myeongsik-view";
-import { parseContentJson, buildSajuImagePrompt, buildLetterFallback } from "@/lib/saju/report-content";
+import { parseContentJson, buildSajuImagePrompt, buildLetterFallback, hasCorruptedText } from "@/lib/saju/report-content";
 import { buildJaehweKunghapChapterPrompt, isJaehweKunghapChapterReady, JAEHWE_KUNGHAP_CHAPTER_SECTIONS } from "@/lib/saju/kunghap_jaehwe-report-content";
 import { sipseongOfStem, sipseongOfBranch } from "@/lib/saju/sipseong-calc";
 import { monthGanji } from "@/lib/saju/ganji-calc";
@@ -130,6 +130,8 @@ async function genChapterContent(chapter: number, input: {
   timingScores?: Array<{ year: number; month: number; score: number; tone: string; label: string; myGanSip: string; myJiSip: string; ptGanSip: string; ptJiSip: string }>;
   ilgan?: string;
   partnerIlgan?: string;
+  ilganFull?: string;
+  partnerIlganFull?: string;
   myOhaengNote?: string;
   partnerOhaengNote?: string;
 }) {
@@ -152,6 +154,27 @@ async function genChapterContent(chapter: number, input: {
         } else { continue; }
       }
       const obj = fixNamesInValue(rawObj, myLabel, ptLabel, "님") as typeof rawObj;
+      if (hasCorruptedText(obj)) {
+        console.error(`[kunghap_jaehwe] ${chapter}장 응답 손상(깨진 문자) 감지 (시도${i+1}):`, JSON.stringify(rawObj).slice(0, 300));
+        continue;
+      }
+      // 1장(나의 원국)·2장(상대 원국)은 두 사람의 만세력이 나란히 주입되어 LLM이
+      // 드물게 본인/상대를 뒤바꿔 쓴다(예: 1장에 상대방 일간으로 풀이). 실제
+      // 일간 이름(예: "무토")이 해당 장에 언급됐는지로 뒤바뀜을 감지해 재시도한다.
+      const extractIlganHangul = (full?: string) => full?.match(/\(([가-힣]+)\)/)?.[1] ?? "";
+      if (chapter === 1 || chapter === 2) {
+        const myEl = extractIlganHangul(input.ilganFull);
+        const ptEl = extractIlganHangul(input.partnerIlganFull);
+        const sectionKey = chapter === 1 ? "myWonguk" : "partnerWonguk";
+        const section = obj[sectionKey] as { intro?: string; callout?: string; paragraphs?: string[] } | undefined;
+        const sectionText = [section?.intro, section?.callout, ...(section?.paragraphs ?? [])].filter(Boolean).join(" ");
+        const expectedEl = chapter === 1 ? myEl : ptEl;
+        const otherEl = chapter === 1 ? ptEl : myEl;
+        if (expectedEl && otherEl && expectedEl !== otherEl && sectionText && !sectionText.includes(expectedEl) && sectionText.includes(otherEl)) {
+          console.error(`[kunghap_jaehwe] ${chapter}장 본인/상대 뒤바뀜 의심 (시도${i+1}): 기대=${expectedEl}, 감지=${otherEl}`);
+          continue;
+        }
+      }
       if (isJaehweKunghapChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[kunghap_jaehwe] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
     } catch (e) {
@@ -582,10 +605,12 @@ async function generateChapter(body: unknown) {
       gender: stored?.gender === "female" ? "female" : "male",
       manseryeokText,
       ilgan,
+      ilganFull: stored?.view?.ilgan as string | undefined,
       partnerName: stored?.partnerName ?? "",
       partnerGender: stored?.partnerGender === "female" ? "female" : "male",
       partnerManseryeokText: stored?.partnerManseryeokText ?? "",
       partnerIlgan,
+      partnerIlganFull: stored?.partnerView?.ilgan as string | undefined,
       myOhaengNote,
       partnerOhaengNote,
       birthYear: birthYear || undefined,
