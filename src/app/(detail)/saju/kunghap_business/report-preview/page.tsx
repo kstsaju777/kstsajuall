@@ -7431,7 +7431,7 @@ function ReportPreviewInner() {
       {ch === "4" && (() => {
         const cs   = (jc.compatScore  as Record<string, unknown> | undefined) ?? null;
         const cr   = (jc.compatReason as Record<string, unknown> | undefined) ?? null;
-        const str  = (jc.strengths    as Record<string, unknown> | undefined) ?? null;
+        const str  = (jc.compatStrengths as Record<string, unknown> | undefined) ?? null;
         const wek  = (jc.weaknesses   as Record<string, unknown> | undefined) ?? null;
         const bal  = (jc.balanceTip   as Record<string, unknown> | undefined) ?? null;
         const score     = ch4Score;

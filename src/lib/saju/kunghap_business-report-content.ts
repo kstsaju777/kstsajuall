@@ -13,7 +13,7 @@ export const BUSINESS_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   1:  ["myWonguk", "myNature", "myYongsin", "myBusinessStyle"],
   2:  ["partnerWonguk", "partnerNature", "partnerYongsin", "partnerBusinessStyle"],
   3:  ["hapList", "chungList", "overallScore"],
-  4:  ["compatScore", "compatReason", "strengths", "weaknesses", "balanceTip"],
+  4:  ["compatScore", "compatReason", "compatStrengths", "weaknesses", "balanceTip"],
   5:  ["bizStyle", "roleBalance", "workLife"],
   6:  ["myStyle", "partnerStyle", "styleGap"],
   7:  ["strengths", "shadows", "balance"],
@@ -104,7 +104,7 @@ export function buildBusinessKunghapChapterPrompt(
     1: `{"myWonguk":{"intro":"","callout":"","singang":"","dominantEl":"","paragraphs":[]},"myNature":{"keywords":[],"strengthDesc":"","shadowDesc":""},"myYongsin":{"yongsinEl":"","heusinEl":"","gisinEl":"","yongsinReason":"","heusinReason":"","gisinReason":"","desc":""},"myBusinessStyle":{"intro":"","patternType":"","patternIcon":"💼","paragraphs":[]}}`,
     2: `{"partnerWonguk":{"intro":"","callout":"","singang":"","dominantEl":"","paragraphs":[]},"partnerNature":{"keywords":[],"strengthDesc":"","shadowDesc":""},"partnerYongsin":{"yongsinEl":"","heusinEl":"","gisinEl":"","yongsinReason":"","heusinReason":"","gisinReason":"","desc":""},"partnerBusinessStyle":{"intro":"","patternType":"","patternIcon":"💼","paragraphs":[]}}`,
     3: `{"hapList":{"items":[{"type":"","effect":"","desc":""}]},"chungList":{"items":[{"type":"","impact":"","desc":"","resolve":""}]},"overallScore":{"score":70,"label":"","desc":""}}`,
-    4: `{"compatScore":{"score":${input.ch4ComputedScore ?? 72},"label":"${input.ch4ComputedLabel ?? ""}","basis":"","paragraphs":[]},"compatReason":{"intro":"","callout":"","paragraphs":[]},"strengths":{"items":[{"title":"","effect":"","desc":""}]},"weaknesses":{"items":[{"title":"","overcome":"","desc":""}]},"balanceTip":{"callout":"","tips":[{"title":"","desc":""}]}}`,
+    4: `{"compatScore":{"score":${input.ch4ComputedScore ?? 72},"label":"${input.ch4ComputedLabel ?? ""}","basis":"","paragraphs":[]},"compatReason":{"intro":"","callout":"","paragraphs":[]},"compatStrengths":{"items":[{"title":"","effect":"","desc":""}]},"weaknesses":{"items":[{"title":"","overcome":"","desc":""}]},"balanceTip":{"callout":"","tips":[{"title":"","desc":""}]}}`,
     5: `{"bizStyle":{"coupleType":"","coupleIcon":"🤝","paragraphs":[]},"roleBalance":{"items":[{"role":"","icon":"💼","myRatio":50,"desc":""}]},"workLife":{"clips":[{"situation":"","myReaction":"","partnerReaction":""}]}}`,
     6: `{"myStyle":{"label":"","icon":"💼","keywords":[],"styleDesc":"","strengthStyle":"","shadowStyle":""},"partnerStyle":{"label":"","icon":"🗂️","keywords":[],"styleDesc":"","strengthStyle":"","shadowStyle":""},"styleGap":{"compatRating":"보통","compatIcon":"🤝","paragraphs":[],"tips":[]}}`,
     7: `{"strengths":{"items":[{"icon":"✨","title":"","desc":"","effect":""}],"lightSummary":""},"shadows":{"items":[{"icon":"🌙","title":"","desc":"","trigger":"","overcome":""}],"shadowSummary":""},"balance":{"lightRatio":60,"paragraphs":[],"tips":[]}}`,
@@ -222,7 +222,7 @@ items 0~3개: 두 사람 사주에서 발견되는 충(沖). 실제 명식에서
 - callout: 오행·십성·합충 기반 핵심 근거 한 문장.
 - paragraphs 2개: ①합충·오행 상생상극의 구체적 사주 근거(5~7문장, 220자+) ②비즈니스 관계 전체 방향성과 조언(4~6문장, 180자+). 홍연 말투.
 
-[strengths 섹션 — 비즈니스 강점]
+[compatStrengths 섹션 — 비즈니스 강점]
 ⚠️ 반드시 위 두 사람의 만세력 텍스트에서 실제 일간·오행 분포·십성을 직접 읽어 근거로 삼으시오. 일반적인 강점을 나열하지 마시오.
 items 3개. 각 item:
 - title: 두 사람의 사주 글자(일간·오행·십성·합충)에서 실제로 도출되는 비즈니스 강점 제목.
