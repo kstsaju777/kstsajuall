@@ -108,6 +108,19 @@ export function fixNamesInText(
     r = r.replace(new RegExp(`${myFull.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${hon}`, "g"), myFull);
   }
 
+  // 6b. 아이·반려동물처럼 정해진 호칭이 "군"/"양"인 대상인데, 토큰 규칙이 없는
+  // 별도 프롬프트(예: 고민조언 생성)에서는 LLM이 이름 뒤에 무난한 기본값 "님"을
+  // 그대로 붙여버리는 사고가 있었다(고객 신고, 자녀궁합 고민조언). 이름+님을
+  // 이름+올바른 호칭으로 교정한다.
+  if (myHonorific === "군" || myHonorific === "양") {
+    const escMy = myLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    r = r.replace(new RegExp(`${escMy}님`, "g"), myFull);
+  }
+  if (ptLabel && ptFull && (ptHonorific === "군" || ptHonorific === "양")) {
+    const escPt = ptLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    r = r.replace(new RegExp(`${escPt}님`, "g"), ptFull);
+  }
+
   // 7. 님/양/군 뒤 잘못된 조사 교정 — 셋 다 받침 있는 글자(ㅁ/ㅇ/ㄴ)라 조사가 동일하게
   // 틀릴 수 있는데, 예전엔 "님"만 교정하고 자녀 상품 호칭인 "양"·"군"은 빠져 있어
   // "지희양는"처럼 잘못된 조사가 그대로 노출되는 사고가 있었다(고객 신고).
