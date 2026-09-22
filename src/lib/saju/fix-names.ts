@@ -108,12 +108,16 @@ export function fixNamesInText(
     r = r.replace(new RegExp(`${myFull.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${hon}`, "g"), myFull);
   }
 
-  // 7. 님 뒤 잘못된 조사 교정
-  r = r
-    .replace(/님는/g, "님은")
-    .replace(/님가/g, "님이")
-    .replace(/님를/g, "님을")
-    .replace(/님와/g, "님과");
+  // 7. 님/양/군 뒤 잘못된 조사 교정 — 셋 다 받침 있는 글자(ㅁ/ㅇ/ㄴ)라 조사가 동일하게
+  // 틀릴 수 있는데, 예전엔 "님"만 교정하고 자녀 상품 호칭인 "양"·"군"은 빠져 있어
+  // "지희양는"처럼 잘못된 조사가 그대로 노출되는 사고가 있었다(고객 신고).
+  for (const hon of ["님", "양", "군"]) {
+    r = r
+      .replace(new RegExp(`${hon}는`, "g"), `${hon}은`)
+      .replace(new RegExp(`${hon}가`, "g"), `${hon}이`)
+      .replace(new RegExp(`${hon}를`, "g"), `${hon}을`)
+      .replace(new RegExp(`${hon}와`, "g"), `${hon}과`);
+  }
 
   // 7. 계절/합성어 보호
   r = r
