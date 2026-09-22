@@ -7123,7 +7123,7 @@ function ReportPreviewInner() {
           </div>
 
           <section className="px-7 pt-8 pb-2">
-            {(c as unknown as Record<string, {paragraphs?: string[]}>).letter?.paragraphs?.map((p, i) => (
+            {(c as unknown as Record<string, {paragraphs?: string[]}>).finalLetter?.paragraphs?.map((p, i) => (
               <P key={i}>{p}</P>
             ))}
             <div className="flex items-center justify-end gap-3 mt-8 mb-2">

@@ -20,7 +20,7 @@ export const BANRYEO_KUNGHAP_CHAPTER_SECTIONS: Record<number, string[]> = {
   6:  ["gaeunMethod", "petDiet", "luckyElements", "gaeunTiming"],
   7:  ["letter"],
   9:  ["futureFlow", "farewell", "finalMessage"],
-  10: ["letter"],
+  10: ["finalLetter"],
 };
 
 // 장별 필드 유효성 검사
@@ -253,7 +253,7 @@ export function buildBanryeoKunghapChapterPrompt(
   "finalMessage": { "desc": "마지막 한 줄 메시지" }
 }`,
     10: `{
-  "letter": { "paragraphs": ["편지 단락1", "편지 단락2", "편지 단락3"] }
+  "finalLetter": { "paragraphs": ["편지 단락1", "편지 단락2", "편지 단락3"] }
 }`,
   };
 
@@ -480,7 +480,7 @@ ${input.partnerName}의 사주에서 고유한 성격 유형을 뽑아내시오.
 - finalMessage: 마지막 한 줄 메시지`,
 
     10: `보호자 ${input.name}님과 반려동물 ${input.partnerName}에게 홍연의 따뜻한 편지를 써주시오.
-- letter: 진심 어린 편지 (3-5 단락, 홍연 말투 ~이오/~하오/~했소)`,
+- finalLetter: 진심 어린 편지 (3-5 단락, 홍연 말투 ~이오/~하오/~했소)`,
   };
 
   const yongsinNote = (chapter !== 1 && input.yongsinEl && input.heusinEl && input.gisinEl)

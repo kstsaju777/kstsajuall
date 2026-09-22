@@ -85,8 +85,10 @@ async function genChapterContent(chapter: number, input: {
         obj = fixNamesInValue(parseContentJson(llm.text), myLabel, ptLabel, "") as Record<string, unknown>;
       } catch (parseErr) {
         console.error(`[kunghap_banryeo] ${chapter}장 JSON파싱실패 (시도${i+1}):`, parseErr instanceof Error ? parseErr.message : String(parseErr), '\nRAW:', llm.text.slice(0, 300));
-        if (chapter === 12) {
+        if (chapter === 7) {
           obj = { letter: { paragraphs: buildLetterFallback(llm.text) } };
+        } else if (chapter === 10) {
+          obj = { finalLetter: { paragraphs: buildLetterFallback(llm.text) } };
         } else {
           continue;
         }
