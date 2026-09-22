@@ -515,16 +515,15 @@ export function buildJaehweKunghapChapterPrompt(
 
 홍연 말투(~이오/~하오/~겠소) 유지.`,
     4: `[제4장 — 두 사람, 왜 헤어졌는가] ${input.name}님과 ${input.partnerName}님의 이별 원인·패턴·치유 방향을 사주로 풀어주시오.
-${input.breakupReason || input.whoEnded || input.breakupDate ? `
-[신청자가 직접 밝힌 이별 정보 — 반드시 풀이에 반영하시오]
-${input.breakupReason ? `• 이별 이유: ${input.breakupReason}` : ""}
+${input.whoEnded || input.breakupDate ? `
+[신청자가 직접 밝힌 이별 정보 — 맥락으로만 참고]
 ${input.whoEnded ? `• 헤어지자고 한 사람: ${input.whoEnded}` : ""}
 ${input.breakupDate ? `• 이별 시점: ${input.breakupDate}` : ""}
 
-⚠️ 위 정보 중 "이별 이유"를 근거로 어느 쪽이 잘못했는지(바람·배신·잠수 등의 행위자) 추론하거나
-단정하지 마시오. "헤어지자고 한 사람"(통보자)만 신청자가 직접 답한 확정된 사실이니 그대로
-참고하되, 누가 그 원인 행동을 저질렀는지는 알 수 없는 정보이니 절대 지어내거나 암시하지
-마시오. 이 정보는 이별의 정서적 무게와 맥락을 이해하는 배경으로만 활용하시오.
+⚠️ 구체적으로 무슨 일 때문에 헤어졌는지(바람·배신·잠수 등 이별의 계기)는 알 수 없는
+정보이니 절대 지어내거나 암시하지 마시오. 어느 쪽이 잘못했는지 추론·단정하는 서술도
+금지하시오. 위 정보는 오직 "이별의 정서적 무게"와 "시간이 얼마나 지났는지"를 감안하는
+용도로만 쓰시오.
 ` : ""}
 
 [breakupCause 섹션 — 이별의 근본 원인]
