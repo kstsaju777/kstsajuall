@@ -3,12 +3,6 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const CHAPTER_TITLES = [
-  "제1장 — 나의 원국","제2장 — 상대 원국","제3장 — 결혼 가능성",
-  "제4장 — 부부상","제5장 — 장단점","제6장 — 합·충",
-  "제7장 — 재물·가정","제8장 — 자녀운","제9장 — 위기·극복",
-  "제10장 — 결혼 시기","제11장 — 미래 흐름","마무리 — 홍연의 서신",
-];
 const TOTAL = 12;
 
 function CreatingScreen({ doneCount, currentChapter, pct }: { doneCount: number; currentChapter: number; pct: number }) {
@@ -40,12 +34,8 @@ function CreatingScreen({ doneCount, currentChapter, pct }: { doneCount: number;
       <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5f5", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #e1337d88" }}>
         결과지를 완성하고 있소…
       </p>
-      <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#f055a0", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
-        {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
-      </p>
       <div className="w-full max-w-[280px] mb-3">
-        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#f055a0" }}>
-          <span>{doneCount} / {TOTAL} 장 완성</span>
+        <div className="flex justify-end text-[11px] mb-2" style={{ color: "#f055a0" }}>
           <span>{pct}%</span>
         </div>
         <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a1000" }}>

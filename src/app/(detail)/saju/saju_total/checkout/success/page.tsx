@@ -4,18 +4,6 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // ─── 로딩 화면 (checkout/page.tsx 와 동일 스타일) ─────────────────────────────
-const CHAPTER_TITLES = [
-  "제2장 — 나의 진짜 모습은 무엇일까",
-  "제1장 — 나는 어떤 그릇으로 태어났나",
-  "제3장 — 나는 세상을 어떻게 대하는가",
-  "제4장 — 내 사주에 나타나는 특이점",
-  "제5장 — 내 재물과 천직은 어떠한가",
-  "제6장 — 내 인연과 혼인의 때는 언제인가",
-  "제7장 — 내 건강과 약한 곳은 어디인가",
-  "제4장 — 내 사주에 나타나는 특이점",
-  "제4장 — 내 사주에 나타나는 특이점",
-  "제8장 — 내 인생은 어떻게 흐르는가",
-];
 const TOTAL = 10;
 
 function CreatingScreen({ doneCount, currentChapter, pct }: { doneCount: number; currentChapter: number; pct: number }) {
@@ -47,12 +35,8 @@ function CreatingScreen({ doneCount, currentChapter, pct }: { doneCount: number;
       <p className="text-[18px] font-bold mb-1" style={{ color: "#fff5f5", fontFamily: "'Noto Serif KR', serif", textShadow: "0 0 20px #9b233588" }}>
         결과지를 완성하고 있소…
       </p>
-      <p key={currentChapter} className="text-[13px] mb-8" style={{ color: "#e8a0a8", animation: "title-fade 4s ease-in-out", minHeight: 20 }}>
-        {doneCount < TOTAL ? CHAPTER_TITLES[currentChapter - 1] + " 풀이 중" : "마무리 중이오…"}
-      </p>
       <div className="w-full max-w-[280px] mb-3">
-        <div className="flex justify-between text-[11px] mb-2" style={{ color: "#c9909a" }}>
-          <span>풀이 진행 중</span>
+        <div className="flex justify-end text-[11px] mb-2" style={{ color: "#c9909a" }}>
           <span>{pct}%</span>
         </div>
         <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "#1a0005" }}>
