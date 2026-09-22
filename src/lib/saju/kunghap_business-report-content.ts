@@ -107,7 +107,7 @@ export function buildBusinessKunghapChapterPrompt(
     4: `{"compatScore":{"score":${input.ch4ComputedScore ?? 72},"label":"${input.ch4ComputedLabel ?? ""}","basis":"","paragraphs":[]},"compatReason":{"intro":"","callout":"","paragraphs":[]},"compatStrengths":{"items":[{"title":"","effect":"","desc":""}]},"weaknesses":{"items":[{"title":"","overcome":"","desc":""}]},"balanceTip":{"callout":"","tips":[{"title":"","desc":""}]}}`,
     5: `{"bizStyle":{"coupleType":"","coupleIcon":"🤝","paragraphs":[]},"roleBalance":{"items":[{"role":"","icon":"💼","myRatio":50,"desc":""}]},"workLife":{"clips":[{"situation":"","myReaction":"","partnerReaction":""}]}}`,
     6: `{"myStyle":{"label":"","icon":"💼","keywords":[],"styleDesc":"","strengthStyle":"","shadowStyle":""},"partnerStyle":{"label":"","icon":"🗂️","keywords":[],"styleDesc":"","strengthStyle":"","shadowStyle":""},"styleGap":{"compatRating":"보통","compatIcon":"🤝","paragraphs":[],"tips":[]}}`,
-    7: `{"strengths":{"items":[{"icon":"✨","title":"","desc":"","effect":""}],"lightSummary":""},"shadows":{"items":[{"icon":"🌙","title":"","desc":"","trigger":"","overcome":""}],"shadowSummary":""},"balance":{"lightRatio":60,"paragraphs":[],"tips":[]}}`,
+    7: `{"strengths":{"items":[{"icon":"✨","title":"","desc":"","effect":""}],"lightSummary":""},"shadows":{"items":[{"icon":"🌙","title":"","desc":"","trigger":"","overcome":""}],"shadowSummary":""},"balance":{"lightRatio":60,"paragraphs":["단락 텍스트(순수 문자열, 객체 금지)1","단락 텍스트2","단락 텍스트3"],"tips":["실천 팁(순수 문자열, 객체 금지)1","실천 팁2","실천 팁3","실천 팁4"]}}`,
     8: `{"bizFutureFlow":{"successGuess":{"successRatio":65,"basis":"","note":""},"paragraphs":[]},"bizFutureTips":{"tips":[{"icon":"💡","title":"","desc":""}]}}`,
     9: `{"letter":{"paragraphs":[]}}`,
   };

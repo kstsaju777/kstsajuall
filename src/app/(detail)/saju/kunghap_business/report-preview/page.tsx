@@ -6045,8 +6045,13 @@ function BizLightShadowSummaryBanner({ lightSummary, shadowSummary }: { lightSum
 function BizLightShadowBalanceCard({ data }: { data: Record<string, unknown> | null }) {
   if (!data) return null;
   const lightRatio = (data.lightRatio as number | undefined) ?? 60;
-  const paragraphs = (data.paragraphs as string[] | undefined) ?? [];
-  const tips       = (data.tips as string[] | undefined) ?? [];
+  // LLM이 가끔 paragraphs/tips를 순수 문자열 대신 {text: "..."} 객체로 내놓는 경우가
+  // 있어(스키마에 형식이 명시돼 있지 않았음) 문자열로 그대로 렌더링하면 React가
+  // "Objects are not valid as a React child"로 크래시했다(고객 신고: 7장 오류).
+  // 문자열/객체 둘 다 안전하게 텍스트로 뽑아내도록 정규화한다.
+  const toText = (v: unknown): string => typeof v === "string" ? v : (v && typeof v === "object" && "text" in v) ? String((v as { text?: unknown }).text ?? "") : String(v ?? "");
+  const paragraphs = ((data.paragraphs as unknown[] | undefined) ?? []).map(toText);
+  const tips       = ((data.tips as unknown[] | undefined) ?? []).map(toText);
   const safeLight  = Math.min(100, Math.max(0, lightRatio));
   return (
     <div className="mb-2">
