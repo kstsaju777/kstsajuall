@@ -17,7 +17,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
-import { parseContentJson, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData , buildLetterFallback } from "@/lib/saju/report-content";
+import { parseContentJson, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData , buildLetterFallback, hasCorruptedText } from "@/lib/saju/report-content";
 import { buildYeonaeSajuChapterPrompt, isYeonaeSajuChapterReady, YEONAE_SAJU_CHAPTER_SECTIONS } from "@/lib/saju/yeonae-saju-report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
@@ -88,6 +88,10 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
             } catch { /* 재시도 */ }
           }
         }));
+      }
+      if (hasCorruptedText(obj)) {
+        console.error(`[saju_yeonae] ${chapter}장 응답 손상(깨진 문자) 감지 (시도${i+1}):`, JSON.stringify(obj).slice(0, 300));
+        continue;
       }
       if (isYeonaeSajuChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[saju_yeonae] ${chapter}장 isYeonaeSajuChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));

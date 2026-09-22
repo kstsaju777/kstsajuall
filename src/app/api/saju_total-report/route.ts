@@ -17,7 +17,7 @@ import {
   type BirthInfo,
 } from "@/lib/saju/saju-api";
 import { buildMyeongsikView, applyLocalSinsal } from "@/lib/saju/myeongsik-view";
-import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData , buildLetterFallback } from "@/lib/saju/report-content";
+import { buildChapterPrompt, parseContentJson, isChapterReady, CHAPTER_SECTIONS, buildSajuImagePrompt, buildCompatDescPrompt, type DescRankData , buildLetterFallback, hasCorruptedText } from "@/lib/saju/report-content";
 import { generateInterpretation, generateSajuImage } from "@/lib/saju/llm";
 import { parseDate, parseTimeVal, parseCalendar } from "@/lib/saju/local-manseryeok";
 import { serverEnv } from "@/lib/env";
@@ -151,6 +151,10 @@ async function genChapterContent(chapter: number, input: { name: string; gender:
           y.heusinEl  = resolveEl(y.heusinEl,  "희신", allText);
           y.gisinEl   = resolveEl(y.gisinEl,   "기신", allText);
         }
+      }
+      if (hasCorruptedText(obj)) {
+        console.error(`[saju_total] ${chapter}장 응답 손상(깨진 문자) 감지 (시도${i+1}):`, JSON.stringify(obj).slice(0, 300));
+        continue;
       }
       if (isChapterReady(obj, chapter)) return { obj, ...meta };
       console.error(`[jeongtong] ${chapter}장 isChapterReady 실패 (시도${i+1}):`, JSON.stringify(obj).slice(0, 500));
