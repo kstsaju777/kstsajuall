@@ -162,12 +162,32 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   if (!demoMode) {
     const service = createServiceClient();
 
-    const { data: allData } = await service
-      .from("orders")
-      .select("id, order_id, amount, status, created_at, user_id, guest_email, product_id, toss_payment_key")
-      .order("created_at", { ascending: false })
-      .limit(5000);
-    allOrders = (allData ?? []) as OrderRow[];
+    // ⚠️ Supabase(PostgREST)는 .limit()에 얼마를 넣든 프로젝트 설정상 한 번에 최대
+    // 1000행까지만 돌려준다. 주문이 1000건을 넘어가면서(현재 1000건+) 단순 .limit()
+    // 호출이 나머지를 조용히 잘라버려, 특히 정렬 없이 조회하던 saju_inputs에서
+    // 신규 주문의 상세정보(이름·생년월일·고민)가 통째로 누락되는 사고가 있었다
+    // (고객 신고). .range()로 1000행씩 끝까지 페이지네이션해서 전량을 가져온다.
+    async function fetchAllRows<T>(
+      build: (from: number, to: number) => PromiseLike<{ data: T[] | null }>
+    ): Promise<T[]> {
+      const PAGE = 1000;
+      const all: T[] = [];
+      for (let from = 0; ; from += PAGE) {
+        const { data } = await build(from, from + PAGE - 1);
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < PAGE) break;
+      }
+      return all;
+    }
+
+    allOrders = await fetchAllRows<OrderRow>((from, to) =>
+      service
+        .from("orders")
+        .select("id, order_id, amount, status, created_at, user_id, guest_email, product_id, toss_payment_key")
+        .order("created_at", { ascending: false })
+        .range(from, to)
+    );
 
     const productIds = Array.from(new Set(allOrders.map((o) => o.product_id)));
     const { data: products } = productIds.length
@@ -175,13 +195,19 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       : { data: [] };
     productMap = new Map((products ?? []).map((p) => [p.id, { name: p.name, slug: p.slug }]));
 
-    // 주문이 많을 땐 .in() 에 uuid를 수백~수천 개 나열하면 요청 URL이 너무 길어져
-    // 조용히 실패(빈 배열 반환)할 수 있어, 필터 없이 전체를 가져와 메모리에서 매칭한다.
-    const { data: results } = await service.from("saju_results").select("id, order_id").limit(10000);
-    resultMap = new Map((results ?? []).map((r) => [r.order_id, r.id]));
+    const results = await fetchAllRows<{ id: string; order_id: string }>((from, to) =>
+      service.from("saju_results").select("id, order_id").order("created_at", { ascending: false }).range(from, to)
+    );
+    resultMap = new Map(results.map((r) => [r.order_id, r.id]));
 
-    const { data: inputs } = await service.from("saju_inputs").select("order_id, name, concerns, birth_date, birth_time, time_unknown, calendar").limit(10000);
-    inputMap = new Map((inputs ?? []).map((i) => [i.order_id, i as InputRow]));
+    const inputs = await fetchAllRows<InputRow>((from, to) =>
+      service
+        .from("saju_inputs")
+        .select("order_id, name, concerns, birth_date, birth_time, time_unknown, calendar")
+        .order("created_at", { ascending: false })
+        .range(from, to)
+    );
+    inputMap = new Map(inputs.map((i) => [i.order_id, i]));
 
     // 어드민 계정으로 결제된 건 = 테스트결제로 간주하여 매출 집계에서 제외
     // ⚠️ profiles.is_admin 컬럼은 실제로 채워져 있지 않아(예: admin@hongyeondang.com도 false) 신뢰할 수 없음.
