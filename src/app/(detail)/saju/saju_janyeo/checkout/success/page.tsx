@@ -137,8 +137,8 @@ function SuccessInner() {
         setError(json.error ?? "결제 확인에 실패했습니다. 고객센터로 문의해 주세요.");
         return;
       }
-      const { resultId, name, gender } = await confirmRes.json();
-      trackPurchase(orderId, amount);
+      const { resultId, name, gender, isTest } = await confirmRes.json();
+      if (!isTest) trackPurchase(orderId, amount);
 
       // 챕터 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
       // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장한다(항상 안정적으로

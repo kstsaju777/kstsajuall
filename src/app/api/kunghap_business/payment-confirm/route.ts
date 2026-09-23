@@ -79,6 +79,9 @@ export async function POST(request: NextRequest) {
   const { paymentKey, orderId, amount } = parsed.data;
 
   const service = createServiceClient();
+  // 어드민 계정 결제는 GA/메타 픽셀 구매 전환 이벤트 집계에서 제외하기 위해
+  // 클라이언트에 isTest 플래그로 알려준다(관리자 페이지 매출 집계와 동일 기준).
+  const isLive = !(await isCurrentUserAdmin());
 
   const { data: order } = await service.from("orders").select("id, amount, status, guest_email, product_id").eq("order_id", orderId).maybeSingle();
   if (!order) return NextResponse.json({ error: "주문을 찾을 수 없습니다" }, { status: 404 });
@@ -86,12 +89,11 @@ export async function POST(request: NextRequest) {
     const { data: result } = await service.from("saju_results").select("id").eq("order_id", order.id).maybeSingle();
     if (result) {
       const { data: si } = await service.from("saju_inputs").select("name, gender").eq("order_id", order.id).maybeSingle();
-      return NextResponse.json({ resultId: result.id, name: si?.name ?? "", gender: si?.gender ?? "male", alreadyPaid: true });
+      return NextResponse.json({ resultId: result.id, name: si?.name ?? "", gender: si?.gender ?? "male", alreadyPaid: true, isTest: !isLive });
     }
   }
   if (order.amount !== amount) return NextResponse.json({ error: "금액이 일치하지 않습니다" }, { status: 400 });
 
-  const isLive = !(await isCurrentUserAdmin());
   const toss = await confirmTossPayment({ paymentKey, orderId, amount }, isLive);
   if (!toss.ok) {
     await service.from("orders").update({ status: "failed" }).eq("id", order.id);
@@ -185,7 +187,7 @@ export async function POST(request: NextRequest) {
 
     after(() => generateReportInBackground(result.id));
 
-    return NextResponse.json({ resultId: result.id, name: input.name ?? "", gender: g, partnerName: pName ?? "", partnerGender: pg });
+    return NextResponse.json({ resultId: result.id, name: input.name ?? "", gender: g, partnerName: pName ?? "", partnerGender: pg, isTest: !isLive });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
   }

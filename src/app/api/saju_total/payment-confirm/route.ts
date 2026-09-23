@@ -79,6 +79,9 @@ export async function POST(request: NextRequest) {
   const { paymentKey, orderId, amount } = parsed.data;
 
   const service = createServiceClient();
+  // 어드민 계정 결제는 GA/메타 픽셀 구매 전환 이벤트 집계에서 제외하기 위해
+  // 클라이언트에 isTest 플래그로 알려준다(관리자 페이지 매출 집계와 동일 기준).
+  const isLive = !(await isCurrentUserAdmin());
 
   // 1. 주문 조회 및 금액 검증
   const { data: order } = await service
@@ -98,7 +101,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
     if (result) {
       const { data: si } = await service.from("saju_inputs").select("name, gender").eq("order_id", order.id).maybeSingle();
-      return NextResponse.json({ resultId: result.id, name: si?.name ?? "", gender: si?.gender ?? "male", alreadyPaid: true });
+      return NextResponse.json({ resultId: result.id, name: si?.name ?? "", gender: si?.gender ?? "male", alreadyPaid: true, isTest: !isLive });
     }
   }
   if (order.amount !== amount) {
@@ -106,7 +109,6 @@ export async function POST(request: NextRequest) {
   }
 
   // 2. 토스 결제 확인
-  const isLive = !(await isCurrentUserAdmin());
   const toss = await confirmTossPayment({ paymentKey, orderId, amount }, isLive);
   if (!toss.ok) {
     await service.from("orders").update({ status: "failed" }).eq("id", order.id);
@@ -201,6 +203,7 @@ export async function POST(request: NextRequest) {
       resultId: result.id,
       name: input.name ?? "",
       gender: input.gender ?? "male",
+      isTest: !isLive,
     });
   } catch (err) {
     return NextResponse.json(

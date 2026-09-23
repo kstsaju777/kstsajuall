@@ -137,8 +137,8 @@ function SuccessInner() {
         setError(json.error ?? "결제 확인에 실패했습니다. 고객센터로 문의해 주세요.");
         return;
       }
-      const { resultId, name, gender, partnerName, partnerGender } = await confirmRes.json();
-      trackPurchase(orderId, amount);
+      const { resultId, name, gender, partnerName, partnerGender, isTest } = await confirmRes.json();
+      if (!isTest) trackPurchase(orderId, amount);
 
       // 실제 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
       // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장하고 알림톡까지 보낸다.
