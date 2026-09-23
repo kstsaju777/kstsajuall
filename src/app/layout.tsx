@@ -12,6 +12,11 @@ export const metadata: Metadata = {
     icon: "/icon.png",
     apple: "/icon.png",
   },
+  verification: {
+    other: {
+      "naver-site-verification": "41a7af7c7c52a4b3f986684ac53c5e05bbe095d3",
+    },
+  },
   appleWebApp: {
     capable: true,
     title: siteConfig.name,
