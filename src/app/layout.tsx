@@ -50,6 +50,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           })(window, document, "clarity", "script", "ymnfgoeet4");`}
         </Script>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-9G72TMN5C9" strategy="afterInteractive" />
+        <Script id="ga4" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-9G72TMN5C9');`}
+        </Script>
       </head>
       <body suppressHydrationWarning className="bg-[#b40501]">
         <div style={{ maxWidth: 430, margin: "0 auto", position: "relative" }}>
