@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -114,6 +114,7 @@ function SuccessInner() {
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
   const navigatingRef = useRef(false);
+  const startedRef = useRef(false); // StrictMode 이중 실행·중복 요청으로 결제확인이 두 번 불리는 것을 방지
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => { if (navigatingRef.current) return; e.preventDefault(); e.returnValue = ""; };
@@ -122,15 +123,24 @@ function SuccessInner() {
   }, []);
 
   useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
     const paymentKey = search.get("paymentKey");
     const orderId = search.get("orderId");
-    const amount = Number(search.get("amount"));
-    if (!paymentKey || !orderId || !amount) { setError("필수 결제 파라미터가 누락되었습니다."); return; }
+    const amountParam = search.get("amount");
+    const amount = amountParam !== null ? Number(amountParam) : NaN;
+
+    // 쿠폰으로 전액 할인된 주문은 토스 결제 자체가 없어 paymentKey가 없다 (amount=0만 있음)
+    if (!orderId || Number.isNaN(amount) || (amount > 0 && !paymentKey)) {
+      setError("필수 결제 파라미터가 누락되었습니다.");
+      return;
+    }
 
     (async () => {
       const confirmRes = await fetch("/api/kunghap_janyeo/payment-confirm", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentKey, orderId, amount }),
+        body: JSON.stringify({ paymentKey: paymentKey ?? undefined, orderId, amount }),
       });
       if (!confirmRes.ok) {
         const json = await confirmRes.json().catch(() => ({}));
@@ -138,7 +148,7 @@ function SuccessInner() {
         return;
       }
       const { resultId, name, gender, partnerName, partnerGender, isTest } = await confirmRes.json();
-      if (!isTest) trackPurchase(orderId, amount);
+      if (!isTest && amount > 0) trackPurchase(orderId, amount);
 
       // 실제 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
       // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장하고 알림톡까지 보낸다.
