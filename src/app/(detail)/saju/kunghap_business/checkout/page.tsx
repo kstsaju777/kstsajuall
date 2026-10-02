@@ -22,6 +22,8 @@ const GRAY3    = "#888888";
 const GRAY4    = "#dddddd";
 const CARD_BG  = "#ffffff";
 
+type CouponOption = { id: string; name: string; discountKind: "fixed" | "free_pass"; amount: number };
+
 // ─── 스크롤 슬라이드 인 훅 ────────────────────────────────────────────────────
 function useSlideInUp() {
   const ref = useRef<HTMLDivElement>(null);
@@ -737,6 +739,10 @@ function CheckoutContent() {
       }
     }
     setOrderError(null);
+    if (!pendingOrderId.current) {
+      setOrderError("주문 생성에 실패했습니다. 다시 시도해 주세요.");
+      return;
+    }
     await proceedWithOrder(pendingOrderId.current, pendingAmount.current);
   };
 
