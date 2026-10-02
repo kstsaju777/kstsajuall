@@ -24,6 +24,8 @@ const CARD_BG  = "#ffffff";
 
 const PILLAR_LABELS = ["시주", "일주", "월주", "년주"] as const;
 
+type CouponOption = { id: string; name: string; discountKind: "fixed" | "free_pass"; amount: number };
+
 // ─── LocalSajuResult → MyeongsikView 변환 ────────────────────────────────────
 const CLASS_TO_EL: Record<string, string> = { wood: "목", fire: "화", earth: "토", metal: "금", water: "수" };
 const JIJANG_LOCAL: Record<string, string> = {
@@ -1648,13 +1650,21 @@ function ReviewSection() {
 // ─── 결제 모달 ────────────────────────────────────────────────────────────────
 const PRODUCT = { name: "종합사주", original: 49800, discount: 50, price: 24900 };
 
-function PayBottomSheet({ open, onClose, onConfirm }: {
+function PayBottomSheet({ open, onClose, onConfirm, coupons, selectedCouponId, onSelectCoupon, applying }: {
   open: boolean; onClose: () => void; onConfirm: () => void;
+  coupons: CouponOption[]; selectedCouponId: string | null; onSelectCoupon: (id: string | null) => void; applying: boolean;
 }) {
   const [legalDoc, setLegalDoc] = useState<null | "terms" | "privacy">(null);
   const [confirmExit, setConfirmExit] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [couponMenuOpen, setCouponMenuOpen] = useState(false);
+
+  const selectedCoupon = coupons.find((c) => c.id === selectedCouponId) ?? null;
+  const couponDiscountAmount = selectedCoupon
+    ? (selectedCoupon.discountKind === "free_pass" ? PRODUCT.price : Math.min(selectedCoupon.amount, PRODUCT.price))
+    : 0;
+  const finalAmount = Math.max(0, PRODUCT.price - couponDiscountAmount);
 
   useEffect(() => {
     if (open) {
@@ -1722,11 +1732,77 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               <span style={{ color: ACCENT, fontWeight: 700 }}>지금 결제 시 할인 ({PRODUCT.discount}% 특가)</span>
               <span style={{ color: ACCENT, fontWeight: 700 }}>-{saved.toLocaleString()}</span>
             </div>
+            {selectedCoupon && (
+              <div className="flex items-center justify-between text-[13px]">
+                <span style={{ color: "#5bbfea", fontWeight: 700 }}>쿠폰 할인 ({selectedCoupon.name})</span>
+                <span style={{ color: "#5bbfea", fontWeight: 700 }}>-{couponDiscountAmount.toLocaleString()}</span>
+              </div>
+            )}
           </div>
-          <button onClick={onConfirm}
+          {coupons.length > 0 && (
+            <div className="mb-4">
+              <p className="text-[12px] font-bold mb-2" style={{ color: DMUTE }}>보유 쿠폰</p>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCouponMenuOpen((v) => !v)}
+                  className="w-full flex items-center justify-between rounded-xl px-3.5 py-3"
+                  style={{ background: DCARD, border: `1.5px solid ${selectedCoupon ? ACCENT : "rgba(255,255,255,0.1)"}` }}
+                >
+                  <span className="text-[13px] font-semibold" style={{ color: DTXT }}>
+                    {selectedCoupon ? selectedCoupon.name : "쿠폰 사용 안 함"}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    {selectedCoupon && (
+                      <span className="text-[12px] font-bold" style={{ color: ACCENT }}>
+                        {selectedCoupon.discountKind === "free_pass" ? "전액 무료" : `-${selectedCoupon.amount.toLocaleString()}원`}
+                      </span>
+                    )}
+                    <span style={{ color: DMUTE, fontSize: 11, transform: couponMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>▼</span>
+                  </span>
+                </button>
+                {couponMenuOpen && (
+                  <div className="absolute left-0 right-0 z-10 mt-1.5 rounded-xl overflow-hidden"
+                    style={{ background: DCARD, border: "1px solid rgba(255,255,255,0.15)", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+                    <button
+                      onClick={() => { onSelectCoupon(null); setCouponMenuOpen(false); }}
+                      className="w-full flex items-center justify-between px-3.5 py-2.5 text-left"
+                      style={{ background: selectedCouponId === null ? "rgba(155,35,53,0.15)" : "transparent" }}
+                    >
+                      <span className="text-[13px]" style={{ color: DTXT }}>쿠폰 사용 안 함</span>
+                      {selectedCouponId === null && <span style={{ color: ACCENT, fontSize: 13 }}>✓</span>}
+                    </button>
+                    {coupons.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => { onSelectCoupon(c.id); setCouponMenuOpen(false); }}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 text-left"
+                        style={{ background: selectedCouponId === c.id ? "rgba(155,35,53,0.15)" : "transparent", borderTop: "1px solid rgba(255,255,255,0.08)" }}
+                      >
+                        <span className="text-[13px]" style={{ color: DTXT }}>{c.name}</span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-[12px] font-bold" style={{ color: ACCENT }}>
+                            {c.discountKind === "free_pass" ? "전액 무료" : `-${c.amount.toLocaleString()}원`}
+                          </span>
+                          {selectedCouponId === c.id && <span style={{ color: ACCENT, fontSize: 13 }}>✓</span>}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-between mb-4 px-0.5">
+            <span className="text-[14px] font-bold" style={{ color: DTXT }}>최종 결제금액</span>
+            <span className="text-[19px] font-black" style={{ color: finalAmount === 0 ? "#5bbfea" : DTXT }}>
+              {finalAmount.toLocaleString()}원
+            </span>
+          </div>
+          <button onClick={onConfirm} disabled={applying}
             className="w-full py-4 rounded-2xl font-black text-[17px] text-white active:scale-[0.99] transition-transform"
-            style={{ background: "linear-gradient(135deg, #9b2335, #c9474f)", boxShadow: "0 6px 20px rgba(155,35,53,0.4)" }}>
-            결제하기
+            style={{ background: "linear-gradient(135deg, #9b2335, #c9474f)", boxShadow: "0 6px 20px rgba(155,35,53,0.4)", opacity: applying ? 0.6 : 1 }}>
+            {applying ? "처리 중…" : "결제하기"}
           </button>
           <div className="flex items-center justify-center gap-2 mt-3.5">
             <span className="flex-shrink-0 flex items-center justify-center rounded"
@@ -1979,6 +2055,18 @@ function CheckoutContent() {
   const [widgetOrderId, setWidgetOrderId] = useState<string | null>(null);
   const [widgetAmount, setWidgetAmount] = useState<number>(PRODUCT.price);
 
+  // 체험단 쿠폰 — 로그인 계정에 지급된 미사용 쿠폰이 있으면 결제 시트에서 선택 가능
+  const [coupons, setCoupons] = useState<CouponOption[]>([]);
+  const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null);
+  const [applying, setApplying] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/coupons/my")
+      .then((r) => r.json())
+      .then((d) => setCoupons(d.coupons ?? []))
+      .catch(() => {});
+  }, []);
+
   // 페이지 로드 시 미리 주문 생성 → 버튼 클릭 즉시 위젯 오픈
   const pendingOrderId = useRef<string | null>(null);
   const pendingAmount  = useRef<number>(PRODUCT.price);
@@ -2012,13 +2100,43 @@ function CheckoutContent() {
     })();
   }, [buildOrderBody]);
 
+  const proceedWithOrder = async (orderId: string, baseAmount: number) => {
+    if (!selectedCouponId) {
+      setWidgetOrderId(orderId);
+      setWidgetAmount(baseAmount);
+      setShowWidget(true);
+      return;
+    }
+    setApplying(true);
+    try {
+      const res = await fetch("/api/orders/apply-coupon", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, couponId: selectedCouponId }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setOrderError(json.error ?? "쿠폰 적용에 실패했습니다.");
+        return;
+      }
+      const finalAmount = json.amount as number;
+      if (finalAmount === 0) {
+        // 쿠폰으로 전액 할인 — 토스 결제창 없이 바로 결제완료 처리
+        router.push(`/saju/saju_total/checkout/success?paymentKey=free&orderId=${encodeURIComponent(orderId)}&amount=0`);
+        return;
+      }
+      setWidgetOrderId(orderId);
+      setWidgetAmount(finalAmount);
+      setShowWidget(true);
+    } finally {
+      setApplying(false);
+    }
+  };
+
   const handleConfirm = async () => {
     setShowSheet(false);
     setOrderError(null);
     if (pendingOrderId.current) {
-      setWidgetOrderId(pendingOrderId.current);
-      setWidgetAmount(pendingAmount.current);
-      setShowWidget(true);
+      await proceedWithOrder(pendingOrderId.current, pendingAmount.current);
       return;
     }
     // 미리 생성 실패 시 즉석 재시도
@@ -2031,9 +2149,7 @@ function CheckoutContent() {
         return;
       }
       const { orderId, amount } = await res.json();
-      setWidgetOrderId(orderId);
-      setWidgetAmount(amount);
-      setShowWidget(true);
+      await proceedWithOrder(orderId, amount);
     } catch {
       setOrderError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
     }
@@ -2150,7 +2266,15 @@ function CheckoutContent() {
 
       <ToastLayer />
       <StickyPayCTA onPay={() => setShowSheet(true)} name={name} />
-      <PayBottomSheet open={showSheet} onClose={() => setShowSheet(false)} onConfirm={handleConfirm} />
+      <PayBottomSheet
+        open={showSheet}
+        onClose={() => setShowSheet(false)}
+        onConfirm={handleConfirm}
+        coupons={coupons}
+        selectedCouponId={selectedCouponId}
+        onSelectCoupon={setSelectedCouponId}
+        applying={applying}
+      />
       {orderError && (
         <div className="fixed bottom-24 z-[60] px-4" style={{ left: "max(0px, calc(50vw - 240px))", width: "min(100%, 480px)" }}>
           <div className="rounded-2xl px-4 py-3 text-center" style={{ background: "#7a1020", color: "#fff", fontSize: 13 }}>

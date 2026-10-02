@@ -66,9 +66,9 @@ async function generateReportInBackground(resultId: string) {
 }
 
 const bodySchema = z.object({
-  paymentKey: z.string().min(1),
+  paymentKey: z.string().min(1).optional(), // 쿠폰으로 0원 처리된 주문은 토스 결제 자체가 없다
   orderId: z.string().min(1),
-  amount: z.number().int().positive(),
+  amount: z.number().int().min(0),
 });
 
 export async function POST(request: NextRequest) {
@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "잘못된 요청입니다" }, { status: 400 });
   }
   const { paymentKey, orderId, amount } = parsed.data;
+  const isFreeOrder = amount === 0;
 
   const service = createServiceClient();
   // 어드민 계정 결제는 GA/메타 픽셀 구매 전환 이벤트 집계에서 제외하기 위해
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
   // 1. 주문 조회 및 금액 검증
   const { data: order } = await service
     .from("orders")
-    .select("id, amount, status, guest_email, product_id")
+    .select("id, amount, status, guest_email, product_id, coupon_user_coupon_id")
     .eq("order_id", orderId)
     .maybeSingle();
 
@@ -107,22 +108,40 @@ export async function POST(request: NextRequest) {
   if (order.amount !== amount) {
     return NextResponse.json({ error: "금액이 일치하지 않습니다" }, { status: 400 });
   }
-
-  // 2. 토스 결제 확인
-  const toss = await confirmTossPayment({ paymentKey, orderId, amount }, isLive);
-  if (!toss.ok) {
-    await service.from("orders").update({ status: "failed" }).eq("id", order.id);
-    return NextResponse.json({ error: toss.error.message, code: toss.error.code }, { status: 402 });
-  }
-  if (toss.data.totalAmount !== amount) {
-    await service.from("orders").update({ status: "failed" }).eq("id", order.id);
-    return NextResponse.json({ error: "토스 응답 금액 불일치" }, { status: 400 });
+  // 0원 처리는 쿠폰으로 전액 할인된 주문에서만 허용한다 (임의로 금액을 0으로 조작하는 것 방지)
+  if (isFreeOrder && !order.coupon_user_coupon_id) {
+    return NextResponse.json({ error: "쿠폰 정보가 없는 주문은 0원 처리할 수 없습니다" }, { status: 400 });
   }
 
-  await service
-    .from("orders")
-    .update({ status: "paid", toss_payment_key: paymentKey, paid_at: toss.data.approvedAt })
-    .eq("id", order.id);
+  if (!isFreeOrder) {
+    // 2. 토스 결제 확인
+    const toss = await confirmTossPayment({ paymentKey: paymentKey ?? "", orderId, amount }, isLive);
+    if (!toss.ok) {
+      await service.from("orders").update({ status: "failed" }).eq("id", order.id);
+      return NextResponse.json({ error: toss.error.message, code: toss.error.code }, { status: 402 });
+    }
+    if (toss.data.totalAmount !== amount) {
+      await service.from("orders").update({ status: "failed" }).eq("id", order.id);
+      return NextResponse.json({ error: "토스 응답 금액 불일치" }, { status: 400 });
+    }
+    await service
+      .from("orders")
+      .update({ status: "paid", toss_payment_key: paymentKey, paid_at: toss.data.approvedAt })
+      .eq("id", order.id);
+  } else {
+    // 쿠폰으로 전액 할인된 주문 — 토스 호출 없이 바로 결제완료 처리
+    await service
+      .from("orders")
+      .update({ status: "paid", paid_at: new Date().toISOString() })
+      .eq("id", order.id);
+  }
+
+  if (order.coupon_user_coupon_id) {
+    await service
+      .from("user_coupons")
+      .update({ status: "used", used_at: new Date().toISOString() })
+      .eq("id", order.coupon_user_coupon_id);
+  }
 
   // 3. 사주 입력 조회
   const { data: input } = await service

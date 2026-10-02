@@ -76,6 +76,7 @@ type OrderRow = {
   guest_email: string | null;
   product_id: string;
   toss_payment_key: string | null;
+  coupon_user_coupon_id: string | null;
 };
 
 type InputRow = {
@@ -184,7 +185,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     allOrders = await fetchAllRows<OrderRow>((from, to) =>
       service
         .from("orders")
-        .select("id, order_id, amount, status, created_at, user_id, guest_email, product_id, toss_payment_key")
+        .select("id, order_id, amount, status, created_at, user_id, guest_email, product_id, toss_payment_key, coupon_user_coupon_id")
         .order("created_at", { ascending: false })
         .range(from, to)
     );
@@ -217,35 +218,41 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   }
 
   const revenueStartAt = new Date(REVENUE_START_AT).getTime();
+  // 쿠폰(체험단 등)으로 전액/일부 할인된 주문은 실결제가 아니므로 별도 버킷으로 분리한다
+  const isCouponOrder = (o: OrderRow) => !!o.coupon_user_coupon_id;
   // 실결제 판정: (1) 오픈 기준일 이후 && 어드민 계정이 아님, 또는 (2) 오픈 전이라도 화이트리스트에 등록된 지인 결제
   const isRealOrder = (o: OrderRow) => {
+    if (isCouponOrder(o)) return false;
     const isAdmin = !!o.user_id && adminUserIds.has(o.user_id);
     if (isAdmin) return false;
     if (o.guest_email && TEST_EMAIL_BLACKLIST.has(o.guest_email)) return false;
     if (o.guest_email && REAL_PAYMENT_WHITELIST_EMAILS.has(o.guest_email)) return true;
     return new Date(o.created_at).getTime() >= revenueStartAt;
   };
-  const isTestOrder = (o: OrderRow) => !isRealOrder(o);
+  const isTestOrder = (o: OrderRow) => !isRealOrder(o) && !isCouponOrder(o);
 
   const paidOrders = allOrders.filter((o) => o.status === "paid");
-  const realOrders = paidOrders.filter((o) => !isTestOrder(o));
+  const realOrders = paidOrders.filter((o) => !isTestOrder(o) && !isCouponOrder(o));
   const testOrders = paidOrders.filter((o) => isTestOrder(o));
+  const couponOrders = paidOrders.filter((o) => isCouponOrder(o));
 
   const totalRealPaid = realOrders.length;
   const totalTestPaid = testOrders.length;
+  const totalCouponPaid = couponOrders.length;
   const totalRevenue = realOrders.reduce((sum, o) => sum + o.amount, 0);
 
   // ── 상품별 집계 (실결제 매출 기준) ──
-  type ProductStat = { productId: string; name: string; slug: string | null; real: number; test: number; revenue: number };
+  type ProductStat = { productId: string; name: string; slug: string | null; real: number; test: number; coupon: number; revenue: number };
   const statsMap = new Map<string, ProductStat>();
   for (const o of paidOrders) {
     const p = productMap.get(o.product_id);
     const key = o.product_id;
     if (!statsMap.has(key)) {
-      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, real: 0, test: 0, revenue: 0 });
+      statsMap.set(key, { productId: key, name: p?.name ?? "알 수 없음", slug: p?.slug ?? null, real: 0, test: 0, coupon: 0, revenue: 0 });
     }
     const s = statsMap.get(key)!;
-    if (isTestOrder(o)) { s.test += 1; }
+    if (isCouponOrder(o)) { s.coupon += 1; }
+    else if (isTestOrder(o)) { s.test += 1; }
     else { s.real += 1; s.revenue += o.amount; }
   }
   const productStats = Array.from(statsMap.values()).sort((a, b) => b.revenue - a.revenue);
@@ -309,12 +316,13 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       ) : null}
 
       <p style={{ fontSize: 12, color: "#aaa", margin: "0 0 20px", lineHeight: 1.6 }}>
-        ※ {REVENUE_START_AT.slice(0, 10)} 이전 주문(개발 중 테스트결제) 및 어드민 계정 결제는 매출 집계에서 제외됩니다. (지인에게 부탁한 사전 실결제 {REAL_PAYMENT_WHITELIST_EMAILS.size}건은 예외로 포함)
+        ※ {REVENUE_START_AT.slice(0, 10)} 이전 주문(개발 중 테스트결제), 어드민 계정 결제, 쿠폰 사용 주문은 매출 집계에서 제외됩니다. (지인에게 부탁한 사전 실결제 {REAL_PAYMENT_WHITELIST_EMAILS.size}건은 예외로 포함)
         {totalTestPaid > 0 && <> (제외된 테스트결제 {totalTestPaid}건)</>}
+        {totalCouponPaid > 0 && <> (쿠폰 사용 {totalCouponPaid}건)</>}
       </p>
 
       {/* 전체 요약 */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 28 }}>
         <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
           <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>실결제 건수</p>
           <p style={{ fontSize: 18, fontWeight: 700, color: "#047857", margin: 0 }}>{totalRealPaid.toLocaleString()}</p>
@@ -322,6 +330,10 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
           <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>누적 총 매출</p>
           <p style={{ fontSize: 18, fontWeight: 700, color: "#111", margin: 0 }}>{formatKRW(totalRevenue)}</p>
+        </div>
+        <div style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 12, padding: "14px 16px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          <p style={{ fontSize: 11, color: "#888", margin: "0 0 6px" }}>쿠폰 사용 건수</p>
+          <p style={{ fontSize: 18, fontWeight: 700, color: "#5bbfea", margin: 0 }}>{totalCouponPaid.toLocaleString()}</p>
         </div>
       </div>
 
@@ -433,6 +445,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               <p style={{ fontSize: 10, margin: 0, whiteSpace: "nowrap" }}>
                 <span style={{ color: "#6ee7b7", fontWeight: 600 }}>실결제 {s.real}</span>
                 {s.test > 0 && <span style={{ color: "#a5b4fc" }}> · 테스트 {s.test}</span>}
+                {s.coupon > 0 && <span style={{ color: "#7dd3fc" }}> · 쿠폰 {s.coupon}</span>}
               </p>
             </Link>
           );

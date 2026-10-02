@@ -12,6 +12,8 @@ export type Json =
 export type OrderStatus = "pending" | "paid" | "failed";
 export type CalendarKind = "solar" | "lunar";
 export type GenderKind = "male" | "female";
+export type CouponDiscountKind = "fixed" | "free_pass";
+export type CouponStatus = "unused" | "used";
 
 type ProfileRow = {
   id: string;
@@ -44,6 +46,28 @@ type OrderRow = {
   toss_payment_key: string | null;
   paid_at: string | null;
   created_at: string;
+  coupon_user_coupon_id: string | null;
+  coupon_discount: number;
+};
+
+type CouponTypeRow = {
+  id: string;
+  code: string;
+  name: string;
+  discount_kind: CouponDiscountKind;
+  amount: number;
+  is_active: boolean;
+  created_at: string;
+};
+
+type UserCouponRow = {
+  id: string;
+  user_id: string;
+  coupon_type_id: string;
+  status: CouponStatus;
+  order_id: string | null;
+  created_at: string;
+  used_at: string | null;
 };
 
 type SajuInputRow = {
@@ -132,8 +156,38 @@ export type Database = {
           toss_payment_key?: string | null;
           paid_at?: string | null;
           created_at?: string;
+          coupon_user_coupon_id?: string | null;
+          coupon_discount?: number;
         };
         Update: Partial<OrderRow>;
+        Relationships: [];
+      };
+      coupon_types: {
+        Row: CouponTypeRow;
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          discount_kind?: CouponDiscountKind;
+          amount?: number;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<CouponTypeRow>;
+        Relationships: [];
+      };
+      user_coupons: {
+        Row: UserCouponRow;
+        Insert: {
+          id?: string;
+          user_id: string;
+          coupon_type_id: string;
+          status?: CouponStatus;
+          order_id?: string | null;
+          created_at?: string;
+          used_at?: string | null;
+        };
+        Update: Partial<UserCouponRow>;
         Relationships: [];
       };
       saju_inputs: {
@@ -233,12 +287,20 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      merge_saju_result_content: {
+        Args: { p_id: string; p_content: Json };
+        Returns: Json;
+      };
+      claim_saju_alimtalk: {
+        Args: { p_id: string };
+        Returns: boolean;
+      };
     };
     Enums: {
       order_status: OrderStatus;
       calendar_kind: CalendarKind;
       gender_kind: GenderKind;
+      coupon_discount_kind: CouponDiscountKind;
     };
     CompositeTypes: {
       [_ in never]: never;

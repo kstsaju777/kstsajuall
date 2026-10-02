@@ -31,6 +31,7 @@ export default async function AdminHome() {
         <MenuCard href="/" emoji="🏠" title="사이트 홈 보기" desc="실제 소비자 화면 확인" external />
         <MenuCard href="/admin/products" emoji="📦" title="상품 관리" desc="상품 공개 / 비공개 전환" />
         <MenuCard href="/admin/orders" emoji="💳" title="결제 내역" desc="전체 결제 내역 조회" />
+        <MenuCard href="/admin/coupons" emoji="🎟️" title="쿠폰 관리" desc="체험단 계정에 쿠폰 지급" />
         <MenuCard href="https://app.tosspayments.com" emoji="💰" title="토스페이먼츠" desc="환불 · 결제취소" external />
         <MenuCard href="https://supabase.com/dashboard" emoji="🗄️" title="Supabase" desc="DB · 유저 관리" external />
       </div>

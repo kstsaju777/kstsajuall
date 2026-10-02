@@ -274,32 +274,29 @@ export async function POST(request: NextRequest) {
   return createReport(body);
 }
 
-// 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
+// 병합 저장 — 합본 저장과 알림톡 발급 플래그 찍기를 모두 행 잠금(for update) RPC로 직렬화해서
+// 거의 동시에 들어오는 두 번의 저장 호출(백그라운드 생성 완료 저장 + 프론트 최종 재확인 저장)이
+// 서로의 claim 플래그를 지우고 알림톡이 중복 발송되는 레이스를 막는다.
 async function saveContent(id: string, content: Record<string, unknown>, skipAlimtalk = false) {
   const service = createServiceClient();
-  const { data } = await service.from("saju_results").select("interpretation_md, order_id, myeongsik").eq("id", id).maybeSingle();
-  let existing: Record<string, unknown> = {};
-  try { existing = JSON.parse(data?.interpretation_md || "{}") || {}; } catch { existing = {}; }
-  const alreadySent = existing.__alimtalkSent === true;
-  const merged = { ...existing, ...content };
-  await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
+  const { data: meta } = await service.from("saju_results").select("order_id, myeongsik").eq("id", id).maybeSingle();
+
+  const { data: merged } = await service.rpc("merge_saju_result_content", { p_id: id, p_content: content as never });
+  if (!merged) return NextResponse.json({ ok: true });
+
+  const mergedContent = merged as Record<string, unknown>;
   const totalChapters = Object.keys(BUSINESS_KUNGHAP_CHAPTER_SECTIONS).map(Number);
-  const allDone = totalChapters.every(n => isBusinessKunghapChapterReady(merged, n));
-  const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const allDone = totalChapters.every(n => isBusinessKunghapChapterReady(mergedContent, n));
+  const storedMyeongsik = meta?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const imageReady = !!storedMyeongsik?.sajuImageUrl && !!storedMyeongsik?.partnerSajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
-  if (!skipAlimtalk && !alreadySent && allDone && (!needsImage || imageReady) && data?.order_id) {
-    const { data: claimed } = await service
-      .from("saju_results")
-      .update({ interpretation_md: JSON.stringify({ ...merged, __alimtalkSent: true }) })
-      .eq("id", id)
-      .not("interpretation_md", "ilike", "%__alimtalkSent%")
-      .select("id");
-    if (claimed && claimed.length > 0) {
-      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
+  if (!skipAlimtalk && allDone && (!needsImage || imageReady) && meta?.order_id) {
+    const { data: claimed } = await service.rpc("claim_saju_alimtalk", { p_id: id });
+    if (claimed === true) {
+      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", meta.order_id).maybeSingle();
       if (si?.phone) {
-      const reportUrl = `https://www.hongyeondang.com/saju/kunghap_business/report-preview?id=${id}`;
-      await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
+        const reportUrl = `https://www.hongyeondang.com/saju/kunghap_business/report-preview?id=${id}`;
+        await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
       }
     }
   }
