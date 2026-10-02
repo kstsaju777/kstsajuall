@@ -9,6 +9,8 @@ import type { MyeongsikView } from "@/lib/saju/myeongsik-view";
 import { LEGAL_DOC_CLASS, TermsContent, PrivacyContent } from "@/components/legal/legal-content";
 import { stripSurname } from "@/lib/utils/strip-surname";
 
+type CouponOption = { id: string; name: string; discountKind: "fixed" | "free_pass"; amount: number };
+
 // ─── 디자인 토큰 ──────────────────────────────────────────────────────────────
 const CREAM    = "#fdf8f4";
 const WHITE    = "#ffffff";
@@ -169,13 +171,21 @@ function FAQSection() {
 // ─── 결제 모달 ────────────────────────────────────────────────────────────────
 const PRODUCT = { name: "자녀사주", original: 39800, discount: 50, price: 19900 };
 
-function PayBottomSheet({ open, onClose, onConfirm }: {
+function PayBottomSheet({ open, onClose, onConfirm, coupons, selectedCouponId, onSelectCoupon, applying }: {
   open: boolean; onClose: () => void; onConfirm: () => void;
+  coupons: CouponOption[]; selectedCouponId: string | null; onSelectCoupon: (id: string | null) => void; applying: boolean;
 }) {
   const [legalDoc, setLegalDoc] = useState<null | "terms" | "privacy">(null);
   const [confirmExit, setConfirmExit] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [couponMenuOpen, setCouponMenuOpen] = useState(false);
+
+  const selectedCoupon = coupons.find((c) => c.id === selectedCouponId) ?? null;
+  const couponDiscountAmount = selectedCoupon
+    ? (selectedCoupon.discountKind === "free_pass" ? PRODUCT.price : Math.min(selectedCoupon.amount, PRODUCT.price))
+    : 0;
+  const finalAmount = Math.max(0, PRODUCT.price - couponDiscountAmount);
 
   useEffect(() => {
     if (open) {
@@ -243,11 +253,77 @@ function PayBottomSheet({ open, onClose, onConfirm }: {
               <span style={{ color: ACCENT, fontWeight: 700 }}>지금 결제 시 할인 ({PRODUCT.discount}% 특가)</span>
               <span style={{ color: ACCENT, fontWeight: 700 }}>-{saved.toLocaleString()}</span>
             </div>
+            {selectedCoupon && (
+              <div className="flex items-center justify-between text-[13px]">
+                <span style={{ color: "#5bbfea", fontWeight: 700 }}>쿠폰 할인 ({selectedCoupon.name})</span>
+                <span style={{ color: "#5bbfea", fontWeight: 700 }}>-{couponDiscountAmount.toLocaleString()}</span>
+              </div>
+            )}
           </div>
-          <button onClick={onConfirm}
+          {coupons.length > 0 && (
+            <div className="mb-4">
+              <p className="text-[12px] font-bold mb-2" style={{ color: DMUTE }}>보유 쿠폰</p>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCouponMenuOpen((v) => !v)}
+                  className="w-full flex items-center justify-between rounded-xl px-3.5 py-3"
+                  style={{ background: DCARD, border: `1.5px solid ${selectedCoupon ? ACCENT : "rgba(255,255,255,0.1)"}` }}
+                >
+                  <span className="text-[13px] font-semibold" style={{ color: DTXT }}>
+                    {selectedCoupon ? selectedCoupon.name : "쿠폰 사용 안 함"}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    {selectedCoupon && (
+                      <span className="text-[12px] font-bold" style={{ color: ACCENT }}>
+                        {selectedCoupon.discountKind === "free_pass" ? "전액 무료" : `-${selectedCoupon.amount.toLocaleString()}원`}
+                      </span>
+                    )}
+                    <span style={{ color: DMUTE, fontSize: 11, transform: couponMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>▼</span>
+                  </span>
+                </button>
+                {couponMenuOpen && (
+                  <div className="absolute left-0 right-0 z-10 mt-1.5 rounded-xl overflow-hidden"
+                    style={{ background: DCARD, border: "1px solid rgba(255,255,255,0.15)", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+                    <button
+                      onClick={() => { onSelectCoupon(null); setCouponMenuOpen(false); }}
+                      className="w-full flex items-center justify-between px-3.5 py-2.5 text-left"
+                      style={{ background: selectedCouponId === null ? "rgba(91,191,234,0.15)" : "transparent" }}
+                    >
+                      <span className="text-[13px]" style={{ color: DTXT }}>쿠폰 사용 안 함</span>
+                      {selectedCouponId === null && <span style={{ color: ACCENT, fontSize: 13 }}>✓</span>}
+                    </button>
+                    {coupons.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => { onSelectCoupon(c.id); setCouponMenuOpen(false); }}
+                        className="w-full flex items-center justify-between px-3.5 py-2.5 text-left"
+                        style={{ background: selectedCouponId === c.id ? "rgba(91,191,234,0.15)" : "transparent", borderTop: "1px solid rgba(255,255,255,0.08)" }}
+                      >
+                        <span className="text-[13px]" style={{ color: DTXT }}>{c.name}</span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-[12px] font-bold" style={{ color: ACCENT }}>
+                            {c.discountKind === "free_pass" ? "전액 무료" : `-${c.amount.toLocaleString()}원`}
+                          </span>
+                          {selectedCouponId === c.id && <span style={{ color: ACCENT, fontSize: 13 }}>✓</span>}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-between mb-4 px-0.5">
+            <span className="text-[14px] font-bold" style={{ color: DTXT }}>최종 결제금액</span>
+            <span className="text-[19px] font-black" style={{ color: finalAmount === 0 ? "#5bbfea" : DTXT }}>
+              {finalAmount.toLocaleString()}원
+            </span>
+          </div>
+          <button onClick={onConfirm} disabled={applying}
             className="w-full py-4 rounded-2xl font-black text-[17px] text-white active:scale-[0.99] transition-transform"
-            style={{ background: "linear-gradient(135deg, #5bbfea, #3aaad8)", boxShadow: "0 6px 20px rgba(91,191,234,0.4)" }}>
-            결제하기
+            style={{ background: "linear-gradient(135deg, #5bbfea, #3aaad8)", boxShadow: "0 6px 20px rgba(91,191,234,0.4)", opacity: applying ? 0.6 : 1 }}>
+            {applying ? "처리 중…" : "결제하기"}
           </button>
           <div className="flex items-center justify-center gap-2 mt-3.5">
             <span className="flex-shrink-0 flex items-center justify-center rounded"
@@ -498,6 +574,18 @@ function CheckoutContent() {
   const [widgetAmount, setWidgetAmount] = useState<number>(PRODUCT_INFO.price);
   const [orderError, setOrderError] = useState<string | null>(null);
 
+  // 체험단 쿠폰 — 로그인 계정에 지급된 미사용 쿠폰이 있으면 결제 시트에서 선택 가능
+  const [coupons, setCoupons] = useState<CouponOption[]>([]);
+  const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null);
+  const [applying, setApplying] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/coupons/my")
+      .then((r) => r.json())
+      .then((d) => setCoupons(d.coupons ?? []))
+      .catch(() => {});
+  }, []);
+
   const pendingOrderId = useRef<string | null>(null);
   const pendingAmount = useRef<number>(PRODUCT_INFO.price);
   const orderCreating = useRef(false);
@@ -521,34 +609,64 @@ function CheckoutContent() {
       .catch(() => setOrderError("주문 준비 중 오류가 발생했습니다."));
   }, [buildOrderBody]);
 
-  const handleConfirm = async () => {
-    setShowSheet(false);
-    if (!pendingOrderId.current) {
-      orderCreating.current = false;
-      try {
-        const body = buildOrderBody();
-        const r = await fetch("/api/orders/create-guest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const json = await r.json();
-        if (json.orderId) {
-          pendingOrderId.current = json.orderId;
-          pendingAmount.current = json.amount;
-          setWidgetAmount(json.amount);
-        } else {
-          setOrderError("주문 생성에 실패했습니다. 다시 시도해 주세요.");
-          return;
-        }
-      } catch {
-        setOrderError("주문 생성에 실패했습니다. 다시 시도해 주세요.");
+  const proceedWithOrder = async (orderId: string, baseAmount: number) => {
+    if (!selectedCouponId) {
+      setWidgetOrderId(orderId);
+      setWidgetAmount(baseAmount);
+      setShowWidget(true);
+      return;
+    }
+    setApplying(true);
+    try {
+      const res = await fetch("/api/orders/apply-coupon", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, couponId: selectedCouponId }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setOrderError(json.error ?? "쿠폰 적용에 실패했습니다.");
         return;
       }
+      const finalAmount = json.amount as number;
+      if (finalAmount === 0) {
+        router.push(`/saju/saju_janyeo/checkout/success?paymentKey=free&orderId=${encodeURIComponent(orderId)}&amount=0`);
+        return;
+      }
+      setWidgetOrderId(orderId);
+      setWidgetAmount(finalAmount);
+      setShowWidget(true);
+    } finally {
+      setApplying(false);
     }
+  };
+
+  const handleConfirm = async () => {
+    setShowSheet(false);
     setOrderError(null);
-    setWidgetOrderId(pendingOrderId.current);
-    setShowWidget(true);
+    if (pendingOrderId.current) {
+      await proceedWithOrder(pendingOrderId.current, pendingAmount.current);
+      return;
+    }
+    orderCreating.current = false;
+    try {
+      const body = buildOrderBody();
+      const r = await fetch("/api/orders/create-guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await r.json();
+      if (json.orderId) {
+        pendingOrderId.current = json.orderId;
+        pendingAmount.current = json.amount;
+        setWidgetAmount(json.amount);
+        await proceedWithOrder(json.orderId, json.amount);
+      } else {
+        setOrderError("주문 생성에 실패했습니다. 다시 시도해 주세요.");
+      }
+    } catch {
+      setOrderError("주문 생성에 실패했습니다. 다시 시도해 주세요.");
+    }
   };
 
   void suffix;
@@ -655,7 +773,15 @@ function CheckoutContent() {
 
       <ToastLayer />
       <StickyPayCTA onPay={() => setShowSheet(true)} name={name} />
-      <PayBottomSheet open={showSheet} onClose={() => setShowSheet(false)} onConfirm={handleConfirm} />
+      <PayBottomSheet
+        open={showSheet}
+        onClose={() => setShowSheet(false)}
+        onConfirm={handleConfirm}
+        coupons={coupons}
+        selectedCouponId={selectedCouponId}
+        onSelectCoupon={setSelectedCouponId}
+        applying={applying}
+      />
 
       {showWidget && widgetOrderId && (
         <>

@@ -114,6 +114,7 @@ function SuccessInner() {
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
   const navigatingRef = useRef(false);
+  const startedRef = useRef(false);
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => { if (navigatingRef.current) return; e.preventDefault(); e.returnValue = ""; };
@@ -122,15 +123,22 @@ function SuccessInner() {
   }, []);
 
   useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
     const paymentKey = search.get("paymentKey");
     const orderId = search.get("orderId");
-    const amount = Number(search.get("amount"));
-    if (!paymentKey || !orderId || !amount) { setError("필수 결제 파라미터가 누락되었습니다."); return; }
+    const amountParam = search.get("amount");
+    const amount = amountParam !== null ? Number(amountParam) : NaN;
+    if (!orderId || Number.isNaN(amount) || (amount > 0 && !paymentKey)) {
+      setError("필수 결제 파라미터가 누락되었습니다.");
+      return;
+    }
 
     (async () => {
       const confirmRes = await fetch("/api/saju_janyeo/payment-confirm", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentKey, orderId, amount }),
+        body: JSON.stringify({ paymentKey: paymentKey ?? undefined, orderId, amount }),
       });
       if (!confirmRes.ok) {
         const json = await confirmRes.json().catch(() => ({}));
@@ -138,7 +146,7 @@ function SuccessInner() {
         return;
       }
       const { resultId, name, gender, isTest } = await confirmRes.json();
-      if (!isTest) trackPurchase(orderId, amount);
+      if (!isTest && amount > 0) trackPurchase(orderId, amount);
 
       // 챕터 생성은 결제 확인 응답 직후 서버가 백그라운드(after())로 전담한다 —
       // 고객이 이 화면을 벗어나도 서버가 끝까지 만들어 저장한다(항상 안정적으로
