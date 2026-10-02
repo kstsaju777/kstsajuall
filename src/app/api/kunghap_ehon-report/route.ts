@@ -417,29 +417,24 @@ export async function POST(request: NextRequest) {
 // 병합 저장 (클라가 전 장 합본을 한 번에 저장 → 동시 쓰기 레이스 없음)
 async function saveContent(id: string, content: Record<string, unknown>, skipAlimtalk = false) {
   const service = createServiceClient();
-  const { data } = await service.from("saju_results").select("interpretation_md, order_id, myeongsik").eq("id", id).maybeSingle();
-  let existing: Record<string, unknown> = {};
-  try { existing = JSON.parse(data?.interpretation_md || "{}") || {}; } catch { existing = {}; }
-  const alreadySent = existing.__alimtalkSent === true;
-  const merged = { ...existing, ...content };
-  await service.from("saju_results").update({ interpretation_md: JSON.stringify(merged) }).eq("id", id);
+  const { data: meta } = await service.from("saju_results").select("order_id, myeongsik").eq("id", id).maybeSingle();
+
+  const { data: merged } = await service.rpc("merge_saju_result_content", { p_id: id, p_content: content as never });
+  if (!merged) return NextResponse.json({ ok: true });
+
+  const mergedContent = merged as Record<string, unknown>;
   const totalChapters = Object.keys(EHON_KUNGHAP_CHAPTER_SECTIONS).map(Number);
-  const allDone = totalChapters.every(n => isEhonKunghapChapterReady(merged, n));
-  const storedMyeongsik = data?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const allDone = totalChapters.every(n => isEhonKunghapChapterReady(mergedContent, n));
+  const storedMyeongsik = meta?.myeongsik as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const imageReady = !!storedMyeongsik?.sajuImageUrl && !!storedMyeongsik?.partnerSajuImageUrl;
   const needsImage = WAIT_FOR_IMAGE.has(PRODUCT_SLUG);
-  if (!skipAlimtalk && !alreadySent && allDone && (!needsImage || imageReady) && data?.order_id) {
-    const { data: claimed } = await service
-      .from("saju_results")
-      .update({ interpretation_md: JSON.stringify({ ...merged, __alimtalkSent: true }) })
-      .eq("id", id)
-      .not("interpretation_md", "ilike", "%__alimtalkSent%")
-      .select("id");
-    if (claimed && claimed.length > 0) {
-      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", data.order_id).maybeSingle();
+  if (!skipAlimtalk && allDone && (!needsImage || imageReady) && meta?.order_id) {
+    const { data: claimed } = await service.rpc("claim_saju_alimtalk", { p_id: id });
+    if (claimed === true) {
+      const { data: si } = await service.from("saju_inputs").select("phone, name").eq("order_id", meta.order_id).maybeSingle();
       if (si?.phone) {
-      const reportUrl = `https://www.hongyeondang.com/saju/kunghap_ehon/report-preview?id=${id}`;
-      await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
+        const reportUrl = `https://www.hongyeondang.com/saju/kunghap_ehon/report-preview?id=${id}`;
+        await sendAlimtalk({ customerPhone: si.phone, customerName: si.name ?? "고객", productName: PRODUCT_NAME, resultUrl: reportUrl });
       }
     }
   }
