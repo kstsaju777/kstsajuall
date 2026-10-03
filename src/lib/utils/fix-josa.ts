@@ -84,6 +84,21 @@ export function fixJosa(text: string): string {
   text = text.replace(/(쉽|깝|겁|럽|롭|답|곱|덥|춥|맵|좁|렵)소이다/g, "$1소");
   text = text.replace(/하소이다/g, "하오");
 
+  // '고구마 같은 것들, 을 자주', '포트폴리오 작성, 을 미루지'처럼 나열 뒤에 쉼표가 찍힌 채 조사가
+  // 홀로 떨어진 오류. 조사는 절 첫머리에 올 수 없으므로(을·를·과·와·의·로·으로·에서·에게·부터·까지)
+  // 쉼표를 지우고 앞 글자 받침에 맞는 형태로 붙인다. 이/가/은/는/만은 '이 시기'·'은(銀)'·'만 40세'처럼
+  // 정상적으로 절 첫머리에 올 수 있어 제외한다.
+  text = text.replace(/([가-힣]), (을|를|과|와|의|으로|로|에서|에게|부터|까지)(?![가-힣])/g, (m, ch: string, p: string) => {
+    const batchim = hasBatchim(ch);
+    if (p === "을" || p === "를") return ch + (batchim ? "을" : "를");
+    if (p === "과" || p === "와") return ch + (batchim ? "과" : "와");
+    if (p === "으로" || p === "로") {
+      const isRieul = (ch.charCodeAt(0) - 0xAC00) % 28 === 8; // ㄹ받침은 '로'
+      return ch + (batchim && !isRieul ? "으로" : "로");
+    }
+    return ch + p;
+  });
+
   // 마크다운 굵게(**) 표시 — 이 텍스트는 화면에 그대로 렌더링되는 일반 문자열이라
   // GLOBAL_GRAMMAR_RULES로 금지했음에도 별표가 그대로 노출되는 경우가 있다. 정상적인
   // 한국어 문장에 별표 2개가 붙어 나올 일이 없으므로 안전하게 제거한다.
