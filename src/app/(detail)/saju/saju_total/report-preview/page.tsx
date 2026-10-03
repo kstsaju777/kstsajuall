@@ -6325,7 +6325,7 @@ function ReportPreviewInner() {
           {/* 적직 */}
           <Illust src="/media/report/total/total-5/total-5-3.jpg" h={360} noTopGrad>
             <div className="absolute pointer-events-none" style={{ top: "25%", left: "75%", transform: "translate(-50%, -50%)" }}>
-              <p className="text-[12px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
+              <p className="text-[15px] font-bold text-center" style={{ color: "#2a2320", fontFamily: SERIF, lineHeight: 1.6, whiteSpace: "nowrap" }}>
                 돈보다 중요한 것은<br />맞는 일을 하는 것이오.<br /><br />{name.slice(1) || name}님에게<br />맞는 직업을 보겠소.
               </p>
             </div>
