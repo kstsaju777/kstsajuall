@@ -94,6 +94,27 @@ export function fixJosa(text: string): string {
   // 쉼표로 안전하게 치환한다. (em dash, horizontal bar, en dash, 한글 ㅡ 전부 포함)
   text = text.replace(/\s*[—―–ㅡ]\s*/g, ", ");
 
+  return fixYinYang(text);
+}
+
+// 간지 바로 옆에 붙은 음양 표기('음금인 경금', '경금은 음금')가 표와 다르면 표 기준으로 고친다.
+// AI가 간지의 음양을 기억으로 지어내 틀리는 경우가 있었다(경금=양금인데 '음금'이라 서술).
+// 십성 계산과 같은 기준(지지는 본기 음양)이며, 천간 신금(음)·지지 신(양)처럼 이름이 겹치는 신금은 제외한다.
+// 오행 글자가 간지의 오행과 같을 때만 고쳐서 우연한 겹침을 피한다.
+const YINYANG: Record<string, string> = {
+  갑목: "양", 을목: "음", 병화: "양", 정화: "음", 무토: "양", 기토: "음", 경금: "양", 임수: "양", 계수: "음",
+  인목: "양", 묘목: "음", 진토: "양", 사화: "양", 오화: "음", 미토: "음", 유금: "음", 술토: "양", 해수: "양", 자수: "음", 축토: "음",
+};
+const YY_NAMES = Object.keys(YINYANG).join("|");
+const YY_AFTER = new RegExp(`(${YY_NAMES})((?:은|는|이|가|도)?[ ]*[(]?[ ]*)(음|양)(목|화|토|금|수)`, "g");
+const YY_BEFORE = new RegExp(`(음|양)(목|화|토|금|수)((?:인|이며|이고|으로)?[ ]*)(${YY_NAMES})`, "g");
+
+export function fixYinYang(text: string): string {
+  if (!text) return text;
+  text = text.replace(YY_AFTER, (m, name: string, mid: string, yy: string, el: string) =>
+    el === name.slice(-1) && YINYANG[name] !== yy ? `${name}${mid}${YINYANG[name]}${el}` : m);
+  text = text.replace(YY_BEFORE, (m, yy: string, el: string, mid: string, name: string) =>
+    el === name.slice(-1) && YINYANG[name] !== yy ? `${YINYANG[name]}${el}${mid}${name}` : m);
   return text;
 }
 
