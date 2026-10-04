@@ -522,16 +522,20 @@ export function buildYeonaeKunghapChapterPrompt(
   const _GAN_EL: Record<string, string>  = { 甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수" };
   const _CTL: Record<string, string> = { 목:"토",토:"수",수:"화",화:"금",금:"목" };
   const _GEN: Record<string, string> = { 목:"화",화:"토",토:"금",금:"수",수:"목" };
+  // 단어 끝 글자의 받침 유무에 맞는 조사를 붙인다 (예: 무토+를, 을목+을) — 고정 조사를 쓰면 '무토을' 같은 오류가 난다
+  const _hasB = (s: string) => { const c = s.charCodeAt(s.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; };
+  const _j = (w: string, withB: string, noB: string) => `${w}${_hasB(w) ? withB : noB}`;
   function sipseongRelSentence(from?: string, to?: string, ss?: string): string {
     if (!from || !to || !ss) return "";
     const fk = _GAN_KOR[from] ?? from; const fe = _GAN_EL[from] ?? "";
     const tk = _GAN_KOR[to] ?? to;   const te = _GAN_EL[to] ?? "";
+    const F = `${fk}${fe}`; const T = `${tk}${te}`;
     let rel = "";
-    if (fe === te) rel = `${fk}${fe}과 ${tk}${te}은 같은 오행이므로`;
-    else if (_CTL[fe] === te) rel = `${fk}${fe}이 ${tk}${te}을 극하는 관계이므로`;
-    else if (_GEN[fe] === te) rel = `${fk}${fe}이 ${tk}${te}을 생하는 관계이므로`;
-    else if (_CTL[te] === fe) rel = `${tk}${te}이 ${fk}${fe}을 극하는 관계이므로`;
-    else if (_GEN[te] === fe) rel = `${tk}${te}이 ${fk}${fe}을 생하는 관계이므로`;
+    if (fe === te) rel = `${_j(F, "과", "와")} ${_j(T, "은", "는")} 같은 오행이므로`;
+    else if (_CTL[fe] === te) rel = `${_j(F, "이", "가")} ${_j(T, "을", "를")} 극하는 관계이므로`;
+    else if (_GEN[fe] === te) rel = `${_j(F, "이", "가")} ${_j(T, "을", "를")} 생하는 관계이므로`;
+    else if (_CTL[te] === fe) rel = `${_j(T, "이", "가")} ${_j(F, "을", "를")} 극하는 관계이므로`;
+    else if (_GEN[te] === fe) rel = `${_j(T, "이", "가")} ${_j(F, "을", "를")} 생하는 관계이므로`;
     return rel ? `${rel} ${ss}이오.` : "";
   }
   const mySipseongFirstSentence = sipseongRelSentence(ilgan, partnerIlgan, mySipseong);
@@ -542,14 +546,16 @@ export function buildYeonaeKunghapChapterPrompt(
     const fe = _GAN_EL[fromHanja] ?? ""; const te = _GAN_EL[toHanja] ?? "";
     const fk = _GAN_KOR[fromHanja] ?? fromHanja; const tk = _GAN_KOR[toHanja] ?? toHanja;
     if (!fe || !te) return "";
+    const F = `${fk}${fe}`; const T = `${tk}${te}`;
+    const FT = `${_j(F, "이", "가")} ${_j(T, "을", "를")}`; // "F가 T를"
     let rel = ""; let wrongRel = "";
     if (fe === te) { rel = `같은 오행(${fe})으로 비화 관계`; wrongRel = "생·극 관계라고 쓰는 것"; }
-    else if (_CTL[fe] === te) { rel = `${fk}${fe}이 ${tk}${te}을 극하는 관계 (${fe}극${te})`; wrongRel = `"${fk}${fe}이 ${tk}${te}을 생한다"`; }
-    else if (_GEN[fe] === te) { rel = `${fk}${fe}이 ${tk}${te}을 생하는 관계 (${fe}생${te})`; wrongRel = `"${fk}${fe}이 ${tk}${te}을 극한다"`; }
-    else if (_CTL[te] === fe) { rel = `${tk}${te}이 ${fk}${fe}을 극하는 관계 (${te}극${fe})`; wrongRel = `"${fk}${fe}이 ${tk}${te}을 극한다"`; }
-    else if (_GEN[te] === fe) { rel = `${tk}${te}이 ${fk}${fe}을 생하는 관계 (${te}생${fe})`; wrongRel = `"${fk}${fe}이 ${tk}${te}을 생한다"`; }
+    else if (_CTL[fe] === te) { rel = `${FT} 극하는 관계 (${fe}극${te})`; wrongRel = `"${FT} 생한다"`; }
+    else if (_GEN[fe] === te) { rel = `${FT} 생하는 관계 (${fe}생${te})`; wrongRel = `"${FT} 극한다"`; }
+    else if (_CTL[te] === fe) { rel = `${_j(T, "이", "가")} ${_j(F, "을", "를")} 극하는 관계 (${te}극${fe})`; wrongRel = `"${FT} 극한다"`; }
+    else if (_GEN[te] === fe) { rel = `${_j(T, "이", "가")} ${_j(F, "을", "를")} 생하는 관계 (${te}생${fe})`; wrongRel = `"${FT} 생한다"`; }
     if (!rel) return "";
-    return `⛔ ${fromName}(${fk}${fe})과 ${toName}(${tk}${te})의 오행 관계 확정값: ${rel}\n   이 관계를 ${wrongRel}고 쓰는 것 절대 금지.`;
+    return `⛔ ${fromName}(${F})${_j(F, "과", "와")} ${toName}(${T})의 오행 관계 확정값: ${rel}\n   이 관계를 ${wrongRel}고 쓰는 것 절대 금지.`;
   }
   const ilganRelLine = ilgan && partnerIlgan
     ? ilganRelBlock(ilgan, partnerIlgan, `${firstName}님`, `${partnerFirstName}님`)
