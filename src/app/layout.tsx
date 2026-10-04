@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Toaster } from "sonner";
 import { siteConfig } from "@/config/site";
+import { InAppBrowserRedirect } from "@/components/InAppBrowserRedirect";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -89,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </div>
         <Toaster position="top-center" />
+        <InAppBrowserRedirect />
       </body>
     </html>
   );
