@@ -11,7 +11,6 @@ import { sendOrderSms, sendOrderEmail } from "@/lib/order-notifications";
 export const maxDuration = 300;
 const SITE_ORIGIN = "https://www.hongyeondang.com";
 const API_ROUTE = "/api/kunghap_yeonae-report";
-const TOTAL_CHAPTERS = 11;
 
 const PRODUCT_NAME = "연애궁합";
 const PRODUCT_PRICE = 29900;
@@ -32,8 +31,8 @@ async function generateReportInBackground(resultId: string) {
       body: JSON.stringify({ id: resultId, concernOnly: true }),
     }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
 
-    const merged = {};
-    const chapterTasks = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
+    const merged: Record<string, unknown> = {};
+    const generateChapter = async (chapter: number) => {
       try {
         const genRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
           method: "POST",
@@ -50,18 +49,27 @@ async function generateReportInBackground(resultId: string) {
       } catch (e) {
         console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
       }
-    });
-
-    await Promise.all(chapterTasks);
-
-    if (Object.keys(merged).length > 0) {
+    };
+    const saveMerged = async () => {
+      if (Object.keys(merged).length === 0) return;
       const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: resultId, content: merged }),
       });
       if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
-    }
+    };
+
+    // 10장(결혼 시기)은 9장 '시기별 관계의 흐름'에서 최적 시기를 읽고, 11장(서신)은 1~10장 요약을 읽는다.
+    // 전부 동시에 만들면 그 시점엔 앞 장 결과가 저장 전이라 10장이 기본값(2027~2028년)으로 쓰이고
+    // 화면 배지(9장 기준)와 어긋났다. 의존하는 장은 앞 장을 저장한 뒤에 단계적으로 생성한다.
+    const INDEPENDENT = Array.from({ length: 9 }, (_, i) => i + 1); // 1~9장
+    await Promise.all(INDEPENDENT.map(generateChapter));
+    await saveMerged();
+    await generateChapter(10);
+    await saveMerged();
+    await generateChapter(11);
+    await saveMerged();
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
   }
