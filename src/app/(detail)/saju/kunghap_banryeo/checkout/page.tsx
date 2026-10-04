@@ -306,8 +306,8 @@ function PayBottomSheet({ open, onClose, onConfirm, coupons, selectedCouponId, o
             </div>
             {selectedCoupon && (
               <div className="flex items-center justify-between text-[13px]">
-                <span style={{ color: "#5bbfea", fontWeight: 700 }}>쿠폰 할인 ({selectedCoupon.name})</span>
-                <span style={{ color: "#5bbfea", fontWeight: 700 }}>-{couponDiscountAmount.toLocaleString()}</span>
+                <span style={{ color: ACCENT, fontWeight: 700 }}>쿠폰 할인 ({selectedCoupon.name})</span>
+                <span style={{ color: ACCENT, fontWeight: 700 }}>-{couponDiscountAmount.toLocaleString()}</span>
               </div>
             )}
           </div>
@@ -367,7 +367,7 @@ function PayBottomSheet({ open, onClose, onConfirm, coupons, selectedCouponId, o
           )}
           <div className="flex items-center justify-between mb-4 px-0.5">
             <span className="text-[14px] font-bold" style={{ color: DTXT }}>최종 결제금액</span>
-            <span className="text-[19px] font-black" style={{ color: finalAmount === 0 ? "#5bbfea" : DTXT }}>
+            <span className="text-[19px] font-black" style={{ color: finalAmount === 0 ? ACCENT : DTXT }}>
               {finalAmount.toLocaleString()}원
             </span>
           </div>
