@@ -56,12 +56,17 @@ export function fixJosa(text: string): string {
   text = text.replace(/(았|었|였)다오/g, "$1소");
   text = text.replace(/있다오/g, "있소");
   text = text.replace(/없다오/g, "없소");
+  // '잃는다오', '겪는다오', '않는다오'처럼 받침 있는 어간+는다오 — 아래 일반 규칙이 '는'의 ㄴ을 떼어
+  // '잃느오'로 만들던 오류. 어간 받침 뒤에서는 '는다오'를 '소'로 바꿔야 한다('잃소').
+  text = text.replace(/는다오/g, "소");
   // '한다오'류(동사 어간+ㄴ다오) — 어간의 받침(ㄴ)을 떼어 '~오'로 바꾼다.
   // 예: 한다오→하오, 만든다오→만드오, 간다오→가오.
   text = text.replace(/([가-힣])다오/g, (m, ch: string) => {
     const code = ch.charCodeAt(0) - 0xAC00;
     if (code < 0 || code > 11171) return m;
     const jong = code % 28;
+    // 종성이 'ㅆ'(20)인 과거·추측형('했다오', '겠다오', '왔다오')은 '했소', '겠소', '왔소'로 고친다.
+    if (jong === 20) return `${ch}소`;
     // 종성이 'ㄴ'(4)인 경우만 대상 — 그 외 종성은 다른 활용 규칙이라 손대지 않는다.
     if (jong !== 4) return m;
     const stripped = String.fromCharCode(ch.charCodeAt(0) - jong);

@@ -200,8 +200,24 @@ async function genChapterContent(chapter: number, input: {
         obj = fixNamesInValue(obj, myLabel, ptLabel, "님") as Record<string, unknown>;
         const SIPSEONG_ALL = ["비견","겁재","식신","상관","편재","정재","편관","정관","편인","정인"];
         function fixSipseongInText(text: string, correct: string): string {
+          // 십성 이름을 바꾸면 받침이 달라지므로, 바로 뒤에 붙은 조사도 새 이름에 맞게 같이 고른다
+          // ('편관이란'→'정재이란'이 아니라 '정재란'). 이 치환은 조사 교정 이후에 돌기 때문에 여기서 처리해야 한다.
+          const cb = hasBatchim(correct[correct.length - 1]);
+          const pickJosa = (p: string): string => {
+            switch (p) {
+              case "은": case "는": return cb ? "은" : "는";
+              case "이": case "가": return cb ? "이" : "가";
+              case "을": case "를": return cb ? "을" : "를";
+              case "과": case "와": return cb ? "과" : "와";
+              case "이란": case "란": return cb ? "이란" : "란";
+              case "으로": case "로": return cb ? "으로" : "로";
+              default: return p;
+            }
+          };
           for (const s of SIPSEONG_ALL) {
-            if (s !== correct) text = text.replace(new RegExp(s, "g"), correct);
+            if (s === correct) continue;
+            text = text.replace(new RegExp(`${s}(은|는|이란|란|이|가|을|를|과|와|으로|로)(?![가-힣])`, "g"), (_m: string, p: string) => correct + pickJosa(p));
+            text = text.replace(new RegExp(s, "g"), correct);
           }
           return text;
         }
