@@ -32,8 +32,8 @@ async function generateReportInBackground(resultId: string) {
       body: JSON.stringify({ id: resultId, concernOnly: true }),
     }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
 
-    const merged = {};
-    const chapterTasks = Array.from({ length: TOTAL_CHAPTERS }, (_, i) => i + 1).map(async (chapter) => {
+    const merged: Record<string, unknown> = {};
+    const generateChapter = async (chapter: number) => {
       try {
         const genRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
           method: "POST",
@@ -50,18 +50,26 @@ async function generateReportInBackground(resultId: string) {
       } catch (e) {
         console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
       }
-    });
-
-    await Promise.all(chapterTasks);
-
-    if (Object.keys(merged).length > 0) {
+    };
+    // intermediate=true 는 알림톡 발송을 막은 채 저장(force) — 마지막 저장에서만 알림톡이 나가도록 한다.
+    const saveMerged = async (intermediate: boolean) => {
+      if (Object.keys(merged).length === 0) return;
       const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: merged }),
+        body: JSON.stringify({ id: resultId, content: merged, ...(intermediate ? { force: true } : {}) }),
       });
       if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
-    }
+    };
+
+    // 8장(화해 점수)은 3장 종합점수를 읽어 계산한다. 전부 동시에 만들면 3장이 저장 전이라 값이 비어
+    // AI가 점수를 임의로 만들었다(4장 이혼 점수와 모순 가능). 1~7장을 먼저 만들어 저장한 뒤 8~10장을 생성한다.
+    const STAGE1 = Array.from({ length: 7 }, (_, i) => i + 1);
+    const STAGE2 = Array.from({ length: TOTAL_CHAPTERS - 7 }, (_, i) => i + 8);
+    await Promise.all(STAGE1.map(generateChapter));
+    await saveMerged(true);
+    await Promise.all(STAGE2.map(generateChapter));
+    await saveMerged(false);
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
   }

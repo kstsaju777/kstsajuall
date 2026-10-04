@@ -25,12 +25,6 @@ const REPORT_PATH = "saju/kunghap_yeonae/report-preview";
 // 진행률만 폴링한다.
 async function generateReportInBackground(resultId: string) {
   try {
-    fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: resultId, concernOnly: true }),
-    }).catch((e) => console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e));
-
     const merged: Record<string, unknown> = {};
     const generateChapter = async (chapter: number) => {
       try {
@@ -50,26 +44,41 @@ async function generateReportInBackground(resultId: string) {
         console.error(`[bg-gen] ${resultId} ${chapter}장 처리 중 예외:`, e);
       }
     };
-    const saveMerged = async () => {
+    // intermediate=true 는 알림톡 발송을 막은 채 저장(force) — 마지막 저장에서만 알림톡이 나가도록 한다.
+    const saveMerged = async (intermediate: boolean) => {
       if (Object.keys(merged).length === 0) return;
       const saveRes = await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: resultId, content: merged }),
+        body: JSON.stringify({ id: resultId, content: merged, ...(intermediate ? { force: true } : {}) }),
       });
       if (!saveRes.ok) console.error(`[bg-gen] ${resultId} 합본 저장 실패:`, saveRes.status);
     };
+    // 고민 조언은 DB에 저장된 1~10장 요약을 읽어 쓰므로 그 저장이 끝난 뒤에 요청하고, 응답(저장 완료)까지 기다린다.
+    const requestConcernAdvice = async () => {
+      try {
+        await fetch(`${SITE_ORIGIN}${API_ROUTE}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: resultId, concernOnly: true }),
+        });
+      } catch (e) {
+        console.error(`[bg-gen] ${resultId} 고민조언 생성 실패:`, e);
+      }
+    };
 
-    // 10장(결혼 시기)은 9장 '시기별 관계의 흐름'에서 최적 시기를 읽고, 11장(서신)은 1~10장 요약을 읽는다.
+    // 10장(결혼 시기)은 9장 '시기별 관계의 흐름'에서 최적 시기를 읽고, 11장(서신)과 고민 조언은 1~10장 요약을 읽는다.
     // 전부 동시에 만들면 그 시점엔 앞 장 결과가 저장 전이라 10장이 기본값(2027~2028년)으로 쓰이고
     // 화면 배지(9장 기준)와 어긋났다. 의존하는 장은 앞 장을 저장한 뒤에 단계적으로 생성한다.
+    // 마지막 저장(알림톡 발송 시점)은 11장·고민 조언이 모두 끝난 뒤에만 하므로, 고객이 링크를 받았을 때
+    // 고민 조언이 비어 있거나 화면이 먼저 넘어가는 일이 없다.
     const INDEPENDENT = Array.from({ length: 9 }, (_, i) => i + 1); // 1~9장
     await Promise.all(INDEPENDENT.map(generateChapter));
-    await saveMerged();
+    await saveMerged(true);
     await generateChapter(10);
-    await saveMerged();
-    await generateChapter(11);
-    await saveMerged();
+    await saveMerged(true);
+    await Promise.all([generateChapter(11), requestConcernAdvice()]);
+    await saveMerged(false);
   } catch (e) {
     console.error(`[bg-gen] ${resultId} 백그라운드 생성 전체 실패:`, e);
   }
