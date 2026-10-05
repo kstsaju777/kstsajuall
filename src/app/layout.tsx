@@ -75,6 +75,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             fbq('init', '1023790197339583');
             fbq('track', 'PageView');`}
         </Script>
+        <Script id="karrot-pixel" strategy="afterInteractive">
+          {`(function (w, d) {
+            if (w.karrotPixel) return;
+            var k = { stub: true, queue: [] };
+            k.init = function () { k.queue.push(['init', arguments, Date.now()]); };
+            k.track = function () { k.queue.push(['track', arguments, Date.now()]); };
+            w.karrotPixel = k;
+            var s = d.createElement('script');
+            s.async = true;
+            s.src = 'https://karrot-pixel.business.daangn.com/karrot-pixel.js';
+            var f = d.getElementsByTagName('script')[0];
+            f && f.parentNode ? f.parentNode.insertBefore(s, f) : d.head.appendChild(s);
+          })(window, document);
+          window.karrotPixel.init('1791179093390808001');
+          window.karrotPixel.track('ViewPage');`}
+        </Script>
       </head>
       <body suppressHydrationWarning className="bg-[#b40501]">
         <noscript>
