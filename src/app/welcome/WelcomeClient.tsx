@@ -45,6 +45,7 @@ export function WelcomeClient() {
   const [showBar, setShowBar] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroRef = useRef<HTMLElement>(null);
+  const heroInView = useRef(true);
 
   // 광고 주소의 utm 값 등을 보관했다가 상품 페이지 링크에 그대로 붙인다.
   useEffect(() => {
@@ -91,10 +92,11 @@ export function WelcomeClient() {
     const io = new IntersectionObserver(
       ([e]) => {
         setShowBar(!e.isIntersecting);
+        heroInView.current = e.isIntersecting;
         const v = videoRef.current;
         if (!v) return;
         if (e.isIntersecting) v.play().catch(() => undefined);
-        else v.pause();
+        else if (v.muted) v.pause(); // 소리를 켜 둔 상태면 화면 밖에서도 계속 재생
       },
       { threshold: 0.35 }
     );
@@ -108,6 +110,7 @@ export function WelcomeClient() {
     v.muted = !v.muted;
     setMuted(v.muted);
     if (!v.muted) v.play().catch(() => undefined);
+    else if (!heroInView.current) v.pause();
   };
 
   const startVideo = () => {
@@ -281,6 +284,19 @@ export function WelcomeClient() {
           <p className="text-[11px]" style={{ color: "#777" }}>Copyright © {new Date().getFullYear()} 홍연당 · All rights reserved</p>
         </div>
       </footer>
+
+      {/* 소리를 켠 채 아래로 내려왔을 때, 끌 수 있는 작은 버튼 */}
+      <div style={{ position: "fixed", top: 12, left: "50%", transform: "translateX(-50%)", width: "min(100%, 430px)", display: "flex", justifyContent: "flex-end", padding: "0 14px", zIndex: 41, pointerEvents: "none", opacity: showBar && !muted ? 1 : 0, transition: "opacity .25s ease" }}>
+        <button
+          onClick={toggleSound}
+          aria-label="소리 끄기"
+          tabIndex={showBar && !muted ? 0 : -1}
+          style={{ pointerEvents: showBar && !muted ? "auto" : "none", display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", borderRadius: 999, background: "rgba(0,0,0,.6)", border: "1px solid rgba(255,255,255,.28)", color: "#fff", fontSize: 12, fontWeight: 700 }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 0 1 0 7" /><path d="M19 5a10 10 0 0 1 0 14" /></svg>
+          소리 끄기
+        </button>
+      </div>
 
       {/* 하단 고정 버튼 */}
       <div
