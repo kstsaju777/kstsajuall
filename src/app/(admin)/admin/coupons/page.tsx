@@ -29,8 +29,10 @@ export default function AdminCouponsPage() {
   const [loading, setLoading] = useState(true);
   const [issuing, setIssuing] = useState(false);
   const [issueUserId, setIssueUserId] = useState("");
+  const [issueCount, setIssueCount] = useState(1);
   const [issueTypeId, setIssueTypeId] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [failures, setFailures] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/admin/coupons");
@@ -47,20 +49,31 @@ export default function AdminCouponsPage() {
 
   const handleIssue = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!issueUserId || !issueTypeId) return;
+    // 줄바꿈·쉼표·공백으로 구분된 여러 아이디를 한 번에 받는다.
+    const userIds = issueUserId.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+    if (userIds.length === 0 || !issueTypeId) return;
     setIssuing(true);
     setMessage(null);
+    setFailures([]);
     const res = await fetch("/api/admin/coupons/issue", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: issueUserId, couponTypeId: issueTypeId }),
+      body: JSON.stringify({ userIds, count: issueCount, couponTypeId: issueTypeId }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setMessage(`❌ ${data.error ?? "지급 실패"}`);
     } else {
-      setMessage(`✅ ${issueUserId} 계정에 쿠폰을 지급했습니다.`);
-      setIssueUserId("");
+      const results: { id: string; ok: boolean; issued: number; error?: string }[] = data.results ?? [];
+      const okList = results.filter((r) => r.ok);
+      const failList = results.filter((r) => !r.ok);
+      setMessage(
+        `${failList.length === 0 ? "✅" : "⚠️"} ${okList.length}명에게 쿠폰 ${issueCount}장씩 지급했습니다.` +
+          (failList.length ? ` (${failList.length}명 실패)` : ""),
+      );
+      setFailures(failList.map((r) => `${r.id}: ${r.error}`));
+      // 실패한 아이디만 남겨서 다시 시도하기 쉽게 한다.
+      setIssueUserId(failList.map((r) => r.id).join("\n"));
       await load();
     }
     setIssuing(false);
@@ -78,7 +91,7 @@ export default function AdminCouponsPage() {
 
       <p style={{ fontSize: 12, color: "#999", marginBottom: 20 }}>
         체험단 등 특정 계정에 쿠폰을 지급합니다. 지급 대상은 사이트에 회원가입(이메일)된 계정이어야 하며,
-        쿠폰은 1상품 1회만 사용 가능합니다. (현재 종합사주 상품에서만 사용 가능)
+        쿠폰 1장은 1상품 1회만 사용 가능합니다. (전 상품에서 사용 가능)
       </p>
 
       {/* 쿠폰 지급 폼 */}
@@ -88,18 +101,30 @@ export default function AdminCouponsPage() {
         border: "1px solid #e8e8e8", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", marginBottom: 24,
       }}>
         <p style={{ fontSize: 14, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>쿠폰 지급</p>
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <input
-            type="text"
-            placeholder="체험단 계정 아이디"
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 4 }}>
+          <textarea
+            placeholder={"체험단 계정 아이디 (여러 명이면 줄바꿈 또는 쉼표로 구분)\n예) abc123\ndef456"}
             value={issueUserId}
             onChange={(e) => setIssueUserId(e.target.value)}
             required
             autoCapitalize="none"
-            style={{ flex: 1, padding: "10px 12px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14 }}
+            rows={5}
+            style={{ flex: 1, padding: "10px 12px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14, resize: "vertical" }}
           />
-          <span style={{ fontSize: 13, color: "#999", flexShrink: 0 }}>@hongyeondang.com</span>
+          <span style={{ fontSize: 13, color: "#999", flexShrink: 0, paddingTop: 10 }}>@hongyeondang.com</span>
         </div>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#555" }}>
+          1인당 지급 수량
+          <input
+            type="number"
+            min={1}
+            max={10}
+            value={issueCount}
+            onChange={(e) => setIssueCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+            style={{ width: 70, padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14 }}
+          />
+          장
+        </label>
         <select
           value={issueTypeId}
           onChange={(e) => setIssueTypeId(e.target.value)}
@@ -122,6 +147,11 @@ export default function AdminCouponsPage() {
           {issuing ? "지급 중…" : "지급하기"}
         </button>
         {message && <p style={{ fontSize: 13, margin: 0, color: message.startsWith("✅") ? "#16a34a" : "#dc2626" }}>{message}</p>}
+        {failures.length > 0 && (
+          <ul style={{ fontSize: 12, color: "#dc2626", margin: 0, paddingLeft: 18 }}>
+            {failures.map((f) => <li key={f}>{f}</li>)}
+          </ul>
+        )}
       </form>
 
       {/* 발급 내역 */}
