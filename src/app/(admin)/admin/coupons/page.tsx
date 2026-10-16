@@ -29,7 +29,8 @@ export default function AdminCouponsPage() {
   const [loading, setLoading] = useState(true);
   const [issuing, setIssuing] = useState(false);
   const [issueUserId, setIssueUserId] = useState("");
-  const [issueCount, setIssueCount] = useState(1);
+  // 입력 중에는 문자열로 들고 있다가(지우고 새로 입력할 수 있도록) 지급할 때만 숫자로 바꾼다.
+  const [issueCountText, setIssueCountText] = useState("1");
   const [issueTypeId, setIssueTypeId] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [failures, setFailures] = useState<string[]>([]);
@@ -52,6 +53,12 @@ export default function AdminCouponsPage() {
     // 줄바꿈·쉼표·공백으로 구분된 여러 아이디를 한 번에 받는다.
     const userIds = issueUserId.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
     if (userIds.length === 0 || !issueTypeId) return;
+    const issueCount = Math.floor(Number(issueCountText));
+    if (!Number.isFinite(issueCount) || issueCount < 1 || issueCount > 10) {
+      setMessage("❌ 지급 수량은 1~10장 사이로 입력해 주세요.");
+      setFailures([]);
+      return;
+    }
     setIssuing(true);
     setMessage(null);
     setFailures([]);
@@ -117,10 +124,11 @@ export default function AdminCouponsPage() {
           1인당 지급 수량
           <input
             type="number"
+            inputMode="numeric"
             min={1}
             max={10}
-            value={issueCount}
-            onChange={(e) => setIssueCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
+            value={issueCountText}
+            onChange={(e) => setIssueCountText(e.target.value)}
             style={{ width: 70, padding: "8px 10px", borderRadius: 8, border: "1px solid #ddd", fontSize: 14 }}
           />
           장
