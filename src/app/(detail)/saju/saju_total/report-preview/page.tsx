@@ -4448,6 +4448,18 @@ function GuiinP({ children }: { children: string }) {
   );
 }
 
+// AI가 만든 섹션({intro, callout?, paragraphs[]})을 안전하게 한 덩어리 텍스트로 합친다.
+// 섹션이 통째로 없거나 paragraphs가 배열이 아니어도 화면 전체가 멈추지 않도록 방어.
+function secText(sec: unknown, withCallout = false): string {
+  if (!sec) return "";
+  if (typeof sec === "string") return sec;
+  const s = sec as { intro?: unknown; callout?: unknown; paragraphs?: unknown };
+  const paras = Array.isArray(s.paragraphs) ? s.paragraphs : typeof s.paragraphs === "string" ? [s.paragraphs] : [];
+  return [s.intro, withCallout ? s.callout : null, ...paras]
+    .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+    .join("\n");
+}
+
 function P({ children }: { children: React.ReactNode }) {
   const reportName = useContext(ReportNameContext);
   const normalize = (s: string) => {
@@ -5311,7 +5323,7 @@ function ReportPreviewInner() {
               />
             )}
             <div className="px-6 pt-4 pb-0">
-              {c.wonguk.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+              {(Array.isArray(c.wonguk?.paragraphs) ? c.wonguk.paragraphs : []).map((p, i) => <P key={i}>{p}</P>)}
             </div>
           </section>
 
@@ -5736,7 +5748,7 @@ function ReportPreviewInner() {
             <P>{`${name}님은 '${report?.view?.sinStrength?.strength ?? "중화"}'한 편에 속하오.\n\n우선, 신강신약을 판단하는\n기준에 대해 자세하게 알려주겠소.\n\n사주팔자를 구성하는 글자들 중에서\n일간을 기준으로 다른 위치에 있는 글자들이\n일간과 같거나 돕는 오행일 경우 '득'이라 하오.\n그렇지 않으면 실패를 했다고 하는 것이오.\n\n일간은 곧 '나 자신'이므로,\n나와 같거나 돕는 오행이 많을수록\n신강한 상태에 가까워지는 것이오.`}</P>
             <DeungCheck view={report?.view ?? null} />
             <div className="mt-6" />
-            {c.strength.intro && <P>{[c.strength.intro, ...c.strength.paragraphs].join("\n")}</P>}
+            {secText(c.strength) && <P>{secText(c.strength)}</P>}
           </section>
 
           {/* 1. 용신 */}
@@ -5807,7 +5819,7 @@ function ReportPreviewInner() {
                 </div>
               );
             })()}
-            {c.yongsin.intro && <P>{[c.yongsin.intro, ...c.yongsin.paragraphs].join("\n")}</P>}
+            {secText(c.yongsin) && <P>{secText(c.yongsin)}</P>}
           </section>
 
           {/* 4. 합충형해파원진 */}
@@ -5860,12 +5872,12 @@ function ReportPreviewInner() {
               </div>
             </div>
           )}
-          {c.gyeokguk.intro && <div className="px-6 pb-4"><P>{[c.gyeokguk.intro, c.gyeokguk.callout, ...c.gyeokguk.paragraphs].filter(Boolean).join("\n")}</P></div>}
+          {secText(c.gyeokguk, true) && <div className="px-6 pb-4"><P>{secText(c.gyeokguk, true)}</P></div>}
 
           <section className="px-6 pt-2 pb-2">
             <Heading>겉으로 드러나는 나와 내면의 나</Heading>
           </section>
-          {c.essence.intro && <div className="px-6 pb-4"><P>{[c.essence.intro, ...c.essence.paragraphs].join("\n")}</P></div>}
+          {secText(c.essence) && <div className="px-6 pb-4"><P>{secText(c.essence)}</P></div>}
 
           {/* 삽화 */}
           <Illust src="/media/report/total/total-2/total-2-1.jpg" h={360} />
@@ -5987,7 +5999,7 @@ function ReportPreviewInner() {
             ];
             const cnt: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
             if (report?.view) {
-              for (const p of report.view.pillars) {
+              for (const p of report.view.pillars ?? []) {
                 if (p.ganEl && cnt[p.ganEl] !== undefined) cnt[p.ganEl]++;
                 if (p.jiEl  && cnt[p.jiEl]  !== undefined) cnt[p.jiEl]++;
               }
@@ -6017,9 +6029,9 @@ function ReportPreviewInner() {
               </div>
             );
           })()}
-          {c.ohaengDesc?.intro && (
+          {secText(c.ohaengDesc) && (
             <div className="px-6 pb-6">
-              <P>{[c.ohaengDesc.intro, ...c.ohaengDesc.paragraphs].join("\n")}</P>
+              <P>{secText(c.ohaengDesc)}</P>
             </div>
           )}
 
@@ -6073,7 +6085,7 @@ function ReportPreviewInner() {
                 </div>
               );
             })()}
-            {c.balance.intro && <P>{[c.balance.intro, ...c.balance.paragraphs].join("\n")}</P>}
+            {secText(c.balance) && <P>{secText(c.balance)}</P>}
           </section>
 
           {/* 해답 */}
@@ -6182,7 +6194,7 @@ function ReportPreviewInner() {
                 </div>
               );
             })()}
-            {c.answer.intro && <P>{[c.answer.intro, ...c.answer.paragraphs].join("\n")}</P>}
+            {secText(c.answer) && <P>{secText(c.answer)}</P>}
           </section>
 
           {/* 삽화 */}
@@ -6504,7 +6516,7 @@ function ReportPreviewInner() {
             {(c.bodyWeak.categories ?? []).map((cat, ci) => (
               <BodyCategoryCard key={ci} emoji={cat.emoji} title={cat.title} subtitle={cat.subtitle} items={cat.items} />
             ))}
-            {c.bodyWeak.intro && <P>{[c.bodyWeak.intro, ...c.bodyWeak.paragraphs].join("\n")}</P>}
+            {secText(c.bodyWeak) && <P>{secText(c.bodyWeak)}</P>}
           </section>
 
           {/* 조심해야 할 시기 */}
@@ -6519,7 +6531,7 @@ function ReportPreviewInner() {
           <section className="px-6 pt-2 pb-4">
             <Heading>{(name.slice(1) || name)}님의 시기별 건강 흐름</Heading>
             <HealthLineChart view={report?.view ?? null} />
-            {c.riskTime.intro && <P>{[c.riskTime.intro, ...c.riskTime.paragraphs].join("\n")}</P>}
+            {secText(c.riskTime) && <P>{secText(c.riskTime)}</P>}
           </section>
 
 
@@ -6654,7 +6666,7 @@ function ReportPreviewInner() {
               </div>
             )}
             <Heading>홍연이 드리는 마지막 서신</Heading>
-            {c.letter.paragraphs.map((p, i) => (
+            {(Array.isArray(c.letter?.paragraphs) ? c.letter.paragraphs : []).map((p, i) => (
               <P key={i}>{p}</P>
             ))}
             {/* 서명 + 낙관 */}
