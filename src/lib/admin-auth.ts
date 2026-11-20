@@ -33,6 +33,18 @@ export async function requireAdminPassword(redirectFrom: string) {
   }
 }
 
+// 결과지 장 "강제 재생성"(AI 재호출 = 비용 발생) 허용 여부.
+// 어드민 이메일로 로그인한 사용자 또는 어드민 비밀번호 세션만 허용한다.
+export async function canForceRegenerate(): Promise<boolean> {
+  try {
+    if (await isAdminAuthenticated()) return true;
+    const { isCurrentUserAdmin } = await import("@/lib/auth");
+    return await isCurrentUserAdmin();
+  } catch {
+    return false;
+  }
+}
+
 export async function setAdminCookie(id: string, password: string): Promise<boolean> {
   const env = serverEnv();
   const cookieStore = await cookies();

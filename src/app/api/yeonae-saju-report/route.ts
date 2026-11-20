@@ -1,3 +1,4 @@
+import { canForceRegenerate } from "@/lib/admin-auth";
 import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// 자녀사주 결과지 생성 + 저장 API
 // POST {name,date,time,calendar,gender,email,concern} → createReport
@@ -245,7 +246,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isYeonaeSajuChapterReady(content, chapter)) {
+  if (!(force && (await canForceRegenerate())) && isYeonaeSajuChapterReady(content, chapter)) {
     const sections: Record<string, unknown> = {};
     for (const k of YEONAE_SAJU_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
     return NextResponse.json({ sections });

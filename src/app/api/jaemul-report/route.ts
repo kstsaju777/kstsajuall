@@ -1,3 +1,4 @@
+import { canForceRegenerate } from "@/lib/admin-auth";
 import { stripSurname } from "@/lib/utils/strip-surname";
 // =====================================================
 // 재물운사주 결과지 생성 + 저장 API (장별 온디맨드)
@@ -392,7 +393,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isJaemulChapterReady(content, chapter)) {
+  if (!(force && (await canForceRegenerate())) && isJaemulChapterReady(content, chapter)) {
     // 7장: concern 있는데 concernAdvice가 비어있으면 강제 재생성
     const ca = (content.concernAdvice as { paragraphs?: string[] } | undefined);
     const caEmpty = !ca || !ca.paragraphs || ca.paragraphs.length === 0;

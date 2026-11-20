@@ -1,3 +1,4 @@
+import { canForceRegenerate } from "@/lib/admin-auth";
 import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 정통사주 결과지 생성 + 저장 API (장별 온디맨드)
@@ -364,7 +365,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isHealthChapterReady(content, chapter)) {
+  if (!(force && (await canForceRegenerate())) && isHealthChapterReady(content, chapter)) {
     // 이미 저장돼 있으면 그 장 섹션만 반환
     const sections: Record<string, unknown> = {};
     for (const k of HEALTH_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];

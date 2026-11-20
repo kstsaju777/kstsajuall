@@ -4674,7 +4674,7 @@ function ReportPreviewInner() {
               />
             )}
             <div className="px-6 pt-4">
-              {c.wonguk.paragraphs.map((p, i) => <P key={i}>{p}</P>)}
+              {(Array.isArray(c.wonguk?.paragraphs) ? c.wonguk.paragraphs : []).map((p, i) => <P key={i}>{p}</P>)}
             </div>
           </section>
 

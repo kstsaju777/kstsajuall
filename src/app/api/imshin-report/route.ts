@@ -4,6 +4,7 @@
 // POST {id, content}                                  → saveContent
 // GET  ?id=<resultId>                                 → 조회
 
+import { canForceRegenerate } from "@/lib/admin-auth";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -243,7 +244,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isImshinChapterReady(content, chapter)) {
+  if (!(force && (await canForceRegenerate())) && isImshinChapterReady(content, chapter)) {
     const sections: Record<string, unknown> = {};
     for (const k of IMSHIN_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
     return NextResponse.json({ sections });

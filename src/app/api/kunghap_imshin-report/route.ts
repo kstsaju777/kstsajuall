@@ -1,3 +1,4 @@
+import { canForceRegenerate } from "@/lib/admin-auth";
 import { stripSurname } from "@/lib/utils/strip-surname";
 ﻿// =====================================================
 // 연애궁합 결과지 생성 + 저장 API (장별 온디맨드)
@@ -465,7 +466,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isImshinKunghapChapterReady(content, chapter)) {
+  if (!(force && (await canForceRegenerate())) && isImshinKunghapChapterReady(content, chapter)) {
     const sections: Record<string, unknown> = {};
     for (const k of IMSHIN_KUNGHAP_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
     return NextResponse.json({ sections });

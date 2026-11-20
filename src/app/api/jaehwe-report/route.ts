@@ -6,6 +6,7 @@
 // POST {id, chapter}  → 그 장만 생성 → {sections}
 // GET  ?id=<resultId> → 저장된 결과 조회
 
+import { canForceRegenerate } from "@/lib/admin-auth";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -268,7 +269,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isJaehweChapterReady(content, chapter)) {
+  if (!(force && (await canForceRegenerate())) && isJaehweChapterReady(content, chapter)) {
     const sections: Record<string, unknown> = {};
     for (const k of JAEHWE_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
     return NextResponse.json({ sections });

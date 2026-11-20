@@ -1,3 +1,4 @@
+import { canForceRegenerate } from "@/lib/admin-auth";
 import { stripSurname } from "@/lib/utils/strip-surname";
 import { fixJosaInObject, hasBatchim } from "@/lib/utils/fix-josa";
 // =====================================================
@@ -634,7 +635,7 @@ async function generateChapter(body: unknown) {
   let content: Record<string, unknown> = {};
   try { content = JSON.parse(data.interpretation_md) || {}; } catch { content = {}; }
 
-  if (!force && isYeonaeKunghapChapterReady(content, chapter)) {
+  if (!(force && (await canForceRegenerate())) && isYeonaeKunghapChapterReady(content, chapter)) {
     const sections: Record<string, unknown> = {};
     for (const k of YEONAE_KUNGHAP_CHAPTER_SECTIONS[chapter] ?? []) sections[k] = content[k];
     return NextResponse.json({ sections });
